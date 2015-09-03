@@ -605,6 +605,6 @@ void Simulation::resetNewTempFields(){
 	for(int i = 0; i < xnumber + 1; ++i){
 		tempEfield[i] = Efield[i];
 		newEfield[i] = Efield[i];
-		implicitEfield[i] = Efield[i];
+		explicitEfield[i] = Efield[i];
 	}
 }
