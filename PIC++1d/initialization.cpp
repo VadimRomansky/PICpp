@@ -153,7 +153,7 @@ Simulation::~Simulation() {
 	delete[] Efield;
 	delete[] newEfield;
 	delete[] tempEfield;
-	delete[] implicitEfield;
+	delete[] explicitEfield;
 	delete[] rotB;
 	delete[] Ederivative;
 	delete[] Bfield;
@@ -195,7 +195,7 @@ void Simulation::initialize() {
 		Efield[i] = E0;
 		newEfield[i] = Efield[i];
 		tempEfield[i] = Efield[i];
-		implicitEfield[i] = Efield[i];
+		explicitEfield[i] = Efield[i];
 		rotB[i] = Vector3d(0, 0, 0);
 		Ederivative[i] = Vector3d(0, 0, 0);
 		externalElectricFlux[i] = Vector3d(0, 0, 0);
@@ -235,12 +235,12 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 		Efield[i].z = 0;
 		tempEfield[i] = Efield[i];
 		newEfield[i] = tempEfield[i];
-		implicitEfield[i] = Efield[i];
+		explicitEfield[i] = Efield[i];
 	}
 	Efield[xnumber] = Efield[0];
 	tempEfield[xnumber] = Efield[0];
 	newEfield[xnumber] = Efield[0];
-	implicitEfield[xnumber] = implicitEfield[0];
+	explicitEfield[xnumber] = explicitEfield[0];
 
 	for (int i = 0; i < xnumber; ++i) {
 		Bfield[i].z = E * sin(kw * middleXgrid[i]);
@@ -438,14 +438,14 @@ void Simulation::initializeAlfvenWave() {
 		Efield[i].x = 0;
 		Efield[i].y = Eyamplitude * cos(kw * xgrid[i] - kw*xshift);
 		Efield[i].z = Ezamplitude * sin(kw * xgrid[i] - kw*xshift);
-		implicitEfield[i] = Efield[i];
+		explicitEfield[i] = Efield[i];
 		tempEfield[i] = Efield[i];
 		newEfield[i] = Efield[i];
 	}
 	Efield[xnumber] = Efield[0];
 	tempEfield[xnumber] = Efield[0];
 	newEfield[xnumber] = Efield[0];
-	implicitEfield[xnumber] = implicitEfield[0];
+	explicitEfield[xnumber] = explicitEfield[0];
 
 	for (int i = 0; i < xnumber; ++i) {
 		Bfield[i].x = B0.x;
@@ -688,12 +688,12 @@ void Simulation::initializeLangmuirWave(){
 		Efield[i].z = 0;
 
 		tempEfield[i] = Efield[i];
-		implicitEfield[i] = Efield[i];
+		explicitEfield[i] = Efield[i];
 	}
 
 	Efield[xnumber] = Efield[0];
 	tempEfield[xnumber] = tempEfield[0];
-	implicitEfield[xnumber] = implicitEfield[0];
+	explicitEfield[xnumber] = explicitEfield[0];
 
 	double Vamplitude = electron_charge_normalized*Eamplitude*fieldScale/(massElectron*omega);
 
@@ -715,7 +715,7 @@ void Simulation::createArrays() {
 	Efield = new Vector3d[xnumber + 1];
 	newEfield = new Vector3d[xnumber + 1];
 	tempEfield = new Vector3d[xnumber + 1];
-	implicitEfield = new Vector3d[xnumber + 1];
+	explicitEfield = new Vector3d[xnumber + 1];
 	rotB = new Vector3d[xnumber + 1];
 	Ederivative = new Vector3d[xnumber + 1];
 	Bfield = new Vector3d[xnumber];
@@ -735,7 +735,7 @@ void Simulation::createArrays() {
 		Efield[i] = Vector3d(0, 0, 0);
 		newEfield[i] = Vector3d(0, 0, 0);
 		tempEfield[i] = Vector3d(0, 0, 0);
-		implicitEfield[i] = Vector3d(0, 0, 0);
+		explicitEfield[i] = Vector3d(0, 0, 0);
 	}
 
 	maxwellEquationMatrix = new std::vector<MatrixElement>*[xnumber];

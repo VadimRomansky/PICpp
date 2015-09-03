@@ -105,7 +105,7 @@ public:
 	Vector3d* tempEfield;
 	//Vector3d*** tempBfield;
 
-	Vector3d* implicitEfield;
+	Vector3d* explicitEfield;
 	Vector3d* rotB;
 	Vector3d* Ederivative;
 

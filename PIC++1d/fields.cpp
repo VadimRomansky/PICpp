@@ -12,46 +12,58 @@
 void Simulation::evaluateFields() {
 	printf("evaluating fields\n");
 
-	evaluateMaxwellEquationMatrix();
+	if(solverType == IMPLICIT){
 
-	double** gmresOutput = new double*[xnumber];
-//#pragma omp parallel for
-	for (int i = 0; i < xnumber; ++i) {
-		gmresOutput[i] = new double[3];
-	}
+		evaluateMaxwellEquationMatrix();
 
-	generalizedMinimalResidualMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumber, 3);
-//#pragma omp parallel for
-	for (int i = 0; i < xnumber; ++i) {
-		for (int l = 0; l < 3; ++l) {
-			tempEfield[i][l] = gmresOutput[i][l];
+		double** gmresOutput = new double*[xnumber];
+		//#pragma omp parallel for
+		for (int i = 0; i < xnumber; ++i) {
+			gmresOutput[i] = new double[3];
 		}
-		delete[] gmresOutput[i];
-	}
-	delete[] gmresOutput;
 
-	updateBoundaries();
-
-	double alfvenV = B0.norm()/sqrt(4*pi*density);
-	double k = 2*pi/xsize;
-
-	evaluateExplicitDerivative();
-	//smoothEderivative();
-	for(int i = 0; i < xnumber; ++i){
-		implicitEfield[i] += Ederivative[i]*deltaT;
-	}
-	implicitEfield[xnumber] = implicitEfield[0];
-
-	//evaluateMagneticField();
-
-	tempEfield[xnumber] = tempEfield[0];
-
-	for (int i = 0; i < xnumber+1; ++i) {
-		newEfield[i] = (tempEfield[i] - Efield[i] * (1 - theta)) / theta;
-		if(solverType == EXPLICIT){
-			newEfield[i] = implicitEfield[i];
+		generalizedMinimalResidualMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumber, 3);
+		//#pragma omp parallel for
+		for (int i = 0; i < xnumber; ++i) {
+			for (int l = 0; l < 3; ++l) {
+				tempEfield[i][l] = gmresOutput[i][l];
+			}
+			delete[] gmresOutput[i];
 		}
-	    newEfield[i].x= 0;
+		delete[] gmresOutput;
+
+		updateBoundaries();
+
+		double alfvenV = B0.norm()/sqrt(4*pi*density);
+		double k = 2*pi/xsize;
+
+		evaluateExplicitDerivative();
+		//smoothEderivative();
+		for(int i = 0; i < xnumber; ++i){
+			explicitEfield[i] += Ederivative[i]*deltaT;
+		}
+		explicitEfield[xnumber] = explicitEfield[0];
+
+		//evaluateMagneticField();
+
+		tempEfield[xnumber] = tempEfield[0];
+		for (int i = 0; i < xnumber+1; ++i) {
+			newEfield[i] = (tempEfield[i] - Efield[i] * (1 - theta)) / theta;
+			newEfield[i].x= 0;
+		}
+	}
+
+	if(solverType == EXPLICIT){
+		evaluateExplicitDerivative();
+		//smoothEderivative();
+		for(int i = 0; i < xnumber; ++i){
+			explicitEfield[i] += Ederivative[i]*deltaT;
+		}
+		explicitEfield[xnumber] = explicitEfield[0];
+		for (int i = 0; i < xnumber+1; ++i) {
+			newEfield[i] = explicitEfield[i];
+			newEfield[i].x= 0;
+		}
 	}
 }
 
