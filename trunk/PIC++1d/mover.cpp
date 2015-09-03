@@ -14,23 +14,13 @@ void Simulation::moveParticles(){
 	int i = 0;
 #pragma omp parallel for private(i) 
 	for(i = 0; i < particles.size(); ++i){
-	//for(int i = 0; i < 1; ++i){
-		//if(i % 100000 == 0) {
-			//printf("particle number %d\n", i);
-			//int currentThread = omp_get_thread_num();
-			//printf("thread num = %d\n", currentThread);
-		//}
 		moveParticle(particles[i]);
 	}
 }
 
 void Simulation::moveParticle(Particle* particle){
-	//Vector3d oldE = correlationTempEfield(particle);
-	if(particle->x > middleXgrid[xnumber - 1]) {
-		//printf("aa\n");
-	}
+	//Vector3d oldE = correlationTempEfield(particle)*fieldScale
 	Vector3d E = correlationTempEfield(particle)*fieldScale;
-	//Vector3d E = correlationTempEfield(particle);
 	Vector3d B = correlationBfield(particle)*fieldScale;
 
 	Vector3d velocity = particle->velocity(speed_of_light_normalized);
@@ -51,7 +41,7 @@ void Simulation::moveParticle(Particle* particle){
 
 	newVelocity = tempParticle.velocity(speed_of_light_normalized);
 
-	//not that it in half-time!!
+	//note that it in half-time!!
 	tempParticle.x += (velocity.x + newVelocity.x)*deltaT/4;
 	tempParticle.y += (velocity.y + newVelocity.y)*deltaT/4;
 	tempParticle.z += (velocity.z + newVelocity.z)*deltaT/4;

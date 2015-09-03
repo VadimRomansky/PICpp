@@ -312,45 +312,6 @@ void Simulation::updateElectroMagneticParameters() {
 		}
 	}
 
-	//for i = 0
-
-
-	/*for (int pcount = 0; pcount < particlesInEbin[0].size(); ++pcount) {
-		Particle* particle = particlesInEbin[0][pcount];
-		double correlation = correlationWithEbin(*particle, -1) / volume(0);
-
-		if(correlation > 0){
-			Vector3d velocity = particle->velocity(speed_of_light_normalized);
-
-			double gamma = particle->gammaFactor(speed_of_light_normalized);
-			Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
-
-			electricFlux[xnumber - 1] += rotatedVelocity * (particle->charge * particle->weight * correlation);
-			dielectricTensor[xnumber - 1] = dielectricTensor[xnumber - 1] - particle->rotationTensor * (theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
-		}
-		if(correlation < 0){
-			printf("aaa\n");
-		}
-	}*/
-	/*for (int pcount = 0; pcount < particlesInEbin[xnumber].size(); ++pcount) {
-		Particle* particle = particlesInEbin[xnumber][pcount];
-		double correlation = correlationWithEbin(*particle, xnumber + 1) / volume(0);
-		if(correlation > 0){
-
-			Vector3d velocity = particle->velocity(speed_of_light_normalized);
-
-			double gamma = particle->gammaFactor(speed_of_light_normalized);
-			Vector3d rotatedVelocity = particle->rotationTensor * velocity * gamma;
-	
-			electricFlux[1] += rotatedVelocity * particle->charge * particle->weight * correlation;
-			dielectricTensor[1] = dielectricTensor[1] - particle->rotationTensor * (theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
-		}
-		if(correlation < 0){
-			printf("aaa\n");
-		}
-	}*/
-
-
 	//for periodic conditions we must summ sides parameters
 	electricFlux[0] = electricFlux[0] + electricFlux[xnumber];
 	electricFlux[xnumber] = electricFlux[0];
@@ -385,8 +346,6 @@ void Simulation::updateElectroMagneticParameters() {
 		}
 	}
 
-	//smoothFlux();
-	//smoothFlux();
 	//smoothFlux();
 
 	if(solverType == IMPLICIT){
@@ -442,14 +401,9 @@ void Simulation::updateDensityParameters() {
 
  		velocityBulk[i] = velocityBulk[i] / (electronConcentration[i] * massElectron + protonConcentration[i] * massProton);
 		velocityBulkElectron[i] = velocityBulkElectron[i] / (electronConcentration[i] * massElectron);
-		//if(i < xnumber - 1  && i > 0){
 		full_density += chargeDensity[i] * volume(i);
 		full_p_concentration += protonConcentration[i] * volume(i);
 		full_e_concentration += electronConcentration[i] * volume(i);
-		//electronConcentration[i][j][k] /= cube(gyroradius);
-		//protonConcentration[i][j][k] /= cube(gyroradius);
-		//chargeDensity[i][j][k] /= (sqrt(cube(gyroradius))*plasma_period);
-		//}
 	}
 	full_density /= xsize;
 	full_p_concentration /= (xsize * gyroradius);
