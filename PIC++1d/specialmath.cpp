@@ -149,7 +149,6 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>** matrix, doubl
 	}
 
 	int matrixDimension = lnumber*xnumber;
-	//double maxError = 1/(matrixDimension * 1E5);
 
 	double** hessenbergMatrix;
 	double** newHessenbergMatrix;
@@ -315,17 +314,6 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>** matrix, doubl
 					}
 		}
 
-		/*double** leftPart1 = multiplySpecialMatrixVector(matrix, outvector, xnumber, lnumber);
-		double error1 = 0;
-		for (int i = 0; i < xnumber; ++i) {
-					for(int l = 0; l < lnumber; ++l){
-						error1 += sqr(leftPart1[i][l] - rightPart[i][l]);
-					}
-			delete[] leftPart1[i];
-		}
-		delete[] leftPart1;
-		error1 = sqrt(error1);*/
-
 		double normRightPart = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, lnumber));
 		relativeError = error/normRightPart;
 
@@ -355,18 +343,6 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>** matrix, doubl
 					}
 				}
 	}
-
-	/*double** leftPart = multiplySpecialMatrixVector(matrix, outvector, xnumber, lnumber);
-	error = 0;
-	for (int i = 0; i < xnumber; ++i) {
-				for(int l = 0; l < lnumber; ++l){
-					error += sqr(leftPart[i][l] - rightPart[i][l]);
-				}
-		delete[] leftPart[i];
-	}
-	delete[] leftPart;
-
-	error = sqrt(error);*/
 
 	for (int i = 0; i < n; ++i) {
 		delete[] Qmatrix[i];

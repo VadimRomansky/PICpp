@@ -337,13 +337,6 @@ void Simulation::initializeAlfvenWave() {
 	a1 = a1*sqr(fakeOmega);
 	double a0 = sqr(sqr(B0.x*fieldScale*speed_of_light_normalized*kw*electron_charge_normalized));
 
-	//a0 = a0/a1;
-	//a1 = a1/a1;
-	//a2 = a2/a1;
-	//a3 = a3/a1;
-	//a4 = a4/a1;
-	//a1 = 1;
-
 	a4 = a4/a0;
 	a3 = a3/a0;
 	a2 = a2/a0;
@@ -626,7 +619,6 @@ void Simulation::initializeLangmuirWave(){
 	int nelectron = 0;
 	double weight = (concentration / particlesPerBin) * volume(0);
 	for (int i = 0; i < xnumber; ++i) {
-		//double weight = (1.0 / particlesPerBin) * volume(i, j, k);
 		double x;
 		for (int l = 0; l < particlesPerBin; ++l) {
 			ParticleTypes type;
@@ -969,7 +961,6 @@ void Simulation::checkDebyeParameter() {
 	printf("debye number = %g\n", debyeNumber);
 	fprintf(informationFile, "debye number = %g\n", debyeNumber);
 
-	//1/weight?
 	double superParticleDebyeLength = 1 / sqrt(4 * pi * superParticleCharge * superParticleCharge * superParticleConcentration / (kBoltzman_normalized * superParticleTemperature));
 	double superParticleDebyeNumber = 4 * pi * cube(superParticleDebyeLength) * superParticleConcentration / 3;
 
@@ -1119,7 +1110,6 @@ void Simulation::createParticles() {
 	int n = 0;
 	for (int i = 0; i < xnumber; ++i) {
 		double weight = (concentration / particlesPerBin) * volume(i);
-		//double weight = (1.0 / particlesPerBin) * volume(i, j, k);
 		double x = xgrid[i] + deltaX*0.00001;
 		for (int l = 0; l < 2 * particlesPerBin; ++l) {
 			ParticleTypes type;

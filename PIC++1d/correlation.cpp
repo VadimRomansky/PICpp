@@ -12,10 +12,9 @@ void Simulation::collectParticlesIntoBins() {
 	for (int i = 0; i < xnumber + 1; ++i) {
 				particlesInEbin[i].clear();
 	}
-
-	//FILE* debugFile = fopen("./output/particleCorrelations1.dat","w");
 	double fullSum = 0;
 	int pcount = 0;
+
 	#pragma omp parallel for private(pcount) 
 	for (pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
@@ -45,7 +44,6 @@ void Simulation::collectParticlesIntoBins() {
 			}
 		}
 	}
-	//fclose(debugFile);
 }
 
 void Simulation::pushParticleIntoEbin(Particle* particle, int i) {
@@ -67,14 +65,11 @@ void Simulation::pushParticleIntoBbin(Particle* particle, int i) {
 }
 
 bool Simulation::particleCrossBbin(Particle& particle, int i) {
-
-
 		if(i < 0) {
 				i = xnumber - 1;
 		} else if(i >= xnumber) {
 			i = 0;
-		}
-	
+		}	
 
 		if (i == 0) {
 			if ((xgrid[i + 1] < particle.x - particle.dx) && (xgrid[xnumber] > particle.x + particle.dx))
@@ -86,10 +81,6 @@ bool Simulation::particleCrossBbin(Particle& particle, int i) {
 			if ((xgrid[i] > particle.x + particle.dx) || (xgrid[i + 1] < particle.x - particle.dx))
 				return false;
 		}
-
-
-
-
 
 	return true;
 }
@@ -187,10 +178,6 @@ Vector3d Simulation::correlationBfield(Particle& particle) {
 	int xcount = floor((x / deltaX) + 0.5);
 	Vector3d result = Vector3d(0, 0, 0);
 
-	/*for (int i = xcount - 1; i <= xcount + 1; ++i) {
-				result = result + correlationFieldWithBbin(particle, i);
-	}*/
-
 	double leftX;
 	double rightX;
 	Vector3d leftField;
@@ -248,10 +235,6 @@ Vector3d Simulation::correlationNewBfield(Particle& particle) {
 	int xcount = floor((x / deltaX) + 0.5);
 	Vector3d result = Vector3d(0, 0, 0);
 
-	/*for (int i = xcount - 1; i <= xcount + 1; ++i) {
-				result = result + correlationFieldWithBbin(particle, i);
-	}*/
-
 	double leftX;
 	double rightX;
 	Vector3d leftField;
@@ -299,36 +282,6 @@ Vector3d Simulation::correlationNewBfield(Particle& particle) {
 Vector3d Simulation::correlationFieldWithBbin(Particle& particle, int i) {
 
 	Vector3d _field;
-
-	/*if (i < 0) {
-		//_field = Vector3d(0,0,0);
-		//note: not zero because reflection
-		if (j < 0) {
-			if (k < 0) {
-				_field = Bfield[0][ynumber - 1][znumber - 1];
-			} else if (k >= znumber) {
-				_field = Bfield[0][ynumber - 1][0];
-			} else {
-				_field = Bfield[0][ynumber - 1][k];
-			}
-		} else if (j >= ynumber) {
-			if (k < 0) {
-				_field = Bfield[0][0][znumber - 1];
-			} else if (k >= znumber) {
-				_field = Bfield[0][0][0];
-			} else {
-				_field = Bfield[0][0][k];
-			}
-		} else {
-			if (k < 0) {
-				_field = Bfield[0][j][znumber - 1];
-			} else if (k >= znumber) {
-				_field = Bfield[0][j][0];
-			} else {
-				_field = Bfield[0][j][k];
-			}
-		}
-	} else*/
 
 	double correlation = correlationWithBbin(particle, i);
 
@@ -517,8 +470,6 @@ double Simulation::correlationBspline(const double& x, const double& dx, const d
 	}else {
 		correlation = 1;
 	}
-
-	//correlation /= dx * dx;
 
 	return correlation;
 }
