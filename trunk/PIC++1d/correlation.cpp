@@ -2,6 +2,7 @@
 
 #include "util.h"
 #include "simulation.h"
+#include "constants.h"
 
 void Simulation::collectParticlesIntoBins() {
 
@@ -451,24 +452,55 @@ double Simulation::correlationBspline(const double& x, const double& dx, const d
 	if (x > rightx + dx)
 		return 0;
 
-	if (x < leftx - dx/2) {
-		correlation = 2*cube(x + dx - leftx)/(3*cube(dx));
-	} else if(x < leftx){
-		correlation = (1.0/12.0) + ((x + dx/2 - leftx)/dx) - 2*(cube(dx/2) - cube(leftx - x))/(3*cube(dx));
-	} else if (x > rightx + dx/2) {
-		correlation = 2*cube(rightx - (x - dx))/(3*cube(dx));
-	} else if(x > rightx){
-		correlation = (1.0/12.0) + ((-(x - dx/2) + rightx)/dx) - 2*(cube(dx/2) - cube(x - rightx))/(3*cube(dx));
-	} else if (x < leftx + dx/2) {
-		correlation = 0.5 + ((x - leftx)/dx) - 2*(cube(x - leftx))/(3*cube(dx));
-	} else if(x < leftx + dx){
-		correlation = 11.0/12.0 + 2*(cube(dx/2) - cube(leftx - (x - dx)))/(3*cube(dx));
-	} else if (x > rightx - dx/2) {
-		correlation = 0.5 + ((rightx - x)/dx) - 2*(cube(rightx - x))/(3*cube(dx));
-	} else if(x > rightx - dx) {
-		correlation = 11.0/12.0 + 2*(cube(dx/2) - cube(x + dx - rightx))/(3*cube(dx));
-	}else {
-		correlation = 1;
+	switch (splineOrder){
+		case 0:
+			if ( x < leftx + deltaX){
+				correlation = 0.5*(x + deltaX - leftx)/deltaX;
+			} else if( x > rightx - deltaX){
+				correlation = 0.5*(rightx - (x - deltaX))/deltaX;
+			} else {
+				correlation = 1;
+			}
+			break;
+		case 1:
+			if( x < leftx){
+				correlation = 0.5*sqr(x + deltaX - leftx)/deltaX2;
+			} else if (x < leftx + deltaX){
+				correlation = 1 - 0.5*sqr(leftx - (x - deltaX))/deltaX2;
+			} else if (x > rightx){
+				correlation = 0.5*sqr(rightx - (x - deltaX))/deltaX2;
+			} else if (x > rightx - deltaX){
+				correlation = 1 - 0.5*sqr(x + deltaX - rightx)/deltaX2;
+			} else {
+				correlation = 1;
+			}
+			break;
+		case 2:
+			if (x < leftx - dx/2) {
+				correlation = 2*cube(x + dx - leftx)/(3*cube(dx));
+			} else if(x < leftx){
+				correlation = (1.0/12.0) + ((x + dx/2 - leftx)/dx) - 2*(cube(dx/2) - cube(leftx - x))/(3*cube(dx));
+			} else if (x > rightx + dx/2) {
+				correlation = 2*cube(rightx - (x - dx))/(3*cube(dx));
+			} else if(x > rightx){
+				correlation = (1.0/12.0) + ((-(x - dx/2) + rightx)/dx) - 2*(cube(dx/2) - cube(x - rightx))/(3*cube(dx));
+			} else if (x < leftx + dx/2) {
+				correlation = 0.5 + ((x - leftx)/dx) - 2*(cube(x - leftx))/(3*cube(dx));
+			} else if(x < leftx + dx){
+				correlation = 11.0/12.0 + 2*(cube(dx/2) - cube(leftx - (x - dx)))/(3*cube(dx));
+			} else if (x > rightx - dx/2) {
+				correlation = 0.5 + ((rightx - x)/dx) - 2*(cube(rightx - x))/(3*cube(dx));
+			} else if(x > rightx - dx) {
+				correlation = 11.0/12.0 + 2*(cube(dx/2) - cube(x + dx - rightx))/(3*cube(dx));
+			}else {
+				correlation = 1;
+			}
+			break;
+		default:
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "spline order is wrong");
+			fclose(errorLogFile);
+			exit(0);
 	}
 
 	return correlation;
