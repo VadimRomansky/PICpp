@@ -141,7 +141,6 @@ void Simulation::outputBackup(){
 
 void Simulation::updateDeltaT() {
 	printf("updating time step\n");
-	double timeEpsilon = 0.01;
 	double delta = deltaX;
 	deltaT = timeEpsilon * delta / speed_of_light_normalized;
 	double B = B0.norm();
@@ -301,7 +300,8 @@ void Simulation::updateElectroMagneticParameters() {
 
 			if(solverType == IMPLICIT){
 				electricFlux[i] += rotatedVelocity * (particle->charge * particle->weight * correlation);
-				dielectricTensor[i] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+				dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+				//dielectricTensor[i] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 			}
 			if(solverType == EXPLICIT){
 				electricFlux[i] += velocity*particle->charge*particle->weight*correlation;
