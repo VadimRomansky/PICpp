@@ -42,6 +42,7 @@ public:
 	double deltaX2;
 
 	double theta;
+	double eta;
 
 	bool debugMode;
 

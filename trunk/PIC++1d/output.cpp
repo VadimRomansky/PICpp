@@ -145,6 +145,7 @@ void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* p
 
 	fprintf(generalFile, "%15.10g\n", simulation->xsize);
 	fprintf(generalFile, "%15.10g\n", simulation->theta);
+	fprintf(generalFile, "%15.10g\n", simulation->eta);
 
 	int debugMode = 0;
 	if(simulation->debugMode){

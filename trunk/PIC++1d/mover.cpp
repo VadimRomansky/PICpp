@@ -41,10 +41,9 @@ void Simulation::moveParticle(Particle* particle){
 
 	newVelocity = tempParticle.velocity(speed_of_light_normalized);
 
-	//note that it in half-time!!
-	tempParticle.x += (velocity.x + newVelocity.x)*deltaT/4;
-	tempParticle.y += (velocity.y + newVelocity.y)*deltaT/4;
-	tempParticle.z += (velocity.z + newVelocity.z)*deltaT/4;
+	tempParticle.x += ((1 - eta)*velocity.x + eta*newVelocity.x)*eta*deltaT;
+	tempParticle.y += ((1 - eta)*velocity.y + eta*newVelocity.y)*eta*deltaT;
+	tempParticle.z += ((1 - eta)*velocity.z + eta*newVelocity.z)*eta*deltaT;
 
 
 	Vector3d prevVelocity = velocity; 
@@ -59,9 +58,10 @@ void Simulation::moveParticle(Particle* particle){
 
 		//tempParticle.momentum += (E + ((velocity + newVelocity).vectorMult(B)/(2.0*speed_of_light_normalized)))*particle->charge*deltaT;
 
-		middleVelocity = (tempParticle.rotationTensor*tempParticle.gammaFactor(speed_of_light_normalized)*velocity) + rotatedE*betaShift;
+		//mistake in noguchi - he writes betashift!
+		middleVelocity = (tempParticle.rotationTensor*tempParticle.gammaFactor(speed_of_light_normalized)*velocity) + rotatedE*beta;
 
-		tempParticle.x += (middleVelocity.x*deltaT/2);
+		tempParticle.x += (middleVelocity.x*theta*deltaT);
 		correctParticlePosition(tempParticle);
 
 		E = correlationTempEfield(tempParticle)*fieldScale;
@@ -75,7 +75,8 @@ void Simulation::moveParticle(Particle* particle){
 
 	particle->momentum = tempParticle.momentum;
 	particle->momentum.x = 0;
-	//particle->x += (velocity.x + newVelocity.x)*deltaT/2;
+
+	//particle->x += middleVelocity.x*deltaT;
 
 	particle->y += middleVelocity.y*deltaT;
 	particle->z += middleVelocity.z*deltaT;
@@ -127,7 +128,7 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d velocity,
 			result.matrix[i][j] = Kronecker.matrix[i][j] + beta * beta * BField[i] * BField[j];
 			for (int k = 0; k < 3; ++k) {
 				for (int l = 0; l < 3; ++l) {
-					result.matrix[i][j] += beta * LeviCivita[j][k][l] * Kronecker.matrix[i][l] * BField[k];
+					result.matrix[i][j] -= beta * LeviCivita[j][k][l] * Kronecker.matrix[i][k] * BField[l];
 				}
 			}
 

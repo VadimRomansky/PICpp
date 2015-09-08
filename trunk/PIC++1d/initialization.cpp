@@ -51,7 +51,8 @@ Simulation::Simulation(double xn, double xsizev, double temp, double rho, double
 	momentum = Vector3d(0, 0, 0);
 
 
-	theta = 0.5;
+	theta = initialTheta;
+	eta = theta;
 
 	xnumber = xn;
 

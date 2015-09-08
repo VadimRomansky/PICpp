@@ -205,6 +205,7 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 
 	fscanf(generalFile, "%lf", &simulation.xsize);
 	fscanf(generalFile, "%lf", &simulation.theta);
+	fscanf(generalFile, "%lf", &simulation.eta);
 
 	int debugMode = 0;
 
