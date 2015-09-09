@@ -192,7 +192,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>** matrix, doubl
 	double module;
 
 	double relativeError = 1;
-	double maxRelativeError = 1/(matrixDimension*1E14);
+	double maxRelativeError = maxErrorLevel/(matrixDimension);
 
 	while (relativeError > maxRelativeError  && n < min2(maxGMRESIterations, matrixDimension + 3)) {
 		printf("GMRES iteration %d\n", n);
