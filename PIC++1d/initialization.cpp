@@ -52,7 +52,7 @@ Simulation::Simulation(double xn, double xsizev, double temp, double rho, double
 
 
 	theta = initialTheta;
-	eta = theta;
+	eta = 0.5;
 
 	xnumber = xn;
 

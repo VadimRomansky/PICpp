@@ -17,11 +17,11 @@ void Simulation::simulate() {
 		initialize();
 		createFiles();
 		//initializeTwoStream();
-		createParticles();
+		//createParticles();
 		//collectParticlesIntoBins();
 		//initializeExternalFluxInstability();
-		initializeAlfvenWave();
-		//initializeSimpleElectroMagneticWave();
+		//initializeAlfvenWave();
+		initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
 	collectParticlesIntoBins();
@@ -143,70 +143,72 @@ void Simulation::updateDeltaT() {
 	printf("updating time step\n");
 	double delta = deltaX;
 	deltaT = timeEpsilon * delta / speed_of_light_normalized;
-	double B = B0.norm();
-	double E = E0.norm();
-	for (int i = 0; i < xnumber; ++i) {
-		if (Bfield[i].norm() > B) {
-			B = Bfield[i].norm();
+	if(particles.size() > 0){
+		double B = B0.norm();
+		double E = E0.norm();
+		for (int i = 0; i < xnumber; ++i) {
+			if (Bfield[i].norm() > B) {
+				B = Bfield[i].norm();
+			}
 		}
-	}
-	for (int i = 0; i < xnumber; ++i) {
-		if (Efield[i].norm() > E) {
-			E = Efield[i].norm();
+		for (int i = 0; i < xnumber; ++i) {
+			if (Efield[i].norm() > E) {
+				E = Efield[i].norm();
+			}
 		}
-	}
 
-	B *= fieldScale;
-	E *= fieldScale;
+		B *= fieldScale;
+		E *= fieldScale;
 
-	double minFlux = electricFlux[0].norm();
-	for(int i = 0; i < xnumber; ++i){
-		if(electricFlux[i].norm() < minFlux){
-			minFlux = electricFlux[i].norm();
-		}
-	}
-
-	/*if(E > 0 && minFlux > 0){
-		double maxResistance = 0;
-		double minResistance = Efield[0].norm()*fieldScale/electricFlux[0].norm();
+		double minFlux = electricFlux[0].norm();
 		for(int i = 0; i < xnumber; ++i){
-			if (Efield[i].norm()*fieldScale/electricFlux[i].norm() < minResistance){
-				minResistance = Efield[i].norm()*fieldScale/electricFlux[i].norm();
-			}
-			if (Efield[i].norm()*fieldScale/electricFlux[i].norm() > maxResistance){
-				maxResistance = Efield[i].norm()*fieldScale/electricFlux[i].norm();
+			if(electricFlux[i].norm() < minFlux){
+				minFlux = electricFlux[i].norm();
 			}
 		}
 
-		deltaT = min2(deltaT, 0.05*(minResistance/(4*pi)));
-		//note that omega plasma = 1 in our system
-		deltaT = min2(deltaT, 0.05/maxResistance);
-	}*/
+		/*if(E > 0 && minFlux > 0){
+			double maxResistance = 0;
+			double minResistance = Efield[0].norm()*fieldScale/electricFlux[0].norm();
+			for(int i = 0; i < xnumber; ++i){
+				if (Efield[i].norm()*fieldScale/electricFlux[i].norm() < minResistance){
+					minResistance = Efield[i].norm()*fieldScale/electricFlux[i].norm();
+				}
+				if (Efield[i].norm()*fieldScale/electricFlux[i].norm() > maxResistance){
+					maxResistance = Efield[i].norm()*fieldScale/electricFlux[i].norm();
+				}
+			}
 
-	double concentration = density / (massProton + massElectron);
+			deltaT = min2(deltaT, 0.05*(minResistance/(4*pi)));
+			//note that omega plasma = 1 in our system
+			deltaT = min2(deltaT, 0.05/maxResistance);
+		}*/
 
-	omegaPlasmaProton = sqrt(4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massProton);
-	omegaPlasmaElectron = sqrt(4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
+		double concentration = density / (massProton + massElectron);
 
-	deltaT = min2(deltaT, timeEpsilon/omegaPlasmaElectron);
+		omegaPlasmaProton = sqrt(4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massProton);
+		omegaPlasmaElectron = sqrt(4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
 
-	omegaGyroProton = electron_charge_normalized * B / (massProton * speed_of_light);
-	omegaGyroElectron = electron_charge_normalized * B / (massElectron * speed_of_light);
+		deltaT = min2(deltaT, timeEpsilon/omegaPlasmaElectron);
 
-	double thermalMomentum = sqrt(massElectron*kBoltzman_normalized*temperature);
+		omegaGyroProton = electron_charge_normalized * B / (massProton * speed_of_light);
+		omegaGyroElectron = electron_charge_normalized * B / (massElectron * speed_of_light);
 
-	if (B > 0) {
-		deltaT = min2(deltaT, timeEpsilon * massElectron * speed_of_light_normalized / (electron_charge_normalized * B));
-	}
-	/*if (E > 0) {
-		deltaT = min2(deltaT, 0.1 * thermalMomentum / (electron_charge_normalized * E));
-	}*/
+		double thermalMomentum = sqrt(massElectron*kBoltzman_normalized*temperature);
+
+		if (B > 0) {
+			deltaT = min2(deltaT, timeEpsilon * massElectron * speed_of_light_normalized / (electron_charge_normalized * B));
+		}
+		/*if (E > 0) {
+			deltaT = min2(deltaT, 0.1 * thermalMomentum / (electron_charge_normalized * E));
+		}*/
 
 
-	double Vthermal = sqrt(2*kBoltzman_normalized*temperature/massElectron);
-	double minDeltaT = deltaX/Vthermal;
-	if(minDeltaT > deltaT){
-		printf("deltaT < dx/Vthermal\n");
+		double Vthermal = sqrt(2*kBoltzman_normalized*temperature/massElectron);
+		double minDeltaT = deltaX/Vthermal;
+		if(minDeltaT > deltaT){
+			printf("deltaT < dx/Vthermal\n");
+		}
 	}
 }
 
@@ -341,8 +343,9 @@ void Simulation::updateElectroMagneticParameters() {
 
 	if(solverType == IMPLICIT){
 		for (int i = 0; i <= xnumber; ++i) {
+
 			Vector3d divPressureTensor = evaluateDivPressureTensor(i);
-			electricFlux[i] = electricFlux[i] - divPressureTensor * deltaT / 2;
+			electricFlux[i] = electricFlux[i] - divPressureTensor * eta * deltaT;
 		}
 	}
 
