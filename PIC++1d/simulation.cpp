@@ -167,7 +167,7 @@ void Simulation::updateDeltaT() {
 			}
 		}
 
-		/*if(E > 0 && minFlux > 0){
+		if(E > 0 && minFlux > 0){
 			double maxResistance = 0;
 			double minResistance = Efield[0].norm()*fieldScale/electricFlux[0].norm();
 			for(int i = 0; i < xnumber; ++i){
@@ -179,10 +179,10 @@ void Simulation::updateDeltaT() {
 				}
 			}
 
-			deltaT = min2(deltaT, 0.05*(minResistance/(4*pi)));
+			deltaT = min2(deltaT, timeEpsilon*(minResistance/(4*pi)));
 			//note that omega plasma = 1 in our system
-			deltaT = min2(deltaT, 0.05/maxResistance);
-		}*/
+			deltaT = min2(deltaT,timeEpsilon/maxResistance);
+		}
 
 		double concentration = density / (massProton + massElectron);
 
