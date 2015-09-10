@@ -1128,6 +1128,7 @@ void Simulation::createParticles() {
 				particle->x= x;
 			}*/
 			particle->x = x;
+			particle->momentum.x = 0;
 			particles.push_back(particle);
 			particlesNumber++;
 			if (particlesNumber % 1000 == 0) {
