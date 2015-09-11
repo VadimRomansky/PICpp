@@ -61,7 +61,7 @@ void Simulation::moveParticle(Particle* particle){
 		//mistake in noguchi - he writes betashift!
 		middleVelocity = (tempParticle.rotationTensor*tempParticle.gammaFactor(speed_of_light_normalized)*velocity) + rotatedE*beta;
 
-		tempParticle.x += (middleVelocity.x*theta*deltaT);
+		tempParticle.x += (middleVelocity.x*eta*deltaT);
 		correctParticlePosition(tempParticle);
 
 		E = correlationTempEfield(tempParticle)*fieldScale;

@@ -17,11 +17,11 @@ void Simulation::simulate() {
 		initialize();
 		createFiles();
 		//initializeTwoStream();
-		createParticles();
+		//createParticles();
 		//collectParticlesIntoBins();
 		//initializeExternalFluxInstability();
-		initializeAlfvenWave();
-		//initializeSimpleElectroMagneticWave();
+		//initializeAlfvenWave();
+		initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
 	collectParticlesIntoBins();
