@@ -17,11 +17,11 @@ void Simulation::simulate() {
 		initialize();
 		createFiles();
 		//initializeTwoStream();
-		//createParticles();
+		createParticles();
 		//collectParticlesIntoBins();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWave();
-		initializeSimpleElectroMagneticWave();
+		initializeAlfvenWave();
+		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
 	collectParticlesIntoBins();
@@ -345,7 +345,8 @@ void Simulation::updateElectroMagneticParameters() {
 		for (int i = 0; i <= xnumber; ++i) {
 
 			Vector3d divPressureTensor = evaluateDivPressureTensor(i);
-			electricFlux[i] = electricFlux[i] - divPressureTensor * eta * deltaT;
+			//electricFlux[i] = electricFlux[i] - divPressureTensor * eta * deltaT;
+			electricFlux[i] = electricFlux[i] + divPressureTensor * eta * deltaT;
 		}
 	}
 
