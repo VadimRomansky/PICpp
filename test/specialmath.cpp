@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "specialmath.h"
-#include "../PIC++/simulation.h"
+//#include "../PIC++/simulation.h"
 
 
 double** arnoldiIterations(double** matrix, double** outHessenbergMatrix, int n, double** prevBasis, double** prevHessenbergMatrix){
@@ -28,23 +28,25 @@ double** arnoldiIterations(double** matrix, double** outHessenbergMatrix, int n,
 	delete[] prevHessenbergMatrix;
 
 	double* tempVector = multiplyMatrixVector(matrix, resultBasis[n - 2]);
+	double b = sqrt(scalarMultiplyLargeVectors(tempVector, tempVector));
+
 
 	for (int m = 0; m < n - 1; ++m) {
+		double a = scalarMultiplyLargeVectors(resultBasis[m], tempVector);
 		outHessenbergMatrix[m][n - 2] = scalarMultiplyLargeVectors(resultBasis[m], tempVector);
-		for (int i = 0; i < number; ++i) {
-						tempVector[i] -= outHessenbergMatrix[m][n - 2] * resultBasis[m][i];
-						//alertNaNOrInfinity(tempVector[i][j][k][l], "tempVector = NaN\n");
+		int i = 0;
+		#pragma omp parallel for shared(tempVector, outHessenbergMatrix, resultBasis, lnumber, m, n) private(i)
+		for (i = 0; i < number; ++i) {
+			tempVector[i] -= outHessenbergMatrix[m][n - 2] * resultBasis[m][i];
+			//alertNaNOrInfinity(tempVector[i], "tempVector = NaN\n");
 		}
 	}
-	double a = scalarMultiplyLargeVectors(resultBasis[0], tempVector);
 	outHessenbergMatrix[n - 1][n - 2] = sqrt(scalarMultiplyLargeVectors(tempVector, tempVector));
 	if (outHessenbergMatrix[n - 1][n - 2] > 0) {
 		for (int i = 0; i < number ; ++i) {
-						tempVector[i] /= outHessenbergMatrix[n - 1][n - 2];
-						//alertNaNOrInfinity(tempVector[i][j][k][l], "tempVector = NaN\n");
+			tempVector[i] /= outHessenbergMatrix[n - 1][n - 2];
+			//alertNaNOrInfinity(tempVector[i], "tempVector = NaN\n");
 		}
-		a = scalarMultiplyLargeVectors(resultBasis[0], tempVector);
-		a = scalarMultiplyLargeVectors(tempVector, tempVector);
 	} else {
 		printf("outHessenbergMatrix[n-1][n-2] == 0\n");
 	}
@@ -55,28 +57,29 @@ double** arnoldiIterations(double** matrix, double** outHessenbergMatrix, int n,
 }
 
 double* generalizedMinimalResidualMethod(double** matrix, double* rightPart){
+	printf("start GMRES\n");
 	double norm = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart));
-
 	double* outvector = new double[number];
 
 	if(norm == 0) {
 		for(int i = 0; i < number; ++i) {
-						outvector[i] = 0;
+			outvector[i] = 0;
 		}
 		return outvector;
 	}
 
+	//#pragma omp parallel for
 	for (int i = 0; i < number; ++i) {
-					rightPart[i] /= norm;
-					for (int m = 0; m < number; ++m) {
-						double value = matrix[i][m];
-						matrix[i][m] /= norm;
-						value = matrix[i][m];
+		rightPart[i] /= norm;
+		for (int m = 0; m < number; ++m) {
+			double value = matrix[i][m];
+			//matrix[i][l][m].value /= norm;
+			value = matrix[i][m];
 		}
+				
 	}
 
 	int matrixDimension = number;
-	//double maxError = 1/(matrixDimension * 1E5);
 
 	double** hessenbergMatrix;
 	double** newHessenbergMatrix;
@@ -101,9 +104,8 @@ double* generalizedMinimalResidualMethod(double** matrix, double* rightPart){
 	double** basis = new double*[1];
 	basis[0] = new double[number];
 	for (int i = 0; i < number; ++i) {
-					basis[0][i] = rightPart[i];
+		basis[0][i] = rightPart[i];
 	}
-
 	double** newBasis;
 
 	int n = 2;
@@ -118,9 +120,9 @@ double* generalizedMinimalResidualMethod(double** matrix, double* rightPart){
 	double module;
 
 	double relativeError = 1;
-	double maxRelativeError = 1/(matrixDimension*1E12);
+	double maxRelativeError = 1E-12/(matrixDimension);
 
-	while (relativeError > maxRelativeError && n < matrixDimension + 2) {
+	while (relativeError > maxRelativeError  && n < matrixDimension + 2) {
 		printf("GMRES iteration %d\n", n);
 		newHessenbergMatrix = new double*[n];
 		for (int i = 0; i < n; ++i) {
@@ -231,19 +233,12 @@ double* generalizedMinimalResidualMethod(double** matrix, double* rightPart){
 
 		error = fabs(beta * Qmatrix[n - 1][0]);
 		for (int i = 0; i < number; ++i) {
-						outvector[i] = 0;
-						for (int m = 0; m < n; ++m) {
-							outvector[i] += basis[m][i] * y[m];
-						}
+			outvector[i] = 0;
+			for (int m = 0; m < n; ++m) {
+				outvector[i] += basis[m][i] * y[m] *norm;
+				//outvector[i][l] += basis[m][i][l] * y[m];
+			}				
 		}
-
-		double* leftPart1 = multiplyMatrixVector(matrix, outvector);
-		double error1 = 0;
-		for (int i = 0; i < number; ++i) {
-						error1 += (leftPart1[i] - rightPart[i])*(leftPart1[i] - rightPart[i]);
-		}
-		delete[] leftPart1;
-		error1 = sqrt(error1);
 
 		double normRightPart = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart));
 		relativeError = error/normRightPart;
@@ -266,21 +261,11 @@ double* generalizedMinimalResidualMethod(double** matrix, double* rightPart){
 	//out result
 
 	for (int i = 0; i < number; ++i) {
-					outvector[i] = 0;
-					for (int m = 0; m < n; ++m) {
-						//outvector[i][j][k][l] += basis[m][i][j][k][l] * y[m]*norm;
-						outvector[i] += basis[m][i] * y[m];
-					}
+		outvector[i] = 0;
+		for (int m = 0; m < n; ++m) {
+			outvector[i] += basis[m][i] * y[m]*norm;
+		}
 	}
-
-	double* leftPart = multiplyMatrixVector(matrix, outvector);
-	error = 0;
-	for (int i = 0; i < number; ++i) {
-					error += (leftPart[i] - rightPart[i])*(leftPart[i] - rightPart[i]);
-	}
-	delete[] leftPart;
-
-	error = sqrt(error);
 
 	for (int i = 0; i < n; ++i) {
 		delete[] Qmatrix[i];
@@ -291,12 +276,21 @@ double* generalizedMinimalResidualMethod(double** matrix, double* rightPart){
 	delete[] Rmatrix;
 	delete[] hessenbergMatrix;
 
-	for (int m = 0; m < n; ++m) {
+	for (int m = 0; m < n-1; ++m) {
 		delete[] basis[m];
 	}
 	delete[] basis;
 
 	delete[] y;
+
+	for (int i = 0; i < number; ++i) {
+		rightPart[i] *= norm;
+		for (int m = 0; m < number; ++m) {
+			double value = matrix[i][m];
+			//matrix[i][l][m].value *= norm;
+			value = matrix[i][m];
+		}
+	}
 
 	return outvector;
 }

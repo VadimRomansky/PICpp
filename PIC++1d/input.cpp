@@ -222,6 +222,7 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 	} else {
 		simulation.solverType = EXPLICIT;
 	}
+	fscanf(generalFile, "%d", &simulation.maxwellEquationMatrixSize);
 
 	fscanf(generalFile, "%lf", &simulation.extJ);
 

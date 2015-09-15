@@ -49,6 +49,7 @@ public:
 	bool newlyStarted;
 
 	SolverType solverType;
+	int maxwellEquationMatrixSize;
 
 	double particleEnergy;
 	double electricFieldEnergy;
@@ -135,6 +136,7 @@ public:
 	FILE* velocityFile;
 	FILE* velocityElectronFile;
 	FILE* fluxFile;
+	FILE* dielectricTensorFile;
 	FILE* informationFile;
 
 	FILE* rotBFile;

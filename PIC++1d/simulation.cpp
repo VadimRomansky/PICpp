@@ -48,7 +48,7 @@ void Simulation::simulate() {
 		evaluateParticlesRotationTensor();
 		updateElectroMagneticParameters();
 		evaluateFields();
-		evaluateMagneticField();
+		//evaluateMagneticField();
 		moveParticles();
 		//cleanupDivergence();
 		updateDensityParameters();
@@ -117,6 +117,10 @@ void Simulation::output() {
 	EderivativeFile = fopen("./output/EderivativeFile.dat", "a");
 	outputVectorArray(EderivativeFile, Ederivative, xnumber + 1, rotBscale);
 	fclose(EderivativeFile);
+
+	dielectricTensorFile = fopen("./output/dielectricTensorFile.dat", "a");
+	outputMatrixArray(dielectricTensorFile, dielectricTensor, xnumber + 1);
+	fclose(dielectricTensorFile);
 
 	generalFile = fopen("./output/general.dat", "a");
 	outputGeneral(generalFile, this);
@@ -345,8 +349,8 @@ void Simulation::updateElectroMagneticParameters() {
 		for (int i = 0; i <= xnumber; ++i) {
 
 			Vector3d divPressureTensor = evaluateDivPressureTensor(i);
-			//electricFlux[i] = electricFlux[i] - divPressureTensor * eta * deltaT;
-			electricFlux[i] = electricFlux[i] + divPressureTensor * eta * deltaT;
+			electricFlux[i] = electricFlux[i] - divPressureTensor * eta * deltaT;
+			//electricFlux[i] = electricFlux[i] + divPressureTensor * eta * deltaT;
 		}
 	}
 
