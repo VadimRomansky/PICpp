@@ -17,6 +17,7 @@ void outputGeneral(FILE* outFile, Simulation* simulatiom);
 void outputFlux(FILE* outFile, Vector3d* electricFlux, Vector3d* externalElectricFlux, int xnumber, double plasma_period, double gyroradius, double fieldScale);
 void outputDivergenceError(FILE* outFile, Simulation* simulation, double plasma_period, double gyroradius, double fieldScale);
 void outputVectorArray(FILE* outFile, Vector3d* vector3d, int number, double scale = 1.0);
+void outputMatrixArray(FILE* outFile, Matrix3d* matrix3d, int number, double scale = 1.0);
 
 void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile, Simulation* simulation); 
 void outputParticles(FILE* outFile, Simulation* simulation);

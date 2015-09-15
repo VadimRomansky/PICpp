@@ -89,41 +89,6 @@ void alertNegative(double value, const char* s){
 	return round;
 }*/
 
-void solveSpecialMatrix(double** const leftHalf, double* const rightPart, double* const output){
-	for(int j = 0; j < 2; ++j){
-		leftHalf[2][j] /= leftHalf[2][2];
-	}
-	rightPart[2] /= leftHalf[2][2];
-	leftHalf[2][2] = 1;
-
-	for(int i = 0; i < 2; ++i){
-		for(int j = 0; j < 2; ++j){
-			leftHalf[i][j] -= leftHalf[2][j]*leftHalf[i][2];
-		}
-		rightPart[i] -= rightPart[2]*leftHalf[i][2];
-		leftHalf[i][2] = 0;
-	}
-
-	leftHalf[1][0] /= leftHalf[1][1];
-	rightPart[1] /= leftHalf[1][1];
-	leftHalf[1][1] = 1;
-
-	leftHalf[0][0] -= leftHalf[1][0]*leftHalf[0][1];
-	rightPart[0] -= rightPart[1]*leftHalf[0][1];
-	leftHalf[0][1] = 0;
-
-	rightPart[0] /= leftHalf[0][0];
-
-	leftHalf[0][0] = 1;
-
-	output[0] = rightPart[0];
-	for(int i = 1; i < 6; ++i){
-		output[i] = rightPart[i];
-		for(int j = 0; j < min2(i,3); ++j){
-			output[i] -= leftHalf[i][j]*output[j];
-		}
-	}
-}
 
 double coordinateDifference(double* const a, double* const b, double dt, double mass){
 	double result = 0;

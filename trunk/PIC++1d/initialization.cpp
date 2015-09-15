@@ -39,6 +39,7 @@ Simulation::Simulation(double xn, double xsizev, double temp, double rho, double
 	newlyStarted = true;
 	solverType = IMPLICIT;
 	//solverType = EXPLICIT;
+	maxwellEquationMatrixSize = 6;
 
 	currentIteration = 0;
 	time = 0;
@@ -52,7 +53,7 @@ Simulation::Simulation(double xn, double xsizev, double temp, double rho, double
 
 
 	theta = initialTheta;
-	eta = 0.5;
+	eta = eta;
 
 	xnumber = xn;
 
@@ -742,8 +743,8 @@ void Simulation::createArrays() {
 	maxwellEquationMatrix = new std::vector<MatrixElement>*[xnumber];
 	maxwellEquationRightPart = new double*[xnumber];
 	for (int i = 0; i < xnumber; ++i) {
-		maxwellEquationMatrix[i] = new std::vector<MatrixElement>[3];
-		maxwellEquationRightPart[i] = new double[3];
+		maxwellEquationMatrix[i] = new std::vector<MatrixElement>[maxwellEquationMatrixSize];
+		maxwellEquationRightPart[i] = new double[maxwellEquationMatrixSize];
 	}
 
 	divergenceCleanUpMatrix = new std::vector<MatrixElement>*[xnumber];
@@ -903,6 +904,8 @@ void Simulation::createFiles() {
 	fclose(rotBFile);
 	EderivativeFile = fopen("./output/EderivativeFile.dat", "w");
 	fclose(EderivativeFile);
+	dielectricTensorFile = fopen("./output/dielectricTensorFile.dat", "w");
+	fclose(dielectricTensorFile);
 	errorLogFile = fopen("./output/errorLog.dat", "w");
 	fclose(errorLogFile);
 }
