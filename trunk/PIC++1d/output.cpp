@@ -127,7 +127,7 @@ void outputVectorArray(FILE* outFile, Vector3d* vector3d, int number, double sca
 
 void outputMatrixArray(FILE* outFile, Matrix3d* matrix3d, int number, double scale){
 	for(int i = 0; i < number; ++i) {
-		fprintf(outFile, "%15.10g %15.10g %15.10g 15.10g 15.10g 15.10g 15.10g 15.10g 15.10g\n", 
+		fprintf(outFile, "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g\n", 
 			matrix3d[i].matrix[0][0]*scale, matrix3d[i].matrix[0][1]*scale, matrix3d[i].matrix[0][2]*scale,
 			matrix3d[i].matrix[1][0]*scale, matrix3d[i].matrix[1][1]*scale, matrix3d[i].matrix[1][2]*scale,
 			matrix3d[i].matrix[2][0]*scale, matrix3d[i].matrix[2][1]*scale, matrix3d[i].matrix[2][2]*scale);
