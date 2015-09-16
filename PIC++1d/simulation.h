@@ -97,6 +97,7 @@ public:
 	double* electricDensity;
 	Matrix3d* dielectricTensor;
 	Matrix3d* pressureTensor;
+	Vector3d* divPressureTensor;
 
 	Vector3d* Efield;
 	Vector3d* Bfield;

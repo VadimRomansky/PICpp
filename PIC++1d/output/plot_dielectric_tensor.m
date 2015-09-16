@@ -87,6 +87,12 @@ plot(Xfile(1:NE,1),Mzz(1:NE,3), 'Color',[0, 0, 1]);
 legend('{{\mu}_{xx}}', '{{\mu}_{xy}}','{{\mu}_{xz}}', '{{\mu}_{yx}}', '{{\mu}_{yy}}','{{\mu}_{yz}}', '{{\mu}_{zx}}', '{{\mu}_{zy}}','{{\mu}_{zz}}','Location','northeast');
 title ('dielectric tensor');
 xlabel ('x/r_g');
-ylabel ('{mu}');
+ylabel ('{\mu}');
 grid ;
 
+figure(2);
+plot(Xfile(1:NE,1),Mxx(1:NE,1), 'r', Xfile(1:NE,1),Mxx(1:NE,2), 'g', Xfile(1:NE,1),Mxx(1:NE,3), 'b');
+title ('dielectric tensor');
+xlabel ('x/r_g');
+ylabel ('{\mu_{xx}}');
+grid ;

@@ -26,6 +26,12 @@ void Simulation::simulate() {
 	}
 	collectParticlesIntoBins();
 	updateParameters();
+
+	//double because dielectric tensor needs deltaT;
+	updateDeltaT();
+	evaluateParticlesRotationTensor();
+	updateElectroMagneticParameters();
+	updateDensityParameters();
 	updateDeltaT();
 	evaluateParticlesRotationTensor();
 	updateElectroMagneticParameters();
@@ -308,6 +314,19 @@ void Simulation::updateElectroMagneticParameters() {
 				electricFlux[i] += rotatedVelocity * (particle->charge * particle->weight * correlation);
 				dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 				//dielectricTensor[i] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+				
+				Particle tempParticle = *particle;
+				double shiftX = 0.01*deltaX;
+				if(particle->x + shiftX >xgrid[xnumber]){
+					shiftX = -shiftX;
+				}
+				tempParticle.x += shiftX;
+
+				double tempCorrelation = correlationWithEbin(tempParticle, i) / volume(i);
+
+				divPressureTensor[i].x += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][0] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+				divPressureTensor[i].y += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][1] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+				divPressureTensor[i].z += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][2] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
 			}
 			if(solverType == EXPLICIT){
 				electricFlux[i] += velocity*particle->charge*particle->weight*correlation;
@@ -324,6 +343,9 @@ void Simulation::updateElectroMagneticParameters() {
 
 	dielectricTensor[0] = dielectricTensor[0] + dielectricTensor[xnumber];
 	dielectricTensor[xnumber] = dielectricTensor[0];
+
+	divPressureTensor[0] = divPressureTensor[0] + divPressureTensor[xnumber];
+	divPressureTensor[xnumber] = divPressureTensor[0];
 
 
 	for (int i = 0; i < xnumber; ++i) {
@@ -348,8 +370,9 @@ void Simulation::updateElectroMagneticParameters() {
 	if(solverType == IMPLICIT){
 		for (int i = 0; i <= xnumber; ++i) {
 
-			Vector3d divPressureTensor = evaluateDivPressureTensor(i);
-			electricFlux[i] = electricFlux[i] - divPressureTensor * eta * deltaT;
+			Vector3d divPressureTensorEvaluated = evaluateDivPressureTensor(i);
+			electricFlux[i] = electricFlux[i] - divPressureTensor[i] * eta * deltaT;
+			//electricFlux[i] = electricFlux[i] - divPressureTensor * eta * deltaT;
 			//electricFlux[i] = electricFlux[i] + divPressureTensor * eta * deltaT;
 		}
 	}
