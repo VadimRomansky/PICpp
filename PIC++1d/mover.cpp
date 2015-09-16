@@ -116,19 +116,19 @@ void Simulation::evaluateParticlesRotationTensor()
 Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d velocity, Vector3d EField, Vector3d BField) {
 	Matrix3d result;
 
-	beta = beta / speed_of_light_normalized;
+	beta = beta;
 
 	double gamma_factor = 1 / sqrt(1 - (velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z) / speed_of_light_normalized_sqr);
-	double G = ((beta * (EField.scalarMult(velocity)) / speed_of_light_normalized) + gamma_factor);
+	double G = ((beta * (EField.scalarMult(velocity)) / speed_of_light_normalized_sqr) + gamma_factor);
 	beta = beta / G;
-	double denominator = G * (1 + beta * beta * BField.scalarMult(BField));
+	double denominator = G * (1 + beta * beta * BField.scalarMult(BField)/speed_of_light_normalized_sqr);
 
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
-			result.matrix[i][j] = Kronecker.matrix[i][j] + beta * beta * BField[i] * BField[j];
+			result.matrix[i][j] = Kronecker.matrix[i][j] + (beta * beta * BField[i] * BField[j]/speed_of_light_normalized_sqr);
 			for (int k = 0; k < 3; ++k) {
 				for (int l = 0; l < 3; ++l) {
-					result.matrix[i][j] -= beta * LeviCivita[j][k][l] * Kronecker.matrix[i][k] * BField[l];
+					result.matrix[i][j] -= (beta * LeviCivita[j][k][l] * Kronecker.matrix[i][k] * BField[l]/speed_of_light_normalized);
 				}
 			}
 

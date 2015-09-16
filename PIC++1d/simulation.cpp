@@ -48,7 +48,7 @@ void Simulation::simulate() {
 		evaluateParticlesRotationTensor();
 		updateElectroMagneticParameters();
 		evaluateFields();
-		//evaluateMagneticField();
+		evaluateMagneticField();
 		moveParticles();
 		//cleanupDivergence();
 		updateDensityParameters();

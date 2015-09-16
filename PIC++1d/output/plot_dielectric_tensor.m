@@ -67,9 +67,24 @@ for i=1:NB,
    middleX(i) = 0.5*(Xfile(i) + Xfile(i+1));
 end;
 figure(1);
-plot(Xfile(1:NE,1),Mxx(1:NE,3), 'Color',[1, 0, 1], Xfile(1:NE,1),Mxy(1:NE,3), 'Color',[0.7, 0.3, 0], Xfile(1:NE,1),Mxz(1:NE,3), 'Color',[0.7, 0, 0.3],...
-     Xfile(1:NE,1),Myx(1:NE,3), 'Color',[0.3, 0.7, 0], Xfile(1:NE,1),Myy(1:NE,3), 'Color',[0, 1, 0], Xfile(1:NE,1),Myz(1:NE,3), 'Color',[0, 0.7, 0.3],...
-     Xfile(1:NE,1),Mzx(1:NE,3), 'Color',[0.3, 0, 0.7], Xfile(1:NE,1),Mzy(1:NE,3), 'Color',[0, 0.3, 0.7], Xfile(1:NE,1),Mzz(1:NE,3), 'Color',[0, 0, 1]);
+plot(Xfile(1:NE,1),Mxx(1:NE,3), 'Color',[1, 0, 0]);
+hold on;
+plot(Xfile(1:NE,1),Mxy(1:NE,3), 'Color',[0.7, 0.3, 0]);
+hold on;
+plot(Xfile(1:NE,1),Mxz(1:NE,3), 'Color',[0.7, 0, 0.3]);
+hold on;
+plot(Xfile(1:NE,1),Myx(1:NE,3), 'Color',[0.3, 0.7, 0]);
+hold on;
+plot(Xfile(1:NE,1),Myy(1:NE,3), 'Color',[0, 1, 0]);
+hold on;
+plot(Xfile(1:NE,1),Myz(1:NE,3), 'Color',[0, 0.7, 0.3]);
+hold on;
+plot(Xfile(1:NE,1),Mzx(1:NE,3), 'Color',[0.3, 0, 0.7]);
+hold on;
+plot(Xfile(1:NE,1),Mzy(1:NE,3), 'Color',[0, 0.3, 0.7]);
+hold on;
+plot(Xfile(1:NE,1),Mzz(1:NE,3), 'Color',[0, 0, 1]);
+legend('{{\mu}_{xx}}', '{{\mu}_{xy}}','{{\mu}_{xz}}', '{{\mu}_{yx}}', '{{\mu}_{yy}}','{{\mu}_{yz}}', '{{\mu}_{zx}}', '{{\mu}_{zy}}','{{\mu}_{zz}}','Location','northeast');
 title ('dielectric tensor');
 xlabel ('x/r_g');
 ylabel ('{mu}');

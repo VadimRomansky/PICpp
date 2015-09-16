@@ -39,7 +39,7 @@ Simulation::Simulation(double xn, double xsizev, double temp, double rho, double
 	newlyStarted = true;
 	solverType = IMPLICIT;
 	//solverType = EXPLICIT;
-	maxwellEquationMatrixSize = 6;
+	maxwellEquationMatrixSize = 3;
 
 	currentIteration = 0;
 	time = 0;
