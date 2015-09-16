@@ -165,6 +165,7 @@ Simulation::~Simulation() {
 	delete[] externalElectricFlux;
 	delete[] chargeDensity;
 	delete[] pressureTensor;
+	delete[] divPressureTensor;
 	delete[] electricDensity;
 
 	delete[] xgrid;
@@ -772,6 +773,7 @@ void Simulation::createArrays() {
 	electricFlux = new Vector3d[xnumber + 1];
 	dielectricTensor = new Matrix3d[xnumber + 1];
 	externalElectricFlux = new Vector3d[xnumber + 1];
+	divPressureTensor = new Vector3d[xnumber + 1];
 
 	for (int i = 0; i < xnumber; ++i) {
 		electronConcentration[i] = 0;
@@ -786,6 +788,7 @@ void Simulation::createArrays() {
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		electricFlux[i] = Vector3d(0, 0, 0);
+		divPressureTensor[i]  = Vector3d(0, 0, 0);
 		dielectricTensor[i] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 }

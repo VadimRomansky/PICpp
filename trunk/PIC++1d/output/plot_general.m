@@ -39,3 +39,10 @@ ylabel ('gauss');
 legend('electric field', 'magnetic field','Location','southeast');
 %legend('electric field', 'magnetic field', 'linear approximation electric field','Location','southeast');
 grid ;
+
+figure(2);
+plot (general(1:N2,2), general(1:N2,13), 'red');
+title ('dt');
+xlabel ('{{t w_p}/{2\pi}}');
+ylabel ('dt');
+grid ;
