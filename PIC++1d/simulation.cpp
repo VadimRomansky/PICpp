@@ -14,8 +14,8 @@
 void Simulation::simulate() {
 	if(newlyStarted){
 		createArrays();
-		initialize();
 		createFiles();
+		initialize();
 		//initializeTwoStream();
 		createParticles();
 		//collectParticlesIntoBins();
@@ -177,7 +177,7 @@ void Simulation::updateDeltaT() {
 			}
 		}
 
-		if(E > 0 && minFlux > 0){
+		/*if(E > 0 && minFlux > 0){
 			double maxResistance = 0;
 			double minResistance = Efield[0].norm()*fieldScale/electricFlux[0].norm();
 			for(int i = 0; i < xnumber; ++i){
@@ -192,7 +192,7 @@ void Simulation::updateDeltaT() {
 			deltaT = min2(deltaT, timeEpsilon*(minResistance/(4*pi)));
 			//note that omega plasma = 1 in our system
 			deltaT = min2(deltaT,timeEpsilon/maxResistance);
-		}
+		}*/
 
 		double concentration = density / (massProton + massElectron);
 
@@ -302,6 +302,7 @@ void Simulation::updateElectroMagneticParameters() {
 	for (int i = 0; i < xnumber + 1; ++i) {
 		electricFlux[i] = Vector3d(0, 0, 0);
 		dielectricTensor[i] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+		divPressureTensor[i] = Vector3d(0, 0, 0);
 		for (int pcount = 0; pcount < particlesInEbin[i].size(); ++pcount) {
 			Particle* particle = particlesInEbin[i][pcount];
 			double correlation = correlationWithEbin(*particle, i) / volume(i);
@@ -392,6 +393,16 @@ void Simulation::updateElectroMagneticParameters() {
 	for(int i = 0; i < xnumber +1 ; ++i){
 		electricFlux[i] = electricFlux[i] + externalElectricFlux[i];
 	}
+
+	//for debug only
+		/*double kw = 2*pi/xsize;
+		double concentration = density/(massProton + massElectron);
+		for(int i = 0; i < xnumber; ++i){
+			electricFlux[i].y = electron_charge_normalized*concentration*(VyamplitudeProton - VyamplitudeElectron)*sin(kw*xgrid[i] - omega*(time + theta*deltaT));
+			electricFlux[i].z = electron_charge_normalized*concentration*(VzamplitudeProton - VzamplitudeElectron)*cos(kw*xgrid[i] - omega*(time + theta*deltaT));
+		}
+		electricFlux[xnumber] = electricFlux[0];*/
+	//
 }
 
 void Simulation::updateDensityParameters() {

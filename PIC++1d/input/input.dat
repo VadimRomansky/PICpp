@@ -1,6 +1,6 @@
 200 3 3                 grid numbers
-2E10 3E6 3E6         gridsizes
-1E-10                    temperature
+1E8 3E6 3E6         gridsizes
+1E-6                    temperature
 1.67E-28               density
 0 0 0                  elecctricField
 2E-4 0 0                  magneticField
