@@ -81,6 +81,14 @@ public:
 	double omegaGyroProton;
 	double omegaGyroElectron;
 
+	//for debug alven wave only/////
+	double omega;
+	double VyamplitudeProton;
+	double VyamplitudeElectron;
+	double VzamplitudeProton;
+	double VzamplitudeElectron;
+	/////////////////////////
+
 	double* xgrid;
 
 	double* middleXgrid;
@@ -170,6 +178,7 @@ public:
 	void rescaleConstants();
 
 	void checkDebyeParameter();
+	void checkGyroRadius();
 	void checkCollisionTime(double omega);
 	void checkMagneticReynolds(double v);
 	void checkDissipation(double k, double alfvenV);

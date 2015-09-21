@@ -53,7 +53,7 @@ Simulation::Simulation(double xn, double xsizev, double temp, double rho, double
 
 
 	theta = initialTheta;
-	eta = eta;
+	eta = 0.5;
 
 	xnumber = xn;
 
@@ -217,6 +217,25 @@ void Simulation::initialize() {
 	omegaPlasmaProton = sqrt(4 * pi * concentration * electron_charge * electron_charge / massProton);
 	omegaPlasmaElectron = sqrt(4 * pi * concentration * electron_charge * electron_charge / massElectron);
 
+	informationFile = fopen("./output/information.dat", "a");
+	if(omegaPlasmaElectron*xsize/speed_of_light_normalized < 5){
+		printf("omegaPlasmaElectron*xsize/speed_of_light_normalized < 5\n");
+		fprintf(informationFile, "omegaPlasmaElectron*xsize/speed_of_light_normalized < 5\n");
+	}
+	printf("omegaPlasmaElectron*xsize/speed_of_light_normalized = %g\n", omegaPlasmaElectron*xsize/speed_of_light_normalized);
+	fprintf(informationFile, "omegaPlasmaElectron*xsize/speed_of_light_normalized = %g\n", omegaPlasmaElectron*xsize/speed_of_light_normalized);
+
+	if(omegaPlasmaElectron*deltaX/speed_of_light_normalized > 1){
+		printf("omegaPlasmaElectron*deltaX/speed_of_light_normalized > 1\n");
+		fprintf(informationFile, "omegaPlasmaElectron*deltaX/speed_of_light_normalized > 1\n");
+	}
+	printf("omegaPlasmaElectron*deltaX/speed_of_light_normalized = %g\n", omegaPlasmaElectron*deltaX/speed_of_light_normalized);
+	fprintf(informationFile, "omegaPlasmaElectron*deltaX/speed_of_light_normalized = %g\n", omegaPlasmaElectron*deltaX/speed_of_light_normalized);
+	fclose(informationFile);
+
+	checkDebyeParameter();
+	checkGyroRadius();
+
 	omegaGyroProton = electron_charge * B0.norm()*fieldScale / (massProton * speed_of_light);
 	omegaGyroProton = electron_charge * B0.norm()*fieldScale / (massElectron * speed_of_light);
 
@@ -375,7 +394,8 @@ void Simulation::initializeAlfvenWave() {
 	double error = (((a4*realOmega2 + a3)*realOmega2 + a2)*realOmega2 + a1)*realOmega2 + a0;
 	printf("error = %15.10g\n", error);
 	fprintf(informationFile, "error = %15.10g\n", error);
-	double omega = sqrt(realOmega2)*fakeOmega;
+	//double 
+	omega = sqrt(realOmega2)*fakeOmega;
 
 	if(omega > speed_of_light_normalized*kw/5.0){
 		printf("omega > k*c/5\n");
@@ -386,7 +406,7 @@ void Simulation::initializeAlfvenWave() {
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega/(kw*speed_of_light_normalized));
 		fclose(errorLogFile);
-		exit(0);
+		//exit(0);
 	}
 	printf("omega = %g\n", omega/plasma_period);
 	fprintf(informationFile, "omega = %g\n", omega/plasma_period);
@@ -395,8 +415,6 @@ void Simulation::initializeAlfvenWave() {
 	fprintf(informationFile, "omega/kc = %g\n", omega/(kw*speed_of_light_normalized));
 	fclose(informationFile);
 
-
-	checkDebyeParameter();
 	checkFrequency(omega);
 
 	informationFile = fopen("./output/information.dat", "a");
@@ -424,13 +442,17 @@ void Simulation::initializeAlfvenWave() {
 
 	double denominator = omega*omega - Omegae2 - (omegae2*omega*omega/(omega*omega - kc2));
 
-	double VzamplitudeProton = -(1.0/(4*pi*concentration*electron_charge_normalized))*(kc + ((omegae2 + omegap2 - omega*omega)/kc) + (omegae2*Omegae2/(kc*denominator)))/((Omegae*omegae2*omega/((kc2 - omega*omega)*denominator)) + (Omegap/omega))*Bzamplitude*fieldScale;
-	double VzamplitudeElectron = (((electron_charge_normalized*omega*Omegae)/(massElectron*kc))*Bzamplitude*fieldScale + (omegae2*omega*omega/(kc2 - omega*omega))*VzamplitudeProton)/denominator;
+	//double 
+	VzamplitudeProton = -(1.0/(4*pi*concentration*electron_charge_normalized))*(kc + ((omegae2 + omegap2 - omega*omega)/kc) + (omegae2*Omegae2/(kc*denominator)))/((Omegae*omegae2*omega/((kc2 - omega*omega)*denominator)) + (Omegap/omega))*Bzamplitude*fieldScale;
+	//double 
+	VzamplitudeElectron = (((electron_charge_normalized*omega*Omegae)/(massElectron*kc))*Bzamplitude*fieldScale + (omegae2*omega*omega/(kc2 - omega*omega))*VzamplitudeProton)/denominator;
 
 	double Byamplitude = (4*pi*concentration*electron_charge_normalized/((omega*omega/kc) - kc))*(VzamplitudeElectron - VzamplitudeProton)/fieldScale;
 
-	double VyamplitudeProton = -(Omegap/omega)*VzamplitudeProton - (electron_charge_normalized/(massProton*kc))*Bzamplitude*fieldScale;
-	double VyamplitudeElectron = (Omegae/omega)*VzamplitudeElectron + (electron_charge_normalized/(massElectron*kc))*Bzamplitude*fieldScale;
+	//double 
+	VyamplitudeProton = -(Omegap/omega)*VzamplitudeProton - (electron_charge_normalized/(massProton*kc))*Bzamplitude*fieldScale;
+	//double 
+	VyamplitudeElectron = (Omegae/omega)*VzamplitudeElectron + (electron_charge_normalized/(massElectron*kc))*Bzamplitude*fieldScale;
 
 	double Eyamplitude = (omega/kc)*Bzamplitude;
 	double Ezamplitude = -(omega/kc)*Byamplitude;
@@ -601,7 +623,7 @@ void Simulation::initializeAlfvenWave() {
 
 void Simulation::initializeLangmuirWave(){
 	double epsilon = 0.1;
-	double kw = 2*pi/xsize;
+	double kw = 2*2*pi/xsize;
 	double omega = 2*pi;
 	double langmuirV = omega/kw;
 
@@ -849,6 +871,8 @@ void Simulation::initializeExternalFluxInstability(){
 	double cyclothronOmegaElectron = electron_charge_normalized*B0.norm()*fieldScale/(massElectron*speed_of_light_normalized);
 	double cyclothronOmegaProton = electron_charge_normalized*B0.norm()*fieldScale/(massProton*speed_of_light_normalized);
 
+
+	checkGyroRadius();
 	informationFile = fopen("./output/information.dat", "a");
 	fprintf(informationFile, "alfven V = %g\n", alfvenV*gyroradius/plasma_period);
 	fprintf(informationFile, "phase V = %g\n", phaseV*gyroradius/plasma_period);
@@ -987,6 +1011,34 @@ void Simulation::checkDebyeParameter() {
 	}
 	printf("superparticle debye number = %g\n", superParticleDebyeNumber);
 	fprintf(informationFile, "superparticle debye number = %g\n", superParticleDebyeNumber);
+	fclose(informationFile);
+}
+
+void Simulation::checkGyroRadius(){
+	informationFile = fopen("./output/information.dat", "a");
+
+	if(B0.norm() > 0){
+		double thermalMomentumElectron = sqrt(massElectron*kBoltzman_normalized*temperature);
+		double gyroRadiusElectron = thermalMomentumElectron*speed_of_light_normalized/(electron_charge_normalized * B0.norm());
+		double thermalMomentumProton = sqrt(massProton*kBoltzman_normalized*temperature);
+		double gyroRadiusProton = thermalMomentumProton*speed_of_light_normalized/(electron_charge_normalized * B0.norm());
+		if(deltaX > 0.5*gyroRadiusElectron){
+			printf("deltaX > 0.5*gyroRadiusElectron\n");
+			fprintf(informationFile, "deltaX > 0.5*gyroRadiusElectron\n");
+		}
+
+		printf("deltaX/gyroRadiusElectron = %g\n", deltaX/gyroRadiusElectron);
+		fprintf(informationFile, "deltaX/gyroRadiusElectron = %g\n", deltaX/gyroRadiusElectron);
+
+		if(xsize > 2*gyroRadiusProton){
+			printf("xsize > 2*gyroRadiusElectron\n");
+			fprintf(informationFile, "xsize > 2*gyroRadiusElectron\n");
+		}
+
+		printf("xsize/gyroRadiusProton= %g\n", xsize/gyroRadiusElectron);
+		fprintf(informationFile, "xsize/gyroRadiusElectron = %g\n", xsize/gyroRadiusElectron);
+	}
+
 	fclose(informationFile);
 }
 
@@ -1133,7 +1185,8 @@ void Simulation::createParticles() {
 			} else {
 				particle->x= x;
 			}*/
-			particle->x = x;
+			int m = l/2;
+			particle->x = x + (m*deltaX/particlesPerBin);
 			particle->momentum.x = 0;
 			particles.push_back(particle);
 			particlesNumber++;
