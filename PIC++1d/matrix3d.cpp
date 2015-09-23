@@ -199,7 +199,12 @@ Matrix3d* Matrix3d::createBasisByOneVector(const Vector3d& v){
 	if ((v.z*v.z + v.y*v.y + v.x*v.x) < epsilon){
 		return new Matrix3d(1,0,0,0,1,0,0,0,1);
 	}
-	double theta = acos(v.z/sqrt(v.z*v.z + v.y*v.y + v.x*v.x));
-	double phi = atan2(v.y,v.x);
-	return new Matrix3d(sin(phi),cos(theta)*cos(phi),sin(theta)*cos(phi),-cos(phi),cos(theta)*sin(phi),sin(theta)*sin(phi),0,-sin(theta),cos(theta));
+	//double theta = acos(v.z/sqrt(v.z*v.z + v.y*v.y + v.x*v.x));
+	double cosTheta = v.z/sqrt(v.z*v.z + v.y*v.y + v.x*v.x);
+	double sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+	//double phi = atan2(v.y,v.x);
+	double cosPhi = v.x/sqrt(v.x*v.x + v.y*v.y);
+	double sinPhi = v.y/sqrt(v.x*v.x + v.y*v.y);
+	//return new Matrix3d(sin(phi),cos(theta)*cos(phi),sin(theta)*cos(phi),-cos(phi),cos(theta)*sin(phi),sin(theta)*sin(phi),0,-sin(theta),cos(theta));
+	return new Matrix3d(sinPhi, cosTheta*cosPhi, sinTheta*cosPhi, -cosPhi, cosTheta*sinPhi, sinTheta*sinPhi, 0, -sinTheta, cosTheta);
 }

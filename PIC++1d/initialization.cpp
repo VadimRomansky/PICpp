@@ -91,6 +91,8 @@ Simulation::Simulation(double xn, double xsizev, double temp, double rho, double
 	//plasma_period = 1.0;
 	//gyroradius = 1.0;
 
+	//gyroradius = xsize;
+
 	
 
 	E0 = E0 * (plasma_period * sqrt(gyroradius));
@@ -396,6 +398,9 @@ void Simulation::initializeAlfvenWave() {
 	fprintf(informationFile, "error = %15.10g\n", error);
 	//double 
 	omega = sqrt(realOmega2)*fakeOmega;
+	//if(omega < 0){
+		//omega = - omega;
+	//}
 
 	if(omega > speed_of_light_normalized*kw/5.0){
 		printf("omega > k*c/5\n");
@@ -413,6 +418,13 @@ void Simulation::initializeAlfvenWave() {
 
 	printf("omega/kc = %g\n", omega/(kw*speed_of_light_normalized));
 	fprintf(informationFile, "omega/kc = %g\n", omega/(kw*speed_of_light_normalized));
+
+	if(abs(omega) > omegaGyroProton/2){
+		printf("omega > omegaGyroProton/2\n");
+		fprintf(informationFile, "omega > omegaGyroProton/2\n");
+	}
+	printf("omega/omegaGyroProton = %g\n", omega/omegaGyroProton);
+	fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega/omegaGyroProton);
 	fclose(informationFile);
 
 	checkFrequency(omega);
@@ -1030,13 +1042,13 @@ void Simulation::checkGyroRadius(){
 		printf("deltaX/gyroRadiusElectron = %g\n", deltaX/gyroRadiusElectron);
 		fprintf(informationFile, "deltaX/gyroRadiusElectron = %g\n", deltaX/gyroRadiusElectron);
 
-		if(xsize > 2*gyroRadiusProton){
-			printf("xsize > 2*gyroRadiusElectron\n");
-			fprintf(informationFile, "xsize > 2*gyroRadiusElectron\n");
+		if(xsize < 2*gyroRadiusProton){
+			printf("xsize < 2*gyroRadiusProton\n");
+			fprintf(informationFile, "xsize < 2*gyroRadiusProton\n");
 		}
 
-		printf("xsize/gyroRadiusProton= %g\n", xsize/gyroRadiusElectron);
-		fprintf(informationFile, "xsize/gyroRadiusElectron = %g\n", xsize/gyroRadiusElectron);
+		printf("xsize/gyroRadiusProton= %g\n", xsize/gyroRadiusProton);
+		fprintf(informationFile, "xsize/gyroRadiusProton = %g\n", xsize/gyroRadiusProton);
 	}
 
 	fclose(informationFile);
