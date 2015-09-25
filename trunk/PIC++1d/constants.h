@@ -22,6 +22,6 @@ const int writeParameter = 10;
 const int writeBackupParameter = 100000;
 const int maxNewtonIterations = 10;
 const int maxGMRESIterations = 200;
-const int splineOrder = 1;
+const int splineOrder = 0;
 
 #endif

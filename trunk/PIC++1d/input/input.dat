@@ -1,4 +1,4 @@
-1000 3 3                 grid numbers
+10000 3 3                 grid numbers
 25E10 3E6 3E6         gridsizes
 1E-6                    temperature
 1.67E-28               density
