@@ -28,9 +28,9 @@ void Simulation::evaluateFields() {
 			for (int l = 0; l < 3; ++l) {
 				tempEfield[i][l] = gmresOutput[i][l];
 			}
-			for (int l = 3; l <maxwellEquationMatrixSize; ++l){
+			/*for (int l = 3; l <maxwellEquationMatrixSize; ++l){
 				newBfield[i][l-3] = gmresOutput[i][l];
-			}
+			}*/
 			delete[] gmresOutput[i];
 		}
 		delete[] gmresOutput;
