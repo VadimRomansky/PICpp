@@ -95,7 +95,7 @@ void Particle::addVelocity(Vector3d& v, double c) {
 	Vector3d vel = velocity(c);
 	vel += v;
 
-	Matrix3d* rotation = Matrix3d::createBasisByOneVector(v);
+	/*Matrix3d* rotation = Matrix3d::createBasisByOneVector(v);
 	Matrix3d* inverse = rotation->Inverse();
 
 	Vector3d rotatedV = (*inverse)*velocity(c);
@@ -110,14 +110,14 @@ void Particle::addVelocity(Vector3d& v, double c) {
 	shiftedV.y = rotatedV.y/(gamma*denominator);
 	shiftedV.x = rotatedV.x/(gamma*denominator);
 
-	Vector3d vel1 = (*rotation)*shiftedV;
+	Vector3d vel1 = (*rotation)*shiftedV;*/
 
 	//todo relativistic!
-	//setMomentumByV(vel, c);
-	setMomentumByV(vel1, c);
+	setMomentumByV(vel, c);
+	//setMomentumByV(vel1, c);
 
-	delete rotation;
-	delete inverse;
+	//delete rotation;
+	//delete inverse;
 }
 
 void Particle::setMomentumByV(Vector3d v, double c){

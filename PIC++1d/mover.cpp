@@ -41,7 +41,12 @@ void Simulation::moveParticle(Particle* particle){
 
 	Vector3d velocity = particle->velocity(speed_of_light_normalized);
 	Vector3d lorentzForce = velocity.vectorMult(B)/speed_of_light_normalized;
-	//particle->momentum += (E + (velocity.vectorMult(B)/speed_of_light_normalized))*particle->charge*deltaT;
+	//particle->momenltatum += (E + (velocity.vectorMult(B)/speed_of_light_normalized))*particle->charge*deltaT;
+
+	double force1 = E.y + B0.x*velocity.z/speed_of_light_normalized;
+	double force2 = (E + lorentzForce).y;
+	double force3 = Efield[0].y +B0.x*VzamplitudeElectron/speed_of_light_normalized;
+	double force4 = Efield[0].y +B0.x*VzamplitudeProton/speed_of_light_normalized;
 
 	double acceleration = particle->charge*(E + lorentzForce).y/particle->mass;
 	double derVe = omega*sqrt((VyamplitudeElectron - velocity.y)*(VyamplitudeElectron + velocity.y));
