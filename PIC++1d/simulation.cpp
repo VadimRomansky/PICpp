@@ -313,7 +313,7 @@ void Simulation::updateElectroMagneticParameters() {
 
 			if(solverType == IMPLICIT){
 				electricFlux[i] += rotatedVelocity * (particle->charge * particle->weight * correlation);
-				dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+				//dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 				//dielectricTensor[i] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 				
 				Particle tempParticle = *particle;

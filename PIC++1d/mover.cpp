@@ -19,6 +19,45 @@ void Simulation::moveParticles(){
 }
 
 void Simulation::moveParticle(Particle* particle){
+	Vector3d E = correlationEfield(particle)*fieldScale;
+	Vector3d B = correlationBfield(particle)*fieldScale;
+
+	/*if(B.norm() > 0){
+		double omega = -1.0/(particle->gammaFactor(speed_of_light_normalized)*particle->mass*speed_of_light_normalized/(particle->charge*B.norm()));
+		double deltaPhi = omega*deltaT;
+		Matrix3d* rotation = Matrix3d::createBasisByOneVector(B);
+		Matrix3d* inverce = rotation->Inverse();
+
+		Matrix3d lorentzRotation = Matrix3d(cos(deltaPhi), -sin(deltaPhi), 0, sin(deltaPhi), cos(deltaPhi), 0, 0, 0, 1);
+
+		Vector3d newMomentum = (*rotation)*(lorentzRotation*((*inverce)*(particle->momentum)));
+		//Vector3d newMomentum = (*inverce)*(lorentzRotation*((*rotation)*(particle->momentum)));
+
+		delete rotation;
+		delete inverce;
+
+		particle->momentum = newMomentum;
+	}*/
+
+	Vector3d velocity = particle->velocity(speed_of_light_normalized);
+	Vector3d lorentzForce = velocity.vectorMult(B)/speed_of_light_normalized;
+	//particle->momentum += (E + (velocity.vectorMult(B)/speed_of_light_normalized))*particle->charge*deltaT;
+
+	double acceleration = particle->charge*(E + lorentzForce).y/particle->mass;
+	double derVe = omega*sqrt((VyamplitudeElectron - velocity.y)*(VyamplitudeElectron + velocity.y));
+	double derVp = omega*sqrt((VyamplitudeProton - velocity.y)*(VyamplitudeProton + velocity.y));
+
+	particle->momentum += E*particle->charge*deltaT;
+	Vector3d newVelocity = particle->velocity(speed_of_light_normalized);
+
+	//particle->x += 0.5*(velocity.x + newVelocity.x)*deltaT;
+	particle->momentum.x = 0;
+
+	particle->y += 0.5*(velocity.y + newVelocity.y)*deltaT;
+	particle->z += 0.5*(velocity.z + newVelocity.z)*deltaT;
+}
+
+/*void Simulation::moveParticle(Particle* particle){
 	//Vector3d oldE = correlationTempEfield(particle)*fieldScale
 	Vector3d E = correlationTempEfield(particle)*fieldScale;
 	Vector3d B = correlationBfield(particle)*fieldScale;
@@ -82,7 +121,7 @@ void Simulation::moveParticle(Particle* particle){
 	particle->z += middleVelocity.z*deltaT;
 
 	correctParticlePosition(particle);
-}
+}*/
 
 void Simulation::correctParticlePosition(Particle* particle) {
 	correctParticlePosition(*particle);
