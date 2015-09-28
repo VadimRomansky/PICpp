@@ -87,6 +87,10 @@ public:
 	double VyamplitudeElectron;
 	double VzamplitudeProton;
 	double VzamplitudeElectron;
+	double Eyamplitude;
+	double Ezamplitude;
+	double Byamplitude;
+	double Bzamplitude;
 	/////////////////////////
 
 	double* xgrid;

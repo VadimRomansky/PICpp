@@ -22,6 +22,8 @@ void Simulation::moveParticle(Particle* particle){
 	Vector3d E = correlationEfield(particle)*fieldScale;
 	Vector3d B = correlationBfield(particle)*fieldScale;
 
+	//Vector3d velocity = particle->velocity(speed_of_light_normalized);
+
 	/*if(B.norm() > 0){
 		double omega = -1.0/(particle->gammaFactor(speed_of_light_normalized)*particle->mass*speed_of_light_normalized/(particle->charge*B.norm()));
 		double deltaPhi = omega*deltaT;
@@ -43,16 +45,24 @@ void Simulation::moveParticle(Particle* particle){
 	Vector3d lorentzForce = velocity.vectorMult(B)/speed_of_light_normalized;
 	//particle->momenltatum += (E + (velocity.vectorMult(B)/speed_of_light_normalized))*particle->charge*deltaT;
 
+	double kw = 2*pi/xsize;
+
+	double realEy = Eyamplitude*cos(kw*particle->x - omega*time);
+	double realVzprotton = VzamplitudeProton*cos(kw*particle->x - omega*time);
+	double realVzelectron = VzamplitudeElectron*cos(kw*particle->x - omega*time);
+
 	double force1 = E.y + B0.x*velocity.z/speed_of_light_normalized;
+	double force5 = Eyamplitude*cos(kw*particle->x) + B0.x*velocity.z/speed_of_light_normalized;
 	double force2 = (E + lorentzForce).y;
-	double force3 = Efield[0].y +B0.x*VzamplitudeElectron/speed_of_light_normalized;
-	double force4 = Efield[0].y +B0.x*VzamplitudeProton/speed_of_light_normalized;
+	double force3 = (Eyamplitude +B0.x*VzamplitudeElectron/speed_of_light_normalized)*cos(kw*particle->x - omega*time);
+	double force4 = (Eyamplitude +B0.x*VzamplitudeProton/speed_of_light_normalized)*cos(kw*particle->x - omega*time);
 
 	double acceleration = particle->charge*(E + lorentzForce).y/particle->mass;
 	double derVe = omega*sqrt((VyamplitudeElectron - velocity.y)*(VyamplitudeElectron + velocity.y));
 	double derVp = omega*sqrt((VyamplitudeProton - velocity.y)*(VyamplitudeProton + velocity.y));
 
-	particle->momentum += E*particle->charge*deltaT;
+	particle->momentum += (E + lorentzForce)*particle->charge*deltaT;
+	//particle->momentum += E*particle->charge*deltaT;
 	Vector3d newVelocity = particle->velocity(speed_of_light_normalized);
 
 	//particle->x += 0.5*(velocity.x + newVelocity.x)*deltaT;
