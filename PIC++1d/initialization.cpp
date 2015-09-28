@@ -406,7 +406,7 @@ void Simulation::initializeAlfvenWave() {
 		fprintf(informationFile, "omega > k*c/5\n");
 		printf("omega/kc = %g\n", omega/(kw*speed_of_light_normalized));
 		fprintf(informationFile, "omega/kc = %g\n", omega/(kw*speed_of_light_normalized));
-		fclose(informationFile);
+		//fclose(informationFile);
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega/(kw*speed_of_light_normalized));
 		fclose(errorLogFile);
@@ -437,7 +437,8 @@ void Simulation::initializeAlfvenWave() {
 
 	double alfvenVReal = omega/kw;
 
-	double Bzamplitude = B0.norm() * epsilonAmplitude;
+	//double 
+	Bzamplitude = B0.norm() * epsilonAmplitude;
 
 	double Omegae = omegaGyroElectron;
 	double Omegae2 = Omegae*Omegae;
@@ -458,17 +459,20 @@ void Simulation::initializeAlfvenWave() {
 	//double 
 	VzamplitudeElectron = (((electron_charge_normalized*omega*Omegae)/(massElectron*kc))*Bzamplitude*fieldScale + (omegae2*omega*omega/(kc2 - omega*omega))*VzamplitudeProton)/denominator;
 
-	double Byamplitude = (4*pi*concentration*electron_charge_normalized/((omega*omega/kc) - kc))*(VzamplitudeElectron - VzamplitudeProton)/fieldScale;
+	//double 
+	Byamplitude = (4*pi*concentration*electron_charge_normalized/((omega*omega/kc) - kc))*(VzamplitudeElectron - VzamplitudeProton)/fieldScale;
 
 	//double 
 	VyamplitudeProton = -(Omegap/omega)*VzamplitudeProton - (electron_charge_normalized/(massProton*kc))*Bzamplitude*fieldScale;
 	//double 
 	VyamplitudeElectron = (Omegae/omega)*VzamplitudeElectron + (electron_charge_normalized/(massElectron*kc))*Bzamplitude*fieldScale;
 
-	double Eyamplitude = (omega/kc)*Bzamplitude;
-	double Ezamplitude = -(omega/kc)*Byamplitude;
+	//double 
+	Eyamplitude = (omega/kc)*Bzamplitude;
+	//double 
+	Ezamplitude = -(omega/kc)*Byamplitude;
 
-	double xshift = 0;
+	double xshift = 0.0;
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		Efield[i].x = 0;
@@ -547,11 +551,16 @@ void Simulation::initializeAlfvenWave() {
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
 		Vector3d velocity = particle->velocity(speed_of_light_normalized);
+		int xn = particle->x/deltaX;
+		double rightWeight = (particle->x - xgrid[xn])/deltaX;
+		double leftWeight = (xgrid[xn+1] - particle->x)/deltaX;
 		if (particle->type == PROTON) {
 			velocity = (Vector3d(0, 0, 1) * (VzamplitudeProton) * cos(kw * particle->x - kw*xshift) + Vector3d(0, 1, 0) * VyamplitudeProton * sin(kw * particle->x - kw*xshift));
+			//velocity = Vector3d(0, 0, 1) * (VzamplitudeProton) * (leftWeight*(cos(kw * (xgrid[xn] - xshift)) + rightWeight*cos(kw*(xgrid[xn+1] - xshift)))) + Vector3d(0, 1, 0) * VyamplitudeProton * (leftWeight*(sin(kw * (xgrid[xn] - xshift)) + rightWeight*sin(kw*(xgrid[xn+1] - xshift))));
 		}
 		if (particle->type == ELECTRON) {
 			velocity = (Vector3d(0, 0, 1) * (VzamplitudeElectron) * cos(kw * particle->x - kw*xshift) + Vector3d(0, 1, 0) * VyamplitudeElectron * sin(kw * particle->x - kw*xshift));
+			//velocity = Vector3d(0, 0, 1) * (VzamplitudeElectron) * (leftWeight*(cos(kw * (xgrid[xn] - xshift)) + rightWeight*cos(kw*(xgrid[xn+1] - xshift)))) + Vector3d(0, 1, 0) * VyamplitudeElectron * (leftWeight*(sin(kw * (xgrid[xn] - xshift)) + rightWeight*sin(kw*(xgrid[xn+1] - xshift))));
 		}
 		double beta = velocity.norm() / speed_of_light_normalized;
 		particle->addVelocity(velocity, speed_of_light_normalized);

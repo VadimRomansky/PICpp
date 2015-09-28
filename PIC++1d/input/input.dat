@@ -1,9 +1,9 @@
-10000 3 3                 grid numbers
-25E10 3E6 3E6         gridsizes
+1000 3 3                 grid numbers
+25E9 3E6 3E6         gridsizes
 1E-6                    temperature
 1.67E-28               density
 0 0 0                  elecctricField
-2E-4 0 0                  magneticField
+6E-4 0 0                  magneticField
 100000000               max iterations
 1E15                   max time
-5                 particles per bin
+20                 particles per bin

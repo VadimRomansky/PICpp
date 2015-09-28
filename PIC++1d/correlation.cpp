@@ -127,7 +127,7 @@ Vector3d Simulation::correlationEfield(Particle* particle) {
 Vector3d Simulation::correlationEfield(Particle& particle) {
 	//checkParticleInBox(particle);
 
-	int xcount = floor((particle.x / deltaX) + 0.5);
+	/*int xcount = floor((particle.x / deltaX) + 0.5);
 
 	Vector3d result = Vector3d(0, 0, 0);
 
@@ -135,13 +135,19 @@ Vector3d Simulation::correlationEfield(Particle& particle) {
 				result = result + correlationFieldWithEbin(particle, i);
 	}
 
-	return result;
+	return result;*/
+
+	int xcount = particle.x/deltaX;
+	double rightWeight = (particle.x - xgrid[xcount])/deltaX;
+	double leftWeight = (xgrid[xcount + 1] - particle.x)/deltaX;
+
+	return Efield[xcount]*leftWeight + Efield[xcount + 1]*rightWeight;
 }
 
 Vector3d Simulation::correlationTempEfield(Particle& particle) {
 	//checkParticleInBox(particle);
 
-	int xcount = floor((particle.x / deltaX) + 0.5);
+	/*int xcount = floor((particle.x / deltaX) + 0.5);
 
 	Vector3d result = Vector3d(0, 0, 0);
 
@@ -149,13 +155,18 @@ Vector3d Simulation::correlationTempEfield(Particle& particle) {
 				result = result + correlationFieldWithTempEbin(particle, i);
 	}
 
-	return result;
+	return result;*/
+	int xcount = particle.x/deltaX;
+	double rightWeight = (particle.x - xgrid[xcount])/deltaX;
+	double leftWeight = (xgrid[xcount + 1] - particle.x)/deltaX;
+
+	return tempEfield[xcount]*leftWeight + tempEfield[xcount + 1]*rightWeight;
 }
 
 Vector3d Simulation::correlationNewEfield(Particle& particle) {
 	//checkParticleInBox(particle);
 
-	int xcount = floor((particle.x / deltaX) + 0.5);
+	/*int xcount = floor((particle.x / deltaX) + 0.5);
 
 	Vector3d result = Vector3d(0, 0, 0);
 
@@ -163,7 +174,12 @@ Vector3d Simulation::correlationNewEfield(Particle& particle) {
 				result = result + correlationFieldWithNewEbin(particle, i);
 	}
 
-	return result;
+	return result;*/
+	int xcount = particle.x/deltaX;
+	double rightWeight = (particle.x - xgrid[xcount])/deltaX;
+	double leftWeight = (xgrid[xcount + 1] - particle.x)/deltaX;
+
+	return newEfield[xcount]*leftWeight + newEfield[xcount + 1]*rightWeight;
 }
 
 Vector3d Simulation::correlationBfield(Particle& particle) {
