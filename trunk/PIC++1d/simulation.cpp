@@ -372,8 +372,8 @@ void Simulation::updateElectroMagneticParameters() {
 		for (int i = 0; i <= xnumber; ++i) {
 
 			Vector3d divPressureTensorEvaluated = evaluateDivPressureTensor(i);
-			//electricFlux[i] = electricFlux[i] - divPressureTensor[i] * eta * deltaT;
-			electricFlux[i] = electricFlux[i] - divPressureTensorEvaluated * eta * deltaT;
+			electricFlux[i] = electricFlux[i] - divPressureTensor[i] * eta * deltaT;
+			//electricFlux[i] = electricFlux[i] - divPressureTensorEvaluated * eta * deltaT;
 		}
 	}
 
