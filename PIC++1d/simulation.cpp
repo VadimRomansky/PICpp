@@ -312,7 +312,8 @@ void Simulation::updateElectroMagneticParameters() {
 			Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
 
 			if(solverType == IMPLICIT){
-				electricFlux[i] += rotatedVelocity * (particle->charge * particle->weight * correlation);
+				//electricFlux[i] += rotatedVelocity * (particle->charge * particle->weight * correlation);
+				electricFlux[i] += velocity * (particle->charge * particle->weight * correlation);
 				//dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 				//dielectricTensor[i] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 				
@@ -372,7 +373,7 @@ void Simulation::updateElectroMagneticParameters() {
 		for (int i = 0; i <= xnumber; ++i) {
 
 			Vector3d divPressureTensorEvaluated = evaluateDivPressureTensor(i);
-			electricFlux[i] = electricFlux[i] - divPressureTensor[i] * eta * deltaT;
+			//electricFlux[i] = electricFlux[i] - divPressureTensor[i] * eta * deltaT;
 			//electricFlux[i] = electricFlux[i] - divPressureTensorEvaluated * eta * deltaT;
 		}
 	}
@@ -394,13 +395,13 @@ void Simulation::updateElectroMagneticParameters() {
 	}
 
 	//for debug only
-		double kw = 2*pi/xsize;
+		/*double kw = 2*pi/xsize;
 		double concentration = density/(massProton + massElectron);
 		for(int i = 0; i < xnumber; ++i){
 			electricFlux[i].y = electron_charge_normalized*concentration*(VyamplitudeProton - VyamplitudeElectron)*sin(kw*xgrid[i] - omega*(time + theta*deltaT));
 			electricFlux[i].z = electron_charge_normalized*concentration*(VzamplitudeProton - VzamplitudeElectron)*cos(kw*xgrid[i] - omega*(time + theta*deltaT));
 		}
-		electricFlux[xnumber] = electricFlux[0];
+		electricFlux[xnumber] = electricFlux[0];*/
 	//
 }
 
