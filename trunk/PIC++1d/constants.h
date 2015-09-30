@@ -14,14 +14,14 @@ const double speed_of_light = 2.99792458E10;
 const double electron_charge = 4.803529695E-10;
 const double pi = 3.1415926535897932384626433832795028841971693993751;
 const double epsilon = 1E-16;
-const double maxErrorLevel = 5E-5;
-const double timeEpsilon = 0.05;
-const double initialTheta = 1.0;
+const double maxErrorLevel = 1E-8;
+const double timeEpsilon = 0.01;
+const double initialTheta = 0.5;
 const int pnumber = 1000;
-const int writeParameter = 100;
+const int writeParameter = 200;
 const int writeBackupParameter = 100000;
 const int maxNewtonIterations = 10;
 const int maxGMRESIterations = 200;
-const int splineOrder = 0;
+const int splineOrder = 2;
 
 #endif
