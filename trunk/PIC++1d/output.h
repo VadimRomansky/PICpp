@@ -20,8 +20,11 @@ void outputVectorArray(FILE* outFile, Vector3d* vector3d, int number, double sca
 void outputMatrixArray(FILE* outFile, Matrix3d* matrix3d, int number, double scale = 1.0);
 
 void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile, Simulation* simulation); 
-void outputParticles(FILE* outFile, Simulation* simulation);
-void outputParticle(FILE* outFile, Particle* particle);
+
+void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, Simulation* simulation);
+
+void outputBackupParticles(FILE* outFile, Simulation* simulation);
+void outputBackupParticle(FILE* outFile, Particle* particle);
 
 
 #endif

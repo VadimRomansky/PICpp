@@ -186,17 +186,29 @@ void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* p
 	fprintf(generalFile, "%15.10g\n", simulation->B0.z);
 
 	outputFields(Efile, Bfile, simulation->Efield, simulation->Bfield, simulation->xnumber, 1.0, 1.0, 1.0);
-	outputParticles(particlesFile, simulation);
+	outputBackupParticles(particlesFile, simulation);
 }
 
-void outputParticles(FILE* outFile, Simulation* simulation){
+void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, Simulation* simulation){
 	for(int i = 0; i < simulation->particles.size(); ++i){
 		Particle* particle = simulation->particles[i];
-		outputParticle(outFile, particle);
+		double p = particle->momentum.norm()*simulation->gyroradius/simulation->plasma_period;
+		if(particle->type == PROTON){
+			fprintf(outProtonsFile, "%15.10g %15.10g\n", particle->x*simulation->gyroradius, p);
+		} else if(particle->type == ELECTRON){
+			fprintf(outElectronsFile, "%15.10g %15.10g\n", particle->x*simulation->gyroradius, p);
+		}
 	}
 }
 
-void outputParticle(FILE* outFile, Particle* particle){
+void outputBackupParticles(FILE* outFile, Simulation* simulation){
+	for(int i = 0; i < simulation->particles.size(); ++i){
+		Particle* particle = simulation->particles[i];
+		outputBackupParticle(outFile, particle);
+	}
+}
+
+void outputBackupParticle(FILE* outFile, Particle* particle){
 	fprintf(outFile, "%d ", particle->number);
 	fprintf(outFile, "%15.10g ", particle->mass);
 	fprintf(outFile, "%15.10g ", particle->charge);

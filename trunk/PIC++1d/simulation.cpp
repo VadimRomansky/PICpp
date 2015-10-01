@@ -128,6 +128,12 @@ void Simulation::output() {
 	outputMatrixArray(dielectricTensorFile, dielectricTensor, xnumber + 1);
 	fclose(dielectricTensorFile);
 
+	particleProtonsFile = fopen("./output/protons.dat", "w");
+	particleElectronsFile = fopen("./output/electrons.dat", "w");
+	outputParticles(particleProtonsFile, particleElectronsFile, this);
+	fclose(particleProtonsFile);
+	fclose(particleElectronsFile);
+
 	generalFile = fopen("./output/general.dat", "a");
 	outputGeneral(generalFile, this);
 	fclose(generalFile);
