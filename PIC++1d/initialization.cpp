@@ -983,6 +983,10 @@ void Simulation::createFiles() {
 	fclose(dielectricTensorFile);
 	errorLogFile = fopen("./output/errorLog.dat", "w");
 	fclose(errorLogFile);
+	particleProtonsFile = fopen("./output/protons.dat", "w");
+	fclose(particleProtonsFile);
+	particleElectronsFile = fopen("./output/electrons.dat", "w");
+	fclose(particleElectronsFile);
 }
 
 void Simulation::checkFrequency(double omega) {
@@ -1233,7 +1237,7 @@ void Simulation::createParticles() {
 			} else {
 				particle->x= x;
 			}*/
-			double m = l/2.0;
+			int m = l/2;
 			particle->x = x + (m*deltaX/particlesPerBin);
 			particles.push_back(particle);
 			particlesNumber++;
@@ -1301,6 +1305,7 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 	double phi = 2 * pi * uniformDistribution();
 	double pnormal = sqrt(p * p - pz * pz);
 	double px = pnormal * cos(phi);
+	px = 0;
 	double py = pnormal * sin(phi);
 
 	Particle* particle = new Particle(n, mass, charge, weight, type, x, px, py, pz, dx);

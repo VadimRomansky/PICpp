@@ -7,6 +7,34 @@
 void Simulation::cleanupDivergence() {
 	printf("cleaning up divergence\n");
 
+	divergenceCleaningField[0][0] = 0;
+	divergenceCleaningField[0][1] = 0;
+	divergenceCleaningField[0][2] = 0;
+
+	double fullDensity = 0;
+	for(int i = 0; i < xnumber; ++i) {
+		fullDensity += chargeDensity[i]*volume(i);
+	}
+	fullDensity /= xsize;
+
+	for(int i = 0; i < xnumber; ++i) {
+		chargeDensity[i] -= fullDensity;
+	}
+
+	for(int i = 1; i < xnumber; ++i){
+		divergenceCleaningField[i][0] = divergenceCleaningField[i-1][0] + cleanUpRightPart(i-1)*deltaX;
+		divergenceCleaningField[i][1] = 0;
+		divergenceCleaningField[i][2] = 0;
+	}
+
+	updateFieldByCleaning();
+	updateBoundariesNewField();
+}
+
+
+/*void Simulation::cleanupDivergence() {
+	printf("cleaning up divergence\n");
+
 
 	int matrixDimension = xnumber;
 
@@ -62,7 +90,7 @@ void Simulation::cleanupDivergence() {
 	//double div = evaluateDivCleaningE(1);
 
 	updateBoundariesNewField();
-}
+}*/
 
 void Simulation::updateFieldByCleaning() {
 	//evaluateDivergenceCleaningField();
@@ -79,7 +107,7 @@ void Simulation::updateFieldByCleaning() {
 				newEfield[i].x += divergenceCleaningField[i][0];
 				newEfield[i].y += divergenceCleaningField[i][1];
 				newEfield[i].z += divergenceCleaningField[i][2];
-				newEfield[i] -= meanField;
+				//newEfield[i] -= meanField;
 	}
 	newEfield[xnumber] = newEfield[0];
 }

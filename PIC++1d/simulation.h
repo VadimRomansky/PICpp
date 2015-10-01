@@ -151,6 +151,8 @@ public:
 	FILE* fluxFile;
 	FILE* dielectricTensorFile;
 	FILE* informationFile;
+	FILE* particleProtonsFile;
+	FILE* particleElectronsFile;
 
 	FILE* rotBFile;
 	FILE* EderivativeFile;
