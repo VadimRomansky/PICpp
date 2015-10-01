@@ -46,6 +46,7 @@ plot (Xfile(1:Nx,1),Vx(1:Nx,1), 'red',Xfile(1:Nx,1),Vx(1:Nx,2), 'green',Xfile(1:
 title ('Vx');
 xlabel ('x/r_g');
 ylabel ('V cm/s');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 figure(2);
@@ -53,6 +54,7 @@ plot (Xfile(1:Nx,1),Vy(1:Nx, 1), 'red', Xfile(1:Nx,1), Vy(1:Nx, 2), 'green',Xfil
 title ('Vy');
 xlabel ('x/r_g');
 ylabel ('V cm/s');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 figure(3);
@@ -60,6 +62,7 @@ plot (Xfile(1:Nx,1),Vz(1:Nx, 1), 'red', Xfile(1:Nx,1), Vz(1:Nx, 2), 'green', Xfi
 title ('Vz');
 xlabel ('x/r_g');
 ylabel ('V cm/s');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 figure(4);
@@ -67,6 +70,7 @@ plot (Xfile(1:Nx,1),Velectronx(1:Nx,1), 'red',Xfile(1:Nx,1),Velectronx(1:Nx,2), 
 title ('Vx');
 xlabel ('x/r_g');
 ylabel ('V cm/s');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 figure(5);
@@ -74,6 +78,7 @@ plot (Xfile(1:Nx,1),Velectrony(1:Nx, 1), 'red', Xfile(1:Nx,1), Velectrony(1:Nx, 
 title ('Vy');
 xlabel ('x/r_g');
 ylabel ('V cm/s');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 figure(6);
@@ -81,5 +86,6 @@ plot (Xfile(1:Nx,1),Velectronz(1:Nx, 1), 'red', Xfile(1:Nx,1), Velectronz(1:Nx, 
 title ('Vz');
 xlabel ('x/r_g');
 ylabel ('V cm/s');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 

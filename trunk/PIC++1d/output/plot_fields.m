@@ -53,6 +53,7 @@ plot (Xfile(1:NE,1),Ex(1:NE,1), 'red',Xfile(1:NE,1),Ex(1:NE,2), 'green',Xfile(1:
 title ('Ex');
 xlabel ('x/r_g');
 ylabel ('E gauss');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 figure(2);
@@ -60,6 +61,7 @@ plot (Xfile(1:NE,1),Ey(1:NE, 1), 'red', Xfile(1:NE,1), Ey(1:NE, 2), 'green',Xfil
 title ('Ey');
 xlabel ('x/r_g');
 ylabel ('E gauss');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 figure(3);
@@ -67,6 +69,7 @@ plot (Xfile(1:NE,1),Ez(1:NE, 1), 'red', Xfile(1:NE,1), Ez(1:NE, 2), 'green', Xfi
 title ('Ez');
 xlabel ('x/r_g');
 ylabel ('E gauss');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 figure(4);
@@ -74,6 +77,7 @@ plot (middleX(1:NB),Bx(1:NB, 1), 'red', middleX(1:NB),Bx(1:NB, 2), 'green', midd
 title ('Bx');
 xlabel ('x cm');
 ylabel ('B gauss');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 figure(5);
@@ -81,6 +85,7 @@ plot (middleX(1:NB),By(1:NB, 1), 'red', middleX(1:NB),By(1:NB, 2), 'green', midd
 title ('By');
 xlabel ('x cm');
 ylabel ('B gauss');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 figure(6);
@@ -88,6 +93,7 @@ plot (middleX(1:NB),Bz(1:NB, 1), 'red', middleX(1:NB),Bz(1:NB, 2), 'green', midd
 title ('Bz');
 xlabel ('x cm');
 ylabel ('B gauss');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 figure(7);
@@ -95,6 +101,7 @@ plot (middleX(1:NB),Bz(1:NB, 1), 'red',Xfile(1:NE,1),Ey(1:NE, 1), 'red', middleX
 title ('Bz and Ey');
 xlabel ('x cm');
 ylabel ('gauss');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 figure(8);
@@ -102,6 +109,7 @@ plot (middleX(1:NB),By(1:NB, 1), 'red',Xfile(1:NE,1),Ez(1:NE, 1), 'red', middleX
 title ('By and Ez');
 xlabel ('x cm');
 ylabel ('gauss');
+legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
 
