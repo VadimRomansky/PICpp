@@ -1233,9 +1233,8 @@ void Simulation::createParticles() {
 			} else {
 				particle->x= x;
 			}*/
-			int m = l/2;
+			double m = l/2.0;
 			particle->x = x + (m*deltaX/particlesPerBin);
-			particle->momentum.x = 0;
 			particles.push_back(particle);
 			particlesNumber++;
 			if (particlesNumber % 1000 == 0) {
@@ -1297,8 +1296,6 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 		p = sqrt(energy * energy - sqr(mass * speed_of_light_normalized_sqr)) / speed_of_light_normalized;
 
 	}
-
-	p = 0;
 
 	double pz = p * (2 * uniformDistribution() - 1);
 	double phi = 2 * pi * uniformDistribution();
