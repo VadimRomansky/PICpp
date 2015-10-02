@@ -107,8 +107,8 @@ void outputArrayParameter(FILE* outFile, double* arrayParameter, int xnumber, do
 }
 
 void outputGeneral(FILE* outFile, Simulation* simulation) {
-	fprintf(outFile, "%d %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g\n", simulation->currentIteration, simulation->time, simulation->time*simulation->plasma_period, simulation->particleEnergy,
-		simulation->electricFieldEnergy, simulation->magneticFieldEnergy, simulation->energy, simulation->momentum.x, simulation->momentum.y, simulation->momentum.z, simulation->maxEfield.norm(), simulation->maxBfield.norm(), simulation->deltaT);
+	fprintf(outFile, "%d %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d\n", simulation->currentIteration, simulation->time, simulation->time*simulation->plasma_period, simulation->particleEnergy,
+		simulation->electricFieldEnergy, simulation->magneticFieldEnergy, simulation->energy, simulation->momentum.x, simulation->momentum.y, simulation->momentum.z, simulation->maxEfield.norm(), simulation->maxBfield.norm(), simulation->deltaT, simulation->particles.size());
 }
 
 void outputDivergenceError(FILE* outFile, Simulation* simulation, double plasma_period, double gyroradius, double fieldScale) {
@@ -167,10 +167,22 @@ void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* p
 
 	int solverType = 0;
 	if(simulation->solverType == IMPLICIT){
-		debugMode = 1;
+		solverType = 1;
 	} else {
-		debugMode = 0;
+		solverType = 0;
 	}
+
+	fprintf(generalFile, "%d\n", solverType);
+
+	int boundaryConditionType = 0;
+	if(simulation->boundaryConditionType == PERIODIC){
+		boundaryConditionType = 1;
+	} else {
+		boundaryConditionType = 0;
+	}
+
+	fprintf(generalFile, "%d\n", boundaryConditionType);
+
 	fprintf(generalFile, "%d\n", simulation->maxwellEquationMatrixSize);
 
 	fprintf(generalFile, "%15.10g\n", simulation->extJ);

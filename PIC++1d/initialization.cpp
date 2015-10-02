@@ -34,11 +34,13 @@ Simulation::Simulation(){
 	LeviCivita[2][1][0] = -1.0;
 }
 
-Simulation::Simulation(double xn, double xsizev, double temp, double rho, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV) {
+Simulation::Simulation(double xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV) {
 	debugMode = true;
 	newlyStarted = true;
 	solverType = IMPLICIT;
 	//solverType = EXPLICIT;
+	//boundaryConditionType = PERIODIC;
+	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
 
 	currentIteration = 0;
@@ -69,7 +71,7 @@ Simulation::Simulation(double xn, double xsizev, double temp, double rho, double
 
 	extJ = 0;
 
-	V0 = Vector3d(0, 0, 0);
+	V0 = Vector3d(Vx, Vy, Vz);
 
 	B0 = Vector3d(Bx, By, Bz);
 	E0 = Vector3d(Ex, Ey, Ez);
@@ -97,6 +99,7 @@ Simulation::Simulation(double xn, double xsizev, double temp, double rho, double
 
 	E0 = E0 * (plasma_period * sqrt(gyroradius));
 	B0 = B0 * (plasma_period * sqrt(gyroradius));
+	V0 = V0 * plasma_period/gyroradius;
 
 	fieldScale = max2(B0.norm(), E0.norm());
 	if(fieldScale <= 0){
@@ -418,7 +421,7 @@ void Simulation::initializeAlfvenWave() {
 	printf("omega/kc = %g\n", omega/(kw*speed_of_light_normalized));
 	fprintf(informationFile, "omega/kc = %g\n", omega/(kw*speed_of_light_normalized));
 
-	if(abs(omega) > omegaGyroProton/2){
+	if(fabs(omega) > omegaGyroProton/2){
 		printf("omega > omegaGyroProton/2\n");
 		fprintf(informationFile, "omega > omegaGyroProton/2\n");
 	}
@@ -776,6 +779,13 @@ void Simulation::initializeLangmuirWave(){
 			Vector3d velocity = Vector3d(1, 0, 0)*Vamplitude*cos(kw*particle->x);
 			particle->addVelocity(velocity, speed_of_light_normalized);
 		}
+	}
+}
+
+void Simulation::initializeFluxFromRight(){
+	for(int i = 0; i < particles.size(); ++i){
+		Particle* particle = particles[i];
+		particle->addVelocity(V0, speed_of_light_normalized);
 	}
 }
 

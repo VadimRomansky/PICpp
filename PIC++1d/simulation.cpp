@@ -18,9 +18,9 @@ void Simulation::simulate() {
 		initialize();
 		//initializeTwoStream();
 		createParticles();
-		//collectParticlesIntoBins();
 		//initializeExternalFluxInstability();
-		initializeAlfvenWave();
+		//initializeAlfvenWave();
+		initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
@@ -42,6 +42,8 @@ void Simulation::simulate() {
 	updateFields();
 	updateEnergy();
 
+	double length = 0;
+
 	while (time * plasma_period < maxTime && currentIteration < maxIteration) {
 		printf("iteration number %d time = %15.10g\n", currentIteration, time * plasma_period);
 		printf(" dt/plasma_period = %15.10g\n", deltaT);
@@ -56,6 +58,14 @@ void Simulation::simulate() {
 		evaluateFields();
 		evaluateMagneticField();
 		moveParticles();
+
+		length += fabs(V0.x*deltaT);
+		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+			if(length > deltaX/particlesPerBin){
+				length -= deltaX/particlesPerBin;
+			}
+			injectNewParticles(1);
+		}
 		//cleanupDivergence();
 		updateDensityParameters();
 		updateFields();
