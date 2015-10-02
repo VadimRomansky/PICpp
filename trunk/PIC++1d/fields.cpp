@@ -52,7 +52,7 @@ void Simulation::evaluateFields() {
 		tempEfield[xnumber] = tempEfield[0];
 		for (int i = 0; i < xnumber+1; ++i) {
 			newEfield[i] = (tempEfield[i] - Efield[i] * (1 - theta)) / theta;
-			newEfield[i].x= 0;
+			//newEfield[i].x= 0;
 		}
 	}
 
@@ -65,7 +65,7 @@ void Simulation::evaluateFields() {
 		explicitEfield[xnumber] = explicitEfield[0];
 		for (int i = 0; i < xnumber+1; ++i) {
 			newEfield[i] = explicitEfield[i];
-			newEfield[i].x = 0;
+			//newEfield[i].x = 0;
 		}
 	}
 }
@@ -74,6 +74,15 @@ void Simulation::evaluateExplicitDerivative(){
 	for(int i = 0; i < xnumber + 1; ++i) {
 		rotB[i] = evaluateRotB(i)*speed_of_light_normalized;
 		Ederivative[i] = (evaluateRotB(i)*speed_of_light_normalized - (electricFlux[i]*4*pi/fieldScale));
+		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+			if(i == 0){
+				Ederivative[i].y = 0;
+				Ederivative[i].z = 0;
+			}
+			if(i == xnumber){
+				Ederivative[i] = Vector3d(0, 0, 0);
+			}
+		}
 	}
 }
 
@@ -96,7 +105,9 @@ void Simulation::updateEfield() {
 		//Efield[i].y = newEfield[i].y;
 		//Efield[i].z = newEfield[i].z;
 	}
-	Efield[xnumber] = Efield[0];
+	if(boundaryConditionType == PERIODIC){
+		Efield[xnumber] = Efield[0];
+	}
 	//smoothEfield();
 }
 
@@ -120,7 +131,15 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 
 	#pragma omp parallel for
 	for (int i = 0; i < xnumber; ++i) {
-		createInternalEquation(i);
+		if((i > 0 && i < xnumber - 1) || boundaryConditionType == PERIODIC){
+			createInternalEquation(i);
+		} else {
+			if(i == 0){
+				createSuperConductorLeftEquation();
+			} else {
+				createFreeRightEquation();
+			}
+		}
 
 	}
 
@@ -167,15 +186,110 @@ void Simulation::checkEquationMatrix(std::vector<MatrixElement>** matrix, int ln
 	}
 }
 
-void Simulation::createPerfectConductaryBoundaryCondition() {
+void Simulation::createSuperConductorLeftEquation() {
 	int i = 0;
-
+	//todo!!!
 	maxwellEquationMatrix[i][0].push_back(MatrixElement(1.0, i, 0));
-	maxwellEquationRightPart[i][0] = 0;
+	maxwellEquationRightPart[i][0] = Efield[0].x;
 	maxwellEquationMatrix[i][1].push_back(MatrixElement(1.0, i, 1));
 	maxwellEquationRightPart[i][1] = 0;
 	maxwellEquationMatrix[i][2].push_back(MatrixElement(1.0, i, 2));
 	maxwellEquationRightPart[i][2] = 0;
+}
+
+void Simulation::createFreeRightEquation(){
+	Vector3d rightPart = Efield[xnumber - 1];
+	rightPart = rightPart + (evaluateRotB(xnumber - 1)* speed_of_light_normalized - (electricFlux[xnumber - 1]*4*pi/fieldScale)) * (theta * deltaT) - (evaluateGradDensity(xnumber - 1)*speed_of_light_normalized_sqr*theta*theta*deltaT*deltaT*4*pi/fieldScale);
+
+	createFreeRightEquationX(rightPart);
+	createFreeRightEquationY(rightPart);
+	createFreeRightEquationZ(rightPart);
+
+	alertNaNOrInfinity(rightPart.x, "right part x = NaN");
+	alertNaNOrInfinity(rightPart.y, "right part y = NaN");
+	alertNaNOrInfinity(rightPart.z, "right part z = NaN");
+
+	maxwellEquationRightPart[xnumber - 1][0] = rightPart.x;
+	maxwellEquationRightPart[xnumber - 1][1] = rightPart.y;
+	maxwellEquationRightPart[xnumber - 1][2] = rightPart.z;
+}
+
+void Simulation::createFreeRightEquationX(Vector3d& rightPart) {
+	int i = xnumber - 1;
+
+	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT);
+	double element = 1.0 - dielectricTensor[i].matrix[0][0] + c_theta_deltaT2*(2.0 - 2*dielectricTensor[i].matrix[0][0])/deltaX2;
+	maxwellEquationMatrix[i][0].push_back(MatrixElement(element, i, 0));
+
+	element = -dielectricTensor[i].matrix[0][1] - c_theta_deltaT2*2*dielectricTensor[i].matrix[0][1]/deltaX2;
+	maxwellEquationMatrix[i][0].push_back(MatrixElement(element, i, 1));
+
+	element = -dielectricTensor[i].matrix[0][2] - c_theta_deltaT2*2*dielectricTensor[i].matrix[0][2]/deltaX2;
+	maxwellEquationMatrix[i][0].push_back(MatrixElement(element, i, 2));
+
+	int prevI = i - 1;
+	if (prevI < 0) {
+		prevI = xnumber - 1;                   
+	}
+
+	element = -c_theta_deltaT2*(1.0  - dielectricTensor[xnumber].matrix[0][0])/ deltaX2;
+	rightPart.x -= element*E0.x;
+	element = c_theta_deltaT2*dielectricTensor[xnumber].matrix[0][1]/deltaX2;
+	rightPart.x -= element*E0.y;
+	element = c_theta_deltaT2*dielectricTensor[xnumber].matrix[0][2]/deltaX2;
+	rightPart.x -= element*E0.z;
+
+	element = -c_theta_deltaT2*(1.0  - dielectricTensor[prevI].matrix[0][0])/ deltaX2;
+	maxwellEquationMatrix[i][0].push_back(MatrixElement(element, prevI, 0));
+	element = c_theta_deltaT2*dielectricTensor[prevI].matrix[0][1]/deltaX2;
+	maxwellEquationMatrix[i][0].push_back(MatrixElement(element, prevI, 1));
+	element = c_theta_deltaT2*dielectricTensor[prevI].matrix[0][2]/deltaX2;
+	maxwellEquationMatrix[i][0].push_back(MatrixElement(element, prevI, 2));
+}
+
+void Simulation::createFreeRightEquationY(Vector3d& rightPart) {
+	int i = xnumber - 1;
+
+	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT);
+
+	double element = 1.0 - dielectricTensor[i].matrix[1][1] + c_theta_deltaT2*2/deltaX2;
+	maxwellEquationMatrix[i][1].push_back(MatrixElement(element, i, 1));
+
+	element = -dielectricTensor[i].matrix[1][0];
+	maxwellEquationMatrix[i][1].push_back(MatrixElement(element, i, 0));
+	
+	element = -dielectricTensor[i].matrix[1][2];
+	maxwellEquationMatrix[i][1].push_back(MatrixElement(element, i, 2));
+
+	int prevI = i - 1;
+	if (prevI < 0) {
+		prevI = xnumber - 1;
+	}
+	element = -c_theta_deltaT2/deltaX2;
+	rightPart.y -= element*E0.y;
+	maxwellEquationMatrix[i][1].push_back(MatrixElement(element, prevI, 1));
+}
+
+void Simulation::createFreeRightEquationZ(Vector3d& rightPart) {
+	int i = xnumber - 1;
+	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT);
+
+	double element = 1.0 - dielectricTensor[i].matrix[2][2] + c_theta_deltaT2 * 2 /deltaX2;
+	maxwellEquationMatrix[i][2].push_back(MatrixElement(element, i, 2));
+
+	element = -dielectricTensor[i].matrix[2][0];
+	maxwellEquationMatrix[i][2].push_back(MatrixElement(element, i, 0));
+
+	element = -dielectricTensor[i].matrix[2][1];
+	maxwellEquationMatrix[i][2].push_back(MatrixElement(element, i, 1));
+
+	int prevI = i - 1;
+	if (prevI < 0) {
+		prevI = xnumber - 1;
+	}
+	element = -c_theta_deltaT2/deltaX2;
+	rightPart.z -= element*E0.z;
+	maxwellEquationMatrix[i][2].push_back(MatrixElement(element, prevI, 2));
 }
 
 void Simulation::createInternalEquationX(int i) {
@@ -262,106 +376,6 @@ void Simulation::createInternalEquationZ(int i) {
 	maxwellEquationMatrix[i][2].push_back(MatrixElement(element, nextI, 2));
 	maxwellEquationMatrix[i][2].push_back(MatrixElement(element, prevI, 2));
 }
-
-/*void Simulation::createInternalEquationX(int i) {
-	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT);
-	double element = 1.0 - dielectricTensor[i].matrix[0][0];
-	maxwellEquationMatrix[i][0].push_back(MatrixElement(element, i, 0));
-
-	element = -dielectricTensor[i].matrix[0][1];
-	maxwellEquationMatrix[i][0].push_back(MatrixElement(element, i, 1));
-
-	element =- dielectricTensor[i].matrix[0][2];
-	maxwellEquationMatrix[i][0].push_back(MatrixElement(element, i, 2));
-}*/
-
-/*void Simulation::createInternalEquationX(int i){
-	double element = 1.0 - dielectricTensor[i].matrix[0][0];
-	maxwellEquationMatrix[i][0].push_back(MatrixElement(element, i, 0));
-
-	element = -dielectricTensor[i].matrix[0][1];
-	maxwellEquationMatrix[i][0].push_back(MatrixElement(element, i, 1));
-
-	element =- dielectricTensor[i].matrix[0][2];
-	maxwellEquationMatrix[i][0].push_back(MatrixElement(element, i, 2));	
-
-	element = 1.0;
-	maxwellEquationMatrix[i][3].push_back(MatrixElement(element, i, 3));
-}
-
-void Simulation::createInternalEquationY(int i){
-	int prevI = i - 1;
-	if(prevI < 0){
-		prevI = xnumber - 1;
-	}
-	int nextI = i + 1;
-	if(nextI >= xnumber){
-		nextI = 0;
-	}
-
-	double c_theta_deltaT = speed_of_light_normalized*theta*deltaT;
-
-	double element = 1.0 - dielectricTensor[i].matrix[1][1];
-	maxwellEquationMatrix[i][1].push_back(MatrixElement(element, i, 1));
-
-	element = -dielectricTensor[i].matrix[1][0];
-	maxwellEquationMatrix[i][1].push_back(MatrixElement(element, i, 0));
-
-	element =- dielectricTensor[i].matrix[1][2];
-	maxwellEquationMatrix[i][1].push_back(MatrixElement(element, i, 2));
-
-	element = c_theta_deltaT*theta/deltaX;
-	//maxwellEquationMatrix[i][1].push_back(MatrixElement(element, i, 5));
-
-	element = -c_theta_deltaT*theta/deltaX;
-	//maxwellEquationMatrix[i][1].push_back(MatrixElement(element, prevI, 5));
-
-	element = 1.0;
-	maxwellEquationMatrix[i][4].push_back(MatrixElement(element, i, 4));
-
-	element = -speed_of_light_normalized*deltaT/deltaX;
-	maxwellEquationMatrix[i][4].push_back(MatrixElement(element, nextI, 2));
-
-	element = speed_of_light_normalized*deltaT/deltaX;
-	maxwellEquationMatrix[i][4].push_back(MatrixElement(element, i, 2));
-}
-
-void Simulation::createInternalEquationZ(int i){
-	int prevI = i - 1;
-	if(prevI < 0){
-		prevI = xnumber - 1;
-	}
-	int nextI = i + 1;
-	if(nextI >= xnumber){
-		nextI = 0;
-	}
-
-	double c_theta_deltaT = speed_of_light_normalized*theta*deltaT;
-
-	double element = 1.0 - dielectricTensor[i].matrix[2][2];
-	maxwellEquationMatrix[i][2].push_back(MatrixElement(element, i, 2));
-
-	element = -dielectricTensor[i].matrix[2][0];
-	maxwellEquationMatrix[i][2].push_back(MatrixElement(element, i, 0));
-
-	element =- dielectricTensor[i].matrix[2][1];
-	maxwellEquationMatrix[i][2].push_back(MatrixElement(element, i, 1));
-
-	element = -c_theta_deltaT*theta/deltaX;
-	//maxwellEquationMatrix[i][1].push_back(MatrixElement(element, i, 4));
-
-	element = c_theta_deltaT*theta/deltaX;
-	//maxwellEquationMatrix[i][1].push_back(MatrixElement(element, prevI, 4));
-
-	element = 1.0;
-	maxwellEquationMatrix[i][5].push_back(MatrixElement(element, i, 5));
-
-	element = speed_of_light_normalized*deltaT/deltaX;
-	maxwellEquationMatrix[i][5].push_back(MatrixElement(element, nextI, 1));
-
-	element = -speed_of_light_normalized*deltaT/deltaX;
-	maxwellEquationMatrix[i][5].push_back(MatrixElement(element, i, 1));
-}*/
 
 void Simulation::createInternalEquation(int i) {
 	Vector3d rightPart = Efield[i];

@@ -14,6 +14,8 @@ public:
 	double weight;
 	ParticleTypes type;
 
+	bool escaped;
+
 	double x;
 	double y;
 	double z;

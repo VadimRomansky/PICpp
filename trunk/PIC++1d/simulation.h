@@ -4,11 +4,14 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "vector"
+#include "list"
 #include "matrix3d.h"
 #include "matrixElement.h"
 #include "particle.h"
 
 enum SolverType {EXPLICIT, IMPLICIT};
+
+enum BoundaryConditionType {PERIODIC, SUPER_CONDUCTOR_LEFT};
 
 class Simulation{
 public:
@@ -49,6 +52,7 @@ public:
 	bool newlyStarted;
 
 	SolverType solverType;
+	BoundaryConditionType boundaryConditionType;
 	int maxwellEquationMatrixSize;
 
 	double particleEnergy;
@@ -128,6 +132,7 @@ public:
 	double** divergenceCleaningPotential;
 
 	std::vector<Particle*> particles;
+	std::vector<Particle*> escapedParticles;
 
 	std::vector<Particle*>* particlesInEbin;
 	std::vector<Particle*>* particlesInBbin;
@@ -166,7 +171,7 @@ public:
 
 	//Simulation();
 	Simulation();
-	Simulation(double xn, double xsizev, double temp, double rho, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV);
+	Simulation(double xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV);
 	~Simulation();
 
 	void initialize();
@@ -176,6 +181,7 @@ public:
 	void initializeLangmuirWave();
 	void initializeTwoStream();
 	void initializeExternalFluxInstability();
+	void initializeFluxFromRight();
 	void createArrays();
 	void createFiles();
 	void simulate();
@@ -197,7 +203,11 @@ public:
 	void updateBfield();
 	void evaluateExplicitDerivative();
 	void checkEquationMatrix(std::vector<MatrixElement>** matrix, int lnumber);
-	void createPerfectConductaryBoundaryCondition();
+	void createSuperConductorLeftEquation();
+	void createFreeRightEquation();
+	void createFreeRightEquationX(Vector3d& rightPart);
+	void createFreeRightEquationY(Vector3d& rightPart);
+	void createFreeRightEquationZ(Vector3d& rightPart);
 	void createInternalEquationX(int i);
 	void createInternalEquationY(int i);
 	void createInternalEquationZ(int i);
@@ -253,11 +263,13 @@ public:
 	Particle* createParticle(int n, int i, double weight, ParticleTypes type);
 
 	void moveParticles();
+	void removeEscapedParticles();
 	void moveParticle(Particle* particle);
 	void correctParticlePosition(Particle* particle);
 	void correctParticlePosition(Particle& particle);
 	void moveParticleNewtonIteration(Particle* particle, double* const oldCoordinates, double* const tempCoordinates, double* const newCoordinates);
 	void evaluateParticlesRotationTensor();
+	void injectNewParticles(int count);
 
 	void collectParticlesIntoBins();
 	void pushParticleIntoEbin(Particle* particle, int i);
@@ -274,10 +286,6 @@ public:
 	Vector3d correlationBfield(Particle& particle);
 	Vector3d correlationNewBfield(Particle& particle);
 	Vector3d correlationEfield(Particle& particle);
-	Vector3d correlationFieldWithBbin(Particle& particle, int i);
-	Vector3d correlationFieldWithEbin(Particle& particle, int i);
-	Vector3d correlationFieldWithTempEbin(Particle& particle, int i);
-	Vector3d correlationFieldWithNewEbin(Particle& particle, int i);
 	double correlationWithBbin(Particle& particle, int i);
 	double correlationWithEbin(Particle& particle, int i);
 	double correlationBspline(const double& x, const double& dx, const double& leftx, const double& rightx);

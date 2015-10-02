@@ -107,6 +107,19 @@ Simulation readInput(FILE* inputFile) {
 	while(ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
+	double Vx;
+	fscanf(inputFile, "%lf", &Vx);
+
+	double Vy;
+	fscanf(inputFile, "%lf", &Vy);
+
+	double Vz;
+	fscanf(inputFile, "%lf", &Vz);
+
+	ch = ' ';
+	while(ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
 
 	double Ex;
 	fscanf(inputFile, "%lf", &Ex);
@@ -179,7 +192,7 @@ Simulation readInput(FILE* inputFile) {
 		exit(0);
 	}
 
-	return Simulation(xnumber, xsize, temperature, density, Ex, Ey, Ez, Bx, By, Bz, maxIterations, maxTime, particlesPerBin);
+	return Simulation(xnumber, xsize, temperature, density, Vx, Vy, Vz, Ex, Ey, Ez, Bx, By, Bz, maxIterations, maxTime, particlesPerBin);
 }
 
 Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile){
@@ -222,6 +235,17 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 	} else {
 		simulation.solverType = EXPLICIT;
 	}
+
+	int boundaryConditionType = 0;
+
+	fscanf(generalFile, "%d", &boundaryConditionType);
+
+	if(boundaryConditionType == 1){
+		simulation.boundaryConditionType = PERIODIC;
+	} else {
+		simulation.boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	}
+
 	fscanf(generalFile, "%d", &simulation.maxwellEquationMatrixSize);
 
 	fscanf(generalFile, "%lf", &simulation.extJ);

@@ -26,6 +26,8 @@ Particle::Particle(int n, double m, double q, double w, ParticleTypes t, double 
 
 	y = 0;
 	z = 0;
+
+	escaped = false;
 }
 
 Particle::Particle(const Particle& particle){
@@ -44,6 +46,8 @@ Particle::Particle(const Particle& particle){
 
 	y = particle.y;
 	z = particle.z;
+
+	escaped = particle.escaped;
 }
 
 double Particle::shapeFunctionX(const double& xvalue){

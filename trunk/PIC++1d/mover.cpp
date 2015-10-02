@@ -13,8 +13,25 @@ void Simulation::moveParticles(){
 	printf("moving particles\n");
 	int i = 0;
 #pragma omp parallel for private(i) 
-	for(i = 0; i < particles.size(); ++i){
+	for(int i = 0; i < particles.size(); ++i){
 		moveParticle(particles[i]);
+	}
+
+	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		removeEscapedParticles();
+	}
+}
+
+void Simulation::removeEscapedParticles(){
+	std::vector<Particle*>::iterator it = particles.end();
+	it = it - 1;
+	while(it != particles.begin()){
+		Particle* particle = *it;
+		std::vector<Particle*>::iterator prev = it - 1;
+		if(particle->escaped){
+			particles.erase(it);
+		}
+		it = prev;
 	}
 }
 
@@ -98,6 +115,26 @@ void Simulation::moveParticle(Particle* particle){
 	tempParticle.y += ((1 - eta)*velocity.y + eta*newVelocity.y)*eta*deltaT;
 	tempParticle.z += ((1 - eta)*velocity.z + eta*newVelocity.z)*eta*deltaT;
 
+	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		if(tempParticle.x < 0){
+			particle->x = -tempParticle.x;
+			particle->y = tempParticle.y;
+			particle->z = tempParticle.z;
+			newVelocity.x = -newVelocity.x;
+			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+			return;
+		}
+		if(tempParticle.x > xsize){
+			escapedParticles.push_back(particle);
+			particle->x = xsize;
+			particle->y = tempParticle.y;
+			particle->z = tempParticle.z;
+			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+			particle->escaped = true;
+			return;
+		}
+	}
+
 
 	Vector3d prevVelocity = velocity; 
 	int i = 0;
@@ -115,6 +152,27 @@ void Simulation::moveParticle(Particle* particle){
 		middleVelocity = (tempParticle.rotationTensor*tempParticle.gammaFactor(speed_of_light_normalized)*velocity) + rotatedE*beta;
 
 		tempParticle.x += (middleVelocity.x*eta*deltaT);
+		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+			//todo more accurate speed!!
+			if(tempParticle.x < 0){
+				particle->x = -tempParticle.x + fabs(middleVelocity.x*(1 - eta)*deltaT);
+				particle->y = tempParticle.y + middleVelocity.y*(1 - eta)*deltaT;
+				particle->z = tempParticle.z + middleVelocity.z*(1 - eta)*deltaT;
+				newVelocity = middleVelocity;
+				newVelocity.x = -newVelocity.x;
+				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+				return;
+			}
+			if(tempParticle.x > xsize){
+				escapedParticles.push_back(particle);
+				particle->x = xsize;
+				particle->y = tempParticle.y;
+				particle->z = tempParticle.z;
+				particle->setMomentumByV(middleVelocity, speed_of_light_normalized);
+				particle->escaped = true;
+				return;
+			}
+		}
 		correctParticlePosition(tempParticle);
 
 		E = correlationTempEfield(tempParticle)*fieldScale;
@@ -127,9 +185,9 @@ void Simulation::moveParticle(Particle* particle){
 	}
 
 	particle->momentum = tempParticle.momentum;
-	particle->momentum.x = 0;
+	//particle->momentum.x = 0;
 
-	//particle->x += middleVelocity.x*deltaT;
+	particle->x += middleVelocity.x*deltaT;
 
 	particle->y += middleVelocity.y*deltaT;
 	particle->z += middleVelocity.z*deltaT;
@@ -190,4 +248,25 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d velocity,
 	}
 
 	return result;
+}
+
+void Simulation::injectNewParticles(int count){
+	double concentration = density/(massProton + massElectron);
+
+	int n = particles.size();
+
+	double weight = (concentration / particlesPerBin) * volume(0);
+	double x = xsize - deltaX*0.00001;
+	for (int l = 0; l < 2 * count; ++l) {
+		ParticleTypes type;
+		if (l % 2 == 0) {
+			type = PROTON;
+		} else {
+			type = ELECTRON;
+		}
+		Particle* particle = createParticle(n, xnumber - 1, weight, type);
+		n++;
+		particle->x = x;
+		particle->addVelocity(V0, speed_of_light_normalized);
+	}
 }
