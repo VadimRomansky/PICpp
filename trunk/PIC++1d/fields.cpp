@@ -190,7 +190,8 @@ void Simulation::createSuperConductorLeftEquation() {
 	int i = 0;
 	//todo!!!
 	maxwellEquationMatrix[i][0].push_back(MatrixElement(1.0, i, 0));
-	maxwellEquationRightPart[i][0] = Efield[0].x;
+	maxwellEquationMatrix[i][0].push_back(MatrixElement(-1.0, i+1, 0));
+	maxwellEquationRightPart[i][0] = -4*pi*electricDensity[0]*deltaX/fieldScale;
 	maxwellEquationMatrix[i][1].push_back(MatrixElement(1.0, i, 1));
 	maxwellEquationRightPart[i][1] = 0;
 	maxwellEquationMatrix[i][2].push_back(MatrixElement(1.0, i, 2));

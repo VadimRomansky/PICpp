@@ -85,6 +85,7 @@ Simulation::Simulation(double xn, double xsizev, double temp, double rho, double
 	} else {
 		thermal_momentum = sqrt(2 * massElectron * kBoltzman * temperature);
 	}
+	thermal_momentum += V0.norm()*massElectron;
 	gyroradius = thermal_momentum * speed_of_light / (electron_charge * B0.norm());
 	if(B0.norm() <= 0){
 		gyroradius = 1.0;
@@ -277,7 +278,7 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 	double t = 2 * pi / (kw * speed_of_light_normalized);
 }
 
-void Simulation::initializeAlfvenWave() {
+void Simulation::initializeAlfvenWave(int wavesCount) {
 	printf("initialization alfven wave\n");
 	E0 = Vector3d(0, 0, 0);
 
@@ -298,10 +299,10 @@ void Simulation::initializeAlfvenWave() {
 	printf("alfven V = %lf\n", alfvenV*gyroradius/plasma_period);
 	printf("alfven V/c = %lf\n", alfvenV/speed_of_light_normalized);
 
-	double kw = 1 * 2 * pi / xsize;
+	double kw = wavesCount * 2 * pi / xsize;
 
 	double concentration = density / (massProton + massElectron);
-	double weight = concentration * volume(0) / particlesPerBin;
+	double weight = concentration * volumeB(0) / particlesPerBin;
 
 	omegaPlasmaProton = sqrt(4*pi*concentration*electron_charge_normalized*electron_charge_normalized/massProton);
 	omegaPlasmaElectron = sqrt(4*pi*concentration*electron_charge_normalized*electron_charge_normalized/massElectron);
@@ -436,7 +437,7 @@ void Simulation::initializeAlfvenWave() {
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
 
-	double epsilonAmplitude = 0.01;
+	double epsilonAmplitude = 0.2;
 
 	double alfvenVReal = omega/kw;
 
@@ -693,7 +694,7 @@ void Simulation::initializeLangmuirWave(){
 	printf("creating particles\n");
 	int nproton = 0;
 	int nelectron = 0;
-	double weight = (concentration / particlesPerBin) * volume(0);
+	double weight = (concentration / particlesPerBin) * volumeB(0);
 	for (int i = 0; i < xnumber; ++i) {
 		double x;
 		for (int l = 0; l < particlesPerBin; ++l) {
@@ -783,10 +784,20 @@ void Simulation::initializeLangmuirWave(){
 }
 
 void Simulation::initializeFluxFromRight(){
+	initializeAlfvenWave(20);
 	for(int i = 0; i < particles.size(); ++i){
 		Particle* particle = particles[i];
 		particle->addVelocity(V0, speed_of_light_normalized);
 	}
+
+	double magneticEnergy = B0.scalarMult(B0)/(8*pi);
+	double kineticEnergy = density*V0.scalarMult(V0)/2;
+
+	informationFile = fopen("./output/information.dat","a");
+	fprintf(informationFile, "magneticEnergy/kineticEnergy = %15.10g\n", magneticEnergy/kineticEnergy);
+	printf("magneticEnergy/kinetikEnergy = %15.10g\n", magneticEnergy/kineticEnergy);
+	fclose(informationFile);
+
 }
 
 void Simulation::createArrays() {
@@ -1029,7 +1040,7 @@ void Simulation::checkFrequency(double omega) {
 void Simulation::checkDebyeParameter() {
 	informationFile = fopen("./output/information.dat", "a");
 	double concentration = density / (massProton + massElectron);
-	double weight = concentration * volume(0) / particlesPerBin;
+	double weight = concentration * volumeB(0) / particlesPerBin;
 	double superParticleCharge = electron_charge_normalized * weight;
 	double superParticleConcentration = concentration / weight;
 	double superParticleTemperature = temperature * weight;
@@ -1107,7 +1118,7 @@ void Simulation::checkGyroRadius(){
 void Simulation::checkCollisionTime(double omega) {
 	informationFile = fopen("./output/information.dat", "a");
 	double concentration = density / (massProton + massElectron);
-	double weight = concentration * volume(0) / particlesPerBin;
+	double weight = concentration * volumeB(0) / particlesPerBin;
 	double superParticleCharge = electron_charge_normalized * weight;
 	double superParticleConcentration = concentration / weight;
 	double superParticleTemperature = temperature * weight;
@@ -1144,7 +1155,7 @@ void Simulation::checkCollisionTime(double omega) {
 void Simulation::checkMagneticReynolds(double v) {
 	informationFile = fopen("./output/information.dat", "a");
 	double concentration = density / (massProton + massElectron);
-	double weight = concentration * volume(0) / particlesPerBin;
+	double weight = concentration * volumeB(0) / particlesPerBin;
 	double superParticleCharge = electron_charge_normalized * weight;
 	double superParticleConcentration = concentration / weight;
 	double superParticleTemperature = temperature * weight;
@@ -1185,7 +1196,7 @@ void Simulation::checkDissipation(double k, double alfvenV) {
 	double omega = k * alfvenV;
 
 	double concentration = density / (massProton + massElectron);
-	double weight = concentration * volume(0) / particlesPerBin;
+	double weight = concentration * volumeB(0) / particlesPerBin;
 	double superParticleCharge = electron_charge_normalized * weight;
 	double superParticleConcentration = concentration / weight;
 	double superParticleTemperature = temperature * weight;
@@ -1230,7 +1241,7 @@ void Simulation::createParticles() {
 	double concentration = density/(massProton + massElectron);
 	int n = 0;
 	for (int i = 0; i < xnumber; ++i) {
-		double weight = (concentration / particlesPerBin) * volume(i);
+		double weight = (concentration / particlesPerBin) * volumeB(i);
 		double x = xgrid[i] + deltaX*0.00001;
 		for (int l = 0; l < 2 * particlesPerBin; ++l) {
 			ParticleTypes type;
