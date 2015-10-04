@@ -19,7 +19,7 @@ void Simulation::simulate() {
 		//initializeTwoStream();
 		createParticles();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWave();
+		//initializeAlfvenWave(1);
 		initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
@@ -63,8 +63,8 @@ void Simulation::simulate() {
 		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 			if(length > deltaX/particlesPerBin){
 				length -= deltaX/particlesPerBin;
+				injectNewParticles(1);
 			}
-			injectNewParticles(1);
 		}
 		//cleanupDivergence();
 		updateDensityParameters();
@@ -238,7 +238,15 @@ void Simulation::updateDeltaT() {
 	}
 }
 
-double Simulation::volume(int i) {
+double Simulation::volumeE(int i) {
+	if((boundaryConditionType == PERIODIC) || ((i > 0) && (i < xnumber))){
+		return deltaX;
+	} else {
+		return deltaX/2;
+	}
+}
+
+double Simulation::volumeB(int i) {
 	return deltaX;
 }
 
@@ -321,7 +329,7 @@ void Simulation::updateElectroMagneticParameters() {
 		divPressureTensor[i] = Vector3d(0, 0, 0);
 		for (int pcount = 0; pcount < particlesInEbin[i].size(); ++pcount) {
 			Particle* particle = particlesInEbin[i][pcount];
-			double correlation = correlationWithEbin(*particle, i) / volume(i);
+			double correlation = correlationWithEbin(*particle, i) / volumeE(i);
 
 			Vector3d velocity = particle->velocity(speed_of_light_normalized);
 			double gamma = particle->gammaFactor(speed_of_light_normalized);
@@ -340,7 +348,7 @@ void Simulation::updateElectroMagneticParameters() {
 				}
 				tempParticle.x += shiftX;
 
-				double tempCorrelation = correlationWithEbin(tempParticle, i) / volume(i);
+				double tempCorrelation = correlationWithEbin(tempParticle, i) / volumeE(i);
 
 				divPressureTensor[i].x += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][0] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
 				divPressureTensor[i].y += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][1] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
@@ -372,7 +380,7 @@ void Simulation::updateElectroMagneticParameters() {
 		if(solverType == IMPLICIT){
 			for (int pcount = 0; pcount < particlesInBbin[i].size(); ++pcount) {
 				Particle* particle = particlesInBbin[i][pcount];
-				double correlation = correlationWithBbin(*particle, i) / volume(i);
+				double correlation = correlationWithBbin(*particle, i) / volumeB(i);
 
 				double gamma = particle->gammaFactor(speed_of_light_normalized);
 				Vector3d velocity = particle->velocity(speed_of_light_normalized);
@@ -437,7 +445,7 @@ void Simulation::updateDensityParameters() {
 		for (int pcount = 0; pcount < particlesInBbin[i].size(); ++pcount) {
 			Particle* particle = particlesInBbin[i][pcount];
 
-			double correlation = correlationWithBbin(*particle, i) / volume(i);
+			double correlation = correlationWithBbin(*particle, i) / volumeB(i);
 
 			chargeDensity[i] += correlation * particle->charge * particle->weight;
 			if (particle->type == ELECTRON) {
@@ -459,9 +467,9 @@ void Simulation::updateDensityParameters() {
 
  		velocityBulk[i] = velocityBulk[i] / (electronConcentration[i] * massElectron + protonConcentration[i] * massProton);
 		velocityBulkElectron[i] = velocityBulkElectron[i] / (electronConcentration[i] * massElectron);
-		full_density += chargeDensity[i] * volume(i);
-		full_p_concentration += protonConcentration[i] * volume(i);
-		full_e_concentration += electronConcentration[i] * volume(i);
+		full_density += chargeDensity[i] * volumeB(i);
+		full_p_concentration += protonConcentration[i] * volumeB(i);
+		full_e_concentration += electronConcentration[i] * volumeB(i);
 	}
 	full_density /= xsize;
 	full_p_concentration /= (xsize * gyroradius);
@@ -478,24 +486,20 @@ void Simulation::updateEnergy() {
 
 	momentum = Vector3d(0, 0, 0);
 	for (int i = 0; i < xnumber + 1; ++i) {
-		double factor = 1;
-		if (i == 0 || i == xnumber) {
-			factor = factor / 2;
-		}
 		Vector3d E = Efield[i]*fieldScale;
-		electricFieldEnergy += E.scalarMult(E) * volume(i) * factor / (8 * pi);
+		electricFieldEnergy += E.scalarMult(E) * volumeE(i) / (8 * pi);
 	}
 
 	for (int i = 0; i < xnumber; ++i) {
 		Vector3d B = (Bfield[i] - B0)*fieldScale;
-		magneticFieldEnergy += B.scalarMult(B) * volume(i) / (8 * pi);
+		magneticFieldEnergy += B.scalarMult(B) * volumeB(i) / (8 * pi);
 	}
 
 	for (int i = 0; i < xnumber; ++i) {
 		Vector3d E = ((Efield[i] + Efield[i + 1]) / 2)*fieldScale;
 		Vector3d B = Bfield[i]*fieldScale;
 
-		momentum += (E.vectorMult(B) / (4 * pi * speed_of_light_normalized)) * volume(i);
+		momentum += (E.vectorMult(B) / (4 * pi * speed_of_light_normalized)) * volumeB(i);
 	}
 
 	for(int pcount = 0; pcount < particles.size(); ++pcount){

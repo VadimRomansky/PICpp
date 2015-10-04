@@ -177,7 +177,7 @@ public:
 	void initialize();
 	void initializeSimpleElectroMagneticWave();
 	void checkFrequency(double omega);
-	void initializeAlfvenWave();
+	void initializeAlfvenWave(int wavesCount);
 	void initializeLangmuirWave();
 	void initializeTwoStream();
 	void initializeExternalFluxInstability();
@@ -227,7 +227,8 @@ public:
 
 	void resetNewTempFields();
 
-	double volume(int i);
+	double volumeE(int i);
+	double volumeB(int i);
 	void checkParticleInBox(Particle& particle);
 	void checkParticlesInBin();
 	void updateElectroMagneticParameters();

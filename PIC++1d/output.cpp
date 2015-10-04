@@ -107,8 +107,9 @@ void outputArrayParameter(FILE* outFile, double* arrayParameter, int xnumber, do
 }
 
 void outputGeneral(FILE* outFile, Simulation* simulation) {
+	int particlesCount = simulation->particles.size();
 	fprintf(outFile, "%d %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d\n", simulation->currentIteration, simulation->time, simulation->time*simulation->plasma_period, simulation->particleEnergy,
-		simulation->electricFieldEnergy, simulation->magneticFieldEnergy, simulation->energy, simulation->momentum.x, simulation->momentum.y, simulation->momentum.z, simulation->maxEfield.norm(), simulation->maxBfield.norm(), simulation->deltaT, simulation->particles.size());
+		simulation->electricFieldEnergy, simulation->magneticFieldEnergy, simulation->energy, simulation->momentum.x, simulation->momentum.y, simulation->momentum.z, simulation->maxEfield.norm(), simulation->maxBfield.norm(), simulation->deltaT, particlesCount);
 }
 
 void outputDivergenceError(FILE* outFile, Simulation* simulation, double plasma_period, double gyroradius, double fieldScale) {

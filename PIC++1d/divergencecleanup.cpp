@@ -13,7 +13,7 @@ void Simulation::cleanupDivergence() {
 
 	double fullDensity = 0;
 	for(int i = 0; i < xnumber; ++i) {
-		fullDensity += chargeDensity[i]*volume(i);
+		fullDensity += chargeDensity[i]*volumeB(i);
 	}
 	fullDensity /= xsize;
 
