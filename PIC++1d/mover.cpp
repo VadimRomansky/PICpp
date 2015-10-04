@@ -269,5 +269,6 @@ void Simulation::injectNewParticles(int count){
 		n++;
 		particle->x = x;
 		particle->addVelocity(V0, speed_of_light_normalized);
+		particles.push_back(particle);
 	}
 }
