@@ -7,11 +7,7 @@
 void Simulation::cleanupDivergence() {
 	printf("cleaning up divergence\n");
 
-	divergenceCleaningField[0][0] = 0;
-	divergenceCleaningField[0][1] = 0;
-	divergenceCleaningField[0][2] = 0;
-
-	double fullDensity = 0;
+	/*double fullDensity = 0;
 	for(int i = 0; i < xnumber; ++i) {
 		fullDensity += chargeDensity[i]*volumeB(i);
 	}
@@ -19,16 +15,22 @@ void Simulation::cleanupDivergence() {
 
 	for(int i = 0; i < xnumber; ++i) {
 		chargeDensity[i] -= fullDensity;
-	}
+	}*/
 
-	for(int i = 1; i < xnumber; ++i){
-		divergenceCleaningField[i][0] = divergenceCleaningField[i-1][0] + cleanUpRightPart(i-1)*deltaX;
+	divergenceCleaningField[xnumber - 1][0] = - cleanUpRightPart(xnumber - 1)*deltaX;
+	divergenceCleaningField[xnumber - 1][1] = - cleanUpRightPart(xnumber - 1)*deltaX;
+	divergenceCleaningField[xnumber - 1][2] = - cleanUpRightPart(xnumber - 1)*deltaX;
+
+	for(int i = xnumber - 2; i >= 0 ; --i){
+		divergenceCleaningField[i][0] = divergenceCleaningField[i+1][0] - cleanUpRightPart(i)*deltaX;
 		divergenceCleaningField[i][1] = 0;
 		divergenceCleaningField[i][2] = 0;
 	}
 
 	updateFieldByCleaning();
-	updateBoundariesNewField();
+	if(boundaryConditionType == PERIODIC){
+		updateBoundariesNewField();
+	}
 }
 
 
@@ -109,7 +111,9 @@ void Simulation::updateFieldByCleaning() {
 				newEfield[i].z += divergenceCleaningField[i][2];
 				//newEfield[i] -= meanField;
 	}
-	newEfield[xnumber] = newEfield[0];
+	if(boundaryConditionType == PERIODIC){
+		newEfield[xnumber] = newEfield[0];
+	}
 }
 
 void Simulation::evaluateDivergenceCleaningField(){

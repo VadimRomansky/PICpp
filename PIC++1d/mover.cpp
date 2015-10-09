@@ -196,16 +196,51 @@ void Simulation::moveParticle(Particle* particle){
 }
 
 void Simulation::correctParticlePosition(Particle* particle) {
-	correctParticlePosition(*particle);
+	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		if(particle->x < 0){
+			particle->x = -particle->x;
+			particle->momentum.x = -particle->momentum.x;
+			return;
+		}
+		if(particle->x > xsize){
+			escapedParticles.push_back(particle);
+			particle->x = xsize;
+			particle->escaped = true;
+			return;
+		}
+	}
+	if(boundaryConditionType == PERIODIC){
+		if(particle->x < 0) {
+			particle->x = particle->x + xsize;
+		}
+		if(particle->x > xsize) {
+			particle->x = particle->x - xsize;
+		}		
+	}
 }
 
 void Simulation::correctParticlePosition(Particle& particle) {
+	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		if(particle.x < 0){
+			particle.x = -particle.x;
+			particle.momentum.x = -particle.momentum.x;
+			return;
+		}
+		if(particle.x > xsize){
+			escapedParticles.push_back(&particle);
+			particle.x = xsize;
+			particle.escaped = true;
+			return;
+		}
+	}
+	if(boundaryConditionType == PERIODIC){
 		if(particle.x < 0) {
 			particle.x = particle.x + xsize;
 		}
 		if(particle.x > xsize) {
 			particle.x = particle.x - xsize;
 		}		
+	}
 }
 
 void Simulation::evaluateParticlesRotationTensor()

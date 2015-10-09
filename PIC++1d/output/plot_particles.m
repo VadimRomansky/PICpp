@@ -13,3 +13,11 @@ xlabel ('{{t w_p}/{2\pi}}');
 ylabel ('P g*cm/s');
 legend('protons', 'electrons','Location','northeast');
 grid ;
+
+figure(2);
+plot (protons(1:N1,1), protons(1:N1,3), 'red', electrons(1:N2,1), electrons(1:N2,3), 'blue');
+title ('particles');
+xlabel ('{{t w_p}/{2\pi}}');
+ylabel ('P g*cm/s');
+legend('protons', 'electrons','Location','northeast');
+grid ;

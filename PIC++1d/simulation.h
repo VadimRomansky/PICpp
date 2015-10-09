@@ -177,7 +177,7 @@ public:
 	void initialize();
 	void initializeSimpleElectroMagneticWave();
 	void checkFrequency(double omega);
-	void initializeAlfvenWave(int wavesCount);
+	void initializeAlfvenWave(int wavesCount, double amplitudeRelation);
 	void initializeLangmuirWave();
 	void initializeTwoStream();
 	void initializeExternalFluxInstability();

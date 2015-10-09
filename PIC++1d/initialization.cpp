@@ -37,8 +37,8 @@ Simulation::Simulation(){
 Simulation::Simulation(double xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV) {
 	debugMode = true;
 	newlyStarted = true;
-	solverType = IMPLICIT;
-	//solverType = EXPLICIT;
+	//solverType = IMPLICIT;
+	solverType = EXPLICIT;
 	//boundaryConditionType = PERIODIC;
 	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
@@ -278,7 +278,7 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 	double t = 2 * pi / (kw * speed_of_light_normalized);
 }
 
-void Simulation::initializeAlfvenWave(int wavesCount) {
+void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) {
 	printf("initialization alfven wave\n");
 	E0 = Vector3d(0, 0, 0);
 
@@ -437,7 +437,7 @@ void Simulation::initializeAlfvenWave(int wavesCount) {
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
 
-	double epsilonAmplitude = 0.2;
+	double epsilonAmplitude = amplitudeRelation;
 
 	double alfvenVReal = omega/kw;
 
@@ -784,7 +784,7 @@ void Simulation::initializeLangmuirWave(){
 }
 
 void Simulation::initializeFluxFromRight(){
-	initializeAlfvenWave(20);
+	//initializeAlfvenWave(10, 1.0E-4);
 	for(int i = 0; i < particles.size(); ++i){
 		Particle* particle = particles[i];
 		particle->addVelocity(V0, speed_of_light_normalized);
@@ -1242,7 +1242,8 @@ void Simulation::createParticles() {
 	int n = 0;
 	for (int i = 0; i < xnumber; ++i) {
 		double weight = (concentration / particlesPerBin) * volumeB(i);
-		double x = xgrid[i] + deltaX*0.00001;
+		double x = xgrid[i] + 0.0001*deltaX;
+		double deltaXParticles = deltaX/particlesPerBin;
 		for (int l = 0; l < 2 * particlesPerBin; ++l) {
 			ParticleTypes type;
 			if (l % 2 == 0) {
@@ -1259,7 +1260,7 @@ void Simulation::createParticles() {
 				particle->x= x;
 			}*/
 			int m = l/2;
-			particle->x = x + (m*deltaX/particlesPerBin);
+			particle->x = x + deltaXParticles*m;
 			particles.push_back(particle);
 			particlesNumber++;
 			if (particlesNumber % 1000 == 0) {
