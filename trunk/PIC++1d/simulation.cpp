@@ -19,7 +19,7 @@ void Simulation::simulate() {
 		//initializeTwoStream();
 		createParticles();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWave(1);
+		//initializeAlfvenWave(1, 0.01);
 		initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
@@ -42,7 +42,7 @@ void Simulation::simulate() {
 	updateFields();
 	updateEnergy();
 
-	double length = 0;
+	double length = deltaX/particlesPerBin - 0.0001*deltaX;
 
 	while (time * plasma_period < maxTime && currentIteration < maxIteration) {
 		printf("iteration number %d time = %15.10g\n", currentIteration, time * plasma_period);
@@ -55,8 +55,8 @@ void Simulation::simulate() {
 		updateDeltaT();
 		evaluateParticlesRotationTensor();
 		updateElectroMagneticParameters();
-		evaluateFields();
-		evaluateMagneticField();
+		//evaluateFields();
+		//evaluateMagneticField();
 		moveParticles();
 
 		length += fabs(V0.x*deltaT);
@@ -364,14 +364,16 @@ void Simulation::updateElectroMagneticParameters() {
 	}
 
 	//for periodic conditions we must summ sides parameters
-	electricFlux[0] = electricFlux[0] + electricFlux[xnumber];
-	electricFlux[xnumber] = electricFlux[0];
+	if(boundaryConditionType == PERIODIC){
+		electricFlux[0] = electricFlux[0] + electricFlux[xnumber];
+		electricFlux[xnumber] = electricFlux[0];
 
-	dielectricTensor[0] = dielectricTensor[0] + dielectricTensor[xnumber];
-	dielectricTensor[xnumber] = dielectricTensor[0];
+		dielectricTensor[0] = dielectricTensor[0] + dielectricTensor[xnumber];
+		dielectricTensor[xnumber] = dielectricTensor[0];
 
-	divPressureTensor[0] = divPressureTensor[0] + divPressureTensor[xnumber];
-	divPressureTensor[xnumber] = divPressureTensor[0];
+		divPressureTensor[0] = divPressureTensor[0] + divPressureTensor[xnumber];
+		divPressureTensor[xnumber] = divPressureTensor[0];
+	}
 
 
 	for (int i = 0; i < xnumber; ++i) {

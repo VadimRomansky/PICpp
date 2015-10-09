@@ -207,9 +207,9 @@ void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, Simulation* s
 		Particle* particle = simulation->particles[i];
 		double p = particle->momentum.norm()*simulation->gyroradius/simulation->plasma_period;
 		if(particle->type == PROTON){
-			fprintf(outProtonsFile, "%15.10g %15.10g\n", particle->x*simulation->gyroradius, p);
+			fprintf(outProtonsFile, "%15.10g %15.10g %15.10g\n", particle->x*simulation->gyroradius, p, particle->momentum.x*simulation->gyroradius/simulation->plasma_period);
 		} else if(particle->type == ELECTRON){
-			fprintf(outElectronsFile, "%15.10g %15.10g\n", particle->x*simulation->gyroradius, p);
+			fprintf(outElectronsFile, "%15.10g %15.10g %15.10g\n", particle->x*simulation->gyroradius, p,  particle->momentum.x*simulation->gyroradius/simulation->plasma_period);
 		}
 	}
 }

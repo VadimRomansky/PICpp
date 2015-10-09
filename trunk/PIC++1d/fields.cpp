@@ -35,7 +35,7 @@ void Simulation::evaluateFields() {
 		}
 		delete[] gmresOutput;
 
-		updateBoundaries();
+		//updateBoundaries();
 
 		double alfvenV = B0.norm()/sqrt(4*pi*density);
 		double k = 2*pi/xsize;
@@ -45,11 +45,15 @@ void Simulation::evaluateFields() {
 		for(int i = 0; i < xnumber; ++i){
 			explicitEfield[i] += Ederivative[i]*deltaT;
 		}
-		explicitEfield[xnumber] = explicitEfield[0];
 
 		//evaluateMagneticField();
-
-		tempEfield[xnumber] = tempEfield[0];
+		if(boundaryConditionType == PERIODIC){
+			tempEfield[xnumber] = tempEfield[0];
+			explicitEfield[xnumber] = explicitEfield[0];
+		} else {
+			tempEfield[xnumber] = E0;
+			explicitEfield[xnumber] = E0;
+		}
 		for (int i = 0; i < xnumber+1; ++i) {
 			newEfield[i] = (tempEfield[i] - Efield[i] * (1 - theta)) / theta;
 			//newEfield[i].x= 0;
@@ -200,7 +204,8 @@ void Simulation::createSuperConductorLeftEquation() {
 
 void Simulation::createFreeRightEquation(){
 	Vector3d rightPart = Efield[xnumber - 1];
-	rightPart = rightPart + (evaluateRotB(xnumber - 1)* speed_of_light_normalized - (electricFlux[xnumber - 1]*4*pi/fieldScale)) * (theta * deltaT) - (evaluateGradDensity(xnumber - 1)*speed_of_light_normalized_sqr*theta*theta*deltaT*deltaT*4*pi/fieldScale);
+	//rightPart = rightPart + (evaluateRotB(xnumber - 1)* speed_of_light_normalized - (electricFlux[xnumber - 1]*4*pi/fieldScale)) * (theta * deltaT) - (evaluateGradDensity(xnumber - 1)*speed_of_light_normalized_sqr*theta*theta*deltaT*deltaT*4*pi/fieldScale);
+	rightPart = rightPart + (evaluateRotB(xnumber - 1)* speed_of_light_normalized - (electricFlux[xnumber - 1]*4*pi/fieldScale)) * (theta * deltaT);
 
 	createFreeRightEquationX(rightPart);
 	createFreeRightEquationY(rightPart);
@@ -233,11 +238,11 @@ void Simulation::createFreeRightEquationX(Vector3d& rightPart) {
 		prevI = xnumber - 1;                   
 	}
 
-	element = -c_theta_deltaT2*(1.0  - dielectricTensor[xnumber].matrix[0][0])/ deltaX2;
+	element = -c_theta_deltaT2*(1.0  - dielectricTensor[xnumber-1].matrix[0][0])/ deltaX2;
 	rightPart.x -= element*E0.x;
-	element = c_theta_deltaT2*dielectricTensor[xnumber].matrix[0][1]/deltaX2;
+	element = c_theta_deltaT2*dielectricTensor[xnumber-1].matrix[0][1]/deltaX2;
 	rightPart.x -= element*E0.y;
-	element = c_theta_deltaT2*dielectricTensor[xnumber].matrix[0][2]/deltaX2;
+	element = c_theta_deltaT2*dielectricTensor[xnumber-1].matrix[0][2]/deltaX2;
 	rightPart.x -= element*E0.z;
 
 	element = -c_theta_deltaT2*(1.0  - dielectricTensor[prevI].matrix[0][0])/ deltaX2;

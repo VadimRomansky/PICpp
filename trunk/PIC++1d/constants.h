@@ -6,7 +6,7 @@ const int numThreads = 6;
 
 const double massProtonReal = 1.67262177E-24;
 const double massElectronReal = 0.910938291E-27;
-const double massElectron = 10*massElectronReal;
+const double massElectron = 100*massElectronReal;
 //const double massProton = massElectronReal*200;
 const double massProton = massProtonReal;
 const double kBoltzman = 1.3806488E-16;
@@ -16,7 +16,7 @@ const double pi = 3.1415926535897932384626433832795028841971693993751;
 const double epsilon = 1E-16;
 const double maxErrorLevel = 1E-8;
 const double timeEpsilon = 0.1;
-const double initialTheta = 0.5;
+const double initialTheta = 0.9;
 const int pnumber = 1000;
 const int writeParameter = 200;
 const int writeBackupParameter = 100000;
