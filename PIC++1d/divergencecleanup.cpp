@@ -18,8 +18,8 @@ void Simulation::cleanupDivergence() {
 	}*/
 
 	divergenceCleaningField[xnumber - 1][0] = - cleanUpRightPart(xnumber - 1)*deltaX;
-	divergenceCleaningField[xnumber - 1][1] = - cleanUpRightPart(xnumber - 1)*deltaX;
-	divergenceCleaningField[xnumber - 1][2] = - cleanUpRightPart(xnumber - 1)*deltaX;
+	divergenceCleaningField[xnumber - 1][1] = 0;
+	divergenceCleaningField[xnumber - 1][2] = 0;
 
 	for(int i = xnumber - 2; i >= 0 ; --i){
 		divergenceCleaningField[i][0] = divergenceCleaningField[i+1][0] - cleanUpRightPart(i)*deltaX;

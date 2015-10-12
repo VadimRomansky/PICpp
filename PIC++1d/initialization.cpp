@@ -478,6 +478,11 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 
 	double xshift = 0.0;
 
+	Eyamplitude = 0.0;
+	VzamplitudeElectron = 0.0;
+	VzamplitudeProton = 0.0;
+	Byamplitude = 0.0;
+
 	for (int i = 0; i < xnumber + 1; ++i) {
 		Efield[i].x = 0;
 		Efield[i].y = Eyamplitude * cos(kw * xgrid[i] - kw*xshift);
@@ -785,6 +790,37 @@ void Simulation::initializeLangmuirWave(){
 
 void Simulation::initializeFluxFromRight(){
 	//initializeAlfvenWave(10, 1.0E-4);
+	Efield[xnumber] = E0;
+	tempEfield[xnumber] = E0;
+	newEfield[xnumber] = E0;
+	explicitEfield[xnumber] = E0;
+	Efield[0] = E0;
+	tempEfield[0] = E0;
+	newEfield[0] = E0;
+	explicitEfield[0] = E0;
+
+	double gamma = 1.0/sqrt(1 - V0.scalarMult(V0)/speed_of_light_normalized_sqr);
+	for(int i = 1; i < xnumber; ++i){
+		Vector3d middleB = (Bfield[i-1] + Bfield[i])*0.5;
+		newEfield[i].y = gamma*(Efield[i].y - V0.x*middleB.z/speed_of_light_normalized);
+		newEfield[i].z = gamma*(Efield[i].z + V0.x*middleB.y/speed_of_light_normalized);
+	}
+	for(int i = 0; i < xnumber; ++i){
+		Vector3d middleE = (Efield[i] + Efield[i+1])*0.5;
+		newBfield[i].y = gamma*(Bfield[i].y + V0.x*middleE.z/speed_of_light_normalized);
+		newBfield[i].z = gamma*(Bfield[i].z - V0.x*middleE.y/speed_of_light_normalized);
+	}
+
+	for(int i = 0; i < xnumber + 1; ++i){
+		Efield[i] = newEfield[i];
+		tempEfield[i] = newEfield[i];
+		explicitEfield[i] = newEfield[i];
+	}
+	
+	for(int i = 0; i < xnumber; ++i){
+		Bfield[i] = newBfield[i];
+	}
+
 	for(int i = 0; i < particles.size(); ++i){
 		Particle* particle = particles[i];
 		particle->addVelocity(V0, speed_of_light_normalized);
