@@ -38,7 +38,7 @@ void Simulation::simulate() {
 	updateDensityParameters();
 
 	evaluateExplicitDerivative();
-	//cleanupDivergence();
+	cleanupDivergence();
 	updateFields();
 	updateEnergy();
 
@@ -55,8 +55,8 @@ void Simulation::simulate() {
 		updateDeltaT();
 		evaluateParticlesRotationTensor();
 		updateElectroMagneticParameters();
-		//evaluateFields();
-		//evaluateMagneticField();
+		evaluateFields();
+		evaluateMagneticField();
 		moveParticles();
 
 		length += fabs(V0.x*deltaT);
@@ -66,7 +66,7 @@ void Simulation::simulate() {
 				injectNewParticles(1);
 			}
 		}
-		//cleanupDivergence();
+		cleanupDivergence();
 		updateDensityParameters();
 		updateFields();
 		updateEnergy();
