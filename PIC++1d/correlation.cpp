@@ -238,8 +238,8 @@ Vector3d Simulation::correlationBfield(Particle& particle) {
 	}
 
 	int xcount = floor((x / deltaX) + 0.5);
-	Vector3d leftField;
-	Vector3d rightField;
+	Vector3d leftField = Vector3d(0, 0, 0);
+	Vector3d rightField = Vector3d(0, 0, 0);
 
 	double rightWeight;
 	double leftWeight;

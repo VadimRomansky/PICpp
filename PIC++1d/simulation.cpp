@@ -38,7 +38,7 @@ void Simulation::simulate() {
 	updateDensityParameters();
 
 	evaluateExplicitDerivative();
-	cleanupDivergence();
+	//cleanupDivergence();
 	updateFields();
 	updateEnergy();
 
@@ -66,7 +66,7 @@ void Simulation::simulate() {
 				injectNewParticles(1);
 			}
 		}
-		cleanupDivergence();
+		//cleanupDivergence();
 		updateDensityParameters();
 		updateFields();
 		updateEnergy();
@@ -336,9 +336,9 @@ void Simulation::updateElectroMagneticParameters() {
 			Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
 
 			if(solverType == IMPLICIT){
-				//electricFlux[i] += rotatedVelocity * (particle->charge * particle->weight * correlation);
-				electricFlux[i] += velocity * (particle->charge * particle->weight * correlation);
-				//dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+				electricFlux[i] += rotatedVelocity * (particle->charge * particle->weight * correlation);
+				//electricFlux[i] += velocity * (particle->charge * particle->weight * correlation);
+				dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 				//dielectricTensor[i] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 				
 				Particle tempParticle = *particle;
@@ -399,7 +399,7 @@ void Simulation::updateElectroMagneticParameters() {
 		for (int i = 0; i <= xnumber; ++i) {
 
 			Vector3d divPressureTensorEvaluated = evaluateDivPressureTensor(i);
-			//electricFlux[i] = electricFlux[i] - divPressureTensor[i] * eta * deltaT;
+			electricFlux[i] = electricFlux[i] - divPressureTensor[i] * eta * deltaT;
 			//electricFlux[i] = electricFlux[i] - divPressureTensorEvaluated * eta * deltaT;
 		}
 	}
