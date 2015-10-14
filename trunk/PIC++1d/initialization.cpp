@@ -37,8 +37,8 @@ Simulation::Simulation(){
 Simulation::Simulation(double xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV) {
 	debugMode = true;
 	newlyStarted = true;
-	//solverType = IMPLICIT;
-	solverType = EXPLICIT;
+	solverType = IMPLICIT;
+	//solverType = EXPLICIT;
 	//boundaryConditionType = PERIODIC;
 	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
@@ -478,10 +478,10 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 
 	double xshift = 0.0;
 
-	Eyamplitude = 0.0;
-	VzamplitudeElectron = 0.0;
-	VzamplitudeProton = 0.0;
-	Byamplitude = 0.0;
+	//Eyamplitude = 0.0;
+	//VzamplitudeElectron = 0.0;
+	//VzamplitudeProton = 0.0;
+	//Byamplitude = 0.0;
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		Efield[i].x = 0;
