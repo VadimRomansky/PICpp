@@ -61,7 +61,7 @@ void Simulation::evaluateFields() {
 		}
 		for (int i = 0; i < xnumber+1; ++i) {
 			newEfield[i] = (tempEfield[i] - Efield[i] * (1 - theta)) / theta;
-			//newEfield[i].x= 0;
+			newEfield[i].x= 0;
 		}
 	}
 
