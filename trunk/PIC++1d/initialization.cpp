@@ -39,8 +39,8 @@ Simulation::Simulation(double xn, double xsizev, double temp, double rho, double
 	newlyStarted = true;
 	solverType = IMPLICIT;
 	//solverType = EXPLICIT;
-	//boundaryConditionType = PERIODIC;
-	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionType = PERIODIC;
+	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
 
 	currentIteration = 0;
@@ -928,24 +928,43 @@ void Simulation::initializeTwoStream(){
 	Vector3d electronsVelocityMinus = Vector3d(-u, 0, 0);
 	B0 = Vector3d(0, 0, 0);
 
-	double Bamplitude = 1E-14;
+	double Bamplitude = 1E-12 * (plasma_period * sqrt(gyroradius));
+	Bamplitude = 0;
+	double Eamplitude = 0;
 
 	checkDebyeParameter();
 
 	double kw = 2*pi/xsize;
 
+	informationFile = fopen("./output/information.dat","a");
 	if(kw*speed_of_light_normalized < 1){
 		printf("k*c/omega plasma < 1\n");
+		fprintf(informationFile, "k*c/omega plasma < 1\n");
 	} else if(kw*speed_of_light_normalized < 100){
 		printf("k*c/omega plasma < 100\n");
+		fprintf(informationFile, "k*c/omega plasma < 100\n");
 	}
 	printf("k*c/omega plasma = %g\n", kw*speed_of_light_normalized);
+	fprintf(informationFile, "k*c/omega plasma = %g\n", kw*speed_of_light_normalized);
+
+	if(kw > omegaPlasmaElectron/u){
+		printf("k > omegaPlasmaElectron/u\n");
+		fprintf(informationFile, "k > omegaPlasmaElectron/u\n");
+	}
+
+	printf("k u/omegaPlasmaElectron = %g\n", kw*u/omegaPlasmaElectron);
+	fprintf(informationFile, "k u/omegaPlasmaElectron = %g\n", kw*u/omegaPlasmaElectron);
+	fclose(informationFile);
 
 	for(int i = 0; i < xnumber; ++i){
 		Bfield[i] = Vector3d(0, 1, 0)*Bamplitude*cos(kw*middleXgrid[i]);
+		newBfield[i] = Bfield[i];
 	}
 	for(int i = 0; i < xnumber + 1; ++i){
-		Efield[i] = Vector3d(0, 0, 0);
+		Efield[i] = Vector3d(0, 0, 1)*Eamplitude*cos(kw*xgrid[i]);;
+		tempEfield[i] = Efield[i];
+		newEfield[i] = Efield[i];
+		explicitEfield[i] = Efield[i];
 	}
 	int electronCount = 0;;
 	for(int pcount = 0; pcount < particles.size(); ++pcount){
@@ -1127,9 +1146,9 @@ void Simulation::checkGyroRadius(){
 	informationFile = fopen("./output/information.dat", "a");
 
 	if(B0.norm() > 0){
-		double thermalMomentumElectron = sqrt(massElectron*kBoltzman_normalized*temperature);
+		double thermalMomentumElectron = sqrt(massElectron*kBoltzman_normalized*temperature) + massElectron*V0.norm();
 		double gyroRadiusElectron = thermalMomentumElectron*speed_of_light_normalized/(electron_charge_normalized * B0.norm());
-		double thermalMomentumProton = sqrt(massProton*kBoltzman_normalized*temperature);
+		double thermalMomentumProton = sqrt(massProton*kBoltzman_normalized*temperature) + massProton*V0.norm();
 		double gyroRadiusProton = thermalMomentumProton*speed_of_light_normalized/(electron_charge_normalized * B0.norm());
 		if(deltaX > 0.5*gyroRadiusElectron){
 			printf("deltaX > 0.5*gyroRadiusElectron\n");

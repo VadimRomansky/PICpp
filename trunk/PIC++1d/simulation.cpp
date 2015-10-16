@@ -16,11 +16,11 @@ void Simulation::simulate() {
 		createArrays();
 		createFiles();
 		initialize();
-		//initializeTwoStream();
-		createParticles();
+		initializeTwoStream();
+		//createParticles();
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWave(1, 0.01);
-		initializeFluxFromRight();
+		//initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
@@ -220,7 +220,7 @@ void Simulation::updateDeltaT() {
 		omegaGyroProton = electron_charge_normalized * B / (massProton * speed_of_light);
 		omegaGyroElectron = electron_charge_normalized * B / (massElectron * speed_of_light);
 
-		double thermalMomentum = sqrt(massElectron*kBoltzman_normalized*temperature);
+		double thermalMomentum = sqrt(massElectron*kBoltzman_normalized*temperature) + massElectron*V0.norm();
 
 		if (B > 0) {
 			deltaT = min2(deltaT, timeEpsilon * massElectron * speed_of_light_normalized / (electron_charge_normalized * B));
