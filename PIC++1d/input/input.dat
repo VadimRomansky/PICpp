@@ -1,5 +1,5 @@
 1000 3 3                 grid numbers
-1E13 3E6 3E6         gridsizes
+1E10 3E6 3E6         gridsizes
 1E-20                    temperature
 1.67E-28               density
 -1E9 0 0                  velocity
