@@ -220,8 +220,8 @@ void Simulation::initialize() {
 
 	double concentration = density / (massProton + massElectron);
 
-	omegaPlasmaProton = sqrt(4 * pi * concentration * electron_charge * electron_charge / massProton);
-	omegaPlasmaElectron = sqrt(4 * pi * concentration * electron_charge * electron_charge / massElectron);
+	omegaPlasmaProton = sqrt(4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massProton);
+	omegaPlasmaElectron = sqrt(4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
 
 	informationFile = fopen("./output/information.dat", "a");
 	if(omegaPlasmaElectron*xsize/speed_of_light_normalized < 5){
@@ -937,15 +937,20 @@ void Simulation::initializeTwoStream(){
 	double kw = 2*pi/xsize;
 
 	informationFile = fopen("./output/information.dat","a");
-	if(kw*speed_of_light_normalized < 1){
-		printf("k*c/omega plasma < 1\n");
-		fprintf(informationFile, "k*c/omega plasma < 1\n");
-	} else if(kw*speed_of_light_normalized < 100){
-		printf("k*c/omega plasma < 100\n");
-		fprintf(informationFile, "k*c/omega plasma < 100\n");
+	
+	if(xsize*omegaPlasmaElectron/speed_of_light_normalized < 5){
+		printf("xsize*omegaPlasmaElectron/speed_of_light_normalized < 5\n");
+		fprintf(informationFile, "xsize*omegaPlasmaElectron/speed_of_light_normalized < 5\n");
 	}
-	printf("k*c/omega plasma = %g\n", kw*speed_of_light_normalized);
-	fprintf(informationFile, "k*c/omega plasma = %g\n", kw*speed_of_light_normalized);
+	printf("xsize*omegaPlasmaElectron/speed_of_light_normalized = %g\n", xsize*omegaPlasmaElectron/speed_of_light_normalized);
+	fprintf(informationFile, "xsize*omegaPlasmaElectron/speed_of_light_normalized = %g\n", xsize*omegaPlasmaElectron/speed_of_light_normalized);
+
+	if(deltaX*omegaPlasmaElectron/speed_of_light_normalized > 0.2){
+		printf("deltaX*omegaPlasmaElectron/speed_of_light_normalized > 0.2\n");
+		fprintf(informationFile, "deltaX*omegaPlasmaElectron/speed_of_light_normalized > 0.2\n");
+	}
+	printf("deltaX*omegaPlasmaElectron/speed_of_light_normalized = %g\n", xsize*omegaPlasmaElectron/speed_of_light_normalized);
+	fprintf(informationFile, "deltaX*omegaPlasmaElectron/speed_of_light_normalized = %g\n", xsize*omegaPlasmaElectron/speed_of_light_normalized);
 
 	if(kw > omegaPlasmaElectron/u){
 		printf("k > omegaPlasmaElectron/u\n");
