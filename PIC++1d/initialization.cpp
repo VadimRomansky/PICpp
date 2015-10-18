@@ -193,8 +193,9 @@ void Simulation::initialize() {
 	deltaX2 = deltaX * deltaX;
 
 	for (int i = 0; i <= xnumber; ++i) {
-		xgrid[i] = i * deltaX;
+		xgrid[i] = xsize + i * deltaX;
 	}
+	xgrid[xnumber] = 2*xsize;
 
 	for (int i = 0; i < xnumber; ++i) {
 		middleXgrid[i] = (xgrid[i] + xgrid[i + 1]) / 2;
@@ -560,7 +561,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
 		Vector3d velocity = particle->velocity(speed_of_light_normalized);
-		int xn = particle->x/deltaX;
+		int xn = (particle->x - xgrid[0])/deltaX;
 		double rightWeight = (particle->x - xgrid[xn])/deltaX;
 		double leftWeight = (xgrid[xn+1] - particle->x)/deltaX;
 		if (particle->type == PROTON) {

@@ -21,7 +21,7 @@ void Simulation::collectParticlesIntoBins() {
 		Particle* particle = particles[pcount];
 		checkParticleInBox(*particle);
 
-		int xcount = floor(particle->x / deltaX);
+		int xcount = floor((particle->x - xgrid[0]) / deltaX);
 
 		double correlationSum = 0;
 		for (int i = xcount - 1; i <= xcount + 1; ++i) {
@@ -30,7 +30,7 @@ void Simulation::collectParticlesIntoBins() {
 			}
 		}
 
-		xcount = floor((particle->x / deltaX) + 0.5);
+		xcount = floor(((particle->x - xgrid[0]) / deltaX) + 0.5);
 
 		for (int i = xcount - 1; i <= xcount + 1; ++i) {
 			int tempi = i;
@@ -180,7 +180,7 @@ Vector3d Simulation::correlationEfield(Particle& particle) {
 
 	return result;*/
 
-	int xcount = floor(particle.x/deltaX);
+	int xcount = floor((particle.x - xgrid[0])/deltaX);
 	double rightWeight = (particle.x - xgrid[xcount])/deltaX;
 	double leftWeight = (xgrid[xcount + 1] - particle.x)/deltaX;
 
@@ -199,7 +199,7 @@ Vector3d Simulation::correlationTempEfield(Particle& particle) {
 	}
 
 	return result;*/
-	int xcount = floor(particle.x/deltaX);
+	int xcount = floor((particle.x - xgrid[0])/deltaX);
 	double rightWeight = (particle.x - xgrid[xcount])/deltaX;
 	double leftWeight = (xgrid[xcount + 1] - particle.x)/deltaX;
 
@@ -218,7 +218,7 @@ Vector3d Simulation::correlationNewEfield(Particle& particle) {
 	}
 
 	return result;*/
-	int xcount = floor(particle.x/deltaX);
+	int xcount = floor((particle.x - xgrid[0])/deltaX);
 	double rightWeight = (particle.x - xgrid[xcount])/deltaX;
 	double leftWeight = (xgrid[xcount + 1] - particle.x)/deltaX;
 
@@ -228,16 +228,16 @@ Vector3d Simulation::correlationNewEfield(Particle& particle) {
 Vector3d Simulation::correlationBfield(Particle& particle) {
 
 	double x = particle.x;
-	if(x > xsize) {
+	if(x > xgrid[xnumber]) {
 		printf("particle out of box in correlationBfield\n");
 		exit(0);
 	}
-	if(x < 0) {
+	if(x < xgrid[0]) {
 		printf("particle out of box in correlationBfield\n");
 		exit(0);
 	}
 
-	int xcount = floor((x / deltaX) + 0.5);
+	int xcount = floor(((x - xgrid[0]) / deltaX) + 0.5);
 	Vector3d leftField = Vector3d(0, 0, 0);
 	Vector3d rightField = Vector3d(0, 0, 0);
 
@@ -320,13 +320,13 @@ Vector3d Simulation::correlationNewBfield(Particle& particle) {
 
 	double x = particle.x;
 
-	int xcount = floor((x / deltaX) + 0.5);
+	int xcount = floor(((x - xgrid[0]) / deltaX) + 0.5);
 
-	if(x > xsize) {
+	if(x > xgrid[xnumber]) {
 		printf("particle out of box in correlationBfield\n");
 		exit(0);
 	}
-	if(x < 0) {
+	if(x < xgrid[0]) {
 		printf("particle out of box in correlationBfield\n");
 		exit(0);
 	}
