@@ -11,229 +11,235 @@
 
 void Simulation::moveParticles(){
 	printf("moving particles\n");
-#pragma omp parallel for
+	int i = 0;
+#pragma omp parallel for private(i) 
 	for(int i = 0; i < particles.size(); ++i){
-	//for(int i = 0; i < 1; ++i){
-		if(i % 100000 == 0) {
-			printf("particle number %d\n", i);
-			//int currentThread = omp_get_thread_num();
-			//printf("thread num = %d\n", currentThread);
-		}
 		moveParticle(particles[i]);
+	}
+
+	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		removeEscapedParticles();
 	}
 }
 
-void Simulation::moveParticle(Particle* particle){
-	Vector3d oldE = correlationTempEfield(particle);
-	Vector3d oldB = correlationBfield(particle);
-
-	Particle newparticle = Particle(*particle);
-
-	Vector3d oldV = particle->velocity(speed_of_light_normalized);
-
-	newparticle.coordinates = newparticle.coordinates + oldV*deltaT;
-	newparticle.momentum = newparticle.momentum + (oldE + (oldV.vectorMult(oldB))/speed_of_light_normalized)*newparticle.charge*deltaT;
-
-	double oldCoordinates[6] = {particle->coordinates.x, particle->coordinates.y, particle->coordinates.z, particle->momentum.x, particle->momentum.y, particle->momentum.z};
-	double tempCoordinates[6] = {newparticle.coordinates.x, newparticle.coordinates.y, newparticle.coordinates.z, newparticle.momentum.x, newparticle.momentum.y, newparticle.momentum.z};
-	double newCoordinates[6];
-	for(int i = 0; i < 6; ++i){
-		newCoordinates[i] = tempCoordinates[i];
-	}
-	moveParticleNewtonIteration(particle, oldCoordinates, tempCoordinates, newCoordinates);
-
-	int iterationCount = 0;
-	double error = oldV.norm()*deltaT*maxErrorLevel;
-	if(error <= 0) {
-		error = abs(particle->dx*maxErrorLevel);
-	}
-	while( coordinateDifference(tempCoordinates, newCoordinates, deltaT, particle->mass) > error && iterationCount < maxNewtonIterations){
-		for(int i = 0; i < 6; ++i){
-			tempCoordinates[i] = newCoordinates[i];
+void Simulation::removeEscapedParticles(){
+	std::vector<Particle*>::iterator it = particles.end();
+	it = it - 1;
+	while(it != particles.begin()){
+		Particle* particle = *it;
+		std::vector<Particle*>::iterator prev = it - 1;
+		if(particle->escaped){
+			particles.erase(it);
 		}
-		moveParticleNewtonIteration(particle, oldCoordinates, tempCoordinates, newCoordinates);
-		iterationCount++;
+		it = prev;
+	}
+}
+
+/*void Simulation::moveParticle(Particle* particle){
+	Vector3d E = correlationEfield(particle)*fieldScale;
+	Vector3d B = correlationBfield(particle)*fieldScale;
+
+	Vector3d velocity = particle->velocity(speed_of_light_normalized);
+
+	if(B.norm() > 0){
+		double omega = -1.0/(particle->gammaFactor(speed_of_light_normalized)*particle->mass*speed_of_light_normalized/(particle->charge*B.norm()));
+		double deltaPhi = omega*deltaT;
+		Matrix3d* rotation = Matrix3d::createBasisByOneVector(B);
+		Matrix3d* inverce = rotation->Inverse();
+
+		Matrix3d lorentzRotation = Matrix3d(cos(deltaPhi), -sin(deltaPhi), 0, sin(deltaPhi), cos(deltaPhi), 0, 0, 0, 1);
+
+		Vector3d newMomentum = (*rotation)*(lorentzRotation*((*inverce)*(particle->momentum)));
+		//Vector3d newMomentum = (*inverce)*(lorentzRotation*((*rotation)*(particle->momentum)));
+
+		delete rotation;
+		delete inverce;
+
+		particle->momentum = newMomentum;
 	}
 
-	if(coordinateDifference(tempCoordinates, newCoordinates, deltaT, particle->mass) > error){
-	//if(true){
-		//printf("ERROR newton method did not converge\n");
-		//*particle = newparticle;
-		//return;
+	//Vector3d velocity = particle->velocity(speed_of_light_normalized);
+	Vector3d lorentzForce = velocity.vectorMult(B)/speed_of_light_normalized;
+	//particle->momenltatum += (E + (velocity.vectorMult(B)/speed_of_light_normalized))*particle->charge*deltaT;
+
+	double kw = 2*pi/xsize;
+
+	double realEy = Eyamplitude*cos(kw*particle->x - omega*time);
+	double realVzprotton = VzamplitudeProton*cos(kw*particle->x - omega*time);
+	double realVzelectron = VzamplitudeElectron*cos(kw*particle->x - omega*time);
+
+	double force1 = E.y + B0.x*velocity.z/speed_of_light_normalized;
+	double force5 = Eyamplitude*cos(kw*particle->x) + B0.x*velocity.z/speed_of_light_normalized;
+	double force2 = (E + lorentzForce).y;
+	double force3 = (Eyamplitude +B0.x*VzamplitudeElectron/speed_of_light_normalized)*cos(kw*particle->x - omega*time);
+	double force4 = (Eyamplitude +B0.x*VzamplitudeProton/speed_of_light_normalized)*cos(kw*particle->x - omega*time);
+
+	double acceleration = particle->charge*(E + lorentzForce).y/particle->mass;
+	double derVe = omega*sqrt((VyamplitudeElectron - velocity.y)*(VyamplitudeElectron + velocity.y));
+	double derVp = omega*sqrt((VyamplitudeProton - velocity.y)*(VyamplitudeProton + velocity.y));
+
+	//particle->momentum += (E + lorentzForce)*particle->charge*deltaT;
+	particle->momentum += E*particle->charge*deltaT;
+	Vector3d newVelocity = particle->velocity(speed_of_light_normalized);
+
+	//particle->x += 0.5*(velocity.x + newVelocity.x)*deltaT;
+	particle->momentum.x = 0;
+
+	particle->y += 0.5*(velocity.y + newVelocity.y)*deltaT;
+	particle->z += 0.5*(velocity.z + newVelocity.z)*deltaT;
+}*/
+
+void Simulation::moveParticle(Particle* particle){
+	Vector3d E = correlationTempEfield(particle)*fieldScale;
+	Vector3d B = correlationBfield(particle)*fieldScale;
+
+	Vector3d velocity = particle->velocity(speed_of_light_normalized);
+	Vector3d newVelocity = velocity;
+	Vector3d middleVelocity = velocity;
+
+	//see Noguchi
+	double beta = 0.5*particle->charge*deltaT/particle->mass;
+	double Gamma = (beta*(E.scalarMult(velocity))/speed_of_light_normalized_sqr) + particle->gammaFactor(speed_of_light_normalized);
+	double betaShift = beta/Gamma;
+
+	int particleIterations = 20;
+
+
+	Particle tempParticle = *particle;
+
+	tempParticle.momentum += (E + (velocity.vectorMult(B)/speed_of_light_normalized))*particle->charge*deltaT;
+
+	newVelocity = tempParticle.velocity(speed_of_light_normalized);
+
+	tempParticle.x += ((1 - eta)*velocity.x + eta*newVelocity.x)*eta*deltaT;
+	tempParticle.y += ((1 - eta)*velocity.y + eta*newVelocity.y)*eta*deltaT;
+	tempParticle.z += ((1 - eta)*velocity.z + eta*newVelocity.z)*eta*deltaT;
+
+	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		if(tempParticle.x < xgrid[0]){
+			particle->x = 2*xgrid[0] - tempParticle.x;
+			particle->y = tempParticle.y;
+			particle->z = tempParticle.z;
+			newVelocity.x = -newVelocity.x;
+			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+			return;
+		}
+		if(tempParticle.x > xgrid[xnumber]){
+			escapedParticles.push_back(particle);
+			particle->x = xsize;
+			particle->y = tempParticle.y;
+			particle->z = tempParticle.z;
+			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+			particle->escaped = true;
+			return;
+		}
+	}
+
+
+	Vector3d prevVelocity = velocity; 
+	int i = 0;
+
+	while((prevVelocity - newVelocity).norm() > 1E-16*velocity.norm() && i < particleIterations){
+		++i;
+		prevVelocity = newVelocity;
+
+		tempParticle = *particle;
+		Vector3d rotatedE = tempParticle.rotationTensor*E;
+
+		//tempParticle.momentum += (E + ((velocity + newVelocity).vectorMult(B)/(2.0*speed_of_light_normalized)))*particle->charge*deltaT;
+
+		//mistake in noguchi - he writes betashift!
+		middleVelocity = (tempParticle.rotationTensor*tempParticle.gammaFactor(speed_of_light_normalized)*velocity) + rotatedE*beta;
+
+		tempParticle.x += (middleVelocity.x*eta*deltaT);
+		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+			//todo more accurate speed!!
+			if(tempParticle.x < xgrid[0]){
+				particle->x = 2*xgrid[0] - tempParticle.x + fabs(middleVelocity.x*(1 - eta)*deltaT);
+				particle->y = tempParticle.y + middleVelocity.y*(1 - eta)*deltaT;
+				particle->z = tempParticle.z + middleVelocity.z*(1 - eta)*deltaT;
+				newVelocity = middleVelocity;
+				newVelocity.x = -newVelocity.x;
+				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+				return;
+			}
+			if(tempParticle.x > xgrid[xnumber]){
+				escapedParticles.push_back(particle);
+				particle->x = xsize;
+				particle->y = tempParticle.y;
+				particle->z = tempParticle.z;
+				particle->setMomentumByV(middleVelocity, speed_of_light_normalized);
+				particle->escaped = true;
+				return;
+			}
+		}
+		correctParticlePosition(tempParticle);
+
+		E = correlationTempEfield(tempParticle)*fieldScale;
+		B = correlationBfield(tempParticle)*fieldScale;
+
+		tempParticle.momentum += (E + (middleVelocity.vectorMult(B)/speed_of_light_normalized))*particle->charge*deltaT;
+
+		newVelocity = tempParticle.velocity(speed_of_light_normalized);
 
 	}
 
-	particle->coordinates.x = newCoordinates[0];
-	particle->coordinates.y = newCoordinates[1];
-	particle->coordinates.z = newCoordinates[2];
-	particle->momentum.x = newCoordinates[3];
-	particle->momentum.y = newCoordinates[4];
-	particle->momentum.z = newCoordinates[5];
+	particle->momentum = tempParticle.momentum;
+	//particle->momentum.x = 0;
+
+	particle->x += middleVelocity.x*deltaT;
+
+	particle->y += middleVelocity.y*deltaT;
+	particle->z += middleVelocity.z*deltaT;
 
 	correctParticlePosition(particle);
 }
 
 void Simulation::correctParticlePosition(Particle* particle) {
-	if(boundaryConditionType == SUPERCONDUCTERLEFT){
-		if(particle->coordinates.x < 0) {
-			particle->coordinates.x = -particle->coordinates.x;
+	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		if(particle->x < xgrid[0]){
+			particle->x = 2*xgrid[0] - particle->x;
 			particle->momentum.x = -particle->momentum.x;
+			return;
 		}
-		if(particle->coordinates.x > xsize) {
-			std::vector<Particle*>::iterator it = particles.begin();
-			while(it != particles.end()) {
-				if(*it == particle) {
-					break;
-				}
-				++it;
-			}
-			particles.erase(it);
-			particlesNumber--;
-			delete particle;
+		if(particle->x > xgrid[xnumber]){
+			escapedParticles.push_back(particle);
+			particle->x = xsize;
+			particle->escaped = true;
 			return;
 		}
 	}
-	if(boundaryConditionType == PERIODIC) {
-		if(particle->coordinates.x < 0) {
-			particle->coordinates.x = particle->coordinates.x + xsize;
+	if(boundaryConditionType == PERIODIC){
+		if(particle->x < xgrid[0]) {
+			particle->x = particle->x + xsize;
 		}
-		if(particle->coordinates.x > xsize) {
-			particle->coordinates.x = particle->coordinates.x - xsize;
+		if(particle->x > xgrid[xnumber]) {
+			particle->x = particle->x - xsize;
 		}		
-	}
-	if(particle->coordinates.y < 0) {
-		particle->coordinates.y += ysize;
-	}
-	if(particle->coordinates.y > ysize) {
-		particle->coordinates.y -= ysize;
-	}
-	if(particle->coordinates.z < 0) {
-		particle->coordinates.z += zsize;
-	}
-	if(particle->coordinates.z > zsize){
-		particle->coordinates.z -= zsize;
 	}
 }
 
-void Simulation::moveParticleNewtonIteration(Particle* particle, double* const oldCoordinates, double* const tempCoordinates, double* const newCoordinates){
-	double* leftHalf[6];
-	double rightPart[6];
-	double functionNewtonMethod[6];
-	Particle tempparticle = *particle;
-	double beta = 0.5*particle->charge*deltaT/particle->mass;
-	double dx = particle->dx/1000;
-	double dy = particle->dy/1000;
-	double dz = particle->dz/1000;
-
-	for(int i = 0; i < 6; ++i){
-		leftHalf[i] = new double[3];
-	}
-
-	Vector3d velocity = particle->velocity(speed_of_light_normalized);
-
-	tempparticle.coordinates.x = (oldCoordinates[0] + tempCoordinates[0])/2;
-	tempparticle.coordinates.y = (oldCoordinates[1] + tempCoordinates[1])/2;
-	tempparticle.coordinates.z = (oldCoordinates[2] + tempCoordinates[2])/2;
-
-	Vector3d E = correlationTempEfield(tempparticle);
-	Vector3d B = correlationBfield(tempparticle);
-	Vector3d oldE = correlationTempEfield(particle);
-
-	double gamma_factor = 1/sqrt(1 - sqr(velocity.norm()/speed_of_light_normalized));
-	double G = (beta*(oldE.scalarMult(velocity))/speed_of_light_normalized_sqr) + gamma_factor;
-	double beta1 = beta/G;
-
-
-	Vector3d tempE;
-	Vector3d tempB;
-
-	tempparticle.coordinates.x += dx;
-
-	tempE = correlationTempEfield(tempparticle);
-	tempB = correlationBfield(tempparticle);
-	Vector3d EderX = (tempE - E)/dx;
-	Vector3d BderX = (tempB - B)/dx;
-
-	tempparticle.coordinates.x -= dx;
-	tempparticle.coordinates.y += dy;
-
-	tempE = correlationTempEfield(tempparticle);
-	tempB = correlationBfield(tempparticle);
-	Vector3d EderY = (tempE - E)/dy;
-	Vector3d BderY = (tempB - B)/dy;
-
-	tempparticle.coordinates.y -= dy;
-	tempparticle.coordinates.z += dz;
-
-	tempE = correlationTempEfield(tempparticle);
-	tempB = correlationBfield(tempparticle);
-	Vector3d EderZ = (tempE - E)/dz;
-	Vector3d BderZ = (tempB - B)/dz;
-
-	tempparticle.coordinates.z -= dz;
-
-
-	Vector3d middleVelocity = particle->rotationTensor*(velocity*gamma_factor + E*beta1);
-
-	Vector3d middleVelocityDerX = particle->rotationTensor*EderX*beta1;
-	Vector3d middleVelocityDerY = particle->rotationTensor*EderY*beta1;
-	Vector3d middleVelocityDerZ = particle->rotationTensor*EderZ*beta1;
-	Vector3d acceleration = (E + (middleVelocity.vectorMult(B))/speed_of_light_normalized)*beta;
-
-	functionNewtonMethod[0] = tempCoordinates[0] - oldCoordinates[0] - middleVelocity.x*deltaT;
-	functionNewtonMethod[1] = tempCoordinates[1] - oldCoordinates[1] - middleVelocity.y*deltaT;
-	functionNewtonMethod[2] = tempCoordinates[2] - oldCoordinates[2] - middleVelocity.z*deltaT;
-	functionNewtonMethod[3] = tempCoordinates[3] - oldCoordinates[3] - particle->mass*acceleration.x;
-	functionNewtonMethod[4] = tempCoordinates[4] - oldCoordinates[4] - particle->mass*acceleration.y;
-	functionNewtonMethod[5] = tempCoordinates[5] - oldCoordinates[5] - particle->mass*acceleration.z;
-
-	leftHalf[0][0] = 1 - middleVelocityDerX.x*0.5*deltaT;
-	leftHalf[0][1] = - middleVelocityDerY.x*0.5*deltaT;
-	leftHalf[0][2] = - middleVelocityDerZ.x*0.5*deltaT;
-
-	leftHalf[1][0] = - middleVelocityDerX.y*0.5*deltaT;
-	leftHalf[1][1] = 1 - middleVelocityDerY.y*0.5*deltaT;
-	leftHalf[1][2] = - middleVelocityDerZ.y*0.5*deltaT;
-
-	leftHalf[2][0] = - middleVelocityDerX.z*0.5*deltaT;
-	leftHalf[2][1] = - middleVelocityDerY.z*0.5*deltaT;
-	leftHalf[2][2] = 1 - middleVelocityDerZ.z*0.5*deltaT;
-
-	Vector3d tempDerX = (EderX + (middleVelocityDerX.vectorMult(B)/speed_of_light_normalized) + (middleVelocity.vectorMult(BderX)/speed_of_light_normalized))*(-0.5*particle->mass*beta);
-	Vector3d tempDerY = (EderY + (middleVelocityDerY.vectorMult(B)/speed_of_light_normalized) + (middleVelocity.vectorMult(BderY)/speed_of_light_normalized))*(-0.5*particle->mass*beta);
-	Vector3d tempDerZ = (EderZ + (middleVelocityDerZ.vectorMult(B)/speed_of_light_normalized) + (middleVelocity.vectorMult(BderZ)/speed_of_light_normalized))*(-0.5*particle->mass*beta);
-
-	leftHalf[3][0] = tempDerX.x;
-	leftHalf[3][1] = tempDerY.x;
-	leftHalf[3][2] = tempDerZ.x;
-
-	leftHalf[4][0] = tempDerX.y;
-	leftHalf[4][1] = tempDerY.y;
-	leftHalf[4][2] = tempDerZ.y;
-
-	leftHalf[5][0] = tempDerX.z;
-	leftHalf[5][1] = tempDerY.z;
-	leftHalf[5][2] = tempDerZ.z;
-
-	for(int i = 0; i < 6; ++i){
-		rightPart[i] = - functionNewtonMethod[i];
-		for(int j = 0; j < 3; ++j){
-			rightPart[i] += leftHalf[i][j]*tempCoordinates[j];
+void Simulation::correctParticlePosition(Particle& particle) {
+	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		if(particle.x < xgrid[0]){
+			particle.x = 2*xgrid[0] - particle.x;
+			particle.momentum.x = -particle.momentum.x;
+			return;
 		}
-		if(i >= 3){
-			rightPart[i] += tempCoordinates[i];
+		if(particle.x > xgrid[xnumber]){
+			escapedParticles.push_back(&particle);
+			particle.x = xsize;
+			particle.escaped = true;
+			return;
 		}
 	}
-
-
-	solveSpecialMatrix(leftHalf, rightPart, newCoordinates);
-
-	if(newCoordinates[0] < - deltaX/2 || newCoordinates[0] > xsize + deltaX/2 || newCoordinates[1] < - deltaY/2 || newCoordinates[1] > ysize + deltaY/2 || newCoordinates[2] < - deltaZ/2 || newCoordinates[2] > zsize + deltaZ/2) {
-		printf("particle out of box\n");
-		exit(0);
-	}
-	for(int i = 0; i < 6; ++i){
-		delete[] leftHalf[i];
+	if(boundaryConditionType == PERIODIC){
+		if(particle.x < xgrid[0]) {
+			particle.x = particle.x + xsize;
+		}
+		if(particle.x > xgrid[xnumber]) {
+			particle.x = particle.x - xsize;
+		}		
 	}
 }
 
@@ -242,13 +248,62 @@ void Simulation::evaluateParticlesRotationTensor()
 	for(int i = 0; i < particles.size(); ++i)
 	{
 		Particle* particle = particles[i];
-		double beta = particle->charge*deltaT/particle->mass;
+		double beta = 0.5*particle->charge*deltaT/particle->mass;
 		Vector3d velocity = particle->velocity(speed_of_light_normalized);
 
-		Vector3d oldE = correlationEfield(particle);
-		Vector3d oldB = correlationBfield(particle);
+		Vector3d oldE = correlationEfield(particle)*fieldScale;
+		Vector3d oldB = correlationBfield(particle)*fieldScale;
 
 		particle->rotationTensor = evaluateAlphaRotationTensor(beta, velocity, oldE, oldB);
 
+	}
+}
+
+Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d velocity, Vector3d EField, Vector3d BField) {
+	Matrix3d result;
+
+	beta = beta;
+
+	double gamma_factor = 1 / sqrt(1 - (velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z) / speed_of_light_normalized_sqr);
+	double G = ((beta * (EField.scalarMult(velocity)) / speed_of_light_normalized_sqr) + gamma_factor);
+	beta = beta / G;
+	double denominator = G * (1 + beta * beta * BField.scalarMult(BField)/speed_of_light_normalized_sqr);
+
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			result.matrix[i][j] = Kronecker.matrix[i][j] + (beta * beta * BField[i] * BField[j]/speed_of_light_normalized_sqr);
+			for (int k = 0; k < 3; ++k) {
+				for (int l = 0; l < 3; ++l) {
+					result.matrix[i][j] -= (beta * LeviCivita[j][k][l] * Kronecker.matrix[i][k] * BField[l]/speed_of_light_normalized);
+				}
+			}
+
+			result.matrix[i][j] /= denominator;
+		}
+	}
+
+	return result;
+}
+
+void Simulation::injectNewParticles(int count){
+	printf("inject new particles\n");
+	double concentration = density/(massProton + massElectron);
+
+	int n = particles.size();
+
+	double weight = (concentration / particlesPerBin) * volumeB(xnumber - 1);
+	double x = xgrid[xnumber] - deltaX*0.00001;
+	for (int l = 0; l < 2 * count; ++l) {
+		ParticleTypes type;
+		if (l % 2 == 0) {
+			type = PROTON;
+		} else {
+			type = ELECTRON;
+		}
+		Particle* particle = createParticle(n, xnumber - 1, weight, type);
+		n++;
+		particle->x = x;
+		particle->addVelocity(V0, speed_of_light_normalized);
+		particles.push_back(particle);
 	}
 }

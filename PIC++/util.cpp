@@ -51,6 +51,9 @@ void alertNaNOrInfinity(double value, const char* s){
 	if(value != value || 0*value != 0*value){
 		printf("%s", s);
 		printf("\n");
+		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "%s", s);
+		fclose(errorLogFile);
 		exit(0);
 		//Sleep(1000);
 	}
@@ -60,6 +63,9 @@ void alertNotPositive(double value, const char* s){
 	if(value <= 0){
 		printf("%s", s);
 		printf("\n");
+		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "%s", s);
+		fclose(errorLogFile);
 		exit(0);
 	}
 }
@@ -68,6 +74,9 @@ void alertNegative(double value, const char* s){
 	if(value < 0){
 		printf("%s", s);
 		printf("\n");
+		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "%s", s);
+		fclose(errorLogFile);
 		exit(0);
 	}
 }
@@ -80,41 +89,6 @@ void alertNegative(double value, const char* s){
 	return round;
 }*/
 
-void solveSpecialMatrix(double** const leftHalf, double* const rightPart, double* const output){
-	for(int j = 0; j < 2; ++j){
-		leftHalf[2][j] /= leftHalf[2][2];
-	}
-	rightPart[2] /= leftHalf[2][2];
-	leftHalf[2][2] = 1;
-
-	for(int i = 0; i < 2; ++i){
-		for(int j = 0; j < 2; ++j){
-			leftHalf[i][j] -= leftHalf[2][j]*leftHalf[i][2];
-		}
-		rightPart[i] -= rightPart[2]*leftHalf[i][2];
-		leftHalf[i][2] = 0;
-	}
-
-	leftHalf[1][0] /= leftHalf[1][1];
-	rightPart[1] /= leftHalf[1][1];
-	leftHalf[1][1] = 1;
-
-	leftHalf[0][0] -= leftHalf[1][0]*leftHalf[0][1];
-	rightPart[0] -= rightPart[1]*leftHalf[0][1];
-	leftHalf[0][1] = 0;
-
-	rightPart[0] /= leftHalf[0][0];
-
-	leftHalf[0][0] = 1;
-
-	output[0] = rightPart[0];
-	for(int i = 1; i < 6; ++i){
-		output[i] = rightPart[i];
-		for(int j = 0; j < min2(i,3); ++j){
-			output[i] -= leftHalf[i][j]*output[j];
-		}
-	}
-}
 
 double coordinateDifference(double* const a, double* const b, double dt, double mass){
 	double result = 0;
@@ -133,6 +107,9 @@ double McDonaldFunction(double x, double index){
 	//todo approximation with small x!!!
 	if(x < 0){
 		printf("x in McDonald < 0\n");
+		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "x in McDonald < 0\n");
+		fclose(errorLogFile);
 		exit(0);
 	}
 	double dt;
@@ -171,7 +148,7 @@ double McDonaldFunction(double x, double index){
 }
 
 double Bspline(double xcenter, double dx, double xvalue) {
-	if(abs(xcenter - xvalue) > dx) {
+	if(fabs(xcenter - xvalue) > dx) {
 		return 0;
 	}
 

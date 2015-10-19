@@ -87,6 +87,7 @@
     <ClCompile Include="correlation.cpp" />
     <ClCompile Include="divergencecleanup.cpp" />
     <ClCompile Include="fields.cpp" />
+    <ClCompile Include="initialization.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="matrix3d.cpp" />
