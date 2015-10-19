@@ -934,7 +934,7 @@ void Simulation::initializeTwoStream(){
 	B0 = Vector3d(0, 0, 0);
 
 	double Bamplitude = 1E-12 * (plasma_period * sqrt(gyroradius));
-	Bamplitude = 0;
+	//Bamplitude = 0;
 	double Eamplitude = 0;
 
 	checkDebyeParameter();
