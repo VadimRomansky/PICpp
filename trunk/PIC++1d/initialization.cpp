@@ -34,7 +34,7 @@ Simulation::Simulation(){
 	LeviCivita[2][1][0] = -1.0;
 }
 
-Simulation::Simulation(double xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV) {
+Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV) {
 	debugMode = true;
 	newlyStarted = true;
 	solverType = IMPLICIT;
@@ -800,27 +800,7 @@ void Simulation::initializeFluxFromRight(){
 	newEfield[0] = E0;
 	explicitEfield[0] = E0;
 
-	double gamma = 1.0/sqrt(1 - V0.scalarMult(V0)/speed_of_light_normalized_sqr);
-	for(int i = 1; i < xnumber; ++i){
-		Vector3d middleB = (Bfield[i-1] + Bfield[i])*0.5;
-		newEfield[i].y = gamma*(Efield[i].y - V0.x*middleB.z/speed_of_light_normalized);
-		newEfield[i].z = gamma*(Efield[i].z + V0.x*middleB.y/speed_of_light_normalized);
-	}
-	for(int i = 0; i < xnumber; ++i){
-		Vector3d middleE = (Efield[i] + Efield[i+1])*0.5;
-		newBfield[i].y = gamma*(Bfield[i].y + V0.x*middleE.z/speed_of_light_normalized);
-		newBfield[i].z = gamma*(Bfield[i].z - V0.x*middleE.y/speed_of_light_normalized);
-	}
-
-	for(int i = 0; i < xnumber + 1; ++i){
-		Efield[i] = newEfield[i];
-		tempEfield[i] = newEfield[i];
-		explicitEfield[i] = newEfield[i];
-	}
-	
-	for(int i = 0; i < xnumber; ++i){
-		Bfield[i] = newBfield[i];
-	}
+	fieldsLorentzTransitionX(V0.x);
 
 	for(int i = 0; i < particles.size(); ++i){
 		Particle* particle = particles[i];
@@ -835,6 +815,30 @@ void Simulation::initializeFluxFromRight(){
 	printf("magneticEnergy/kinetikEnergy = %15.10g\n", magneticEnergy/kineticEnergy);
 	fclose(informationFile);
 
+}
+
+void Simulation::fieldsLorentzTransitionX(const double& v){
+	double gamma = 1.0/sqrt(1 - v*v/speed_of_light_normalized_sqr);
+	for(int i = 1; i < xnumber; ++i){
+		Vector3d middleB = (Bfield[i-1] + Bfield[i])*0.5;
+		newEfield[i].y = gamma*(Efield[i].y - v*middleB.z/speed_of_light_normalized);
+		newEfield[i].z = gamma*(Efield[i].z + v*middleB.y/speed_of_light_normalized);
+	}
+	for(int i = 0; i < xnumber; ++i){
+		Vector3d middleE = (Efield[i] + Efield[i+1])*0.5;
+		newBfield[i].y = gamma*(Bfield[i].y + v*middleE.z/speed_of_light_normalized);
+		newBfield[i].z = gamma*(Bfield[i].z - v*middleE.y/speed_of_light_normalized);
+	}
+
+	for(int i = 0; i < xnumber + 1; ++i){
+		Efield[i] = newEfield[i];
+		tempEfield[i] = newEfield[i];
+		explicitEfield[i] = newEfield[i];
+	}
+	
+	for(int i = 0; i < xnumber; ++i){
+		Bfield[i] = newBfield[i];
+	}
 }
 
 void Simulation::createArrays() {
@@ -925,8 +929,8 @@ void Simulation::initializeTwoStream(){
 	createParticles();
 	collectParticlesIntoBins();
 	double u = speed_of_light_normalized/5;
-	Vector3d electronsVelocityPlus = Vector3d(u, 0, 0);
-	Vector3d electronsVelocityMinus = Vector3d(-u, 0, 0);
+	Vector3d electronsVelocityPlus = Vector3d(0, u, 0);
+	Vector3d electronsVelocityMinus = Vector3d(0, -u, 0);
 	B0 = Vector3d(0, 0, 0);
 
 	double Bamplitude = 1E-12 * (plasma_period * sqrt(gyroradius));
@@ -972,7 +976,7 @@ void Simulation::initializeTwoStream(){
 		newEfield[i] = Efield[i];
 		explicitEfield[i] = Efield[i];
 	}
-	int electronCount = 0;;
+	int electronCount = 0;
 	for(int pcount = 0; pcount < particles.size(); ++pcount){
 		Particle* particle = particles[pcount];
 		if(particle->type == ELECTRON){

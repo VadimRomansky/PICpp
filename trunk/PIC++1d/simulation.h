@@ -171,7 +171,7 @@ public:
 
 	//Simulation();
 	Simulation();
-	Simulation(double xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV);
+	Simulation(int xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV);
 	~Simulation();
 
 	void initialize();
@@ -182,6 +182,7 @@ public:
 	void initializeTwoStream();
 	void initializeExternalFluxInstability();
 	void initializeFluxFromRight();
+	void fieldsLorentzTransitionX(const double& v);
 	void createArrays();
 	void createFiles();
 	void simulate();
