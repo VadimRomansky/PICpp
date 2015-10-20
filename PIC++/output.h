@@ -8,13 +8,13 @@
 #include "simulation.h"
 
 void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int particleType);
-void outputTraectory(FILE* outFile, Particle* particle, double time);
-void outputGrid(FILE* outFile, double* grid, int number);
+void outputTraectory(FILE* outFile, Particle* particle, double time, double plasma_period, double gyroradius);
+void outputGrid(FILE* outFile, double* grid, int number, double scale = 1.0);
 void outputFields(FILE* outEfile, FILE* outBfile, Vector3d*** Efield, Vector3d*** Bfield, int xnumber, int ynumber, int znumber, double plasma_priod, double gyroradius, double fieldScale);
 void outputConcentrations(FILE* outFile, double*** electronConcentration, double*** protonConcentration, double*** chargeDensity, double*** shiftChargeDensity, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius, double fieldScale);
 void outputVelocity(FILE* outFile, FILE* outElectronFile, Vector3d*** velocity, Vector3d*** electronVelocity, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius);
 void outputGeneral(FILE* outFile, Simulation* simulation);
-void outputFlux(FILE* outFile, Vector3d*** electricFlux, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius, double fieldScale);
+void outputFlux(FILE* outFile, Vector3d*** electricFlux, Vector3d*** externalElectricFlux, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius, double fieldScale);
 void outputDivergenceError(FILE* outFile, Simulation* simulation, double plasma_period, double gyroradius, double fieldScale)
 void outputVectorArray(FILE* outFile, Vector3d*** vector3d, int xnumber, int ynumber, int znumber, double scale = 1.0);
 void outputMatrixArray(FILE* outFile, Matrix3d*** matrix3d, int xnumber, int ynumber, int znumber, double scale = 1.0);
