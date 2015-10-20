@@ -98,7 +98,7 @@ void Simulation::output() {
 
 	EfieldFile = fopen("./output/Efield.dat", "a");
 	BfieldFile = fopen("./output/Bfield.dat", "a");
-	outputFields(EfieldFile, BfieldFile, Efield, Bfield, xnumber, plasma_period, gyroradius, fieldScale);
+	outputFields(EfieldFile, BfieldFile, Efield, Bfield, xnumber, ynumber, znumber, plasma_period, gyroradius, fieldScale);
 	fclose(EfieldFile);
 	fclose(BfieldFile);
 
@@ -107,17 +107,17 @@ void Simulation::output() {
 	fclose(Xfile);
 
 	densityFile = fopen("./output/concentrations.dat", "a");
-	outputConcentrations(densityFile, electronConcentration, protonConcentration, chargeDensity, electricDensity, xnumber, plasma_period, gyroradius, fieldScale);
+	outputConcentrations(densityFile, electronConcentration, protonConcentration, chargeDensity, electricDensity, xnumber, ynumber, znumber, plasma_period, gyroradius, fieldScale);
 	fclose(densityFile);
 
 	velocityFile = fopen("./output/velocity.dat", "a");
 	velocityElectronFile = fopen("./output/velocity_electron.dat", "a");
-	outputVelocity(velocityFile, velocityElectronFile, velocityBulk, velocityBulkElectron, xnumber, plasma_period, gyroradius);
+	outputVelocity(velocityFile, velocityElectronFile, velocityBulk, velocityBulkElectron, xnumber, ynumber, znumber, plasma_period, gyroradius);
 	fclose(velocityFile);
 	fclose(velocityElectronFile);
 
 	fluxFile = fopen("./output/fluxFile.dat", "a");
-	outputFlux(fluxFile, electricFlux, externalElectricFlux, xnumber, plasma_period, gyroradius, fieldScale);
+	outputFlux(fluxFile, electricFlux, externalElectricFlux, xnumber, ynumber, znumber, plasma_period, gyroradius, fieldScale);
 	fclose(fluxFile);
 
 	divergenceErrorFile = fopen("./output/divergence_error.dat", "a");
@@ -127,15 +127,15 @@ void Simulation::output() {
 	double rotBscale = fieldScale/(plasma_period * plasma_period * sqrt(gyroradius));
 
 	rotBFile = fopen("./output/rotBFile.dat", "a");
-	outputVectorArray(rotBFile, rotB, xnumber + 1, rotBscale);
+	outputVectorArray(rotBFile, rotB, xnumber + 1, ynumber + 1, znumber + 1, rotBscale);
 	fclose(rotBFile);
 
 	EderivativeFile = fopen("./output/EderivativeFile.dat", "a");
-	outputVectorArray(EderivativeFile, Ederivative, xnumber + 1, rotBscale);
+	outputVectorArray(EderivativeFile, Ederivative, xnumber + 1, ynumber + 1, znumber + 1, rotBscale);
 	fclose(EderivativeFile);
 
 	dielectricTensorFile = fopen("./output/dielectricTensorFile.dat", "a");
-	outputMatrixArray(dielectricTensorFile, dielectricTensor, xnumber + 1);
+	outputMatrixArray(dielectricTensorFile, dielectricTensor, xnumber + 1, ynumber + 1, znumber + 1);
 	fclose(dielectricTensorFile);
 
 	particleProtonsFile = fopen("./output/protons.dat", "w");
@@ -173,23 +173,35 @@ void Simulation::updateDeltaT() {
 		double B = B0.norm();
 		double E = E0.norm();
 		for (int i = 0; i < xnumber; ++i) {
-			if (Bfield[i].norm() > B) {
-				B = Bfield[i].norm();
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					if (Bfield[i][j][k].norm() > B) {
+						B = Bfield[i][j][k].norm();
+					}
+				}
 			}
 		}
 		for (int i = 0; i < xnumber; ++i) {
-			if (Efield[i].norm() > E) {
-				E = Efield[i].norm();
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					if (Efield[i][j][k].norm() > E) {
+						E = Efield[i][j][k].norm();
+					}
+				}
 			}
 		}
 
 		B *= fieldScale;
 		E *= fieldScale;
 
-		double minFlux = electricFlux[0].norm();
+		double minFlux = electricFlux[0][0][0].norm();
 		for(int i = 0; i < xnumber; ++i){
-			if(electricFlux[i].norm() < minFlux){
-				minFlux = electricFlux[i].norm();
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k< znumber; ++k){
+					if(electricFlux[i][j][k].norm() < minFlux){
+						minFlux = electricFlux[i][j][k].norm();
+					}
+				}
 			}
 		}
 
@@ -197,11 +209,15 @@ void Simulation::updateDeltaT() {
 			double maxResistance = 0;
 			double minResistance = Efield[0].norm()*fieldScale/electricFlux[0].norm();
 			for(int i = 0; i < xnumber; ++i){
-				if (Efield[i].norm()*fieldScale/electricFlux[i].norm() < minResistance){
-					minResistance = Efield[i].norm()*fieldScale/electricFlux[i].norm();
-				}
-				if (Efield[i].norm()*fieldScale/electricFlux[i].norm() > maxResistance){
-					maxResistance = Efield[i].norm()*fieldScale/electricFlux[i].norm();
+				for(int j = 0; j < ynumber; ++j){
+					for(int k = 0; k < znumber; ++K){
+						if (Efield[i][j][k].norm()*fieldScale/electricFlux[i][j][k].norm() < minResistance){
+							minResistance = Efield[i][j][k].norm()*fieldScale/electricFlux[i][j][k].norm();
+						}
+						if (Efield[i][j][k].norm()*fieldScale/electricFlux[i][j][k].norm() > maxResistance){
+							maxResistance = Efield[i][j][k].norm()*fieldScale/electricFlux[i][j][k].norm();
+						}
+					}
 				}
 			}
 
@@ -238,58 +254,77 @@ void Simulation::updateDeltaT() {
 	}
 }
 
-double Simulation::volumeE(int i) {
+double Simulation::volumeE(int i, int j, int k) {
+	double dx = deltaX;
 	if((boundaryConditionType == PERIODIC) || ((i > 0) && (i < xnumber))){
-		return deltaX;
+		dx = deltaX;
 	} else {
-		return deltaX/2;
+		dx = deltaX/2;
 	}
+	return dx*deltaY*deltaZ;
 }
 
-double Simulation::volumeB(int i) {
-	return deltaX;
+double Simulation::volumeB(int i, int j, int k) {
+	return deltaX*deltaY*deltaZ;
 }
 
 void Simulation::checkParticleInBox(Particle& particle) {
-	if (particle.x < 0) {
+	if (particle.coordinates.x < 0) {
 		printf("particle.x < 0\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
-		fprintf(errorLogFile, "particle.x = %15.10g < 0\n", particle.x);
+		fprintf(errorLogFile, "particle.x = %15.10g < 0\n", particle.coordinates.x);
 		fclose(errorLogFile);
 		exit(0);
 	}
-	if (particle.x > xgrid[xnumber]) {
+	if (particle.coordinates.x > xgrid[xnumber]) {
 		printf("particle.x > xsize\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
-		fprintf(errorLogFile, "particle.x = %15.10g > %15.10g\n", particle.x, xgrid[xnumber]);
+		fprintf(errorLogFile, "particle.x = %15.10g > %15.10g\n", particle.coordinates.x, xgrid[xnumber]);
+		fclose(errorLogFile);
+		exit(0);
+	}
+
+	if (particle.coordinates.y < 0) {
+		printf("particle.y < 0\n");
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "particle.y = %15.10g < 0\n", particle.coordinates.y);
+		fclose(errorLogFile);
+		exit(0);
+	}
+	if (particle.coordinates.y > ygrid[ynumber]) {
+		printf("particle.y > ysize\n");
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "particle.y = %15.10g > %15.10g\n", particle.coordinates.y, ygrid[ynumber]);
+		fclose(errorLogFile);
+		exit(0);
+	}
+
+	if (particle.coordinates.z < 0) {
+		printf("particle.z < 0\n");
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "particle.z = %15.10g < 0\n", particle.coordinates.z);
+		fclose(errorLogFile);
+		exit(0);
+	}
+	if (particle.coordinates.z > zgrid[znumber]) {
+		printf("particle.z > zsize\n");
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "particle.z = %15.10g > %15.10g\n", particle.coordinates.z, zgrid[znumber]);
 		fclose(errorLogFile);
 		exit(0);
 	}
 }
 
 void Simulation::checkParticlesInBin() {
-	for(int pcount = 0; pcount < particlesInEbin[0].size(); ++pcount) {
-		Particle* particle = particlesInEbin[0][pcount];
-		for(int pcountRight = 0; pcountRight < particlesInEbin[xnumber].size(); ++pcountRight) {
-			if(particle == particlesInEbin[xnumber][pcountRight]) {
-				printf("particle is in 0 and xnumber bin\n");
-				errorLogFile = fopen("./output/errorLog.dat", "w");
-				fprintf(errorLogFile, "particle is in 0 and xnumber bin, particle.x = %15.10g xmax = %15.10g\n", particle->x, xgrid[xnumber]);
-				fclose(errorLogFile);
-				exit(0);
-			}
-		}
-	}
-
-	for(int i = 0; i < xnumber + 1; ++i) {
-		if(particlesInEbin[i].size() > 1){
-			for(int pcount = 0; pcount < particlesInEbin[i].size() - 1; ++pcount) {
-				Particle* particle = particlesInEbin[i][pcount];
-				for(int pcount2 = pcount + 1; pcount2 < particlesInEbin[i].size(); ++pcount2) {
-					if(particle == particlesInEbin[i][pcount2]) {
-						printf("particle is twice in Ebin number %d\n", i);
+	for(int j = 0; j <ynumber; ++j){
+		for(int k = 0; k < znumber; ++k){
+			for(int pcount = 0; pcount < particlesInEbin[0][j][k].size(); ++pcount) {
+				Particle* particle = particlesInEbin[0][j][k][pcount];
+				for(int pcountRight = 0; pcountRight < particlesInEbin[xnumber][j][k].size(); ++pcountRight) {
+					if(particle == particlesInEbin[xnumber][j][k][pcountRight]) {
+						printf("particle is in 0 and xnumber bin\n");
 						errorLogFile = fopen("./output/errorLog.dat", "w");
-						fprintf(errorLogFile, "particle is twice in Ebin number %d\n", i);
+						fprintf(errorLogFile, "particle is in 0 and xnumber bin, particle.x = %15.10g xmax = %15.10g\n", particle->coordinates.x, xgrid[xnumber]);
 						fclose(errorLogFile);
 						exit(0);
 					}
@@ -298,17 +333,76 @@ void Simulation::checkParticlesInBin() {
 		}
 	}
 
-	for(int i = 0; i < xnumber; ++i) {
-		if(particlesInBbin[i].size() > 1){
-			for(int pcount = 0; pcount < particlesInBbin[i].size() - 1; ++pcount) {
-				Particle* particle = particlesInBbin[i][pcount];
-				for(int pcount2 = pcount + 1; pcount2 < particlesInBbin[i].size(); ++pcount2) {
-					if(particle == particlesInBbin[i][pcount2]) {
-						printf("particle is twice in Bbin number %d\n", i);
+	for(int i = 0; i <xnumber; ++i){
+		for(int k = 0; k < znumber; ++k){
+			for(int pcount = 0; pcount < particlesInEbin[i][0][k].size(); ++pcount) {
+				Particle* particle = particlesInEbin[i][0][k][pcount];
+				for(int pcountRight = 0; pcountRight < particlesInEbin[i][ynumber][k].size(); ++pcountRight) {
+					if(particle == particlesInEbin[i][ynumber][k][pcountRight]) {
+						printf("particle is in 0 and ynumber bin\n");
 						errorLogFile = fopen("./output/errorLog.dat", "w");
-						fprintf(errorLogFile, "particle is twice in Bbi number %d\n", i);
+						fprintf(errorLogFile, "particle is in 0 and ynumber bin, particle.y = %15.10g ymax = %15.10g\n", particle->coordinates.y, ygrid[ynumber]);
 						fclose(errorLogFile);
 						exit(0);
+					}
+				}
+			}
+		}
+	}
+
+	for(int j = 0; j <ynumber; ++j){
+		for(int i = 0; i < xnumber; ++i){
+			for(int pcount = 0; pcount < particlesInEbin[i][j][0].size(); ++pcount) {
+				Particle* particle = particlesInEbin[i][j][0][pcount];
+				for(int pcountRight = 0; pcountRight < particlesInEbin[i][j][znumber].size(); ++pcountRight) {
+					if(particle == particlesInEbin[i][j][znumber][pcountRight]) {
+						printf("particle is in 0 and znumber bin\n");
+						errorLogFile = fopen("./output/errorLog.dat", "w");
+						fprintf(errorLogFile, "particle is in 0 and znumber bin, particle.z = %15.10g zmax = %15.10g\n", particle->coordinates.z, zgrid[znumber]);
+						fclose(errorLogFile);
+						exit(0);
+					}
+				}
+			}
+		}
+	}
+
+	for(int i = 0; i < xnumber + 1; ++i) {
+		for(int j = 0; j < ynumber + 1; ++j){
+			for(int k = 0; k < znumber + 1; ++k){
+				if(particlesInEbin[i][j][k].size() > 1){
+					for(int pcount = 0; pcount < particlesInEbin[i][j][k].size() - 1; ++pcount) {
+						Particle* particle = particlesInEbin[i][j][k][pcount];
+						for(int pcount2 = pcount + 1; pcount2 < particlesInEbin[i][j][k].size(); ++pcount2) {
+							if(particle == particlesInEbin[i][j][k][pcount2]) {
+								printf("particle is twice in Ebin number %d %d %d\n", i, j, k);
+								errorLogFile = fopen("./output/errorLog.dat", "w");
+								fprintf(errorLogFile, "particle is twice in Ebin number %d %d %d\n", i, j, k);
+								fclose(errorLogFile);
+								exit(0);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for(int i = 0; i < xnumber; ++i) {
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				if(particlesInBbin[i][j][k].size() > 1){
+					for(int pcount = 0; pcount < particlesInBbin[i][j][k].size() - 1; ++pcount) {
+						Particle* particle = particlesInBbin[i][j][k][pcount];
+						for(int pcount2 = pcount + 1; pcount2 < particlesInBbin[i][j][k].size(); ++pcount2) {
+							if(particle == particlesInBbin[i][j][k][pcount2]) {
+								printf("particle is twice in Bbin number %d %d %d\n", i, j, k);
+								errorLogFile = fopen("./output/errorLog.dat", "w");
+								fprintf(errorLogFile, "particle is twice in Bbi number %d %d 5d\n", i, j, k);
+								fclose(errorLogFile);
+								exit(0);
+							}
+						}
 					}
 				}
 			}
@@ -324,83 +418,126 @@ void Simulation::updateElectroMagneticParameters() {
 	}
 	//collectParticlesIntoBins();
 	for (int i = 0; i < xnumber + 1; ++i) {
-		electricFlux[i] = Vector3d(0, 0, 0);
-		dielectricTensor[i] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-		divPressureTensor[i] = Vector3d(0, 0, 0);
-		for (int pcount = 0; pcount < particlesInEbin[i].size(); ++pcount) {
-			Particle* particle = particlesInEbin[i][pcount];
-			double correlation = correlationWithEbin(*particle, i) / volumeE(i);
+		for(int j = 0; j  < ynumber + 1; ++j){
+			for(int k = 0; k < znumber + 1; ++k){
+				electricFlux[i][j][k] = Vector3d(0, 0, 0);
+				dielectricTensor[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+				divPressureTensor[i][j][k] = Vector3d(0, 0, 0);
+				for (int pcount = 0; pcount < particlesInEbin[i][j][k].size(); ++pcount) {
+					Particle* particle = particlesInEbin[i][j][k][pcount];
+					double correlation = correlationWithEbin(*particle, i, j, k) / volumeE(i, j, k);
 
-			Vector3d velocity = particle->velocity(speed_of_light_normalized);
-			double gamma = particle->gammaFactor(speed_of_light_normalized);
-			Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
+					Vector3d velocity = particle->velocity(speed_of_light_normalized);
+					double gamma = particle->gammaFactor(speed_of_light_normalized);
+					Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
 
-			if(solverType == IMPLICIT){
-				electricFlux[i] += rotatedVelocity * (particle->charge * particle->weight * correlation);
-				//electricFlux[i] += velocity * (particle->charge * particle->weight * correlation);
-				dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
-				//dielectricTensor[i] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+					if(solverType == IMPLICIT){
+						electricFlux[i][j][k] += rotatedVelocity * (particle->charge * particle->weight * correlation);
+						//electricFlux[i] += velocity * (particle->charge * particle->weight * correlation);
+						dielectricTensor[i][j][k] = dielectricTensor[i][j][k] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+						//dielectricTensor[i] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 				
-				Particle tempParticle = *particle;
-				double shiftX = 0.01*deltaX;
-				if(particle->x + shiftX >xgrid[xnumber]){
-					shiftX = -shiftX;
+						Particle tempParticle = *particle;
+						double shiftX = 0.01*deltaX;
+						if(particle->x + shiftX >xgrid[xnumber]){
+							shiftX = -shiftX;
+						}
+						tempParticle.x += shiftX;
+
+						double tempCorrelation = correlationWithEbin(tempParticle, i, j, k) / volumeE(i, j, k);
+
+						divPressureTensor[i].x += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][0] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+						divPressureTensor[i].y += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][1] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+						divPressureTensor[i].z += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][2] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+					}
+					if(solverType == EXPLICIT){
+						electricFlux[i][j][k] += velocity*particle->charge*particle->weight*correlation;
+					}
+					alertNaNOrInfinity(electricFlux[i][j][k].x, "right part x = NaN");
+					alertNaNOrInfinity(electricFlux[i][j][k].y, "right part y = NaN");
+					alertNaNOrInfinity(electricFlux[i][j][k].z, "right part z = NaN");
 				}
-				tempParticle.x += shiftX;
-
-				double tempCorrelation = correlationWithEbin(tempParticle, i) / volumeE(i);
-
-				divPressureTensor[i].x += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][0] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
-				divPressureTensor[i].y += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][1] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
-				divPressureTensor[i].z += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][2] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
 			}
-			if(solverType == EXPLICIT){
-				electricFlux[i] += velocity*particle->charge*particle->weight*correlation;
-			}
-			alertNaNOrInfinity(electricFlux[i].x, "right part x = NaN");
-			alertNaNOrInfinity(electricFlux[i].y, "right part y = NaN");
-			alertNaNOrInfinity(electricFlux[i].z, "right part z = NaN");
 		}
 	}
 
 	//for periodic conditions we must summ sides parameters
 	if(boundaryConditionType == PERIODIC){
-		electricFlux[0] = electricFlux[0] + electricFlux[xnumber];
-		electricFlux[xnumber] = electricFlux[0];
+		for(int j = 0; j < ynumber + 1; ++j){
+			for(int k = 0; k < znumber + 1; ++k){
+				electricFlux[0][j][k] = electricFlux[0][j][k] + electricFlux[xnumber][j][k];
+				electricFlux[xnumber][j][k] = electricFlux[0][j][k];
 
-		dielectricTensor[0] = dielectricTensor[0] + dielectricTensor[xnumber];
-		dielectricTensor[xnumber] = dielectricTensor[0];
+				dielectricTensor[0][j][k] = dielectricTensor[0][j][k] + dielectricTensor[xnumber][j][k];
+				dielectricTensor[xnumber][j][k] = dielectricTensor[0][j][k];
 
-		divPressureTensor[0] = divPressureTensor[0] + divPressureTensor[xnumber];
-		divPressureTensor[xnumber] = divPressureTensor[0];
+				divPressureTensor[0][j][k] = divPressureTensor[0][j][k] + divPressureTensor[xnumber][j][k];
+				divPressureTensor[xnumber][j][k] = divPressureTensor[0][j][k];
+			}
+		}
+	}
+
+	//for periodic y
+	for(int i = 0; i < xnumber + 1; ++i){
+		for(int k = 0; k < znumber + 1; ++k){
+			electricFlux[i][0][k] = electricFlux[i][0][k] + electricFlux[i][ynumber][k];
+			electricFlux[i][ynumber][k] = electricFlux[i][0][k];
+
+			dielectricTensor[i][0][k] = dielectricTensor[i][0][k] + dielectricTensor[i][ynumber][k];
+			dielectricTensor[i][ynumber][k] = dielectricTensor[i][0][k];
+
+			divPressureTensor[i][0][k] = divPressureTensor[i][0][k] + divPressureTensor[i][ynumber][k];
+			divPressureTensor[i][ynumber][k] = divPressureTensor[i][0][k];
+		}
+	}
+
+	//for periodic z
+	for(int i = 0; i < xnumber + 1; ++i){
+		for(int j = 0; j < ynumber + 1; ++j){
+			electricFlux[i][j][0] = electricFlux[i][j][0] + electricFlux[i][j][znumber];
+			electricFlux[i][j][znumber] = electricFlux[i][j][0];
+
+			dielectricTensor[i][j][0] = dielectricTensor[i][j][0] + dielectricTensor[i][j][znumber];
+			dielectricTensor[i][j][znumber] = dielectricTensor[i][0][0];
+
+			divPressureTensor[i][j][0] = divPressureTensor[i][j][0] + divPressureTensor[i][j][znumber];
+			divPressureTensor[i][j][znumber] = divPressureTensor[i][j][0];
+		}
 	}
 
 
 	for (int i = 0; i < xnumber; ++i) {
-		electricDensity[i] = 0;
-		pressureTensor[i] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-		if(solverType == IMPLICIT){
-			for (int pcount = 0; pcount < particlesInBbin[i].size(); ++pcount) {
-				Particle* particle = particlesInBbin[i][pcount];
-				double correlation = correlationWithBbin(*particle, i) / volumeB(i);
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				electricDensity[i][j][k] = 0;
+				pressureTensor[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+				if(solverType == IMPLICIT){
+					for (int pcount = 0; pcount < particlesInBbin[i][j][k].size(); ++pcount) {
+						Particle* particle = particlesInBbin[i][j][k][pcount];
+						double correlation = correlationWithBbin(*particle, i, j, k) / volumeB(i, j, k);
 
-				double gamma = particle->gammaFactor(speed_of_light_normalized);
-				Vector3d velocity = particle->velocity(speed_of_light_normalized);
-				Vector3d rotatedVelocity = particle->rotationTensor * velocity * gamma;
+						double gamma = particle->gammaFactor(speed_of_light_normalized);
+						Vector3d velocity = particle->velocity(speed_of_light_normalized);
+						Vector3d rotatedVelocity = particle->rotationTensor * velocity * gamma;
 
-				electricDensity[i] += particle->weight * particle->charge * correlation;
+						electricDensity[i][j][k] += particle->weight * particle->charge * correlation;
 
-				pressureTensor[i] += rotatedVelocity.tensorMult(rotatedVelocity) * particle->weight * particle->charge * correlation;
+						pressureTensor[i][j][k] += rotatedVelocity.tensorMult(rotatedVelocity) * particle->weight * particle->charge * correlation;
+					}
+				}
 			}
 		}
 	}
 
 	if(solverType == IMPLICIT){
 		for (int i = 0; i <= xnumber; ++i) {
-
-			Vector3d divPressureTensorEvaluated = evaluateDivPressureTensor(i);
-			electricFlux[i] = electricFlux[i] - divPressureTensor[i] * eta * deltaT;
-			//electricFlux[i] = electricFlux[i] - divPressureTensorEvaluated * eta * deltaT;
+			for(int j = 0; j <= ynumber; ++j){
+				for(int k = 0; k <= znumber; ++k){
+					Vector3d divPressureTensorEvaluated = evaluateDivPressureTensor(i, j, k);
+					electricFlux[i][j][k] = electricFlux[i][j][k] - divPressureTensor[i][j][k] * eta * deltaT;
+					//electricFlux[i] = electricFlux[i] - divPressureTensorEvaluated * eta * deltaT;
+				}
+			}
 		}
 	}
 
@@ -408,26 +545,38 @@ void Simulation::updateElectroMagneticParameters() {
 
 	if(solverType == IMPLICIT){
 		for (int i = 0; i < xnumber; ++i) {
-			double divJ = evaluateDivFlux(i);
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					double divJ = evaluateDivFlux(i, j, k);
 
-			electricDensity[i] -= deltaT * theta * divJ;
+					electricDensity[i][j][k] -= deltaT * theta * divJ;
+				}
+			}
 		}
 	}
 
 	updateExternalFlux();
 
 	for(int i = 0; i < xnumber +1 ; ++i){
-		electricFlux[i] = electricFlux[i] + externalElectricFlux[i];
+		for(int j = 0; j < ynumber + 1; ++j){
+			for(int k = 0; k < znumber + 1; ++k){
+				electricFlux[i][j][k] = electricFlux[i][j][k] + externalElectricFlux[i][j][k];
+			}
+		}
 	}
 
 	//for debug only
 		/*double kw = 2*pi/xsize;
 		double concentration = density/(massProton + massElectron);
-		for(int i = 0; i < xnumber; ++i){
-			electricFlux[i].y = electron_charge_normalized*concentration*(VyamplitudeProton - VyamplitudeElectron)*sin(kw*xgrid[i] - omega*(time + theta*deltaT));
-			electricFlux[i].z = electron_charge_normalized*concentration*(VzamplitudeProton - VzamplitudeElectron)*cos(kw*xgrid[i] - omega*(time + theta*deltaT));
+		for(int i = 0; i < xnumber + 1; ++i){
+		for(int j = 0; j < ynumber + 1; ++j){
+		for(int k = 0l k < znumber + 1; ++k){
+			electricFlux[i][j][k].y = electron_charge_normalized*concentration*(VyamplitudeProton - VyamplitudeElectron)*sin(kw*xgrid[i] - omega*(time + theta*deltaT));
+			electricFlux[i][j][k].z = electron_charge_normalized*concentration*(VzamplitudeProton - VzamplitudeElectron)*cos(kw*xgrid[i] - omega*(time + theta*deltaT));
 		}
-		electricFlux[xnumber] = electricFlux[0];*/
+		}
+		}
+		*/
 	//
 }
 
@@ -438,40 +587,44 @@ void Simulation::updateDensityParameters() {
 	collectParticlesIntoBins();
 	//FILE* debugFile = fopen("./output/particleCorrelations.dat","w");
 	for (int i = 0; i < xnumber; ++i) {
-		electronConcentration[i] = 0;
-		protonConcentration[i] = 0;
-		chargeDensity[i] = 0;
-		velocityBulk[i] = Vector3d(0, 0, 0);
-		velocityBulkElectron[i] = Vector3d(0, 0, 0);
-		//fprintf(debugFile, "%d %d %d\n", i, j, k);
-		for (int pcount = 0; pcount < particlesInBbin[i].size(); ++pcount) {
-			Particle* particle = particlesInBbin[i][pcount];
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				electronConcentration[i][j][k] = 0;
+				protonConcentration[i][j][k] = 0;
+				chargeDensity[i][j][k] = 0;
+				velocityBulk[i][j][k] = Vector3d(0, 0, 0);
+				velocityBulkElectron[i][j][k] = Vector3d(0, 0, 0);
+				//fprintf(debugFile, "%d %d %d\n", i, j, k);
+				for (int pcount = 0; pcount < particlesInBbin[i][j][k].size(); ++pcount) {
+					Particle* particle = particlesInBbin[i][j][k][pcount];
 
-			double correlation = correlationWithBbin(*particle, i) / volumeB(i);
+					double correlation = correlationWithBbin(*particle, i, j, k) / volumeB(i, j, k);
 
-			chargeDensity[i] += correlation * particle->charge * particle->weight;
-			if (particle->type == ELECTRON) {
-				electronConcentration[i] += correlation * particle->weight;
-				velocityBulkElectron[i] += particle->momentum * particle->weight * correlation;
-			} else if (particle->type == PROTON) {
-				protonConcentration[i] += correlation * particle->weight;
+					chargeDensity[i][j][k] += correlation * particle->charge * particle->weight;
+					if (particle->type == ELECTRON) {
+						electronConcentration[i][j][k] += correlation * particle->weight;
+						velocityBulkElectron[i][j][k] += particle->momentum * particle->weight * correlation;
+					} else if (particle->type == PROTON) {
+						protonConcentration[i][j][k] += correlation * particle->weight;
+					}
+					velocityBulk[i][j][k] += particle->momentum * particle->weight * correlation;
+
+					if (correlation == 0) {
+						//printf("aaa\n");
+					}
+
+					//fprintf(debugFile, "%d %15.10g\n", particle->number, correlation*volume(i, j, k));
+				}
+
+				//fprintf(debugFile, "charge %15.10g proton %15.10g electron %15.10g\n", chargeDensity[i][j][k], protonConcentration[i][j][k], electronConcentration[i][j][k]);
+
+ 				velocityBulk[i][j][k] = velocityBulk[i][j][k] / (electronConcentration[i][j][k] * massElectron + protonConcentration[i][j][k] * massProton);
+				velocityBulkElectron[i][j][k] = velocityBulkElectron[i][j][k] / (electronConcentration[i][j][k] * massElectron);
+				full_density += chargeDensity[i][j][k] * volumeB(i, j, k);
+				full_p_concentration += protonConcentration[i][j][k] * volumeB(i, j, k);
+				full_e_concentration += electronConcentration[i][j][k] * volumeB(i, j, k);
 			}
-			velocityBulk[i] += particle->momentum * particle->weight * correlation;
-
-			if (correlation == 0) {
-				//printf("aaa\n");
-			}
-
-			//fprintf(debugFile, "%d %15.10g\n", particle->number, correlation*volume(i, j, k));
 		}
-
-		//fprintf(debugFile, "charge %15.10g proton %15.10g electron %15.10g\n", chargeDensity[i][j][k], protonConcentration[i][j][k], electronConcentration[i][j][k]);
-
- 		velocityBulk[i] = velocityBulk[i] / (electronConcentration[i] * massElectron + protonConcentration[i] * massProton);
-		velocityBulkElectron[i] = velocityBulkElectron[i] / (electronConcentration[i] * massElectron);
-		full_density += chargeDensity[i] * volumeB(i);
-		full_p_concentration += protonConcentration[i] * volumeB(i);
-		full_e_concentration += electronConcentration[i] * volumeB(i);
 	}
 	full_density /= xsize;
 	full_p_concentration /= (xsize * gyroradius);
@@ -488,20 +641,32 @@ void Simulation::updateEnergy() {
 
 	momentum = Vector3d(0, 0, 0);
 	for (int i = 0; i < xnumber + 1; ++i) {
-		Vector3d E = Efield[i]*fieldScale;
-		electricFieldEnergy += E.scalarMult(E) * volumeE(i) / (8 * pi);
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				Vector3d E = Efield[i][j][k]*fieldScale;
+				electricFieldEnergy += E.scalarMult(E) * volumeE(i, j, k) / (8 * pi);
+			}
+		}
 	}
 
 	for (int i = 0; i < xnumber; ++i) {
-		Vector3d B = (Bfield[i] - B0)*fieldScale;
-		magneticFieldEnergy += B.scalarMult(B) * volumeB(i) / (8 * pi);
+		for(int j = 0; j < ynumber; ++J){
+			for(int k = 0; k < znumber; ++k){
+				Vector3d B = (Bfield[i] - B0)*fieldScale;
+				magneticFieldEnergy += B.scalarMult(B) * volumeB(i, j, k) / (8 * pi);
+			}
+		}
 	}
 
 	for (int i = 0; i < xnumber; ++i) {
-		Vector3d E = ((Efield[i] + Efield[i + 1]) / 2)*fieldScale;
-		Vector3d B = Bfield[i]*fieldScale;
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				Vector3d E = ((Efield[i][j][k] + Efield[i][j][k+1] + Efield[i][j+1][k] + Efield[i][j+1][k+1] + Efield[i+1][j][k] + Efield[i+1][j][k+1] + Efield[i+1][j+1][k] + Efield[i + 1][j+1][k+1]) / 8)*fieldScale;
+				Vector3d B = Bfield[i][j][k]*fieldScale;
 
-		momentum += (E.vectorMult(B) / (4 * pi * speed_of_light_normalized)) * volumeB(i);
+				momentum += (E.vectorMult(B) / (4 * pi * speed_of_light_normalized)) * volumeB(i, j, k);
+			}
+		}
 	}
 
 	for(int pcount = 0; pcount < particles.size(); ++pcount){
@@ -519,7 +684,7 @@ void Simulation::updateEnergy() {
 	energy = particleEnergy + electricFieldEnergy + magneticFieldEnergy;
 }
 
-Vector3d Simulation::getBfield(int i) {
+Vector3d Simulation::getBfield(int i, int j, int k) {
 	if (i == -1) {
 		i = xnumber - 1;
 	} else if (i == xnumber) {
@@ -532,7 +697,31 @@ Vector3d Simulation::getBfield(int i) {
 		exit(0);
 	}
 
-	return Bfield[i];
+	if (j == -1) {
+		j = ynumber - 1;
+	} else if (j == ynumber) {
+		j = 0;
+	} else if (j < -1 || j > ynumber) {
+		printf("j < -1 || j > ynumber in getBfied i = %d\n", j);
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "j = %d, ynumber = %d\n", j, ynumber);
+		fclose(errorLogFile);
+		exit(0);
+	}
+
+	if (k == -1) {
+		k = znumber - 1;
+	} else if (k == znumber) {
+		k = 0;
+	} else if (k < -1 || k > znumber) {
+		printf("k < -1 || k > znumber in getBfied i = %d\n", k);
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "k = %d, znumber = %d\n", k, znumber);
+		fclose(errorLogFile);
+		exit(0);
+	}
+
+	return Bfield[i][j][k];
 }
 
 Vector3d Simulation::getTempEfield(int i) {

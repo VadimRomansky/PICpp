@@ -67,14 +67,20 @@ void Simulation::collectParticlesIntoBins() {
 	}
 }
 
-void Simulation::pushParticleIntoEbin(Particle* particle, int i) {
+void Simulation::pushParticleIntoEbin(Particle* particle, int i, int j, int k) {
 	if (i < 0) return;
 	if (i > xnumber) return;
 
-	particlesInEbin[i].push_back(particle);
+	if (j < 0) return;
+	if (j > ynumber) return;
+
+	if (k < 0) return;
+	if (k > znumber) return;
+
+	particlesInEbin[i][j][k].push_back(particle);
 }
 
-void Simulation::pushParticleIntoBbin(Particle* particle, int i) {
+void Simulation::pushParticleIntoBbin(Particle* particle, int i, int j, int k) {
 	if (i < 0){
 		if(boundaryConditionType == PERIODIC){
 			i = xnumber - 1;
@@ -90,10 +96,55 @@ void Simulation::pushParticleIntoBbin(Particle* particle, int i) {
 		}
 	}
 
-	particlesInBbin[i].push_back(particle);
+	if(j < 0){
+		j = ynumber - 1;
+	}
+	if(j >= ynumber){
+		j = 0;
+	}
+	if(k < 0){
+		k = znumber -1;
+	}
+	if(k >= znumber){
+		k = 0;
+	}
+
+	particlesInBbin[i][j][k].push_back(particle);
 }
 
-bool Simulation::particleCrossBbin(Particle& particle, int i) {
+bool Simulation::particleCrossBbin(Particle& particle, int i, int j, int k) {
+	if(j < 0) {
+		j = ynumber - 1;
+	} else if(j >= ynumber) {
+		j = 0;
+	}	
+	if (j == 0) {
+		if ((ygrid[j + 1] < particle.coordinates.y - particle.dy) && (ygrid[ynumber] > particle.coordinates.y + particle.dy))
+			return false;
+	} else if (j == ynumber - 1) {
+		if ((ygrid[j] > particle.coordinates.y + particle.dy) && (ygrid[0] < particle.coordinates.y - particle.dy))
+			return false;
+	} else {
+		if ((ygrid[j] > particle.coordinates.y + particle.dy) || (ygrid[j + 1] < particle.coordinates.y - particle.dy))
+			return false;
+	}
+
+	if(k < 0) {
+		k = znumber - 1;
+	} else if(k >= znumber) {
+		k = 0;
+	}	
+	if (k == 0) {
+		if ((zgrid[k + 1] < particle.coordinates.z - particle.dz) && (zgrid[xnumber] > particle.coordinates.z + particle.dz))
+			return false;
+	} else if (k == znumber - 1) {
+		if ((zgrid[k] > particle.coordinates.z + particle.dz) && (zgrid[0] < particle.coordinates.z - particle.dz))
+			return false;
+	} else {
+		if ((zgrid[k] > particle.coordinates.z + particle.dz) || (zgrid[k + 1] < particle.coordinates.z - particle.dz))
+			return false;
+	}
+
 	if(boundaryConditionType == PERIODIC){
 		if(i < 0) {
 			i = xnumber - 1;
@@ -102,13 +153,13 @@ bool Simulation::particleCrossBbin(Particle& particle, int i) {
 		}	
 
 		if (i == 0) {
-			if ((xgrid[i + 1] < particle.x - particle.dx) && (xgrid[xnumber] > particle.x + particle.dx))
+			if ((xgrid[i + 1] < particle.coordinates.x - particle.dx) && (xgrid[xnumber] > particle.coordinates.x + particle.dx))
 				return false;
 		} else if (i == xnumber - 1) {
-			if ((xgrid[i] > particle.x + particle.dx) && (xgrid[0] < particle.x - particle.dx))
+			if ((xgrid[i] > particle.coordinates.x + particle.dx) && (xgrid[0] < particle.coordinates.x - particle.dx))
 				return false;
 		} else {
-			if ((xgrid[i] > particle.x + particle.dx) || (xgrid[i + 1] < particle.x - particle.dx))
+			if ((xgrid[i] > particle.coordinates.x + particle.dx) || (xgrid[i + 1] < particle.coordinates.x - particle.dx))
 				return false;
 		}
 
@@ -136,28 +187,51 @@ bool Simulation::particleCrossBbin(Particle& particle, int i) {
 	return false;
 }
 
-bool Simulation::particleCrossEbin(Particle& particle, int i) {
+bool Simulation::particleCrossEbin(Particle& particle, int i, int j, int k) {
+	if(j == 0){
+		if(ygrid[0] + (deltaY/2) < particle.coordinates.y - particle.dy && ygrid[ynumber] - (deltaY/2) > particle.coordinates.y + particle.dy)
+			return false;
+	} else if(j == ynumber){
+		if(ygrid[0] + (deltaY/2) < particle.coordinates.y - particle.dy && ygrid[ynumber] - (deltaY/2) > particle.coordinates.y + particle.dy)
+			return false;
+	} else {
+		if ((ygrid[j] - (deltaY / 2) > particle.coordinates.y + particle.dy) || (ygrid[j + 1] - (deltaY / 2) < particle.coordinates.y - particle.dy))
+			return false;
+	}
+
+	if(k == 0){
+		if(zgrid[0] + (deltaZ/2) < particle.coordinates.z - particle.dz && zgrid[znumber] - (deltaZ/2) > particle.coordinates.z + particle.dz)
+			return false;
+	} else if(k == znumber){
+		if(zgrid[0] + (deltaZ/2) < particle.coordinates.z - particle.dz && zgrid[znumber] - (deltaZ/2) > particle.coordinates.z + particle.dz)
+			return false;
+	} else {
+		if ((zgrid[k] - (deltaZ / 2) > particle.coordinates.z + particle.dz) || (zgrid[k + 1] - (deltaZ / 2) < particle.coordinates.z - particle.dz))
+			return false;
+	}
+
+
 	if(boundaryConditionType == PERIODIC){
 		if(i == 0){
-			if(xgrid[0] + (deltaX/2) < particle.x - particle.dx && xgrid[xnumber] - (deltaX/2) > particle.x + particle.dx)
+			if(xgrid[0] + (deltaX/2) < particle.coordinates.x - particle.dx && xgrid[xnumber] - (deltaX/2) > particle.coordinates.x + particle.dx)
 				return false;
 		} else if(i == xnumber){
-			if(xgrid[0] + (deltaX/2) < particle.x - particle.dx && xgrid[xnumber] - (deltaX/2) > particle.x + particle.dx)
+			if(xgrid[0] + (deltaX/2) < particle.coordinates.x - particle.dx && xgrid[xnumber] - (deltaX/2) > particle.coordinates.x + particle.dx)
 				return false;
 		} else {
-			if ((xgrid[i] - (deltaX / 2) > particle.x + particle.dx) || (xgrid[i + 1] - (deltaX / 2) < particle.x - particle.dx))
+			if ((xgrid[i] - (deltaX / 2) > particle.coordinates.x + particle.dx) || (xgrid[i + 1] - (deltaX / 2) < particle.coordinates.x - particle.dx))
 				return false;
 		}
 		return true;
 	} else if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 		if(i == 0){
-			if(xgrid[0] + (deltaX/2) < particle.x - particle.dx)
+			if(xgrid[0] + (deltaX/2) < particle.coordinates.x - particle.dx)
 				return false;
 		} else if(i == xnumber){
-			if(xgrid[xnumber] - (deltaX/2) > particle.x + particle.dx)
+			if(xgrid[xnumber] - (deltaX/2) > particle.coordinates.x + particle.dx)
 				return false;
 		} else {
-			if ((xgrid[i] - (deltaX / 2) > particle.x + particle.dx) || (xgrid[i + 1] - (deltaX / 2) < particle.x - particle.dx))
+			if ((xgrid[i] - (deltaX / 2) > particle.coordinates.x + particle.dx) || (xgrid[i + 1] - (deltaX / 2) < particle.coordinates.x - particle.dx))
 				return false;
 		}
 		return true;
@@ -200,11 +274,21 @@ Vector3d Simulation::correlationEfield(Particle& particle) {
 
 	return result;*/
 
-	int xcount = floor((particle.x - xgrid[0])/deltaX);
-	double rightWeight = (particle.x - xgrid[xcount])/deltaX;
-	double leftWeight = (xgrid[xcount + 1] - particle.x)/deltaX;
+	int xcount = floor((particle.coordinates.x - xgrid[0])/deltaX);
+	int ycount = floor((particle.coordinates.y - ygrid[0])/deltaY);
+	int zcount = floor((particle.coordinates.z - zgrid[0])/deltaZ);
 
-	return Efield[xcount]*leftWeight + Efield[xcount + 1]*rightWeight;
+	double rightWeightX = (particle.coordinates.x - xgrid[xcount])/deltaX;
+	double leftWeightX = (xgrid[xcount + 1] - particle.coordinates.x)/deltaX;
+
+	double rightWeightY = (particle.coordinates.y - ygrid[ycount])/deltaY;
+	double leftWeightY = (ygrid[xcount + 1] - particle.coordinates.y)/deltaY;
+
+	double rightWeightZ = (particle.coordinates.z - zgrid[zcount])/deltaZ;
+	double leftWeightZ = (zgrid[zcount + 1] - particle.coordinates.z)/deltaZ;
+
+	return ((Efield[xcount][ycount][zcount]*leftWeightZ + Efield[xcount][ycount][zcount+1]*rightWeightZ)*leftWeightY + (Efield[xcount][ycount+1][zcount]*leftWeightZ + Efield[xcount][ycount+1][zcount+1]*rightWeightZ)*rightWeightY)*leftWeightX 
+		+ ((Efield[xcount+1][ycount][zcount]*leftWeightZ + Efield[xcount+1][ycount][zcount+1]*rightWeightZ)*leftWeightY + (Efield[xcount+1][ycount+1][zcount]*leftWeightZ + Efield[xcount+1][ycount+1][zcount+1]*rightWeightZ)*rightWeightY)*rightWeightX;
 }
 
 Vector3d Simulation::correlationTempEfield(Particle& particle) {
@@ -219,11 +303,21 @@ Vector3d Simulation::correlationTempEfield(Particle& particle) {
 	}
 
 	return result;*/
-	int xcount = floor((particle.x - xgrid[0])/deltaX);
-	double rightWeight = (particle.x - xgrid[xcount])/deltaX;
-	double leftWeight = (xgrid[xcount + 1] - particle.x)/deltaX;
+	int xcount = floor((particle.coordinates.x - xgrid[0])/deltaX);
+	int ycount = floor((particle.coordinates.y - ygrid[0])/deltaY);
+	int zcount = floor((particle.coordinates.z - zgrid[0])/deltaZ);
 
-	return tempEfield[xcount]*leftWeight + tempEfield[xcount + 1]*rightWeight;
+	double rightWeightX = (particle.coordinates.x - xgrid[xcount])/deltaX;
+	double leftWeightX = (xgrid[xcount + 1] - particle.coordinates.x)/deltaX;
+
+	double rightWeightY = (particle.coordinates.y - ygrid[ycount])/deltaY;
+	double leftWeightY = (ygrid[xcount + 1] - particle.coordinates.y)/deltaY;
+
+	double rightWeightZ = (particle.coordinates.z - zgrid[zcount])/deltaZ;
+	double leftWeightZ = (zgrid[zcount + 1] - particle.coordinates.z)/deltaZ;
+
+	return ((tempEfield[xcount][ycount][zcount]*leftWeightZ + tempEfield[xcount][ycount][zcount+1]*rightWeightZ)*leftWeightY + (tempEfield[xcount][ycount+1][zcount]*leftWeightZ + tempEfield[xcount][ycount+1][zcount+1]*rightWeightZ)*rightWeightY)*leftWeightX 
+		+ ((tempEfield[xcount+1][ycount][zcount]*leftWeightZ + tempEfield[xcount+1][ycount][zcount+1]*rightWeightZ)*leftWeightY + (tempEfield[xcount+1][ycount+1][zcount]*leftWeightZ + tempEfield[xcount+1][ycount+1][zcount+1]*rightWeightZ)*rightWeightY)*rightWeightX;
 }
 
 Vector3d Simulation::correlationNewEfield(Particle& particle) {
@@ -238,16 +332,26 @@ Vector3d Simulation::correlationNewEfield(Particle& particle) {
 	}
 
 	return result;*/
-	int xcount = floor((particle.x - xgrid[0])/deltaX);
-	double rightWeight = (particle.x - xgrid[xcount])/deltaX;
-	double leftWeight = (xgrid[xcount + 1] - particle.x)/deltaX;
+	int xcount = floor((particle.coordinates.x - xgrid[0])/deltaX);
+	int ycount = floor((particle.coordinates.y - ygrid[0])/deltaY);
+	int zcount = floor((particle.coordinates.z - zgrid[0])/deltaZ);
 
-	return newEfield[xcount]*leftWeight + newEfield[xcount + 1]*rightWeight;
+	double rightWeightX = (particle.coordinates.x - xgrid[xcount])/deltaX;
+	double leftWeightX = (xgrid[xcount + 1] - particle.coordinates.x)/deltaX;
+
+	double rightWeightY = (particle.coordinates.y - ygrid[ycount])/deltaY;
+	double leftWeightY = (ygrid[xcount + 1] - particle.coordinates.y)/deltaY;
+
+	double rightWeightZ = (particle.coordinates.z - zgrid[zcount])/deltaZ;
+	double leftWeightZ = (zgrid[zcount + 1] - particle.coordinates.z)/deltaZ;
+
+	return ((newEfield[xcount][ycount][zcount]*leftWeightZ + newEfield[xcount][ycount][zcount+1]*rightWeightZ)*leftWeightY + (newEfield[xcount][ycount+1][zcount]*leftWeightZ + newEfield[xcount][ycount+1][zcount+1]*rightWeightZ)*rightWeightY)*leftWeightX 
+		+ ((newEfield[xcount+1][ycount][zcount]*leftWeightZ + newEfield[xcount+1][ycount][zcount+1]*rightWeightZ)*leftWeightY + (newEfield[xcount+1][ycount+1][zcount]*leftWeightZ + newEfield[xcount+1][ycount+1][zcount+1]*rightWeightZ)*rightWeightY)*rightWeightX;
 }
 
 Vector3d Simulation::correlationBfield(Particle& particle) {
 
-	double x = particle.x;
+	double x = particle.coordinates.x;
 	if(x > xgrid[xnumber]) {
 		printf("particle out of box in correlationBfield\n");
 		exit(0);
@@ -257,91 +361,125 @@ Vector3d Simulation::correlationBfield(Particle& particle) {
 		exit(0);
 	}
 
+	double y = particle.coordinates.y;
+	if(y > ygrid[ynumber]) {
+		printf("particle out of box in correlationBfield\n");
+		exit(0);
+	}
+	if(y < ygrid[0]) {
+		printf("particle out of box in correlationBfield\n");
+		exit(0);
+	}
+
+	double z = particle.coordinates.z;
+	if(z > zgrid[znumber]) {
+		printf("particle out of box in correlationBfield\n");
+		exit(0);
+	}
+	if(z < zgrid[0]) {
+		printf("particle out of box in correlationBfield\n");
+		exit(0);
+	}
+
 	int xcount = floor(((x - xgrid[0]) / deltaX) + 0.5);
+	int ycount = floor(((y - ygrid[0]) / deltaY) + 0.5);
+	int zcount = floor(((z - xgrid[0]) / deltaZ) + 0.5);
+
 	Vector3d leftField = Vector3d(0, 0, 0);
 	Vector3d rightField = Vector3d(0, 0, 0);
 
-	double rightWeight;
-	double leftWeight;
+	double rightWeightX;
+	double leftWeightX;
+	double rightWeightY;
+	double leftWeightY;
+	double rightWeightZ;
+	double leftWeightZ;
+
+	int curI = xcount;
+	int prevI = xcount - 1;
+	int curJ = ycount;
+	int prevJ = ycount - 1;
+	int curK = zcount;
+	int prevK = zcount - 1;
+
 
 	if(xcount > 0 && xcount < xnumber){
-		rightWeight = (particle.coordinates.x - middleXgrid[xcount-1])/deltaX;
-		leftWeight = (middleXgrid[xcount] - particle.coordinates.x)/deltaX;
-		leftField = Bfield[xcount-1];
-		rightField = Bfield[xcount];
+		curI = xcount;
+		prevI = xcount - 1;
+		rightWeightX = (particle.coordinates.x - middleXgrid[xcount-1])/deltaX;
+		leftWeightX = (middleXgrid[xcount] - particle.coordinates.x)/deltaX;
+
 	} else if(xcount == 0){
-		leftWeight = (middleXgrid[xcount] - particle.x)/deltaX;
-		rightWeight = 1.0 - leftWeight;
-		rightField = Bfield[xcount];
+		curI = xcount;
+
+		leftWeightX = (middleXgrid[xcount] - particle.coordinates.x)/deltaX;
+		rightWeightX = 1.0 - leftWeightX;
+
 		if(boundaryConditionType == PERIODIC){
-			leftField = Bfield[xnumber - 1];
+			prevI = xnumber - 1;
 		} else {
-			leftField = Bfield[0];
+			prevI = 0;
 		}
 	} else if(xcount == xnumber){
-		rightWeight = (particle.x - middleXgrid[xcount-1])/deltaX;
-		leftWeight = 1 - rightWeight;
-		leftField = Bfield[xcount - 1];
+		rightWeightX = (particle.coordinates.x - middleXgrid[xcount-1])/deltaX;
+		leftWeightX = 1 - rightWeightX;
+		
+		prevI = xcount - 1;
 		if(boundaryConditionType == PERIODIC){
-			rightField = Bfield[0];
+			curI = 0;
 		} else {
-			rightField = B0;
+			curI = xcount-1;
 		}
 	}
 
-	return leftField*leftWeight + rightField*rightWeight;
+	if(ycount > 0 && ycount < ynumber){
+		curJ = ycount;
+		prevJ = ycount - 1;
+		rightWeightY = (particle.coordinates.y - middleYgrid[ycount-1])/deltaY;
+		leftWeightY = (middleYgrid[ycount] - particle.coordinates.y)/deltaY;
 
-	/*double leftX;
-	double rightX;
-	Vector3d result;
-	Vector3d leftField;
-	Vector3d rightField;
-	if( xcount == 0) {
-		leftX = middleXgrid[0] - deltaX;
-		rightX = middleXgrid[0];
-		leftField = Bfield[xnumber - 1];
-		rightField = Bfield[0];
-	} else if(xcount == xnumber) {
-		leftX = middleXgrid[xnumber - 1];
-		rightX = middleXgrid[xnumber - 1] + deltaX;
-		leftField = Bfield[xnumber - 1];
-		rightField = Bfield[0];
-	} else {
-		leftX = middleXgrid[xcount - 1];
-		rightX = middleXgrid[xcount];
-		leftField = Bfield[xcount-1];
-		rightField = Bfield[xcount];
+	} else if(ycount == 0){
+		curJ = ycount;
+		prevJ = ynumber - 1;
+
+		leftWeightY = (middleYgrid[ycount] - particle.coordinates.y)/deltaY;
+		rightWeightY = 1.0 - leftWeightY;
+
+	} else if(ycount == ynumber){
+		rightWeightY = (particle.coordinates.y - middleYgrid[ycount-1])/deltaY;
+		leftWeightY = 1 - rightWeightY;
+		
+		prevJ = ycount - 1;
+		curJ = 0;
 	}
 
-	double rightWeight = (x - leftX)/deltaX;
-	double leftWeight = (rightX - x)/deltaX;
+	if(zcount > 0 && zcount < znumber){
+		curK = zcount;
+		prevK = zcount - 1;
+		rightWeightZ = (particle.coordinates.z - middleZgrid[zcount-1])/deltaZ;
+		leftWeightZ = (middleZgrid[zcount] - particle.coordinates.z)/deltaZ;
 
-	if(rightWeight > 1 || rightWeight < 0){
-		printf("rightWeight is invalid\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
-		fprintf(errorLogFile, "rightWeight = %15.10g is invalid\n", rightWeight);
-		fclose(errorLogFile);
-		exit(0);
+	} else if(zcount == 0){
+		curK = zcount;
+		prevK = znumber - 1;
+
+		leftWeightZ = (middleZgrid[zcount] - particle.coordinates.z)/deltaZ;
+		rightWeightZ = 1.0 - leftWeightZ;
+
+	} else if(zcount == znumber){
+		rightWeightZ = (particle.coordinates.z - middleZgrid[zcount-1])/deltaZ;
+		leftWeightZ = 1 - rightWeightZ;
+		
+		prevK = zcount - 1;
+		curK = 0;
 	}
-	if(leftWeight > 1 || leftWeight < 0){
-		printf("leftWeight is invalid\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
-		fprintf(errorLogFile, "leftWeight = %15.10g is invalid\n", leftWeight);
-		fclose(errorLogFile);
-		exit(0);
-	}
 
-	result = rightField*rightWeight + leftField*leftWeight;
-
-	return result;*/
+	return ((Bfield[prevI][prevJ][prevK]*leftWeightZ + Bfield[prevI][prevJ][curK]*rightWeightZ)*leftWeightY + ((Bfield[prevI][curJ][prevK]*leftWeightZ + Bfield[prevI][curJ][curK]*rightWeightZ)*rightWeightY))*leftWeightX
+		+ ((Bfield[curI][prevJ][prevK]*leftWeightZ + Bfield[curI][prevJ][curK]*rightWeightZ)*leftWeightY + ((Bfield[curI][curJ][prevK]*leftWeightZ + Bfield[curI][curJ][curK]*rightWeightZ)*rightWeightY))*rightWeightX;
 }
 
 Vector3d Simulation::correlationNewBfield(Particle& particle) {
-
-	double x = particle.x;
-
-	int xcount = floor(((x - xgrid[0]) / deltaX) + 0.5);
-
+	double x = particle.coordinates.x;
 	if(x > xgrid[xnumber]) {
 		printf("particle out of box in correlationBfield\n");
 		exit(0);
@@ -351,98 +489,145 @@ Vector3d Simulation::correlationNewBfield(Particle& particle) {
 		exit(0);
 	}
 
-	Vector3d leftField;
-	Vector3d rightField;
+	double y = particle.coordinates.y;
+	if(y > ygrid[ynumber]) {
+		printf("particle out of box in correlationBfield\n");
+		exit(0);
+	}
+	if(y < ygrid[0]) {
+		printf("particle out of box in correlationBfield\n");
+		exit(0);
+	}
 
-	double rightWeight;
-	double leftWeight;
+	double z = particle.coordinates.z;
+	if(z > zgrid[znumber]) {
+		printf("particle out of box in correlationBfield\n");
+		exit(0);
+	}
+	if(z < zgrid[0]) {
+		printf("particle out of box in correlationBfield\n");
+		exit(0);
+	}
+
+	int xcount = floor(((x - xgrid[0]) / deltaX) + 0.5);
+	int ycount = floor(((y - ygrid[0]) / deltaY) + 0.5);
+	int zcount = floor(((z - xgrid[0]) / deltaZ) + 0.5);
+
+	Vector3d leftField = Vector3d(0, 0, 0);
+	Vector3d rightField = Vector3d(0, 0, 0);
+
+	double rightWeightX;
+	double leftWeightX;
+	double rightWeightY;
+	double leftWeightY;
+	double rightWeightZ;
+	double leftWeightZ;
+
+	int curI = xcount;
+	int prevI = xcount - 1;
+	int curJ = ycount;
+	int prevJ = ycount - 1;
+	int curK = zcount;
+	int prevK = zcount - 1;
+
 
 	if(xcount > 0 && xcount < xnumber){
-		rightWeight = (particle.x - middleXgrid[xcount-1])/deltaX;
-		leftWeight = (middleXgrid[xcount] - particle.x)/deltaX;
-		leftField = newBfield[xcount-1];
-		rightField = newBfield[xcount];
+		curI = xcount;
+		prevI = xcount - 1;
+		rightWeightX = (particle.coordinates.x - middleXgrid[xcount-1])/deltaX;
+		leftWeightX = (middleXgrid[xcount] - particle.coordinates.x)/deltaX;
+
 	} else if(xcount == 0){
-		leftWeight = (middleXgrid[xcount] - particle.x)/deltaX;
-		rightWeight = 1.0 - leftWeight;
-		rightField = newBfield[xcount];
+		curI = xcount;
+
+		leftWeightX = (middleXgrid[xcount] - particle.coordinates.x)/deltaX;
+		rightWeightX = 1.0 - leftWeightX;
+
 		if(boundaryConditionType == PERIODIC){
-			leftField = newBfield[xnumber - 1];
+			prevI = xnumber - 1;
 		} else {
-			leftField = newBfield[0];
+			prevI = 0;
 		}
 	} else if(xcount == xnumber){
-		rightWeight = (particle.x - middleXgrid[xcount-1])/deltaX;
-		leftWeight = 1 - rightWeight;
-		leftField = newBfield[xcount - 1];
+		rightWeightX = (particle.coordinates.x - middleXgrid[xcount-1])/deltaX;
+		leftWeightX = 1 - rightWeightX;
+		
+		prevI = xcount - 1;
 		if(boundaryConditionType == PERIODIC){
-			rightField = newBfield[0];
+			curI = 0;
 		} else {
-			rightField = B0;
+			curI = xcount-1;
 		}
 	}
 
-	return leftField*leftWeight + rightField*rightWeight;
-	/*Vector3d result = Vector3d(0, 0, 0);
+	if(ycount > 0 && ycount < ynumber){
+		curJ = ycount;
+		prevJ = ycount - 1;
+		rightWeightY = (particle.coordinates.y - middleYgrid[ycount-1])/deltaY;
+		leftWeightY = (middleYgrid[ycount] - particle.coordinates.y)/deltaY;
 
-	double leftX;
-	double rightX;
-	Vector3d leftField;
-	Vector3d rightField;
-	if( xcount == 0) {
-		leftX = middleXgrid[0] - deltaX;
-		rightX = middleXgrid[0];
-		leftField = newBfield[xnumber - 1];
-		rightField = newBfield[0];
-	} else if(xcount == xnumber) {
-		leftX = middleXgrid[xnumber - 1];
-		rightX = middleXgrid[xnumber - 1] + deltaX;
-		leftField = newBfield[xnumber - 1];
-		rightField = newBfield[0];
-	} else {
-		leftX = middleXgrid[xcount - 1];
-		rightX = middleXgrid[xcount];
-		leftField = newBfield[xcount-1];
-		rightField = newBfield[xcount];
+	} else if(ycount == 0){
+		curJ = ycount;
+		prevJ = ynumber - 1;
+
+		leftWeightY = (middleYgrid[ycount] - particle.coordinates.y)/deltaY;
+		rightWeightY = 1.0 - leftWeightY;
+
+	} else if(ycount == ynumber){
+		rightWeightY = (particle.coordinates.y - middleYgrid[ycount-1])/deltaY;
+		leftWeightY = 1 - rightWeightY;
+		
+		prevJ = ycount - 1;
+		curJ = 0;
 	}
 
-	double rightWeight = (x - leftX)/deltaX;
-	double leftWeight = (rightX - x)/deltaX;
+	if(zcount > 0 && zcount < znumber){
+		curK = zcount;
+		prevK = zcount - 1;
+		rightWeightZ = (particle.coordinates.z - middleZgrid[zcount-1])/deltaZ;
+		leftWeightZ = (middleZgrid[zcount] - particle.coordinates.z)/deltaZ;
 
-	if(rightWeight > 1 || rightWeight < 0){
-		printf("rightWeight is invalid\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
-		fprintf(errorLogFile, "rightWeight = %15.10g is invalid\n", rightWeight);
-		fclose(errorLogFile);
-		exit(0);
+	} else if(zcount == 0){
+		curK = zcount;
+		prevK = znumber - 1;
+
+		leftWeightZ = (middleZgrid[zcount] - particle.coordinates.z)/deltaZ;
+		rightWeightZ = 1.0 - leftWeightZ;
+
+	} else if(zcount == znumber){
+		rightWeightZ = (particle.coordinates.z - middleZgrid[zcount-1])/deltaZ;
+		leftWeightZ = 1 - rightWeightZ;
+		
+		prevK = zcount - 1;
+		curK = 0;
 	}
-	if(leftWeight > 1 || leftWeight < 0){
-		printf("leftWeight is invalid\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
-		fprintf(errorLogFile, "rleftWeight = %15.10g is invalid\n", leftWeight);
-		fclose(errorLogFile);
-		exit(0);
-	}
 
-	result = rightField*rightWeight + leftField*leftWeight;
-
-	return result;*/
+	return ((newBfield[prevI][prevJ][prevK]*leftWeightZ + newBfield[prevI][prevJ][curK]*rightWeightZ)*leftWeightY + ((newBfield[prevI][curJ][prevK]*leftWeightZ + newBfield[prevI][curJ][curK]*rightWeightZ)*rightWeightY))*leftWeightX
+		+ ((newBfield[curI][prevJ][prevK]*leftWeightZ + newBfield[curI][prevJ][curK]*rightWeightZ)*leftWeightY + ((newBfield[curI][curJ][prevK]*leftWeightZ + newBfield[curI][curJ][curK]*rightWeightZ)*rightWeightY))*rightWeightX;
 }
 
-double Simulation::correlationWithBbin(Particle& particle, int i) {
-	if (! particleCrossBbin(particle, i))
+double Simulation::correlationWithBbin(Particle& particle, int i, int j, int k) {
+	if (! particleCrossBbin(particle, i, j, k))
 		return 0.0;
 
-	double x = particle.x;
+	double x = particle.coordinates.x;
+	double y = particle.coordinates.y;
+	double z = particle.coordinates.z;
 
 	double leftx;
 	double rightx;
+
+	double lefty;
+	double righty;
+
+	double leftz;
+	double rightz;
 
 	if(i == -1) {
 		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 			return 0.0;
 		}
-		if (particle.x - particle.dx > xgrid[0]) {
+		if (particle.coordinates.x - particle.dx > xgrid[0]) {
 			leftx = xgrid[xnumber-1];
 			rightx = xgrid[xnumber];
 		} else {
@@ -451,7 +636,7 @@ double Simulation::correlationWithBbin(Particle& particle, int i) {
 		}	
 	} else if(i == 0){
 		if(boundaryConditionType == PERIODIC){
-			if (particle.x - particle.dx > xgrid[1]) {
+			if (particle.coordinates.x - particle.dx > xgrid[1]) {
 				leftx = xgrid[xnumber];
 				rightx = xgrid[xnumber] + deltaX;
 			} else {
@@ -464,7 +649,7 @@ double Simulation::correlationWithBbin(Particle& particle, int i) {
 		}
 	} else if(i == xnumber - 1){
 		if(boundaryConditionType == PERIODIC){
-			if (particle.x + particle.dx < xgrid[xnumber - 1]) {
+			if (particle.coordinates.x + particle.dx < xgrid[xnumber - 1]) {
 				leftx = xgrid[0] - deltaX;
 				rightx = xgrid[0];
 			} else {
@@ -479,7 +664,7 @@ double Simulation::correlationWithBbin(Particle& particle, int i) {
 		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 			return 0.0;
 		}
-		if (particle.x + particle.dx < xgrid[xnumber]) {
+		if (particle.coordinates.x + particle.dx < xgrid[xnumber]) {
 			leftx = xgrid[0];
 			rightx = xgrid[1];
 		} else {
@@ -491,24 +676,106 @@ double Simulation::correlationWithBbin(Particle& particle, int i) {
 		rightx = xgrid[i + 1];
 	}
 
+	if(j == -1) {
+		if (particle.coordinates.y - particle.dy > ygrid[0]) {
+			lefty = ygrid[ynumber-1];
+			righty = ygrid[ynumber];
+		} else {
+			lefty = ygrid[0] - deltaY;
+			righty = ygrid[0];
+		}	
+	} else if(j == 0){
+		if (particle.coordinates.y - particle.dy > ygrid[1]) {
+			lefty = ygrid[ynumber];
+			righty = ygrid[ynumber] + deltaY;
+		} else {
+			lefty = ygrid[0];
+			righty = ygrid[1];
+		}
+	} else if(j == ynumber - 1){
+		if (particle.coordinates.y + particle.dy < ygrid[ynumber - 1]) {
+			lefty = ygrid[0] - deltaY;
+			righty = ygrid[0];
+		} else {
+			lefty = ygrid[ynumber - 1];
+			righty = ygrid[ynumber];
+		}
+	} else if(j == ynumber) {
+		if (particle.coordinates.y + particle.dy < ygrid[ynumber]) {
+			lefty = ygrid[0];
+			righty = ygrid[1];
+		} else {
+			lefty = ygrid[ynumber];
+			righty = ygrid[ynumber] + deltaY;
+		}
+	} else {
+		lefty = ygrid[j];
+		righty = ygrid[j + 1];
+	}
+
+	if(k == -1) {
+		if (particle.coordinates.z - particle.dz > zgrid[0]) {
+			leftz = zgrid[znumber-1];
+			rightz = zgrid[znumber];
+		} else {
+			leftz = zgrid[0] - deltaZ;
+			rightz = zgrid[0];
+		}	
+	} else if(k == 0){
+		if (particle.coordinates.z - particle.dz > zgrid[1]) {
+			leftz = ygrid[znumber];
+			rightz = ygrid[znumber] + deltaZ;
+		} else {
+			leftz = zgrid[0];
+			rightz = zgrid[1];
+		}
+	} else if(k == znumber - 1){
+		if (particle.coordinates.z + particle.dz < zgrid[znumber - 1]) {
+			leftz = zgrid[0] - deltaZ;
+			rightz = zgrid[0];
+		} else {
+			leftz = zgrid[znumber - 1];
+			rightz = zgrid[znumber];
+		}
+	} else if(k == znumber) {
+		if (particle.coordinates.z + particle.dz < zgrid[znumber]) {
+			leftz = zgrid[0];
+			rightz = zgrid[1];
+		} else {
+			leftz = zgrid[znumber];
+			rightz = zgrid[znumber] + deltaZ;
+		}
+	} else {
+		leftz = zgrid[k];
+		rightz = zgrid[k + 1];
+	}
+
 
 
 	double correlationx = correlationBspline(x, particle.dx, leftx, rightx);
+	double correlationy = correlationBspline(y, particle.dy, lefty, righty);
+	double correlationz = correlationBspline(z, particle.dz, leftz, rightz);
 
-	return correlationx;
+	return correlationx*correlationy*correlationz;
 }
 
-double Simulation::correlationWithEbin(Particle& particle, int i) {
-	double x = particle.x;
+double Simulation::correlationWithEbin(Particle& particle, int i, int j, int k) {
+	double x = particle.coordinates.x;
+	double y = particle.coordinates.y;
+	double z = particle.coordinates.z;
 
 	double leftx;
 	double rightx;
+	double lefty;
+	double righty;
+	double leftz;
+	double rightz;
 
 	if(i == -1) {
 		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 			return 0.0;
 		}
-		if (particle.x - particle.dx > xgrid[0] - deltaX/2) {
+		if (particle.coordinates.x - particle.dx > xgrid[0] - deltaX/2) {
 			leftx = xgrid[xnumber - 1] - deltaX/2;
 			rightx = xgrid[xnumber - 1] + deltaX/2;
 		} else {
@@ -517,7 +784,7 @@ double Simulation::correlationWithEbin(Particle& particle, int i) {
 		}		
 	} else if(i == 0){
 		if(boundaryConditionType == PERIODIC){
-			if (particle.x - particle.dx > xgrid[0] + deltaX/2) {
+			if (particle.coordinates.x - particle.dx > xgrid[0] + deltaX/2) {
 				leftx = xgrid[xnumber] - deltaX/2;
 				rightx = xgrid[xnumber] + deltaX/2;
 			} else {
@@ -530,7 +797,7 @@ double Simulation::correlationWithEbin(Particle& particle, int i) {
 		}
 	} else if (i == xnumber) {
 		if(boundaryConditionType == PERIODIC){
-			if (particle.x + particle.dx < xgrid[xnumber] - deltaX/2) {
+			if (particle.coordinates.x + particle.dx < xgrid[xnumber] - deltaX/2) {
 				leftx = xgrid[0] - deltaX/2;
 				rightx = xgrid[0] + deltaX/2;
 			} else {
@@ -545,7 +812,7 @@ double Simulation::correlationWithEbin(Particle& particle, int i) {
 		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 			return 0.0;
 		}
-		if (particle.x + particle.dx < xgrid[xnumber] + deltaX/2) {
+		if (particle.coordinates.x + particle.dx < xgrid[xnumber] + deltaX/2) {
 			leftx = xgrid[1] - deltaX/2;
 			rightx = xgrid[1] + deltaX/2;
 		} else {
@@ -557,9 +824,85 @@ double Simulation::correlationWithEbin(Particle& particle, int i) {
 		rightx = xgrid[i] + (deltaX / 2);
 	}
 
-	double correlationx = correlationBspline(x, particle.dx, leftx, rightx);
+	if(j == -1) {
+		if (particle.coordinates.y - particle.dy > ygrid[0] - deltaY/2) {
+			lefty = ygrid[ynumber - 1] - deltaY/2;
+			righty = ygrid[ynumber - 1] + deltaY/2;
+		} else {
+			lefty = ygrid[0] - 3*deltaY/2;
+			righty = ygrid[0] - deltaY/2;
+		}		
+	} else if(j == 0){
+			if (particle.coordinates.y - particle.dy > ygrid[0] + deltaY/2) {
+				lefty = ygrid[ynumber] - deltaY/2;
+				righty = ygrid[ynumber] + deltaY/2;
+			} else {
+				lefty = ygrid[0] - deltaY/2;
+				righty = ygrid[0] + deltaY/2;
+			}
+	} else if (j == ynumber) {
+			if (particle.coordinates.y + particle.dy < ygrid[ynumber] - deltaY/2) {
+				lefty = ygrid[0] - deltaY/2;
+				righty = ygrid[0] + deltaY/2;
+			} else {
+				lefty = ygrid[ynumber] - deltaY/2;
+				righty = ygrid[ynumber] + deltaY/2;
+			}
+	} else if(j == ynumber + 1) {
+		if (particle.coordinates.y + particle.dy < ygrid[ynumber] + deltaY/2) {
+			lefty = ygrid[1] - deltaY/2;
+			righty = ygrid[1] + deltaY/2;
+		} else {
+			lefty = ygrid[ynumber] + deltaY/2;
+			righty = ygrid[ynumber] + 3*deltaY/2;
+		}
+	} else {
+		lefty = ygrid[j] - (deltaY / 2);
+		righty = ygrid[j] + (deltaY / 2);
+	}
 
-	return correlationx;
+	if(k == -1) {
+		if (particle.coordinates.z - particle.dz > zgrid[0] - deltaZ/2) {
+			leftz = zgrid[ynumber - 1] - deltaZ/2;
+			rightz = zgrid[ynumber - 1] + deltaZ/2;
+		} else {
+			leftz = zgrid[0] - 3*deltaZ/2;
+			rightz = zgrid[0] - deltaZ/2;
+		}		
+	} else if(k == 0){
+			if (particle.coordinates.z - particle.dz > zgrid[0] + deltaZ/2) {
+				leftz = zgrid[znumber] - deltaZ/2;
+				rightz = zgrid[znumber] + deltaZ/2;
+			} else {
+				leftz = zgrid[0] - deltaZ/2;
+				rightz = zgrid[0] + deltaZ/2;
+			}
+	} else if (k == znumber) {
+			if (particle.coordinates.z + particle.dz < zgrid[znumber] - deltaZ/2) {
+				leftz = zgrid[0] - deltaZ/2;
+				rightz = zgrid[0] + deltaZ/2;
+			} else {
+				leftz = zgrid[znumber] - deltaZ/2;
+				rightz = zgrid[znumber] + deltaZ/2;
+			}
+	} else if(k == znumber + 1) {
+		if (particle.coordinates.z + particle.dz < zgrid[znumber] + deltaZ/2) {
+			leftz = zgrid[1] - deltaZ/2;
+			rightz = zgrid[1] + deltaZ/2;
+		} else {
+			leftz = zgrid[znumber] + deltaZ/2;
+			rightz = zgrid[znumber] + 3*deltaZ/2;
+		}
+	} else {
+		leftz = zgrid[k] - (deltaZ / 2);
+		rightz = zgrid[k] + (deltaZ / 2);
+	}
+
+	double correlationx = correlationBspline(x, particle.dx, leftx, rightx);
+	double correlationy = correlationBspline(y, particle.dy, lefty, righty);
+	double correlationz = correlationBspline(z, particle.dz, leftz, rightz);
+
+	return correlationx*correlationy*correlationz;
 }
 
 double Simulation::correlationBspline(const double& x, const double& dx, const double& leftx, const double& rightx) {
