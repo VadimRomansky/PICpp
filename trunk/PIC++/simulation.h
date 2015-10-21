@@ -211,12 +211,11 @@ public:
 	void updateDeltaT();
 
 	void evaluateFields();
-	void smoothEfield();
 	void updateEfield();
 	void updateBfield();
 	void evaluateExplicitDerivative();
-	void checkEquationMatrix(std::vector<MatrixElement>** matrix, int lnumber);
-	void createSuperConductorLeftEquation();
+	void checkEquationMatrix(std::vector<MatrixElement>**** matrix, int lnumber);
+	void createSuperConductorLeftEquation(int j, int k);
 	void createFreeRightEquation(int j, int k);
 	void createFreeRightEquationX(int j, int k, Vector3d& rightPart);
 	void createFreeRightEquationY(int j, int k, Vector3d& rightPart);

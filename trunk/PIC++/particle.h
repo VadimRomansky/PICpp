@@ -14,6 +14,8 @@ public:
 	double weight;
 	ParticleTypes type;
 
+	bool escaped;
+
 	Vector3d coordinates;
 
 	Vector3d momentum;
