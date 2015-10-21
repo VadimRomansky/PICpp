@@ -25,6 +25,8 @@ Particle::Particle(int n, double m, double q, double w, ParticleTypes t, double 
 	dx = dx0;
 	dy = dy0;
 	dz = dz0;
+
+	escaped = false;
 }
 
 Particle::Particle(const Particle& particle){
@@ -42,6 +44,8 @@ Particle::Particle(const Particle& particle){
 	dx = particle.dx;
 	dy = particle.dy;
 	dz = particle.dz;
+
+	escaped = particle.escaped;
 }
 
 double Particle::shapeFunctionX(const double& xvalue){
@@ -95,7 +99,10 @@ double Particle::velocityZ(double c){
 void Particle::addVelocity(Vector3d& v, double c) {
 	if(v.norm() > c) {
 		printf("ERROR v > c\n");
-		exit(0);		
+		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "v/c > 1 in addVelocity\n");
+		fclose(errorLogFile);
+		exit(0);			
 	}
 
 	Vector3d vel = velocity(c);
@@ -108,6 +115,11 @@ void Particle::addVelocity(Vector3d& v, double c) {
 void Particle::setMomentumByV(Vector3d v, double c){
 	if(v.norm() > c){
 		printf("ERROR v > c\n");
+		printf("v = %g\n",v.norm());
+		printf("c = %g\n", c);
+		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "v/c > 1 in setMomentumByV\n");
+		fclose(errorLogFile);
 		exit(0);
 	}
 	double gamma_factor = 1/sqrt(1 - v.scalarMult(v)/(c*c));
@@ -124,5 +136,6 @@ double Particle::gammaFactor(double c){
 
 double Particle::energy(double c) {
 	double gamma_factor = gammaFactor(c);
-	return gamma_factor*mass*c*c;
+	//return gamma_factor*mass*c*c;
+	return (gamma_factor-1)*mass*c*c;
 }

@@ -111,24 +111,24 @@ void Simulation::moveParticle(Particle* particle){
 
 	newVelocity = tempParticle.velocity(speed_of_light_normalized);
 
-	tempParticle.x += ((1 - eta)*velocity.x + eta*newVelocity.x)*eta*deltaT;
-	tempParticle.y += ((1 - eta)*velocity.y + eta*newVelocity.y)*eta*deltaT;
-	tempParticle.z += ((1 - eta)*velocity.z + eta*newVelocity.z)*eta*deltaT;
+	tempParticle.coordinates.x += ((1 - eta)*velocity.x + eta*newVelocity.x)*eta*deltaT;
+	tempParticle.coordinates.y += ((1 - eta)*velocity.y + eta*newVelocity.y)*eta*deltaT;
+	tempParticle.coordinates.z += ((1 - eta)*velocity.z + eta*newVelocity.z)*eta*deltaT;
 
 	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-		if(tempParticle.x < xgrid[0]){
-			particle->x = 2*xgrid[0] - tempParticle.x;
-			particle->y = tempParticle.y;
-			particle->z = tempParticle.z;
+		if(tempParticle.coordinates.x < xgrid[0]){
+			particle->coordinates.x = 2*xgrid[0] - tempParticle.coordinates.x;
+			particle->coordinates.y = tempParticle.coordinates.y;
+			particle->coordinates.z = tempParticle.coordinates.z;
 			newVelocity.x = -newVelocity.x;
 			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 			return;
 		}
-		if(tempParticle.x > xgrid[xnumber]){
+		if(tempParticle.coordinates.x > xgrid[xnumber]){
 			escapedParticles.push_back(particle);
-			particle->x = xsize;
-			particle->y = tempParticle.y;
-			particle->z = tempParticle.z;
+			particle->coordinates.x = xsize;
+			particle->coordinates.y = tempParticle.coordinates.y;
+			particle->coordinates.z = tempParticle.coordinates.z;
 			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 			particle->escaped = true;
 			return;
@@ -151,23 +151,23 @@ void Simulation::moveParticle(Particle* particle){
 		//mistake in noguchi - he writes betashift!
 		middleVelocity = (tempParticle.rotationTensor*tempParticle.gammaFactor(speed_of_light_normalized)*velocity) + rotatedE*beta;
 
-		tempParticle.x += (middleVelocity.x*eta*deltaT);
+		tempParticle.coordinates.x += (middleVelocity.x*eta*deltaT);
 		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 			//todo more accurate speed!!
-			if(tempParticle.x < xgrid[0]){
-				particle->x = 2*xgrid[0] - tempParticle.x + fabs(middleVelocity.x*(1 - eta)*deltaT);
-				particle->y = tempParticle.y + middleVelocity.y*(1 - eta)*deltaT;
-				particle->z = tempParticle.z + middleVelocity.z*(1 - eta)*deltaT;
+			if(tempParticle.coordinates.x < xgrid[0]){
+				particle->coordinates.x = 2*xgrid[0] - tempParticle.coordinates.x + fabs(middleVelocity.x*(1 - eta)*deltaT);
+				particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y*(1 - eta)*deltaT;
+				particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z*(1 - eta)*deltaT;
 				newVelocity = middleVelocity;
 				newVelocity.x = -newVelocity.x;
 				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 				return;
 			}
-			if(tempParticle.x > xgrid[xnumber]){
+			if(tempParticle.coordinates.x > xgrid[xnumber]){
 				escapedParticles.push_back(particle);
-				particle->x = xsize;
-				particle->y = tempParticle.y;
-				particle->z = tempParticle.z;
+				particle->coordinates.x = xsize;
+				particle->coordinates.y = tempParticle.coordinates.y;
+				particle->coordinates.z = tempParticle.coordinates.z;
 				particle->setMomentumByV(middleVelocity, speed_of_light_normalized);
 				particle->escaped = true;
 				return;
@@ -187,58 +187,86 @@ void Simulation::moveParticle(Particle* particle){
 	particle->momentum = tempParticle.momentum;
 	//particle->momentum.x = 0;
 
-	particle->x += middleVelocity.x*deltaT;
+	particle->coordinates.x += middleVelocity.x*deltaT;
 
-	particle->y += middleVelocity.y*deltaT;
-	particle->z += middleVelocity.z*deltaT;
+	particle->coordinates.y += middleVelocity.y*deltaT;
+	particle->coordinates.z += middleVelocity.z*deltaT;
 
 	correctParticlePosition(particle);
 }
 
 void Simulation::correctParticlePosition(Particle* particle) {
+	if(particle->coordinates.y < ygrid[0]) {
+		particle->coordinates.y = particle->coordinates.y + ysize;
+	}
+	if(particle->coordinates.y > ygrid[ynumber]) {
+		particle->coordinates.y = particle->coordinates.y - ysize;
+	}		
+
+	if(particle->coordinates.z < zgrid[0]) {
+		particle->coordinates.z = particle->coordinates.z + zsize;
+	}
+	if(particle->coordinates.z > zgrid[znumber]) {
+		particle->coordinates.z = particle->coordinates.z - zsize;
+	}		
+
 	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-		if(particle->x < xgrid[0]){
-			particle->x = 2*xgrid[0] - particle->x;
+		if(particle->coordinates.x < xgrid[0]){
+			particle->coordinates.x = 2*xgrid[0] - particle->coordinates.x;
 			particle->momentum.x = -particle->momentum.x;
 			return;
 		}
-		if(particle->x > xgrid[xnumber]){
+		if(particle->coordinates.x > xgrid[xnumber]){
 			escapedParticles.push_back(particle);
-			particle->x = xsize;
+			particle->coordinates.x = xsize;
 			particle->escaped = true;
 			return;
 		}
 	}
 	if(boundaryConditionType == PERIODIC){
-		if(particle->x < xgrid[0]) {
-			particle->x = particle->x + xsize;
+		if(particle->coordinates.x < xgrid[0]) {
+			particle->coordinates.x = particle->coordinates.x + xsize;
 		}
-		if(particle->x > xgrid[xnumber]) {
-			particle->x = particle->x - xsize;
+		if(particle->coordinates.x > xgrid[xnumber]) {
+			particle->coordinates.x = particle->coordinates.x - xsize;
 		}		
 	}
 }
 
 void Simulation::correctParticlePosition(Particle& particle) {
+	if(particle.coordinates.y < ygrid[0]) {
+		particle.coordinates.y = particle.coordinates.y + ysize;
+	}
+	if(particle.coordinates.y > ygrid[ynumber]) {
+		particle.coordinates.y = particle.coordinates.y - ysize;
+	}
+
+	if(particle.coordinates.z < zgrid[0]) {
+		particle.coordinates.z = particle.coordinates.z + zsize;
+	}
+	if(particle.coordinates.z > zgrid[znumber]) {
+		particle.coordinates.z = particle.coordinates.z - zsize;
+	}	
+
 	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-		if(particle.x < xgrid[0]){
-			particle.x = 2*xgrid[0] - particle.x;
+		if(particle.coordinates.x < xgrid[0]){
+			particle.coordinates.x = 2*xgrid[0] - particle.coordinates.x;
 			particle.momentum.x = -particle.momentum.x;
 			return;
 		}
-		if(particle.x > xgrid[xnumber]){
+		if(particle.coordinates.x > xgrid[xnumber]){
 			escapedParticles.push_back(&particle);
-			particle.x = xsize;
+			particle.coordinates.x = xsize;
 			particle.escaped = true;
 			return;
 		}
 	}
 	if(boundaryConditionType == PERIODIC){
-		if(particle.x < xgrid[0]) {
-			particle.x = particle.x + xsize;
+		if(particle.coordinates.x < xgrid[0]) {
+			particle.coordinates.x = particle.coordinates.x + xsize;
 		}
-		if(particle.x > xgrid[xnumber]) {
-			particle.x = particle.x - xsize;
+		if(particle.coordinates.x > xgrid[xnumber]) {
+			particle.coordinates.x = particle.coordinates.x - xsize;
 		}		
 	}
 }
@@ -291,19 +319,23 @@ void Simulation::injectNewParticles(int count){
 
 	int n = particles.size();
 
-	double weight = (concentration / particlesPerBin) * volumeB(xnumber - 1);
+	double weight = (concentration / particlesPerBin) * volumeB(xnumber - 1, 0, 0);
 	double x = xgrid[xnumber] - deltaX*0.00001;
-	for (int l = 0; l < 2 * count; ++l) {
-		ParticleTypes type;
-		if (l % 2 == 0) {
-			type = PROTON;
-		} else {
-			type = ELECTRON;
+	for(int j = 0; j < ynumber; ++j){
+		for(int k = 0; k < znumber; ++k){
+			for (int l = 0; l < 2 * count; ++l) {
+				ParticleTypes type;
+				if (l % 2 == 0) {
+					type = PROTON;
+				} else {
+					type = ELECTRON;
+				}
+				Particle* particle = createParticle(n, xnumber - 1, j, k, weight, type);
+				n++;
+				particle->coordinates.x = x;
+				particle->addVelocity(V0, speed_of_light_normalized);
+				particles.push_back(particle);
+			}
 		}
-		Particle* particle = createParticle(n, xnumber - 1, weight, type);
-		n++;
-		particle->x = x;
-		particle->addVelocity(V0, speed_of_light_normalized);
-		particles.push_back(particle);
 	}
 }
