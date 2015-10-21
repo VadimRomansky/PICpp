@@ -6,9 +6,11 @@ MatrixElement::MatrixElement() {
 	l = 0;
 }
 
-MatrixElement::MatrixElement(double v, int iv, int lv) {
+MatrixElement::MatrixElement(double v, int iv, int jv, int kv, int lv) {
 	value = v;
 	i = iv;
+	j = jv;
+	k = kv;
 	l = lv;
 }
 

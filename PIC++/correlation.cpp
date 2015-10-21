@@ -57,9 +57,23 @@ void Simulation::collectParticlesIntoBins() {
 				tempi = 1;
 			}
 			for(int j = ycount - 1; j <= ycount + 1; ++j){
-				for(int k = zcount - 1; k <= zcount + 1; ++k){ 
-					if (particleCrossEbin(*particle, tempi)) {
-						pushParticleIntoEbin(particle, tempi);
+				int tempj = j;
+				if( tempj == -1) {
+					tempj = ynumber - 1;
+				}
+				if(tempj == ynumber + 1) {
+					tempj = 1;
+				}
+				for(int k = zcount - 1; k <= zcount + 1; ++k){
+					int tempk = k;
+					if( tempk == -1) {
+						tempk = znumber - 1;
+					}
+					if(tempk == znumber + 1) {
+						tempk = 1;
+					}
+					if (particleCrossEbin(*particle, tempi, tempj, tempk)) {
+						pushParticleIntoEbin(particle, tempi, tempj, tempk);
 					}
 				}
 			}
@@ -172,13 +186,13 @@ bool Simulation::particleCrossBbin(Particle& particle, int i, int j, int k) {
 		}	
 
 		if (i == 0) {
-			if (xgrid[i + 1] < particle.x - particle.dx)
+			if (xgrid[i + 1] < particle.coordinates.x - particle.dx)
 				return false;
 		} else if (i == xnumber - 1) {
-			if (xgrid[i] > particle.x + particle.dx)
+			if (xgrid[i] > particle.coordinates.x + particle.dx)
 				return false;
 		} else {
-			if ((xgrid[i] > particle.x + particle.dx) || (xgrid[i + 1] < particle.x - particle.dx))
+			if ((xgrid[i] > particle.coordinates.x + particle.dx) || (xgrid[i + 1] < particle.coordinates.x - particle.dx))
 				return false;
 		}
 		return true;
