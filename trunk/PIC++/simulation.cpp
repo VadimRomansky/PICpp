@@ -438,17 +438,46 @@ void Simulation::updateElectroMagneticParameters() {
 						//dielectricTensor[i] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 				
 						Particle tempParticle = *particle;
+						Matrix3d pressureTensorDerX;
+						Matrix3d pressureTensorDerY;
+						Matrix3d pressureTensorDerZ;
+						Matrix3d tensor = rotatedVelocity.tensorMult(rotatedVelocity);
+
 						double shiftX = 0.01*deltaX;
-						if(particle->x + shiftX >xgrid[xnumber]){
+						if(particle->coordinates.x + shiftX >xgrid[xnumber]){
 							shiftX = -shiftX;
 						}
-						tempParticle.x += shiftX;
+						tempParticle.coordinates.x = particle->coordinates.x + shiftX;
 
 						double tempCorrelation = correlationWithEbin(tempParticle, i, j, k) / volumeE(i, j, k);
 
-						divPressureTensor[i].x += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][0] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
-						divPressureTensor[i].y += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][1] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
-						divPressureTensor[i].z += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][2] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+						pressureTensorDerX = tensor*particle->weight*particle->charge*(tempCorrelation - correlation)/shiftX;
+
+						double shiftY = 0.01*deltaY;
+						if(particle->coordinates.y + shiftY >ygrid[ynumber]){
+							shiftY = -shiftY;
+						}
+						tempParticle.coordinates.x = particle->coordinates.x;
+						tempParticle.coordinates.y = particle->coordinates.y + shiftY;
+
+						tempCorrelation = correlationWithEbin(tempParticle, i, j, k) / volumeE(i, j, k);
+
+						pressureTensorDerY = tensor*particle->weight*particle->charge*(tempCorrelation - correlation)/shiftY;
+
+						double shiftZ = 0.01*deltaZ;
+						if(particle->coordinates.z + shiftZ >zgrid[znumber]){
+							shiftZ = -shiftZ;
+						}
+						tempParticle.coordinates.y = particle->coordinates.y;
+						tempParticle.coordinates.z = particle->coordinates.z + shiftZ;
+
+						tempCorrelation = correlationWithEbin(tempParticle, i, j, k) / volumeE(i, j, k);
+
+						pressureTensorDerZ = tensor*particle->weight*particle->charge*(tempCorrelation - correlation)/shiftZ;
+
+						divPressureTensor[i][j][k].x += pressureTensorDerX.matrix[0][0] + pressureTensorDerY.matrix[1][0] + pressureTensorDerZ.matrix[2][0];
+						divPressureTensor[i][j][k].y += pressureTensorDerX.matrix[0][1] + pressureTensorDerY.matrix[1][1] + pressureTensorDerZ.matrix[2][1];
+						divPressureTensor[i][j][k].z += pressureTensorDerX.matrix[0][2] + pressureTensorDerY.matrix[1][2] + pressureTensorDerZ.matrix[2][2];
 					}
 					if(solverType == EXPLICIT){
 						electricFlux[i][j][k] += velocity*particle->charge*particle->weight*correlation;
@@ -650,9 +679,9 @@ void Simulation::updateEnergy() {
 	}
 
 	for (int i = 0; i < xnumber; ++i) {
-		for(int j = 0; j < ynumber; ++J){
+		for(int j = 0; j < ynumber; ++j){
 			for(int k = 0; k < znumber; ++k){
-				Vector3d B = (Bfield[i] - B0)*fieldScale;
+				Vector3d B = (Bfield[i][j][k] - B0)*fieldScale;
 				magneticFieldEnergy += B.scalarMult(B) * volumeB(i, j, k) / (8 * pi);
 			}
 		}
@@ -724,116 +753,137 @@ Vector3d Simulation::getBfield(int i, int j, int k) {
 	return Bfield[i][j][k];
 }
 
-Vector3d Simulation::getTempEfield(int i) {
+Vector3d Simulation::getTempEfield(int i, int j, int k) {
 	if (i < 0) {
-		return tempEfield[xnumber-1];
+		i = xnumber - 1;
 	} else if (i > xnumber) {
-		return tempEfield[1];
+		i = 1;
 	}
 
-	return tempEfield[i];
-}
-
-Vector3d Simulation::getNewEfield(int i) {
-	if (i < 0) {
-		return newEfield[xnumber-1];
-	} else if (i > xnumber) {
-		return newEfield[1];
+	if (j < 0) {
+		j = ynumber - 1;
+	} else if (j > ynumber) {
+		j = 1;
 	}
 
-	return newEfield[i];
-}
-
-Vector3d Simulation::getEfield(int i) {
-	if (i < 0) {
-		return Efield[xnumber-1];
-	} else if (i > xnumber) {
-		return Efield[1];
+	if (k < 0) {
+		k = znumber - 1;
+	} else if (k > znumber) {
+		k = 1;
 	}
 
-	return Efield[i];
+	return tempEfield[i][j][k];
 }
 
-Matrix3d Simulation::getPressureTensor(int i) {
+Vector3d Simulation::getNewEfield(int i, int j, int k) {
+	if (i < 0) {
+		i = xnumber - 1;
+	} else if (i > xnumber) {
+		i = 1;
+	}
+
+	if (j < 0) {
+		j = ynumber - 1;
+	} else if (j > ynumber) {
+		j = 1;
+	}
+
+	if (k < 0) {
+		k = znumber - 1;
+	} else if (k > znumber) {
+		k = 1;
+	}
+
+	return newEfield[i][j][k];
+}
+
+Vector3d Simulation::getEfield(int i, int j, int k) {
+	if (i < 0) {
+		i = xnumber - 1;
+	} else if (i > xnumber) {
+		i = 1;
+	}
+
+	if (j < 0) {
+		j = ynumber - 1;
+	} else if (j > ynumber) {
+		j = 1;
+	}
+
+	if (k < 0) {
+		k = znumber - 1;
+	} else if (k > znumber) {
+		k = 1;
+	}
+
+	return Efield[i][j][k];
+}
+
+Matrix3d Simulation::getPressureTensor(int i, int j, int k) {
 	if (i < 0) {
 		i = xnumber - 1;
 	} else if (i >= xnumber) {
 		i = 0;
 	}
 
-	return pressureTensor[i];
+	if (j < 0) {
+		j = ynumber - 1;
+	} else if (j >= ynumber) {
+		j = 0;
+	}
+
+	if (k < 0) {
+		k = znumber - 1;
+	} else if (k >= znumber) {
+		k = 0;
+	}
+
+	return pressureTensor[i][j][k];
 }
 
-double Simulation::getDensity(int i) {
+double Simulation::getDensity(int i, int j, int k) {
 	if (i < 0) {
 		i = xnumber - 1;
-	}
-	if (i >= xnumber) {
+	} else if (i >= xnumber) {
 		i = 0;
 	}
 
-
-	return electricDensity[i];
-}
-
-void Simulation::smoothFlux(){
-	Vector3d* newFlux = new Vector3d[xnumber + 1];
-	for(int i = 0; i < xnumber + 1; ++i){
-		newFlux[i] = Vector3d(0, 0, 0);
-		int prevI = i - 1;
-		if(prevI < 0){
-			prevI = prevI + xnumber;
-		}
-		int nextI = i + 1;
-		if(nextI >= xnumber + 1){
-			nextI = nextI - xnumber;
-		}
-
-		newFlux[i] = (electricFlux[prevI] + electricFlux[i]*2 + electricFlux[nextI])/4.0;
+	if (j < 0) {
+		j = ynumber - 1;
+	} else if (j >= ynumber) {
+		j = 0;
 	}
 
-	for(int i = 0; i < xnumber + 1; ++i){
-		electricFlux[i] = newFlux[i];
+	if (k < 0) {
+		k = znumber - 1;
+	} else if (k >= znumber) {
+		k = 0;
 	}
 
-	delete[] newFlux;
-}
 
-void Simulation::smoothEderivative(){
-	Vector3d* newDerivative = new Vector3d[xnumber + 1];
-	for(int i = 0; i < xnumber + 1; ++i){
-		newDerivative[i] = Vector3d(0, 0, 0);
-		int prevI = i - 1;
-		if(prevI < 0){
-			prevI = prevI + xnumber;
-		}
-		int nextI = i + 1;
-		if(nextI >= xnumber + 1){
-			nextI = nextI - xnumber;
-		}
-
-		newDerivative[i] = (Ederivative[prevI] + Ederivative[i]*2 + Ederivative[nextI])/4.0;
-	}
-
-	for(int i = 0; i < xnumber + 1; ++i){
-		Ederivative[i] = newDerivative[i];
-	}
-
-	delete[] newDerivative;
+	return electricDensity[i][j][k];
 }
 
 void Simulation::updateParameters(){
-	maxBfield = Bfield[0];
-	maxEfield = Efield[0];
+	maxBfield = Bfield[0][0][0];
+	maxEfield = Efield[0][0][0];
 	for(int i = 0; i < xnumber ; ++i){
-		if(Bfield[i].norm() > maxBfield.norm()){
-			maxBfield = Bfield[i];
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				if(Bfield[i][j][k].norm() > maxBfield.norm()){
+					maxBfield = Bfield[i][j][k];
+				}
+			}
 		}
 	}
 
 	for(int i = 0; i < xnumber + 1; ++i){
-		if(Efield[i].norm() > maxEfield.norm()){
-			maxEfield = Efield[i];
+		for(int j = 0; j < ynumber + 1; ++j){
+			for(int k = 0; k < znumber + 1; ++k){
+				if(Efield[i][j][k].norm() > maxEfield.norm()){
+					maxEfield = Efield[i][j][k];
+				}
+			}
 		}
 	}
 }
@@ -846,18 +896,30 @@ void Simulation::updateExternalFlux(){
 	double omega = kw*phaseV;
 
 	for(int i = 0; i < xnumber +1 ; ++i){
-		externalElectricFlux[i] = Vector3d(0, 0, 1.0)*extJ*cos(kw*xgrid[i] - omega*time);
+		for(int j = 0; j < ynumber + 1; ++j){
+			for(int k = 0; k < znumber + 1; ++k){
+				externalElectricFlux[i][j][k] = Vector3d(0, 0, 1.0)*extJ*cos(kw*xgrid[i] - omega*time);
+			}
+		}
 	}
 }
 
 void Simulation::resetNewTempFields(){
 	for(int i = 0; i < xnumber; ++i){
-		newBfield[i] = Bfield[i];
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				newBfield[i][j][k] = Bfield[i][j][k];
+			}
+		}
 	}
 
 	for(int i = 0; i < xnumber + 1; ++i){
-		tempEfield[i] = Efield[i];
-		newEfield[i] = Efield[i];
-		explicitEfield[i] = Efield[i];
+		for(int j = 0; j < ynumber + 1; ++j){
+			for(int k = 0; k < znumber + 1; ++k){
+				tempEfield[i][j][k] = Efield[i][j][k];
+				newEfield[i][j][k] = Efield[i][j][k];
+				explicitEfield[i][j][k] = Efield[i][j][k];
+			}
+		}
 	}
 }

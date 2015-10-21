@@ -192,7 +192,7 @@ Simulation readInput(FILE* inputFile) {
 		exit(0);
 	}
 
-	return Simulation(xnumber, xsize, temperature, density, Vx, Vy, Vz, Ex, Ey, Ez, Bx, By, Bz, maxIterations, maxTime, particlesPerBin);
+	return Simulation(xnumber, ynumber, znumber, xsize, ysize, zsize, temperature, density, Vx, Vy, Vz, Ex, Ey, Ez, Bx, By, Bz, maxIterations, maxTime, particlesPerBin);
 }
 
 Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile){
@@ -285,11 +285,19 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 
 void readFields(FILE* Efile, FILE* Bfile, Simulation& simulation){
 	for(int i = 0; i < simulation.xnumber; ++i) {
-		fscanf(Bfile, "%lf %lf %lf", &(simulation.Bfield[i].x), &(simulation.Bfield[i].y), &(simulation.Bfield[i].z));
+		for(int j = 0; j < simulation.ynumber; ++j){
+			for(int k = 0; k < simulation.znumber; ++k){
+				fscanf(Bfile, "%lf %lf %lf", &(simulation.Bfield[i][j][k].x), &(simulation.Bfield[i][j][k].y), &(simulation.Bfield[i][j][k].z));
+			}
+		}
 	}
 
 	for(int i = 0; i < simulation.xnumber + 1; ++i) {
-		fscanf(Efile, "%lf %lf %lf", &(simulation.Efield[i].x), &(simulation.Efield[i].y), &(simulation.Efield[i].z));
+		for(int j = 0; j < simulation.ynumber + 1; ++j){
+			for(int k = 0; k < simulation.znumber + 1; ++k){
+				fscanf(Efile, "%lf %lf %lf", &(simulation.Efield[i][j][k].x), &(simulation.Efield[i][j][k].y), &(simulation.Efield[i][j][k].z));
+			}
+		}
 	}
 }
 
@@ -307,8 +315,10 @@ void readParticles(FILE* particlesFile, Simulation& simulation){
 		double py;
 		double pz;
 		double dx;
+		double dy;
+		double dz;
 
-		fscanf(particlesFile, "%d %lf %lf %lf %d %lf %lf %lf %lf %lf %lf %lf", &number, &mass, &charge, &weight, &type, &x, &y, &z, &px, &py, &pz, &dx);
+		fscanf(particlesFile, "%d %lf %lf %lf %d %lf %lf %lf %lf %lf %lf %lf %lf %lf", &number, &mass, &charge, &weight, &type, &x, &y, &z, &px, &py, &pz, &dx, &dy, &dz);
 
 		ParticleTypes particleType;
 		if(type == 1){
@@ -317,9 +327,7 @@ void readParticles(FILE* particlesFile, Simulation& simulation){
 			particleType = ELECTRON;
 		}
 
-		Particle* particle = new Particle(number, mass, charge, weight, particleType, x, px, py, pz, dx);
-		particle->y = y;
-		particle->z = z;
+		Particle* particle = new Particle(number, mass, charge, weight, particleType, x, y, z, px, py, pz, dx, dy, dz);
 
 		simulation.particles.push_back(particle);
 	}

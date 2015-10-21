@@ -268,8 +268,6 @@ public:
 	Vector3d getEfield(int i, int j, int k);
 	Matrix3d getPressureTensor(int i, int j, int k);
 	double getDensity(int i, int j, int k);
-	void smoothFlux();
-	void smoothEderivative();
 
 	void createParticles();
 	Particle* getFirstProton();

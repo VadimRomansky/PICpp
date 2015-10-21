@@ -23,7 +23,7 @@ plot (general(1:N2,2), general(1:N2,4), 'green', general(1:N2,2), general(1:N2,5
 title ('energy');
 xlabel ('{{t \omega_p}/{2\pi}}');
 ylabel ('E erg');
-legend('particle', 'electric','magnetic', 'full','Location','northeast');
+legend('particle', 'electric','magnetic', 'full','Location','southwest');
 grid ;
 
 figure(2);
