@@ -61,22 +61,44 @@ void Simulation::evaluateFields() {
 
 		//evaluateMagneticField();
 		if(boundaryConditionType == PERIODIC){
-			tempEfield[xnumber] = tempEfield[0];
-			explicitEfield[xnumber] = explicitEfield[0];
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					tempEfield[xnumber][j][k] = tempEfield[0][j][k];
+					explicitEfield[xnumber][j][k] = explicitEfield[0][j][k];
+				}
+			}
 		} else {
 			//tempEfield[xnumber] = E0;
 
 			//tempEfield[xnumber] = Efield[xnumber] + evaluateRotB(xnumber - 1)*speed_of_light_normalized*deltaT*theta;
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					tempEfield[xnumber][j][k] = tempEfield[xnumber - 1][j][k];
 
-			tempEfield[xnumber] = tempEfield[xnumber - 1];
-
-			explicitEfield[xnumber] = tempEfield[xnumber];
+					explicitEfield[xnumber][j][k] = tempEfield[xnumber][j][k];
+				}
+			}
 		}
+
+		for(int i = 0; i < xnumber + 1; ++i){
+			for(int j = 0; j < ynumber; ++j){
+				tempEfield[i][j][znumber] = tempEfield[i][j][0];
+				explicitEfield[i][j][znumber] = explicitEfield[i][j][0];
+			}
+		}
+
+		for(int i = 0; i < xnumber + 1; ++i){
+			for(int k = 0; k < znumber + 1; ++k){
+				tempEfield[i][ynumber][k] = tempEfield[i][0][k];
+				explicitEfield[i][ynumber][k] = explicitEfield[i][0][k];
+			}
+		}
+
 		for (int i = 0; i < xnumber + 1; ++i) {
 			for(int j = 0; j < ynumber + 1; ++j){
 				for(int k = 0; k < znumber + 1; ++k){
 					newEfield[i][j][k] = (tempEfield[i][j][k] - Efield[i][j][k] * (1 - theta)) / theta;
-					newEfield[i][j][k].x= 0;
+					//newEfield[i][j][k].x= 0;
 				}
 			}
 		}
@@ -176,6 +198,18 @@ void Simulation::updateEfield() {
 			}
 		}
 	}
+
+		for(int i = 0; i < xnumber + 1; ++i){
+			for(int j = 0; j < ynumber; ++j){
+				Efield[i][j][znumber] = Efield[i][j][0];
+			}
+		}
+
+		for(int i = 0; i < xnumber + 1; ++i){
+			for(int k = 0; k < znumber + 1; ++k){
+				Efield[i][ynumber][k] = Efield[i][0][k];
+			}
+		}
 }
 
 void Simulation::updateBfield() {
@@ -434,16 +468,16 @@ void Simulation::createInternalEquationZ(int i) {
 	maxwellEquationMatrix[i][2].push_back(MatrixElement(element, prevI, 2));
 }
 
-void Simulation::createInternalEquation(int i) {
-	Vector3d rightPart = Efield[i];
-	Vector3d rightPart2 = Bfield[i];
+void Simulation::createInternalEquation(int i, int j, int k) {
+	Vector3d rightPart = Efield[i][j][k];
+	Vector3d rightPart2 = Bfield[i][j][k];
 
 	//rightPart = rightPart + (evaluateRotB(i)* speed_of_light_normalized - electricFlux[i]*4*pi/fieldScale) * (theta * deltaT);
-	rightPart = rightPart + (evaluateRotB(i)* speed_of_light_normalized - (electricFlux[i]*4*pi/fieldScale)) * (theta * deltaT) - (evaluateGradDensity(i)*speed_of_light_normalized_sqr*theta*theta*deltaT*deltaT*4*pi/fieldScale);
+	rightPart = rightPart + (evaluateRotB(i, j, k)* speed_of_light_normalized - (electricFlux[i][j][k]*4*pi/fieldScale)) * (theta * deltaT) - (evaluateGradDensity(i, j, k)*speed_of_light_normalized_sqr*theta*theta*deltaT*deltaT*4*pi/fieldScale);
 	//rightPart = rightPart + evaluateRotB(i)*speed_of_light_normalized*theta*deltaT - electricFlux[i]*4*pi*theta*deltaT/fieldScale;
-	createInternalEquationX(i);
-	createInternalEquationY(i);
-	createInternalEquationZ(i);
+	createInternalEquationX(i, j, k);
+	createInternalEquationY(i, j, k);
+	createInternalEquationZ(i, j, k);
 
 	alertNaNOrInfinity(rightPart.x, "right part x = NaN");
 	alertNaNOrInfinity(rightPart.y, "right part y = NaN");
@@ -454,9 +488,9 @@ void Simulation::createInternalEquation(int i) {
 	alertNaNOrInfinity(rightPart2.z, "right part 2 z = NaN");
 
 
-	maxwellEquationRightPart[i][0] = rightPart.x;
-	maxwellEquationRightPart[i][1] = rightPart.y;
-	maxwellEquationRightPart[i][2] = rightPart.z;
+	maxwellEquationRightPart[i][j][k][0] = rightPart.x;
+	maxwellEquationRightPart[i][j][k][1] = rightPart.y;
+	maxwellEquationRightPart[i][j][k][2] = rightPart.z;
 
 	//maxwellEquationRightPart[i][3] = rightPart2.x;
 	//maxwellEquationRightPart[i][4] = rightPart2.y;
@@ -465,31 +499,109 @@ void Simulation::createInternalEquation(int i) {
 
 void Simulation::evaluateMagneticField() {
 	for (int i = 0; i < xnumber; ++i) {
-		Vector3d rotEold = evaluateRotE(i);
-		Vector3d rotEnew = evaluateRotNewE(i);
-		Vector3d fakeRotE;
-		if(i >= 1 && i < xnumber - 1) {
-			fakeRotE = (evaluateRotNewE(i-1) + evaluateRotNewE(i)*2 + evaluateRotNewE(i+1))/4.0;
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				newBfield[i][j][k] = Bfield[i][j][k] - ((evaluateRotTempE(i, j, k))* 0.125 * (speed_of_light_normalized * deltaT));
+				//newBfield[i] = Bfield[i] - rotEold*speed_of_light_normalized*deltaT;
+			}
 		}
-		newBfield[i] = Bfield[i] - (rotEold * (1 - theta) + rotEnew * theta) * (speed_of_light_normalized * deltaT);
-		//newBfield[i] = Bfield[i] - rotEold*speed_of_light_normalized*deltaT;
 	}
 }
 
 void Simulation::updateBoundaries() {
-	tempEfield[xnumber] = tempEfield[0];
+		if(boundaryConditionType == PERIODIC){
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					tempEfield[xnumber][j][k] = tempEfield[0][j][k];
+					explicitEfield[xnumber][j][k] = explicitEfield[0][j][k];
+				}
+			}
+		} else {
+			//tempEfield[xnumber] = E0;
+
+			//tempEfield[xnumber] = Efield[xnumber] + evaluateRotB(xnumber - 1)*speed_of_light_normalized*deltaT*theta;
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					tempEfield[xnumber][j][k] = tempEfield[xnumber - 1][j][k];
+
+					explicitEfield[xnumber][j][k] = tempEfield[xnumber][j][k];
+				}
+			}
+		}
+
+		for(int i = 0; i < xnumber + 1; ++i){
+			for(int j = 0; j < ynumber; ++j){
+				tempEfield[i][j][znumber] = tempEfield[i][j][0];
+				explicitEfield[i][j][znumber] = explicitEfield[i][j][0];
+			}
+		}
+
+		for(int i = 0; i < xnumber + 1; ++i){
+			for(int k = 0; k < znumber + 1; ++k){
+				tempEfield[i][ynumber][k] = tempEfield[i][0][k];
+				explicitEfield[i][ynumber][k] = explicitEfield[i][0][k];
+			}
+		}
 }
 
 void Simulation::updateBoundariesOldField() {
-	Efield[xnumber] = Efield[0];
+	if(boundaryConditionType == PERIODIC){
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				Efield[xnumber][j][k] = Efield[0][j][k];
+			}
+		}
+	} else {
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				Efield[xnumber][j][k] = Efield[xnumber - 1][j][k];
+			}
+		}
+	}
+
+	for(int i = 0; i < xnumber + 1; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			Efield[i][j][znumber] = Efield[i][j][0];
+		}
+	}
+
+	for(int i = 0; i < xnumber + 1; ++i){
+		for(int k = 0; k < znumber + 1; ++k){
+			Efield[i][ynumber][k] = Efield[i][0][k];
+		}
+	}
 }
 
 void Simulation::updateBoundariesNewField() {
-	newEfield[xnumber] = newEfield[0];
+	if(boundaryConditionType == PERIODIC){
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				newEfield[xnumber][j][k] = newEfield[0][j][k];
+			}
+		}
+	} else {
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				newEfield[xnumber][j][k] = newEfield[xnumber - 1][j][k];
+			}
+		}
+	}
+
+	for(int i = 0; i < xnumber + 1; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			newEfield[i][j][znumber] = newEfield[i][j][0];
+		}
+	}
+
+	for(int i = 0; i < xnumber + 1; ++i){
+		for(int k = 0; k < znumber + 1; ++k){
+			newEfield[i][ynumber][k] = newEfield[i][0][k];
+		}
+	}
 }
 
 
-Vector3d Simulation::evaluateRotB(int i) {
+Vector3d Simulation::evaluateRotB(int i, int j, int k) {
 	if (debugMode) {
 		if ((i < 0) || ((i == 0) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT))) {
 			printf("i < 0\n");
@@ -517,30 +629,44 @@ Vector3d Simulation::evaluateRotB(int i) {
 
 	int prevI = i - 1;
 	if (prevI < 0) {
-		prevI = xnumber - 1;
+		if(boundaryConditionType == PERIODIC){
+			prevI = xnumber - 1;
+		} else {
+			prevI = i;
+		}
 	}
-	BrightX = getBfield(i);
-	BleftX = getBfield(prevI);
 
-	BrightY = (getBfield(prevI) + getBfield(i)) / 2;
-	BleftY = (getBfield(i) + getBfield(prevI)) / 2;
+	int prevJ = j - 1;
+	if (prevJ < 0) {
+		prevJ = ynumber - 1;
+	}
 
-	BrightZ = (getBfield(i) + getBfield(prevI)) / 2;
-	BleftZ = (getBfield(i) + getBfield(prevI)) / 2;
+	int prevK = k - 1;
+	if (prevK < 0) {
+		prevK = znumber - 1;
+	}
+	BrightX = (Bfield[i][j][k] + Bfield[i][prevJ][k] + Bfield[i][j][prevK] + Bfield[i][prevJ][prevK])/4.0;
+	BleftX = (Bfield[prevI][j][k] + Bfield[prevI][prevJ][k] + Bfield[prevI][j][prevK] + Bfield[prevI][prevJ][prevK])/4.0;
+
+	BrightY = (Bfield[i][j][k] + Bfield[prevI][j][k] + Bfield[i][j][prevK] + Bfield[prevI][j][prevK])/4.0;
+	BleftY = (Bfield[i][prevJ][k] + Bfield[prevI][prevJ][k] + Bfield[i][prevJ][prevK] + Bfield[prevI][prevJ][prevK])/4.0;
+
+	BrightZ = (Bfield[i][j][k] + Bfield[prevI][j][k] + Bfield[i][prevJ][k] + Bfield[prevI][prevJ][k])/4.0;
+	BleftZ = (Bfield[i][j][prevK] + Bfield[prevI][j][prevK] + Bfield[i][prevJ][prevK] + Bfield[prevI][prevJ][prevK])/4.0;
 
 
 	double x = 0;
 	double y = 0;
 	double z = 0;
 
-	x = 0;
-	y = - ((BrightX.z - BleftX.z) / deltaX);
-	z = (BrightX.y - BleftX.y) / deltaX;
+	x = (BrightY.z - BleftY.z)/deltaY - (BrightZ.y - BleftZ.y)/deltaZ;
+	y = (BrightZ.x - BleftZ.x)/deltaZ - (BrightX.z - BleftX.z)/deltaX;
+	z = (BrightX.y - BleftX.y)/deltaX - (BrightY.x - BleftY.x)/deltaY;
 
 	return Vector3d(x, y, z);
 }
 
-Vector3d Simulation::evaluateRotTempE(int i) {
+Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 	if (debugMode) {
 		if (i < 0) {
 			printf("i < 0\n");
@@ -557,28 +683,66 @@ Vector3d Simulation::evaluateRotTempE(int i) {
 			fclose(errorLogFile);
 			exit(0);
 		}
+
+		if (j < 0) {
+			printf("j < 0\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "j = %d < 0 in evaluateRotTempE\n", j);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (j >= ynumber) {
+			printf("y >= ynumber\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "j = %d >= ynumber = %d in evaluateRotTempE\n", j, ynumber);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (k < 0) {
+			printf("k < 0\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "k = %d < 0 in evaluateRotTempE\n", k);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (k >= znumber) {
+			printf("z >= znumber\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "k = %d >= znumber = %d in evaluateRotTempE\n", k, znumber);
+			fclose(errorLogFile);
+			exit(0);
+		}
 	}
 
 	double x = 0;
 	double y = 0;
 	double z = 0;
 
-	Vector3d ErightX = tempEfield[i + 1];
-	Vector3d EleftX = tempEfield[i];
+	Vector3d ErightX = (tempEfield[i+1][j][k] + tempEfield[i+1][j+1][k] + tempEfield[i+1][j][k+1] + tempEfield[i+1][j+1][k+1])/4.0;
+	Vector3d EleftX = (tempEfield[i][j][k] + tempEfield[i][j+1][k] + tempEfield[i][j][k+1] + tempEfield[i][j+1][k+1])/4.0;
 
-	x = 0;
-	y = - ((ErightX.z - EleftX.z) / deltaX);
-	z = (ErightX.y - EleftX.y) / deltaX;
+	Vector3d ErightY = (tempEfield[i][j+1][k] + tempEfield[i+1][j+1][k] + tempEfield[i][j+1][k+1] + tempEfield[i+1][j+1][k+1])/4.0;
+	Vector3d EleftY = (tempEfield[i][j][k] + tempEfield[i+1][j][k] + tempEfield[i][j][k+1] + tempEfield[i+1][j][k+1])/4.0;
+
+	Vector3d ErightZ = (tempEfield[i][j][k+1] + tempEfield[i+1][j][k+1] + tempEfield[i][j+1][k+1] + tempEfield[i+1][j+1][k+1])/4.0;
+	Vector3d EleftZ = (tempEfield[i][j][k] + tempEfield[i+1][j][k] + tempEfield[i][j+1][k] + tempEfield[i+1][j+1][k])/4.0;
+
+	x = (ErightY.z - EleftY.z)/deltaY - (ErightZ.y - EleftZ.y)/deltaZ;
+	y = (ErightZ.x - EleftZ.x)/deltaZ - (ErightX.z - EleftX.z)/deltaX;
+	z = (ErightX.y - EleftX.y)/deltaX - (ErightY.x - EleftY.x)/deltaY;
 
 	return Vector3d(x, y, z);
 }
 
-Vector3d Simulation::evaluateRotE(int i) {
+Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 	if (debugMode) {
 		if (i < 0) {
 			printf("i < 0\n");
 			errorLogFile = fopen("./output/errorLog.dat", "w");
-			fprintf(errorLogFile, "i = %d < 0 in evaluateRotE\n", i);
+			fprintf(errorLogFile, "i = %d < 0 in evaluateRotTempE\n", i);
 			fclose(errorLogFile);
 			exit(0);
 		}
@@ -586,7 +750,39 @@ Vector3d Simulation::evaluateRotE(int i) {
 		if (i >= xnumber) {
 			printf("x >= xnumber\n");
 			errorLogFile = fopen("./output/errorLog.dat", "w");
-			fprintf(errorLogFile, "i = %d >= xnumber = %d in evaluateRotE\n", i, xnumber);
+			fprintf(errorLogFile, "i = %d >= xnumber = %d in evaluateRotTempE\n", i, xnumber);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (j < 0) {
+			printf("j < 0\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "j = %d < 0 in evaluateRotTempE\n", j);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (j >= ynumber) {
+			printf("y >= ynumber\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "j = %d >= ynumber = %d in evaluateRotTempE\n", j, ynumber);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (k < 0) {
+			printf("k < 0\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "k = %d < 0 in evaluateRotTempE\n", k);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (k >= znumber) {
+			printf("z >= znumber\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "k = %d >= znumber = %d in evaluateRotTempE\n", k, znumber);
 			fclose(errorLogFile);
 			exit(0);
 		}
@@ -596,22 +792,28 @@ Vector3d Simulation::evaluateRotE(int i) {
 	double y = 0;
 	double z = 0;
 
-	Vector3d ErightX = Efield[i + 1];
-	Vector3d EleftX = Efield[i];
+	Vector3d ErightX = (Efield[i+1][j][k] + Efield[i+1][j+1][k] + Efield[i+1][j][k+1] + Efield[i+1][j+1][k+1])/4.0;
+	Vector3d EleftX = (Efield[i][j][k] + Efield[i][j+1][k] + Efield[i][j][k+1] + Efield[i][j+1][k+1])/4.0;
 
-	x = 0;
-	y = - ((ErightX.z - EleftX.z) / deltaX);
-	z = (ErightX.y - EleftX.y) / deltaX;
+	Vector3d ErightY = (Efield[i][j+1][k] + Efield[i+1][j+1][k] + Efield[i][j+1][k+1] + Efield[i+1][j+1][k+1])/4.0;
+	Vector3d EleftY = (Efield[i][j][k] + Efield[i+1][j][k] + Efield[i][j][k+1] + Efield[i+1][j][k+1])/4.0;
+
+	Vector3d ErightZ = (Efield[i][j][k+1] + Efield[i+1][j][k+1] + Efield[i][j+1][k+1] + Efield[i+1][j+1][k+1])/4.0;
+	Vector3d EleftZ = (Efield[i][j][k] + Efield[i+1][j][k] + Efield[i][j+1][k] + Efield[i+1][j+1][k])/4.0;
+
+	x = (ErightY.z - EleftY.z)/deltaY - (ErightZ.y - EleftZ.y)/deltaZ;
+	y = (ErightZ.x - EleftZ.x)/deltaZ - (ErightX.z - EleftX.z)/deltaX;
+	z = (ErightX.y - EleftX.y)/deltaX - (ErightY.x - EleftY.x)/deltaY;
 
 	return Vector3d(x, y, z);
 }
 
-Vector3d Simulation::evaluateRotNewE(int i) {
+Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 	if (debugMode) {
 		if (i < 0) {
 			printf("i < 0\n");
 			errorLogFile = fopen("./output/errorLog.dat", "w");
-			fprintf(errorLogFile, "i = %d < 0 in evaluateRotNewE\n", i);
+			fprintf(errorLogFile, "i = %d < 0 in evaluateRotTempE\n", i);
 			fclose(errorLogFile);
 			exit(0);
 		}
@@ -619,7 +821,39 @@ Vector3d Simulation::evaluateRotNewE(int i) {
 		if (i >= xnumber) {
 			printf("x >= xnumber\n");
 			errorLogFile = fopen("./output/errorLog.dat", "w");
-			fprintf(errorLogFile, "i = %d >= xnumber = %d in evaluateRotNewE\n", i, xnumber);
+			fprintf(errorLogFile, "i = %d >= xnumber = %d in evaluateRotTempE\n", i, xnumber);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (j < 0) {
+			printf("j < 0\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "j = %d < 0 in evaluateRotTempE\n", j);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (j >= ynumber) {
+			printf("y >= ynumber\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "j = %d >= ynumber = %d in evaluateRotTempE\n", j, ynumber);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (k < 0) {
+			printf("k < 0\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "k = %d < 0 in evaluateRotTempE\n", k);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (k >= znumber) {
+			printf("z >= znumber\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "k = %d >= znumber = %d in evaluateRotTempE\n", k, znumber);
 			fclose(errorLogFile);
 			exit(0);
 		}
@@ -629,47 +863,76 @@ Vector3d Simulation::evaluateRotNewE(int i) {
 	double y = 0;
 	double z = 0;
 
-	Vector3d ErightX = newEfield[i + 1];
-	Vector3d EleftX = newEfield[i];
+	Vector3d ErightX = (newEfield[i+1][j][k] + newEfield[i+1][j+1][k] + newEfield[i+1][j][k+1] + newEfield[i+1][j+1][k+1])/4.0;
+	Vector3d EleftX = (newEfield[i][j][k] + newEfield[i][j+1][k] + newEfield[i][j][k+1] + newEfield[i][j+1][k+1])/4.0;
 
+	Vector3d ErightY = (newEfield[i][j+1][k] + newEfield[i+1][j+1][k] + newEfield[i][j+1][k+1] + newEfield[i+1][j+1][k+1])/4.0;
+	Vector3d EleftY = (newEfield[i][j][k] + newEfield[i+1][j][k] + newEfield[i][j][k+1] + newEfield[i+1][j][k+1])/4.0;
 
-	x = 0;
-	y = - ((ErightX.z - EleftX.z) / deltaX);
-	z = (ErightX.y - EleftX.y) / deltaX;
+	Vector3d ErightZ = (newEfield[i][j][k+1] + newEfield[i+1][j][k+1] + newEfield[i][j+1][k+1] + newEfield[i+1][j+1][k+1])/4.0;
+	Vector3d EleftZ = (newEfield[i][j][k] + newEfield[i+1][j][k] + newEfield[i][j+1][k] + newEfield[i+1][j+1][k])/4.0;
+
+	x = (ErightY.z - EleftY.z)/deltaY - (ErightZ.y - EleftZ.y)/deltaZ;
+	y = (ErightZ.x - EleftZ.x)/deltaZ - (ErightX.z - EleftX.z)/deltaX;
+	z = (ErightX.y - EleftX.y)/deltaX - (ErightY.x - EleftY.x)/deltaY;
 
 	return Vector3d(x, y, z);
 }
 
-double Simulation::evaluateDivE(int i) {
-	double ErightX = Efield[i + 1].x;
-	double EleftX = Efield[i].x;
+double Simulation::evaluateDivE(int i, int j, int k) {
+	double ErightX = (Efield[i+1][j][k].x + Efield[i+1][j+1][k].x + Efield[i+1][j][k+1].x + Efield[i+1][j+1][k+1].x)/4.0;
+	double EleftX = (Efield[i][j][k].x + Efield[i][j+1][k].x + Efield[i][j][k+1].x + Efield[i][j+1][k+1].x)/4.0;
 
+	double ErightY = (Efield[i][j+1][k].y + Efield[i+1][j+1][k].y + Efield[i][j+1][k+1].y + Efield[i+1][j+1][k+1].y)/4.0;
+	double EleftY = (Efield[i][j][k].y + Efield[i+1][j][k].y + Efield[i][j][k+1].y + Efield[i+1][j][k+1].y)/4.0;
 
-	return (ErightX - EleftX) / deltaX;
+	double ErightZ = (Efield[i][j][k+1].z + Efield[i+1][j][k+1].z + Efield[i][j+1][k+1].z + Efield[i+1][j+1][k+1].z)/4.0;
+	double EleftZ = (Efield[i][j][k].z + Efield[i+1][j][k].z + Efield[i][j+1][k].z + Efield[i+1][j+1][k].z)/4.0;
+
+	return (ErightX - EleftX) / deltaX + (ErightY - EleftY)/deltaY + (ErightZ - EleftZ)/deltaZ;
 }
 
-double Simulation::evaluateDivCleaningE(int i) {
-	double ErightX = divergenceCleaningField[i + 1][0];
-	double EleftX = divergenceCleaningField[i][0];
+double Simulation::evaluateDivCleaningE(int i, int j, int k) {
+	//todo
+	double ErightX = (divergenceCleaningField[i+1][j][k][0] + divergenceCleaningField[i+1][j+1][k][0] + divergenceCleaningField[i+1][j][k+1][0] + divergenceCleaningField[i+1][j+1][k+1][0])/4.0;
+	double EleftX = (divergenceCleaningField[i][j][k][0] + divergenceCleaningField[i][j+1][k][0] + divergenceCleaningField[i][j][k+1][0] + divergenceCleaningField[i][j+1][k+1][0])/4.0;
 
-	return (ErightX - EleftX) / deltaX;
+	double ErightY = (divergenceCleaningField[i][j+1][k][1] + divergenceCleaningField[i+1][j+1][k][1] + divergenceCleaningField[i][j+1][k+1][1] + divergenceCleaningField[i+1][j+1][k+1][1])/4.0;
+	double EleftY = (divergenceCleaningField[i][j][k][1] + divergenceCleaningField[i+1][j][k][1] + divergenceCleaningField[i][j][k+1][1] + divergenceCleaningField[i+1][j][k+1][1])/4.0;
+
+	double ErightZ = (divergenceCleaningField[i][j][k+1][2] + divergenceCleaningField[i+1][j][k+1][2]+ divergenceCleaningField[i][j+1][k+1][2] + divergenceCleaningField[i+1][j+1][k+1][2])/4.0;
+	double EleftZ = (divergenceCleaningField[i][j][k][2] + divergenceCleaningField[i+1][j][k][2] + divergenceCleaningField[i][j+1][k][2] + divergenceCleaningField[i+1][j+1][k][2])/4.0;
+
+	return (ErightX - EleftX) / deltaX + (ErightY - EleftY)/deltaY + (ErightZ - EleftZ)/deltaZ;
 }
 
-double Simulation::evaluateDivTempE(int i) {
-	double ErightX = tempEfield[i + 1].x;
-	double EleftX = tempEfield[i].x;
+double Simulation::evaluateDivTempE(int i, int j, int k) {
+	double ErightX = (tempEfield[i+1][j][k].x + tempEfield[i+1][j+1][k].x + tempEfield[i+1][j][k+1].x + tempEfield[i+1][j+1][k+1].x)/4.0;
+	double EleftX = (tempEfield[i][j][k].x + tempEfield[i][j+1][k].x + tempEfield[i][j][k+1].x + tempEfield[i][j+1][k+1].x)/4.0;
 
-	return (ErightX - EleftX) / deltaX;
+	double ErightY = (tempEfield[i][j+1][k].y + tempEfield[i+1][j+1][k].y + tempEfield[i][j+1][k+1].y + tempEfield[i+1][j+1][k+1].y)/4.0;
+	double EleftY = (tempEfield[i][j][k].y + tempEfield[i+1][j][k].y + tempEfield[i][j][k+1].y + tempEfield[i+1][j][k+1].y)/4.0;
+
+	double ErightZ = (tempEfield[i][j][k+1].z + tempEfield[i+1][j][k+1].z + tempEfield[i][j+1][k+1].z + tempEfield[i+1][j+1][k+1].z)/4.0;
+	double EleftZ = (tempEfield[i][j][k].z + tempEfield[i+1][j][k].z + tempEfield[i][j+1][k].z + tempEfield[i+1][j+1][k].z)/4.0;
+
+	return (ErightX - EleftX) / deltaX + (ErightY - EleftY)/deltaY + (ErightZ - EleftZ)/deltaZ;
 }
 
-double Simulation::evaluateDivNewE(int i) {
-	double ErightX = newEfield[i + 1].x;
-	double EleftX = newEfield[i].x;
+double Simulation::evaluateDivNewE(int i, int j, int k) {
+	double ErightX = (newEfield[i+1][j][k].x + newEfield[i+1][j+1][k].x + newEfield[i+1][j][k+1].x + newEfield[i+1][j+1][k+1].x)/4.0;
+	double EleftX = (newEfield[i][j][k].x + newEfield[i][j+1][k].x + newEfield[i][j][k+1].x + newEfield[i][j+1][k+1].x)/4.0;
 
-	return (ErightX - EleftX) / deltaX;
+	double ErightY = (newEfield[i][j+1][k].y + newEfield[i+1][j+1][k].y + newEfield[i][j+1][k+1].y + newEfield[i+1][j+1][k+1].y)/4.0;
+	double EleftY = (newEfield[i][j][k].y + newEfield[i+1][j][k].y + newEfield[i][j][k+1].y + newEfield[i+1][j][k+1].y)/4.0;
+
+	double ErightZ = (newEfield[i][j][k+1].z + newEfield[i+1][j][k+1].z + newEfield[i][j+1][k+1].z + newEfield[i+1][j+1][k+1].z)/4.0;
+	double EleftZ = (newEfield[i][j][k].z + newEfield[i+1][j][k].z + newEfield[i][j+1][k].z + newEfield[i+1][j+1][k].z)/4.0;
+
+	return (ErightX - EleftX) / deltaX + (ErightY - EleftY)/deltaY + (ErightZ - EleftZ)/deltaZ;
 }
 
-double Simulation::evaluateDivFlux(int i) {
+double Simulation::evaluateDivFlux(int i, int j, int k) {
 	if (debugMode) {
 		if (i < 0) {
 			printf("i < 0\n");
