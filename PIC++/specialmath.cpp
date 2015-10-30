@@ -31,39 +31,51 @@ double evaluateError(double** hessenbergMatrix, double* vector, double beta, int
 	return sqrt(norm);
 }
 
-double** multiplySpecialMatrixVector(std::vector<MatrixElement>** matrix, Vector3d* vector, int xnumber, int lnumber) {
-	double** result = new double*[xnumber];
+double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber) {
+	double**** result = new double***[xnumber];
 	int i = 0;
 	#pragma omp parallel for shared(result, matrix, vector, xnumber, lnumber) private(i)
 	for (i = 0; i < xnumber; ++i) {
-				result[i] = new double[lnumber];
+		result[i] = new double**[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			result[i][j] = new double*[znumber];
+			for(int k = 0; k < znumber; ++k){
+				result[i][j][k] = new double[lnumber];
 				for (int l = 0; l < lnumber; ++l) {
-					result[i][l] = 0;
-					for (int m = 0; m < matrix[i][l].size(); ++m) {
-						MatrixElement element = matrix[i][l][m];
+					result[i][j][k][l] = 0;
+					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+						MatrixElement element = matrix[i][j][k][l][m];
 
-						result[i][l] += element.value * vector[element.i][element.l];
+						result[i][j][k][l] += element.value * vector[element.i][element.j][element.j][element.l];
 					}
 				}
+			}
+		}
 	}
 
 	return result;
 }
 
-double** multiplySpecialMatrixVector(std::vector<MatrixElement>** matrix, double** vector, int xnumber, int lnumber) {
-	double** result = new double*[xnumber];
+double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber) {
+	double**** result = new double***[xnumber];
 	int i = 0;
-	#pragma omp parallel for shared(matrix, vector, xnumber, lnumber) private(i)
+	#pragma omp parallel for shared(result, matrix, vector, xnumber, lnumber) private(i)
 	for (i = 0; i < xnumber; ++i) {
-				result[i] = new double[lnumber];
+		result[i] = new double**[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			result[i][j] = new double*[znumber];
+			for(int k = 0; k < znumber; ++k){
+				result[i][j][k] = new double[lnumber];
 				for (int l = 0; l < lnumber; ++l) {
-					result[i][l] = 0;
-					for (int m = 0; m < matrix[i][l].size(); ++m) {
-						MatrixElement element = matrix[i][l][m];
+					result[i][j][k][l] = 0;
+					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+						MatrixElement element = matrix[i][j][k][l][m];
 
-						result[i][l] += element.value * vector[element.i][element.l];
+						result[i][j][k][l] += element.value * vector[element.i][element.j][element.j][element.l];
 					}
 				}
+			}
+		}
 	}
 
 	return result;

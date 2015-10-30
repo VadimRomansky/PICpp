@@ -121,7 +121,7 @@ void Simulation::output() {
 	fclose(fluxFile);
 
 	divergenceErrorFile = fopen("./output/divergence_error.dat", "a");
-	outputDivergenceError(divergenceErrorFile, this, plasma_period, gyroradius, fieldScale);
+	outputDivergenceError(divergenceErrorFile, this);
 	fclose(divergenceErrorFile);
 
 	double rotBscale = fieldScale/(plasma_period * plasma_period * sqrt(gyroradius));

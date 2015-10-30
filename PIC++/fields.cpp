@@ -1216,38 +1216,121 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 			fclose(errorLogFile);
 			exit(0);
 		}
+
+		if (j < 0) {
+			printf("i < 0\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "j = %d < 0 in evaluateDivFlux\n", j);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (j >= ynumber) {
+			printf("y >= ynumber\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "j = %d >= ynumber = %d in evaluateDivFlux\n", j, ynumber);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (k < 0) {
+			printf("k < 0\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "k = %d < 0 in evaluateDivFlux\n", k);
+			fclose(errorLogFile);
+			exit(0);
+		}
+
+		if (k >= znumber) {
+			printf("z >= znumber\n");
+			errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "k = %d >= znumber = %d in evaluateDivFlux\n", k, znumber);
+			fclose(errorLogFile);
+			exit(0);
+		}
 	}
 
 
-	double rfluxX = electricFlux[i + 1].x;
-	double lfluxX = electricFlux[i].x;
+	double rightFluxX = (electricFlux[i + 1][j][k].x + electricFlux[i+1][j+1][k].x + electricFlux[i+1][j][k+1].x + electricFlux[i+1][j+1][k+1].x)*0.25;
+	double leftFluxX = (electricFlux[i][j][k].x + electricFlux[i][j+1][k].x + electricFlux[i][j][k+1].x + electricFlux[i][j+1][k+1].x)*0.25;
 
-	return (rfluxX - lfluxX) / deltaX;
+	double rightFluxY = (electricFlux[i][j+1][k].x + electricFlux[i+1][j+1][k].x + electricFlux[i][j+1][k+1].x + electricFlux[i+1][j+1][k+1].x)*0.25;
+	double leftFluxY = (electricFlux[i][j][k].x + electricFlux[i+1][j][k].x + electricFlux[i][j][k+1].x + electricFlux[i+1][j][k+1].x)*0.25;
+
+	double rightFluxZ = (electricFlux[i + 1][j][k+1].x + electricFlux[i][j][k+1].x + electricFlux[i][j+1][k+1].x + electricFlux[i+1][j+1][k+1].x)*0.25;
+	double leftFluxZ = (electricFlux[i + 1][j][k].x + electricFlux[i][j][k].x + electricFlux[i][j+1][k].x + electricFlux[i+1][j+1][k].x)*0.25;
+
+	return (rightFluxX - leftFluxX) / deltaX + (rightFluxY - leftFluxY)/deltaY + (rightFluxZ - leftFluxZ)/deltaZ;
 }
 
-Vector3d Simulation::evaluateDivPressureTensor(int i) {
-	Vector3d result = Vector3d(0, 0, 0);
+Vector3d Simulation::evaluateDivPressureTensor(int i, int j, int k) {
+	int prevI = i - 1;
+	if(prevI < 0){
+		if(boundaryConditionType == PERIODIC){
+			prevI = xnumber - 1;
+		} else {
+			prevI = 0;
+		}
+	}
 
-	// why /4 ?
-	Matrix3d tensorDerX = (getPressureTensor(i)  - getPressureTensor(i - 1)) / (deltaX);
+	int prevJ = j - 1;
+	if(prevJ < 0){
+		prevJ = ynumber - 1;
+	}
 
-	result.x = tensorDerX.matrix[0][0];
-	result.y = tensorDerX.matrix[0][1];
-	result.z = tensorDerX.matrix[0][2];
+	int prevK = k - 1;
+	if(prevK < 0){
+		prevK = znumber - 1;
+	}
 
-	return result;
+	Matrix3d tensorRightX = (pressureTensor[i][j][k] + pressureTensor[i][prevJ][k] + pressureTensor[i][j][prevK] + pressureTensor[i][prevJ][prevK])*0.25;
+	Matrix3d tensorLeftX = (pressureTensor[prevI][j][k] + pressureTensor[prevI][prevJ][k] + pressureTensor[prevI][j][prevK] + pressureTensor[prevI][prevJ][prevK])*0.25;
+
+	Matrix3d tensorRightY = (pressureTensor[i][j][k] + pressureTensor[prevI][j][k] + pressureTensor[i][j][prevK] + pressureTensor[prevI][j][prevK])*0.25;
+	Matrix3d tensorLeftY = (pressureTensor[i][prevJ][k] + pressureTensor[prevI][prevJ][k] + pressureTensor[i][prevJ][prevK] + pressureTensor[prevI][prevJ][prevK])*0.25;
+
+	Matrix3d tensorRightZ = (pressureTensor[i][j][k] + pressureTensor[i][prevJ][k] + pressureTensor[prevI][j][k] + pressureTensor[prevI][prevJ][k])*0.25;
+	Matrix3d tensorLeftZ = (pressureTensor[i][j][prevK] + pressureTensor[i][prevJ][prevK] + pressureTensor[prevI][j][prevK] + pressureTensor[prevI][prevJ][prevK])*0.25;
+
+	double x = (tensorRightX.matrix[0][0] - tensorLeftX.matrix[0][0])/deltaX + (tensorRightY.matrix[1][0] - tensorRightY.matrix[1][0])/deltaY + (tensorRightZ.matrix[2][0] - tensorLeftZ.matrix[2][0])/deltaZ;
+	double y = (tensorRightX.matrix[0][1] - tensorLeftX.matrix[0][1])/deltaX + (tensorRightY.matrix[1][1] - tensorRightY.matrix[1][1])/deltaY + (tensorRightZ.matrix[2][1] - tensorLeftZ.matrix[2][1])/deltaZ;
+	double z = (tensorRightX.matrix[0][2] - tensorLeftX.matrix[0][2])/deltaX + (tensorRightY.matrix[1][2] - tensorRightY.matrix[1][2])/deltaY + (tensorRightZ.matrix[2][2] - tensorLeftZ.matrix[2][2])/deltaZ;
+
+	return Vector3d(x, y, z);
 }
 
-Vector3d Simulation::evaluateGradDensity(int i) {
+Vector3d Simulation::evaluateGradDensity(int i, int j, int k) {
 	int prevI = i - 1;
 	if(prevI < 0) {
-		prevI = xnumber - 1;
+		if(boundaryConditionType == PERIODIC){
+			prevI = xnumber - 1;
+		} else {
+			prevI = 0;
+		}
 	}
 
-	double densityRightX = getDensity(i);
-	double densityLeftX = getDensity(prevI);
+	int prevJ = j - 1;
+	if(prevJ < 0){
+		prevJ = ynumber - 1;
+	}
+
+	int prevK = k - 1;
+	if(prevK < 0){
+		prevK = znumber - 1;
+	}
+
+	double densityRightX = (electricDensity[i][j][k] + electricDensity[i][prevJ][k] + electricDensity[i][j][prevK] + electricDensity[i][prevJ][prevK])*0.25;
+	double densityLeftX = (electricDensity[prevI][j][k] + electricDensity[prevI][prevJ][k] + electricDensity[prevI][j][prevK] + electricDensity[prevI][prevJ][prevK])*0.25;
+
+	double densityRightY = (electricDensity[i][j][k] + electricDensity[prevI][j][k] + electricDensity[i][j][prevK] + electricDensity[prevI][j][prevK])*0.25;
+	double densityLeftY = (electricDensity[i][prevJ][k] + electricDensity[prevI][prevJ][k] + electricDensity[i][prevJ][prevK] + electricDensity[prevI][prevJ][prevK])*0.25;
+
+	double densityRightZ = (electricDensity[i][j][k] + electricDensity[i][prevJ][k] + electricDensity[prevI][j][k] + electricDensity[prevI][prevJ][k])*0.25;
+	double densityLeftZ = (electricDensity[i][j][prevK] + electricDensity[i][prevJ][prevK] + electricDensity[prevI][j][prevK] + electricDensity[prevI][prevJ][prevK])*0.25;
 
 	double x = (densityRightX - densityLeftX) / deltaX;
+	double y = (densityRightY - densityLeftY) / deltaY;
+	double z = (densityRightZ - densityLeftZ) / deltaZ;
 
-	return Vector3d(x, 0, 0);
+	return Vector3d(x, y, z);
 }
