@@ -16,10 +16,10 @@ void Simulation::simulate() {
 		createArrays();
 		createFiles();
 		initialize();
-		initializeTwoStream();
-		//createParticles();
+		//initializeTwoStream();
+		createParticles();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWave(1, 0.01);
+		initializeAlfvenWave(1, 0.01);
 		//initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
@@ -57,6 +57,7 @@ void Simulation::simulate() {
 		updateElectroMagneticParameters();
 		evaluateFields();
 		evaluateMagneticField();
+		updateParameters();
 		moveParticles();
 
 		length += fabs(V0.x*deltaT);
@@ -70,7 +71,6 @@ void Simulation::simulate() {
 		updateDensityParameters();
 		updateFields();
 		updateEnergy();
-		updateParameters();
 
 		time += deltaT;
 		currentIteration++;
@@ -559,9 +559,9 @@ void Simulation::updateElectroMagneticParameters() {
 	}
 
 	if(solverType == IMPLICIT){
-		for (int i = 0; i <= xnumber; ++i) {
-			for(int j = 0; j <= ynumber; ++j){
-				for(int k = 0; k <= znumber; ++k){
+		for (int i = 0; i < xnumber; ++i) {
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
 					Vector3d divPressureTensorEvaluated = evaluateDivPressureTensor(i, j, k);
 					electricFlux[i][j][k] = electricFlux[i][j][k] - divPressureTensor[i][j][k] * eta * deltaT;
 					//electricFlux[i] = electricFlux[i] - divPressureTensorEvaluated * eta * deltaT;
