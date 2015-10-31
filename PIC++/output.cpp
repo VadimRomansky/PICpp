@@ -65,8 +65,8 @@ void outputTraectory(FILE* outFile, Particle* particle, double time, double plas
 }
 
 void outputGrid(FILE* outFile, double* grid, int number, double scale) {
-	for(int i = 0; i < number; ++i) {
-		fprintf(outFile, "%15.10g %15.10g\n", grid[i], (grid[i+1] + grid[i])/2);
+	for(int i = 0; i <= number; ++i) {
+		fprintf(outFile, "%15.10g\n", grid[i]);
 	}
 }
 
@@ -80,9 +80,9 @@ void outputFields(FILE* outEfile, FILE* outBfile, Vector3d*** Efield, Vector3d**
 		}
 	}
 
-	for(int i = 0; i < xnumber; ++i) {
-		for(int j = 0; j < ynumber; ++j) {
-			for(int k = 0; k < znumber; ++k) {
+	for(int i = 0; i <= xnumber; ++i) {
+		for(int j = 0; j <= ynumber; ++j) {
+			for(int k = 0; k <= znumber; ++k) {
 				fprintf(outEfile, "%15.10g %15.10g %15.10g\n", scale*Efield[i][j][k].x, scale*Efield[i][j][k].y, scale*Efield[i][j][k].z);
 			}
 		}

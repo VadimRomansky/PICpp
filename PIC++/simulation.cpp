@@ -17,12 +17,12 @@ void Simulation::simulate() {
 		createFiles();
 		initialize();
 		//initializeTwoStream();
-		createParticles();
+		//createParticles();
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWave(1, 0.01);
-		initializeRotatedAlfvenWave(1, 0.01);
+		//initializeRotatedAlfvenWave(1, 0.01);
 		//initializeFluxFromRight();
-		//initializeSimpleElectroMagneticWave();
+		initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
 	collectParticlesIntoBins();
@@ -106,6 +106,14 @@ void Simulation::output() {
 	Xfile = fopen("./output/Xfile.dat", "w");
 	outputGrid(Xfile, xgrid, xnumber, gyroradius);
 	fclose(Xfile);
+
+	Yfile = fopen("./output/Yfile.dat", "w");
+	outputGrid(Yfile, ygrid, ynumber, gyroradius);
+	fclose(Yfile);
+
+	Zfile = fopen("./output/Zfile.dat", "w");
+	outputGrid(Zfile, zgrid, znumber, gyroradius);
+	fclose(Zfile);
 
 	densityFile = fopen("./output/concentrations.dat", "a");
 	outputConcentrations(densityFile, electronConcentration, protonConcentration, chargeDensity, electricDensity, xnumber, ynumber, znumber, plasma_period, gyroradius, fieldScale);

@@ -21,7 +21,7 @@ void Simulation::simulate() {
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWave(1, 0.01);
 		//initializeFluxFromRight();
-		//initializeSimpleElectroMagneticWave();
+		initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
 	collectParticlesIntoBins();

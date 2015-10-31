@@ -1031,8 +1031,8 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 
 	double alfvenVReal = omega/kw;
 
-	fprintf(informationFile, "alfven V real = %15.10g\n", alfvenVReal);
-	fprintf(informationFile, "alfven V real x = %15.10g\n", alfvenVReal*kx/kw);
+	fprintf(informationFile, "alfven V real = %15.10g\n", alfvenVReal*gyroradius/plasma_period);
+	fprintf(informationFile, "alfven V real x = %15.10g\n", alfvenVReal*(kx/kw)*gyroradius/plasma_period);
 
 	//double 
 	Bzamplitude = B0.norm() * epsilonAmplitude;
@@ -2125,7 +2125,11 @@ void Simulation::createParticles() {
 			for(int k = 0; k < znumber; ++k){
 				double weight = (concentration / particlesPerBin) * volumeB(i, j, k);
 				double x = xgrid[i] + 0.0001*deltaX;
+				double y = ygrid[j] + 0.0001*deltaY;
+				double z = zgrid[k] + 0.0001*deltaZ;
 				double deltaXParticles = deltaX/particlesPerBin;
+				double deltaYParticles = deltaY/particlesPerBin;
+				double deltaZParticles = deltaZ/particlesPerBin;
 				for (int l = 0; l < 2 * particlesPerBin; ++l) {
 					ParticleTypes type;
 					if (l % 2 == 0) {
@@ -2143,6 +2147,8 @@ void Simulation::createParticles() {
 					}*/
 					int m = l/2;
 					particle->coordinates.x = x + deltaXParticles*m;
+					particle->coordinates.y = y + deltaYParticles*m;
+					particle->coordinates.z = z + deltaZParticles*m;
 					particles.push_back(particle);
 					particlesNumber++;
 					if (particlesNumber % 1000 == 0) {
