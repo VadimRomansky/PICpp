@@ -264,7 +264,7 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 void Simulation::checkEquationMatrix(std::vector<MatrixElement>**** matrix, int lnumber) {
 //#pragma omp parallel for
 	for (int i = 0; i < xnumber; ++i) {
-		for(int j = ynumber; ++j;++j){
+		for(int j = 0; j < ynumber; ++j){
 			for(int k = 0; k < znumber; ++k){
 				for (int l = 0; l < lnumber; ++l) {
 					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
@@ -318,8 +318,8 @@ void Simulation::checkEquationMatrix(std::vector<MatrixElement>**** matrix, int 
 	
 							if (element.equalsIndex(tempElement)) {
 								printf("equals indexes\n");
-								printf("current = %d %d %d %d\n", i, l);
-								printf("temp = %d %d %d %d\n", element.i, element.j, element.k, element.l);
+								printf("current = %d %d %d %d\n", i, j, k, l);
+								printf("temp = %d %d %d %d\n", tempElement.i, tempElement.j, tempElement.k, tempElement.l);
 								errorLogFile = fopen("./output/errorLog.dat", "w");
 								fprintf(errorLogFile, "equal indexes current = %d %d %d %d temp = %d %d %d %d\n", i, j, k, l, element.i, element.j, element.k, element.l);
 								fclose(errorLogFile);
@@ -416,7 +416,7 @@ void Simulation::createInternalEquationX(int i, int j, int k) {
 	if (nextK >= znumber) {
 		nextK = 0;
 	}
-	int prevK = i - 1;
+	int prevK = k - 1;
 	if (prevK < 0) {
 		prevK = znumber - 1;                   
 	}
@@ -533,7 +533,7 @@ void Simulation::createInternalEquationY(int i, int j, int k) {
 	if (nextK >= znumber) {
 		nextK = 0;
 	}
-	int prevK = i - 1;
+	int prevK = k - 1;
 	if (prevK < 0) {
 		prevK = znumber - 1;                   
 	}
@@ -650,7 +650,7 @@ void Simulation::createInternalEquationZ(int i, int j, int k) {
 	if (nextK >= znumber) {
 		nextK = 0;
 	}
-	int prevK = i - 1;
+	int prevK = k - 1;
 	if (prevK < 0) {
 		prevK = znumber - 1;                   
 	}
@@ -894,6 +894,15 @@ Vector3d Simulation::evaluateRotB(int i, int j, int k) {
 	Vector3d BrightZ;
 	Vector3d BleftZ;
 
+	int curI = i;
+	if(curI >= xnumber){
+		if(boundaryConditionType == PERIODIC){
+			curI = 0;
+		} else {
+			curI = i - 1;
+		}
+	}
+
 	int prevI = i - 1;
 	if (prevI < 0) {
 		if(boundaryConditionType == PERIODIC){
@@ -912,14 +921,14 @@ Vector3d Simulation::evaluateRotB(int i, int j, int k) {
 	if (prevK < 0) {
 		prevK = znumber - 1;
 	}
-	BrightX = (Bfield[i][j][k] + Bfield[i][prevJ][k] + Bfield[i][j][prevK] + Bfield[i][prevJ][prevK])/4.0;
+	BrightX = (Bfield[curI][j][k] + Bfield[curI][prevJ][k] + Bfield[curI][j][prevK] + Bfield[curI][prevJ][prevK])/4.0;
 	BleftX = (Bfield[prevI][j][k] + Bfield[prevI][prevJ][k] + Bfield[prevI][j][prevK] + Bfield[prevI][prevJ][prevK])/4.0;
 
-	BrightY = (Bfield[i][j][k] + Bfield[prevI][j][k] + Bfield[i][j][prevK] + Bfield[prevI][j][prevK])/4.0;
-	BleftY = (Bfield[i][prevJ][k] + Bfield[prevI][prevJ][k] + Bfield[i][prevJ][prevK] + Bfield[prevI][prevJ][prevK])/4.0;
+	BrightY = (Bfield[curI][j][k] + Bfield[prevI][j][k] + Bfield[curI][j][prevK] + Bfield[prevI][j][prevK])/4.0;
+	BleftY = (Bfield[curI][prevJ][k] + Bfield[prevI][prevJ][k] + Bfield[curI][prevJ][prevK] + Bfield[prevI][prevJ][prevK])/4.0;
 
-	BrightZ = (Bfield[i][j][k] + Bfield[prevI][j][k] + Bfield[i][prevJ][k] + Bfield[prevI][prevJ][k])/4.0;
-	BleftZ = (Bfield[i][j][prevK] + Bfield[prevI][j][prevK] + Bfield[i][prevJ][prevK] + Bfield[prevI][prevJ][prevK])/4.0;
+	BrightZ = (Bfield[curI][j][k] + Bfield[prevI][j][k] + Bfield[curI][prevJ][k] + Bfield[prevI][prevJ][k])/4.0;
+	BleftZ = (Bfield[curI][j][prevK] + Bfield[prevI][j][prevK] + Bfield[curI][prevJ][prevK] + Bfield[prevI][prevJ][prevK])/4.0;
 
 
 	double x = 0;

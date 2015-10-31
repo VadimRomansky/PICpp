@@ -15,7 +15,7 @@ void Simulation::collectParticlesIntoBins() {
 	}
 
 	for (int i = 0; i < xnumber + 1; ++i) {
-		for(int j = 0; j , ynumber + 1; ++j){
+		for(int j = 0; j < ynumber + 1; ++j){
 			for(int k = 0; k < znumber + 1; ++k){
 				particlesInEbin[i][j][k].clear();
 			}
@@ -296,7 +296,7 @@ Vector3d Simulation::correlationEfield(Particle& particle) {
 	double leftWeightX = (xgrid[xcount + 1] - particle.coordinates.x)/deltaX;
 
 	double rightWeightY = (particle.coordinates.y - ygrid[ycount])/deltaY;
-	double leftWeightY = (ygrid[xcount + 1] - particle.coordinates.y)/deltaY;
+	double leftWeightY = (ygrid[ycount + 1] - particle.coordinates.y)/deltaY;
 
 	double rightWeightZ = (particle.coordinates.z - zgrid[zcount])/deltaZ;
 	double leftWeightZ = (zgrid[zcount + 1] - particle.coordinates.z)/deltaZ;
@@ -325,7 +325,7 @@ Vector3d Simulation::correlationTempEfield(Particle& particle) {
 	double leftWeightX = (xgrid[xcount + 1] - particle.coordinates.x)/deltaX;
 
 	double rightWeightY = (particle.coordinates.y - ygrid[ycount])/deltaY;
-	double leftWeightY = (ygrid[xcount + 1] - particle.coordinates.y)/deltaY;
+	double leftWeightY = (ygrid[ycount + 1] - particle.coordinates.y)/deltaY;
 
 	double rightWeightZ = (particle.coordinates.z - zgrid[zcount])/deltaZ;
 	double leftWeightZ = (zgrid[zcount + 1] - particle.coordinates.z)/deltaZ;
@@ -354,7 +354,7 @@ Vector3d Simulation::correlationNewEfield(Particle& particle) {
 	double leftWeightX = (xgrid[xcount + 1] - particle.coordinates.x)/deltaX;
 
 	double rightWeightY = (particle.coordinates.y - ygrid[ycount])/deltaY;
-	double leftWeightY = (ygrid[xcount + 1] - particle.coordinates.y)/deltaY;
+	double leftWeightY = (ygrid[ycount + 1] - particle.coordinates.y)/deltaY;
 
 	double rightWeightZ = (particle.coordinates.z - zgrid[zcount])/deltaZ;
 	double leftWeightZ = (zgrid[zcount + 1] - particle.coordinates.z)/deltaZ;
@@ -397,7 +397,7 @@ Vector3d Simulation::correlationBfield(Particle& particle) {
 
 	int xcount = floor(((x - xgrid[0]) / deltaX) + 0.5);
 	int ycount = floor(((y - ygrid[0]) / deltaY) + 0.5);
-	int zcount = floor(((z - xgrid[0]) / deltaZ) + 0.5);
+	int zcount = floor(((z - zgrid[0]) / deltaZ) + 0.5);
 
 	Vector3d leftField = Vector3d(0, 0, 0);
 	Vector3d rightField = Vector3d(0, 0, 0);

@@ -1174,12 +1174,19 @@ void Simulation::createArrays() {
 	divergenceCleanUpMatrix = new std::vector<MatrixElement>***[xnumber];
 	divergenceCleanUpRightPart = new double***[xnumber];
 
+	divergenceCleaningField = new double***[xnumber];
+	divergenceCleaningPotential = new double***[xnumber];
+
 	for (int i = 0; i < xnumber; ++i) {
 		divergenceCleanUpMatrix[i] = new std::vector<MatrixElement>**[ynumber];
 		divergenceCleanUpRightPart[i] = new double**[ynumber];
+		divergenceCleaningField[i] = new double**[ynumber];
+		divergenceCleaningPotential[i] = new double**[ynumber];
 		for(int j = 0; j < ynumber; ++j) {
 			divergenceCleanUpMatrix[i][j] = new std::vector<MatrixElement>*[znumber];
 			divergenceCleanUpRightPart[i][j] = new double*[znumber];
+			divergenceCleaningField[i][j] = new double*[xnumber];
+			divergenceCleaningPotential[i][j] = new double*[xnumber];
 			for(int k = 0; k < znumber; ++k) {
 				divergenceCleaningField[i][j][j] = new double[3];
 				divergenceCleaningPotential[i][j][k] = new double[1];

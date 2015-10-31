@@ -46,7 +46,7 @@ double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Ve
 					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
 						MatrixElement element = matrix[i][j][k][l][m];
 
-						result[i][j][k][l] += element.value * vector[element.i][element.j][element.j][element.l];
+						result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
 					}
 				}
 			}
@@ -71,7 +71,7 @@ double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, do
 					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
 						MatrixElement element = matrix[i][j][k][l][m];
 
-						result[i][j][k][l] += element.value * vector[element.i][element.j][element.j][element.l];
+						result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
 					}
 				}
 			}
@@ -376,7 +376,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 		for(int j = 0; j < ynumber; ++j){
 			for(int k = 0; k < znumber; ++k){
 				for(int l = 0; l < lnumber; ++l){
-					outvector[i][l] = 0;
+					outvector[i][j][k][l] = 0;
 					for (int m = 0; m < n; ++m) {
 						outvector[i][j][k][l] += basis[m][i][j][k][l] * y[m]*norm;
 						//outvector[i][l] += basis[m][i][l] * y[m];
