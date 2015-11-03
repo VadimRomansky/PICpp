@@ -768,7 +768,7 @@ void Simulation::evaluateMagneticField() {
 	for (int i = 0; i < xnumber; ++i) {
 		for(int j = 0; j < ynumber; ++j){
 			for(int k = 0; k < znumber; ++k){
-				newBfield[i][j][k] = Bfield[i][j][k] - ((evaluateRotTempE(i, j, k))* 0.125 * (speed_of_light_normalized * deltaT));
+				newBfield[i][j][k] = Bfield[i][j][k] - ((evaluateRotTempE(i, j, k)) * (speed_of_light_normalized * deltaT));
 				//newBfield[i] = Bfield[i] - rotEold*speed_of_light_normalized*deltaT;
 			}
 		}
