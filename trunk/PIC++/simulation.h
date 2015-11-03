@@ -188,6 +188,7 @@ public:
 
 	void initialize();
 	void initializeSimpleElectroMagneticWave();
+	void initializeRotatedSimpleElectroMagneticWave();
 	void checkFrequency(double omega);
 	void initializeAlfvenWave(int wavesCount, double amplitudeRelation);
 	void initializeRotatedAlfvenWave(int wavesCount, double amplitudeRelation);
