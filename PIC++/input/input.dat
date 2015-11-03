@@ -1,5 +1,5 @@
-200 3 3                 grid numbers
-2E9 3E7 3E7         gridsizes
+100 20 20                 grid numbers
+1E9 2E8 2E8         gridsizes
 1E-5                    temperature
 1.67E-28               density
 0 0 0                  velocity

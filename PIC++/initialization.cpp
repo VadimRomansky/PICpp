@@ -430,7 +430,84 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 		}
 	}
 
-	double t = 2 * pi / (kw * speed_of_light_normalized);
+}
+
+void Simulation::initializeRotatedSimpleElectroMagneticWave() {
+	E0 = Vector3d(0, 0, 0);
+	B0 = Vector3d(0, 0, 0);
+	for (int i = 0; i < xnumber; ++i) {
+		for( int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				Bfield[i][j][k] = Vector3d(0, 0, 0);
+				newBfield[i][j][k] = Bfield[i][j][k];
+			}
+		}
+	}
+	double kx = 1 * 2 * pi / xsize;
+	double ky = 1 * 2 * pi / ysize;
+	double kz = 1 * 2 * pi / zsize;
+
+	double kw = sqrt(kx*kx + ky*ky + kz*kz);
+	double E = 1E-5;
+
+	double kxy = sqrt(kx*kx + ky*ky);
+	double rotatedZortNorm = sqrt(kx*kx + ky*ky + sqr(kx*kx + ky*ky)/(kz*kz));
+	double matrixzz = (kx*kx + ky*ky)/(kz*rotatedZortNorm);
+
+	Matrix3d rotationMatrix = Matrix3d(kx/kw, -ky/kxy, -kx/rotatedZortNorm,
+									   ky/kw, kx/kxy, -ky/rotatedZortNorm,
+									   kz/kw, 0, matrixzz);
+
+	for (int i = 0; i < xnumber; ++i) {
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				Efield[i][j][k].x = 0;
+				Efield[i][j][k].y = E * sin(kx * xgrid[i] + ky * ygrid[j] + kz * zgrid[k]);
+				Efield[i][j][k].z = 0;
+				Efield[i][j][k] = rotationMatrix * Efield[i][j][k];
+				tempEfield[i][j][k] = Efield[i][j][k];
+				newEfield[i][j][k] = tempEfield[i][j][k];
+				explicitEfield[i][j][k] = Efield[i][j][k];
+			}
+		}
+	}
+
+	for(int k = 0; k < znumber; ++k){
+		for(int j = 0; j < ynumber; ++j){
+			Efield[xnumber][j][k] = Efield[0][j][k];
+			tempEfield[xnumber][j][k] = Efield[0][j][k];
+			newEfield[xnumber][j][k] = Efield[0][j][k];
+			explicitEfield[xnumber][j][k] = explicitEfield[0][j][k];
+		}
+	}
+
+	for(int i = 0; i < xnumber + 1; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			Efield[i][j][znumber] = Efield[i][j][0];
+			tempEfield[i][j][znumber] = Efield[i][j][0];
+			newEfield[i][j][znumber] = Efield[i][j][0];
+			explicitEfield[i][j][znumber] = explicitEfield[i][j][0];
+		}
+	}
+
+	for(int k = 0; k < znumber + 1; ++k){
+		for(int i = 0; i < xnumber + 1; ++i){
+			Efield[i][ynumber][k] = Efield[i][0][k];
+			tempEfield[i][ynumber][k] = Efield[i][0][k];
+			newEfield[i][ynumber][k] = Efield[i][0][k];
+			explicitEfield[i][ynumber][k] = explicitEfield[i][0][k];
+		}
+	}
+
+	for (int i = 0; i < xnumber; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				Bfield[i][j][k].z = E * sin(kx * middleXgrid[i] + ky * middleYgrid[j] + kz * middleZgrid[k]);
+				Bfield[i][j][k] = rotationMatrix * Bfield[i][j][k];
+				newBfield[i][j][k] = Bfield[i][j][k];
+			}
+		}
+	}
 }
 
 void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) {

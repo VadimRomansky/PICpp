@@ -23,6 +23,7 @@ void Simulation::simulate() {
 		//initializeRotatedAlfvenWave(1, 0.01);
 		//initializeFluxFromRight();
 		initializeSimpleElectroMagneticWave();
+		//initializeRotatedSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
 	collectParticlesIntoBins();
