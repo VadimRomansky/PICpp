@@ -20,8 +20,8 @@ void Simulation::simulate() {
 		//createParticles();
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWave(1, 0.01);
-		//initializeFluxFromRight();
-		initializeSimpleElectroMagneticWave();
+		initializeFluxFromRight();
+		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
 	collectParticlesIntoBins();
