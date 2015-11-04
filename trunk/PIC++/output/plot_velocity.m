@@ -11,8 +11,8 @@ Nz = size(Zfile, 1);
 
 N = Nx*Ny*Nz;
 Nt = size(velocity, 1)/N;
-ynumber = 2;
-znumber = 2;
+ynumber = 1;
+znumber = 1;
 
 a = 0;
 b = fix(Nt/2);

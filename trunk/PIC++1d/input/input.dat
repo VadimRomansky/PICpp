@@ -1,7 +1,7 @@
 200 3 3                 grid numbers
 1E13 3E6 3E6         gridsizes
 1E-6                    temperature
-1.67E-28               density
+1.67E-31               density
 -1E9 0 0                  velocity
 0 0 0                  elecctricField
 1E-6 1E-7 0                  magneticField
