@@ -61,7 +61,7 @@ void Simulation::evaluateFields() {
 		}
 		for (int i = 0; i < xnumber+1; ++i) {
 			newEfield[i] = (tempEfield[i] - Efield[i] * (1 - theta)) / theta;
-			newEfield[i].x= 0;
+			//newEfield[i].x= 0;
 		}
 	}
 
@@ -154,7 +154,11 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 			createInternalEquation(i);
 		} else {
 			if(i == 0){
-				createSuperConductorLeftEquation();
+				if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+					createSuperConductorLeftEquation();
+				} else {
+					createFreeLeftEquation();
+				}
 			} else {
 				createFreeRightEquation();
 			}
@@ -227,6 +231,27 @@ void Simulation::createFreeRightEquation(){
 	maxwellEquationMatrix[xnumber - 1][0].push_back(MatrixElement(-1.0, xnumber - 2, 0));
 	maxwellEquationMatrix[xnumber - 1][1].push_back(MatrixElement(-1.0, xnumber - 2, 1));
 	maxwellEquationMatrix[xnumber - 1][2].push_back(MatrixElement(-1.0, xnumber - 2, 2));
+	
+
+	alertNaNOrInfinity(rightPart.x, "right part x = NaN");
+	alertNaNOrInfinity(rightPart.y, "right part y = NaN");
+	alertNaNOrInfinity(rightPart.z, "right part z = NaN");
+
+	maxwellEquationRightPart[xnumber - 1][0] = rightPart.x;
+	maxwellEquationRightPart[xnumber - 1][1] = rightPart.y;
+	maxwellEquationRightPart[xnumber - 1][2] = rightPart.z;
+}
+
+void Simulation::createFreeLeftEquation(){
+	Vector3d rightPart = Vector3d(0, 0, 0);
+
+	maxwellEquationMatrix[0][0].push_back(MatrixElement(1.0, 0, 0));
+	maxwellEquationMatrix[0][1].push_back(MatrixElement(1.0, 0, 1));
+	maxwellEquationMatrix[0][2].push_back(MatrixElement(1.0, 0, 2));
+
+	maxwellEquationMatrix[0][0].push_back(MatrixElement(-1.0, 1, 0));
+	maxwellEquationMatrix[0][1].push_back(MatrixElement(-1.0, 1, 1));
+	maxwellEquationMatrix[0][2].push_back(MatrixElement(-1.0, 1, 2));
 	
 
 	alertNaNOrInfinity(rightPart.x, "right part x = NaN");

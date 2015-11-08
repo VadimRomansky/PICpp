@@ -16,8 +16,8 @@ void Simulation::simulate() {
 		createArrays();
 		createFiles();
 		initialize();
-		initializeTwoStream();
-		//createParticles();
+		//initializeTwoStream();
+		createParticles();
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWave(1, 0.01);
 		initializeFluxFromRight();
@@ -38,7 +38,7 @@ void Simulation::simulate() {
 	updateDensityParameters();
 
 	evaluateExplicitDerivative();
-	//cleanupDivergence();
+	cleanupDivergence();
 	updateFields();
 	updateEnergy();
 
@@ -60,13 +60,13 @@ void Simulation::simulate() {
 		moveParticles();
 
 		length += fabs(V0.x*deltaT);
-		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH){
 			if(length > deltaX/particlesPerBin){
 				length -= deltaX/particlesPerBin;
 				injectNewParticles(1);
 			}
 		}
-		//cleanupDivergence();
+		cleanupDivergence();
 		updateDensityParameters();
 		updateFields();
 		updateEnergy();
@@ -357,6 +357,12 @@ void Simulation::updateElectroMagneticParameters() {
 			if(solverType == EXPLICIT){
 				electricFlux[i] += velocity*particle->charge*particle->weight*correlation;
 			}
+
+			if(i == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+				if(particle->x - particle->dx < 0){
+					addReflectedParticleToElectroMagneticParameters(particle);
+				}
+			}
 			alertNaNOrInfinity(electricFlux[i].x, "right part x = NaN");
 			alertNaNOrInfinity(electricFlux[i].y, "right part y = NaN");
 			alertNaNOrInfinity(electricFlux[i].z, "right part z = NaN");
@@ -429,6 +435,48 @@ void Simulation::updateElectroMagneticParameters() {
 		}
 		electricFlux[xnumber] = electricFlux[0];*/
 	//
+}
+
+void Simulation::addReflectedParticleToElectroMagneticParameters(const Particle* particle){
+	Particle tempParticle = *particle;
+
+	tempParticle.momentum.x = - particle->momentum.x;
+
+	double correlation = correlationWithEbin(tempParticle, -1) / volumeE(0);
+
+	double beta = 0.5*particle->charge*deltaT/particle->mass;
+	Vector3d velocity = tempParticle.velocity(speed_of_light_normalized);
+
+	Vector3d oldE = correlationEfield(tempParticle)*fieldScale;
+	Vector3d oldB = correlationBfield(tempParticle)*fieldScale;
+
+	tempParticle.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, oldE, oldB);
+	double gamma = tempParticle.gammaFactor(speed_of_light_normalized);
+	
+	Vector3d rotatedVelocity = tempParticle.rotationTensor * (velocity * gamma);
+
+	if(solverType == IMPLICIT){
+		electricFlux[0] += rotatedVelocity * (particle->charge * particle->weight * correlation);
+		//electricFlux[i] += velocity * (particle->charge * particle->weight * correlation);
+		dielectricTensor[0] = dielectricTensor[0] - tempParticle.rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+		//dielectricTensor[0] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+				
+		Particle tempParticle2 = tempParticle;
+		double shiftX = 0.01*deltaX;
+		if(tempParticle.x + shiftX >xgrid[xnumber]){
+			shiftX = -shiftX;
+		}
+		tempParticle2.x += shiftX;
+
+		double tempCorrelation = correlationWithEbin(tempParticle2, -1) / volumeE(0);
+
+		divPressureTensor[0].x += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][0] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+		divPressureTensor[0].y += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][1] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+		divPressureTensor[0].z += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][2] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+	}
+	if(solverType == EXPLICIT){
+		electricFlux[0] += velocity*particle->charge*particle->weight*correlation;
+	}
 }
 
 void Simulation::updateDensityParameters() {

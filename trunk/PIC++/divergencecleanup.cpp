@@ -40,7 +40,13 @@ void Simulation::cleanupDivergence() {
 				divergenceCleanUpRightPart[i][j][k][0] = 0;
 				divergenceCleanUpRightPart[i][j][k][1] = 0;
 				divergenceCleanUpRightPart[i][j][k][2] = 0;
-				createDivergenceCleanupInternalEquation(i, j, k);
+				if(((i > 0) && (i < xnumber)) || (boundaryConditionType = PERIODIC)){
+					createDivergenceCleanupInternalEquation(i, j, k);
+				} else if(i ==0){
+					createDivergenceCleanupLeftEquation(j, k);
+				} else {
+					createDivergenceCleanupRightEquation(j, k);
+				}
 			}
 		}
 	}
@@ -55,8 +61,8 @@ void Simulation::cleanupDivergence() {
 		summRightPart += divergenceCleanUpRightPart[i][0];
 	}*/
 	//double rightPart = cleanUpRightPart(1);
-	//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumber, 1);
-	generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningField, xnumber, ynumber, znumber, 3);
+	generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumber, ynumber, znumber, 1);
+	//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningField, xnumber, ynumber, znumber, 3);
 
 
 	//double** leftPart = multiplySpecialMatrixVector(divergenceCleanUpMatrix, divergenceCleaningPotential, xnumber, 1);
@@ -68,7 +74,7 @@ void Simulation::cleanupDivergence() {
 }
 
 void Simulation::updateFieldByCleaning() {
-	//evaluateDivergenceCleaningField();
+	evaluateDivergenceCleaningField();
 	/*Vector3d meanField = Vector3d(0, 0, 0);
 	for(int i = 0; i < xnumber; ++i){
 		meanField.x += divergenceCleaningField[i][0];
@@ -123,16 +129,36 @@ void Simulation::evaluateDivergenceCleaningField(){
 			}
 		}
 	}
+
+	Vector3d constantField;
+	constantField.x = divergenceCleaningField[xnumber-1][0][0][0];
+	constantField.y = divergenceCleaningField[xnumber-1][0][0][1];
+	constantField.z = divergenceCleaningField[xnumber-1][0][0][2];
+
+	for(int i = 0; i < xnumber; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				divergenceCleaningField[i][j][k][0] -= constantField.x;
+				divergenceCleaningField[i][j][k][1] -= constantField.y;
+				divergenceCleaningField[i][j][k][2] -= constantField.z;
+			}
+		}
+	}
 }
 
 void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k) {
 
-	/*if(i == 0){
-		divergenceCleanUpMatrix[i][0].push_back(MatrixElement(1, i, 0));
-		divergenceCleanUpMatrix[i][0].push_back(MatrixElement(-1, i+1, 0));
-		divergenceCleanUpRightPart[i][0] = 0;
+	if(i == 0 && j == 0 && k == 0){
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(1, i, j, k, 0));
+		divergenceCleanUpRightPart[i][j][k][0] = 0;
 		return;
-	}*/
+	}
+
+	if(i == xnumber - 1 && j == ynumber - 1 && k == znumber - 1){
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(1, i, j, k, 0));
+		divergenceCleanUpRightPart[i][j][k][0] = 0;
+		return;
+	}
 	
 	int prevI = i - 1;
 	if(prevI < 0) {
@@ -143,40 +169,120 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k) {
 		nextI = 0;
 	}
 
-	//div for x
-	/*double element = -2/deltaX2;
-	divergenceCleanUpMatrix[i][0].push_back(MatrixElement(element, i, 0));
+	int prevJ = j - 1;
+	if(prevJ < 0) {
+		prevJ = ynumber - 1;
+	}
+	int nextJ = j + 1;
+	if(nextJ >= ynumber) {
+		nextJ = 0;
+	}
 
-	element = 1/deltaX2;
-	divergenceCleanUpMatrix[i][0].push_back(MatrixElement(element, nextI, 0));
-	divergenceCleanUpMatrix[i][0].push_back(MatrixElement(element, prevI, 0));
+	int prevK = k - 1;
+	if(prevK < 0) {
+		prevK = ynumber - 1;
+	}
+	int nextK = k + 1;
+	if(nextK >= ynumber) {
+		nextK = 0;
+	}
 
-	divergenceCleanUpRightPart[i][0] = -cleanUpRightPart(i);*/
+	
 
-	//divergenceCleanUpMatrix[i][j][k][1].push_back(MatrixElement(1, i,  1));
-	//divergenceCleanUpMatrix[i][j][k][2].push_back(MatrixElement(1, i, 2));
-	divergenceCleanUpRightPart[i][j][k][1] = 0;
-	divergenceCleanUpRightPart[i][j][k][2] = 0;
+	divergenceCleanUpRightPart[i][j][k][0] = -cleanUpRightPart(i, j, k);
 
-	divergenceCleanUpRightPart[i][j][k][0] = cleanUpRightPart(i, j, k);
+	double element = -1/(2*deltaX2) - 1/(2*deltaY2) - 1/(2*deltaZ2);
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
 
-	//divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(-1.0/deltaX, i, 0));
-	//divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(1.0/deltaX, nextI, 0));
+	element = 1/(16*deltaX2) + 1/(16*deltaY2) + 1/(16*deltaZ2);
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, nextJ, nextK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, nextJ, prevK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, prevJ, nextK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, prevJ, prevK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, nextJ, nextK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, nextJ, prevK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, prevJ, nextK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, prevJ, prevK, 0));
 
+	element = 1/(8*deltaX2) + 1/(8*deltaY2) - 1/(8*deltaZ2);
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, nextJ, k, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, prevJ, k, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, nextJ, k, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, prevJ, k, 0));
+
+	element = 1/(8*deltaX2) - 1/(8*deltaY2) + 1/(8*deltaZ2);
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, nextK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, prevK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, nextK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, prevK, 0));
+
+	element = - 1/(8*deltaX2) + 1/(8*deltaY2) + 1/(8*deltaZ2);
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, nextK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, prevK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, nextK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, prevK, 0));
+
+	element = 1/(4*deltaX2) - 1/(4*deltaY2) - 1/(4*deltaZ2);
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
+
+	element = - 1/(4*deltaX2) + 1/(4*deltaY2) - 1/(4*deltaZ2);
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, k, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, k, 0));
+
+	element =  - 1/(4*deltaX2) - 1/(4*deltaY2) + 1/(4*deltaZ2);
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
+	divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
 }
 
-void Simulation::createDivergenceCleanupLeftEquation() {
+void Simulation::createDivergenceCleanupLeftEquation(int j, int k) {
 	int i = 0;
 
 	int nextI = i+1;
+
+	int prevJ = j - 1;
+	if(prevJ < 0) {
+		prevJ = ynumber - 1;
+	}
+	int nextJ = j + 1;
+	if(nextJ >= ynumber) {
+		nextJ = 0;
+	}
+
+	int prevK = k - 1;
+	if(prevK < 0) {
+		prevK = ynumber - 1;
+	}
+	int nextK = k + 1;
+	if(nextK >= ynumber) {
+		nextK = 0;
+	}
 
 	//div for x
 
 	divergenceCleanUpRightPart[i][0] = 0;
 }
 
-void Simulation::createDivergenceCleanupRightEquation() {
+void Simulation::createDivergenceCleanupRightEquation(int j, int k) {
 	int i = xnumber - 1;
+
+	int prevJ = j - 1;
+	if(prevJ < 0) {
+		prevJ = ynumber - 1;
+	}
+	int nextJ = j + 1;
+	if(nextJ >= ynumber) {
+		nextJ = 0;
+	}
+
+	int prevK = k - 1;
+	if(prevK < 0) {
+		prevK = ynumber - 1;
+	}
+	int nextK = k + 1;
+	if(nextK >= ynumber) {
+		nextK = 0;
+	}
 
 	//div for x
 	

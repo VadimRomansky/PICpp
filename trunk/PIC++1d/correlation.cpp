@@ -486,7 +486,8 @@ double Simulation::correlationWithEbin(Particle& particle, int i) {
 
 	if(i == -1) {
 		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-			return 0.0;
+			leftx = xgrid[0] - deltaX;
+			rightx = xgrid[0];
 		}
 		if (particle.x - particle.dx > xgrid[0] - deltaX/2) {
 			leftx = xgrid[xnumber - 1] - deltaX/2;
@@ -504,8 +505,11 @@ double Simulation::correlationWithEbin(Particle& particle, int i) {
 				leftx = xgrid[0] - deltaX/2;
 				rightx = xgrid[0] + deltaX/2;
 			}
-		} else {
+		} else if(boundaryConditionType == FREE_BOTH){
 			leftx = xgrid[0] - deltaX/2;
+			rightx = xgrid[0] + deltaX/2;
+		} else {
+			leftx = xgrid[0];
 			rightx = xgrid[0] + deltaX/2;
 		}
 	} else if (i == xnumber) {

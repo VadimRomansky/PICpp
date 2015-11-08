@@ -27,6 +27,16 @@ void Simulation::cleanupDivergence() {
 		divergenceCleaningField[i][2] = 0;
 	}
 
+	/*divergenceCleaningField[0][0] = 0;
+	divergenceCleaningField[0][1] = 0;
+	divergenceCleaningField[0][2] = 0;
+
+	for(int i = 1; i < xnumber ; ++i){
+		divergenceCleaningField[i][0] = divergenceCleaningField[i-1][0] + cleanUpRightPart(i)*deltaX;
+		divergenceCleaningField[i][1] = 0;
+		divergenceCleaningField[i][2] = 0;
+	}*/
+
 	updateFieldByCleaning();
 	if(boundaryConditionType == PERIODIC){
 		updateBoundariesNewField();
