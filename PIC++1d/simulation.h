@@ -11,7 +11,7 @@
 
 enum SolverType {EXPLICIT, IMPLICIT};
 
-enum BoundaryConditionType {PERIODIC, SUPER_CONDUCTOR_LEFT};
+enum BoundaryConditionType {PERIODIC, SUPER_CONDUCTOR_LEFT, FREE_BOTH};
 
 class Simulation{
 public:
@@ -206,6 +206,7 @@ public:
 	void checkEquationMatrix(std::vector<MatrixElement>** matrix, int lnumber);
 	void createSuperConductorLeftEquation();
 	void createFreeRightEquation();
+	void createFreeLeftEquation();
 	void createFreeRightEquationX(Vector3d& rightPart);
 	void createFreeRightEquationY(Vector3d& rightPart);
 	void createFreeRightEquationZ(Vector3d& rightPart);
@@ -233,6 +234,7 @@ public:
 	void checkParticleInBox(Particle& particle);
 	void checkParticlesInBin();
 	void updateElectroMagneticParameters();
+	void addReflectedParticleToElectroMagneticParameters(const Particle* particle);
 	void updateDensityParameters();
 	void updateEnergy();
 	void updateFields();
@@ -262,6 +264,8 @@ public:
 	void createParticles();
 	Particle* getFirstProton();
 	Particle* getFirstElectron();
+	Particle* getLastProton();
+	Particle* getLastElectron();
 	Particle* createParticle(int n, int i, double weight, ParticleTypes type);
 
 	void moveParticles();

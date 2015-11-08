@@ -115,18 +115,28 @@ void Simulation::moveParticle(Particle* particle){
 	tempParticle.y += ((1 - eta)*velocity.y + eta*newVelocity.y)*eta*deltaT;
 	tempParticle.z += ((1 - eta)*velocity.z + eta*newVelocity.z)*eta*deltaT;
 
-	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+	if(boundaryConditionType != PERIODIC){
 		if(tempParticle.x < xgrid[0]){
-			particle->x = 2*xgrid[0] - tempParticle.x;
-			particle->y = tempParticle.y;
-			particle->z = tempParticle.z;
-			newVelocity.x = -newVelocity.x;
-			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
-			return;
+			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+				particle->x = 2*xgrid[0] - tempParticle.x;
+				particle->y = tempParticle.y;
+				particle->z = tempParticle.z;
+				newVelocity.x = -newVelocity.x;
+				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+				return;
+			} else {
+				escapedParticles.push_back(particle);
+				particle->x = xgrid[0];
+				particle->y = tempParticle.y;
+				particle->z = tempParticle.z;
+				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+				particle->escaped = true;
+				return;
+			}
 		}
 		if(tempParticle.x > xgrid[xnumber]){
 			escapedParticles.push_back(particle);
-			particle->x = xsize;
+			particle->x = xgrid[xnumber];
 			particle->y = tempParticle.y;
 			particle->z = tempParticle.z;
 			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
@@ -152,20 +162,30 @@ void Simulation::moveParticle(Particle* particle){
 		middleVelocity = (tempParticle.rotationTensor*tempParticle.gammaFactor(speed_of_light_normalized)*velocity) + rotatedE*beta;
 
 		tempParticle.x += (middleVelocity.x*eta*deltaT);
-		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		if(boundaryConditionType != PERIODIC){
 			//todo more accurate speed!!
 			if(tempParticle.x < xgrid[0]){
-				particle->x = 2*xgrid[0] - tempParticle.x + fabs(middleVelocity.x*(1 - eta)*deltaT);
-				particle->y = tempParticle.y + middleVelocity.y*(1 - eta)*deltaT;
-				particle->z = tempParticle.z + middleVelocity.z*(1 - eta)*deltaT;
-				newVelocity = middleVelocity;
-				newVelocity.x = -newVelocity.x;
-				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
-				return;
+				if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+					particle->x = 2*xgrid[0] - tempParticle.x + fabs(middleVelocity.x*(1 - eta)*deltaT);
+					particle->y = tempParticle.y + middleVelocity.y*(1 - eta)*deltaT;
+					particle->z = tempParticle.z + middleVelocity.z*(1 - eta)*deltaT;
+					newVelocity = middleVelocity;
+					newVelocity.x = -newVelocity.x;
+					particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+					return;
+				} else {
+					escapedParticles.push_back(particle);
+					particle->x = xgrid[0];
+					particle->y = tempParticle.y;
+					particle->z = tempParticle.z;
+					particle->setMomentumByV(middleVelocity, speed_of_light_normalized);
+					particle->escaped = true;
+					return;
+				}
 			}
 			if(tempParticle.x > xgrid[xnumber]){
 				escapedParticles.push_back(particle);
-				particle->x = xsize;
+				particle->x = xgrid[xnumber];
 				particle->y = tempParticle.y;
 				particle->z = tempParticle.z;
 				particle->setMomentumByV(middleVelocity, speed_of_light_normalized);
@@ -196,15 +216,22 @@ void Simulation::moveParticle(Particle* particle){
 }
 
 void Simulation::correctParticlePosition(Particle* particle) {
-	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+	if(boundaryConditionType != PERIODIC){
 		if(particle->x < xgrid[0]){
-			particle->x = 2*xgrid[0] - particle->x;
-			particle->momentum.x = -particle->momentum.x;
-			return;
+			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+				particle->x = 2*xgrid[0] - particle->x;
+				particle->momentum.x = -particle->momentum.x;
+				return;
+			} else {
+				escapedParticles.push_back(particle);
+				particle->x = xgrid[0];
+				particle->escaped = true;
+				return;
+			}
 		}
 		if(particle->x > xgrid[xnumber]){
 			escapedParticles.push_back(particle);
-			particle->x = xsize;
+			particle->x = xgrid[xnumber];
 			particle->escaped = true;
 			return;
 		}
@@ -220,15 +247,22 @@ void Simulation::correctParticlePosition(Particle* particle) {
 }
 
 void Simulation::correctParticlePosition(Particle& particle) {
-	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+	if(boundaryConditionType != PERIODIC){
 		if(particle.x < xgrid[0]){
-			particle.x = 2*xgrid[0] - particle.x;
-			particle.momentum.x = -particle.momentum.x;
-			return;
+			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+				particle.x = 2*xgrid[0] - particle.x;
+				particle.momentum.x = -particle.momentum.x;
+				return;
+			} else {
+				escapedParticles.push_back(&particle);
+				particle.x = xgrid[0];
+				particle.escaped = true;
+				return;
+			}
 		}
 		if(particle.x > xgrid[xnumber]){
 			escapedParticles.push_back(&particle);
-			particle.x = xsize;
+			particle.x = xgrid[xnumber];
 			particle.escaped = true;
 			return;
 		}

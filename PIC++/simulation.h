@@ -234,8 +234,8 @@ public:
 	void updateFieldByCleaning();
 	void evaluateDivergenceCleaningField();
 	void createDivergenceCleanupInternalEquation(int i, int j, int k);
-	void createDivergenceCleanupLeftEquation();
-	void createDivergenceCleanupRightEquation();
+	void createDivergenceCleanupLeftEquation(int j, int k);
+	void createDivergenceCleanupRightEquation(int j, int k);
 	double cleanUpRightPart(int i, int j, int k);
 
 	void resetNewTempFields();

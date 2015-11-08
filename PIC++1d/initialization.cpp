@@ -39,8 +39,9 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 	newlyStarted = true;
 	solverType = IMPLICIT;
 	//solverType = EXPLICIT;
-	boundaryConditionType = PERIODIC;
-	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	//boundaryConditionType = PERIODIC;
+	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	//boundaryConditionType = FREE_BOTH;
 	maxwellEquationMatrixSize = 3;
 
 	currentIteration = 0;
@@ -800,7 +801,11 @@ void Simulation::initializeFluxFromRight(){
 	newEfield[0] = E0;
 	explicitEfield[0] = E0;
 
-	fieldsLorentzTransitionX(V0.x);
+	for(int i = 0; i < xnumber/2; ++i){
+		Bfield[i].y = 0.1*B0.x*sin(4*pi*middleXgrid[i]/xsize);
+	}
+
+	//fieldsLorentzTransitionX(V0.x);
 
 	for(int i = 0; i < particles.size(); ++i){
 		Particle* particle = particles[i];
@@ -1372,7 +1377,7 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 
 	double x = xgrid[i] +  deltaX * uniformDistribution();
 
-	double dx = deltaX / 2;
+	double dx = deltaX / 4;
 
 	double energy = mass * speed_of_light_normalized_sqr;
 	double p;

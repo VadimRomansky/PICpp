@@ -257,7 +257,7 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 	}
 
 	if (debugMode) {
-		checkEquationMatrix(maxwellEquationMatrix, maxwellEquationMatrixSize);
+		//checkEquationMatrix(maxwellEquationMatrix, maxwellEquationMatrixSize);
 	}
 }
 

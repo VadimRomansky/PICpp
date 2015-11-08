@@ -4,7 +4,7 @@
 1.67E-31               density
 -1E9 0 0                  velocity
 0 0 0                  elecctricField
-1E-6 1E-7 0                  magneticField
+1E-6 0 0                  magneticField
 100000000               max iterations
 1E15                   max time
-500                 particles per bin
+200                 particles per bin
