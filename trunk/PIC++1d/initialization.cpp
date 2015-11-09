@@ -1360,6 +1360,26 @@ Particle* Simulation::getFirstElectron() {
 	return NULL;
 }
 
+Particle* Simulation::getLastProton() {
+	for (int pcount = particles.size() - 1; pcount >= 0; --pcount) {
+		Particle* particle = particles[pcount];
+		if (particle->type == PROTON) {
+			return particle;
+		}
+	}
+	return NULL;
+}
+
+Particle* Simulation::getLastElectron() {
+	for (int pcount = particles.size() - 1; pcount >= 0; --pcount) {
+		Particle* particle = particles[pcount];
+		if (particle->type == ELECTRON) {
+			return particle;
+		}
+	}
+	return NULL;
+}
+
 Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes type) {
 	double charge = 0;
 	double mass = 0;

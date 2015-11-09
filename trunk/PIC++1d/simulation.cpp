@@ -38,7 +38,7 @@ void Simulation::simulate() {
 	updateDensityParameters();
 
 	evaluateExplicitDerivative();
-	cleanupDivergence();
+	//cleanupDivergence();
 	updateFields();
 	updateEnergy();
 
@@ -55,8 +55,10 @@ void Simulation::simulate() {
 		updateDeltaT();
 		evaluateParticlesRotationTensor();
 		updateElectroMagneticParameters();
-		evaluateFields();
-		evaluateMagneticField();
+		if(currentIteration > 1000){
+			evaluateFields();
+			evaluateMagneticField();
+		}
 		moveParticles();
 
 		length += fabs(V0.x*deltaT);
@@ -66,7 +68,7 @@ void Simulation::simulate() {
 				injectNewParticles(1);
 			}
 		}
-		cleanupDivergence();
+		//cleanupDivergence();
 		updateDensityParameters();
 		updateFields();
 		updateEnergy();
@@ -410,7 +412,10 @@ void Simulation::updateElectroMagneticParameters() {
 		}
 	}
 
-	//smoothFlux();
+	smoothFlux();
+	//electricFlux[0].x = 0;
+	electricFlux[0] = Vector3d(0, 0, 0);
+	dielectricTensor[0] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	if(solverType == IMPLICIT){
 		for (int i = 0; i < xnumber; ++i) {
@@ -641,11 +646,19 @@ void Simulation::smoothFlux(){
 		newFlux[i] = Vector3d(0, 0, 0);
 		int prevI = i - 1;
 		if(prevI < 0){
-			prevI = prevI + xnumber;
+			if(boundaryConditionType == PERIODIC){
+				prevI = xnumber - 1;
+			} else {
+				prevI = i;
+			}
 		}
 		int nextI = i + 1;
 		if(nextI >= xnumber + 1){
-			nextI = nextI - xnumber;
+			if(boundaryConditionType == PERIODIC){
+				nextI = 1;
+			} else {
+				nextI = i;
+			}
 		}
 
 		newFlux[i] = (electricFlux[prevI] + electricFlux[i]*2 + electricFlux[nextI])/4.0;
