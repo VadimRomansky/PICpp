@@ -286,7 +286,13 @@ public:
 	void collectParticlesIntoBins();
 	void pushParticleIntoEbin(Particle* particle, int i, int j, int k);
 	void pushParticleIntoBbin(Particle* particle, int i, int j, int k);
+	bool particleCrossBbinX(Particle& particle, int i);
+	bool particleCrossBbinY(Particle& particle, int j);
+	bool particleCrossBbinZ(Particle& particle, int k);
 	bool particleCrossBbin(Particle& particle, int i, int j, int k);
+	bool particleCrossEbinX(Particle& particle, int i);
+	bool particleCrossEbinY(Particle& particle, int j);
+	bool particleCrossEbinZ(Particle& particle, int k);
 	bool particleCrossEbin(Particle& particle, int i, int j, int k);
 	Vector3d correlationTempEfield(Particle* particle);
 	Vector3d correlationNewEfield(Particle* particle);

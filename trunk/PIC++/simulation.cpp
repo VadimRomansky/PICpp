@@ -426,6 +426,7 @@ void Simulation::updateElectroMagneticParameters() {
 		//checkParticlesInBin();
 	}
 	//collectParticlesIntoBins();
+	int particlePartsCount = 0;
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for(int j = 0; j  < ynumber + 1; ++j){
 			for(int k = 0; k < znumber + 1; ++k){
@@ -433,6 +434,7 @@ void Simulation::updateElectroMagneticParameters() {
 				dielectricTensor[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 				divPressureTensor[i][j][k] = Vector3d(0, 0, 0);
 				for (int pcount = 0; pcount < particlesInEbin[i][j][k].size(); ++pcount) {
+					particlePartsCount++;
 					Particle* particle = particlesInEbin[i][j][k][pcount];
 					double correlation = correlationWithEbin(*particle, i, j, k) / volumeE(i, j, k);
 
