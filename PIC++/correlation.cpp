@@ -33,14 +33,118 @@ void Simulation::collectParticlesIntoBins() {
 		int ycount = floor((particle->coordinates.y - ygrid[0]) / deltaY);
 		int zcount = floor((particle->coordinates.z - zgrid[0]) / deltaZ);
 
-		double correlationSum = 0;
-		for (int i = xcount - 1; i <= xcount + 1; ++i) {
-			for(int j = ycount - 1; j <= ycount + 1; ++j){
-				for(int k = zcount - 1; k <= zcount + 1; ++k){
-					if (particleCrossBbin(*particle, i, j, k)) {
-						pushParticleIntoBbin(particle, i, j, k);
-					}
-				}
+		bool crossPrevX = particleCrossBbinX(*particle, xcount - 1);
+		bool crossNextX = particleCrossBbinX(*particle, xcount + 1);
+
+		bool crossPrevY = particleCrossBbinY(*particle, ycount - 1) && (ynumber > 1);
+		bool crossNextY = particleCrossBbinY(*particle, ycount + 1) && (ynumber > 1);
+
+		bool crossPrevZ = particleCrossBbinZ(*particle, zcount - 1) && (znumber > 1);
+		bool crossNextZ = particleCrossBbinZ(*particle, zcount + 1) && (znumber > 1);
+
+		pushParticleIntoBbin(particle, xcount, ycount, zcount);
+
+		if(crossPrevY){
+			pushParticleIntoBbin(particle, xcount, ycount - 1, zcount);
+		}
+
+		if(crossPrevZ){
+			pushParticleIntoBbin(particle, xcount, ycount, zcount - 1);
+		}
+
+		if(crossNextY){
+			pushParticleIntoBbin(particle, xcount, ycount + 1, zcount);
+		}
+
+		if(crossNextZ){
+			pushParticleIntoBbin(particle, xcount, ycount, zcount + 1);
+		}
+
+		if(crossPrevY && crossPrevZ){
+			pushParticleIntoBbin(particle, xcount, ycount - 1, zcount - 1);
+		}
+
+		if(crossNextY && crossPrevZ){
+			pushParticleIntoBbin(particle, xcount, ycount + 1, zcount - 1);
+		}
+
+		if(crossPrevY && crossNextZ){
+			pushParticleIntoBbin(particle, xcount, ycount - 1, zcount + 1);
+		}
+
+		if(crossNextY && crossNextZ){
+			pushParticleIntoBbin(particle, xcount, ycount + 1, zcount + 1);
+		}
+
+		if(crossPrevX){
+			pushParticleIntoBbin(particle, xcount - 1, ycount, zcount);
+
+			if(crossPrevY){
+				pushParticleIntoBbin(particle, xcount - 1, ycount - 1, zcount);
+			}
+
+			if(crossPrevZ){
+				pushParticleIntoBbin(particle, xcount - 1, ycount, zcount - 1);
+			}
+
+			if(crossNextY){
+				pushParticleIntoBbin(particle, xcount - 1, ycount + 1, zcount);
+			}
+
+			if(crossNextZ){
+				pushParticleIntoBbin(particle, xcount - 1, ycount, zcount + 1);
+			}
+
+			if(crossPrevY && crossPrevZ){
+				pushParticleIntoBbin(particle, xcount - 1, ycount - 1, zcount - 1);
+			}
+
+			if(crossNextY && crossPrevZ){
+				pushParticleIntoBbin(particle, xcount - 1, ycount + 1, zcount - 1);
+			}
+
+			if(crossPrevY && crossNextZ){
+				pushParticleIntoBbin(particle, xcount - 1, ycount - 1, zcount + 1);
+			}
+
+			if(crossNextY && crossNextZ){
+				pushParticleIntoBbin(particle, xcount - 1, ycount + 1, zcount + 1);
+			}
+		}
+
+		if(crossNextX){
+			pushParticleIntoBbin(particle, xcount + 1, ycount, zcount);
+
+			if(crossPrevY){
+				pushParticleIntoBbin(particle, xcount + 1, ycount - 1, zcount);
+			}
+
+			if(crossPrevZ){
+				pushParticleIntoBbin(particle, xcount + 1, ycount, zcount - 1);
+			}
+
+			if(crossNextY){
+				pushParticleIntoBbin(particle, xcount + 1, ycount + 1, zcount);
+			}
+
+			if(crossNextZ){
+				pushParticleIntoBbin(particle, xcount + 1, ycount, zcount + 1);
+			}
+
+			if(crossPrevY && crossPrevZ){
+				pushParticleIntoBbin(particle, xcount + 1, ycount - 1, zcount - 1);
+			}
+
+			if(crossNextY && crossPrevZ){
+				pushParticleIntoBbin(particle, xcount + 1, ycount + 1, zcount - 1);
+			}
+
+			if(crossPrevY && crossNextZ){
+				pushParticleIntoBbin(particle, xcount + 1, ycount - 1, zcount + 1);
+			}
+
+			if(crossNextY && crossNextZ){
+				pushParticleIntoBbin(particle, xcount + 1, ycount + 1, zcount + 1);
 			}
 		}
 
@@ -48,34 +152,146 @@ void Simulation::collectParticlesIntoBins() {
 		ycount = floor(((particle->coordinates.y - ygrid[0]) / deltaY) + 0.5);
 		zcount = floor(((particle->coordinates.z - zgrid[0]) / deltaZ) + 0.5);
 
-		for (int i = xcount - 1; i <= xcount + 1; ++i) {
-			int tempi = i;
-			if( tempi == -1) {
-				tempi = xnumber - 1;
+		int prevX = xcount - 1;
+		if(prevX == -1  && boundaryConditionType == PERIODIC){
+			prevX = xnumber - 1;
+		}
+		int nextX = xcount + 1;
+
+		if(nextX == xnumber + 1 && boundaryConditionType == PERIODIC){
+			nextX = 1;
+		}
+
+		int prevY = ycount - 1;
+		if(prevY == -1){
+			prevY = ynumber - 1;
+		}
+		int nextY = ycount + 1;
+		if(nextY == ynumber + 1){
+			nextY = 1;
+		}
+
+		int prevZ = zcount - 1;
+		if(prevZ == -1){
+			prevZ = znumber - 1;
+		}
+		int nextZ = zcount + 1;
+		if(nextZ == znumber + 1){
+			nextZ = 1;
+		}
+
+		crossPrevX = particleCrossEbinX(*particle, prevX);
+		crossNextX = particleCrossEbinX(*particle, nextX);
+
+		crossPrevY = particleCrossEbinY(*particle, prevY) && (ynumber > 1);
+		crossNextY = particleCrossEbinY(*particle, nextY) && (ynumber > 1);
+
+		crossPrevZ = particleCrossEbinZ(*particle, prevZ) && (znumber > 1);
+		crossNextZ = particleCrossEbinZ(*particle, nextZ) && (znumber > 1);
+
+		pushParticleIntoEbin(particle, xcount, ycount, zcount);
+
+		if(crossPrevY){
+			pushParticleIntoEbin(particle, xcount, ycount - 1, zcount);
+		}
+
+		if(crossPrevZ){
+			pushParticleIntoEbin(particle, xcount, ycount, zcount - 1);
+		}
+
+		if(crossNextY){
+			pushParticleIntoEbin(particle, xcount, ycount + 1, zcount);
+		}
+
+		if(crossNextZ){
+			pushParticleIntoEbin(particle, xcount, ycount, zcount + 1);
+		}
+
+		if(crossPrevY && crossPrevZ){
+			pushParticleIntoEbin(particle, xcount, ycount - 1, zcount - 1);
+		}
+
+		if(crossNextY && crossPrevZ){
+			pushParticleIntoEbin(particle, xcount, ycount + 1, zcount - 1);
+		}
+
+		if(crossPrevY && crossNextZ){
+			pushParticleIntoEbin(particle, xcount, ycount - 1, zcount + 1);
+		}
+
+		if(crossNextY && crossNextZ){
+			pushParticleIntoEbin(particle, xcount, ycount + 1, zcount + 1);
+		}
+
+		if(crossPrevX){
+			pushParticleIntoEbin(particle, xcount - 1, ycount, zcount);
+
+			if(crossPrevY){
+				pushParticleIntoEbin(particle, xcount - 1, ycount - 1, zcount);
 			}
-			if(tempi == xnumber + 1) {
-				tempi = 1;
+
+			if(crossPrevZ){
+				pushParticleIntoEbin(particle, xcount - 1, ycount, zcount - 1);
 			}
-			for(int j = ycount - 1; j <= ycount + 1; ++j){
-				int tempj = j;
-				if( tempj == -1) {
-					tempj = ynumber - 1;
-				}
-				if(tempj == ynumber + 1) {
-					tempj = 1;
-				}
-				for(int k = zcount - 1; k <= zcount + 1; ++k){
-					int tempk = k;
-					if( tempk == -1) {
-						tempk = znumber - 1;
-					}
-					if(tempk == znumber + 1) {
-						tempk = 1;
-					}
-					if (particleCrossEbin(*particle, tempi, tempj, tempk)) {
-						pushParticleIntoEbin(particle, tempi, tempj, tempk);
-					}
-				}
+
+			if(crossNextY){
+				pushParticleIntoEbin(particle, xcount - 1, ycount + 1, zcount);
+			}
+
+			if(crossNextZ){
+				pushParticleIntoEbin(particle, xcount - 1, ycount, zcount + 1);
+			}
+
+			if(crossPrevY && crossPrevZ){
+				pushParticleIntoEbin(particle, xcount - 1, ycount - 1, zcount - 1);
+			}
+
+			if(crossNextY && crossPrevZ){
+				pushParticleIntoEbin(particle, xcount - 1, ycount + 1, zcount - 1);
+			}
+
+			if(crossPrevY && crossNextZ){
+				pushParticleIntoEbin(particle, xcount - 1, ycount - 1, zcount + 1);
+			}
+
+			if(crossNextY && crossNextZ){
+				pushParticleIntoEbin(particle, xcount - 1, ycount + 1, zcount + 1);
+			}
+		}
+
+		if(crossNextX){
+			pushParticleIntoEbin(particle, xcount + 1, ycount, zcount);
+
+			if(crossPrevY){
+				pushParticleIntoEbin(particle, xcount + 1, ycount - 1, zcount);
+			}
+
+			if(crossPrevZ){
+				pushParticleIntoEbin(particle, xcount + 1, ycount, zcount - 1);
+			}
+
+			if(crossNextY){
+				pushParticleIntoEbin(particle, xcount + 1, ycount + 1, zcount);
+			}
+
+			if(crossNextZ){
+				pushParticleIntoEbin(particle, xcount + 1, ycount, zcount + 1);
+			}
+
+			if(crossPrevY && crossPrevZ){
+				pushParticleIntoEbin(particle, xcount + 1, ycount - 1, zcount - 1);
+			}
+
+			if(crossNextY && crossPrevZ){
+				pushParticleIntoEbin(particle, xcount + 1, ycount + 1, zcount - 1);
+			}
+
+			if(crossPrevY && crossNextZ){
+				pushParticleIntoEbin(particle, xcount + 1, ycount - 1, zcount + 1);
+			}
+
+			if(crossNextY && crossNextZ){
+				pushParticleIntoEbin(particle, xcount + 1, ycount + 1, zcount + 1);
 			}
 		}
 	}
@@ -126,39 +342,7 @@ void Simulation::pushParticleIntoBbin(Particle* particle, int i, int j, int k) {
 	particlesInBbin[i][j][k].push_back(particle);
 }
 
-bool Simulation::particleCrossBbin(Particle& particle, int i, int j, int k) {
-	if(j < 0) {
-		j = ynumber - 1;
-	} else if(j >= ynumber) {
-		j = 0;
-	}	
-	if (j == 0) {
-		if ((ygrid[j + 1] < particle.coordinates.y - particle.dy) && (ygrid[ynumber] > particle.coordinates.y + particle.dy))
-			return false;
-	} else if (j == ynumber - 1) {
-		if ((ygrid[j] > particle.coordinates.y + particle.dy) && (ygrid[0] < particle.coordinates.y - particle.dy))
-			return false;
-	} else {
-		if ((ygrid[j] > particle.coordinates.y + particle.dy) || (ygrid[j + 1] < particle.coordinates.y - particle.dy))
-			return false;
-	}
-
-	if(k < 0) {
-		k = znumber - 1;
-	} else if(k >= znumber) {
-		k = 0;
-	}	
-	if (k == 0) {
-		if ((zgrid[k + 1] < particle.coordinates.z - particle.dz) && (zgrid[xnumber] > particle.coordinates.z + particle.dz))
-			return false;
-	} else if (k == znumber - 1) {
-		if ((zgrid[k] > particle.coordinates.z + particle.dz) && (zgrid[0] < particle.coordinates.z - particle.dz))
-			return false;
-	} else {
-		if ((zgrid[k] > particle.coordinates.z + particle.dz) || (zgrid[k + 1] < particle.coordinates.z - particle.dz))
-			return false;
-	}
-
+bool Simulation::particleCrossBbinX(Particle& particle, int i) {
 	if(boundaryConditionType == PERIODIC){
 		if(i < 0) {
 			i = xnumber - 1;
@@ -201,30 +385,62 @@ bool Simulation::particleCrossBbin(Particle& particle, int i, int j, int k) {
 	return false;
 }
 
-bool Simulation::particleCrossEbin(Particle& particle, int i, int j, int k) {
-	if(j == 0){
-		if(ygrid[0] + (deltaY/2) < particle.coordinates.y - particle.dy && ygrid[ynumber] - (deltaY/2) > particle.coordinates.y + particle.dy)
+bool Simulation::particleCrossBbinY(Particle& particle, int j) {
+	if(j < 0) {
+		j = ynumber - 1;
+	} else if(j >= ynumber) {
+		j = 0;
+	}	
+	if (j == 0) {
+		if ((ygrid[j + 1] < particle.coordinates.y - particle.dy) && (ygrid[ynumber] > particle.coordinates.y + particle.dy))
 			return false;
-	} else if(j == ynumber){
-		if(ygrid[0] + (deltaY/2) < particle.coordinates.y - particle.dy && ygrid[ynumber] - (deltaY/2) > particle.coordinates.y + particle.dy)
+	} else if (j == ynumber - 1) {
+		if ((ygrid[j] > particle.coordinates.y + particle.dy) && (ygrid[0] < particle.coordinates.y - particle.dy))
 			return false;
 	} else {
-		if ((ygrid[j] - (deltaY / 2) > particle.coordinates.y + particle.dy) || (ygrid[j + 1] - (deltaY / 2) < particle.coordinates.y - particle.dy))
+		if ((ygrid[j] > particle.coordinates.y + particle.dy) || (ygrid[j + 1] < particle.coordinates.y - particle.dy))
+			return false;
+	}
+	return true;
+}
+
+bool Simulation::particleCrossBbinZ(Particle& particle, int k) {
+	if(k < 0) {
+		k = znumber - 1;
+	} else if(k >= znumber) {
+		k = 0;
+	}	
+	if (k == 0) {
+		if ((zgrid[k + 1] < particle.coordinates.z - particle.dz) && (zgrid[xnumber] > particle.coordinates.z + particle.dz))
+			return false;
+	} else if (k == znumber - 1) {
+		if ((zgrid[k] > particle.coordinates.z + particle.dz) && (zgrid[0] < particle.coordinates.z - particle.dz))
+			return false;
+	} else {
+		if ((zgrid[k] > particle.coordinates.z + particle.dz) || (zgrid[k + 1] < particle.coordinates.z - particle.dz))
 			return false;
 	}
 
-	if(k == 0){
-		if(zgrid[0] + (deltaZ/2) < particle.coordinates.z - particle.dz && zgrid[znumber] - (deltaZ/2) > particle.coordinates.z + particle.dz)
-			return false;
-	} else if(k == znumber){
-		if(zgrid[0] + (deltaZ/2) < particle.coordinates.z - particle.dz && zgrid[znumber] - (deltaZ/2) > particle.coordinates.z + particle.dz)
-			return false;
-	} else {
-		if ((zgrid[k] - (deltaZ / 2) > particle.coordinates.z + particle.dz) || (zgrid[k + 1] - (deltaZ / 2) < particle.coordinates.z - particle.dz))
-			return false;
+	return true;
+}
+
+bool Simulation::particleCrossBbin(Particle& particle, int i, int j, int k) {
+	bool crossX = particleCrossBbinX(particle, i);
+
+	if(! crossX){
+		return false;
 	}
 
+	bool crossY = particleCrossBbinY(particle, j);
 
+	if(! crossY){
+		return false;
+	}
+
+	return particleCrossBbinZ(particle, k);
+}
+
+bool Simulation::particleCrossEbinX(Particle& particle, int i){
 	if(boundaryConditionType == PERIODIC){
 		if(i == 0){
 			if(xgrid[0] + (deltaX/2) < particle.coordinates.x - particle.dx && xgrid[xnumber] - (deltaX/2) > particle.coordinates.x + particle.dx)
@@ -252,6 +468,52 @@ bool Simulation::particleCrossEbin(Particle& particle, int i, int j, int k) {
 	}
 
 	return false;
+}
+
+bool Simulation::particleCrossEbinY(Particle& particle, int j){
+	if(j == 0){
+		if(ygrid[0] + (deltaY/2) < particle.coordinates.y - particle.dy && ygrid[ynumber] - (deltaY/2) > particle.coordinates.y + particle.dy)
+			return false;
+	} else if(j == ynumber){
+		if(ygrid[0] + (deltaY/2) < particle.coordinates.y - particle.dy && ygrid[ynumber] - (deltaY/2) > particle.coordinates.y + particle.dy)
+			return false;
+	} else {
+		if ((ygrid[j] - (deltaY / 2) > particle.coordinates.y + particle.dy) || (ygrid[j + 1] - (deltaY / 2) < particle.coordinates.y - particle.dy))
+			return false;
+	}
+
+	return true;
+}
+
+bool Simulation::particleCrossEbinZ(Particle& particle, int k){
+	if(k == 0){
+		if(zgrid[0] + (deltaZ/2) < particle.coordinates.z - particle.dz && zgrid[znumber] - (deltaZ/2) > particle.coordinates.z + particle.dz)
+			return false;
+	} else if(k == znumber){
+		if(zgrid[0] + (deltaZ/2) < particle.coordinates.z - particle.dz && zgrid[znumber] - (deltaZ/2) > particle.coordinates.z + particle.dz)
+			return false;
+	} else {
+		if ((zgrid[k] - (deltaZ / 2) > particle.coordinates.z + particle.dz) || (zgrid[k + 1] - (deltaZ / 2) < particle.coordinates.z - particle.dz))
+			return false;
+	}
+
+	return true;
+}
+
+bool Simulation::particleCrossEbin(Particle& particle, int i, int j, int k) {
+	bool crossX = particleCrossEbinX(particle, i);
+
+	if(! crossX){
+		return false;
+	}
+
+	bool crossY = particleCrossEbinY(particle, j);
+
+	if(! crossY){
+		return false;
+	}
+
+	return particleCrossEbinZ(particle, k);
 }
 
 
@@ -621,8 +883,8 @@ Vector3d Simulation::correlationNewBfield(Particle& particle) {
 }
 
 double Simulation::correlationWithBbin(Particle& particle, int i, int j, int k) {
-	if (! particleCrossBbin(particle, i, j, k))
-		return 0.0;
+	//if (! particleCrossBbin(particle, i, j, k))
+		//return 0.0;
 
 	double x = particle.coordinates.x;
 	double y = particle.coordinates.y;

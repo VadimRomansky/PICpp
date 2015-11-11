@@ -55,10 +55,10 @@ void Simulation::simulate() {
 		updateDeltaT();
 		evaluateParticlesRotationTensor();
 		updateElectroMagneticParameters();
-		if(currentIteration > 1000){
+		//if(currentIteration > 1000){
 			evaluateFields();
 			evaluateMagneticField();
-		}
+		//}
 		moveParticles();
 
 		length += fabs(V0.x*deltaT);
