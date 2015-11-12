@@ -434,6 +434,7 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 }
 
 void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) {
+	createParticles();
 	printf("initialization alfven wave\n");
 	E0 = Vector3d(0, 0, 0);
 
@@ -865,6 +866,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 }
 
 void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRelation) {
+	createParticles();
 	printf("initialization alfven wave\n");
 	E0 = Vector3d(0, 0, 0);
 
@@ -1444,6 +1446,7 @@ void Simulation::initializeLangmuirWave(){
 }
 
 void Simulation::initializeFluxFromRight(){
+	createParticles();
 	//initializeAlfvenWave(10, 1.0E-4);
 	for(int j = 0; j < ynumber + 1; ++j){
 		for(int k = 0; k < znumber + 1; ++k){
@@ -1808,6 +1811,7 @@ void Simulation::initializeTwoStream(){
 }
 
 void Simulation::initializeExternalFluxInstability(){
+	createParticles();
 	double alfvenV = B0.norm()*fieldScale/sqrt(4*pi*density);
 	double concentration = density/(massProton + massElectron);
 	double phaseV = 2*alfvenV;
