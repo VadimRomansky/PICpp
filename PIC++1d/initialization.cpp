@@ -39,8 +39,8 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 	newlyStarted = true;
 	solverType = IMPLICIT;
 	//solverType = EXPLICIT;
-	//boundaryConditionType = PERIODIC;
-	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionType = PERIODIC;
+	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	//boundaryConditionType = FREE_BOTH;
 	maxwellEquationMatrixSize = 3;
 
