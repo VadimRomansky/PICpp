@@ -6,7 +6,7 @@ const int numThreads = 6;
 
 const double massProtonReal = 1.67262177E-24;
 const double massElectronReal = 0.910938291E-27;
-const double massElectron = 200*massElectronReal;
+const double massElectron = 20*massElectronReal;
 //const double massProton = massElectronReal*200;
 const double massProton = massProtonReal;
 const double kBoltzman = 1.3806488E-16;

@@ -19,8 +19,8 @@ void Simulation::simulate() {
 		//initializeTwoStream();
 		createParticles();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWave(1, 0.01);
-		initializeFluxFromRight();
+		initializeAlfvenWave(1, 0.01);
+		//initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
@@ -414,8 +414,8 @@ void Simulation::updateElectroMagneticParameters() {
 
 	smoothFlux();
 	//electricFlux[0].x = 0;
-	electricFlux[0] = Vector3d(0, 0, 0);
-	dielectricTensor[0] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+	//electricFlux[0] = Vector3d(0, 0, 0);
+	//dielectricTensor[0] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	if(solverType == IMPLICIT){
 		for (int i = 0; i < xnumber; ++i) {
