@@ -1417,7 +1417,6 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 	double phi = 2 * pi * uniformDistribution();
 	double pnormal = sqrt(p * p - pz * pz);
 	double px = pnormal * cos(phi);
-	px = 0;
 	double py = pnormal * sin(phi);
 
 	Particle* particle = new Particle(n, mass, charge, weight, type, x, px, py, pz, dx);
