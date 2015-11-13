@@ -18,10 +18,10 @@ void Simulation::simulate() {
 		initialize();
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWave(1, 0.01);
+		initializeAlfvenWave(1, 0.01);
 		//initializeRotatedAlfvenWave(1, 0.01);
 		//initializeFluxFromRight();
-		initializeSimpleElectroMagneticWave();
+		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
 	collectParticlesIntoBins();
@@ -85,9 +85,12 @@ void Simulation::output() {
 	printf("outputing\n");
 
 	if (particles.size() > 0) {
-		distributionFile = fopen("./output/distribution_protons.dat", "a");
-		outputDistribution(distributionFile, particles, PROTON);
-		fclose(distributionFile);
+		distributionFileProton = fopen("./output/distribution_protons.dat", "a");
+		outputDistribution(distributionFileProton, particles, PROTON, gyroradius, plasma_period);
+		fclose(distributionFileProton);
+		distributionFileElectron = fopen("./output/distribution_electrons.dat", "a");
+		outputDistribution(distributionFileElectron, particles, ELECTRON, gyroradius, plasma_period);
+		fclose(distributionFileElectron);
 		protonTraectoryFile = fopen("./output/traectory_proton.dat", "a");
 		outputTraectory(protonTraectoryFile, getFirstProton(), time, plasma_period, gyroradius);
 		fclose(protonTraectoryFile);
