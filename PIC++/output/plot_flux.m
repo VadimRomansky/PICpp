@@ -10,7 +10,7 @@ Nt = fix(size(fluxFile,1)/NE)-1;
 
 a = 0;
 b = fix(Nt/2);
-c = Nt - 1;
+c = Nt-1;
 
 Jx(1:NE, 1:3) = 0;
 Jy(1:NE, 1:3) = 0;
