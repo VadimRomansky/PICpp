@@ -8,6 +8,7 @@
 
 double uniformDistribution(){
 	return (rand()%randomSeed + 0.5)/randomSeed;
+	//return ((rand()%randomSeed*1.0))/randomSeed;
 }
 
 double normalDistribution(){
