@@ -154,7 +154,8 @@ public:
 
 	FILE* protonTraectoryFile;
 	FILE* electronTraectoryFile;
-	FILE* distributionFile;
+	FILE* distributionFileProton;
+	FILE* distributionFileElectron;
 	FILE* EfieldFile;
 	FILE* BfieldFile;
 	FILE* Xfile;

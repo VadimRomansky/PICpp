@@ -7,7 +7,7 @@
 #include "vector3d.h"
 #include "simulation.h"
 
-void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int particleType);
+void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int particleType, double plasma_period, double gyroradius);
 void outputTraectory(FILE* outFile, Particle* particle, double time, double plasma_period, double gyroradius);
 void outputGrid(FILE* outFile, double* grid, int number, double scale = 1.0);
 void outputFields(FILE* outEfile, FILE* outBfile, Vector3d*** Efield, Vector3d*** Bfield, int xnumber, int ynumber, int znumber, double plasma_priod, double gyroradius, double fieldScale);

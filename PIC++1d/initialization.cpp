@@ -56,7 +56,7 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 
 
 	theta = initialTheta;
-	eta = 0.5;
+	eta = theta;
 
 	xnumber = xn;
 
@@ -1040,8 +1040,10 @@ void Simulation::createFiles() {
 	fclose(protonTraectoryFile);
 	electronTraectoryFile = fopen("./output/traectory_electron.dat", "w");
 	fclose(electronTraectoryFile);
-	distributionFile = fopen("./output/distribution_protons.dat", "w");
-	fclose(distributionFile);
+	distributionFileProton = fopen("./output/distribution_protons.dat", "w");
+	fclose(distributionFileProton);
+	distributionFileElectron = fopen("./output/distribution_electrons.dat", "w");
+	fclose(distributionFileElectron);
 	EfieldFile = fopen("./output/Efield.dat", "w");
 	fclose(EfieldFile);
 	BfieldFile = fopen("./output/Bfield.dat", "w");

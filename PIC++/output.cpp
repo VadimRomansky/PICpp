@@ -9,19 +9,19 @@
 #include "vector3d.h"
 #include "util.h"
 
-void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int particleType){
-	double minMomentum = -1; //todo something else
+void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int particleType, double gyroradius, double plasma_period){
+	double minMomentum = 0; //todo something else
 	double maxMomentum = 0;
 	for(int i = 0; i < particles.size(); ++i){
 		if(particles[i]->type == particleType){
-			if(minMomentum < 0){
-				minMomentum = particles[i]->momentum.norm();
+			if(minMomentum <= 0){
+				minMomentum = particles[i]->momentum.norm()*gyroradius/plasma_period;
 			}
-			if(particles[i]->momentum.norm() < minMomentum){
-				minMomentum = particles[i]->momentum.norm();
+			if(particles[i]->momentum.norm()*gyroradius/plasma_period < minMomentum){
+				minMomentum = particles[i]->momentum.norm()*gyroradius/plasma_period;
 			} else {
-				if(particles[i]->momentum.norm() > maxMomentum){
-					maxMomentum = particles[i]->momentum.norm();
+				if(particles[i]->momentum.norm()*gyroradius/plasma_period > maxMomentum){
+					maxMomentum = particles[i]->momentum.norm()*gyroradius/plasma_period;
 				}
 			}
 		}
@@ -43,7 +43,7 @@ void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int par
 
 	for(int i = 0; i < particles.size(); ++i){
 		if(particles[i]->type == particleType){
-			int j = (log(particles[i]->momentum.norm()) - logMinMomentum)/deltaLogP;
+			int j = (log(particles[i]->momentum.norm()*gyroradius/plasma_period) - logMinMomentum)/deltaLogP;
 			if( j >= 0 && j < pnumber){
 				distribution[j] += particles[i]->weight;
 				weight += particles[i]->weight;
@@ -56,7 +56,7 @@ void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int par
 	}
 
 	for(int i = 0; i < pnumber; ++i){
-		fprintf(outFile, "%g %g\n", (pgrid[i] + pgrid[i+1])/2, distribution[i]);
+		fprintf(outFile, "%20.15g %20.15g\n", (pgrid[i] + pgrid[i+1])/2, distribution[i]);
 	}
 }
 
@@ -66,7 +66,7 @@ void outputTraectory(FILE* outFile, Particle* particle, double time, double plas
 
 void outputGrid(FILE* outFile, double* grid, int number, double scale) {
 	for(int i = 0; i <= number; ++i) {
-		fprintf(outFile, "%15.10g\n", grid[i]);
+		fprintf(outFile, "%15.10g\n", grid[i]*scale);
 	}
 }
 

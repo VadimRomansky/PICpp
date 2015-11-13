@@ -55,7 +55,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 
 
 	theta = initialTheta;
-	eta = 0.5;
+	eta = theta;
 
 	xnumber = xn;
 	ynumber = yn;
@@ -1856,8 +1856,10 @@ void Simulation::createFiles() {
 	fclose(protonTraectoryFile);
 	electronTraectoryFile = fopen("./output/traectory_electron.dat", "w");
 	fclose(electronTraectoryFile);
-	distributionFile = fopen("./output/distribution_protons.dat", "w");
-	fclose(distributionFile);
+	distributionFileProton = fopen("./output/distribution_protons.dat", "w");
+	fclose(distributionFileProton);
+	distributionFileElectron = fopen("./output/distribution_electrons.dat", "w");
+	fclose(distributionFileElectron);
 	EfieldFile = fopen("./output/Efield.dat", "w");
 	fclose(EfieldFile);
 	BfieldFile = fopen("./output/Bfield.dat", "w");
@@ -2227,7 +2229,6 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, double weight, 
 	double phi = 2 * pi * uniformDistribution();
 	double pnormal = sqrt(p * p - pz * pz);
 	double px = pnormal * cos(phi);
-	px = 0;
 	double py = pnormal * sin(phi);
 
 	Particle* particle = new Particle(n, mass, charge, weight, type, x, y, z, px, py, pz, dx, dy, dz);
