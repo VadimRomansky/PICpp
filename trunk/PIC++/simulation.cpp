@@ -128,7 +128,7 @@ void Simulation::output() {
 	fclose(velocityElectronFile);
 
 	fluxFile = fopen("./output/fluxFile.dat", "a");
-	outputFlux(fluxFile, electricFlux, externalElectricFlux, xnumber, ynumber, znumber, plasma_period, gyroradius, fieldScale);
+	outputFlux(fluxFile, electricFlux, externalElectricFlux, xnumber+1, ynumber+1, znumber+1, plasma_period, gyroradius, fieldScale);
 	fclose(fluxFile);
 
 	divergenceErrorFile = fopen("./output/divergence_error.dat", "a");
@@ -445,8 +445,8 @@ void Simulation::updateElectroMagneticParameters() {
 					Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
 
 					if(solverType == IMPLICIT){
-						electricFlux[i][j][k] += rotatedVelocity * (particle->charge * particle->weight * correlation);
-						//electricFlux[i] += velocity * (particle->charge * particle->weight * correlation);
+						//electricFlux[i][j][k] += rotatedVelocity * (particle->charge * particle->weight * correlation);
+						electricFlux[i][j][k] += velocity * (particle->charge * particle->weight * correlation);
 						dielectricTensor[i][j][k] = dielectricTensor[i][j][k] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 						//dielectricTensor[i] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 				
@@ -572,10 +572,10 @@ void Simulation::updateElectroMagneticParameters() {
 	}
 
 	if(solverType == IMPLICIT){
-		for (int i = 0; i < xnumber; ++i) {
-			for(int j = 0; j < ynumber; ++j){
-				for(int k = 0; k < znumber; ++k){
-					Vector3d divPressureTensorEvaluated = evaluateDivPressureTensor(i, j, k);
+		for (int i = 0; i < xnumber+1; ++i) {
+			for(int j = 0; j < ynumber+1; ++j){
+				for(int k = 0; k < znumber+1; ++k){
+					//Vector3d divPressureTensorEvaluated = evaluateDivPressureTensor(i, j, k);
 					electricFlux[i][j][k] = electricFlux[i][j][k] - divPressureTensor[i][j][k] * eta * deltaT;
 					//electricFlux[i] = electricFlux[i] - divPressureTensorEvaluated * eta * deltaT;
 				}

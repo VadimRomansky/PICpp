@@ -11,13 +11,13 @@ Nz = size(Zfile, 1);
 
 NE = Nx*Ny*Nz;
 NB = (Nx-1)*(Ny-1)*(Nz-1);
-Nt = size(Efield, 1)/NE;
+Nt = (size(Efield, 1)/NE)-1;
 ynumber = 1;
 znumber = 1;
 
 a = 0;
 b = fix(Nt/2);
-c = Nt - 1;
+c = Nt - 3;
 
 Ex(1:Nx, 1:3) = 0;
 Ey(1:Nx, 1:3) = 0;
