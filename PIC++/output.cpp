@@ -114,7 +114,7 @@ void outputFlux(FILE* outFile, Vector3d*** electricFlux, Vector3d*** externalEle
 	for(int i = 0; i < xnumber; ++i) {
 		for(int j = 0; j < ynumber; ++j) {
 			for(int k = 0; k < znumber; ++k) {
-				fprintf(outFile, "%15.10g %15.10g %15.10g 15.10g %15.10g %15.10g\n", electricFlux[i][j][k].x, electricFlux[i][j][k].y, electricFlux[i][j][k].z, externalElectricFlux[i][j][k].x, externalElectricFlux[i][j][k].y, externalElectricFlux[i][j][k].z);
+				fprintf(outFile, "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g\n", electricFlux[i][j][k].x, electricFlux[i][j][k].y, electricFlux[i][j][k].z, externalElectricFlux[i][j][k].x, externalElectricFlux[i][j][k].y, externalElectricFlux[i][j][k].z);
 			}
 		}
 	}

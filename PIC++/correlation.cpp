@@ -1030,7 +1030,13 @@ double Simulation::correlationWithBbin(Particle& particle, int i, int j, int k) 
 
 	double correlationx = correlationBspline(x, particle.dx, leftx, rightx);
 	double correlationy = correlationBspline(y, particle.dy, lefty, righty);
+	if(ynumber == 1){
+		correlationy = 1.0;
+	}
 	double correlationz = correlationBspline(z, particle.dz, leftz, rightz);
+	if(znumber == 1){
+		correlationz = 1.0;
+	}
 
 	return correlationx*correlationy*correlationz;
 }
@@ -1176,7 +1182,13 @@ double Simulation::correlationWithEbin(Particle& particle, int i, int j, int k) 
 
 	double correlationx = correlationBspline(x, particle.dx, leftx, rightx);
 	double correlationy = correlationBspline(y, particle.dy, lefty, righty);
+	if(ynumber == 1){
+		correlationy = 1.0;
+	}
 	double correlationz = correlationBspline(z, particle.dz, leftz, rightz);
+	if(znumber == 1){
+		correlationz = 1.0;
+	}
 
 	return correlationx*correlationy*correlationz;
 }

@@ -185,7 +185,7 @@ void Simulation::moveParticle(Particle* particle){
 	}
 
 	particle->momentum = tempParticle.momentum;
-	//particle->momentum.x = 0;
+	particle->momentum.x = 0;
 
 	particle->coordinates.x += middleVelocity.x*deltaT;
 
