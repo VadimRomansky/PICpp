@@ -71,7 +71,15 @@ void Simulation::evaluateFields() {
 		for(int i = 0; i < xnumber; ++i){
 			explicitEfield[i] += Ederivative[i]*deltaT;
 		}
-		explicitEfield[xnumber] = explicitEfield[0];
+		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+			explicitEfield[xnumber] = explicitEfield[xnumber - 1];
+			explicitEfield[0].y = 0;
+			explicitEfield[0].z = 0;
+			explicitEfield[0].x = explicitEfield[1].x - 4*pi*electricDensity[0]*deltaX;
+		}
+		if(boundaryConditionType == PERIODIC){
+			explicitEfield[xnumber] = explicitEfield[0];
+		}
 		for (int i = 0; i < xnumber+1; ++i) {
 			newEfield[i] = explicitEfield[i];
 			//newEfield[i].x = 0;

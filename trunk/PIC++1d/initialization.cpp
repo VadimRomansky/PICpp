@@ -37,10 +37,10 @@ Simulation::Simulation(){
 Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV) {
 	debugMode = true;
 	newlyStarted = true;
-	solverType = IMPLICIT;
-	//solverType = EXPLICIT;
-	boundaryConditionType = PERIODIC;
-	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	//solverType = IMPLICIT;
+	solverType = EXPLICIT;
+	//boundaryConditionType = PERIODIC;
+	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	//boundaryConditionType = FREE_BOTH;
 	maxwellEquationMatrixSize = 3;
 

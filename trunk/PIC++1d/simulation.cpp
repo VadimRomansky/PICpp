@@ -19,8 +19,8 @@ void Simulation::simulate() {
 		//initializeTwoStream();
 		createParticles();
 		//initializeExternalFluxInstability();
-		initializeAlfvenWave(1, 0.01);
-		//initializeFluxFromRight();
+		//initializeAlfvenWave(1, 0.01);
+		initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
