@@ -61,6 +61,9 @@ double Particle::momentumAbs(){
 Vector3d Particle::velocity(double c){
 	double p2 = momentum.x*momentum.x + momentum.y*momentum.y + momentum.z*momentum.z;
 	double mc2 = mass*c*c;
+	if(p2 < relativisticPrecision*mass*mass*c*c){
+		return momentum/mass;
+	}
 	double gamma_factor = sqrt(p2*c*c + mc2*mc2)/mc2;
 
 	return momentum/(mass*gamma_factor);
@@ -69,6 +72,9 @@ Vector3d Particle::velocity(double c){
 double Particle::velocityX(double c){
 	double p2 = momentum.x*momentum.x + momentum.y*momentum.y + momentum.z*momentum.z;
 	double mc2 = mass*c*c;
+	if(p2 < relativisticPrecision*mass*mass*c*c){
+		return momentum.x/mass;
+	}
 	double gamma_factor = sqrt(p2*c*c + mc2*mc2)/mc2;
 	return momentum.x/(mass*gamma_factor);
 }
@@ -76,12 +82,18 @@ double Particle::velocityX(double c){
 double Particle::velocityY(double c){
 	double p2 = momentum.x*momentum.x + momentum.y*momentum.y + momentum.z*momentum.z;
 	double mc2 = mass*c*c;
+	if(p2 < relativisticPrecision*mass*mass*c*c){
+		return momentum.y/mass;
+	}
 	double gamma_factor = sqrt(p2*c*c + mc2*mc2)/mc2;
 	return momentum.y/(mass*gamma_factor);
 }
 double Particle::velocityZ(double c){
 	double p2 = momentum.x*momentum.x + momentum.y*momentum.y + momentum.z*momentum.z;
 	double mc2 = mass*c*c;
+	if(p2 < relativisticPrecision*mass*mass*c*c){
+		return momentum.z/mass;
+	}
 	double gamma_factor = sqrt(p2*c*c + mc2*mc2)/mc2;
 	return momentum.z/(mass*gamma_factor);
 }
@@ -133,6 +145,10 @@ void Particle::setMomentumByV(Vector3d v, double c){
 		fprintf(errorLogFile, "v/c > 1 in setMomentumByV\n");
 		fclose(errorLogFile);
 		exit(0);
+	}
+	if(v.norm() < relativisticPrecision*c){
+		momentum = v*mass;
+		return;
 	}
 	double gamma_factor = 1/sqrt(1 - v.scalarMult(v)/(c*c));
 	momentum = v*(mass*gamma_factor);

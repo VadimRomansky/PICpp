@@ -39,8 +39,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	newlyStarted = true;
 	solverType = IMPLICIT;
 	//solverType = EXPLICIT;
-	boundaryConditionType = PERIODIC;
-	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	//boundaryConditionType = PERIODIC;
+	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
 
 	currentIteration = 0;
@@ -1461,7 +1461,7 @@ void Simulation::initializeFluxFromRight(){
 		}
 	}
 
-	fieldsLorentzTransitionX(V0.x);
+	//fieldsLorentzTransitionX(V0.x);
 
 	for(int i = 0; i < particles.size(); ++i){
 		Particle* particle = particles[i];
@@ -1499,7 +1499,7 @@ void Simulation::fieldsLorentzTransitionX(const double& v){
 				if(prevK < 0){
 					prevK = znumber - 1;
 				}
-				Vector3d middleB = (Bfield[i-1][prevJ][prevK] + Bfield[i-1][j][prevK] + Bfield[i-1][prevJ][k] + Bfield[i-1][j][k]
+				Vector3d middleB = (Bfield[prevI][prevJ][prevK] + Bfield[prevI][j][prevK] + Bfield[prevI][prevJ][k] + Bfield[prevI][j][k]
 									+ Bfield[i][prevJ][prevK] + Bfield[i][j][prevK] + Bfield[i][prevJ][k] + Bfield[i][j][k])*0.125;
 				newEfield[i][j][k].y = gamma*(Efield[i][j][k].y - v*middleB.z/speed_of_light_normalized);
 				newEfield[i][j][k].z = gamma*(Efield[i][j][k].z + v*middleB.y/speed_of_light_normalized);
