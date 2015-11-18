@@ -37,8 +37,8 @@ Simulation::Simulation(){
 Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV) {
 	debugMode = true;
 	newlyStarted = true;
-	//solverType = IMPLICIT;
-	solverType = EXPLICIT;
+	solverType = IMPLICIT;
+	//solverType = EXPLICIT;
 	//boundaryConditionType = PERIODIC;
 	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	//boundaryConditionType = FREE_BOTH;
@@ -801,8 +801,11 @@ void Simulation::initializeFluxFromRight(){
 	newEfield[0] = E0;
 	explicitEfield[0] = E0;
 
-	for(int i = 0; i < xnumber/2; ++i){
-		Bfield[i].y = 0.1*B0.x*sin(4*pi*middleXgrid[i]/xsize);
+	for(int i = 0; i < xnumber/4; ++i){
+		//Bfield[i].y = B0.x*sin(2*20*pi*middleXgrid[i]/xsize);
+		Bfield[i].y = 0.01*B0.x*(uniformDistribution() - 0.5);
+		Bfield[i].z = 0.01*B0.x*(uniformDistribution() - 0.5);
+		newBfield[i] = Bfield[i];
 	}
 
 	//fieldsLorentzTransitionX(V0.x);
@@ -1120,9 +1123,13 @@ void Simulation::checkDebyeParameter() {
 	double debyeLength = 1 / sqrt(4 * pi * electron_charge_normalized * electron_charge_normalized * concentration / (kBoltzman_normalized * temperature));
 	double debyeNumber = 4 * pi * cube(debyeLength) * concentration / 3;
 
-	if(debyeLength > deltaX){
-		printf("debye length > deltaX\n");
-		fprintf(informationFile, "debye length > deltaX\n");
+	if(debyeLength > 2*deltaX){
+		printf("debye length > 2*deltaX\n");
+		fprintf(informationFile, "debye length > 2*deltaX\n");
+	}
+	if(debyeLength < 0.5*deltaX){
+		printf("debye length < 0.5*deltaX\n");
+		fprintf(informationFile, "debye length < 0.5*deltaX\n");
 	}
 	printf("debye length/deltaX = %g\n", debyeLength/deltaX);
 	fprintf(informationFile, "debye length/deltaX = %g\n", debyeLength/deltaX);
@@ -1399,7 +1406,7 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 
 	double x = xgrid[i] +  deltaX * uniformDistribution();
 
-	double dx = deltaX / 4;
+	double dx = deltaX / 20;
 
 	double energy = mass * speed_of_light_normalized_sqr;
 	double p;
