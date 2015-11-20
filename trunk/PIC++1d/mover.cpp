@@ -336,7 +336,7 @@ void Simulation::injectNewParticles(int count){
 		} else {
 			type = ELECTRON;
 		}
-		Particle* particle = createParticle(n, xnumber - 1, weight, type);
+		Particle* particle = createParticle(n, xnumber - 1, weight, type, temperature);
 		n++;
 		particle->x = x;
 		//particle->addVelocity(V0, speed_of_light_normalized);

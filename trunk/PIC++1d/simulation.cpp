@@ -17,10 +17,11 @@ void Simulation::simulate() {
 		createFiles();
 		initialize();
 		//initializeTwoStream();
-		createParticles();
+		//createParticles();
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWave(1, 0.01);
-		initializeFluxFromRight();
+		//initializeFluxFromRight();
+		initializeShockWave();
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
@@ -256,7 +257,7 @@ double Simulation::volumeB(int i) {
 }
 
 void Simulation::checkParticleInBox(Particle& particle) {
-	if (particle.x < 0) {
+	if (particle.x < xgrid[0]) {
 		printf("particle.x < 0\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "particle.x = %15.10g < 0\n", particle.x);
