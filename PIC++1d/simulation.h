@@ -184,6 +184,7 @@ public:
 	void initializeExternalFluxInstability();
 	void initializeFluxFromRight();
 	void fieldsLorentzTransitionX(const double& v);
+	void initializeShockWave();
 	void createArrays();
 	void createFiles();
 	void simulate();
@@ -267,7 +268,7 @@ public:
 	Particle* getFirstElectron();
 	Particle* getLastProton();
 	Particle* getLastElectron();
-	Particle* createParticle(int n, int i, double weight, ParticleTypes type);
+	Particle* createParticle(int n, int i, double weight, ParticleTypes type, double localTemperature);
 
 	void moveParticles();
 	void removeEscapedParticles();

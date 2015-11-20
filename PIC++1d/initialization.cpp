@@ -40,8 +40,8 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 	solverType = IMPLICIT;
 	//solverType = EXPLICIT;
 	//boundaryConditionType = PERIODIC;
-	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	//boundaryConditionType = FREE_BOTH;
+	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionType = FREE_BOTH;
 	maxwellEquationMatrixSize = 3;
 
 	currentIteration = 0;
@@ -707,7 +707,7 @@ void Simulation::initializeLangmuirWave(){
 		for (int l = 0; l < particlesPerBin; ++l) {
 			ParticleTypes type;
 			type = PROTON;
-			Particle* particle = createParticle(particlesNumber, i, weight, type);
+			Particle* particle = createParticle(particlesNumber, i, weight, type, temperature);
 			nproton++;
 			particles.push_back(particle);
 			particlesNumber++;
@@ -718,7 +718,7 @@ void Simulation::initializeLangmuirWave(){
 		for (int l = 0; l < particlesPerBin*(1 + epsilon*cos(kw*middleXgrid[i])); ++l) {
 			ParticleTypes type;
 			type = ELECTRON;
-			Particle* particle = createParticle(particlesNumber, i, weight, type);
+			Particle* particle = createParticle(particlesNumber, i, weight, type, temperature);
 			nelectron++;
 			particles.push_back(particle);
 			particlesNumber++;
@@ -740,7 +740,7 @@ void Simulation::initializeLangmuirWave(){
 		}
 		int i = 0;
 		while(n > 0){
-			Particle* particle = createParticle(particlesNumber, i, weight, type);
+			Particle* particle = createParticle(particlesNumber, i, weight, type, temperature);
 			particles.push_back(particle);
 			particlesNumber++;
 			++i;
@@ -849,87 +849,86 @@ void Simulation::fieldsLorentzTransitionX(const double& v){
 	}
 }
 
-void Simulation::createArrays() {
-	printf("creating arrays\n");
-	xgrid = new double[xnumber + 1];
-
-	middleXgrid = new double[xnumber];
-
-	Efield = new Vector3d[xnumber + 1];
-	newEfield = new Vector3d[xnumber + 1];
-	tempEfield = new Vector3d[xnumber + 1];
-	explicitEfield = new Vector3d[xnumber + 1];
-	rotB = new Vector3d[xnumber + 1];
-	Ederivative = new Vector3d[xnumber + 1];
-	Bfield = new Vector3d[xnumber];
-	newBfield = new Vector3d[xnumber];
-	//tempBfield = new Vector3d**[xnumber];
-
-
-	divergenceCleaningField = new double*[xnumber];
-	divergenceCleaningPotential = new double*[xnumber];
-
-	for (int i = 0; i < xnumber; ++i) {
-		Bfield[i] = Vector3d(0, 0, 0);
-		newBfield[i] = Vector3d(0, 0, 0);
-	}
-
-	for (int i = 0; i < xnumber + 1; ++i) {
+void Simulation::initializeShockWave(){
+	E0 = Vector3d(0, 0, 0);
+	for(int i = 0; i < xnumber + 1; ++i){
 		Efield[i] = Vector3d(0, 0, 0);
-		newEfield[i] = Vector3d(0, 0, 0);
-		tempEfield[i] = Vector3d(0, 0, 0);
-		explicitEfield[i] = Vector3d(0, 0, 0);
+		tempEfield[i] = Efield[i];
+		newEfield[i] = Efield[i];
+		explicitEfield[i] = Efield[i];
+	}
+	for(int i = 0; i < xnumber; ++i){
+		Bfield[i] = Vector3d(B0.x, 0, 0);
+		newBfield[i] = Bfield[i];
 	}
 
-	maxwellEquationMatrix = new std::vector<MatrixElement>*[xnumber];
-	maxwellEquationRightPart = new double*[xnumber];
+	printf("creating particles\n");
+	double concentration = density/(massProton + massElectron);
+	double downstreamTemperature = 1000*temperature;
+	double upstreamTemperature = temperature;
+	Vector3d upstreamVelocity = V0;
+	//Vector3d downstreamVelocity = Vector3d(V0.x/4, 0, 0);
+	Vector3d downstreamVelocity = Vector3d(0, 0, 0);
+	int shockWavePoint = xnumber/10;
+	int n = 0;
 	for (int i = 0; i < xnumber; ++i) {
-		maxwellEquationMatrix[i] = new std::vector<MatrixElement>[maxwellEquationMatrixSize];
-		maxwellEquationRightPart[i] = new double[maxwellEquationMatrixSize];
+		double weight = (concentration / particlesPerBin) * volumeB(i);
+		double x = xgrid[i] + 0.0001*deltaX;
+		int localParticlesPerBin = particlesPerBin;
+		double localTemperature = upstreamTemperature;
+		if(i < shockWavePoint){
+			localParticlesPerBin = particlesPerBin*4;
+			localTemperature = upstreamTemperature;
+		}
+		double deltaXParticles = deltaX/localParticlesPerBin;
+		for (int l = 0; l < 2 * localParticlesPerBin; ++l) {
+			ParticleTypes type;
+			if (l % 2 == 0) {
+				type = PROTON;
+			} else {
+				type = ELECTRON;
+			}
+			Particle* particle = createParticle(n, i, weight, type, localTemperature);
+			//particle->x = middleXgrid[i];
+			n++;
+			/*if (l % 2 == 0) {
+				x = particle->x;
+			} else {
+				particle->x= x;
+			}*/
+			if(i >= shockWavePoint){
+				particle->addVelocity(upstreamVelocity, speed_of_light_normalized);
+			} else {
+				particle->addVelocity(downstreamVelocity, speed_of_light_normalized);
+			}
+			int m = l/2;
+			particle->x = x + deltaXParticles*m;
+			particles.push_back(particle);
+			particlesNumber++;
+			if (particlesNumber % 1000 == 0) {
+				printf("create particle number %d\n", particlesNumber);
+			}
+		}
 	}
 
-	divergenceCleanUpMatrix = new std::vector<MatrixElement>*[xnumber];
-	divergenceCleanUpRightPart = new double*[xnumber];
-
-	for (int i = 0; i < xnumber; ++i) {
-		divergenceCleaningField[i] = new double[3];
-		divergenceCleaningPotential[i] = new double[1];
-		divergenceCleanUpMatrix[i] = new std::vector<MatrixElement>[3];
-		divergenceCleanUpRightPart[i] = new double[3];
+	for(int i = 0; i < shockWavePoint; ++i){
+		//Bfield[i].y = B0.x*sin(2*20*pi*middleXgrid[i]/xsize);
+		double amplitude = 0.1*B0.x;
+		Bfield[i].y = amplitude*(uniformDistribution() - 0.5);
+		Bfield[i].z = amplitude*(uniformDistribution() - 0.5);
+		newBfield[i] = Bfield[i];
 	}
 
-	particlesInBbin = new std::vector<Particle*>[xnumber];
-	particlesInEbin = new std::vector<Particle*>[xnumber + 1];
-
-	electronConcentration = new double[xnumber];
-	protonConcentration = new double[xnumber];
-	chargeDensity = new double[xnumber];
-	velocityBulk = new Vector3d[xnumber];
-	velocityBulkElectron = new Vector3d[xnumber];
-
-	electricDensity = new double[xnumber];
-	pressureTensor = new Matrix3d[xnumber];
-
-	electricFlux = new Vector3d[xnumber + 1];
-	dielectricTensor = new Matrix3d[xnumber + 1];
-	externalElectricFlux = new Vector3d[xnumber + 1];
-	divPressureTensor = new Vector3d[xnumber + 1];
-
-	for (int i = 0; i < xnumber; ++i) {
-		electronConcentration[i] = 0;
-		protonConcentration[i] = 0;
-		chargeDensity[i] = 0;
-		velocityBulk[i] = Vector3d(0, 0, 0);
-		velocityBulkElectron[i] = Vector3d(0, 0, 0);
-
-		electricDensity[i] = 0;
-		pressureTensor[i] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-	}
-
-	for (int i = 0; i < xnumber + 1; ++i) {
-		electricFlux[i] = Vector3d(0, 0, 0);
-		divPressureTensor[i]  = Vector3d(0, 0, 0);
-		dielectricTensor[i] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+	for(int i = 0; i < xnumber; ++i){
+		double v = upstreamVelocity.x;
+		if(i < shockWavePoint){
+			//v = V0.x/4;
+			v = downstreamVelocity.x;
+		}
+		double gamma = 1.0/sqrt(1 - v*v/speed_of_light_normalized_sqr);
+		Vector3d middleE = (Efield[i] + Efield[i+1])*0.5;
+		newBfield[i].y = gamma*(Bfield[i].y + v*middleE.z/speed_of_light_normalized);
+		newBfield[i].z = gamma*(Bfield[i].z - v*middleE.y/speed_of_light_normalized);
 	}
 }
 
@@ -1035,6 +1034,90 @@ void Simulation::initializeExternalFluxInstability(){
 	fprintf(informationFile, "omega/cyclothronOmega = %g\n", omega/cyclothronOmegaProton);
 
 	fclose(informationFile);
+}
+
+void Simulation::createArrays() {
+	printf("creating arrays\n");
+	xgrid = new double[xnumber + 1];
+
+	middleXgrid = new double[xnumber];
+
+	Efield = new Vector3d[xnumber + 1];
+	newEfield = new Vector3d[xnumber + 1];
+	tempEfield = new Vector3d[xnumber + 1];
+	explicitEfield = new Vector3d[xnumber + 1];
+	rotB = new Vector3d[xnumber + 1];
+	Ederivative = new Vector3d[xnumber + 1];
+	Bfield = new Vector3d[xnumber];
+	newBfield = new Vector3d[xnumber];
+	//tempBfield = new Vector3d**[xnumber];
+
+
+	divergenceCleaningField = new double*[xnumber];
+	divergenceCleaningPotential = new double*[xnumber];
+
+	for (int i = 0; i < xnumber; ++i) {
+		Bfield[i] = Vector3d(0, 0, 0);
+		newBfield[i] = Vector3d(0, 0, 0);
+	}
+
+	for (int i = 0; i < xnumber + 1; ++i) {
+		Efield[i] = Vector3d(0, 0, 0);
+		newEfield[i] = Vector3d(0, 0, 0);
+		tempEfield[i] = Vector3d(0, 0, 0);
+		explicitEfield[i] = Vector3d(0, 0, 0);
+	}
+
+	maxwellEquationMatrix = new std::vector<MatrixElement>*[xnumber];
+	maxwellEquationRightPart = new double*[xnumber];
+	for (int i = 0; i < xnumber; ++i) {
+		maxwellEquationMatrix[i] = new std::vector<MatrixElement>[maxwellEquationMatrixSize];
+		maxwellEquationRightPart[i] = new double[maxwellEquationMatrixSize];
+	}
+
+	divergenceCleanUpMatrix = new std::vector<MatrixElement>*[xnumber];
+	divergenceCleanUpRightPart = new double*[xnumber];
+
+	for (int i = 0; i < xnumber; ++i) {
+		divergenceCleaningField[i] = new double[3];
+		divergenceCleaningPotential[i] = new double[1];
+		divergenceCleanUpMatrix[i] = new std::vector<MatrixElement>[3];
+		divergenceCleanUpRightPart[i] = new double[3];
+	}
+
+	particlesInBbin = new std::vector<Particle*>[xnumber];
+	particlesInEbin = new std::vector<Particle*>[xnumber + 1];
+
+	electronConcentration = new double[xnumber];
+	protonConcentration = new double[xnumber];
+	chargeDensity = new double[xnumber];
+	velocityBulk = new Vector3d[xnumber];
+	velocityBulkElectron = new Vector3d[xnumber];
+
+	electricDensity = new double[xnumber];
+	pressureTensor = new Matrix3d[xnumber];
+
+	electricFlux = new Vector3d[xnumber + 1];
+	dielectricTensor = new Matrix3d[xnumber + 1];
+	externalElectricFlux = new Vector3d[xnumber + 1];
+	divPressureTensor = new Vector3d[xnumber + 1];
+
+	for (int i = 0; i < xnumber; ++i) {
+		electronConcentration[i] = 0;
+		protonConcentration[i] = 0;
+		chargeDensity[i] = 0;
+		velocityBulk[i] = Vector3d(0, 0, 0);
+		velocityBulkElectron[i] = Vector3d(0, 0, 0);
+
+		electricDensity[i] = 0;
+		pressureTensor[i] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+	}
+
+	for (int i = 0; i < xnumber + 1; ++i) {
+		electricFlux[i] = Vector3d(0, 0, 0);
+		divPressureTensor[i]  = Vector3d(0, 0, 0);
+		dielectricTensor[i] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+	}
 }
 
 void Simulation::createFiles() {
@@ -1330,7 +1413,7 @@ void Simulation::createParticles() {
 			} else {
 				type = ELECTRON;
 			}
-			Particle* particle = createParticle(n, i, weight, type);
+			Particle* particle = createParticle(n, i, weight, type, temperature);
 			//particle->x = middleXgrid[i];
 			n++;
 			/*if (l % 2 == 0) {
@@ -1389,7 +1472,7 @@ Particle* Simulation::getLastElectron() {
 	return NULL;
 }
 
-Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes type) {
+Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes type, double localTemperature) {
 	double charge = 0;
 	double mass = 0;
 
@@ -1411,13 +1494,13 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 	double energy = mass * speed_of_light_normalized_sqr;
 	double p;
 
-	double thetaParamter = kBoltzman_normalized * temperature / (mass * speed_of_light_normalized_sqr);
+	double thetaParamter = kBoltzman_normalized * localTemperature / (mass * speed_of_light_normalized_sqr);
 
 	if (thetaParamter < 0.01) {
-		energy = maxwellDistribution(temperature, kBoltzman_normalized);
+		energy = maxwellDistribution(localTemperature, kBoltzman_normalized);
 		p = sqrt(2*mass*energy);
 	} else {
-		energy = maxwellJuttnerDistribution(temperature, mass, speed_of_light_normalized, kBoltzman_normalized);
+		energy = maxwellJuttnerDistribution(localTemperature, mass, speed_of_light_normalized, kBoltzman_normalized);
 		p = sqrt(energy * energy - sqr(mass * speed_of_light_normalized_sqr)) / speed_of_light_normalized;
 
 	}

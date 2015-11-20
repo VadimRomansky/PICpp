@@ -112,6 +112,24 @@ bool Simulation::particleCrossBbin(Particle& particle, int i) {
 		}
 		return true;
 
+	} else if (boundaryConditionType == FREE_BOTH){
+		if(i < 0) {
+			return false;
+		} else if(i >= xnumber) {
+			return false;
+		}	
+
+		if (i == 0) {
+			if (xgrid[i + 1] < particle.x - particle.dx)
+				return false;
+		} else if (i == xnumber - 1) {
+			if (xgrid[i] > particle.x + particle.dx)
+				return false;
+		} else {
+			if ((xgrid[i] > particle.x + particle.dx) || (xgrid[i + 1] < particle.x - particle.dx))
+				return false;
+		}
+		return true;
 	}
 	return false;
 }
@@ -130,6 +148,18 @@ bool Simulation::particleCrossEbin(Particle& particle, int i) {
 		}
 		return true;
 	} else if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		if(i == 0){
+			if(xgrid[0] + (deltaX/2) < particle.x - particle.dx)
+				return false;
+		} else if(i == xnumber){
+			if(xgrid[xnumber] - (deltaX/2) > particle.x + particle.dx)
+				return false;
+		} else {
+			if ((xgrid[i] - (deltaX / 2) > particle.x + particle.dx) || (xgrid[i + 1] - (deltaX / 2) < particle.x - particle.dx))
+				return false;
+		}
+		return true;
+	} else if (boundaryConditionType == FREE_BOTH){
 		if(i == 0){
 			if(xgrid[0] + (deltaX/2) < particle.x - particle.dx)
 				return false;
