@@ -8,6 +8,7 @@
 #include "particle.h"
 #include "constants.h"
 #include "matrix3d.h"
+#include "random.h"
 
 void Simulation::moveParticles(){
 	printf("moving particles\n");
@@ -17,8 +18,12 @@ void Simulation::moveParticles(){
 		moveParticle(particles[i]);
 	}
 
-	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH){
 		removeEscapedParticles();
+	}
+
+	for(int i = 0; i < particles.size(); ++i){
+		scatterParticle(particles[i]);
 	}
 }
 
@@ -32,6 +37,11 @@ void Simulation::removeEscapedParticles(){
 			particles.erase(it);
 		}
 		it = prev;
+	}
+
+	Particle* tempParticle = *particles.begin();
+	if(tempParticle->escaped){
+		particles.erase(particles.begin());
 	}
 }
 
@@ -347,4 +357,42 @@ void Simulation::injectNewParticles(int count){
 		}
 		particles.push_back(particle);
 	}
+}
+
+void Simulation::scatterParticle(Particle* particle){
+	double B = correlationBfield(particle).norm()*fieldScale;
+	double lambda = fabs(particle->momentum.norm()*speed_of_light_normalized/(particle->charge*B));
+
+	int i = (particle->x - xgrid[0])/deltaX;
+	Vector3d oldMomentum = particle->momentum;
+	Vector3d reverseVelocity = Vector3d(-velocityBulk[i].x, -velocityBulk[i].y, -velocityBulk[i].z);
+	particle->addVelocity(reverseVelocity, speed_of_light_normalized);
+	Vector3d particleVelocity = particle->velocity(speed_of_light_normalized);
+	double probability = particleVelocity.norm()*deltaT/lambda;
+	double maxTheta = 2*pi*lambda/particle->velocity(speed_of_light_normalized).norm();
+	if(maxTheta > pi){
+		maxTheta = pi;
+	}
+
+	//if(uniformDistribution() > (1 - probability)){
+		Vector3d newVelocity;
+		Matrix3d* rotation = Matrix3d::createBasisByOneVector(particleVelocity);
+		
+		//newVelocity.x = particleVelocity.norm()*2*(uniformDistribution()-0.5);
+		newVelocity.z = particleVelocity.norm()*(1 - uniformDistribution()*(1 - cos(maxTheta)));
+		double perpendicularVelocity = sqrt(particleVelocity.x* particleVelocity.x + 
+											particleVelocity.y* particleVelocity.y +
+											particleVelocity.z* particleVelocity.z -
+											newVelocity.z*newVelocity.z);
+		double phi = 2*pi*uniformDistribution();
+		newVelocity.y = perpendicularVelocity*cos(phi);
+		newVelocity.x = perpendicularVelocity*sin(phi);
+		newVelocity = (*rotation)*newVelocity;
+		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+
+		delete rotation;
+	//}
+
+	particle->addVelocity(velocityBulk[i], speed_of_light_normalized);
+	Vector3d newMomentum = particle->momentum;
 }

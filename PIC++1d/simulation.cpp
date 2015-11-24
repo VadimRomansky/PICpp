@@ -17,7 +17,7 @@ void Simulation::simulate() {
 		createFiles();
 		initialize();
 		//initializeTwoStream();
-		//createParticles();
+	    //createParticles();
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWave(1, 0.01);
 		//initializeFluxFromRight();
@@ -88,6 +88,12 @@ void Simulation::output() {
 	printf("outputing\n");
 
 	if (particles.size() > 0) {
+		distributionFileProtonUpstream = fopen("./output/distribution_protons_upstream.dat", "a");
+		outputDistributionUpstream(distributionFileProtonUpstream, particles, PROTON, xgrid[shockWavePoint], gyroradius, plasma_period);
+		fclose(distributionFileProtonUpstream);
+		distributionFileElectronUpstream = fopen("./output/distribution_electrons_upstream.dat", "a");
+		outputDistributionUpstream(distributionFileElectronUpstream, particles, ELECTRON, xgrid[shockWavePoint], gyroradius, plasma_period);
+		fclose(distributionFileElectronUpstream);
 		distributionFileProton = fopen("./output/distribution_protons.dat", "a");
 		outputDistribution(distributionFileProton, particles, PROTON, gyroradius, plasma_period);
 		fclose(distributionFileProton);

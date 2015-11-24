@@ -47,6 +47,8 @@ public:
 	double theta;
 	double eta;
 
+	int shockWavePoint;
+
 	bool debugMode;
 
 	bool newlyStarted;
@@ -144,6 +146,8 @@ public:
 	FILE* electronTraectoryFile;
 	FILE* distributionFileProton;
 	FILE* distributionFileElectron;
+	FILE* distributionFileProtonUpstream;
+	FILE* distributionFileElectronUpstream;
 	FILE* EfieldFile;
 	FILE* BfieldFile;
 	FILE* Xfile;
@@ -278,6 +282,7 @@ public:
 	void moveParticleNewtonIteration(Particle* particle, double* const oldCoordinates, double* const tempCoordinates, double* const newCoordinates);
 	void evaluateParticlesRotationTensor();
 	void injectNewParticles(int count);
+	void scatterParticle(Particle* particle);
 
 	void collectParticlesIntoBins();
 	void pushParticleIntoEbin(Particle* particle, int i);

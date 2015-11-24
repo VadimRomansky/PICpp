@@ -16,6 +16,7 @@ Simulation::Simulation(){
 
 	maxEfield = Vector3d(0, 0, 0);
 	maxBfield = Vector3d(0, 0, 0);
+	shockWavePoint = 0;
 
 	Kronecker = Matrix3d(1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0);
 
@@ -121,6 +122,8 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 
 	maxEfield = Vector3d(0, 0, 0);
 	maxBfield = Vector3d(0, 0, 0);
+
+	shockWavePoint = 0;
 
 	Kronecker = Matrix3d(1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0);
 
@@ -867,9 +870,9 @@ void Simulation::initializeShockWave(){
 	double downstreamTemperature = 1000*temperature;
 	double upstreamTemperature = temperature;
 	Vector3d upstreamVelocity = V0;
-	//Vector3d downstreamVelocity = Vector3d(V0.x/4, 0, 0);
-	Vector3d downstreamVelocity = Vector3d(0, 0, 0);
-	int shockWavePoint = xnumber/10;
+	Vector3d downstreamVelocity = Vector3d(V0.x/4, 0, 0);
+	//Vector3d downstreamVelocity = Vector3d(0, 0, 0);
+	shockWavePoint = xnumber/4;
 	int n = 0;
 	for (int i = 0; i < xnumber; ++i) {
 		double weight = (concentration / particlesPerBin) * volumeB(i);
@@ -1130,6 +1133,10 @@ void Simulation::createFiles() {
 	fclose(distributionFileProton);
 	distributionFileElectron = fopen("./output/distribution_electrons.dat", "w");
 	fclose(distributionFileElectron);
+	distributionFileProtonUpstream = fopen("./output/distribution_protons_upstream.dat", "w");
+	fclose(distributionFileProtonUpstream);
+	distributionFileElectronUpstream = fopen("./output/distribution_electrons_upstream.dat", "w");
+	fclose(distributionFileElectronUpstream);
 	EfieldFile = fopen("./output/Efield.dat", "w");
 	fclose(EfieldFile);
 	BfieldFile = fopen("./output/Bfield.dat", "w");
@@ -1496,7 +1503,7 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 
 	double thetaParamter = kBoltzman_normalized * localTemperature / (mass * speed_of_light_normalized_sqr);
 
-	if (thetaParamter < 0.01) {
+	/*if (thetaParamter < 0.01) {
 		energy = maxwellDistribution(localTemperature, kBoltzman_normalized);
 		p = sqrt(2*mass*energy);
 	} else {
@@ -1510,7 +1517,11 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 	double pnormal = sqrt(p * p - pz * pz);
 	double px = pnormal * cos(phi);
 	px = 0;
-	double py = pnormal * sin(phi);
+	double py = pnormal * sin(phi);*/
+
+	double pz = normalDistribution()*sqrt(mass*kBoltzman_normalized*localTemperature);
+	double py = normalDistribution()*sqrt(mass*kBoltzman_normalized*localTemperature);
+	double px = normalDistribution()*sqrt(mass*kBoltzman_normalized*localTemperature);
 
 	Particle* particle = new Particle(n, mass, charge, weight, type, x, px, py, pz, dx);
 
