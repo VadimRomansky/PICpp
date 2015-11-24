@@ -23,6 +23,7 @@ void Simulation::evaluateFields() {
 		}
 
 		generalizedMinimalResidualMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumber, maxwellEquationMatrixSize);
+		printf("end of GMRES\n");
 		//#pragma omp parallel for
 		for (int i = 0; i < xnumber; ++i) {
 			for (int l = 0; l < 3; ++l) {
@@ -266,9 +267,9 @@ void Simulation::createFreeLeftEquation(){
 	alertNaNOrInfinity(rightPart.y, "right part y = NaN");
 	alertNaNOrInfinity(rightPart.z, "right part z = NaN");
 
-	maxwellEquationRightPart[xnumber - 1][0] = rightPart.x;
-	maxwellEquationRightPart[xnumber - 1][1] = rightPart.y;
-	maxwellEquationRightPart[xnumber - 1][2] = rightPart.z;
+	maxwellEquationRightPart[0][0] = rightPart.x;
+	maxwellEquationRightPart[0][1] = rightPart.y;
+	maxwellEquationRightPart[0][2] = rightPart.z;
 }
 
 /*void Simulation::createFreeRightEquation(){
@@ -482,6 +483,7 @@ void Simulation::createInternalEquation(int i) {
 }
 
 void Simulation::evaluateMagneticField() {
+	printf("updating magnetic field\n");
 	for (int i = 0; i < xnumber; ++i) {
 		Vector3d rotEold = evaluateRotE(i);
 		Vector3d rotEnew = evaluateRotNewE(i);

@@ -8,6 +8,61 @@
 #include "vector3d.h"
 #include "util.h"
 
+void outputDistributionUpstream(FILE* outFile, std::vector<Particle*> particles, int particleType, double shockWavePoint, double plasma_period, double gyroradius){
+	double minMomentum = 0; //todo something else
+	double maxMomentum = 0;
+	for(int i = 0; i < particles.size(); ++i){
+		if(particles[i]->x > shockWavePoint){
+			if(particles[i]->type == particleType){
+				if(minMomentum <= 0){
+					minMomentum = particles[i]->momentum.norm()*gyroradius/plasma_period;
+				}
+				if(particles[i]->momentum.norm()*gyroradius/plasma_period < minMomentum){
+					minMomentum = particles[i]->momentum.norm()*gyroradius/plasma_period;
+				} else {
+					if(particles[i]->momentum.norm()*gyroradius/plasma_period > maxMomentum){
+						maxMomentum = particles[i]->momentum.norm()*gyroradius/plasma_period;
+					}
+				}
+			}
+		}
+	}
+
+	double pgrid[pnumber+1];
+	double distribution[pnumber];
+	double logMinMomentum = log(minMomentum);
+	pgrid[0] = minMomentum;
+	distribution[0] = 0;
+	double deltaLogP = (log(maxMomentum) - log(minMomentum))/(pnumber);
+	for(int i = 1; i < pnumber; ++i){
+		distribution[i] = 0;
+		pgrid[i] = exp(logMinMomentum + i*deltaLogP);
+	}
+	pgrid[pnumber] = maxMomentum;
+
+	double weight = 0;
+
+	for(int i = 0; i < particles.size(); ++i){
+		if(particles[i]->x > shockWavePoint){
+			if(particles[i]->type == particleType){
+				int j = (log(particles[i]->momentum.norm()*gyroradius/plasma_period) - logMinMomentum)/deltaLogP;
+				if( j >= 0 && j < pnumber){
+					distribution[j] += particles[i]->weight;
+					weight += particles[i]->weight;
+				}
+			}
+		}
+	}
+
+	for(int i = 0; i < pnumber; ++i){
+		distribution[i] /= (weight*(pgrid[i+1] - pgrid[i]));
+	}
+
+	for(int i = 0; i < pnumber; ++i){
+		fprintf(outFile, "%20.15g %20.15g\n", (pgrid[i] + pgrid[i+1])/2, distribution[i]);
+	}
+}
+
 void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int particleType, double plasma_period, double gyroradius){
 	double minMomentum = 0; //todo something else
 	double maxMomentum = 0;
