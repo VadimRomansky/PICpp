@@ -1094,7 +1094,7 @@ void Simulation::createArrays() {
 	electronConcentration = new double[xnumber];
 	protonConcentration = new double[xnumber];
 	chargeDensity = new double[xnumber];
-	velocityBulk = new Vector3d[xnumber];
+	velocityBulkProton = new Vector3d[xnumber];
 	velocityBulkElectron = new Vector3d[xnumber];
 
 	electricDensity = new double[xnumber];
@@ -1109,7 +1109,7 @@ void Simulation::createArrays() {
 		electronConcentration[i] = 0;
 		protonConcentration[i] = 0;
 		chargeDensity[i] = 0;
-		velocityBulk[i] = Vector3d(0, 0, 0);
+		velocityBulkProton[i] = Vector3d(0, 0, 0);
 		velocityBulkElectron[i] = Vector3d(0, 0, 0);
 
 		electricDensity[i] = 0;
