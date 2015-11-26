@@ -72,6 +72,7 @@ void Simulation::simulate() {
 		//cleanupDivergence();
 		updateDensityParameters();
 		updateFields();
+		fourierFilter();
 		updateEnergy();
 		updateParameters();
 
@@ -124,7 +125,7 @@ void Simulation::output() {
 
 	velocityFile = fopen("./output/velocity.dat", "a");
 	velocityElectronFile = fopen("./output/velocity_electron.dat", "a");
-	outputVelocity(velocityFile, velocityElectronFile, velocityBulk, velocityBulkElectron, xnumber, plasma_period, gyroradius);
+	outputVelocity(velocityFile, velocityElectronFile, velocityBulkProton, velocityBulkElectron, xnumber, plasma_period, gyroradius);
 	fclose(velocityFile);
 	fclose(velocityElectronFile);
 
@@ -503,7 +504,7 @@ void Simulation::updateDensityParameters() {
 		electronConcentration[i] = 0;
 		protonConcentration[i] = 0;
 		chargeDensity[i] = 0;
-		velocityBulk[i] = Vector3d(0, 0, 0);
+		velocityBulkProton[i] = Vector3d(0, 0, 0);
 		velocityBulkElectron[i] = Vector3d(0, 0, 0);
 		//fprintf(debugFile, "%d %d %d\n", i, j, k);
 		for (int pcount = 0; pcount < particlesInBbin[i].size(); ++pcount) {
@@ -518,7 +519,7 @@ void Simulation::updateDensityParameters() {
 			} else if (particle->type == PROTON) {
 				protonConcentration[i] += correlation * particle->weight;
 			}
-			velocityBulk[i] += particle->momentum * particle->weight * correlation;
+			velocityBulkProton[i] += particle->momentum * particle->weight * correlation;
 
 			if (correlation == 0) {
 				//printf("aaa\n");
@@ -529,7 +530,7 @@ void Simulation::updateDensityParameters() {
 
 		//fprintf(debugFile, "charge %15.10g proton %15.10g electron %15.10g\n", chargeDensity[i][j][k], protonConcentration[i][j][k], electronConcentration[i][j][k]);
 
- 		velocityBulk[i] = velocityBulk[i] / (electronConcentration[i] * massElectron + protonConcentration[i] * massProton);
+ 		velocityBulkProton[i] = velocityBulkProton[i] / (protonConcentration[i] * massProton);
 		velocityBulkElectron[i] = velocityBulkElectron[i] / (electronConcentration[i] * massElectron);
 		full_density += chargeDensity[i] * volumeB(i);
 		full_p_concentration += protonConcentration[i] * volumeB(i);

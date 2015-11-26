@@ -69,7 +69,7 @@ public:
 	double* electronConcentration;
 	double* protonConcentration;
 	double* chargeDensity;
-	Vector3d* velocityBulk;
+	Vector3d* velocityBulkProton;
 	Vector3d* velocityBulkElectron;
 
 	Vector3d maxEfield;
@@ -222,9 +222,14 @@ public:
 	void createInternalEquation(int i);
 	void evaluateMaxwellEquationMatrix();
 	void evaluateMagneticField();
+
+
 	void updateBoundaries();
 	void updateBoundariesOldField();
 	void updateBoundariesNewField();
+	void resetNewTempFields();
+
+
 	void cleanupDivergence();
 	void updateFieldByCleaning();
 	void evaluateDivergenceCleaningField();
@@ -233,7 +238,10 @@ public:
 	void createDivergenceCleanupRightEquation();
 	double cleanUpRightPart(int i);
 
-	void resetNewTempFields();
+
+	void fourierFilter();
+
+
 
 	double volumeE(int i);
 	double volumeB(int i);

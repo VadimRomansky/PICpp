@@ -22,9 +22,9 @@ void Simulation::moveParticles(){
 		removeEscapedParticles();
 	}
 
-	for(int i = 0; i < particles.size(); ++i){
+	/*for(int i = 0; i < particles.size(); ++i){
 		scatterParticle(particles[i]);
-	}
+	}*/
 }
 
 void Simulation::removeEscapedParticles(){
@@ -102,6 +102,8 @@ void Simulation::removeEscapedParticles(){
 void Simulation::moveParticle(Particle* particle){
 	Vector3d E = correlationTempEfield(particle)*fieldScale;
 	Vector3d B = correlationBfield(particle)*fieldScale;
+	//Vector3d E = Vector3d(0, 0, 0);
+	//Vector3d B = Vector3d(0, 0, 0);
 
 	Vector3d velocity = particle->velocity(speed_of_light_normalized);
 	Vector3d newVelocity = velocity;
@@ -365,8 +367,16 @@ void Simulation::scatterParticle(Particle* particle){
 
 	int i = (particle->x - xgrid[0])/deltaX;
 	Vector3d oldMomentum = particle->momentum;
-	Vector3d reverseVelocity = Vector3d(-velocityBulk[i].x, -velocityBulk[i].y, -velocityBulk[i].z);
-	particle->addVelocity(reverseVelocity, speed_of_light_normalized);
+	Vector3d reverseBulkVelocity;
+	Vector3d bulkVelocity;
+	if(particle->type == PROTON){
+		bulkVelocity = velocityBulkProton[i];
+		reverseBulkVelocity = Vector3d(-velocityBulkProton[i].x, -velocityBulkProton[i].y, -velocityBulkProton[i].z);
+	} else if(particle->type == ELECTRON){
+		bulkVelocity = velocityBulkElectron[i];
+		reverseBulkVelocity = Vector3d(-velocityBulkElectron[i].x, -velocityBulkElectron[i].y, -velocityBulkElectron[i].z);
+	}
+	particle->addVelocity(reverseBulkVelocity, speed_of_light_normalized);
 	Vector3d particleVelocity = particle->velocity(speed_of_light_normalized);
 	double probability = particleVelocity.norm()*deltaT/lambda;
 	double maxTheta = 2*pi*lambda/particle->velocity(speed_of_light_normalized).norm();
@@ -393,6 +403,6 @@ void Simulation::scatterParticle(Particle* particle){
 		delete rotation;
 	//}
 
-	particle->addVelocity(velocityBulk[i], speed_of_light_normalized);
+	particle->addVelocity(bulkVelocity, speed_of_light_normalized);
 	Vector3d newMomentum = particle->momentum;
 }

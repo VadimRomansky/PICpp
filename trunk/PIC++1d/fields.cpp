@@ -741,3 +741,60 @@ Vector3d Simulation::evaluateGradDensity(int i) {
 
 	return Vector3d(x, 0, 0);
 }
+
+
+void Simulation::fourierFilter(){
+	printf("fourier filtering\n");
+
+	double length = xgrid[shockWavePoint] - xgrid[0];
+
+	double minWaveLength = 2*deltaX;
+	double maxWaveLength = length/4;
+
+
+	int maxHarmonicNumber = length/minWaveLength;
+	int minHarmonicNumber = length/maxWaveLength;
+
+	for(int harmCounter = minHarmonicNumber; harmCounter <= maxHarmonicNumber; ++harmCounter){
+		Vector3d Ecos = Vector3d(0, 0, 0);
+		Vector3d Esin = Vector3d(0, 0, 0);
+		Vector3d Bcos = Vector3d(0, 0, 0);
+		Vector3d Bsin = Vector3d(0, 0, 0);
+
+		double k = 2*pi*harmCounter/length;
+
+		//for(int i = 0; i < xnumber; ++i
+		for(int i = 0; i < shockWavePoint; ++i){
+			Bcos = Bcos + Bfield[i]*cos(k*middleXgrid[i])*deltaX*2/xsize;
+			Bsin = Bsin + Bfield[i]*sin(k*middleXgrid[i])*deltaX*2/xsize;
+		}
+
+		Ecos = Ecos + Efield[0]*cos(k*xgrid[0])*(deltaX/2)*2/xsize;
+		Esin = Esin + Efield[0]*sin(k*xgrid[0])*(deltaX/2)*2/xsize;
+		for(int i = 0; i < shockWavePoint; ++i){
+		//for(int i = 1; i < xnumber; ++i){
+			Ecos = Ecos + Efield[i]*cos(k*xgrid[i])*deltaX*2/xsize;
+			Esin = Esin + Efield[i]*sin(k*xgrid[i])*deltaX*2/xsize;
+		}
+		//Ecos = Ecos + Efield[xnumber]*cos(k*xgrid[xnumber])*(deltaX/2)*2/xsize;
+		//Esin = Esin + Efield[xnumber]*sin(k*xgrid[xnumber])*(deltaX/2)*2/xsize;
+		Ecos = Ecos + Efield[shockWavePoint]*cos(k*xgrid[shockWavePoint])*(deltaX/2)*2/xsize;
+		Esin = Esin + Efield[shockWavePoint]*sin(k*xgrid[shockWavePoint])*(deltaX/2)*2/xsize;
+
+		Bcos.x = 0;
+		Bsin.x = 0;
+
+		for(int i = 0; i < shockWavePoint; ++i){
+		//for(int i = 0; i < xnumber; ++i){
+			Bfield[i] = Bfield[i] - Bcos*cos(k*middleXgrid[i]);
+			Bfield[i] = Bfield[i] - Bsin*sin(k*middleXgrid[i]);
+		}
+
+		for(int i = 0; i < shockWavePoint; ++i){
+		//for(int i = 0; i < xnumber+1; ++i){
+			Efield[i] = Efield[i] - Ecos*cos(k*xgrid[i]);
+			Efield[i] = Efield[i] - Esin*sin(k*xgrid[i]);
+		}
+	}
+
+}
