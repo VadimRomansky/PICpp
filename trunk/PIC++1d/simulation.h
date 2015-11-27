@@ -189,6 +189,7 @@ public:
 	void initializeFluxFromRight();
 	void fieldsLorentzTransitionX(const double& v);
 	void initializeShockWave();
+	void initializeKolmogorovSpectrum();
 	void createArrays();
 	void createFiles();
 	void simulate();
@@ -240,6 +241,7 @@ public:
 
 
 	void fourierFilter();
+	void fourierFilter(int startPoint, int endPoint);
 
 
 
