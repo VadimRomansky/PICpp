@@ -914,13 +914,15 @@ void Simulation::initializeShockWave(){
 		}
 	}
 
-	for(int i = 0; i < shockWavePoint; ++i){
+	/*for(int i = 0; i < shockWavePoint; ++i){
 		//Bfield[i].y = B0.x*sin(2*20*pi*middleXgrid[i]/xsize);
 		double amplitude = 0.1*B0.x;
 		Bfield[i].y = amplitude*(uniformDistribution() - 0.5);
 		Bfield[i].z = amplitude*(uniformDistribution() - 0.5);
 		newBfield[i] = Bfield[i];
-	}
+	}*/
+
+	initializeKolmogorovSpectrum();
 
 	for(int i = 0; i < xnumber; ++i){
 		double v = upstreamVelocity.x;
@@ -932,6 +934,28 @@ void Simulation::initializeShockWave(){
 		Vector3d middleE = (Efield[i] + Efield[i+1])*0.5;
 		newBfield[i].y = gamma*(Bfield[i].y + v*middleE.z/speed_of_light_normalized);
 		newBfield[i].z = gamma*(Bfield[i].z - v*middleE.y/speed_of_light_normalized);
+	}
+
+	for(int i = 0; i < xnumber; ++i){
+		double v = upstreamVelocity.x;
+		if(i < shockWavePoint){
+			//v = V0.x/4;
+			v = downstreamVelocity.x;
+		}
+		Vector3d middleE = (Efield[i] + Efield[i+1])*0.5;
+		double gamma = 1.0/sqrt(1 - v*v/speed_of_light_normalized_sqr);
+		newBfield[i].y = gamma*(Bfield[i].y + v*middleE.z/speed_of_light_normalized);
+		newBfield[i].z = gamma*(Bfield[i].z - v*middleE.y/speed_of_light_normalized);
+	}
+
+	for(int i = 0; i < xnumber + 1; ++i){
+		Efield[i] = newEfield[i];
+		tempEfield[i] = newEfield[i];
+		explicitEfield[i] = newEfield[i];
+	}
+	
+	for(int i = 0; i < xnumber; ++i){
+		Bfield[i] = newBfield[i];
 	}
 }
 
@@ -1037,6 +1061,32 @@ void Simulation::initializeExternalFluxInstability(){
 	fprintf(informationFile, "omega/cyclothronOmega = %g\n", omega/cyclothronOmegaProton);
 
 	fclose(informationFile);
+}
+
+void Simulation::initializeKolmogorovSpectrum(){
+	double turbulenceFraction = 0.1;
+	//use if defined shockWavePoint
+	double downstreamLength = xgrid[shockWavePoint] - xgrid[0];
+	double upstreamLength = xgrid[xnumber] - xgrid[shockWavePoint];
+
+	int minWaveLength = downstreamLength/10;
+	int maxWaveLength = downstreamLength;
+
+	int maxHarmonicNumber = downstreamLength/minWaveLength;
+	int minHarmonicNumber = downstreamLength/maxWaveLength;
+
+	for(int harmCounter = minHarmonicNumber; harmCounter <= maxHarmonicNumber; ++harmCounter){
+		double k = 2*pi*harmCounter/downstreamLength;
+		double Bamplitude = turbulenceFraction*B0.x*power(k*downstreamLength/(2*pi), -5.0/6.0);
+		double phiY = 2*pi*uniformDistribution();
+		double phiZ = 2*pi*uniformDistribution();
+
+		for(int i = 0; i < shockWavePoint; ++i){
+			Bfield[i].y += Bamplitude*sin(k*middleXgrid[i] + phiY);
+			Bfield[i].z += Bamplitude*sin(k*middleXgrid[i] + phiZ);
+			newBfield[i] = Bfield[i];
+		}
+	}
 }
 
 void Simulation::createArrays() {
