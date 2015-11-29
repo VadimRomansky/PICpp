@@ -60,6 +60,7 @@ void Simulation::evaluateFields() {
 
 			explicitEfield[xnumber] = tempEfield[xnumber];
 		}
+		smoothEfield();
 		for (int i = 0; i < xnumber+1; ++i) {
 			newEfield[i] = (tempEfield[i] - Efield[i] * (1 - theta)) / theta;
 			//newEfield[i].x= 0;
@@ -114,17 +115,42 @@ void Simulation::evaluateExplicitDerivative(){
 	}
 }
 
-void Simulation::smoothEfield() {
+/*void Simulation::smoothEfield() {
 	for(int i = 1; i < xnumber-1; ++i) {
 		Efield[i] = (newEfield[i-1] + newEfield[i]*2 + newEfield[i+1])/4.0;
 		//Efield[i].x = 0;
 	}
 
-	Efield[0] = (newEfield[0]*2 + newEfield[1] + newEfield[xnumber-1])/4.0;
+	Efield[0] = newEfield[0];
+	Efield[xnumber] = newEfield[xnumber];
+	//Efield[0] = (newEfield[0]*2 + newEfield[1] + newEfield[xnumber-1])/4.0;
 	//Efield[0].x = 0;
-	Efield[xnumber-1] = (newEfield[0] + newEfield[xnumber - 1]*2 + newEfield[xnumber - 2])/4.0;
+	//Efield[xnumber-1] = (newEfield[0] + newEfield[xnumber - 1]*2 + newEfield[xnumber - 2])/4.0;
 	//Efield[xnumber-1].x = 0;
-	Efield[xnumber] = Efield[0];
+	//Efield[xnumber] = Efield[0];
+
+	for(int i = 0; i < xnumber + 1; ++i){
+		newEfield[i] = Efield[i];
+	}
+}*/
+
+void Simulation::smoothEfield() {
+	for(int i = 1; i < xnumber-1; ++i) {
+		newEfield[i] = (tempEfield[i-1] + tempEfield[i]*2 + tempEfield[i+1])/4.0;
+		//Efield[i].x = 0;
+	}
+
+	newEfield[0] = tempEfield[0];
+	newEfield[xnumber] = tempEfield[xnumber];
+	//Efield[0] = (newEfield[0]*2 + newEfield[1] + newEfield[xnumber-1])/4.0;
+	//Efield[0].x = 0;
+	//Efield[xnumber-1] = (newEfield[0] + newEfield[xnumber - 1]*2 + newEfield[xnumber - 2])/4.0;
+	//Efield[xnumber-1].x = 0;
+	//Efield[xnumber] = Efield[0];
+
+	for(int i = 0; i < xnumber + 1; ++i){
+		tempEfield[i] = newEfield[i];
+	}
 }
 
 void Simulation::updateEfield() {
