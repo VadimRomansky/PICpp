@@ -58,6 +58,7 @@ void Simulation::simulate() {
 		updateElectroMagneticParameters();
 		//if(currentIteration > 1000){
 			evaluateFields();
+			//smoothEfield();
 			evaluateMagneticField();
 		//}
 		moveParticles();
@@ -72,9 +73,13 @@ void Simulation::simulate() {
 		//cleanupDivergence();
 		updateDensityParameters();
 		updateFields();
-		if(currentIteration % 100 == 0){
+		/*if(currentIteration % 100 == 0){
 			fourierFilter();
-		}
+		}*/
+
+		//smoothEfield();
+		//smoothBfield();
+
 		updateEnergy();
 		updateParameters();
 
