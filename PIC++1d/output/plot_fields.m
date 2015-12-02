@@ -96,20 +96,20 @@ ylabel ('B gauss');
 legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
 grid ;
 
-figure(7);
-plot (middleX(1:NB),Bz(1:NB, 1), 'red',Xfile(1:NE,1),Ey(1:NE, 1), 'red', middleX(1:NB),Bz(1:NB, 2), 'green', Xfile(1:NE,1),Ey(1:NE, 2), 'green', middleX(1:NB), Bz(1:NB, 3), 'blue', Xfile(1:NE,1),Ey(1:NE, 3), 'blue');
-title ('Bz and Ey');
-xlabel ('x cm');
-ylabel ('gauss');
-legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
-grid ;
+%figure(7);
+%plot (middleX(1:NB),Bz(1:NB, 1), 'red',Xfile(1:NE,1),Ey(1:NE, 1), 'red', middleX(1:NB),Bz(1:NB, 2), 'green', Xfile(1:NE,1),Ey(1:NE, 2), 'green', middleX(1:NB), Bz(1:NB, 3), 'blue', Xfile(1:NE,1),Ey(1:NE, 3), 'blue');
+%title ('Bz and Ey');
+%xlabel ('x cm');
+%ylabel ('gauss');
+%legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
+%grid ;
 
-figure(8);
-plot (middleX(1:NB),By(1:NB, 1), 'red',Xfile(1:NE,1),Ez(1:NE, 1), 'red', middleX(1:NB),By(1:NB, 2), 'green', Xfile(1:NE,1),Ez(1:NE, 2), 'green', middleX(1:NB), By(1:NB, 3), 'blue', Xfile(1:NE,1),Ez(1:NE, 3), 'blue');
-title ('By and Ez');
-xlabel ('x cm');
-ylabel ('gauss');
-legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
-grid ;
+%figure(8);
+%plot (middleX(1:NB),By(1:NB, 1), 'red',Xfile(1:NE,1),Ez(1:NE, 1), 'red', middleX(1:NB),By(1:NB, 2), 'green', Xfile(1:NE,1),Ez(1:NE, 2), 'green', middleX(1:NB), By(1:NB, 3), 'blue', Xfile(1:NE,1),Ez(1:NE, 3), 'blue');
+%title ('By and Ez');
+%xlabel ('x cm');
+%ylabel ('gauss');
+%legend('at t = 0', 'at t = maxT/2','at t = maxT','Location','southwest');
+%grid ;
 
 

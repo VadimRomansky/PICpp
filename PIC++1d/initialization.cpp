@@ -38,8 +38,8 @@ Simulation::Simulation(){
 Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV) {
 	debugMode = true;
 	newlyStarted = true;
-	solverType = IMPLICIT;
-	//solverType = EXPLICIT;
+	//solverType = IMPLICIT; //неявный
+	solverType = EXPLICIT; // явный
 	//boundaryConditionType = PERIODIC;
 	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	boundaryConditionType = FREE_BOTH;
@@ -853,6 +853,7 @@ void Simulation::fieldsLorentzTransitionX(const double& v){
 }
 
 void Simulation::initializeShockWave(){
+
 	E0 = Vector3d(0, 0, 0);
 	for(int i = 0; i < xnumber + 1; ++i){
 		Efield[i] = Vector3d(0, 0, 0);
@@ -871,6 +872,19 @@ void Simulation::initializeShockWave(){
 	double upstreamTemperature = temperature;
 	Vector3d upstreamVelocity = V0;
 	Vector3d downstreamVelocity = Vector3d(V0.x/4, 0, 0);
+	double alfvenV = B0.norm()/sqrt(4*pi*density);
+	double soundVelectron = sqrt(5*kBoltzman_normalized*downstreamTemperature/(3*massElectron));
+
+	if(alfvenV > V0.norm()){
+		printf("alfvenV > V0\n");
+	}
+
+	printf("alfvenV/V0 = %15.10g\n", alfvenV/V0.norm());
+
+	if(soundVelectron > V0.norm()){
+		printf("soundV > V0\n");
+	}
+	printf("soundV/V0 = %15.10g\n", soundVelectron/V0.norm());
 	//Vector3d downstreamVelocity = Vector3d(0, 0, 0);
 	shockWavePoint = xnumber/4;
 	int n = 0;
@@ -1064,7 +1078,7 @@ void Simulation::initializeExternalFluxInstability(){
 }
 
 void Simulation::initializeKolmogorovSpectrum(){
-	double turbulenceFraction = 0.1;
+	double turbulenceFraction = 1.0;
 	//use if defined shockWavePoint
 	double downstreamLength = xgrid[shockWavePoint] - xgrid[0];
 	double upstreamLength = xgrid[xnumber] - xgrid[shockWavePoint];
@@ -1546,7 +1560,7 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 
 	double x = xgrid[i] +  deltaX * uniformDistribution();
 
-	double dx = deltaX / 20;
+	double dx = deltaX / 4;
 
 	double energy = mass * speed_of_light_normalized_sqr;
 	double p;
