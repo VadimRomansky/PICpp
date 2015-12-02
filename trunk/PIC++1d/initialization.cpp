@@ -41,8 +41,8 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 	//solverType = IMPLICIT; //неявный
 	solverType = EXPLICIT; // явный
 	//boundaryConditionType = PERIODIC;
-	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	boundaryConditionType = FREE_BOTH;
+	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	//boundaryConditionType = FREE_BOTH;
 	maxwellEquationMatrixSize = 3;
 
 	currentIteration = 0;
@@ -285,6 +285,7 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 
 void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) {
 	printf("initialization alfven wave\n");
+	createParticles();
 	E0 = Vector3d(0, 0, 0);
 
 	informationFile = fopen("./output/information.dat", "a");
@@ -795,6 +796,7 @@ void Simulation::initializeLangmuirWave(){
 
 void Simulation::initializeFluxFromRight(){
 	//initializeAlfvenWave(10, 1.0E-4);
+	createParticles();
 	Efield[xnumber] = E0;
 	tempEfield[xnumber] = E0;
 	newEfield[xnumber] = E0;
@@ -1039,6 +1041,7 @@ void Simulation::initializeTwoStream(){
 }
 
 void Simulation::initializeExternalFluxInstability(){
+	createParticles();
 	double alfvenV = B0.norm()*fieldScale/sqrt(4*pi*density);
 	double concentration = density/(massProton + massElectron);
 	double phaseV = 2*alfvenV;
