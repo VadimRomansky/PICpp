@@ -63,7 +63,7 @@ void Simulation::evaluateFields() {
 		smoothEfield();
 		for (int i = 0; i < xnumber+1; ++i) {
 			newEfield[i] = (tempEfield[i] - Efield[i] * (1 - theta)) / theta;
-			//newEfield[i].x= 0;
+			newEfield[i].x= 0;
 		}
 	}
 
@@ -84,6 +84,7 @@ void Simulation::evaluateFields() {
 		}
 		for (int i = 0; i < xnumber+1; ++i) {
 			newEfield[i] = explicitEfield[i];
+			tempEfield[i] = newEfield[i]*theta + Efield[i]*(1-theta);
 			//newEfield[i].x = 0;
 		}
 	}
@@ -135,8 +136,9 @@ void Simulation::evaluateExplicitDerivative(){
 }*/
 
 void Simulation::smoothEfield() {
+	double x = 0.001;
 	for(int i = 1; i < xnumber-1; ++i) {
-		newEfield[i] = (tempEfield[i-1] + tempEfield[i]*2 + tempEfield[i+1])/4.0;
+		newEfield[i] = tempEfield[i]*(1-x) +((tempEfield[i-1] + tempEfield[i]*2.0 + tempEfield[i+1])*x/4.0);
 		//Efield[i].x = 0;
 	}
 
@@ -744,7 +746,6 @@ double Simulation::evaluateDivFlux(int i) {
 Vector3d Simulation::evaluateDivPressureTensor(int i) {
 	Vector3d result = Vector3d(0, 0, 0);
 
-	// why /4 ?
 	Matrix3d tensorDerX = (getPressureTensor(i)  - getPressureTensor(i - 1)) / (deltaX);
 
 	result.x = tensorDerX.matrix[0][0];

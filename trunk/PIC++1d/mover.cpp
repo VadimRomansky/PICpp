@@ -109,6 +109,9 @@ void Simulation::moveParticle(Particle* particle){
 	Vector3d newVelocity = velocity;
 	Vector3d middleVelocity = velocity;
 
+	Vector3d electricForce = E*particle->charge*deltaT;
+	Vector3d lorentzForce = (velocity.vectorMult(B)/speed_of_light_normalized)*particle->charge*deltaT;
+
 	//see Noguchi
 	double beta = 0.5*particle->charge*deltaT/particle->mass;
 	double Gamma = (beta*(E.scalarMult(velocity))/speed_of_light_normalized_sqr) + particle->gammaFactor(speed_of_light_normalized);
