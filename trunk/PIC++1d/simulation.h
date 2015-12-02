@@ -189,7 +189,7 @@ public:
 	void initializeFluxFromRight();
 	void fieldsLorentzTransitionX(const double& v);
 	void initializeShockWave();
-	void initializeKolmogorovSpectrum();
+	void initializeKolmogorovSpectrum(int start, int end);
 	void createArrays();
 	void createFiles();
 	void simulate();

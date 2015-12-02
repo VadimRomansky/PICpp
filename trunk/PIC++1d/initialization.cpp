@@ -38,8 +38,8 @@ Simulation::Simulation(){
 Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV) {
 	debugMode = true;
 	newlyStarted = true;
-	//solverType = IMPLICIT; //неявный
-	solverType = EXPLICIT; // явный
+	solverType = IMPLICIT; //неявный
+	//solverType = EXPLICIT; // явный
 	//boundaryConditionType = PERIODIC;
 	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	//boundaryConditionType = FREE_BOTH;
@@ -806,14 +806,15 @@ void Simulation::initializeFluxFromRight(){
 	newEfield[0] = E0;
 	explicitEfield[0] = E0;
 
-	for(int i = 0; i < xnumber/4; ++i){
+	/*for(int i = 0; i < xnumber/4; ++i){
 		//Bfield[i].y = B0.x*sin(2*20*pi*middleXgrid[i]/xsize);
 		Bfield[i].y = 0.01*B0.x*(uniformDistribution() - 0.5);
 		Bfield[i].z = 0.01*B0.x*(uniformDistribution() - 0.5);
 		newBfield[i] = Bfield[i];
-	}
+	}*/
 
 	//fieldsLorentzTransitionX(V0.x);
+	initializeKolmogorovSpectrum(0, xnumber - 1);
 
 	for(int i = 0; i < particles.size(); ++i){
 		Particle* particle = particles[i];
@@ -938,7 +939,7 @@ void Simulation::initializeShockWave(){
 		newBfield[i] = Bfield[i];
 	}*/
 
-	initializeKolmogorovSpectrum();
+	initializeKolmogorovSpectrum(0, shockWavePoint);
 
 	for(int i = 0; i < xnumber; ++i){
 		double v = upstreamVelocity.x;
@@ -1080,25 +1081,24 @@ void Simulation::initializeExternalFluxInstability(){
 	fclose(informationFile);
 }
 
-void Simulation::initializeKolmogorovSpectrum(){
+void Simulation::initializeKolmogorovSpectrum(int start, int end){
 	double turbulenceFraction = 1.0;
 	//use if defined shockWavePoint
-	double downstreamLength = xgrid[shockWavePoint] - xgrid[0];
-	double upstreamLength = xgrid[xnumber] - xgrid[shockWavePoint];
+	double length = xgrid[end] - xgrid[start];
 
-	int minWaveLength = downstreamLength/10;
-	int maxWaveLength = downstreamLength;
+	int minWaveLength = length/10;
+	int maxWaveLength = length;
 
-	int maxHarmonicNumber = downstreamLength/minWaveLength;
-	int minHarmonicNumber = downstreamLength/maxWaveLength;
+	int maxHarmonicNumber = length/minWaveLength;
+	int minHarmonicNumber = length/maxWaveLength;
 
 	for(int harmCounter = minHarmonicNumber; harmCounter <= maxHarmonicNumber; ++harmCounter){
-		double k = 2*pi*harmCounter/downstreamLength;
-		double Bamplitude = turbulenceFraction*B0.x*power(k*downstreamLength/(2*pi), -5.0/6.0);
+		double k = 2*pi*harmCounter/length;
+		double Bamplitude = turbulenceFraction*B0.x*power(k*length/(2*pi), -5.0/6.0);
 		double phiY = 2*pi*uniformDistribution();
 		double phiZ = 2*pi*uniformDistribution();
 
-		for(int i = 0; i < shockWavePoint; ++i){
+		for(int i = start; i < end; ++i){
 			Bfield[i].y += Bamplitude*sin(k*middleXgrid[i] + phiY);
 			Bfield[i].z += Bamplitude*sin(k*middleXgrid[i] + phiZ);
 			newBfield[i] = Bfield[i];
