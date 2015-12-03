@@ -315,6 +315,10 @@ void readParticles(FILE* particlesFile, Simulation& simulation){
 			particleType = PROTON;
 		} else if(type == 2){
 			particleType = ELECTRON;
+		} else if(type == 3){
+			particleType = POSITRON;
+		} else if(type == 4){
+			particleType = ALPHA;
 		}
 
 		Particle* particle = new Particle(number, mass, charge, weight, particleType, x, px, py, pz, dx);

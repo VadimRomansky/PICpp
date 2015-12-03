@@ -41,8 +41,8 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 	solverType = IMPLICIT; //неявный
 	//solverType = EXPLICIT; // явный
 	//boundaryConditionType = PERIODIC;
-	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	//boundaryConditionType = FREE_BOTH;
+	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionType = FREE_BOTH;
 	maxwellEquationMatrixSize = 3;
 
 	currentIteration = 0;
@@ -253,6 +253,7 @@ void Simulation::initialize() {
 }
 
 void Simulation::initializeSimpleElectroMagneticWave() {
+	boundaryConditionType = PERIODIC;
 	E0 = Vector3d(0, 0, 0);
 	B0 = Vector3d(0, 0, 0);
 	for (int i = 0; i < xnumber; ++i) {
@@ -284,6 +285,7 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 }
 
 void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) {
+	boundaryConditionType = PERIODIC;
 	printf("initialization alfven wave\n");
 	createParticles();
 	E0 = Vector3d(0, 0, 0);
@@ -685,6 +687,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 }
 
 void Simulation::initializeLangmuirWave(){
+	boundaryConditionType = PERIODIC;
 	double epsilon = 0.1;
 	double kw = 2*2*pi/xsize;
 	double omega = 2*pi;
@@ -795,6 +798,7 @@ void Simulation::initializeLangmuirWave(){
 }
 
 void Simulation::initializeFluxFromRight(){
+	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	//initializeAlfvenWave(10, 1.0E-4);
 	createParticles();
 	Efield[xnumber] = E0;
@@ -856,6 +860,7 @@ void Simulation::fieldsLorentzTransitionX(const double& v){
 }
 
 void Simulation::initializeShockWave(){
+	boundaryConditionType = FREE_BOTH;
 
 	E0 = Vector3d(0, 0, 0);
 	for(int i = 0; i < xnumber + 1; ++i){
@@ -1558,6 +1563,14 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 	case ELECTRON:
 		mass = massElectron;
 		charge = -electron_charge_normalized;
+		break;
+	case POSITRON:
+		mass = massElectron;
+		charge = electron_charge_normalized;
+		break;
+	case ALPHA:
+		mass = massAlpha;
+		charge = 2.0*electron_charge_normalized;
 		break;
 	}
 

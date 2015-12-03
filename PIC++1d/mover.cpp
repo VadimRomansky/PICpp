@@ -372,10 +372,10 @@ void Simulation::scatterParticle(Particle* particle){
 	Vector3d oldMomentum = particle->momentum;
 	Vector3d reverseBulkVelocity;
 	Vector3d bulkVelocity;
-	if(particle->type == PROTON){
+	if(particle->type == PROTON || particle->type == ALPHA){
 		bulkVelocity = velocityBulkProton[i];
 		reverseBulkVelocity = Vector3d(-velocityBulkProton[i].x, -velocityBulkProton[i].y, -velocityBulkProton[i].z);
-	} else if(particle->type == ELECTRON){
+	} else if(particle->type == ELECTRON || particle->type == POSITRON){
 		bulkVelocity = velocityBulkElectron[i];
 		reverseBulkVelocity = Vector3d(-velocityBulkElectron[i].x, -velocityBulkElectron[i].y, -velocityBulkElectron[i].z);
 	}
