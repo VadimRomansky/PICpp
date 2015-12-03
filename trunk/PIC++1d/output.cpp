@@ -286,6 +286,10 @@ void outputBackupParticle(FILE* outFile, Particle* particle){
 		type = 1;
 	} else if (particle->type == ELECTRON){
 		type = 2;
+	} else if ( particle->type == POSITRON){
+		type = 3;
+	} else if ( particle->type == ALPHA){
+		type = 4;
 	}
 	fprintf(outFile, "%d ", type);
 	fprintf(outFile, "%15.10g ", particle->x);
