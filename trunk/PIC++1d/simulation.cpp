@@ -357,8 +357,7 @@ void Simulation::updateElectroMagneticParameters() {
 			if(solverType == IMPLICIT){
 				electricFlux[i] += rotatedVelocity * (particle->charge * particle->weight * correlation);
 				//electricFlux[i] += velocity * (particle->charge * particle->weight * correlation);
-				dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
-				//dielectricTensor[i] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+				//dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 				
 				Particle tempParticle = *particle;
 				double shiftX = 0.01*deltaX;
@@ -369,9 +368,9 @@ void Simulation::updateElectroMagneticParameters() {
 
 				double tempCorrelation = correlationWithEbin(tempParticle, i) / volumeE(i);
 
-				divPressureTensor[i].x += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][0] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
-				divPressureTensor[i].y += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][1] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
-				divPressureTensor[i].z += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][2] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+				//divPressureTensor[i].x += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][0] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+				//divPressureTensor[i].y += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][1] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+				//divPressureTensor[i].z += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][2] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
 			}
 			if(solverType == EXPLICIT){
 				electricFlux[i] += velocity*particle->charge*particle->weight*correlation;
@@ -413,12 +412,14 @@ void Simulation::updateElectroMagneticParameters() {
 				Vector3d velocity = particle->velocity(speed_of_light_normalized);
 				Vector3d rotatedVelocity = particle->rotationTensor * velocity * gamma;
 
-				electricDensity[i] += particle->weight * particle->charge * correlation;
+				//electricDensity[i] += particle->weight * particle->charge * correlation;
 
-				pressureTensor[i] += rotatedVelocity.tensorMult(rotatedVelocity) * particle->weight * particle->charge * correlation;
+				//pressureTensor[i] += rotatedVelocity.tensorMult(rotatedVelocity) * particle->weight * particle->charge * correlation;
 			}
 		}
 	}
+
+	//smoothDensity();
 
 	if(solverType == IMPLICIT){
 		for (int i = 0; i <= xnumber; ++i) {
@@ -456,6 +457,26 @@ void Simulation::updateElectroMagneticParameters() {
 		}
 		electricFlux[xnumber] = electricFlux[0];*/
 	//
+}
+
+void Simulation::smoothDensity(){
+	double newLeftDensity = (electricDensity[0] + electricDensity[1])/2.0;
+	double newRightDensity = (electricDensity[xnumber-1] + electricDensity[xnumber-2])/2.0;
+	if(boundaryConditionType == PERIODIC){
+		newLeftDensity = (electricDensity[xnumber-1] + 2.0*electricDensity[0] + electricDensity[1])/4.0;
+		newRightDensity = (electricDensity[xnumber-2] + 2.0*electricDensity[xnumber-1] + electricDensity[0])/4.0;
+	}
+	double prevDensity = electricDensity[0];
+	for(int i = 1; i < xnumber - 1; ++i){
+		double tempDensity = electricDensity[i];
+
+		electricDensity[i] = (prevDensity + 2.0*electricDensity[i] + electricDensity[i+1])/4.0;
+
+		prevDensity = tempDensity;
+	}
+
+	electricDensity[0] = newLeftDensity;
+	electricDensity[xnumber - 1] = newRightDensity;
 }
 
 void Simulation::addReflectedParticleToElectroMagneticParameters(const Particle* particle){

@@ -341,7 +341,7 @@ void Simulation::injectNewParticles(int count){
 	int n = particles.size();
 
 	double weight = (concentration / particlesPerBin) * volumeB(xnumber - 1);
-	double x = xgrid[xnumber] - deltaX*0.00001;
+	double x = xgrid[xnumber] - (deltaX/particlesPerBin)/100;
 	Particle* lastProton = getLastProton();
 	Particle* lastElectron = getLastElectron();
 	for (int l = 0; l < 2 * count; ++l) {
