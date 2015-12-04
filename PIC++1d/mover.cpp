@@ -341,7 +341,7 @@ void Simulation::injectNewParticles(int count){
 	int n = particles.size();
 
 	double weight = (concentration / particlesPerBin) * volumeB(xnumber - 1);
-	double x = xgrid[xnumber] - (deltaX/particlesPerBin)/100;
+	double x = xgrid[xnumber] - ((deltaX/particlesPerBin)/100);
 	Particle* lastProton = getLastProton();
 	Particle* lastElectron = getLastElectron();
 	for (int l = 0; l < 2 * count; ++l) {
@@ -354,12 +354,12 @@ void Simulation::injectNewParticles(int count){
 		Particle* particle = createParticle(n, xnumber - 1, weight, type, temperature);
 		n++;
 		particle->x = x;
-		//particle->addVelocity(V0, speed_of_light_normalized);
-		if(type == PROTON){
+		particle->addVelocity(V0, speed_of_light_normalized);
+		/*if(type == PROTON){
 			particle->momentum = lastProton->momentum;
 		} else {
 			particle->momentum = lastElectron->momentum;
-		}
+		}*/
 		particles.push_back(particle);
 	}
 }
