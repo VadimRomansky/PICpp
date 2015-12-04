@@ -1,6 +1,6 @@
 1000 3 3                 grid numbers
 2E11 3E10 3E10         gridsizes
-1E1                    temperature
+1E0                    temperature
 1.67E-28               density
 -3E9 0 0                  velocity
 0 0 0                  elecctricField

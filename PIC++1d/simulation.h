@@ -250,6 +250,7 @@ public:
 	void checkParticleInBox(Particle& particle);
 	void checkParticlesInBin();
 	void updateElectroMagneticParameters();
+	void smoothDensity();
 	void addReflectedParticleToElectroMagneticParameters(const Particle* particle);
 	void updateDensityParameters();
 	void updateEnergy();
