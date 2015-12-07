@@ -1088,11 +1088,11 @@ void Simulation::initializeExternalFluxInstability(){
 }
 
 void Simulation::initializeKolmogorovSpectrum(int start, int end){
-	double turbulenceFraction = 1.0;
+	double turbulenceFraction = 0.01;
 	//use if defined shockWavePoint
 	double length = xgrid[end] - xgrid[start];
 
-	int minWaveLength = length/10;
+	int minWaveLength = length/50;
 	int maxWaveLength = length;
 
 	int maxHarmonicNumber = length/minWaveLength;

@@ -420,9 +420,9 @@ void Simulation::updateElectroMagneticParameters() {
 				Vector3d velocity = particle->velocity(speed_of_light_normalized);
 				Vector3d rotatedVelocity = particle->rotationTensor * velocity * gamma;
 
-				//electricDensity[i] += particle->weight * particle->charge * correlation;
+				electricDensity[i] += particle->weight * particle->charge * correlation;
 
-				//pressureTensor[i] += rotatedVelocity.tensorMult(rotatedVelocity) * particle->weight * particle->charge * correlation;
+				pressureTensor[i] += rotatedVelocity.tensorMult(rotatedVelocity) * particle->weight * particle->charge * correlation;
 			}
 		}
 	}
