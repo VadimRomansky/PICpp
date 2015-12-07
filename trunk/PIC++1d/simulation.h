@@ -292,7 +292,7 @@ public:
 	void correctParticlePosition(Particle& particle);
 	void moveParticleNewtonIteration(Particle* particle, double* const oldCoordinates, double* const tempCoordinates, double* const newCoordinates);
 	void evaluateParticlesRotationTensor();
-	void injectNewParticles(int count);
+	void injectNewParticles(int count, double length);
 	void scatterParticle(Particle* particle);
 
 	void collectParticlesIntoBins();

@@ -19,8 +19,8 @@ void Simulation::simulate() {
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWave(1, 0.01);
-		//initializeFluxFromRight();
-		initializeShockWave();
+		initializeFluxFromRight();
+		//initializeShockWave();
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 	}
@@ -42,7 +42,7 @@ void Simulation::simulate() {
 	updateFields();
 	updateEnergy();
 
-	double length = deltaX/particlesPerBin - 0.0001*deltaX;
+	double length = (deltaX/particlesPerBin) - 0.0001*deltaX;
 
 	while (time * plasma_period < maxTime && currentIteration < maxIteration) {
 		printf("iteration number %d time = %15.10g\n", currentIteration, time * plasma_period);
@@ -56,17 +56,21 @@ void Simulation::simulate() {
 		evaluateParticlesRotationTensor();
 		updateElectroMagneticParameters();
 		//if(currentIteration > 1000){
-			evaluateFields();
+			//evaluateFields();
 			//smoothEfield();
-			evaluateMagneticField();
+			//evaluateMagneticField();
 		//}
 		moveParticles();
 
 		length += fabs(V0.x*deltaT);
 		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH){
-			if(length > deltaX/particlesPerBin){
+			if(length > 2*deltaX/particlesPerBin){
+				printf("length > 2*deltaX/particlesPerBin\n");
+			}
+			if(length >= deltaX/particlesPerBin){
 				length -= deltaX/particlesPerBin;
-				injectNewParticles(1);
+				injectNewParticles(1, length);
+				//length = 0;
 			}
 		}
 		//cleanupDivergence();
@@ -251,9 +255,13 @@ void Simulation::updateDeltaT() {
 
 		double Vthermal = sqrt(2*kBoltzman_normalized*temperature/massElectron);
 		double minDeltaT = deltaX/Vthermal;
-		if(minDeltaT > deltaT){
-			printf("deltaT < dx/Vthermal\n");
+
+		if(deltaT*fabs(V0.x)*particlesPerBin > 0.5*deltaX){
+			deltaT = 0.5*deltaX/(fabs(V0.x)*particlesPerBin);
 		}
+		//if(minDeltaT > deltaT){
+			//printf("deltaT < dx/Vthermal\n");
+		//}
 	}
 }
 
@@ -357,7 +365,7 @@ void Simulation::updateElectroMagneticParameters() {
 			if(solverType == IMPLICIT){
 				electricFlux[i] += rotatedVelocity * (particle->charge * particle->weight * correlation);
 				//electricFlux[i] += velocity * (particle->charge * particle->weight * correlation);
-				//dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+				dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 				
 				Particle tempParticle = *particle;
 				double shiftX = 0.01*deltaX;
@@ -368,9 +376,9 @@ void Simulation::updateElectroMagneticParameters() {
 
 				double tempCorrelation = correlationWithEbin(tempParticle, i) / volumeE(i);
 
-				//divPressureTensor[i].x += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][0] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
-				//divPressureTensor[i].y += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][1] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
-				//divPressureTensor[i].z += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][2] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+				divPressureTensor[i].x += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][0] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+				divPressureTensor[i].y += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][1] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+				divPressureTensor[i].z += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][2] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
 			}
 			if(solverType == EXPLICIT){
 				electricFlux[i] += velocity*particle->charge*particle->weight*correlation;

@@ -334,14 +334,14 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d velocity,
 	return result;
 }
 
-void Simulation::injectNewParticles(int count){
+void Simulation::injectNewParticles(int count, double length){
 	printf("inject new particles\n");
 	double concentration = density/(massProton + massElectron);
 
 	int n = particles.size();
 
 	double weight = (concentration / particlesPerBin) * volumeB(xnumber - 1);
-	double x = xgrid[xnumber] - ((deltaX/particlesPerBin)/100);
+	double x = xgrid[xnumber] - length;
 	Particle* lastProton = getLastProton();
 	Particle* lastElectron = getLastElectron();
 	for (int l = 0; l < 2 * count; ++l) {

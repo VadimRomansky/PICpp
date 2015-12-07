@@ -93,8 +93,8 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 		gyroradius = 1.0;
 	}
 
-	//plasma_period = 1.0;
-	//gyroradius = 1.0;
+	plasma_period = 1.0;
+	gyroradius = 1.0;
 
 	//gyroradius = xsize;
 
@@ -798,7 +798,8 @@ void Simulation::initializeLangmuirWave(){
 }
 
 void Simulation::initializeFluxFromRight(){
-	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionType = FREE_BOTH;
 	//initializeAlfvenWave(10, 1.0E-4);
 	createParticles();
 	Efield[xnumber] = E0;
@@ -818,7 +819,7 @@ void Simulation::initializeFluxFromRight(){
 	}*/
 
 	//fieldsLorentzTransitionX(V0.x);
-	initializeKolmogorovSpectrum(0, xnumber - 1);
+	//initializeKolmogorovSpectrum(0, xnumber - 1);
 
 	for(int i = 0; i < particles.size(); ++i){
 		Particle* particle = particles[i];
@@ -1576,7 +1577,7 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 
 	double x = xgrid[i] +  deltaX * uniformDistribution();
 
-	double dx = deltaX / 4;
+	double dx = deltaX / 20.0;
 
 	double energy = mass * speed_of_light_normalized_sqr;
 	double p;
@@ -1602,6 +1603,11 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 	double pz = normalDistribution()*sqrt(mass*kBoltzman_normalized*localTemperature);
 	double py = normalDistribution()*sqrt(mass*kBoltzman_normalized*localTemperature);
 	double px = normalDistribution()*sqrt(mass*kBoltzman_normalized*localTemperature);
+
+	//px = 0;
+	//py = 0;
+	//pz = 0;
+
 
 	Particle* particle = new Particle(n, mass, charge, weight, type, x, px, py, pz, dx);
 
