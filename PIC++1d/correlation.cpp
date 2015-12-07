@@ -468,8 +468,11 @@ double Simulation::correlationWithBbin(Particle& particle, int i) {
 				leftx = xgrid[0];
 				rightx = xgrid[1];
 			}
-		} else {
+		} else if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 			leftx = -deltaX;
+			rightx = xgrid[1];
+		} else {
+			leftx = xgrid[0];
 			rightx = xgrid[1];
 		}
 	} else if(i == xnumber - 1){
@@ -614,11 +617,11 @@ double Simulation::correlationBspline(const double& x, const double& dx, const d
 		case 1:
 			if( x < leftx){
 				correlation = 0.5*sqr(x + dx - leftx)/dx2;
-			} else if (x < leftx + deltaX){
+			} else if (x < leftx + dx){
 				correlation = 1 - 0.5*sqr(leftx - (x - dx))/dx2;
 			} else if (x > rightx){
 				correlation = 0.5*sqr(rightx - (x - dx))/dx2;
-			} else if (x > rightx - deltaX){
+			} else if (x > rightx - dx){
 				correlation = 1 - 0.5*sqr(x + dx - rightx)/dx2;
 			} else {
 				correlation = 1;

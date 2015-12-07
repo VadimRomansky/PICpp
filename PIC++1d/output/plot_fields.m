@@ -8,6 +8,7 @@ Nx = size(Xfile, 1);
 NE = Nx;
 NB = Nx - 1;
 Nt = fix(size(Bfield,1)/Nx);
+Nt = 5;
 
 a = 0;
 b = fix(Nt/2);
