@@ -798,8 +798,8 @@ void Simulation::initializeLangmuirWave(){
 }
 
 void Simulation::initializeFluxFromRight(){
-	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	boundaryConditionType = FREE_BOTH;
+	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	//boundaryConditionType = FREE_BOTH;
 	//initializeAlfvenWave(10, 1.0E-4);
 	createParticles();
 	Efield[xnumber] = E0;
@@ -819,7 +819,7 @@ void Simulation::initializeFluxFromRight(){
 	}*/
 
 	//fieldsLorentzTransitionX(V0.x);
-	//initializeKolmogorovSpectrum(0, xnumber - 1);
+	initializeKolmogorovSpectrum(0, xnumber - 1);
 
 	for(int i = 0; i < particles.size(); ++i){
 		Particle* particle = particles[i];
@@ -1088,12 +1088,12 @@ void Simulation::initializeExternalFluxInstability(){
 }
 
 void Simulation::initializeKolmogorovSpectrum(int start, int end){
-	double turbulenceFraction = 0.01;
+	double turbulenceFraction = 0.5;
 	//use if defined shockWavePoint
 	double length = xgrid[end] - xgrid[start];
 
-	int minWaveLength = length/50;
-	int maxWaveLength = length;
+	double minWaveLength = length/25;
+	double maxWaveLength = length;
 
 	int maxHarmonicNumber = length/minWaveLength;
 	int minHarmonicNumber = length/maxWaveLength;
