@@ -137,7 +137,7 @@ void Simulation::evaluateExplicitDerivative(){
 
 void Simulation::smoothEfield() {
 	double x = 0.001;
-	for(int i = 1; i < xnumber-1; ++i) {
+	for(int i = 1; i < xnumber; ++i) {
 		newEfield[i] = tempEfield[i]*(1-x) +((tempEfield[i-1] + tempEfield[i]*2.0 + tempEfield[i+1])*x/4.0);
 		//Efield[i].x = 0;
 	}

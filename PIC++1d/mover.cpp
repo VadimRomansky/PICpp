@@ -328,6 +328,7 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d velocity,
 			}
 
 			result.matrix[i][j] /= denominator;
+			//alertNaNOrInfinity(result.matrix[i][j], "rotation tensot = NaN\n");
 		}
 	}
 

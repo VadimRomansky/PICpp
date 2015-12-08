@@ -56,9 +56,9 @@ void Simulation::simulate() {
 		evaluateParticlesRotationTensor();
 		updateElectroMagneticParameters();
 		//if(currentIteration > 1000){
-			//evaluateFields();
+			evaluateFields();
 			//smoothEfield();
-			//evaluateMagneticField();
+			evaluateMagneticField();
 		//}
 		moveParticles();
 
