@@ -52,15 +52,17 @@ void Simulation::evaluateFields() {
 			tempEfield[xnumber] = tempEfield[0];
 			explicitEfield[xnumber] = explicitEfield[0];
 		} else {
-			//tempEfield[xnumber] = E0;
+			tempEfield[xnumber] = E0;
+
+			explicitEfield[xnumber] = E0;
 
 			//tempEfield[xnumber] = Efield[xnumber] + evaluateRotB(xnumber - 1)*speed_of_light_normalized*deltaT*theta;
 
-			tempEfield[xnumber] = tempEfield[xnumber - 1];
+			//tempEfield[xnumber] = tempEfield[xnumber - 1];
 
-			explicitEfield[xnumber] = tempEfield[xnumber];
+			//explicitEfield[xnumber] = tempEfield[xnumber];
 		}
-		smoothEfield();
+		//smoothEfield();
 		for (int i = 0; i < xnumber+1; ++i) {
 			newEfield[i] = (tempEfield[i] - Efield[i] * (1 - theta)) / theta;
 			//newEfield[i].x= 0;
@@ -259,15 +261,16 @@ void Simulation::createSuperConductorLeftEquation() {
 }
 
 void Simulation::createFreeRightEquation(){
-	Vector3d rightPart = Vector3d(0, 0, 0);
+	//Vector3d rightPart = Vector3d(0, 0, 0);
+	Vector3d rightPart = E0;
 
 	maxwellEquationMatrix[xnumber - 1][0].push_back(MatrixElement(1.0, xnumber - 1, 0));
 	maxwellEquationMatrix[xnumber - 1][1].push_back(MatrixElement(1.0, xnumber - 1, 1));
 	maxwellEquationMatrix[xnumber - 1][2].push_back(MatrixElement(1.0, xnumber - 1, 2));
 
-	maxwellEquationMatrix[xnumber - 1][0].push_back(MatrixElement(-1.0, xnumber - 2, 0));
-	maxwellEquationMatrix[xnumber - 1][1].push_back(MatrixElement(-1.0, xnumber - 2, 1));
-	maxwellEquationMatrix[xnumber - 1][2].push_back(MatrixElement(-1.0, xnumber - 2, 2));
+	//maxwellEquationMatrix[xnumber - 1][0].push_back(MatrixElement(-1.0, xnumber - 2, 0));
+	//maxwellEquationMatrix[xnumber - 1][1].push_back(MatrixElement(-1.0, xnumber - 2, 1));
+	//maxwellEquationMatrix[xnumber - 1][2].push_back(MatrixElement(-1.0, xnumber - 2, 2));
 	
 
 	alertNaNOrInfinity(rightPart.x, "right part x = NaN");

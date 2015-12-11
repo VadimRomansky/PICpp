@@ -254,7 +254,7 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 		Bfield[i].z = E*sin(kw*middleXgrid[i]);
 	}
 
-	double t = 2 * pi / (kw * speed_of_light_normalized);
+	//double t = 2 * pi / (kw * speed_of_light_normalized);
 }
 
 void Simulation::createArrays() {
