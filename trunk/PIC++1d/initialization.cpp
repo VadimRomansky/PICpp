@@ -895,7 +895,7 @@ void Simulation::initializeShockWave(){
 	}
 	printf("soundV/V0 = %15.10g\n", soundVelectron/V0.norm());
 	//Vector3d downstreamVelocity = Vector3d(0, 0, 0);
-	shockWavePoint = xnumber/4;
+	shockWavePoint = xnumber/2;
 	int n = 0;
 	for (int i = 0; i < xnumber; ++i) {
 		double weight = (concentration / particlesPerBin) * volumeB(i);
@@ -1088,12 +1088,12 @@ void Simulation::initializeExternalFluxInstability(){
 }
 
 void Simulation::initializeKolmogorovSpectrum(int start, int end){
-	double turbulenceFraction = 0.5;
+	double turbulenceFraction = 1.0;
 	//use if defined shockWavePoint
 	double length = xgrid[end] - xgrid[start];
 
-	double minWaveLength = length/25;
-	double maxWaveLength = length;
+	double minWaveLength = length/200;
+	double maxWaveLength = length/10;
 
 	int maxHarmonicNumber = length/minWaveLength;
 	int minHarmonicNumber = length/maxWaveLength;
