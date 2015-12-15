@@ -30,20 +30,20 @@ end;
 figure(1);
 plot (Xfile(1:Nx,1),electron_concentration(1:Nx, 1), 'red', Xfile(1:Nx,1), electron_concentration(1:Nx, 2), 'green', Xfile(1:Nx,1), electron_concentration(1:Nx, 3), 'blue');
 title ('electrons');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('n cm^-3');
 grid ;
 
 figure(2);
 plot (Xfile(1:Nx,1),proton_concentration(1:Nx, 1), 'red', Xfile(1:Nx,1), proton_concentration(1:Nx, 2), 'green', Xfile(1:Nx,1), proton_concentration(1:Nx, 3), 'blue');
 title ('protons');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('n cm^-3');
 grid ;
 
 figure(3);
 plot (Xfile(1:Nx,1),charge_density(1:Nx, 1), 'red', Xfile(1:Nx,1), charge_density(1:Nx, 2), 'green', Xfile(1:Nx,1), charge_density(1:Nx, 3), 'blue');
 title ('charge density');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('n sgs*cm^-3');
 grid ;
