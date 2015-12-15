@@ -30,20 +30,20 @@ end;
 figure(1);
 plot (Xfile(1:Nx,1),divergenceError(1:Nx, 1), 'red', Xfile(1:Nx,1), divergenceError(1:Nx, 2), 'green', Xfile(1:Nx,1), divergenceError(1:Nx, 3), 'blue');
 title ('divergence error');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('rho sgs*cm^-3');
 grid ;
 
 figure(2);
 plot (Xfile(1:Nx,1),divergence(1:Nx, 1), 'red', Xfile(1:Nx,1), divergence(1:Nx, 2), 'green', Xfile(1:Nx,1), divergence(1:Nx, 3), 'blue');
 title ('divergence');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('rho sgs*cm^-3');
 grid ;
 
 figure(3);
 plot (Xfile(1:Nx,1),density(1:Nx, 1), 'red', Xfile(1:Nx,1), density(1:Nx, 2), 'green', Xfile(1:Nx,1), density(1:Nx, 3), 'blue');
 title ('4*pi*density');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('rho sgs*cm^-3');
 grid ;

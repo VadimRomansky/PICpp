@@ -45,42 +45,42 @@ end;
 figure(1);
 plot (Xfile(1:NE,1),Jx(1:NE,1), 'red',Xfile(1:NE,1),Jx(1:NE,2), 'green',Xfile(1:NE,1),Jx(1:NE,3), 'blue');
 title ('Jx');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('flux');
 grid ;
 
 figure(2);
 plot (Xfile(1:NE,1),Jy(1:NE, 1), 'red', Xfile(1:NE,1), Jy(1:NE, 2), 'green',Xfile(1:NE,1),Jy(1:NE, 3), 'blue');
 title ('Jy');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('flux');
 grid ;
 
 figure(3);
 plot (Xfile(1:NE,1),Jz(1:NE, 1), 'red', Xfile(1:NE,1), Jz(1:NE, 2), 'green', Xfile(1:NE,1), Jz(1:NE, 3), 'blue');
 title ('Jz');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('flux');
 grid ;
 
 figure(4);
 plot (Xfile(1:NE,1),extJx(1:NE,1), 'red',Xfile(1:NE,1),extJx(1:NE,2), 'green',Xfile(1:NE,1),extJx(1:NE,3), 'blue');
 title ('external Jx');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('flux');
 grid ;
 
 figure(5);
 plot (Xfile(1:NE,1),extJy(1:NE, 1), 'red', Xfile(1:NE,1), extJy(1:NE, 2), 'green',Xfile(1:NE,1),extJy(1:NE, 3), 'blue');
 title ('external Jy');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('flux');
 grid ;
 
 figure(6);
 plot (Xfile(1:NE,1),extJz(1:NE, 1), 'red', Xfile(1:NE,1), extJz(1:NE, 2), 'green', Xfile(1:NE,1), extJz(1:NE, 3), 'blue');
 title ('external Jz');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('flux');
 grid ;
 

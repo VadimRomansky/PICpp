@@ -63,63 +63,63 @@ end;
 figure(1);
 plot (Xfile(1:Nx,1),Jx(1:Nx,1), 'red',Xfile(1:Nx,1),Jx(1:Nx,2), 'green',Xfile(1:Nx,1),Jx(1:Nx,3), 'blue');
 title ('Jx');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('flux');
 grid ;
 
 figure(2);
 plot (Xfile(1:Nx,1),Jy(1:Nx, 1), 'red', Xfile(1:Nx,1), Jy(1:Nx, 2), 'green',Xfile(1:Nx,1),Jy(1:Nx, 3), 'blue');
 title ('Jy');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('flux');
 grid ;
 
 figure(3);
 plot (Xfile(1:Nx,1),Jz(1:Nx, 1), 'red', Xfile(1:Nx,1), Jz(1:Nx, 2), 'green', Xfile(1:Nx,1), Jz(1:Nx, 3), 'blue');
 title ('Jz');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('flux');
 grid ;
 
 figure(4);
 plot (Xfile(1:Nx,1),rotBx(1:Nx,1), 'red',Xfile(1:Nx,1),rotBx(1:Nx,2), 'green',Xfile(1:Nx,1),rotBx(1:Nx,3), 'blue');
 title ('rotBx');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('rotB');
 grid ;
 
 figure(5);
 plot (Xfile(1:Nx,1),rotBy(1:Nx, 1), 'red', Xfile(1:Nx,1), rotBy(1:Nx, 2), 'green',Xfile(1:Nx,1),rotBy(1:Nx, 3), 'blue');
 title ('rotBy');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('rotB');
 grid ;
 
 figure(6);
 plot (Xfile(1:Nx,1),rotBz(1:Nx, 1), 'red', Xfile(1:Nx,1), rotBz(1:Nx, 2), 'green', Xfile(1:Nx,1), rotBz(1:Nx, 3), 'blue');
 title ('rotBz');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('rotB');
 grid ;
 
 figure(7);
 plot (Xfile(1:Nx,1),derEx(1:Nx,1), 'red',Xfile(1:Nx,1),derEx(1:Nx,2), 'green',Xfile(1:Nx,1),derEx(1:Nx,3), 'blue');
 title ('derEx');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('derE');
 grid ;
 
 figure(8);
 plot (Xfile(1:Nx,1),derEy(1:Nx, 1), 'red', Xfile(1:Nx,1), derEy(1:Nx, 2), 'green',Xfile(1:Nx,1),derEy(1:Nx, 3), 'blue');
 title ('derEy');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('derE');
 grid ;
 
 figure(9);
 plot (Xfile(1:Nx,1),derEz(1:Nx, 1), 'red', Xfile(1:Nx,1), derEz(1:Nx, 2), 'green', Xfile(1:Nx,1), derEz(1:Nx, 3), 'blue');
 title ('derEz');
-xlabel ('x/r_g');
+xlabel ('x cm');
 ylabel ('derE');
 grid ;
 

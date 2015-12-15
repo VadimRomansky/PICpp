@@ -73,9 +73,11 @@ void Simulation::simulate() {
 				//length = 0;
 			}
 		}
-		//cleanupDivergence();
+		
 		updateDensityParameters();
+		cleanupDivergence();
 		updateFields();
+
 		/*if(currentIteration % 100 == 0){
 			fourierFilter();
 		}*/
