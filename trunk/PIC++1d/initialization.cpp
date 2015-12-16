@@ -40,9 +40,9 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 	newlyStarted = true;
 	solverType = IMPLICIT; //неявный
 	//solverType = EXPLICIT; // явный
-	//boundaryConditionType = PERIODIC;
+	boundaryConditionType = PERIODIC;
 	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	boundaryConditionType = FREE_BOTH;
+	//boundaryConditionType = FREE_BOTH;
 	maxwellEquationMatrixSize = 3;
 
 	currentIteration = 0;
@@ -93,8 +93,8 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 		gyroradius = 1.0;
 	}
 
-	plasma_period = 1.0;
-	gyroradius = 1.0;
+	//plasma_period = 1.0;
+	//gyroradius = 1.0;
 
 	//gyroradius = xsize;
 
@@ -689,7 +689,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 void Simulation::initializeLangmuirWave(){
 	boundaryConditionType = PERIODIC;
 	double epsilon = 0.1;
-	double kw = 2*2*pi/xsize;
+	double kw = 1*2*pi/xsize;
 	double omega = 2*pi;
 	double langmuirV = omega/kw;
 
@@ -706,7 +706,7 @@ void Simulation::initializeLangmuirWave(){
 	}
 	double concentration = density / (massProton + massElectron);
 	printf("creating particles\n");
-	int nproton = 0;
+	/*int nproton = 0;
 	int nelectron = 0;
 	double weight = (concentration / particlesPerBin) * volumeB(0);
 	for (int i = 0; i < xnumber; ++i) {
@@ -768,7 +768,8 @@ void Simulation::initializeLangmuirWave(){
 		fprintf(errorLogFile, "nproton = %d nelectron = %d\n", nproton, nelectron);
 		fclose(errorLogFile);
 		exit(0);
-	}
+	}*/
+	createParticles();
 
 	double chargeDensityAmplitude = epsilon*concentration*electron_charge_normalized;
 	double Eamplitude = -4*pi*chargeDensityAmplitude/(kw*fieldScale);
@@ -778,6 +779,7 @@ void Simulation::initializeLangmuirWave(){
 		Efield[i].y = 0;
 		Efield[i].z = 0;
 
+		newEfield[i] = Efield[i];
 		tempEfield[i] = Efield[i];
 		explicitEfield[i] = Efield[i];
 	}
@@ -1577,7 +1579,7 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 
 	double x = xgrid[i] +  deltaX * uniformDistribution();
 
-	double dx = deltaX / 20.0;
+	double dx = deltaX / 2.0;
 
 	double energy = mass * speed_of_light_normalized_sqr;
 	double p;
