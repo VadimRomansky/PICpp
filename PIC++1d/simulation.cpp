@@ -20,9 +20,10 @@ void Simulation::simulate() {
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWave(1, 0.01);
 		//initializeFluxFromRight();
-		initializeShockWave();
+		//initializeShockWave();
 		//initializeSimpleElectroMagneticWave();
-		//initializeLangmuirWave();
+		initializeLangmuirWave();
+		//createParticles();
 	}
 	collectParticlesIntoBins();
 	updateParameters();
@@ -68,14 +69,16 @@ void Simulation::simulate() {
 				printf("length > 2*deltaX/particlesPerBin\n");
 			}
 			if(length >= deltaX/particlesPerBin){
-				length -= deltaX/particlesPerBin;
-				injectNewParticles(1, length);
-				//length = 0;
+				int newParticlesCount = length*particlesPerBin/deltaX;
+				for(int i = newParticlesCount; i > 0; --i){
+					length -= deltaX/particlesPerBin;
+					injectNewParticles(1, length);
+				}
 			}
 		}
 		
 		updateDensityParameters();
-		cleanupDivergence();
+		//cleanupDivergence();
 		updateFields();
 
 		/*if(currentIteration % 100 == 0){
@@ -258,9 +261,9 @@ void Simulation::updateDeltaT() {
 		double Vthermal = sqrt(2*kBoltzman_normalized*temperature/massElectron);
 		double minDeltaT = deltaX/Vthermal;
 
-		if(deltaT*fabs(V0.x)*particlesPerBin > 0.5*deltaX){
+		/*if(deltaT*fabs(V0.x)*particlesPerBin > 0.5*deltaX){
 			deltaT = 0.5*deltaX/(fabs(V0.x)*particlesPerBin);
-		}
+		}*/
 		//if(minDeltaT > deltaT){
 			//printf("deltaT < dx/Vthermal\n");
 		//}
