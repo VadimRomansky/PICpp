@@ -62,6 +62,9 @@ public:
 	double magneticFieldEnergy;
 	double energy;
 
+	double theoreticalEnergy;
+	Vector3d theoreticalMomentum;
+
 	double extJ;
 
 	Vector3d momentum;

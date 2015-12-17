@@ -22,8 +22,8 @@ void Simulation::simulate() {
 		//initializeFluxFromRight();
 		//initializeShockWave();
 		//initializeSimpleElectroMagneticWave();
-		initializeLangmuirWave();
-		//createParticles();
+		//initializeLangmuirWave();
+		createParticles();
 	}
 	collectParticlesIntoBins();
 	updateParameters();
@@ -42,6 +42,8 @@ void Simulation::simulate() {
 	//cleanupDivergence();
 	updateFields();
 	updateEnergy();
+	theoreticalEnergy = energy;
+	theoreticalMomentum = momentum;
 
 	double length = (deltaX/particlesPerBin) - 0.0001*deltaX;
 
@@ -90,6 +92,10 @@ void Simulation::simulate() {
 
 		updateEnergy();
 		updateParameters();
+
+		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH){
+			removeEscapedParticles();
+		}
 
 		time += deltaT;
 		currentIteration++;
@@ -558,8 +564,8 @@ void Simulation::updateDensityParameters() {
 				velocityBulkElectron[i] += particle->momentum * particle->weight * correlation;
 			} else if (particle->type == PROTON) {
 				protonConcentration[i] += correlation * particle->weight;
+				velocityBulkProton[i] += particle->momentum * particle->weight * correlation;
 			}
-			velocityBulkProton[i] += particle->momentum * particle->weight * correlation;
 
 			if (correlation == 0) {
 				//printf("aaa\n");
@@ -618,8 +624,30 @@ void Simulation::updateEnergy() {
 	magneticFieldEnergy *= sqr(gyroradius / plasma_period);
 	momentum = momentum * gyroradius / plasma_period;
 
+	double concentration = density/(massProton + massElectron);
+
 
 	energy = particleEnergy + electricFieldEnergy + magneticFieldEnergy;
+
+	if(boundaryConditionType != PERIODIC) {
+		theoreticalEnergy -= (density*V0.scalarMult(V0)/2.0)*V0.x*deltaT;
+		theoreticalEnergy -= (2*(3.0/2.0)*concentration*kBoltzman_normalized*temperature)*V0.x*deltaT;
+
+		theoreticalMomentum -= V0*V0.x*density*deltaT;
+		theoreticalMomentum -= Vector3d(1,0,0)*(2*concentration*kBoltzman_normalized*temperature)*deltaT;
+
+		for(int i = 0; i < escapedParticles.size(); ++i) {
+			Particle* particle = escapedParticles[i];
+			theoreticalEnergy -= particle->energy(speed_of_light_normalized)*particle->weight;
+			theoreticalMomentum -= particle->momentum*particle->weight;
+		}
+
+		theoreticalEnergy -= (Efield[xnumber].vectorMult(Bfield[xnumber - 1])).x*deltaT*speed_of_light_normalized/(4*pi);
+		theoreticalEnergy -= (Efield[0].vectorMult(Bfield[0])).x*deltaT*speed_of_light_normalized/(4*pi);
+
+		theoreticalMomentum -= (Efield[xnumber].vectorMult(Bfield[xnumber - 1]))*deltaT/(4*pi);
+		theoreticalMomentum -= (Efield[0].vectorMult(Bfield[0]))*deltaT/(4*pi);
+	}
 }
 
 Vector3d Simulation::getBfield(int i) {
