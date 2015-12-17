@@ -17,12 +17,12 @@ void Simulation::cleanupDivergence() {
 		chargeDensity[i] -= fullDensity;
 	}*/
 
-	divergenceCleaningField[xnumber - 1][0] = - cleanUpRightPart(xnumber - 1)*deltaX;
+	divergenceCleaningField[xnumber - 1][0] = - cleanUpRightPart(xnumber - 1) * deltaX;
 	divergenceCleaningField[xnumber - 1][1] = 0;
 	divergenceCleaningField[xnumber - 1][2] = 0;
 
-	for(int i = xnumber - 2; i >= 0 ; --i){
-		divergenceCleaningField[i][0] = divergenceCleaningField[i+1][0] - cleanUpRightPart(i)*deltaX;
+	for (int i = xnumber - 2; i >= 0; --i) {
+		divergenceCleaningField[i][0] = divergenceCleaningField[i + 1][0] - cleanUpRightPart(i) * deltaX;
 		divergenceCleaningField[i][1] = 0;
 		divergenceCleaningField[i][2] = 0;
 	}
@@ -38,7 +38,7 @@ void Simulation::cleanupDivergence() {
 	}*/
 
 	updateFieldByCleaning();
-	if(boundaryConditionType == PERIODIC){
+	if (boundaryConditionType == PERIODIC) {
 		updateBoundariesNewField();
 	}
 }
@@ -107,7 +107,7 @@ void Simulation::cleanupDivergence() {
 void Simulation::updateFieldByCleaning() {
 	//evaluateDivergenceCleaningField();
 	Vector3d meanField = Vector3d(0, 0, 0);
-	for(int i = 0; i < xnumber; ++i){
+	for (int i = 0; i < xnumber; ++i) {
 		meanField.x += divergenceCleaningField[i][0];
 		meanField.y += divergenceCleaningField[i][1];
 		meanField.z += divergenceCleaningField[i][2];
@@ -115,28 +115,28 @@ void Simulation::updateFieldByCleaning() {
 	meanField.x /= xnumber;
 	meanField.y /= xnumber;
 	meanField.z /= xnumber;
-	for(int i = 0; i < xnumber; ++i) {
-				newEfield[i].x += divergenceCleaningField[i][0];
-				newEfield[i].y += divergenceCleaningField[i][1];
-				newEfield[i].z += divergenceCleaningField[i][2];
-				//newEfield[i] -= meanField;
+	for (int i = 0; i < xnumber; ++i) {
+		newEfield[i].x += divergenceCleaningField[i][0];
+		newEfield[i].y += divergenceCleaningField[i][1];
+		newEfield[i].z += divergenceCleaningField[i][2];
+		//newEfield[i] -= meanField;
 	}
-	if(boundaryConditionType == PERIODIC){
+	if (boundaryConditionType == PERIODIC) {
 		newEfield[xnumber] = newEfield[0];
 	}
 }
 
-void Simulation::evaluateDivergenceCleaningField(){
-	for(int i = 0; i < xnumber; ++i){
-				int prevI = i - 1;
-				if(prevI < 0){
-					prevI = xnumber - 1;
-				}
-				divergenceCleaningField[i][0] = -(divergenceCleaningPotential[i][0] - divergenceCleaningPotential[prevI][0])/deltaX;
+void Simulation::evaluateDivergenceCleaningField() {
+	for (int i = 0; i < xnumber; ++i) {
+		int prevI = i - 1;
+		if (prevI < 0) {
+			prevI = xnumber - 1;
+		}
+		divergenceCleaningField[i][0] = -(divergenceCleaningPotential[i][0] - divergenceCleaningPotential[prevI][0]) / deltaX;
 
-				divergenceCleaningField[i][1] = 0;
+		divergenceCleaningField[i][1] = 0;
 
-				divergenceCleaningField[i][2] = 0;
+		divergenceCleaningField[i][2] = 0;
 	}
 }
 
@@ -148,13 +148,13 @@ void Simulation::createDivergenceCleanupInternalEquation(int i) {
 		divergenceCleanUpRightPart[i][0] = 0;
 		return;
 	}*/
-	
+
 	int prevI = i - 1;
-	if(prevI < 0) {
+	if (prevI < 0) {
 		prevI = xnumber - 1;
 	}
 	int nextI = i + 1;
-	if(nextI >= xnumber) {
+	if (nextI >= xnumber) {
 		nextI = 0;
 	}
 
@@ -175,15 +175,15 @@ void Simulation::createDivergenceCleanupInternalEquation(int i) {
 
 	divergenceCleanUpRightPart[i][0] = cleanUpRightPart(i);
 
-	divergenceCleanUpMatrix[i][0].push_back(MatrixElement(-1.0/deltaX, i, 0));
-	divergenceCleanUpMatrix[i][0].push_back(MatrixElement(1.0/deltaX, nextI, 0));
+	divergenceCleanUpMatrix[i][0].push_back(MatrixElement(-1.0 / deltaX, i, 0));
+	divergenceCleanUpMatrix[i][0].push_back(MatrixElement(1.0 / deltaX, nextI, 0));
 
 }
 
 void Simulation::createDivergenceCleanupLeftEquation() {
 	int i = 0;
 
-	int nextI = i+1;
+	int nextI = i + 1;
 
 	//div for x
 
@@ -194,7 +194,7 @@ void Simulation::createDivergenceCleanupRightEquation() {
 	int i = xnumber - 1;
 
 	//div for x
-	
+
 
 	divergenceCleanUpRightPart[i][2] = 0;
 }
@@ -202,5 +202,5 @@ void Simulation::createDivergenceCleanupRightEquation() {
 double Simulation::cleanUpRightPart(int i) {
 	double div = evaluateDivNewE(i);
 
-	return  4*pi*chargeDensity[i] - div;
+	return 4 * pi * chargeDensity[i] - div;
 }

@@ -5,7 +5,7 @@
 
 enum ParticleTypes {PROTON, ELECTRON, POSITRON, ALPHA};
 
-class Particle{
+class Particle {
 public:
 	int number;
 

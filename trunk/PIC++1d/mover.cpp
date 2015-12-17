@@ -18,10 +18,6 @@ void Simulation::moveParticles(){
 		moveParticle(particles[i]);
 	}
 
-	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH){
-		removeEscapedParticles();
-	}
-
 	/*for(int i = 0; i < particles.size(); ++i){
 		scatterParticle(particles[i]);
 	}*/
