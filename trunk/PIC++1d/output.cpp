@@ -117,7 +117,8 @@ void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int par
 }
 
 void outputTraectory(FILE* outFile, Particle* particle, double time, double plasma_period, double gyroradius) {
-	fprintf(outFile, "%g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g\n", time * plasma_period, particle->x * gyroradius, particle->y * gyroradius, particle->z * gyroradius, particle->momentum.x * gyroradius / plasma_period, particle->momentum.y * gyroradius / plasma_period, particle->momentum.z * gyroradius / plasma_period, particle->momentum.norm() * gyroradius / plasma_period);
+	Vector3d velocity = particle->velocity(speed_of_light*plasma_period/gyroradius);
+	fprintf(outFile, "%20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g\n", time, time * plasma_period, particle->x * gyroradius, particle->y * gyroradius, particle->z * gyroradius, particle->momentum.x * gyroradius / plasma_period, particle->momentum.y * gyroradius / plasma_period, particle->momentum.z * gyroradius / plasma_period, particle->momentum.norm() * gyroradius / plasma_period, velocity.x * gyroradius / plasma_period, velocity.y * gyroradius / plasma_period, velocity.z * gyroradius / plasma_period);
 }
 
 void outputGrid(FILE* outFile, double* grid, int number, double scale) {
