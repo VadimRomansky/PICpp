@@ -6,7 +6,9 @@ N2=size(general,1);
 Nsaturation = N2;
 %Nsaturation = 140;
 linearField(1:N2) = 0;
-gamma = 0.2*2*3.14;
+beta = 0.7;
+gamma = beta*2*3.14*sqrt(sqrt(1 - beta*beta));
+%gamma = beta*2*3.14;
 
 linearField(1) = general(Nsaturation, 16)/exp(gamma*general(Nsaturation,2));
 
@@ -21,7 +23,7 @@ end
 figure(1);
 plot (general(1:N2,2), general(1:N2,4), 'green', general(1:N2,2), general(1:N2,5), 'blue', general(1:N2, 2), general(1:N2,6), 'black', general(1:N2, 2), general(1:N2,7), 'red', general(1:N2, 2), general(1:N2,11), 'yellow');
 title ('energy');
-xlabel ('{{t \omega_p}/{2\pi}}');
+xlabel ('t');
 ylabel ('E erg');
 legend('particle', 'electric','magnetic', 'full', 'theoretical','Location','southwest');
 grid ;

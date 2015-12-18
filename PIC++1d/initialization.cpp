@@ -86,7 +86,10 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 
 	double concentration = density / (massProton + massElectron);
 
-	plasma_period = sqrt(massElectron / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi);
+	double gamma = 1/sqrt(1 - V0.scalarMult(V0)/sqr(speed_of_light));
+
+	plasma_period = sqrt(massElectron / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi)*sqrt(gamma);
+	//plasma_period = sqrt(massElectron / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi)/sqrt(gamma);
 	double thermal_momentum;
 	if (kBoltzman * temperature > massElectron * speed_of_light * speed_of_light) {
 		thermal_momentum = kBoltzman * temperature / speed_of_light;
@@ -995,7 +998,7 @@ void Simulation::initializeShockWave() {
 void Simulation::initializeTwoStream() {
 	createParticles();
 	collectParticlesIntoBins();
-	double u = speed_of_light_normalized / 5;
+	double u = speed_of_light_normalized * 0.7;
 	Vector3d electronsVelocityPlus = Vector3d(0, u, 0);
 	Vector3d electronsVelocityMinus = Vector3d(0, -u, 0);
 	B0 = Vector3d(0, 0, 0);
@@ -1526,6 +1529,7 @@ void Simulation::createParticles() {
 			}*/
 			int m = l / 2;
 			particle->x = x + deltaXParticles * m;
+			particle->addVelocity(V0, speed_of_light_normalized);
 			particles.push_back(particle);
 			particlesNumber++;
 			if (particlesNumber % 1000 == 0) {
@@ -1607,7 +1611,7 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 
 	double thetaParamter = kBoltzman_normalized * localTemperature / (mass * speed_of_light_normalized_sqr);
 
-	/*if (thetaParamter < 0.01) {
+	if (thetaParamter < 0.01) {
 		energy = maxwellDistribution(localTemperature, kBoltzman_normalized);
 		p = sqrt(2*mass*energy);
 	} else {
@@ -1621,11 +1625,11 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 	double pnormal = sqrt(p * p - pz * pz);
 	double px = pnormal * cos(phi);
 	px = 0;
-	double py = pnormal * sin(phi);*/
+	double py = pnormal * sin(phi);
 
-	double pz = normalDistribution() * sqrt(mass * kBoltzman_normalized * localTemperature);
+	/*double pz = normalDistribution() * sqrt(mass * kBoltzman_normalized * localTemperature);
 	double py = normalDistribution() * sqrt(mass * kBoltzman_normalized * localTemperature);
-	double px = normalDistribution() * sqrt(mass * kBoltzman_normalized * localTemperature);
+	double px = normalDistribution() * sqrt(mass * kBoltzman_normalized * localTemperature);*/
 
 	//px = 0;
 	//py = 0;
