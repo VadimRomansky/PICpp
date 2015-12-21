@@ -11,7 +11,7 @@
 
 enum SolverType {EXPLICIT, IMPLICIT};
 
-enum BoundaryConditionType {PERIODIC, SUPER_CONDUCTOR_LEFT};
+enum BoundaryConditionType {PERIODIC, SUPER_CONDUCTOR_LEFT, FREE_BOTH};
 
 class Simulation{
 public:
@@ -55,6 +55,8 @@ public:
 	double theta;
 	double eta;
 
+	int shockWavePoint;
+
 	bool debugMode;
 
 	bool newlyStarted;
@@ -67,6 +69,9 @@ public:
 	double electricFieldEnergy;
 	double magneticFieldEnergy;
 	double energy;
+
+	double theoreticalEnergy;
+	Vector3d theoreticalMomentum;
 
 	double extJ;
 
@@ -156,6 +161,8 @@ public:
 	FILE* electronTraectoryFile;
 	FILE* distributionFileProton;
 	FILE* distributionFileElectron;
+	FILE* distributionFileProtonUpstream;
+	FILE* distributionFileElectronUpstream;
 	FILE* EfieldFile;
 	FILE* BfieldFile;
 	FILE* Xfile;
@@ -197,6 +204,8 @@ public:
 	void initializeExternalFluxInstability();
 	void initializeFluxFromRight();
 	void fieldsLorentzTransitionX(const double& v);
+	void initializeShockWave();
+	void initializeKolmogorovSpectrum(int start, int end);
 	void createArrays();
 	void createFiles();
 	void simulate();
@@ -228,6 +237,8 @@ public:
 	void createInternalEquation(int i, int j, int k);
 	void evaluateMaxwellEquationMatrix();
 	void evaluateMagneticField();
+
+
 	void updateBoundaries();
 	void updateBoundariesOldField();
 	void updateBoundariesNewField();
@@ -273,16 +284,17 @@ public:
 	void createParticles();
 	Particle* getFirstProton();
 	Particle* getFirstElectron();
-	Particle* createParticle(int n, int i, int j, int k, double weight, ParticleTypes type);
+	Particle* getLastProton();
+	Particle* getLastElectron();
+	Particle* createParticle(int n, int i, int j, int k, double weight, ParticleTypes type, double temperature);
 
 	void moveParticles();
 	void removeEscapedParticles();
 	void moveParticle(Particle* particle);
 	void correctParticlePosition(Particle* particle);
 	void correctParticlePosition(Particle& particle);
-	void moveParticleNewtonIteration(Particle* particle, double* const oldCoordinates, double* const tempCoordinates, double* const newCoordinates);
 	void evaluateParticlesRotationTensor();
-	void injectNewParticles(int count);
+	void injectNewParticles(int count, double length);
 
 	void collectParticlesIntoBins();
 	void pushParticleIntoEbin(Particle* particle, int i, int j, int k);

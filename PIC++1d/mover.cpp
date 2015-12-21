@@ -41,13 +41,13 @@ void Simulation::removeEscapedParticles(){
 	}
 }
 
-void Simulation::moveParticle(Particle* particle){
+/*void Simulation::moveParticle(Particle* particle){
 	Vector3d E = correlationEfield(particle)*fieldScale;
 	Vector3d B = correlationBfield(particle)*fieldScale;
 
 	Vector3d velocity = particle->velocity(speed_of_light_normalized);
 
-	/*if(B.norm() > 0){
+	if(B.norm() > 0){
 		double omega = -1.0/(particle->gammaFactor(speed_of_light_normalized)*particle->mass*speed_of_light_normalized/(particle->charge*B.norm()));
 		double deltaPhi = omega*deltaT;
 		Matrix3d* rotation = Matrix3d::createBasisByOneVector(B);
@@ -62,7 +62,7 @@ void Simulation::moveParticle(Particle* particle){
 		delete inverce;
 
 		particle->momentum = newMomentum;
-	}*/
+	}
 
 	//Vector3d velocity = particle->velocity(speed_of_light_normalized);
 	Vector3d lorentzForce = velocity.vectorMult(B)/speed_of_light_normalized;
@@ -93,9 +93,9 @@ void Simulation::moveParticle(Particle* particle){
 	particle->x += 0.5*(velocity.x + newVelocity.x)*deltaT;
 
 	correctParticlePosition(particle);
-}
+}*/
 
-/*void Simulation::moveParticle(Particle* particle){
+void Simulation::moveParticle(Particle* particle){
 	Vector3d E = correlationTempEfield(particle)*fieldScale;
 	Vector3d B = correlationBfield(particle)*fieldScale;
 	//Vector3d E = Vector3d(0, 0, 0);
@@ -224,7 +224,7 @@ void Simulation::moveParticle(Particle* particle){
 	particle->z += middleVelocity.z*deltaT;
 
 	correctParticlePosition(particle);
-}*/
+}
 
 void Simulation::correctParticlePosition(Particle* particle) {
 	if(boundaryConditionType != PERIODIC){

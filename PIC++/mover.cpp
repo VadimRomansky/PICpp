@@ -313,14 +313,14 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d velocity,
 	return result;
 }
 
-void Simulation::injectNewParticles(int count){
+void Simulation::injectNewParticles(int count, double length){
 	printf("inject new particles\n");
 	double concentration = density/(massProton + massElectron);
 
 	int n = particles.size();
 
 	double weight = (concentration / particlesPerBin) * volumeB(xnumber - 1, 0, 0);
-	double x = xgrid[xnumber] - deltaX*0.00001;
+	double x = xgrid[xnumber] - length;
 	for(int j = 0; j < ynumber; ++j){
 		for(int k = 0; k < znumber; ++k){
 			for (int l = 0; l < 2 * count; ++l) {
@@ -330,7 +330,7 @@ void Simulation::injectNewParticles(int count){
 				} else {
 					type = ELECTRON;
 				}
-				Particle* particle = createParticle(n, xnumber - 1, j, k, weight, type);
+				Particle* particle = createParticle(n, xnumber - 1, j, k, weight, type, temperature);
 				n++;
 				particle->coordinates.x = x;
 				particle->addVelocity(V0, speed_of_light_normalized);
