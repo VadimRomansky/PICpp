@@ -41,6 +41,8 @@ void Simulation::simulate() {
 	//cleanupDivergence();
 	updateFields();
 	updateEnergy();
+	theoreticalEnergy = energy;
+	theoreticalMomentum = momentum;
 
 	double length = deltaX/particlesPerBin - 0.0001*deltaX;
 
@@ -61,10 +63,16 @@ void Simulation::simulate() {
 		moveParticles();
 
 		length += fabs(V0.x*deltaT);
-		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-			if(length > deltaX/particlesPerBin){
-				length -= deltaX/particlesPerBin;
-				injectNewParticles(1);
+		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH){
+			if(length > 2*deltaX/particlesPerBin){
+				printf("length > 2*deltaX/particlesPerBin\n");
+			}
+			if(length >= deltaX/particlesPerBin){
+				int newParticlesCount = length*particlesPerBin/deltaX;
+				for(int i = newParticlesCount; i > 0; --i){
+					length -= deltaX/particlesPerBin;
+					injectNewParticles(1, length);
+				}
 			}
 		}
 		//cleanupDivergence();

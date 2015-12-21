@@ -24,7 +24,8 @@ void Simulation::simulate() {
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
 		createParticles();
-		fieldsLorentzTransitionX(V0.x);
+		//initializeMovingLangmuirWave();
+		//fieldsLorentzTransitionX(V0.x);
 	}
 	collectParticlesIntoBins();
 	updateParameters();

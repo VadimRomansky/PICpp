@@ -88,8 +88,10 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 
 	double gamma = 1/sqrt(1 - V0.scalarMult(V0)/sqr(speed_of_light));
 
-	plasma_period = sqrt(massElectron / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi)*sqrt(gamma);
-	//plasma_period = sqrt(massElectron / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi)/sqrt(gamma);
+	double effectiveMass = massProton*massElectron/(massProton + massElectron);
+
+	//plasma_period = sqrt(massElectron / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi)*sqrt(gamma);
+	plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi)*gamma*sqrt(gamma);
 	double thermal_momentum;
 	if (kBoltzman * temperature > massElectron * speed_of_light * speed_of_light) {
 		thermal_momentum = kBoltzman * temperature / speed_of_light;
@@ -1125,6 +1127,27 @@ void Simulation::initializeKolmogorovSpectrum(int start, int end) {
 			newBfield[i] = Bfield[i];
 		}
 	}
+}
+
+void Simulation::initializeMovingLangmuirWave() {
+	int n = 1;
+	double effectiveMass = massProton*massElectron/(massProton + massElectron);
+	double movingConcentration = (density/(massProton + massElectron));
+	double omega_plasma0 = sqrt(4*pi*electron_charge_normalized*electron_charge_normalized*movingConcentration/effectiveMass);
+	double a = 2*pi*speed_of_light_normalized_sqr/(n*xsize*omega_plasma0);
+	
+	double velocity = sqrt((sqrt(4*power(a,4)+(power(a,8)/power(speed_of_light_normalized,4)))-(power(a,4)/speed_of_light_normalized_sqr))/2.0);
+	double beta = velocity/speed_of_light_normalized;
+	V0 = Vector3d(velocity, 0, 0);
+	double gamma = sqrt(1 - V0.x*V0.x/speed_of_light_normalized_sqr);
+	double lambda = xsize/n;
+	for(int i = 0; i < xnumber; ++i) {
+		Efield[i] = E0*cos(2*pi*xgrid[i]/lambda);
+		tempEfield[i] = Efield[i];
+		newEfield[i] = Efield[i];
+	}
+
+	createParticles();
 }
 
 void Simulation::createArrays() {

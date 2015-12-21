@@ -193,6 +193,7 @@ public:
 	void fieldsLorentzTransitionX(const double& v);
 	void initializeShockWave();
 	void initializeKolmogorovSpectrum(int start, int end);
+	void initializeMovingLangmuirWave();
 	void createArrays();
 	void createFiles();
 	void simulate();
@@ -293,7 +294,6 @@ public:
 	void moveParticle(Particle* particle);
 	void correctParticlePosition(Particle* particle);
 	void correctParticlePosition(Particle& particle);
-	void moveParticleNewtonIteration(Particle* particle, double* const oldCoordinates, double* const tempCoordinates, double* const newCoordinates);
 	void evaluateParticlesRotationTensor();
 	void injectNewParticles(int count, double length);
 	void scatterParticle(Particle* particle);
