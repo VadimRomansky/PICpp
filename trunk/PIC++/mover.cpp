@@ -13,7 +13,7 @@ void Simulation::moveParticles(){
 	printf("moving particles\n");
 	int i = 0;
 #pragma omp parallel for private(i) 
-	for(int i = 0; i < particles.size(); ++i){
+	for(i = 0; i < particles.size(); ++i){
 		moveParticle(particles[i]);
 	}
 
@@ -115,18 +115,28 @@ void Simulation::moveParticle(Particle* particle){
 	tempParticle.coordinates.y += ((1 - eta)*velocity.y + eta*newVelocity.y)*eta*deltaT;
 	tempParticle.coordinates.z += ((1 - eta)*velocity.z + eta*newVelocity.z)*eta*deltaT;
 
-	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+if(boundaryConditionType != PERIODIC){
 		if(tempParticle.coordinates.x < xgrid[0]){
-			particle->coordinates.x = 2*xgrid[0] - tempParticle.coordinates.x;
-			particle->coordinates.y = tempParticle.coordinates.y;
-			particle->coordinates.z = tempParticle.coordinates.z;
-			newVelocity.x = -newVelocity.x;
-			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
-			return;
+			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+				particle->coordinates.x = 2*xgrid[0] - tempParticle.coordinates.x;
+				particle->coordinates.y = tempParticle.coordinates.y;
+				particle->coordinates.z = tempParticle.coordinates.z;
+				newVelocity.x = -newVelocity.x;
+				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+				return;
+			} else {
+				escapedParticles.push_back(particle);
+				particle->coordinates.x = xgrid[0];
+				particle->coordinates.y = tempParticle.coordinates.y;
+				particle->coordinates.z = tempParticle.coordinates.z;
+				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+				particle->escaped = true;
+				return;
+			}
 		}
 		if(tempParticle.coordinates.x > xgrid[xnumber]){
 			escapedParticles.push_back(particle);
-			particle->coordinates.x = xsize;
+			particle->coordinates.x = xgrid[xnumber];
 			particle->coordinates.y = tempParticle.coordinates.y;
 			particle->coordinates.z = tempParticle.coordinates.z;
 			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
@@ -152,20 +162,30 @@ void Simulation::moveParticle(Particle* particle){
 		middleVelocity = (tempParticle.rotationTensor*tempParticle.gammaFactor(speed_of_light_normalized)*velocity) + rotatedE*beta;
 
 		tempParticle.coordinates.x += (middleVelocity.x*eta*deltaT);
-		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		if(boundaryConditionType != PERIODIC){
 			//todo more accurate speed!!
 			if(tempParticle.coordinates.x < xgrid[0]){
-				particle->coordinates.x = 2*xgrid[0] - tempParticle.coordinates.x + fabs(middleVelocity.x*(1 - eta)*deltaT);
-				particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y*(1 - eta)*deltaT;
-				particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z*(1 - eta)*deltaT;
-				newVelocity = middleVelocity;
-				newVelocity.x = -newVelocity.x;
-				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
-				return;
+				if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+					particle->coordinates.x = 2*xgrid[0] - tempParticle.coordinates.x + fabs(middleVelocity.x*(1 - eta)*deltaT);
+					particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y*(1 - eta)*deltaT;
+					particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z*(1 - eta)*deltaT;
+					newVelocity = middleVelocity;
+					newVelocity.x = -newVelocity.x;
+					particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+					return;
+				} else {
+					escapedParticles.push_back(particle);
+					particle->coordinates.x = xgrid[0];
+					particle->coordinates.y = tempParticle.coordinates.y;
+					particle->coordinates.z = tempParticle.coordinates.z;
+					particle->setMomentumByV(middleVelocity, speed_of_light_normalized);
+					particle->escaped = true;
+					return;
+				}
 			}
 			if(tempParticle.coordinates.x > xgrid[xnumber]){
 				escapedParticles.push_back(particle);
-				particle->coordinates.x = xsize;
+				particle->coordinates.x = xgrid[xnumber];
 				particle->coordinates.y = tempParticle.coordinates.y;
 				particle->coordinates.z = tempParticle.coordinates.z;
 				particle->setMomentumByV(middleVelocity, speed_of_light_normalized);
@@ -185,7 +205,7 @@ void Simulation::moveParticle(Particle* particle){
 	}
 
 	particle->momentum = tempParticle.momentum;
-	particle->momentum.x = 0;
+	//particle->momentum.x = 0;
 
 	particle->coordinates.x += middleVelocity.x*deltaT;
 

@@ -37,8 +37,8 @@ Simulation::Simulation() {
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV) {
 	debugMode = true;
 	newlyStarted = true;
-	solverType = IMPLICIT;
-	//solverType = EXPLICIT;
+	solverType = IMPLICIT; //неявный
+	//solverType = EXPLICIT; //явный
 	//boundaryConditionType = PERIODIC;
 	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
@@ -230,7 +230,7 @@ Simulation::~Simulation() {
 
 			delete[] electronConcentration[i][j];
 			delete[] protonConcentration[i][j];
-			delete[] velocityBulk[i][j];
+			delete[] velocityBulkProton[i][j];
 			delete[] velocityBulkElectron[i][j];
 			delete[] chargeDensity[i][j];
 			delete[] pressureTensor[i][j];
@@ -241,7 +241,7 @@ Simulation::~Simulation() {
 
 		delete[] electronConcentration[i];
 		delete[] protonConcentration[i];
-		delete[] velocityBulk[i];
+		delete[] velocityBulkProton[i];
 		delete[] velocityBulkElectron[i];
 		delete[] chargeDensity[i];
 		delete[] pressureTensor[i];
@@ -253,7 +253,7 @@ Simulation::~Simulation() {
 
 	delete[] electronConcentration;
 	delete[] protonConcentration;
-	delete[] velocityBulk;
+	delete[] velocityBulkProton;
 	delete[] velocityBulkElectron;
 	delete[] chargeDensity;
 	delete[] pressureTensor;
@@ -368,6 +368,7 @@ void Simulation::initialize() {
 }
 
 void Simulation::initializeSimpleElectroMagneticWave() {
+	boundaryConditionType = PERIODIC;
 	E0 = Vector3d(0, 0, 0);
 	B0 = Vector3d(0, 0, 0);
 	for (int i = 0; i < xnumber; ++i) {
@@ -433,7 +434,93 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 	double t = 2 * pi / (kw * speed_of_light_normalized);
 }
 
+void Simulation::initializeRotatedSimpleElectroMagneticWave(int wavesCount) {
+	boundaryConditionType = PERIODIC;
+
+	Eyamplitude = 1;
+	Ezamplitude = 0;
+	Bzamplitude = Eyamplitude;
+	Byamplitude = Ezamplitude;
+
+	double kx = wavesCount * 2 * pi / xsize;
+	double ky = wavesCount * 2 * pi / ysize;
+	double kz = wavesCount * 2 * pi / zsize;
+	kz = 0;
+
+	double kw = sqrt(kx * kx + ky * ky + kz * kz);
+
+
+	double kxy = sqrt(kx * kx + ky * ky);
+	double rotatedZortNorm = sqrt(kx * kx + ky * ky + sqr(kx * kx + ky * ky) / (kz * kz));
+	double matrixzz = (kx * kx + ky * ky) / (kz * rotatedZortNorm);
+
+	Matrix3d rotationMatrix = Matrix3d(kx / kw, -ky / kxy, -kx / rotatedZortNorm,
+	                                   ky / kw, kx / kxy, -ky / rotatedZortNorm,
+	                                   kz / kw, 0, matrixzz);
+
+	if (kz == 0) {
+		rotationMatrix = Matrix3d(kx / kw, -ky / kw, 0,
+		                          ky / kw, kx / kw, 0,
+		                          0, 0, 1);
+	}
+
+
+	for (int i = 0; i < xnumber + 1; ++i) {
+		for (int j = 0; j < ynumber + 1; ++j) {
+			for (int k = 0; k < znumber + 1; ++k) {
+				Efield[i][j][k].x = 0;
+				Efield[i][j][k].y = Eyamplitude * cos(kx * xgrid[i] + ky * ygrid[j] + kz * zgrid[k]);
+				Efield[i][j][k].z = Ezamplitude * sin(kx * xgrid[i] + ky * ygrid[j] + kz * zgrid[k]);
+				Efield[i][j][k] = rotationMatrix * Efield[i][j][k];
+				explicitEfield[i][j][k] = Efield[i][j][k];
+				tempEfield[i][j][k] = Efield[i][j][k];
+				newEfield[i][j][k] = Efield[i][j][k];
+			}
+		}
+	}
+
+	for (int k = 0; k < znumber; ++k) {
+		for (int j = 0; j < ynumber; ++j) {
+			Efield[xnumber][j][k] = Efield[0][j][k];
+			tempEfield[xnumber][j][k] = Efield[0][j][k];
+			newEfield[xnumber][j][k] = Efield[0][j][k];
+			explicitEfield[xnumber][j][k] = explicitEfield[0][j][k];
+		}
+	}
+
+	for (int i = 0; i < xnumber + 1; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			Efield[i][j][znumber] = Efield[i][j][0];
+			tempEfield[i][j][znumber] = Efield[i][j][0];
+			newEfield[i][j][znumber] = Efield[i][j][0];
+			explicitEfield[i][j][znumber] = explicitEfield[i][j][0];
+		}
+	}
+
+	for (int k = 0; k < znumber + 1; ++k) {
+		for (int i = 0; i < xnumber + 1; ++i) {
+			Efield[i][ynumber][k] = Efield[i][0][k];
+			tempEfield[i][ynumber][k] = Efield[i][0][k];
+			newEfield[i][ynumber][k] = Efield[i][0][k];
+			explicitEfield[i][ynumber][k] = explicitEfield[i][0][k];
+		}
+	}
+
+	for (int i = 0; i < xnumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				Bfield[i][j][k].x = 0;
+				Bfield[i][j][k].y = Byamplitude * sin(kx * middleXgrid[i] + ky * middleYgrid[j] + kz * middleZgrid[k]);
+				Bfield[i][j][k].z = Bzamplitude * cos(kx * middleXgrid[i] + ky * middleYgrid[j] + kz * middleZgrid[k]);
+				Bfield[i][j][k] = rotationMatrix * Bfield[i][j][k];
+				newBfield[i][j][k] = Bfield[i][j][k];
+			}
+		}
+	}
+}
+
 void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) {
+	boundaryConditionType = PERIODIC;
 	createParticles();
 	printf("initialization alfven wave\n");
 	E0 = Vector3d(0, 0, 0);
@@ -866,6 +953,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 }
 
 void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRelation) {
+	boundaryConditionType = PERIODIC;
 	createParticles();
 	printf("initialization alfven wave\n");
 	E0 = Vector3d(0, 0, 0);
@@ -1324,6 +1412,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 }
 
 void Simulation::initializeLangmuirWave() {
+	boundaryConditionType = PERIODIC;
 	double epsilon = 0.1;
 	double kw = 2 * 2 * pi / xsize;
 	double omega = 2 * pi;
@@ -1448,6 +1537,7 @@ void Simulation::initializeLangmuirWave() {
 }
 
 void Simulation::initializeFluxFromRight() {
+	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	createParticles();
 	//initializeAlfvenWave(10, 1.0E-4);
 	for (int j = 0; j < ynumber + 1; ++j) {
@@ -1681,7 +1771,7 @@ void Simulation::createArrays() {
 	electronConcentration = new double**[xnumber];
 	protonConcentration = new double**[xnumber];
 	chargeDensity = new double**[xnumber];
-	velocityBulk = new Vector3d**[xnumber];
+	velocityBulkProton = new Vector3d**[xnumber];
 	velocityBulkElectron = new Vector3d**[xnumber];
 	electricDensity = new double**[xnumber];
 	pressureTensor = new Matrix3d**[xnumber];
@@ -1690,7 +1780,7 @@ void Simulation::createArrays() {
 		electronConcentration[i] = new double*[ynumber];
 		protonConcentration[i] = new double*[ynumber];
 		chargeDensity[i] = new double*[ynumber];
-		velocityBulk[i] = new Vector3d*[ynumber];
+		velocityBulkProton[i] = new Vector3d*[ynumber];
 		velocityBulkElectron[i] = new Vector3d*[ynumber];
 		electricDensity[i] = new double*[ynumber];
 		pressureTensor[i] = new Matrix3d*[ynumber];
@@ -1698,7 +1788,7 @@ void Simulation::createArrays() {
 			electronConcentration[i][j] = new double[znumber];
 			protonConcentration[i][j] = new double[znumber];
 			chargeDensity[i][j] = new double[znumber];
-			velocityBulk[i][j] = new Vector3d[znumber];
+			velocityBulkProton[i][j] = new Vector3d[znumber];
 			velocityBulkElectron[i][j] = new Vector3d[znumber];
 			electricDensity[i][j] = new double[znumber];
 			pressureTensor[i][j] = new Matrix3d[znumber];
@@ -1706,7 +1796,7 @@ void Simulation::createArrays() {
 				electronConcentration[i][j][k] = 0;
 				protonConcentration[i][j][k] = 0;
 				chargeDensity[i][j][k] = 0;
-				velocityBulk[i][j][k] = Vector3d(0, 0, 0);
+				velocityBulkProton[i][j][k] = Vector3d(0, 0, 0);
 				velocityBulkElectron[i][j][k] = Vector3d(0, 0, 0);
 
 				electricDensity[i][j][k] = 0;
@@ -1933,6 +2023,7 @@ void Simulation::initializeKolmogorovSpectrum(int start, int end) {
 }
 
 void Simulation::initializeTwoStream() {
+	boundaryConditionType = PERIODIC;
 	createParticles();
 	collectParticlesIntoBins();
 	double u = speed_of_light_normalized / 5;
@@ -2008,6 +2099,7 @@ void Simulation::initializeTwoStream() {
 }
 
 void Simulation::initializeExternalFluxInstability() {
+	boundaryConditionType = PERIODIC;
 	createParticles();
 	double alfvenV = B0.norm() * fieldScale / sqrt(4 * pi * density);
 	double concentration = density / (massProton + massElectron);

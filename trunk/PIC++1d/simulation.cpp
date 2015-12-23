@@ -18,12 +18,12 @@ void Simulation::simulate() {
 		initialize();
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWave(1, 0.01);
+		initializeAlfvenWave(1, 0.01);
 		//initializeFluxFromRight();
 		//initializeShockWave();
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
-		createParticles();
+		//createParticles();
 		//initializeMovingLangmuirWave();
 		//fieldsLorentzTransitionX(V0.x);
 	}
@@ -41,7 +41,7 @@ void Simulation::simulate() {
 	updateDensityParameters();
 
 	evaluateExplicitDerivative();
-	//cleanupDivergence();
+	cleanupDivergence();
 	updateFields();
 	updateEnergy();
 	theoreticalEnergy = energy;
@@ -82,7 +82,7 @@ void Simulation::simulate() {
 		}
 		
 		updateDensityParameters();
-		//cleanupDivergence();
+		cleanupDivergence();
 		updateFields();
 
 		/*if(currentIteration % 100 == 0){
@@ -369,7 +369,12 @@ void Simulation::updateElectroMagneticParameters() {
 		divPressureTensor[i] = Vector3d(0, 0, 0);
 		for (int pcount = 0; pcount < particlesInEbin[i].size(); ++pcount) {
 			Particle* particle = particlesInEbin[i][pcount];
-			double correlation = correlationWithEbin(*particle, i) / volumeE(i);
+			double correlation = correlationWithEbin(*particle, i);
+			if(correlation > 1.0) {
+				printf("correlation > 1\n");
+				exit(0);
+			}
+			correlation /= volumeE(i);
 
 			Vector3d velocity = particle->velocity(speed_of_light_normalized);
 			double gamma = particle->gammaFactor(speed_of_light_normalized);
@@ -469,11 +474,13 @@ void Simulation::updateElectroMagneticParameters() {
 		electricFlux[i] = electricFlux[i] + externalElectricFlux[i];
 	}
 
+	double fluxFactor = 1.0/ (plasma_period * plasma_period * sqrt(gyroradius));
+
 	//for debug only
 		/*double kw = 2*pi/xsize;
 		double concentration = density/(massProton + massElectron);
 		for(int i = 0; i < xnumber; ++i){
-			electricFlux[i].y = electron_charge_normalized*concentration*(VyamplitudeProton - VyamplitudeElectron)*sin(kw*xgrid[i] - omega*(time + theta*deltaT));
+ 			electricFlux[i].y = electron_charge_normalized*concentration*(VyamplitudeProton - VyamplitudeElectron)*sin(kw*xgrid[i] - omega*(time + theta*deltaT));
 			electricFlux[i].z = electron_charge_normalized*concentration*(VzamplitudeProton - VzamplitudeElectron)*cos(kw*xgrid[i] - omega*(time + theta*deltaT));
 		}
 		electricFlux[xnumber] = electricFlux[0];*/

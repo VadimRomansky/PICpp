@@ -919,8 +919,11 @@ double Simulation::correlationWithBbin(Particle& particle, int i, int j, int k) 
 				leftx = xgrid[0];
 				rightx = xgrid[1];
 			}
+		} else if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+			leftx = xgrid[0] - deltaX;
+			rightx = xgrid[1];
 		} else {
-			leftx = -deltaX;
+			leftx = xgrid[0];
 			rightx = xgrid[1];
 		}
 	} else if(i == xnumber - 1){
@@ -999,8 +1002,8 @@ double Simulation::correlationWithBbin(Particle& particle, int i, int j, int k) 
 		}	
 	} else if(k == 0){
 		if (particle.coordinates.z - particle.dz > zgrid[1]) {
-			leftz = ygrid[znumber];
-			rightz = ygrid[znumber] + deltaZ;
+			leftz = zgrid[znumber];
+			rightz = zgrid[znumber] + deltaZ;
 		} else {
 			leftz = zgrid[0];
 			rightz = zgrid[1];
@@ -1073,8 +1076,11 @@ double Simulation::correlationWithEbin(Particle& particle, int i, int j, int k) 
 				leftx = xgrid[0] - deltaX/2;
 				rightx = xgrid[0] + deltaX/2;
 			}
-		} else {
+		} else if(boundaryConditionType == FREE_BOTH){
 			leftx = xgrid[0] - deltaX/2;
+			rightx = xgrid[0] + deltaX/2;
+		} else {
+			leftx = xgrid[0];
 			rightx = xgrid[0] + deltaX/2;
 		}
 	} else if (i == xnumber) {
@@ -1145,8 +1151,8 @@ double Simulation::correlationWithEbin(Particle& particle, int i, int j, int k) 
 
 	if(k == -1) {
 		if (particle.coordinates.z - particle.dz > zgrid[0] - deltaZ/2) {
-			leftz = zgrid[ynumber - 1] - deltaZ/2;
-			rightz = zgrid[ynumber - 1] + deltaZ/2;
+			leftz = zgrid[znumber - 1] - deltaZ/2;
+			rightz = zgrid[znumber - 1] + deltaZ/2;
 		} else {
 			leftz = zgrid[0] - 3*deltaZ/2;
 			rightz = zgrid[0] - deltaZ/2;

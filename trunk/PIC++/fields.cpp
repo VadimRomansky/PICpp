@@ -98,7 +98,7 @@ void Simulation::evaluateFields() {
 			for(int j = 0; j < ynumber + 1; ++j){
 				for(int k = 0; k < znumber + 1; ++k){
 					newEfield[i][j][k] = (tempEfield[i][j][k] - Efield[i][j][k] * (1 - theta)) / theta;
-					newEfield[i][j][k].x= 0;
+					//newEfield[i][j][k].x= 0;
 				}
 			}
 		}

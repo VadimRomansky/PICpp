@@ -437,7 +437,7 @@ void Simulation::createInternalEquationX(int i) {
 void Simulation::createInternalEquationY(int i) {
 	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT);
 
-	double element = 1.0 - dielectricTensor[i].matrix[1][1] + c_theta_deltaT2*2/deltaX2;
+	double element = 1.0 - dielectricTensor[i].matrix[1][1] + c_theta_deltaT2*2.0/deltaX2;
 	maxwellEquationMatrix[i][1].push_back(MatrixElement(element, i, 1));
 
 	element = -dielectricTensor[i].matrix[1][0];

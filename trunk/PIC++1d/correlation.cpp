@@ -440,8 +440,8 @@ Vector3d Simulation::correlationNewBfield(Particle& particle) {
 }
 
 double Simulation::correlationWithBbin(Particle& particle, int i) {
-	if (! particleCrossBbin(particle, i))
-		return 0.0;
+	//if (! particleCrossBbin(particle, i))
+		//return 0.0;
 
 	double x = particle.x;
 
@@ -469,7 +469,7 @@ double Simulation::correlationWithBbin(Particle& particle, int i) {
 				rightx = xgrid[1];
 			}
 		} else if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-			leftx = -deltaX;
+			leftx = xgrid[0] -deltaX;
 			rightx = xgrid[1];
 		} else {
 			leftx = xgrid[0];
