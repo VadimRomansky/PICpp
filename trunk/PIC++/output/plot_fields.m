@@ -17,7 +17,7 @@ znumber = 1;
 
 a = 0;
 b = fix(Nt/2);
-c = Nt - 3;
+c = Nt;
 
 Ex(1:Nx, 1:3) = 0;
 Ey(1:Nx, 1:3) = 0;

@@ -2528,9 +2528,9 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, double weight, 
 	double y = ygrid[j] + deltaY * uniformDistribution();
 	double z = zgrid[k] + deltaZ * uniformDistribution();
 
-	double dx = deltaX / 2;
-	double dy = deltaY / 2;
-	double dz = deltaZ / 2;
+	double dx = deltaX / 10;
+	double dy = deltaY / 10;
+	double dz = deltaZ / 10;
 
 	double energy = mass * speed_of_light_normalized_sqr;
 	double p;

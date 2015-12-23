@@ -1629,7 +1629,7 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 
 	double x = xgrid[i] + deltaX * uniformDistribution();
 
-	double dx = deltaX / 20.0;
+	double dx = deltaX / 2.0;
 
 	double energy = mass * speed_of_light_normalized_sqr;
 	double p;
