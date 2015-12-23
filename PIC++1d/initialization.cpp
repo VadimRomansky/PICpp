@@ -631,6 +631,8 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 	fprintf(informationFile, "Vz amplitude e = %g\n", VzamplitudeElectron * gyroradius / plasma_period);
 	fprintf(informationFile, "Vy amplitude p = %g\n", VyamplitudeProton * gyroradius / plasma_period);
 	fprintf(informationFile, "Vy amplitude e = %g\n", VyamplitudeElectron * gyroradius / plasma_period);
+	fprintf(informationFile, "Jy amplitude = %g\n", concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "Jz amplitude = %g\n", concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (plasma_period * plasma_period * sqrt(gyroradius)));
 	fprintf(informationFile, "Ey amplitude = %g\n", Eyamplitude * fieldScale / (plasma_period * sqrt(gyroradius)));
 	fprintf(informationFile, "Ez amplitude = %g\n", Ezamplitude * fieldScale / (plasma_period * sqrt(gyroradius)));
 	fprintf(informationFile, "By/Ez = %g\n", Byamplitude / Ezamplitude);
@@ -1627,7 +1629,7 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 
 	double x = xgrid[i] + deltaX * uniformDistribution();
 
-	double dx = deltaX / 2.0;
+	double dx = deltaX / 20.0;
 
 	double energy = mass * speed_of_light_normalized_sqr;
 	double p;

@@ -80,7 +80,7 @@ public:
 	double*** electronConcentration;
 	double*** protonConcentration;
 	double*** chargeDensity;
-	Vector3d*** velocityBulk;
+	Vector3d*** velocityBulkProton;
 	Vector3d*** velocityBulkElectron;
 
 	Vector3d maxEfield;
@@ -196,6 +196,7 @@ public:
 
 	void initialize();
 	void initializeSimpleElectroMagneticWave();
+	void initializeRotatedSimpleElectroMagneticWave(int wavesCount);
 	void checkFrequency(double omega);
 	void initializeAlfvenWave(int wavesCount, double amplitudeRelation);
 	void initializeRotatedAlfvenWave(int wavesCount, double amplitudeRelation);
@@ -257,6 +258,8 @@ public:
 	void checkParticleInBox(Particle& particle);
 	void checkParticlesInBin();
 	void updateElectroMagneticParameters();
+	void smoothDensity();
+	void addReflectedParticleToElectroMagneticParameters(const Particle* particle, int j, int k);
 	void updateDensityParameters();
 	void updateEnergy();
 	void updateFields();

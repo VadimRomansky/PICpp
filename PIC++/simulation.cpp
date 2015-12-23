@@ -18,10 +18,11 @@ void Simulation::simulate() {
 		initialize();
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWave(1, 0.01);
+		initializeAlfvenWave(1, 0.01);
 		//initializeRotatedAlfvenWave(1, 0.01);
-		initializeFluxFromRight();
+		//initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
+		//initializeRotatedSimpleElectroMagneticWave(1);
 		//initializeLangmuirWave();
 	}
 	collectParticlesIntoBins();
@@ -62,8 +63,8 @@ void Simulation::simulate() {
 		updateParameters();
 		moveParticles();
 
-		length += fabs(V0.x*deltaT);
 		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH){
+			length += fabs(V0.x*deltaT);
 			if(length > 2*deltaX/particlesPerBin){
 				printf("length > 2*deltaX/particlesPerBin\n");
 			}
@@ -75,8 +76,8 @@ void Simulation::simulate() {
 				}
 			}
 		}
-		//cleanupDivergence();
 		updateDensityParameters();
+		//cleanupDivergence();
 		updateFields();
 		updateEnergy();
 
@@ -99,6 +100,12 @@ void Simulation::output() {
 		distributionFileElectron = fopen("./output/distribution_electrons.dat", "a");
 		outputDistribution(distributionFileElectron, particles, ELECTRON, gyroradius, plasma_period);
 		fclose(distributionFileElectron);
+		distributionFileProtonUpstream = fopen("./output/distribution_protons_upstream.dat", "a");
+		outputDistributionUpstream(distributionFileProtonUpstream, particles, PROTON, xgrid[shockWavePoint], gyroradius, plasma_period);
+		fclose(distributionFileProtonUpstream);
+		distributionFileElectronUpstream = fopen("./output/distribution_electrons_upstream.dat", "a");
+		outputDistributionUpstream(distributionFileElectronUpstream, particles, ELECTRON, xgrid[shockWavePoint], gyroradius, plasma_period);
+		fclose(distributionFileElectronUpstream);
 		protonTraectoryFile = fopen("./output/traectory_proton.dat", "a");
 		outputTraectory(protonTraectoryFile, getFirstProton(), time, plasma_period, gyroradius);
 		fclose(protonTraectoryFile);
@@ -131,7 +138,7 @@ void Simulation::output() {
 
 	velocityFile = fopen("./output/velocity.dat", "a");
 	velocityElectronFile = fopen("./output/velocity_electron.dat", "a");
-	outputVelocity(velocityFile, velocityElectronFile, velocityBulk, velocityBulkElectron, xnumber, ynumber, znumber, plasma_period, gyroradius);
+	outputVelocity(velocityFile, velocityElectronFile, velocityBulkProton, velocityBulkElectron, xnumber, ynumber, znumber, plasma_period, gyroradius);
 	fclose(velocityFile);
 	fclose(velocityElectronFile);
 
@@ -267,9 +274,9 @@ void Simulation::updateDeltaT() {
 
 		double Vthermal = sqrt(2*kBoltzman_normalized*temperature/massElectron);
 		double minDeltaT = deltaX/Vthermal;
-		if(minDeltaT > deltaT){
+		/*if(minDeltaT > deltaT){
 			printf("deltaT < dx/Vthermal\n");
-		}
+		}*/
 	}
 }
 
@@ -503,6 +510,11 @@ void Simulation::updateElectroMagneticParameters() {
 					if(solverType == EXPLICIT){
 						electricFlux[i][j][k] += velocity*particle->charge*particle->weight*correlation;
 					}
+					if(i == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+						if(particle->coordinates.x - particle->dx < 0){
+							addReflectedParticleToElectroMagneticParameters(particle, j, k);
+						}
+					}
 					alertNaNOrInfinity(electricFlux[i][j][k].x, "right part x = NaN");
 					alertNaNOrInfinity(electricFlux[i][j][k].y, "right part y = NaN");
 					alertNaNOrInfinity(electricFlux[i][j][k].z, "right part z = NaN");
@@ -630,6 +642,72 @@ void Simulation::updateElectroMagneticParameters() {
 	//
 }
 
+void Simulation::smoothDensity(){
+	for(int j = 0; j < ynumber; ++j){
+		for(int k = 0; k < znumber; ++k){
+			double newLeftDensity = (electricDensity[0][j][k] + electricDensity[1][j][k])/2.0;
+			double newRightDensity = (electricDensity[xnumber-1][j][k] + electricDensity[xnumber-2][j][k])/2.0;
+			if(boundaryConditionType == PERIODIC){
+				newLeftDensity = (electricDensity[xnumber-1][j][k] + 2.0*electricDensity[0][j][k] + electricDensity[1][j][k])/4.0;
+				newRightDensity = (electricDensity[xnumber-2][j][k]+ 2.0*electricDensity[xnumber-1][j][k] + electricDensity[0][j][k])/4.0;
+			}
+			double prevDensity = electricDensity[0][j][k];
+			for(int i = 1; i < xnumber - 1; ++i){
+				double tempDensity = electricDensity[i][j][k];
+	
+				electricDensity[i][j][k] = (prevDensity + 2.0*electricDensity[i][j][k] + electricDensity[i+1][j][k])/4.0;
+
+				prevDensity = tempDensity;
+			}
+	
+			electricDensity[0][j][k] = newLeftDensity;
+			electricDensity[xnumber - 1][j][k] = newRightDensity;
+		}
+	}
+}
+
+void Simulation::addReflectedParticleToElectroMagneticParameters(const Particle* particle, int j, int k){
+	Particle tempParticle = *particle;
+
+	tempParticle.momentum.x = - particle->momentum.x;
+
+	double correlation = correlationWithEbin(tempParticle, -1, j, k) / volumeE(0, j, k);
+
+	double beta = 0.5*particle->charge*deltaT/particle->mass;
+	Vector3d velocity = tempParticle.velocity(speed_of_light_normalized);
+
+	Vector3d oldE = correlationEfield(tempParticle)*fieldScale;
+	Vector3d oldB = correlationBfield(tempParticle)*fieldScale;
+
+	tempParticle.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, oldE, oldB);
+	double gamma = tempParticle.gammaFactor(speed_of_light_normalized);
+	
+	Vector3d rotatedVelocity = tempParticle.rotationTensor * (velocity * gamma);
+
+	if(solverType == IMPLICIT){
+		electricFlux[0][j][k] += rotatedVelocity * (particle->charge * particle->weight * correlation);
+		//electricFlux[i] += velocity * (particle->charge * particle->weight * correlation);
+		dielectricTensor[0][j][k]= dielectricTensor[0][j][k] - tempParticle.rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+		//dielectricTensor[0] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
+				
+		Particle tempParticle2 = tempParticle;
+		double shiftX = 0.01*deltaX;
+		if(tempParticle.coordinates.x + shiftX >xgrid[xnumber]){
+			shiftX = -shiftX;
+		}
+		tempParticle2.coordinates.x += shiftX;
+
+		double tempCorrelation = correlationWithEbin(tempParticle2, -1, j, k) / volumeE(0, j, k);
+
+		divPressureTensor[0][j][k].x += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][0] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+		divPressureTensor[0][j][k].y += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][1] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+		divPressureTensor[0][j][k].z += (rotatedVelocity.tensorMult(rotatedVelocity)).matrix[0][2] * particle->weight * particle->charge*(tempCorrelation - correlation)/shiftX;
+	}
+	if(solverType == EXPLICIT){
+		electricFlux[0][j][k] += velocity*particle->charge*particle->weight*correlation;
+	}
+}
+
 void Simulation::updateDensityParameters() {
 	double full_density = 0;
 	double full_p_concentration = 0;
@@ -642,7 +720,7 @@ void Simulation::updateDensityParameters() {
 				electronConcentration[i][j][k] = 0;
 				protonConcentration[i][j][k] = 0;
 				chargeDensity[i][j][k] = 0;
-				velocityBulk[i][j][k] = Vector3d(0, 0, 0);
+				velocityBulkProton[i][j][k] = Vector3d(0, 0, 0);
 				velocityBulkElectron[i][j][k] = Vector3d(0, 0, 0);
 				//fprintf(debugFile, "%d %d %d\n", i, j, k);
 				for (int pcount = 0; pcount < particlesInBbin[i][j][k].size(); ++pcount) {
@@ -656,8 +734,8 @@ void Simulation::updateDensityParameters() {
 						velocityBulkElectron[i][j][k] += particle->momentum * particle->weight * correlation;
 					} else if (particle->type == PROTON) {
 						protonConcentration[i][j][k] += correlation * particle->weight;
+						velocityBulkProton[i][j][k] += particle->momentum * particle->weight * correlation;
 					}
-					velocityBulk[i][j][k] += particle->momentum * particle->weight * correlation;
 
 					if (correlation == 0) {
 						//printf("aaa\n");
@@ -668,8 +746,12 @@ void Simulation::updateDensityParameters() {
 
 				//fprintf(debugFile, "charge %15.10g proton %15.10g electron %15.10g\n", chargeDensity[i][j][k], protonConcentration[i][j][k], electronConcentration[i][j][k]);
 
- 				velocityBulk[i][j][k] = velocityBulk[i][j][k] / (electronConcentration[i][j][k] * massElectron + protonConcentration[i][j][k] * massProton);
+ 				velocityBulkProton[i][j][k] = velocityBulkProton[i][j][k] / (protonConcentration[i][j][k] * massProton);
+				double gamma = sqrt((velocityBulkProton[i][j][k].scalarMult(velocityBulkProton[i][j][k])/speed_of_light_normalized_sqr) + 1);
+				velocityBulkProton[i][j][k] = velocityBulkProton[i][j][k] / gamma;
 				velocityBulkElectron[i][j][k] = velocityBulkElectron[i][j][k] / (electronConcentration[i][j][k] * massElectron);
+				gamma = sqrt((velocityBulkElectron[i][j][k].scalarMult(velocityBulkElectron[i][j][k])/speed_of_light_normalized_sqr) + 1);
+				velocityBulkElectron[i][j][k] = velocityBulkElectron[i][j][k] / gamma;
 				full_density += chargeDensity[i][j][k] * volumeB(i, j, k);
 				full_p_concentration += protonConcentration[i][j][k] * volumeB(i, j, k);
 				full_e_concentration += electronConcentration[i][j][k] * volumeB(i, j, k);
@@ -732,6 +814,32 @@ void Simulation::updateEnergy() {
 
 
 	energy = particleEnergy + electricFieldEnergy + magneticFieldEnergy;
+
+	double concentration = density/(massProton + massElectron);
+
+	if(boundaryConditionType != PERIODIC) {
+		theoreticalEnergy -= (density*V0.scalarMult(V0)/2.0)*V0.x*deltaT*ysize*zsize;
+		theoreticalEnergy -= (2*(3.0/2.0)*concentration*kBoltzman_normalized*temperature)*V0.x*deltaT*ysize*zsize;
+
+		theoreticalMomentum -= V0*V0.x*density*deltaT*ysize*zsize;
+		theoreticalMomentum -= Vector3d(1,0,0)*(2*concentration*kBoltzman_normalized*temperature)*deltaT*ysize*zsize;
+
+		for(int i = 0; i < escapedParticles.size(); ++i) {
+			Particle* particle = escapedParticles[i];
+			theoreticalEnergy -= particle->energy(speed_of_light_normalized)*particle->weight;
+			theoreticalMomentum -= particle->momentum*particle->weight;
+		}
+
+		for(int j = 0; j < ynumber; ++j) {
+			for(int k = 0;k < znumber; ++k) {
+				theoreticalEnergy -= (Efield[xnumber][j][k].vectorMult(Bfield[xnumber - 1][j][k])).x*deltaT*speed_of_light_normalized*deltaX*deltaY/(4*pi);
+				theoreticalEnergy -= (Efield[0][j][k].vectorMult(Bfield[0][j][k])).x*deltaT*speed_of_light_normalized*deltaX*deltaY/(4*pi);
+
+				theoreticalMomentum -= (Efield[xnumber][j][k].vectorMult(Bfield[xnumber - 1][j][k]))*deltaT*deltaX*deltaY/(4*pi);
+				theoreticalMomentum -= (Efield[0][j][k].vectorMult(Bfield[0][j][k]))*deltaT*deltaX*deltaY/(4*pi);
+			}
+		}
+	}
 }
 
 Vector3d Simulation::getBfield(int i, int j, int k) {
