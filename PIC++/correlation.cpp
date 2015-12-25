@@ -744,7 +744,7 @@ Vector3d Simulation::correlationBfield(Particle& particle) {
 
 	} else if(zcount == znumber){
 		rightWeightZ = (particle.coordinates.z - middleZgrid[zcount-1])/deltaZ;
-		leftWeightZ = 1 - rightWeightZ;
+		leftWeightZ = 1.0 - rightWeightZ;
 		
 		prevK = zcount - 1;
 		curK = 0;

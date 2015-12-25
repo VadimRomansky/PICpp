@@ -84,8 +84,8 @@ void Simulation::removeEscapedParticles(){
 	double derVe = omega*sqrt((VyamplitudeElectron - velocity.y)*(VyamplitudeElectron + velocity.y));
 	double derVp = omega*sqrt((VyamplitudeProton - velocity.y)*(VyamplitudeProton + velocity.y));
 
-	//particle->momentum += (E + lorentzForce)*particle->charge*deltaT;
-	particle->momentum += E*particle->charge*deltaT;
+	particle->momentum += (E + lorentzForce)*particle->charge*deltaT;
+	//particle->momentum += E*particle->charge*deltaT;
 	Vector3d newVelocity = particle->velocity(speed_of_light_normalized);
 
 	particle->y += 0.5*(velocity.y + newVelocity.y)*deltaT;
