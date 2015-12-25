@@ -103,7 +103,6 @@ double***** arnoldiIterations(std::vector<MatrixElement>**** matrix,double** out
 	delete[] prevHessenbergMatrix;
 
 	double**** tempVector = multiplySpecialMatrixVector(matrix, resultBasis[n - 2], xnumber, ynumber, znumber, lnumber);
-	double b = sqrt(scalarMultiplyLargeVectors(tempVector, tempVector, xnumber, ynumber, znumber, lnumber));
 
 
 	for (int m = 0; m < n - 1; ++m) {

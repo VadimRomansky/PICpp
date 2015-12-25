@@ -817,15 +817,25 @@ void Simulation::initializeFluxFromRight() {
 	//boundaryConditionType = FREE_BOTH;
 	//initializeAlfvenWave(10, 1.0E-4);
 	createParticles();
+	E0 = E0 - V0.vectorMult(B0)/(speed_of_light_normalized);
+	for(int i = 0; i < xnumber + 1; ++i){
+		tempEfield[i] = E0;
+		Efield[i] = E0;
+		newEfield[i] = E0;
+		explicitEfield[i] = E0;
+	}
 	Efield[xnumber] = E0;
 	tempEfield[xnumber] = E0;
 	newEfield[xnumber] = E0;
 	explicitEfield[xnumber] = E0;
-	Efield[0] = E0;
-	tempEfield[0] = E0;
-	newEfield[0] = E0;
-	explicitEfield[0] = E0;
-
+	Efield[0].y = 0;
+	Efield[0].z = 0;
+	tempEfield[0].y = 0;
+	tempEfield[0].z = 0;
+	newEfield[0].y = 0;
+	newEfield[0].z = 0;
+	explicitEfield[0].y = 0;
+	explicitEfield[0].z = 0;
 	/*for(int i = 0; i < xnumber/4; ++i){
 		//Bfield[i].y = B0.x*sin(2*20*pi*middleXgrid[i]/xsize);
 		Bfield[i].y = 0.01*B0.x*(uniformDistribution() - 0.5);
@@ -1629,7 +1639,7 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 
 	double x = xgrid[i] + deltaX * uniformDistribution();
 
-	double dx = deltaX / 2.0;
+	double dx = deltaX / 4.0;
 
 	double energy = mass * speed_of_light_normalized_sqr;
 	double p;
