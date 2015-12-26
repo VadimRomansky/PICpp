@@ -584,13 +584,20 @@ void Simulation::updateDensityParameters() {
 		}
 
 		//fprintf(debugFile, "charge %15.10g proton %15.10g electron %15.10g\n", chargeDensity[i][j][k], protonConcentration[i][j][k], electronConcentration[i][j][k]);
-
- 		velocityBulkProton[i] = velocityBulkProton[i] / (protonConcentration[i] * massProton);
-		double gamma = sqrt((velocityBulkProton[i].scalarMult(velocityBulkProton[i])/speed_of_light_normalized_sqr) + 1);
-		velocityBulkProton[i] = velocityBulkProton[i] / gamma;
-		velocityBulkElectron[i] = velocityBulkElectron[i] / (electronConcentration[i] * massElectron);
-		gamma = sqrt((velocityBulkElectron[i].scalarMult(velocityBulkElectron[i])/speed_of_light_normalized_sqr) + 1);
-		velocityBulkElectron[i] = velocityBulkElectron[i] / gamma;
+		if(protonConcentration[i] <= 0){
+			velocityBulkProton[i] = Vector3d(0, 0, 0);
+		} else {
+ 			velocityBulkProton[i] = velocityBulkProton[i] / (protonConcentration[i] * massProton);
+			double gamma = sqrt((velocityBulkProton[i].scalarMult(velocityBulkProton[i])/speed_of_light_normalized_sqr) + 1.0);
+			velocityBulkProton[i] = velocityBulkProton[i] / gamma;
+		}
+		if(electronConcentration[i] <= 0){
+			velocityBulkElectron[i] = Vector3d(0, 0, 0);
+		} else {
+			velocityBulkElectron[i] = velocityBulkElectron[i] / (electronConcentration[i] * massElectron);
+			double gamma = sqrt((velocityBulkElectron[i].scalarMult(velocityBulkElectron[i])/speed_of_light_normalized_sqr) + 1.0);
+			velocityBulkElectron[i] = velocityBulkElectron[i] / gamma;
+		}
 		full_density += chargeDensity[i] * volumeB(i);
 		full_p_concentration += protonConcentration[i] * volumeB(i);
 		full_e_concentration += electronConcentration[i] * volumeB(i);
