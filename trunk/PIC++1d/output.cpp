@@ -29,6 +29,8 @@ void outputDistributionUpstream(FILE* outFile, std::vector<Particle*> particles,
 		}
 	}
 
+	maxMomentum *= 1.001;
+
 	double pgrid[pnumber + 1];
 	double distribution[pnumber];
 	double logMinMomentum = log(minMomentum);

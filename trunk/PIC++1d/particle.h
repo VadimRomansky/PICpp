@@ -21,6 +21,7 @@ public:
 	double z;
 
 	Vector3d momentum;
+	Vector3d initialMomentum;
 
 	double dx;
 

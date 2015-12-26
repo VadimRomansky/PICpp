@@ -22,6 +22,8 @@ Particle::Particle(int n, double m, double q, double w, ParticleTypes t, double 
 	momentum.y = py0;
 	momentum.z = pz0;
 
+	initialMomentum = momentum;
+
 	dx = dx0;
 
 	y = 0;
@@ -40,6 +42,7 @@ Particle::Particle(const Particle& particle) {
 
 	x = particle.x;
 	momentum = particle.momentum;
+	initialMomentum = particle.initialMomentum;
 	rotationTensor = particle.rotationTensor;
 
 	dx = particle.dx;

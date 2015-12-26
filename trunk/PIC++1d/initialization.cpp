@@ -592,6 +592,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 		}
 		double beta = velocity.norm() / speed_of_light_normalized;
 		particle->addVelocity(velocity, speed_of_light_normalized);
+		particle->initialMomentum = particle->momentum;
 	}
 
 	updateDeltaT();
@@ -808,6 +809,7 @@ void Simulation::initializeLangmuirWave() {
 		if (particle->type == ELECTRON) {
 			Vector3d velocity = Vector3d(1, 0, 0) * Vamplitude * cos(kw * particle->x);
 			particle->addVelocity(velocity, speed_of_light_normalized);
+			particle->initialMomentum = particle->momentum;
 		}
 	}
 }
@@ -849,6 +851,7 @@ void Simulation::initializeFluxFromRight() {
 	for (int i = 0; i < particles.size(); ++i) {
 		Particle* particle = particles[i];
 		particle->addVelocity(V0, speed_of_light_normalized);
+		particle->initialMomentum = particle->momentum;
 	}
 
 	double magneticEnergy = B0.scalarMult(B0) / (8 * pi);
@@ -956,6 +959,7 @@ void Simulation::initializeShockWave() {
 			}
 			int m = l / 2;
 			particle->x = x + deltaXParticles * m;
+			particle->initialMomentum = particle->momentum;
 			particles.push_back(particle);
 			particlesNumber++;
 			if (particlesNumber % 1000 == 0) {
@@ -1070,6 +1074,7 @@ void Simulation::initializeTwoStream() {
 			else {
 				particle->addVelocity(electronsVelocityMinus, speed_of_light_normalized);
 			}
+			particle->initialMomentum = particle->momentum;
 			electronCount++;
 		}
 	}
@@ -1564,7 +1569,7 @@ void Simulation::createParticles() {
 			}*/
 			int m = l / 2;
 			particle->x = x + deltaXParticles * m;
-			particle->addVelocity(V0, speed_of_light_normalized);
+			//particle->addVelocity(V0, speed_of_light_normalized);
 			particles.push_back(particle);
 			particlesNumber++;
 			if (particlesNumber % 1000 == 0) {
@@ -1659,7 +1664,6 @@ Particle* Simulation::createParticle(int n, int i, double weight, ParticleTypes 
 	double phi = 2 * pi * uniformDistribution();
 	double pnormal = sqrt(p * p - pz * pz);
 	double px = pnormal * cos(phi);
-	px = 0;
 	double py = pnormal * sin(phi);
 
 	/*double pz = normalDistribution() * sqrt(mass * kBoltzman_normalized * localTemperature);
