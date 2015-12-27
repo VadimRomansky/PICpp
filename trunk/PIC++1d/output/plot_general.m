@@ -46,7 +46,7 @@ ylabel ('gauss');
 legend('electric field', 'magnetic field', 'magnetic field with linear increment {{u}/{c} {\omega_p}}','Location','northwest');
 grid ;
 
-figure(2);
+figure(4);
 plot (general(1:N2,2), general(1:N2,17), 'red');
 title ('dt');
 xlabel ('{{t \omega_p}/{2\pi}}');
