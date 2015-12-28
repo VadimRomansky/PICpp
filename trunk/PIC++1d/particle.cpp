@@ -169,7 +169,7 @@ double Particle::gammaFactor(double c) {
 double Particle::energy(double c) {
 	double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
 	if (p2 < relativisticPrecision * mass * mass * c * c) {
-		return momentum.scalarMult(momentum) / (2 * mass);
+		return p2 / (2 * mass);
 	}
 	double gamma_factor = gammaFactor(c);
 	//return gamma_factor*mass*c*c;
