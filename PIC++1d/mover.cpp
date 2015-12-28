@@ -358,6 +358,8 @@ void Simulation::injectNewParticles(int count, double length){
 			particle->momentum = lastElectron->momentum;
 		}*/
 		particles.push_back(particle);
+		//theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
+		//theoreticalMomentum += particle->momentum*particle->weight*gyroradius/plasma_period;
 	}
 }
 

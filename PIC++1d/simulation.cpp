@@ -83,7 +83,7 @@ void Simulation::simulate() {
 		
 		updateDensityParameters();
 		cleanupDivergence();
-		updateFields();
+		//updateFields();
 
 		/*if(currentIteration % 100 == 0){
 			fourierFilter();
@@ -650,23 +650,28 @@ void Simulation::updateEnergy() {
 	energy = particleEnergy + electricFieldEnergy + magneticFieldEnergy;
 
 	if(boundaryConditionType != PERIODIC) {
-		theoreticalEnergy -= (density*V0.scalarMult(V0)/2.0)*V0.x*deltaT;
-		theoreticalEnergy -= (2*(3.0/2.0)*concentration*kBoltzman_normalized*temperature)*V0.x*deltaT;
+		double gamma = 1.0/sqrt(1 - sqr(V0.norm()/speed_of_light_normalized));
+		if(V0.norm()/speed_of_light_normalized > relativisticPrecision){
+			theoreticalEnergy -= density*(gamma - 1)*speed_of_light_normalized_sqr*V0.x*deltaT*sqr(gyroradius / plasma_period);
+		} else {
+			theoreticalEnergy -= density*(V0.scalarMult(V0)/2.0)*V0.x*deltaT*sqr(gyroradius / plasma_period);
+		}
+		theoreticalEnergy -= (2*(3.0/2.0)*concentration*kBoltzman_normalized*temperature)*V0.x*deltaT*sqr(gyroradius / plasma_period);
 
-		theoreticalMomentum -= V0*V0.x*density*deltaT;
-		theoreticalMomentum -= Vector3d(1,0,0)*(2*concentration*kBoltzman_normalized*temperature)*deltaT;
+		theoreticalMomentum -= V0*gamma*V0.x*density*deltaT * gyroradius / plasma_period;
+		theoreticalMomentum -= Vector3d(1,0,0)*(2*concentration*kBoltzman_normalized*temperature)*deltaT * gyroradius / plasma_period;
 
 		for(int i = 0; i < escapedParticles.size(); ++i) {
 			Particle* particle = escapedParticles[i];
-			theoreticalEnergy -= particle->energy(speed_of_light_normalized)*particle->weight;
-			theoreticalMomentum -= particle->momentum*particle->weight;
+			theoreticalEnergy -= particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius / plasma_period);
+			theoreticalMomentum -= particle->momentum*particle->weight * gyroradius / plasma_period;
 		}
 
-		theoreticalEnergy -= (Efield[xnumber].vectorMult(Bfield[xnumber - 1])).x*deltaT*speed_of_light_normalized/(4*pi);
-		theoreticalEnergy -= (Efield[0].vectorMult(Bfield[0])).x*deltaT*speed_of_light_normalized/(4*pi);
+		theoreticalEnergy -= ((Efield[xnumber].vectorMult(Bfield[xnumber - 1])).x*deltaT*speed_of_light_normalized/(4*pi))*sqr(gyroradius / plasma_period);
+		theoreticalEnergy -= ((Efield[0].vectorMult(Bfield[0])).x*deltaT*speed_of_light_normalized/(4*pi))*sqr(gyroradius / plasma_period);
 
-		theoreticalMomentum -= (Efield[xnumber].vectorMult(Bfield[xnumber - 1]))*deltaT/(4*pi);
-		theoreticalMomentum -= (Efield[0].vectorMult(Bfield[0]))*deltaT/(4*pi);
+		theoreticalMomentum -= ((Efield[xnumber].vectorMult(Bfield[xnumber - 1]))*deltaT/(4*pi))* gyroradius / plasma_period;
+		theoreticalMomentum -= ((Efield[0].vectorMult(Bfield[0]))*deltaT/(4*pi))* gyroradius / plasma_period;
 	}
 }
 
