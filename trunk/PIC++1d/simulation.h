@@ -287,6 +287,8 @@ public:
 	Particle* getFirstElectron();
 	Particle* getLastProton();
 	Particle* getLastElectron();
+	Particle* getProton(int n);
+	Particle* getElectron(int n);
 	Particle* createParticle(int n, int i, double weight, ParticleTypes type, double localTemperature);
 
 	void moveParticles();
