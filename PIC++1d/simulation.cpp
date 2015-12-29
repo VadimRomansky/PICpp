@@ -125,7 +125,7 @@ void Simulation::output() {
 		outputDistribution(distributionFileElectron, particles, ELECTRON, gyroradius, plasma_period);
 		fclose(distributionFileElectron);
 		protonTraectoryFile = fopen("./output/traectory_proton.dat", "a");
-		outputTraectory(protonTraectoryFile, getFirstProton(), time, plasma_period, gyroradius);
+		outputTraectory(protonTraectoryFile, getProton(5000), time, plasma_period, gyroradius);
 		fclose(protonTraectoryFile);
 		electronTraectoryFile = fopen("./output/traectory_electron.dat", "a");
 		outputTraectory(electronTraectoryFile, getFirstElectron(), time, plasma_period, gyroradius);
@@ -652,14 +652,14 @@ void Simulation::updateEnergy() {
 	if(boundaryConditionType != PERIODIC) {
 		double gamma = 1.0/sqrt(1 - sqr(V0.norm()/speed_of_light_normalized));
 		if(V0.norm()/speed_of_light_normalized > relativisticPrecision){
-			theoreticalEnergy -= density*(gamma - 1)*speed_of_light_normalized_sqr*V0.x*deltaT*sqr(gyroradius / plasma_period);
+			//theoreticalEnergy -= density*(gamma - 1)*speed_of_light_normalized_sqr*V0.x*deltaT*sqr(gyroradius / plasma_period);
 		} else {
-			theoreticalEnergy -= density*(V0.scalarMult(V0)/2.0)*V0.x*deltaT*sqr(gyroradius / plasma_period);
+			//theoreticalEnergy -= density*(V0.scalarMult(V0)/2.0)*V0.x*deltaT*sqr(gyroradius / plasma_period);
 		}
-		theoreticalEnergy -= (2*(3.0/2.0)*concentration*kBoltzman_normalized*temperature)*V0.x*deltaT*sqr(gyroradius / plasma_period);
+		//theoreticalEnergy -= (2*(3.0/2.0)*concentration*kBoltzman_normalized*temperature)*V0.x*deltaT*sqr(gyroradius / plasma_period);
 
-		theoreticalMomentum -= V0*gamma*V0.x*density*deltaT * gyroradius / plasma_period;
-		theoreticalMomentum -= Vector3d(1,0,0)*(2*concentration*kBoltzman_normalized*temperature)*deltaT * gyroradius / plasma_period;
+		//theoreticalMomentum -= V0*gamma*V0.x*density*deltaT * gyroradius / plasma_period;
+		//theoreticalMomentum -= Vector3d(1,0,0)*(2*concentration*kBoltzman_normalized*temperature)*deltaT * gyroradius / plasma_period;
 
 		for(int i = 0; i < escapedParticles.size(); ++i) {
 			Particle* particle = escapedParticles[i];
