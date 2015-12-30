@@ -134,6 +134,7 @@ void Simulation::moveParticle(Particle* particle){
 				particle->z = tempParticle.z;
 				newVelocity.x = -newVelocity.x;
 				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+				theoreticalMomentum.x += 2*particle->momentum.x;
 				return;
 			} else {
 				escapedParticles.push_back(particle);
@@ -183,6 +184,7 @@ void Simulation::moveParticle(Particle* particle){
 					newVelocity = middleVelocity;
 					newVelocity.x = -newVelocity.x;
 					particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+					theoreticalMomentum.x += 2*particle->momentum.x;
 					return;
 				} else {
 					escapedParticles.push_back(particle);
@@ -358,6 +360,7 @@ void Simulation::injectNewParticles(int count, double length){
 			particle->momentum = lastElectron->momentum;
 		}*/
 		particles.push_back(particle);
+		double en = particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
 		theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
 		theoreticalMomentum += particle->momentum*particle->weight*gyroradius/plasma_period;
 	}

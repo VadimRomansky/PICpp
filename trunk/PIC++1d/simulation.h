@@ -260,6 +260,7 @@ public:
 	void updateEnergy();
 	void updateFields();
 	void updateParameters();
+	void clearEscapedParticles();
 	void updateExternalFlux();
 	Vector3d evaluateRotB(int i);
 	Vector3d evaluateRotTempE(int i);
