@@ -98,6 +98,7 @@ void Simulation::simulate() {
 		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH){
 			removeEscapedParticles();
 		}
+		clearEscapedParticles();
 
 		time += deltaT;
 		currentIteration++;
@@ -663,15 +664,16 @@ void Simulation::updateEnergy() {
 
 		for(int i = 0; i < escapedParticles.size(); ++i) {
 			Particle* particle = escapedParticles[i];
+			double en = particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius / plasma_period);
 			theoreticalEnergy -= particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius / plasma_period);
 			theoreticalMomentum -= particle->momentum*particle->weight * gyroradius / plasma_period;
 		}
 
 		theoreticalEnergy -= ((Efield[xnumber].vectorMult(Bfield[xnumber - 1])).x*deltaT*speed_of_light_normalized/(4*pi))*sqr(gyroradius / plasma_period);
-		theoreticalEnergy -= ((Efield[0].vectorMult(Bfield[0])).x*deltaT*speed_of_light_normalized/(4*pi))*sqr(gyroradius / plasma_period);
+		theoreticalEnergy += ((Efield[0].vectorMult(Bfield[0])).x*deltaT*speed_of_light_normalized/(4*pi))*sqr(gyroradius / plasma_period);
 
 		theoreticalMomentum -= ((Efield[xnumber].vectorMult(Bfield[xnumber - 1]))*deltaT/(4*pi))* gyroradius / plasma_period;
-		theoreticalMomentum -= ((Efield[0].vectorMult(Bfield[0]))*deltaT/(4*pi))* gyroradius / plasma_period;
+		theoreticalMomentum += ((Efield[0].vectorMult(Bfield[0]))*deltaT/(4*pi))* gyroradius / plasma_period;
 	}
 }
 
@@ -811,6 +813,10 @@ void Simulation::updateParameters(){
 			maxEfield = Efield[i];
 		}
 	}
+}
+
+void Simulation::clearEscapedParticles() {
+	escapedParticles.clear();
 }
 
 void Simulation::updateExternalFlux(){
