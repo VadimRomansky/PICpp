@@ -8,13 +8,14 @@
 #include "vector3d.h"
 #include "matrix3d.h"
 
-Particle::Particle(int n, double m, double q, double w, ParticleTypes t, double x0, double px0, double py0, double pz0, double dx0) {
+Particle::Particle(int n, double m, double q, double w, ParticleTypes t, ParticleTypeContainer type_container, double x0, double px0, double py0, double pz0, double dx0) {
 	number = n;
 
 	mass = m;
 	charge = q;
 	weight = w;
 	type = t;
+	typeContainer = type_container;
 
 	x = x0;
 
@@ -39,6 +40,7 @@ Particle::Particle(const Particle& particle) {
 	charge = particle.charge;
 	weight = particle.weight;
 	type = particle.type;
+	typeContainer = particle.typeContainer;
 
 	x = particle.x;
 	momentum = particle.momentum;

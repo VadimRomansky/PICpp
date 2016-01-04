@@ -192,7 +192,44 @@ Simulation readInput(FILE* inputFile) {
 		exit(0);
 	}
 
-	return Simulation(xnumber, xsize, temperature, density, Vx, Vy, Vz, Ex, Ey, Ez, Bx, By, Bz, maxIterations, maxTime, particlesPerBin);
+	ch = ' ';
+	while(ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
+	int positronsPerBin;
+	fscanf(inputFile, "%d", &positronsPerBin);
+
+	if(positronsPerBin < 0) {
+		printf("positrons per bin must be >= 0\n");
+		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "positrons per bin must be >= 0\n");
+		fclose(errorLogFile);
+		exit(0);
+	}
+
+	ch = ' ';
+	while(ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
+	int alphaPerBin;
+	fscanf(inputFile, "%d", &alphaPerBin);
+
+	if(alphaPerBin < 0) {
+		printf("alpha per bin must be >= 0\n");
+		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "alpha per bin must be >= 0\n");
+		fclose(errorLogFile);
+		exit(0);
+	}
+
+	ch = ' ';
+	while(ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
+	return Simulation(xnumber, xsize, temperature, density, Vx, Vy, Vz, Ex, Ey, Ez, Bx, By, Bz, maxIterations, maxTime, particlesPerBin, positronsPerBin, alphaPerBin);
 }
 
 Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile){
@@ -202,7 +239,10 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 	fscanf(generalFile, "%d", &xnumber);
 	simulation.xnumber = xnumber;
 	fscanf(generalFile, "%d", &simulation.particlesNumber);
-	fscanf(generalFile, "%d", &simulation.particlesPerBin);
+	fscanf(generalFile, "%d", &simulation.electronsPerBin);
+	fscanf(generalFile, "%d", &simulation.protonsPerBin);
+	fscanf(generalFile, "%d", &simulation.positronsPerBin);
+	fscanf(generalFile, "%d", &simulation.alphaPerBin);
 
 	fscanf(generalFile, "%lf", &simulation.density);
 	fscanf(generalFile, "%lf", &simulation.temperature);
@@ -319,9 +359,13 @@ void readParticles(FILE* particlesFile, Simulation& simulation){
 			particleType = POSITRON;
 		} else if(type == 4){
 			particleType = ALPHA;
+		} else {
+			printf("particle type must be 1 2 3 4\n");
+			exit(0);
 		}
+		ParticleTypeContainer typeContainer = simulation.types[type - 1];
 
-		Particle* particle = new Particle(number, mass, charge, weight, particleType, x, px, py, pz, dx);
+		Particle* particle = new Particle(number, mass, charge, weight, particleType, typeContainer, x, px, py, pz, dx);
 		particle->y = y;
 		particle->z = z;
 

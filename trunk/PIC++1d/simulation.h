@@ -17,7 +17,10 @@ class Simulation{
 public:
 	int xnumber;
 	int particlesNumber;
-	int particlesPerBin;
+	int electronsPerBin;
+	int protonsPerBin;
+	int positronsPerBin;
+	int alphaPerBin;
 
 	double density;
 	double temperature;
@@ -68,6 +71,9 @@ public:
 	double extJ;
 
 	Vector3d momentum;
+
+	ParticleTypeContainer* types;
+	int typesNumber;
 
 	double* electronConcentration;
 	double* protonConcentration;
@@ -166,6 +172,8 @@ public:
 	FILE* informationFile;
 	FILE* particleProtonsFile;
 	FILE* particleElectronsFile;
+	FILE* particlePositronsFile;
+	FILE* particleAlphaFile;
 
 	FILE* rotBFile;
 	FILE* EderivativeFile;
@@ -179,7 +187,7 @@ public:
 
 	//Simulation();
 	Simulation();
-	Simulation(int xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV);
+	Simulation(int xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV, int positronsPerBinV, int alphaPerBinV);
 	~Simulation();
 
 	void initialize();
@@ -195,6 +203,7 @@ public:
 	void initializeKolmogorovSpectrum(int start, int end);
 	void initializeMovingLangmuirWave();
 	void createArrays();
+	void createParticleTypes();
 	void createFiles();
 	void simulate();
 	void output();
@@ -290,7 +299,7 @@ public:
 	Particle* getLastElectron();
 	Particle* getProton(int n);
 	Particle* getElectron(int n);
-	Particle* createParticle(int n, int i, double weight, ParticleTypes type, double localTemperature);
+	Particle* createParticle(int n, int i, double weight, ParticleTypes type, ParticleTypeContainer typeContainer, double localTemperature);
 
 	void moveParticles();
 	void removeEscapedParticles();
@@ -298,7 +307,7 @@ public:
 	void correctParticlePosition(Particle* particle);
 	void correctParticlePosition(Particle& particle);
 	void evaluateParticlesRotationTensor();
-	void injectNewParticles(int count, double length);
+	void injectNewParticles(int count, ParticleTypeContainer typeContainer, double length);
 	void scatterParticle(Particle* particle);
 
 	void collectParticlesIntoBins();
