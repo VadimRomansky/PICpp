@@ -333,32 +333,19 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d velocity,
 	return result;
 }
 
-void Simulation::injectNewParticles(int count, double length){
+void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContainer, double length){
 	printf("inject new particles\n");
-	double concentration = density/(massProton + massElectron);
 
 	int n = particles.size();
 
-	double weight = (concentration / particlesPerBin) * volumeB(xnumber - 1);
+	double weight = (typeContainer.concentration / typeContainer.particlesPerBin) * volumeB(xnumber - 1);
 	double x = xgrid[xnumber] - length;
-	Particle* lastProton = getLastProton();
-	Particle* lastElectron = getLastElectron();
-	for (int l = 0; l < 2 * count; ++l) {
-		ParticleTypes type;
-		if (l % 2 == 0) {
-			type = PROTON;
-		} else {
-			type = ELECTRON;
-		}
-		Particle* particle = createParticle(n, xnumber - 1, weight, type, temperature);
+	for (int l = 0; l < count; ++l) {
+		ParticleTypes type = typeContainer.type;
+		Particle* particle = createParticle(n, xnumber - 1, weight, type, typeContainer, temperature);
 		n++;
 		particle->x = x;
 		particle->addVelocity(V0, speed_of_light_normalized);
-		/*if(type == PROTON){
-			particle->momentum = lastProton->momentum;
-		} else {
-			particle->momentum = lastElectron->momentum;
-		}*/
 		particles.push_back(particle);
 		double en = particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
 		theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);

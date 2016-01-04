@@ -200,7 +200,10 @@ void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* p
 
 	fprintf(generalFile, "%d\n", simulation->xnumber);
 	fprintf(generalFile, "%d\n", simulation->particlesNumber);
-	fprintf(generalFile, "%d\n", simulation->particlesPerBin);
+	fprintf(generalFile, "%d\n", simulation->electronsPerBin);
+	fprintf(generalFile, "%d\n", simulation->protonsPerBin);
+	fprintf(generalFile, "%d\n", simulation->positronsPerBin);
+	fprintf(generalFile, "%d\n", simulation->alphaPerBin);
 
 	fprintf(generalFile, "%15.10g\n", simulation->density);
 	fprintf(generalFile, "%15.10g\n", simulation->temperature);
@@ -266,7 +269,7 @@ void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* p
 	outputBackupParticles(particlesFile, simulation);
 }
 
-void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, Simulation* simulation) {
+void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPositronsFile, FILE* outAlphaFile, Simulation* simulation) {
 	for (int i = 0; i < simulation->particles.size(); ++i) {
 		Particle* particle = simulation->particles[i];
 		double p = particle->momentum.norm() * simulation->gyroradius / simulation->plasma_period;
@@ -275,6 +278,12 @@ void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, Simulation* s
 		}
 		else if (particle->type == ELECTRON) {
 			fprintf(outElectronsFile, "%15.10g %15.10g %15.10g\n", particle->x * simulation->gyroradius, p, particle->momentum.x * simulation->gyroradius / simulation->plasma_period);
+		}
+		if (particle->type == POSITRON) {
+			fprintf(outPositronsFile, "%15.10g %15.10g %15.10g\n", particle->x * simulation->gyroradius, p, particle->momentum.x * simulation->gyroradius / simulation->plasma_period);
+		}
+		else if (particle->type == ALPHA) {
+			fprintf(outAlphaFile, "%15.10g %15.10g %15.10g\n", particle->x * simulation->gyroradius, p, particle->momentum.x * simulation->gyroradius / simulation->plasma_period);
 		}
 	}
 }
