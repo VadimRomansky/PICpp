@@ -118,8 +118,8 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 		gyroradius = 1.0;
 	}
 
-	//plasma_period = 1.0;
-	//gyroradius = 1.0;
+	plasma_period = 1.0;
+	gyroradius = 1.0;
 
 	//gyroradius = xsize;
 
@@ -1709,6 +1709,11 @@ Particle* Simulation::getProton(int n) {
 			}
 		}
 	}
+	errorLogFile = fopen("./output/errorLog.dat", "w");
+	fprintf(errorLogFile, "can not find proton number %d\n", n);
+	printf("can not find proton number %d\n", n);
+	fclose(errorLogFile);
+	exit(0);
 	return NULL;
 }
 
@@ -1723,6 +1728,11 @@ Particle* Simulation::getElectron(int n) {
 			}
 		}
 	}
+	errorLogFile = fopen("./output/errorLog.dat", "w");
+	fprintf(errorLogFile, "can not find electron number %d\n", n);
+	printf("can not find electron number %d\n", n);
+	fclose(errorLogFile);
+	exit(0);
 	return NULL;
 }
 

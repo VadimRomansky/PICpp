@@ -17,7 +17,8 @@ void Simulation::cleanupDivergence() {
 		chargeDensity[i] -= fullDensity;
 	}*/
 
-	divergenceCleaningField[xnumber - 1][0] = - cleanUpRightPart(xnumber - 1) * deltaX;
+	//divergenceCleaningField[xnumber - 1][0] = - cleanUpRightPart(xnumber - 1) * deltaX;
+	divergenceCleaningField[xnumber - 1][0] = 0;
 	divergenceCleaningField[xnumber - 1][1] = 0;
 	divergenceCleaningField[xnumber - 1][2] = 0;
 
