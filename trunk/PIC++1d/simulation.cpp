@@ -57,6 +57,7 @@ void Simulation::simulate() {
 		if (currentIteration % writeParameter == 0) {
 			output();
 		}
+		//Particle* tempParticle = particles[0];
 
 		updateDeltaT();
 		evaluateParticlesRotationTensor();
@@ -130,7 +131,7 @@ void Simulation::output() {
 		outputDistribution(distributionFileElectron, particles, ELECTRON, gyroradius, plasma_period);
 		fclose(distributionFileElectron);
 		protonTraectoryFile = fopen("./output/traectory_proton.dat", "a");
-		outputTraectory(protonTraectoryFile, getProton(5000), time, plasma_period, gyroradius);
+		outputTraectory(protonTraectoryFile, getProton(100), time, plasma_period, gyroradius);
 		fclose(protonTraectoryFile);
 		electronTraectoryFile = fopen("./output/traectory_electron.dat", "a");
 		outputTraectory(electronTraectoryFile, getFirstElectron(), time, plasma_period, gyroradius);

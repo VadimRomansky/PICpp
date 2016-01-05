@@ -120,7 +120,7 @@ void Simulation::moveParticle(Particle* particle){
 
 	tempParticle.momentum += (E + (velocity.vectorMult(B)/speed_of_light_normalized))*particle->charge*deltaT;
 
-	newVelocity = tempParticle.velocity(speed_of_light_normalized);
+ 	newVelocity = tempParticle.velocity(speed_of_light_normalized);
 
 	tempParticle.x += ((1 - eta)*velocity.x + eta*newVelocity.x)*eta*deltaT;
 	tempParticle.y += ((1 - eta)*velocity.y + eta*newVelocity.y)*eta*deltaT;
@@ -337,6 +337,7 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 	printf("inject new particles\n");
 
 	int n = particles.size();
+	//Particle* tempParticle = particles[0];
 
 	double weight = (typeContainer.concentration / typeContainer.particlesPerBin) * volumeB(xnumber - 1);
 	double x = xgrid[xnumber] - length;
@@ -346,6 +347,7 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 		n++;
 		particle->x = x;
 		particle->addVelocity(V0, speed_of_light_normalized);
+		particle->initialMomentum = particle->momentum;
 		particles.push_back(particle);
 		double en = particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
 		theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
