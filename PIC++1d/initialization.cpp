@@ -1,5 +1,6 @@
 #include "stdlib.h"
 #include "stdio.h"
+#include <math.h>
 #include <cmath>
 #include <omp.h>
 
@@ -43,6 +44,7 @@ Simulation::Simulation() {
 Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int electronsPerBinV, int positronsPerBinV, int alphaPerBinV) {
 	debugMode = true;
 	newlyStarted = true;
+	preserveCharge = true;
 	solverType = IMPLICIT; //неявный
 	//solverType = EXPLICIT; // явный
 	boundaryConditionType = PERIODIC;
@@ -1296,28 +1298,28 @@ void Simulation::createParticleTypes() {
 
 	type.type = ELECTRON;
 	type.mass = massElectron;
-	type.charge = -electron_charge;
+	type.charge = -electron_charge_normalized;
 	type.particlesPerBin = electronsPerBin;
 
 	types[0] = type;
 
 	type.type = PROTON;
 	type.mass = massProton;
-	type.charge = electron_charge;
+	type.charge = electron_charge_normalized;
 	type.particlesPerBin = protonsPerBin;
 
 	types[1] = type;
 
 	type.type = POSITRON;
 	type.mass = massElectron;
-	type.charge = electron_charge;
+	type.charge = electron_charge_normalized;
 	type.particlesPerBin = positronsPerBin;
 
 	types[2] = type;
 
 	type.type = ALPHA;
 	type.mass = massAlpha;
-	type.charge = 2.0 * electron_charge;
+	type.charge = 2.0 * electron_charge_normalized;
 	type.particlesPerBin = alphaPerBin;
 
 	types[3] = type;
@@ -1655,6 +1657,54 @@ void Simulation::createParticles() {
 				}
 			}
 		}
+	}
+
+	if(preserveCharge){
+		moveToPreserveCharge();
+	}
+}
+void Simulation::moveToPreserveCharge(){
+	Particle* electron = NULL;
+	Particle* notElectron = NULL;
+	Particle* particle;
+	int electronCount = 0;
+	int notElectronCount = 0;
+	int particleCount = 0;
+
+	while(particleCount < particles.size()){
+		particle = particles[particleCount];
+		if(particle->type != ELECTRON){
+			notElectron = particle;
+			notElectronCount = particleCount;
+
+			int necessaryElectrons = 1;
+
+			if(particle->type == ALPHA){
+				necessaryElectrons = 2;
+			}
+
+			while(necessaryElectrons > 0){
+				electron = NULL;
+				while( electron == NULL){
+					if(electronCount >= particles.size()){
+						errorLogFile = fopen("./output/errorLog.dat", "w");
+						printf("error in preserving charge\n");
+						fprintf(errorLogFile, "error in preserving charge\n");
+						fclose(errorLogFile);
+						exit(0);
+					}
+					if(particles[electronCount]->type == ELECTRON){
+						electron = particles[electronCount];
+						electron->x = notElectron->x;
+						electron->y = notElectron->y;
+						electron->z = notElectron->z;
+					}
+					electronCount++;
+				}
+				necessaryElectrons--;
+			}
+		}
+		particleCount++;
 	}
 }
 

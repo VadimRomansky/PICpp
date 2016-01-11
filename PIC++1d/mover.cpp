@@ -341,6 +341,10 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 
 	double weight = (typeContainer.concentration / typeContainer.particlesPerBin) * volumeB(xnumber - 1);
 	double x = xgrid[xnumber] - length;
+
+	if(typeContainer.type == ELECTRON && preserveCharge){
+		return;
+	}
 	for (int l = 0; l < count; ++l) {
 		ParticleTypes type = typeContainer.type;
 		Particle* particle = createParticle(n, xnumber - 1, weight, type, typeContainer, temperature);
@@ -352,6 +356,24 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 		double en = particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
 		theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
 		theoreticalMomentum += particle->momentum*particle->weight*gyroradius/plasma_period;
+		if(preserveCharge){
+			int necessaryElectrons = 1;
+			if(type == ALPHA){
+				necessaryElectrons = 2;
+			}
+			while(necessaryElectrons > 0){
+				particle = createParticle(n, xnumber - 1, weight, ELECTRON, types[0], temperature);
+				n++;
+				particle->x = x;
+				particle->addVelocity(V0, speed_of_light_normalized);
+				particle->initialMomentum = particle->momentum;
+				particles.push_back(particle);
+				en = particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
+				theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
+				theoreticalMomentum += particle->momentum*particle->weight*gyroradius/plasma_period;
+				necessaryElectrons--;
+			}
+		}
 	}
 }
 
