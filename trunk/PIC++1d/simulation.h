@@ -55,6 +55,7 @@ public:
 	bool debugMode;
 
 	bool newlyStarted;
+	bool preserveCharge;
 
 	SolverType solverType;
 	BoundaryConditionType boundaryConditionType;
@@ -293,6 +294,7 @@ public:
 	void smoothEderivative();
 
 	void createParticles();
+	void moveToPreserveCharge();
 	Particle* getFirstProton();
 	Particle* getFirstElectron();
 	Particle* getLastProton();

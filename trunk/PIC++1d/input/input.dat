@@ -4,9 +4,9 @@
 1.67E-28               density
 -3E9 0 0                  velocity
 0 0 0                  elecctricField
-0 0 0                  magneticField
+0 0 1E-4                  magneticField
 100000000               max iterations
 1E15                   max time
 30                 electrons per bin
 1                  positrons per bin
-0                  alpha per bin (protons - electrons - positron - alpha)
+1                  alpha per bin (protons - electrons - positron - 2*alpha)
