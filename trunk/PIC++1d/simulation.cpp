@@ -124,15 +124,19 @@ void Simulation::output() {
 		distributionFileElectronUpstream = fopen("./output/distribution_electrons_upstream.dat", "a");
 		outputDistributionUpstream(distributionFileElectronUpstream, particles, ELECTRON, xgrid[shockWavePoint], gyroradius, plasma_period);
 		fclose(distributionFileElectronUpstream);
-		distributionFileProton = fopen("./output/distribution_protons.dat", "a");
-		outputDistribution(distributionFileProton, particles, PROTON, gyroradius, plasma_period);
-		fclose(distributionFileProton);
+		if(protonsPerBin > 0){
+			distributionFileProton = fopen("./output/distribution_protons.dat", "a");
+			outputDistribution(distributionFileProton, particles, PROTON, gyroradius, plasma_period);
+			fclose(distributionFileProton);
+		}
 		distributionFileElectron = fopen("./output/distribution_electrons.dat", "a");
 		outputDistribution(distributionFileElectron, particles, ELECTRON, gyroradius, plasma_period);
 		fclose(distributionFileElectron);
-		protonTraectoryFile = fopen("./output/traectory_proton.dat", "a");
-		outputTraectory(protonTraectoryFile, getProton(100), time, plasma_period, gyroradius);
-		fclose(protonTraectoryFile);
+		if(protonsPerBin > 0){
+			protonTraectoryFile = fopen("./output/traectory_proton.dat", "a");
+			outputTraectory(protonTraectoryFile, getProton(100), time, plasma_period, gyroradius);
+			fclose(protonTraectoryFile);
+		}
 		electronTraectoryFile = fopen("./output/traectory_electron.dat", "a");
 		outputTraectory(electronTraectoryFile, getFirstElectron(), time, plasma_period, gyroradius);
 		fclose(electronTraectoryFile);
