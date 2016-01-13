@@ -139,6 +139,7 @@ public:
 	Vector3d* explicitEfield;
 	Vector3d* rotB;
 	Vector3d* Ederivative;
+	Vector3d currentRightField;
 
 	double** divergenceCleaningField;
 	double** divergenceCleaningPotential;
@@ -199,6 +200,7 @@ public:
 	void initializeTwoStream();
 	void initializeExternalFluxInstability();
 	void initializeFluxFromRight();
+	void initializeStripeFluxFromRight();
 	void fieldsLorentzTransitionX(const double& v);
 	void initializeShockWave();
 	void initializeKolmogorovSpectrum(int start, int end);
@@ -237,6 +239,7 @@ public:
 	void createInternalEquation(int i);
 	void evaluateMaxwellEquationMatrix();
 	void evaluateMagneticField();
+	void updateRightFields();
 
 
 	void updateBoundaries();

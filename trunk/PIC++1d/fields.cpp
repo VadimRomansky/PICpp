@@ -52,9 +52,9 @@ void Simulation::evaluateFields() {
 			tempEfield[xnumber] = tempEfield[0];
 			explicitEfield[xnumber] = explicitEfield[0];
 		} else {
-			tempEfield[xnumber] = E0;
+			tempEfield[xnumber] = currentRightField;
 
-			explicitEfield[xnumber] = E0;
+			explicitEfield[xnumber] = currentRightField;
 
 			//tempEfield[xnumber] = Efield[xnumber] + evaluateRotB(xnumber - 1)*speed_of_light_normalized*deltaT*theta;
 
@@ -262,7 +262,7 @@ void Simulation::createSuperConductorLeftEquation() {
 
 void Simulation::createFreeRightEquation(){
 	//Vector3d rightPart = Vector3d(0, 0, 0);
-	Vector3d rightPart = E0;
+	Vector3d rightPart = currentRightField;
 
 	maxwellEquationMatrix[xnumber - 1][0].push_back(MatrixElement(1.0, xnumber - 1, 0));
 	maxwellEquationMatrix[xnumber - 1][1].push_back(MatrixElement(1.0, xnumber - 1, 1));
@@ -829,4 +829,16 @@ void Simulation::fourierFilter(int startPoint, int endPoint){
 		}
 	}
 
+}
+
+void Simulation::updateRightFields(){
+	int n = 20;
+	double halfLength = xsize/(2*n);
+	double halfPeriod = halfLength/fabs(V0.x);
+	int count = time/halfPeriod;
+	if((count % 2) == 0){
+		currentRightField = E0;
+	} else {
+		currentRightField = E0*(-1.0);
+	}
 }
