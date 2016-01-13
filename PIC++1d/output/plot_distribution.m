@@ -9,7 +9,7 @@ Nt = size(distribution_protons, 1)/Np;
 
 a = 0;
 b = fix(Nt/2);
-c = Nt - 1;
+c = Nt - 2;
 
 Fp(1:Np, 1:3) = 0;
 Fe(1:Np, 1:3) = 0;

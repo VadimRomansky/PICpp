@@ -120,8 +120,8 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 		gyroradius = 1.0;
 	}
 
-	plasma_period = 1.0;
-	gyroradius = 1.0;
+	//plasma_period = 1.0;
+	//gyroradius = 1.0;
 
 	//gyroradius = xsize;
 
@@ -234,6 +234,7 @@ void Simulation::initialize() {
 		middleXgrid[i] = (xgrid[i] + xgrid[i + 1]) / 2;
 	}
 
+	currentRightField = E0;
 	for (int i = 0; i < xnumber + 1; ++i) {
 		Efield[i] = E0;
 		newEfield[i] = Efield[i];
@@ -863,6 +864,7 @@ void Simulation::initializeFluxFromRight() {
 	//initializeAlfvenWave(10, 1.0E-4);
 	createParticles();
 	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized);
+	currentRightField = E0;
 	for (int i = 0; i < xnumber + 1; ++i) {
 		tempEfield[i] = E0;
 		Efield[i] = E0;
@@ -890,6 +892,66 @@ void Simulation::initializeFluxFromRight() {
 
 	//fieldsLorentzTransitionX(V0.x);
 	initializeKolmogorovSpectrum(0, xnumber - 1);
+
+	for (int i = 0; i < particles.size(); ++i) {
+		Particle* particle = particles[i];
+		particle->addVelocity(V0, speed_of_light_normalized);
+		particle->initialMomentum = particle->momentum;
+	}
+
+	double magneticEnergy = B0.scalarMult(B0) / (8 * pi);
+	double kineticEnergy = density * V0.scalarMult(V0) / 2;
+
+	informationFile = fopen("./output/information.dat", "a");
+	fprintf(informationFile, "magneticEnergy/kineticEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
+	printf("magneticEnergy/kinetikEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
+	fclose(informationFile);
+
+}
+
+void Simulation::initializeStripeFluxFromRight() {
+	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	//boundaryConditionType = FREE_BOTH;
+	//initializeAlfvenWave(10, 1.0E-4);
+	createParticles();
+	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized);
+	currentRightField = E0;
+
+	int n = 20;
+	double halfLength = xsize/(2*n);
+	for (int i = 0; i < xnumber + 1; ++i) {
+		int count = (xgrid[i] - xgrid[0])/halfLength;
+		if((count % 2) == 0){
+			tempEfield[i] = E0;
+		} else {
+			tempEfield[i] = E0*(-1.0);
+		}
+		Efield[i] = tempEfield[i];
+		newEfield[i] = tempEfield[i];
+		explicitEfield[i] = tempEfield[i];
+	}
+	Efield[xnumber] = E0;
+	tempEfield[xnumber] = E0;
+	newEfield[xnumber] = E0;
+	explicitEfield[xnumber] = E0;
+	Efield[0].y = 0;
+	Efield[0].z = 0;
+	tempEfield[0].y = 0;
+	tempEfield[0].z = 0;
+	newEfield[0].y = 0;
+	newEfield[0].z = 0;
+	explicitEfield[0].y = 0;
+	explicitEfield[0].z = 0;
+	for(int i = 0; i < xnumber; ++i){
+		int count = (middleXgrid[i] - xgrid[0])/halfLength;
+		if((count % 2) == 0){
+			Bfield[i] = B0;
+		} else {
+			Bfield[i] = B0*(-1.0);
+		}
+		newBfield[i] = Bfield[i];
+
+	}
 
 	for (int i = 0; i < particles.size(); ++i) {
 		Particle* particle = particles[i];
@@ -935,6 +997,7 @@ void Simulation::initializeShockWave() {
 	boundaryConditionType = FREE_BOTH;
 
 	E0 = Vector3d(0, 0, 0);
+	currentRightField = E0;
 	for (int i = 0; i < xnumber + 1; ++i) {
 		Efield[i] = Vector3d(0, 0, 0);
 		tempEfield[i] = Efield[i];
@@ -1052,6 +1115,7 @@ void Simulation::initializeShockWave() {
 }
 
 void Simulation::initializeTwoStream() {
+	boundaryConditionType = PERIODIC;
 	createParticles();
 	collectParticlesIntoBins();
 	double u = speed_of_light_normalized * 0.7;
@@ -1119,6 +1183,7 @@ void Simulation::initializeTwoStream() {
 }
 
 void Simulation::initializeExternalFluxInstability() {
+	boundaryConditionType = PERIODIC;
 	createParticles();
 	double alfvenV = B0.norm() * fieldScale / sqrt(4 * pi * density);
 	double concentration = density / (massProton + massElectron);
@@ -1185,6 +1250,7 @@ void Simulation::initializeKolmogorovSpectrum(int start, int end) {
 }
 
 void Simulation::initializeMovingLangmuirWave() {
+	boundaryConditionType = PERIODIC;
 	int n = 1;
 	double effectiveMass = massProton * massElectron / (massProton + massElectron);
 	double movingConcentration = (density / (massProton + massElectron));
