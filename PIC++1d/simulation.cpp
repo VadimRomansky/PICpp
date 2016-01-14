@@ -294,14 +294,17 @@ void Simulation::updateDeltaT() {
 
 double Simulation::volumeE(int i) {
 	if((boundaryConditionType == PERIODIC) || ((i > 0) && (i < xnumber))){
-		return deltaX;
+		//return deltaX;
+		return deltaX/(gyroradius*gyroradius);
 	} else {
-		return deltaX/2;
+		//return deltaX/2;
+		return 0.5*deltaX/(gyroradius*gyroradius);
 	}
 }
 
 double Simulation::volumeB(int i) {
-	return deltaX;
+	//return deltaX;
+	return deltaX/(gyroradius*gyroradius);
 }
 
 void Simulation::checkParticleInBox(Particle& particle) {
@@ -636,7 +639,8 @@ void Simulation::updateEnergy() {
 	}
 
 	for (int i = 0; i < xnumber; ++i) {
-		Vector3d B = (Bfield[i] - B0)*fieldScale;
+		Vector3d B = Bfield[i]*fieldScale;
+		//Vector3d B = (Bfield[i] - B0)*fieldScale;
 		magneticFieldEnergy += B.scalarMult(B) * volumeB(i) / (8 * pi);
 	}
 
@@ -682,8 +686,8 @@ void Simulation::updateEnergy() {
 			theoreticalMomentum -= particle->momentum*particle->weight * gyroradius / plasma_period;
 		}
 
-		theoreticalEnergy -= ((Efield[xnumber].vectorMult(Bfield[xnumber - 1])).x*deltaT*speed_of_light_normalized/(4*pi))*sqr(gyroradius / plasma_period);
-		theoreticalEnergy += ((Efield[0].vectorMult(Bfield[0])).x*deltaT*speed_of_light_normalized/(4*pi))*sqr(gyroradius / plasma_period);
+		theoreticalEnergy -= ((Efield[xnumber].vectorMult(Bfield[xnumber - 1])).x*deltaT*speed_of_light_normalized/(4*pi))*sqr(1/gyroradius)*sqr(gyroradius / plasma_period);
+		theoreticalEnergy += ((Efield[0].vectorMult(Bfield[0])).x*deltaT*speed_of_light_normalized/(4*pi))*sqr(1/gyroradius)*sqr(gyroradius / plasma_period);
 
 		theoreticalMomentum -= ((Efield[xnumber].vectorMult(Bfield[xnumber - 1]))*deltaT/(4*pi))* gyroradius / plasma_period;
 		theoreticalMomentum += ((Efield[0].vectorMult(Bfield[0]))*deltaT/(4*pi))* gyroradius / plasma_period;
