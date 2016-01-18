@@ -103,7 +103,7 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 
 	double gamma = 1 / sqrt(1 - V0.scalarMult(V0) / sqr(speed_of_light));
 
-	double effectiveMass = ((electronsPerBin / massElectron) + (protonsPerBin / massProton) + (positronsPerBin / massElectron) + (alphaPerBin / massAlpha)) / electronsPerBin;
+	double effectiveMass = 1/(((electronsPerBin / massElectron) + (protonsPerBin / massProton) + (positronsPerBin / massElectron) + (alphaPerBin / massAlpha)) / electronsPerBin);
 
 	//plasma_period = sqrt(massElectron / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi)*sqrt(gamma);
 	plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi) * gamma * sqrt(gamma);
