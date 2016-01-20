@@ -45,7 +45,9 @@ void Simulation::simulate() {
 	theoreticalEnergy = energy;
 	theoreticalMomentum = momentum;
 
-	double length = deltaX / particlesPerBin - 0.0001 * deltaX;
+	for(int i = 0; i < typesNumber; ++i){
+		types[i].injectionLength = types[i].particesDeltaX - 0.0001*deltaX;
+	}
 
 	while (time * plasma_period < maxTime && currentIteration < maxIteration) {
 		printf("iteration number %d time = %15.10g\n", currentIteration, time * plasma_period);
@@ -63,16 +65,19 @@ void Simulation::simulate() {
 		updateParameters();
 		moveParticles();
 
-		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH) {
-			length += fabs(V0.x * deltaT);
-			if (length > 2 * deltaX / particlesPerBin) {
-				printf("length > 2*deltaX/particlesPerBin\n");
-			}
-			if (length >= deltaX / particlesPerBin) {
-				int newParticlesCount = length * particlesPerBin / deltaX;
-				for (int i = newParticlesCount; i > 0; --i) {
-					length -= deltaX / particlesPerBin;
-					injectNewParticles(1, length);
+		for(int i = 0; i < typesNumber; ++i){
+			types[i].injectionLength += fabs(V0.x*deltaT);
+		}
+		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH){
+			for(int typeCounter = 0; typeCounter < typesNumber; ++typeCounter){
+				if(types[typeCounter].particlesPerBin > 0){
+					if(types[typeCounter].particlesPerBin*types[typeCounter].injectionLength >= deltaX){
+						int newParticlesCount = types[typeCounter].injectionLength*types[typeCounter].particlesPerBin/deltaX;
+						for(int i = newParticlesCount; i > 0; --i){
+							types[typeCounter].injectionLength -= deltaX/types[typeCounter].particlesPerBin;
+							injectNewParticles(1,types[typeCounter], types[typeCounter].injectionLength);
+						}
+					}
 				}
 			}
 		}
@@ -166,9 +171,13 @@ void Simulation::output() {
 
 	particleProtonsFile = fopen("./output/protons.dat", "w");
 	particleElectronsFile = fopen("./output/electrons.dat", "w");
-	outputParticles(particleProtonsFile, particleElectronsFile, this);
+	particlePositronsFile = fopen("./output/positrons.dat", "w");
+	particleAlphaFile = fopen("./output/alphas.dat", "w");
+	outputParticles(particleProtonsFile, particleElectronsFile, particlePositronsFile, particleAlphaFile, this);
 	fclose(particleProtonsFile);
 	fclose(particleElectronsFile);
+	fclose(particlePositronsFile);
+	fclose(particleAlphaFile);
 
 	generalFile = fopen("./output/general.dat", "a");
 	outputGeneral(generalFile, this);

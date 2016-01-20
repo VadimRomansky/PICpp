@@ -3,7 +3,18 @@
 
 #include "vector3d.h"
 
-enum ParticleTypes {PROTON, ELECTRON};
+enum ParticleTypes {PROTON, ELECTRON, POSITRON, ALPHA};
+
+class ParticleTypeContainer {
+public:
+	ParticleTypes type;
+	double mass;
+	double charge;
+	int particlesPerBin;
+	double particesDeltaX;
+	double concentration;
+	double injectionLength;
+};
 
 class Particle{
 public:
@@ -13,12 +24,14 @@ public:
 	double charge;
 	double weight;
 	ParticleTypes type;
+	ParticleTypeContainer typeContainer; //maybe unnecessary
 
 	bool escaped;
 
 	Vector3d coordinates;
 
 	Vector3d momentum;
+	Vector3d initialMomentum;
 
 	Matrix3d rotationTensor;
 
@@ -27,7 +40,7 @@ public:
 	double dy;
 	double dz;
 
-	Particle(int n, double m, double q, double w, ParticleTypes type, double x0, double y0, double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0);
+	Particle(int n, double m, double q, double w, ParticleTypes type, ParticleTypeContainer typeContainer, double x0, double y0, double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0);
 	Particle(const Particle& particle);
 
 	double shapeFunctionX(const double& xvalue);

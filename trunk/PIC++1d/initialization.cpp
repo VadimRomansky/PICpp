@@ -1043,7 +1043,7 @@ void Simulation::initializeShockWave() {
 			}
 			double deltaXParticles = deltaX / localParticlesPerBin;
 			for (int l = 0; l < localParticlesPerBin; ++l) {
-				ParticleTypes type = ELECTRON;
+				ParticleTypes type = types[typeCounter].type;
 				Particle* particle = createParticle(n, i, weight, type, types[typeCounter], localTemperature);
 				//particle->x = middleXgrid[i];
 				n++;

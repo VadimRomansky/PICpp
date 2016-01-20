@@ -19,7 +19,10 @@ public:
 	int ynumber;
 	int znumber;
 	int particlesNumber;
-	int particlesPerBin;
+	int electronsPerBin;
+	int protonsPerBin;
+	int positronsPerBin;
+	int alphaPerBin;
 
 	double density;
 	double temperature;
@@ -60,6 +63,7 @@ public:
 	bool debugMode;
 
 	bool newlyStarted;
+	bool preserveCharge;
 
 	SolverType solverType;
 	BoundaryConditionType boundaryConditionType;
@@ -76,6 +80,9 @@ public:
 	double extJ;
 
 	Vector3d momentum;
+
+	ParticleTypeContainer* types;
+	int typesNumber;
 
 	double*** electronConcentration;
 	double*** protonConcentration;
@@ -178,6 +185,8 @@ public:
 	FILE* informationFile;
 	FILE* particleProtonsFile;
 	FILE* particleElectronsFile;
+	FILE* particlePositronsFile;
+	FILE* particleAlphaFile;
 
 	FILE* rotBFile;
 	FILE* EderivativeFile;
@@ -191,7 +200,7 @@ public:
 
 	//Simulation();
 	Simulation();
-	Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV);
+	Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV, int positronsPerBinV, int alphaPerBinV);
 	~Simulation();
 
 	void initialize();
@@ -208,6 +217,7 @@ public:
 	void initializeShockWave();
 	void initializeKolmogorovSpectrum(int start, int end);
 	void createArrays();
+	void createParticleTypes();
 	void createFiles();
 	void simulate();
 	void output();
@@ -285,11 +295,14 @@ public:
 	double getDensity(int i, int j, int k);
 
 	void createParticles();
+	void moveToPreserveCharge();
 	Particle* getFirstProton();
 	Particle* getFirstElectron();
 	Particle* getLastProton();
 	Particle* getLastElectron();
-	Particle* createParticle(int n, int i, int j, int k, double weight, ParticleTypes type, double temperature);
+	Particle* getProton(int n);
+	Particle* getElectron(int n);
+	Particle* createParticle(int n, int i, int j, int k, double weight, ParticleTypes type, ParticleTypeContainer typeContainer, double temperature);
 
 	void moveParticles();
 	void removeEscapedParticles();
@@ -297,7 +310,7 @@ public:
 	void correctParticlePosition(Particle* particle);
 	void correctParticlePosition(Particle& particle);
 	void evaluateParticlesRotationTensor();
-	void injectNewParticles(int count, double length);
+	void injectNewParticles(int count, ParticleTypeContainer typeContainer, double length);
 
 	void collectParticlesIntoBins();
 	void pushParticleIntoEbin(Particle* particle, int i, int j, int k);
