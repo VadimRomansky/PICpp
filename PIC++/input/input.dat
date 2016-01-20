@@ -1,4 +1,4 @@
-25 1 1                 grid numbers
+50 1 1                 grid numbers
 5E10 2E9 2E9         gridsizes
 1E-10                    temperature
 1.67E-28               density
@@ -7,4 +7,6 @@
 1E-4 0 0                  magneticField
 100000000               max iterations
 1E15                   max time
-100                 particles per bin
+100                 electrons per bin
+0                   positrons per bin
+0                   alphas per bin
