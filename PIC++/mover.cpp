@@ -333,28 +333,51 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d velocity,
 	return result;
 }
 
-void Simulation::injectNewParticles(int count, double length){
+void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContainer, double length){
 	printf("inject new particles\n");
 	double concentration = density/(massProton + massElectron);
 
 	int n = particles.size();
+	//Particle* tempParticle = particles[0];
 
-	double weight = (concentration / particlesPerBin) * volumeB(xnumber - 1, 0, 0);
 	double x = xgrid[xnumber] - length;
+
+	if(typeContainer.type == ELECTRON && preserveCharge){
+		return;
+	}
+
 	for(int j = 0; j < ynumber; ++j){
 		for(int k = 0; k < znumber; ++k){
+			double weight = (typeContainer.concentration / typeContainer.particlesPerBin) * volumeB(xnumber - 1, j, k);
 			for (int l = 0; l < 2 * count; ++l) {
-				ParticleTypes type;
-				if (l % 2 == 0) {
-					type = PROTON;
-				} else {
-					type = ELECTRON;
-				}
-				Particle* particle = createParticle(n, xnumber - 1, j, k, weight, type, temperature);
+				ParticleTypes type = typeContainer.type;
+				Particle* particle = createParticle(n, xnumber - 1, j, k, weight, type, typeContainer, temperature);
 				n++;
 				particle->coordinates.x = x;
 				particle->addVelocity(V0, speed_of_light_normalized);
+				particle->initialMomentum = particle->momentum;
 				particles.push_back(particle);
+				double en = particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
+				theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
+				theoreticalMomentum += particle->momentum*particle->weight*gyroradius/plasma_period;
+				if(preserveCharge){
+					int necessaryElectrons = 1;
+					if(type == ALPHA){
+						necessaryElectrons = 2;
+					}
+					while(necessaryElectrons > 0){
+						particle = createParticle(n, xnumber - 1, j, k, weight, ELECTRON, types[0], temperature);
+						n++;
+						particle->coordinates.x = x;
+						particle->addVelocity(V0, speed_of_light_normalized);
+						particle->initialMomentum = particle->momentum;
+						particles.push_back(particle);
+						en = particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
+						theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
+						theoreticalMomentum += particle->momentum*particle->weight*gyroradius/plasma_period;
+						necessaryElectrons--;
+					}
+				}
 			}
 		}
 	}

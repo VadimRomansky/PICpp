@@ -228,8 +228,17 @@ void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* p
 	else {
 		debugMode = 0;
 	}
-
 	fprintf(generalFile, "%d\n", debugMode);
+
+	int preserveCharge = 0;
+	if (simulation->preserveCharge) {
+		preserveCharge = 1;
+	}
+	else {
+		preserveCharge = 0;
+	}
+
+	fprintf(generalFile, "%d\n", preserveCharge);
 
 	int solverType = 0;
 	if (simulation->solverType == IMPLICIT) {
@@ -301,10 +310,10 @@ void outputBackupParticle(FILE* outFile, Particle* particle) {
 	fprintf(outFile, "%15.10g ", particle->charge);
 	fprintf(outFile, "%15.10g ", particle->weight);
 	int type = 0;
-	if (particle->type == PROTON) {
+	if (particle->type == ELECTRON) {
 		type = 1;
 	}
-	else if (particle->type == ELECTRON) {
+	else if (particle->type == PROTON) {
 		type = 2;
 	}
 	else if (particle->type == POSITRON) {

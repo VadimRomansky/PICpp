@@ -266,6 +266,12 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 
 	simulation.debugMode = (debugMode == 1);
 
+	int preserveCharge = 0;
+
+	fscanf(generalFile, "%d", &preserveCharge);
+
+	simulation.preserveCharge = (preserveCharge == 1);
+
 	int solverType = 0;
 
 	fscanf(generalFile, "%d", &solverType);
@@ -352,9 +358,9 @@ void readParticles(FILE* particlesFile, Simulation& simulation){
 
 		ParticleTypes particleType;
 		if(type == 1){
-			particleType = PROTON;
-		} else if(type == 2){
 			particleType = ELECTRON;
+		} else if(type == 2){
+			particleType = PROTON;
 		} else if(type == 3){
 			particleType = POSITRON;
 		} else if(type == 4){

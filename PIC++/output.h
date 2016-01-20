@@ -22,7 +22,7 @@ void outputMatrixArray(FILE* outFile, Matrix3d*** matrix3d, int xnumber, int ynu
 
 void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile, Simulation* simulation); 
 
-void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, Simulation* simulation);
+void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPositronsFile, FILE* outAlphaFile, Simulation* simulation);
 
 void outputBackupParticles(FILE* outFile, Simulation* simulation);
 void outputBackupParticle(FILE* outFile, Particle* particle);
