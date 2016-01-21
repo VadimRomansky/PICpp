@@ -98,7 +98,7 @@ void Simulation::evaluateFields() {
 			for(int j = 0; j < ynumber + 1; ++j){
 				for(int k = 0; k < znumber + 1; ++k){
 					newEfield[i][j][k] = (tempEfield[i][j][k] - Efield[i][j][k] * (1 - theta)) / theta;
-					newEfield[i][j][k].x= 0;
+					//newEfield[i][j][k].x= 0;
 				}
 			}
 		}
@@ -192,15 +192,15 @@ void Simulation::updateEfield() {
 		}
 	}
 	if(boundaryConditionType == PERIODIC){
-		for(int j = 0; j < ynumber; ++j){
-			for(int k = 0; k < znumber; ++k){
+		for(int j = 0; j < ynumber+1; ++j){
+			for(int k = 0; k < znumber+1; ++k){
 				Efield[xnumber][j][k] = Efield[0][j][k];
 			}
 		}
 	}
 
 		for(int i = 0; i < xnumber + 1; ++i){
-			for(int j = 0; j < ynumber; ++j){
+			for(int j = 0; j < ynumber+1; ++j){
 				Efield[i][j][znumber] = Efield[i][j][0];
 			}
 		}
@@ -345,15 +345,15 @@ void Simulation::createSuperConductorLeftEquation(int j, int k) {
 		nextK = 0;
 	}
 	//todo!!!
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(1.0, i, j, k, 0));
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(1.0, i, nextJ, k, 0));
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(1.0, i, j, nextK, 0));
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(1.0, i, nextJ, nextK, 0));
+	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.25, i, j, k, 0));
+	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.25, i, nextJ, k, 0));
+	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.25, i, j, nextK, 0));
+	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.25, i, nextJ, nextK, 0));
 
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-1.0, i+1, j, k, 0));
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-1.0, i+1, nextJ, k, 0));
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-1.0, i+1, j, nextK, 0));
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-1.0, i+1, nextJ, nextK, 0));
+	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.25, i+1, j, k, 0));
+	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.25, i+1, nextJ, k, 0));
+	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.25, i+1, j, nextK, 0));
+	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.25, i+1, nextJ, nextK, 0));
 
 	maxwellEquationRightPart[i][j][k][0] = -4*pi*electricDensity[0][j][k]*deltaX/fieldScale;
 	maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(1.0, i, j, k, 1));
@@ -363,15 +363,16 @@ void Simulation::createSuperConductorLeftEquation(int j, int k) {
 }
 
 void Simulation::createFreeRightEquation(int j, int k){
-	Vector3d rightPart = Vector3d(0, 0, 0);
+	//Vector3d rightPart = Vector3d(0, 0, 0);
+	Vector3d rightPart = E0;
 
 	maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(1.0, xnumber - 1, j, k, 0));
 	maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(1.0, xnumber - 1, j, k, 1));
 	maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(1.0, xnumber - 1, j, k, 2));
 
-	maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(-1.0, xnumber - 2, j, k, 0));
-	maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(-1.0, xnumber - 2, j, k, 1));
-	maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(-1.0, xnumber - 2, j, k, 2));
+	//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(-1.0, xnumber - 2, j, k, 0));
+	//maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(-1.0, xnumber - 2, j, k, 1));
+	//maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(-1.0, xnumber - 2, j, k, 2));
 	
 
 	alertNaNOrInfinity(rightPart.x, "right part x = NaN");
@@ -663,17 +664,17 @@ void Simulation::createInternalEquationZ(int i, int j, int k) {
 	}
 	maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, i, j, k, 2));
 
-	element = -dielectricTensor[i][j][k].matrix[2][1];
-	if(znumber > 1){
-		element -= c_theta_deltaT2*2*dielectricTensor[i][j][k].matrix[2][1]/deltaZ2;
-	}
-	maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, i, j, k, 1));
-
 	element = -dielectricTensor[i][j][k].matrix[2][0];
 	if(znumber > 1){
 		element -= c_theta_deltaT2*2*dielectricTensor[i][j][k].matrix[2][0]/deltaZ2;
 	}
 	maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, i, j, k, 0));
+
+	element = -dielectricTensor[i][j][k].matrix[2][1];
+	if(znumber > 1){
+		element -= c_theta_deltaT2*2*dielectricTensor[i][j][k].matrix[2][1]/deltaZ2;
+	}
+	maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, i, j, k, 1));
 
 	int nextI = i + 1;
 	if (nextI >= xnumber) {
@@ -822,8 +823,10 @@ void Simulation::evaluateMagneticField() {
 	for (int i = 0; i < xnumber; ++i) {
 		for(int j = 0; j < ynumber; ++j){
 			for(int k = 0; k < znumber; ++k){
-				newBfield[i][j][k] = Bfield[i][j][k] - ((evaluateRotTempE(i, j, k)) * (speed_of_light_normalized * deltaT));
-				//newBfield[i] = Bfield[i] - rotEold*speed_of_light_normalized*deltaT;
+				Vector3d rotEold = evaluateRotE(i, j, k);
+				Vector3d rotEnew = evaluateRotNewE(i, j, k);
+				newBfield[i][j][k] = Bfield[i][j][k] - (rotEold * (1 - theta) + rotEnew * theta) * (speed_of_light_normalized * deltaT);
+				//newBfield[i][j][k] = Bfield[i][j][k] - ((evaluateRotTempE(i, j, k)) * (speed_of_light_normalized * deltaT));
 			}
 		}
 	}
@@ -1056,9 +1059,17 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 
 	Vector3d ErightY = (tempEfield[i][j+1][k] + tempEfield[i+1][j+1][k] + tempEfield[i][j+1][k+1] + tempEfield[i+1][j+1][k+1])/4.0;
 	Vector3d EleftY = (tempEfield[i][j][k] + tempEfield[i+1][j][k] + tempEfield[i][j][k+1] + tempEfield[i+1][j][k+1])/4.0;
+	if(ynumber == 1){
+		ErightY = Vector3d(0, 0, 0);
+		EleftY = Vector3d(0, 0, 0);
+	}
 
 	Vector3d ErightZ = (tempEfield[i][j][k+1] + tempEfield[i+1][j][k+1] + tempEfield[i][j+1][k+1] + tempEfield[i+1][j+1][k+1])/4.0;
 	Vector3d EleftZ = (tempEfield[i][j][k] + tempEfield[i+1][j][k] + tempEfield[i][j+1][k] + tempEfield[i+1][j+1][k])/4.0;
+	if(znumber == 1){
+		ErightZ = Vector3d(0, 0, 0);
+		EleftZ = Vector3d(0, 0, 0);
+	}
 
 	x = (ErightY.z - EleftY.z)/deltaY - (ErightZ.y - EleftZ.y)/deltaZ;
 	y = (ErightZ.x - EleftZ.x)/deltaZ - (ErightX.z - EleftX.z)/deltaX;
@@ -1127,9 +1138,17 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 
 	Vector3d ErightY = (Efield[i][j+1][k] + Efield[i+1][j+1][k] + Efield[i][j+1][k+1] + Efield[i+1][j+1][k+1])/4.0;
 	Vector3d EleftY = (Efield[i][j][k] + Efield[i+1][j][k] + Efield[i][j][k+1] + Efield[i+1][j][k+1])/4.0;
+	if(ynumber == 1){
+		ErightY = Vector3d(0, 0, 0);
+		EleftY = Vector3d(0, 0, 0);
+	}
 
 	Vector3d ErightZ = (Efield[i][j][k+1] + Efield[i+1][j][k+1] + Efield[i][j+1][k+1] + Efield[i+1][j+1][k+1])/4.0;
 	Vector3d EleftZ = (Efield[i][j][k] + Efield[i+1][j][k] + Efield[i][j+1][k] + Efield[i+1][j+1][k])/4.0;
+	if(znumber == 1){
+		ErightZ = Vector3d(0, 0, 0);
+		EleftZ = Vector3d(0, 0, 0);
+	}
 
 	x = (ErightY.z - EleftY.z)/deltaY - (ErightZ.y - EleftZ.y)/deltaZ;
 	y = (ErightZ.x - EleftZ.x)/deltaZ - (ErightX.z - EleftX.z)/deltaX;
@@ -1198,9 +1217,17 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 
 	Vector3d ErightY = (newEfield[i][j+1][k] + newEfield[i+1][j+1][k] + newEfield[i][j+1][k+1] + newEfield[i+1][j+1][k+1])/4.0;
 	Vector3d EleftY = (newEfield[i][j][k] + newEfield[i+1][j][k] + newEfield[i][j][k+1] + newEfield[i+1][j][k+1])/4.0;
+	if(ynumber == 1){
+		ErightY = Vector3d(0, 0, 0);
+		EleftY = Vector3d(0, 0, 0);
+	}
 
 	Vector3d ErightZ = (newEfield[i][j][k+1] + newEfield[i+1][j][k+1] + newEfield[i][j+1][k+1] + newEfield[i+1][j+1][k+1])/4.0;
 	Vector3d EleftZ = (newEfield[i][j][k] + newEfield[i+1][j][k] + newEfield[i][j+1][k] + newEfield[i+1][j+1][k])/4.0;
+	if(znumber == 1){
+		ErightZ = Vector3d(0, 0, 0);
+		EleftZ = Vector3d(0, 0, 0);
+	}
 
 	x = (ErightY.z - EleftY.z)/deltaY - (ErightZ.y - EleftZ.y)/deltaZ;
 	y = (ErightZ.x - EleftZ.x)/deltaZ - (ErightX.z - EleftX.z)/deltaX;
@@ -1219,7 +1246,7 @@ double Simulation::evaluateDivE(int i, int j, int k) {
 	double ErightZ = (Efield[i][j][k+1].z + Efield[i+1][j][k+1].z + Efield[i][j+1][k+1].z + Efield[i+1][j+1][k+1].z)/4.0;
 	double EleftZ = (Efield[i][j][k].z + Efield[i+1][j][k].z + Efield[i][j+1][k].z + Efield[i+1][j+1][k].z)/4.0;
 
-	return (ErightX - EleftX) / deltaX + (ErightY - EleftY)/deltaY + (ErightZ - EleftZ)/deltaZ;
+	return ((ErightX - EleftX) / deltaX) + ((ErightY - EleftY)/deltaY) + ((ErightZ - EleftZ)/deltaZ);
 }
 
 double Simulation::evaluateDivCleaningE(int i, int j, int k) {
@@ -1246,7 +1273,7 @@ double Simulation::evaluateDivTempE(int i, int j, int k) {
 	double ErightZ = (tempEfield[i][j][k+1].z + tempEfield[i+1][j][k+1].z + tempEfield[i][j+1][k+1].z + tempEfield[i+1][j+1][k+1].z)/4.0;
 	double EleftZ = (tempEfield[i][j][k].z + tempEfield[i+1][j][k].z + tempEfield[i][j+1][k].z + tempEfield[i+1][j+1][k].z)/4.0;
 
-	return (ErightX - EleftX) / deltaX + (ErightY - EleftY)/deltaY + (ErightZ - EleftZ)/deltaZ;
+	return ((ErightX - EleftX) / deltaX) + ((ErightY - EleftY)/deltaY) + ((ErightZ - EleftZ)/deltaZ);
 }
 
 double Simulation::evaluateDivNewE(int i, int j, int k) {
@@ -1259,7 +1286,7 @@ double Simulation::evaluateDivNewE(int i, int j, int k) {
 	double ErightZ = (newEfield[i][j][k+1].z + newEfield[i+1][j][k+1].z + newEfield[i][j+1][k+1].z + newEfield[i+1][j+1][k+1].z)/4.0;
 	double EleftZ = (newEfield[i][j][k].z + newEfield[i+1][j][k].z + newEfield[i][j+1][k].z + newEfield[i+1][j+1][k].z)/4.0;
 
-	return (ErightX - EleftX) / deltaX + (ErightY - EleftY)/deltaY + (ErightZ - EleftZ)/deltaZ;
+	return ((ErightX - EleftX) / deltaX) + ((ErightY - EleftY)/deltaY) + ((ErightZ - EleftZ)/deltaZ);
 }
 
 double Simulation::evaluateDivFlux(int i, int j, int k) {
@@ -1323,7 +1350,7 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 	double rightFluxZ = (electricFlux[i + 1][j][k+1].x + electricFlux[i][j][k+1].x + electricFlux[i][j+1][k+1].x + electricFlux[i+1][j+1][k+1].x)*0.25;
 	double leftFluxZ = (electricFlux[i + 1][j][k].x + electricFlux[i][j][k].x + electricFlux[i][j+1][k].x + electricFlux[i+1][j+1][k].x)*0.25;
 
-	return (rightFluxX - leftFluxX) / deltaX + (rightFluxY - leftFluxY)/deltaY + (rightFluxZ - leftFluxZ)/deltaZ;
+	return ((rightFluxX - leftFluxX) / deltaX) + ((rightFluxY - leftFluxY)/deltaY) + ((rightFluxZ - leftFluxZ)/deltaZ);
 }
 
 Vector3d Simulation::evaluateDivPressureTensor(int i, int j, int k) {
