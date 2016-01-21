@@ -9,7 +9,7 @@ Ny = size(Yfile, 1);
 Nz = size(Zfile, 1);
 
 NE = Nx*Ny*Nz;
-Nt = fix(size(fluxFile,1)/NE)-1;
+Nt = fix(size(fluxFile,1)/NE);
 
 ynumber = 1;
 znumber = 1;

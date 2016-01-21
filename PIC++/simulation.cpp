@@ -18,12 +18,13 @@ void Simulation::simulate() {
 		initialize();
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
-		initializeAlfvenWave(1, 0.01);
+		//initializeAlfvenWave(1, 0.01);
 		//initializeRotatedAlfvenWave(1, 0.01);
 		//initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeRotatedSimpleElectroMagneticWave(1);
 		//initializeLangmuirWave();
+		createParticles();
 	}
 	collectParticlesIntoBins();
 	updateParameters();
@@ -62,7 +63,6 @@ void Simulation::simulate() {
 		updateElectroMagneticParameters();
 		evaluateFields();
 		evaluateMagneticField();
-		updateParameters();
 		moveParticles();
 
 		for(int i = 0; i < typesNumber; ++i){
@@ -85,6 +85,7 @@ void Simulation::simulate() {
 		//cleanupDivergence();
 		updateFields();
 		updateEnergy();
+		updateParameters();
 
 		time += deltaT;
 		currentIteration++;

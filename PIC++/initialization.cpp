@@ -17,6 +17,8 @@ Simulation::Simulation() {
 	maxEfield = Vector3d(0, 0, 0);
 	maxBfield = Vector3d(0, 0, 0);
 
+	shockWavePoint = 0;
+
 	Kronecker = Matrix3d(1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0);
 
 	for (int i = 0; i < 3; ++i) {
@@ -40,8 +42,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	newlyStarted = true;
 	solverType = IMPLICIT; //неявный
 	//solverType = EXPLICIT; //явный
-	//boundaryConditionType = PERIODIC;
-	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionType = PERIODIC;
+	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
 
 	currentIteration = 0;
@@ -134,6 +136,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 
 	maxEfield = Vector3d(0, 0, 0);
 	maxBfield = Vector3d(0, 0, 0);
+	shockWavePoint = 0;
 
 	Kronecker = Matrix3d(1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0);
 
