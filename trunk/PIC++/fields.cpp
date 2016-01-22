@@ -8,6 +8,7 @@
 #include "constants.h"
 #include "matrix3d.h"
 #include "specialmath.h"
+#include "output.h"
 
 void Simulation::evaluateFields() {
 	printf("evaluating fields\n");
@@ -15,6 +16,7 @@ void Simulation::evaluateFields() {
 	if(solverType == IMPLICIT){
 
 		evaluateMaxwellEquationMatrix();
+		//outputMaxwellEquationMatrix(maxwellEquationMatrix, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
 
 		double**** gmresOutput = new double***[xnumber];
 		//#pragma omp parallel for
@@ -27,6 +29,11 @@ void Simulation::evaluateFields() {
 				}
 			}
 		}
+
+		//printf("E.x = %g E.y = %g E.z = %g\n", Efield[0][0][0].x, Efield[0][0][0].y, Efield[0][0][0].z);
+		//printf("rotB.x = %g rotB.y = %g rotB.z = %g\n", evaluateRotB(0, 0, 0).x, evaluateRotB(0, 0, 0).y, evaluateRotB(0, 0, 0).z);
+		//printf("J.x = %g J.y = %g J.z = %g\n", electricFlux[0][0][0].x, electricFlux[0][0][0].y, electricFlux[0][0][0].z);
+		//printf("gradDensity.x = %g gradDensity.y = %g gradDensity.z = %g\n", evaluateGradDensity(0, 0, 0).x, evaluateGradDensity(0, 0, 0).y, evaluateGradDensity(0, 0, 0).z);
 
 		generalizedMinimalResidualMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
 		//#pragma omp parallel for
@@ -814,6 +821,8 @@ void Simulation::createInternalEquation(int i, int j, int k) {
 	maxwellEquationRightPart[i][j][k][1] = rightPart.y;
 	maxwellEquationRightPart[i][j][k][2] = rightPart.z;
 
+	//printf("right part = %g %g %g\n", rightPart.x, rightPart.y, rightPart.z);
+
 	//maxwellEquationRightPart[i][3] = rightPart2.x;
 	//maxwellEquationRightPart[i][4] = rightPart2.y;
 	//maxwellEquationRightPart[i][5] = rightPart2.z;
@@ -1408,7 +1417,14 @@ Vector3d Simulation::evaluateGradDensity(int i, int j, int k) {
 	if(prevK < 0){
 		prevK = znumber - 1;
 	}
-
+	/*printf("electricDensity[i][j][k] = %g\n", electricDensity[i][j][k]);
+	printf("electricDensity[i][j][prevK] = %g\n", electricDensity[i][j][prevK]);
+	printf("electricDensity[i][prevJ][k] = %g\n", electricDensity[i][prevJ][k]);
+	printf("electricDensity[i][prevJ][prevK] = %g\n", electricDensity[i][prevJ][prevK]);
+	printf("electricDensity[prevI][j][k] = %g\n", electricDensity[prevI][j][k]);
+	printf("electricDensity[prevI][j][prevK] = %g\n", electricDensity[prevI][j][prevK]);
+	printf("electricDensity[prevI][prevJ][k] = %g\n", electricDensity[prevI][prevJ][k]);
+	printf("electricDensity[prevI][prevJ][prevK] = %g\n", electricDensity[prevI][prevJ][prevK]);*/
 	double densityRightX = (electricDensity[i][j][k] + electricDensity[i][prevJ][k] + electricDensity[i][j][prevK] + electricDensity[i][prevJ][prevK])*0.25;
 	double densityLeftX = (electricDensity[prevI][j][k] + electricDensity[prevI][prevJ][k] + electricDensity[prevI][j][prevK] + electricDensity[prevI][prevJ][prevK])*0.25;
 

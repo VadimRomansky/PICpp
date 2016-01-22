@@ -103,11 +103,21 @@ double***** arnoldiIterations(std::vector<MatrixElement>**** matrix,double** out
 	delete[] prevHessenbergMatrix;
 
 	double**** tempVector = multiplySpecialMatrixVector(matrix, resultBasis[n - 2], xnumber, ynumber, znumber, lnumber);
+	/*for(int i = 0; i < xnumber; ++i) {
+		for(int j = 0; j < ynumber; ++j) {
+			for(int k = 0; k < znumber; ++k) {
+				for(int l = 0; l < lnumber; ++l){
+					printf("%g\n", tempVector[i][j][k][l]);
+				}
+			}
+		}
+	}*/
 
 
 	for (int m = 0; m < n - 1; ++m) {
 		double a = scalarMultiplyLargeVectors(resultBasis[m], tempVector, xnumber, ynumber, znumber, lnumber);
 		outHessenbergMatrix[m][n - 2] = scalarMultiplyLargeVectors(resultBasis[m], tempVector, xnumber, ynumber, znumber, lnumber);
+		//printf("outHessenbergMatrix[%d][%d] = %g\n", m, n-2, outHessenbergMatrix[m][n - 2]);
 		int i = 0;
 		#pragma omp parallel for shared(tempVector, outHessenbergMatrix, resultBasis, lnumber, ynumber, znumber, m, n) private(i)
 		for (i = 0; i < xnumber; ++i) {
@@ -116,12 +126,14 @@ double***** arnoldiIterations(std::vector<MatrixElement>**** matrix,double** out
 					for (int l = 0; l < lnumber; ++l) {
 						tempVector[i][j][k][l] -= outHessenbergMatrix[m][n - 2] * resultBasis[m][i][j][k][l];
 						alertNaNOrInfinity(tempVector[i][j][k][l], "tempVector = NaN\n");
+						//printf("tempvector[%d][%d][%d][%d] = %g\n", i, j, k, l, tempVector[i][j][k][l]);
 					}
 				}
 			}
 		}
 	}
 	outHessenbergMatrix[n - 1][n - 2] = sqrt(scalarMultiplyLargeVectors(tempVector, tempVector, xnumber, ynumber, znumber, lnumber));
+	//printf("outHessenbergMatrix[%d][%d] = %g\n", n-1, n-2, outHessenbergMatrix[n - 1][n - 2]);
 	if (outHessenbergMatrix[n - 1][n - 2] > 0) {
 		for (int i = 0; i < xnumber ; ++i) {
 			for(int j = 0; j < ynumber; ++j){
@@ -129,6 +141,7 @@ double***** arnoldiIterations(std::vector<MatrixElement>**** matrix,double** out
 					for (int l = 0; l < lnumber; ++l) {
 						tempVector[i][j][k][l] /= outHessenbergMatrix[n - 1][n - 2];
 						alertNaNOrInfinity(tempVector[i][j][k][l], "tempVector = NaN\n");
+						//printf("tempvector[%d][%d][%d][%d] = %g\n", i, j, k, l, tempVector[i][j][k][l]);
 					}
 				}
 			}
@@ -145,6 +158,7 @@ double***** arnoldiIterations(std::vector<MatrixElement>**** matrix,double** out
 void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outvector, int xnumber, int ynumber, int znumber, int lnumber) {
 	printf("start GMRES\n");
 	double norm = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber));
+	//printf("norm = %g\n", norm);
 
 	if(norm == 0) {
 		for(int i = 0; i < xnumber; ++i) {
@@ -227,7 +241,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 	double relativeError = 1;
 	double maxRelativeError = maxErrorLevel/(matrixDimension);
 
-	while (relativeError > maxRelativeError  && n < min2(maxGMRESIterations, matrixDimension + 3)) {
+	while ((relativeError > maxRelativeError  && n < min2(maxGMRESIterations, matrixDimension + 3) ||(n <= 3))) {
 		printf("GMRES iteration %d\n", n);
 		newHessenbergMatrix = new double*[n];
 		for (int i = 0; i < n; ++i) {
@@ -321,9 +335,11 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 
 		delete[] y;
 		y = new double[n - 1];
+		//printf("n = %d\n", n);
 
 		for (int i = n - 2; i >= 0; --i) {
 			y[i] = beta * Qmatrix[i][0];
+			//printf("y[%d] = %g\n", i, y[i]);
 			for (int j = n - 2; j > i; --j) {
 				y[i] -= Rmatrix[i][j] * y[j];
 			}
@@ -333,6 +349,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 				y[i] = 0;
 				printf("Rmatrix[%d][%d] = 0\n", i, i);
 			}
+			//printf("y[%d] = %g\n", i, y[i]);
 			alertNaNOrInfinity(y[i], "y = NaN\n");
 		}
 
@@ -342,10 +359,14 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 				for(int k = 0; k < znumber; ++k){
 					for(int l = 0; l < lnumber; ++l){
 						outvector[i][j][k][l] = 0;
-						for (int m = 0; m < n; ++m) {
+						for (int m = 0; m < n-1; ++m) {
 							outvector[i][j][k][l] += basis[m][i][j][k][l] * y[m]*norm;
+							//printf("outvector[%d][%d][%d][%d] %d = %g\n", i, j, k, l, m, outvector[i][j][k][l]);
+							//printf("norm = %g\n", norm);
+							//printf("y[%d] = %g\n", m, y[m]);
 							//outvector[i][l] += basis[m][i][l] * y[m];
 						}
+						//printf("outvector[%d][%d][%d][%d] = %g\n", i, j, k, l, outvector[i][j][k][l]);
 					}
 				}
 			}
@@ -376,7 +397,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 			for(int k = 0; k < znumber; ++k){
 				for(int l = 0; l < lnumber; ++l){
 					outvector[i][j][k][l] = 0;
-					for (int m = 0; m < n; ++m) {
+					for (int m = 0; m < n-1; ++m) {
 						outvector[i][j][k][l] += basis[m][i][j][k][l] * y[m]*norm;
 						//outvector[i][l] += basis[m][i][l] * y[m];
 					}

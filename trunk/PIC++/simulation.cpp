@@ -26,6 +26,8 @@ void Simulation::simulate() {
 		//initializeLangmuirWave();
 		createParticles();
 	}
+	//printf("E.x = %g E.y = %g E.z = %g\n", Efield[0][0][0].x, Efield[0][0][0].y, Efield[0][0][0].z);
+	//printf("tempE.x = %g tempE.y = %g tempE.z = %g\n", tempEfield[0][0][0].x, tempEfield[0][0][0].y, tempEfield[0][0][0].z);
 	collectParticlesIntoBins();
 	updateParameters();
 
@@ -46,6 +48,9 @@ void Simulation::simulate() {
 	theoreticalEnergy = energy;
 	theoreticalMomentum = momentum;
 
+	//printf("E.x = %g E.y = %g E.z = %g\n", Efield[0][0][0].x, Efield[0][0][0].y, Efield[0][0][0].z);
+	//printf("tempE.x = %g tempE.y = %g tempE.z = %g\n", tempEfield[0][0][0].x, tempEfield[0][0][0].y, tempEfield[0][0][0].z);
+
 	for(int i = 0; i < typesNumber; ++i){
 		types[i].injectionLength = types[i].particesDeltaX - 0.0001*deltaX;
 	}
@@ -63,6 +68,9 @@ void Simulation::simulate() {
 		updateElectroMagneticParameters();
 		evaluateFields();
 		evaluateMagneticField();
+
+		//printf("E.x = %g E.y = %g E.z = %g\n", Efield[0][0][0].x, Efield[0][0][0].y, Efield[0][0][0].z);
+		//printf("tempE.x = %g tempE.y = %g tempE.z = %g\n", tempEfield[0][0][0].x, tempEfield[0][0][0].y, tempEfield[0][0][0].z);
 		moveParticles();
 
 		for(int i = 0; i < typesNumber; ++i){
@@ -471,8 +479,8 @@ void Simulation::updateElectroMagneticParameters() {
 					Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
 
 					if (solverType == IMPLICIT) {
-						//electricFlux[i][j][k] += rotatedVelocity * (particle->charge * particle->weight * correlation);
-						electricFlux[i][j][k] += velocity * (particle->charge * particle->weight * correlation);
+						electricFlux[i][j][k] += rotatedVelocity * (particle->charge * particle->weight * correlation);
+						//electricFlux[i][j][k] += velocity * (particle->charge * particle->weight * correlation);
 						dielectricTensor[i][j][k] = dielectricTensor[i][j][k] - particle->rotationTensor * (particle->weight * theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 						//dielectricTensor[i] = dielectricTensor[i] + particle->rotationTensor * (particle->weight*theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
 
@@ -650,7 +658,7 @@ void Simulation::updateElectroMagneticParameters() {
 		}
 	}*/
 
-	double kx = 1 * 2 * pi / xsize;
+	/*double kx = 1 * 2 * pi / xsize;
 	double ky = 1 * 2 * pi / ysize;
 	double kz = 1 * 2 * pi / zsize;
 	kz = 0;
@@ -684,7 +692,7 @@ void Simulation::updateElectroMagneticParameters() {
 				electricFlux[i][j][k] = rotationMatrix * newFlux;
 			}
 		}
-	}
+	}*/
 
 	//
 }

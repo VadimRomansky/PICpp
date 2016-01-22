@@ -582,6 +582,7 @@ Vector3d Simulation::correlationTempEfield(Particle& particle) {
 	int xcount = floor((particle.coordinates.x - xgrid[0])/deltaX);
 	int ycount = floor((particle.coordinates.y - ygrid[0])/deltaY);
 	int zcount = floor((particle.coordinates.z - zgrid[0])/deltaZ);
+	//printf("xcount = %d ycount = %d zcount = %d\n", xcount, ycount, zcount);
 
 	double rightWeightX = (particle.coordinates.x - xgrid[xcount])/deltaX;
 	double leftWeightX = (xgrid[xcount + 1] - particle.coordinates.x)/deltaX;
@@ -591,6 +592,8 @@ Vector3d Simulation::correlationTempEfield(Particle& particle) {
 
 	double rightWeightZ = (particle.coordinates.z - zgrid[zcount])/deltaZ;
 	double leftWeightZ = (zgrid[zcount + 1] - particle.coordinates.z)/deltaZ;
+
+	//printf("E.x = %g E.y = %g E.z = %g\n", tempEfield[xcount][ycount][zcount].x, tempEfield[xcount][ycount][zcount].y, tempEfield[xcount][ycount][zcount].z);
 
 	return ((tempEfield[xcount][ycount][zcount]*leftWeightZ + tempEfield[xcount][ycount][zcount+1]*rightWeightZ)*leftWeightY + (tempEfield[xcount][ycount+1][zcount]*leftWeightZ + tempEfield[xcount][ycount+1][zcount+1]*rightWeightZ)*rightWeightY)*leftWeightX 
 		+ ((tempEfield[xcount+1][ycount][zcount]*leftWeightZ + tempEfield[xcount+1][ycount][zcount+1]*rightWeightZ)*leftWeightY + (tempEfield[xcount+1][ycount+1][zcount]*leftWeightZ + tempEfield[xcount+1][ycount+1][zcount+1]*rightWeightZ)*rightWeightY)*rightWeightX;
@@ -630,30 +633,40 @@ Vector3d Simulation::correlationBfield(Particle& particle) {
 	double x = particle.coordinates.x;
 	if(x > xgrid[xnumber]) {
 		printf("particle out of box in correlationBfield\n");
+		printf("x = %g xgrid[xnumber] = %g\n", x, xgrid[xnumber]);
+		printf("number = %d\n", particle.number);
 		exit(0);
 	}
 	if(x < xgrid[0]) {
 		printf("particle out of box in correlationBfield\n");
+		printf("x = %g xgrid[0] = %g\n", x, xgrid[0]);
+		printf("number = %d\n", particle.number);
 		exit(0);
 	}
 
 	double y = particle.coordinates.y;
 	if(y > ygrid[ynumber]) {
 		printf("particle out of box in correlationBfield\n");
+		printf("y = %g ygrid[ynumber] = %g\n", y, ygrid[ynumber]);
+		printf("number = %d\n", particle.number);
 		exit(0);
 	}
 	if(y < ygrid[0]) {
 		printf("particle out of box in correlationBfield\n");
+		printf("y = %g ygrid[0] = %g\n", y, ygrid[0]);
+		printf("number = %d\n", particle.number);
 		exit(0);
 	}
 
 	double z = particle.coordinates.z;
 	if(z > zgrid[znumber]) {
 		printf("particle out of box in correlationBfield\n");
+		printf("z = %g zgrid[znumber] = %g\n", z, zgrid[znumber]);
 		exit(0);
 	}
 	if(z < zgrid[0]) {
 		printf("particle out of box in correlationBfield\n");
+		printf("z = %g zgrid[0] = %g\n", z, zgrid[0]);
 		exit(0);
 	}
 
