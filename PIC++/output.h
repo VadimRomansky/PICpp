@@ -6,6 +6,7 @@
 
 #include "vector3d.h"
 #include "simulation.h"
+#include "matrixElement.h"
 
 void outputDistributionUpstream(FILE* outFile, std::vector<Particle*> particles, int particleType, double shockWavePoint, double plasma_period, double gyroradius);
 void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int particleType, double plasma_period, double gyroradius);
@@ -19,6 +20,7 @@ void outputFlux(FILE* outFile, Vector3d*** electricFlux, Vector3d*** externalEle
 void outputDivergenceError(FILE* outFile, Simulation* simulation);
 void outputVectorArray(FILE* outFile, Vector3d*** vector3d, int xnumber, int ynumber, int znumber, double scale = 1.0);
 void outputMatrixArray(FILE* outFile, Matrix3d*** matrix3d, int xnumber, int ynumber, int znumber, double scale = 1.0);
+void outputMaxwellEquationMatrix(std::vector<MatrixElement>****& maxwellEquationMatrix, int xnumber, int ynumber, int znumber, int lnumber);
 
 void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile, Simulation* simulation); 
 
