@@ -12,12 +12,14 @@ Nz = size(Zfile, 1);
 NE = Nx*Ny*Nz;
 NB = (Nx-1)*(Ny-1)*(Nz-1);
 Nt = (size(Efield, 1)/NE)-1;
+%Nt = fix(Nt/2);
+NtB = (size(Bfield, 1)/NB)-1;
 ynumber = 1;
 znumber = 1;
 
 a = 0;
 b = fix(Nt/2);
-c = Nt;
+c = Nt-1;
 
 Ex(1:Nx, 1:3) = 0;
 Ey(1:Nx, 1:3) = 0;
@@ -41,7 +43,8 @@ for i=1:Nx,
    Ez(i,2) = Efield((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + b*NE, 3);
    Ez(i,3) = Efield((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + c*NE, 3);
 end;
-
+%ynumber = 1;
+%znumber = 1;
 for i = 1:Nx-1,
    middleX(i) = 0.5*(Xfile(i) + Xfile(i+1));
    Bx(i, 1) = Bfield(((Nz-1)*(Ny-1)*(i-1) + (Nz-1)*(ynumber-1) + znumber) + a*NB, 1);
