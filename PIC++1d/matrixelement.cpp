@@ -13,8 +13,8 @@ MatrixElement::MatrixElement(double v, int iv, int lv) {
 }
 
 bool MatrixElement::equalsIndex(MatrixElement& element) {
-	if(i != element.i) return false;
-	if(l != element.l) return false;
-	
+	if (i != element.i) return false;
+	if (l != element.l) return false;
+
 	return true;
 }

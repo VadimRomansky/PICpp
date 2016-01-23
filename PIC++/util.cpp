@@ -3,52 +3,52 @@
 #include <math.h>
 #include "util.h"
 
-double power(double v, double p){
-	return exp(p*log(v));
+double power(double v, double p) {
+	return exp(p * log(v));
 }
 
-double sqr(double v){
-	return v*v;
+double sqr(double v) {
+	return v * v;
 }
 
-double cube(double v){
-	return v*v*v;
+double cube(double v) {
+	return v * v * v;
 }
 
-double max2(double a, double b){
-	if(a >= b){
+double max2(double a, double b) {
+	if (a >= b) {
 		return a;
 	} else {
 		return b;
 	}
 }
 
-double max3(double a, double b, double c){
-	if(a > b){
+double max3(double a, double b, double c) {
+	if (a > b) {
 		return max2(a, c);
 	} else {
 		return max2(b, c);
 	}
 }
 
-double min2(double a, double b){
-	if(a >= b){
+double min2(double a, double b) {
+	if (a >= b) {
 		return b;
 	} else {
 		return a;
 	}
 }
 
-double min3(double a, double b, double c){
-	if(a > b){
+double min3(double a, double b, double c) {
+	if (a > b) {
 		return min2(b, c);
 	} else {
 		return min2(a, c);
 	}
 }
 
-void alertNaNOrInfinity(double value, const char* s){
-	if(value != value || 0*value != 0*value){
+void alertNaNOrInfinity(double value, const char* s) {
+	if (value != value || 0 * value != 0 * value) {
 		printf("%s", s);
 		printf("\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
@@ -59,8 +59,8 @@ void alertNaNOrInfinity(double value, const char* s){
 	}
 }
 
-void alertNotPositive(double value, const char* s){
-	if(value <= 0){
+void alertNotPositive(double value, const char* s) {
+	if (value <= 0) {
 		printf("%s", s);
 		printf("\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
@@ -70,8 +70,8 @@ void alertNotPositive(double value, const char* s){
 	}
 }
 
-void alertNegative(double value, const char* s){
-	if(value < 0){
+void alertNegative(double value, const char* s) {
+	if (value < 0) {
 		printf("%s", s);
 		printf("\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
@@ -90,22 +90,22 @@ void alertNegative(double value, const char* s){
 }*/
 
 
-double coordinateDifference(double* const a, double* const b, double dt, double mass){
+double coordinateDifference(double* const a, double* const b, double dt, double mass) {
 	double result = 0;
-	for(int i = 0; i < 3; ++i){
+	for (int i = 0; i < 3; ++i) {
 		result += fabs(a[i] - b[i]);
 	}
 
-	for(int i = 3; i < 6; ++i){
-		result += fabs(a[i] - b[i])*dt/mass;
+	for (int i = 3; i < 6; ++i) {
+		result += fabs(a[i] - b[i]) * dt / mass;
 	}
 	return result;
 }
 
 
-double McDonaldFunction(double x, double index){
+double McDonaldFunction(double x, double index) {
 	//todo approximation with small x!!!
-	if(x < 0){
+	if (x < 0) {
 		printf("x in McDonald < 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "x in McDonald < 0\n");
@@ -119,26 +119,26 @@ double McDonaldFunction(double x, double index){
 	double maxT;
 	double maxLevel = 10;
 
-	double discr = index*index - 2*x*x + 2*x*maxLevel;
-	if(discr < 0){
-		maxT = log(maxLevel*maxLevel + sqrt(maxLevel*maxLevel - 1));
+	double discr = index * index - 2 * x * x + 2 * x * maxLevel;
+	if (discr < 0) {
+		maxT = log(maxLevel * maxLevel + sqrt(maxLevel * maxLevel - 1));
 	} else {
-		maxT = (index + sqrt(discr))/(x);
+		maxT = (index + sqrt(discr)) / (x);
 	}
-	dt = maxT/100;
+	dt = maxT / 100;
 
-	while(x*cosh(maxT) - index*maxT < 10){
+	while (x * cosh(maxT) - index * maxT < 10) {
 		maxT = maxT + dt;
 	}
-	dt = maxT/10000;
+	dt = maxT / 10000;
 
 	t = dt;
 	int i = 0;
-	while(i < 10000){
-		double middleT = 0.5*(t + prevT);
-		double dresult = exp(-x*cosh(middleT))*cosh(index*middleT)*dt;
+	while (i < 10000) {
+		double middleT = 0.5 * (t + prevT);
+		double dresult = exp(-x * cosh(middleT)) * cosh(index * middleT) * dt;
 		result += dresult;
-		if(dresult < result/1E10) break;
+		if (dresult < result / 1E10) break;
 		prevT = t;
 		t += dt;
 		++i;
@@ -148,19 +148,19 @@ double McDonaldFunction(double x, double index){
 }
 
 double Bspline(double xcenter, double dx, double xvalue) {
-	if(fabs(xcenter - xvalue) > dx) {
+	if (fabs(xcenter - xvalue) > dx) {
 		return 0;
 	}
 
-	if(xvalue > xcenter + dx/2) {
-		return 2*sqr(xcenter + dx - xvalue)/cube(dx);
+	if (xvalue > xcenter + dx / 2) {
+		return 2 * sqr(xcenter + dx - xvalue) / cube(dx);
 	}
 
-	if(xvalue < xcenter - dx/2) {
-		return 2*sqr(xcenter - dx - xvalue)/cube(dx);
+	if (xvalue < xcenter - dx / 2) {
+		return 2 * sqr(xcenter - dx - xvalue) / cube(dx);
 	}
 
-	return (1/dx) - 2*sqr(xvalue - xcenter)/cube(dx);
+	return (1 / dx) - 2 * sqr(xvalue - xcenter) / cube(dx);
 }
 
 

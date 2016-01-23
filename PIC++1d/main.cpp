@@ -10,20 +10,19 @@
 #include "input.h"
 #include "simulation.h"
 
-int main()
-{	
+int main() {
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
 	//omp_set_num_threads(numThreads);
 	printf("start\n");
 
 	printf("random initialize\n");
-    srand (time(NULL));
+	srand(time(NULL));
 
 	bool startNew = true;
 
-	if(startNew){
+	if (startNew) {
 		printf("open input\n");
-		FILE* inputFile = fopen("./input/input.dat","r");
+		FILE* inputFile = fopen("./input/input.dat", "r");
 		printf("read input\n");
 		Simulation simulation = readInput(inputFile);
 		printf("close input\n");
@@ -45,7 +44,7 @@ int main()
 		fclose(backupGeneralFile);
 		fclose(backupEfieldFile);
 		fclose(backupBfieldFile);
-		fclose(backupParticlesFile);	
+		fclose(backupParticlesFile);
 
 		printf("simulate\n");
 		simulation.simulate();

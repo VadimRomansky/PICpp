@@ -8,7 +8,7 @@ Simulation readInput(FILE* inputFile) {
 	char ch = ' ';
 	fscanf(inputFile, "%d", &xnumber);
 
-	if(xnumber < 0) {
+	if (xnumber < 0) {
 		printf("xnumber must be > 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "xnumber must be > 0\n");
@@ -19,7 +19,7 @@ Simulation readInput(FILE* inputFile) {
 	int ynumber;
 	fscanf(inputFile, "%d", &ynumber);
 
-	if(ynumber < 0) {
+	if (ynumber < 0) {
 		printf("ynumber must be > 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "ynumber must be > 0\n");
@@ -29,7 +29,7 @@ Simulation readInput(FILE* inputFile) {
 
 	int znumber;
 	fscanf(inputFile, "%d", &znumber);
-	if(znumber < 0) {
+	if (znumber < 0) {
 		printf("znumber must be > 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "znumber must be > 0\n");
@@ -37,13 +37,13 @@ Simulation readInput(FILE* inputFile) {
 		exit(0);
 	}
 
-	while(ch != '\n') {
+	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 
 	double xsize;
 	fscanf(inputFile, "%lf", &xsize);
-	if(xsize < 0) {
+	if (xsize < 0) {
 		printf("xsize must be > 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "xsize must be > 0\n");
@@ -53,7 +53,7 @@ Simulation readInput(FILE* inputFile) {
 
 	double ysize;
 	fscanf(inputFile, "%lf", &ysize);
-	if(ysize < 0) {
+	if (ysize < 0) {
 		printf("ysize must be > 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "ysize must be > 0\n");
@@ -63,7 +63,7 @@ Simulation readInput(FILE* inputFile) {
 
 	double zsize;
 	fscanf(inputFile, "%lf", &zsize);
-	if(zsize < 0) {
+	if (zsize < 0) {
 		printf("zsize must be > 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "zsize must be > 0\n");
@@ -72,14 +72,14 @@ Simulation readInput(FILE* inputFile) {
 	}
 
 	ch = ' ';
-	while(ch != '\n') {
+	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 
 	double temperature;
 	fscanf(inputFile, "%lf", &temperature);
 
-	if(temperature < 0) {
+	if (temperature < 0) {
 		printf("temperature must be > 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "v/c > 1 in setMomentumByV\n");
@@ -88,14 +88,14 @@ Simulation readInput(FILE* inputFile) {
 	}
 
 	ch = ' ';
-	while(ch != '\n') {
+	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 
 	double density;
 	fscanf(inputFile, "%lf", &density);
 
-	if(density < 0) {
+	if (density < 0) {
 		printf("density must be > 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "density must be > 0\n");
@@ -104,7 +104,7 @@ Simulation readInput(FILE* inputFile) {
 	}
 
 	ch = ' ';
-	while(ch != '\n') {
+	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 	double Vx;
@@ -117,7 +117,7 @@ Simulation readInput(FILE* inputFile) {
 	fscanf(inputFile, "%lf", &Vz);
 
 	ch = ' ';
-	while(ch != '\n') {
+	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 
@@ -131,7 +131,7 @@ Simulation readInput(FILE* inputFile) {
 	fscanf(inputFile, "%lf", &Ez);
 
 	ch = ' ';
-	while(ch != '\n') {
+	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 
@@ -145,14 +145,14 @@ Simulation readInput(FILE* inputFile) {
 	fscanf(inputFile, "%lf", &Bz);
 
 	ch = ' ';
-	while(ch != '\n') {
+	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 
 	int maxIterations;
 	fscanf(inputFile, "%d", &maxIterations);
 
-	if(maxIterations < 0) {
+	if (maxIterations < 0) {
 		printf("max iterations must be > 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "maxIterations mast be > 0\n");
@@ -161,14 +161,14 @@ Simulation readInput(FILE* inputFile) {
 	}
 
 	ch = ' ';
-	while(ch != '\n') {
+	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 
 	double maxTime;
 	fscanf(inputFile, "%lf", &maxTime);
 
-	if(maxTime < 0) {
+	if (maxTime < 0) {
 		printf("max time must be > 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "maxTime must be > 0\n");
@@ -177,14 +177,14 @@ Simulation readInput(FILE* inputFile) {
 	}
 
 	ch = ' ';
-	while(ch != '\n') {
+	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 
 	int particlesPerBin;
 	fscanf(inputFile, "%d", &particlesPerBin);
 
-	if(particlesPerBin < 0) {
+	if (particlesPerBin < 0) {
 		printf("particles per bin must be > 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "particles per bin must be > 0\n");
@@ -193,14 +193,14 @@ Simulation readInput(FILE* inputFile) {
 	}
 
 	ch = ' ';
-	while(ch != '\n') {
+	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 
 	int positronsPerBin;
 	fscanf(inputFile, "%d", &positronsPerBin);
 
-	if(positronsPerBin < 0) {
+	if (positronsPerBin < 0) {
 		printf("positrons per bin must be >= 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "positrons per bin must be >= 0\n");
@@ -209,14 +209,14 @@ Simulation readInput(FILE* inputFile) {
 	}
 
 	ch = ' ';
-	while(ch != '\n') {
+	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 
 	int alphaPerBin;
 	fscanf(inputFile, "%d", &alphaPerBin);
 
-	if(alphaPerBin < 0) {
+	if (alphaPerBin < 0) {
 		printf("alpha per bin must be >= 0\n");
 		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "alpha per bin must be >= 0\n");
@@ -225,14 +225,14 @@ Simulation readInput(FILE* inputFile) {
 	}
 
 	ch = ' ';
-	while(ch != '\n') {
+	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 
 	return Simulation(xnumber, xsize, temperature, density, Vx, Vy, Vz, Ex, Ey, Ez, Bx, By, Bz, maxIterations, maxTime, particlesPerBin, positronsPerBin, alphaPerBin);
 }
 
-Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile){
+Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile) {
 	Simulation simulation = Simulation();
 
 	int xnumber = 0;
@@ -276,7 +276,7 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 
 	fscanf(generalFile, "%d", &solverType);
 
-	if(solverType == 1){
+	if (solverType == 1) {
 		simulation.solverType = IMPLICIT;
 	} else {
 		simulation.solverType = EXPLICIT;
@@ -286,7 +286,7 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 
 	fscanf(generalFile, "%d", &boundaryConditionType);
 
-	if(boundaryConditionType == 1){
+	if (boundaryConditionType == 1) {
 		simulation.boundaryConditionType = PERIODIC;
 	} else {
 		simulation.boundaryConditionType = SUPER_CONDUCTOR_LEFT;
@@ -329,18 +329,18 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 	return simulation;
 }
 
-void readFields(FILE* Efile, FILE* Bfile, Simulation& simulation){
-	for(int i = 0; i < simulation.xnumber; ++i) {
+void readFields(FILE* Efile, FILE* Bfile, Simulation& simulation) {
+	for (int i = 0; i < simulation.xnumber; ++i) {
 		fscanf(Bfile, "%lf %lf %lf", &(simulation.Bfield[i].x), &(simulation.Bfield[i].y), &(simulation.Bfield[i].z));
 	}
 
-	for(int i = 0; i < simulation.xnumber + 1; ++i) {
+	for (int i = 0; i < simulation.xnumber + 1; ++i) {
 		fscanf(Efile, "%lf %lf %lf", &(simulation.Efield[i].x), &(simulation.Efield[i].y), &(simulation.Efield[i].z));
 	}
 }
 
-void readParticles(FILE* particlesFile, Simulation& simulation){
-	for(int i = 0; i < simulation.particlesNumber; ++i){
+void readParticles(FILE* particlesFile, Simulation& simulation) {
+	for (int i = 0; i < simulation.particlesNumber; ++i) {
 		int number = 0;
 		double mass = 0;
 		double charge = 0;
@@ -357,13 +357,13 @@ void readParticles(FILE* particlesFile, Simulation& simulation){
 		fscanf(particlesFile, "%d %lf %lf %lf %d %lf %lf %lf %lf %lf %lf %lf", &number, &mass, &charge, &weight, &type, &x, &y, &z, &px, &py, &pz, &dx);
 
 		ParticleTypes particleType;
-		if(type == 1){
+		if (type == 1) {
 			particleType = ELECTRON;
-		} else if(type == 2){
+		} else if (type == 2) {
 			particleType = PROTON;
-		} else if(type == 3){
+		} else if (type == 3) {
 			particleType = POSITRON;
-		} else if(type == 4){
+		} else if (type == 4) {
 			particleType = ALPHA;
 		} else {
 			printf("particle type must be 1 2 3 4\n");

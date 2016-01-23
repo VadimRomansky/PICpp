@@ -20,11 +20,11 @@ void Simulation::simulate() {
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWave(1, 0.01);
 		//initializeRotatedAlfvenWave(1, 0.01);
-		//initializeFluxFromRight();
+		initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeRotatedSimpleElectroMagneticWave(1);
 		//initializeLangmuirWave();
-		createParticles();
+		//createParticles();
 	}
 	//printf("E.x = %g E.y = %g E.z = %g\n", Efield[0][0][0].x, Efield[0][0][0].y, Efield[0][0][0].z);
 	//printf("tempE.x = %g tempE.y = %g tempE.z = %g\n", tempEfield[0][0][0].x, tempEfield[0][0][0].y, tempEfield[0][0][0].z);
@@ -51,8 +51,8 @@ void Simulation::simulate() {
 	//printf("E.x = %g E.y = %g E.z = %g\n", Efield[0][0][0].x, Efield[0][0][0].y, Efield[0][0][0].z);
 	//printf("tempE.x = %g tempE.y = %g tempE.z = %g\n", tempEfield[0][0][0].x, tempEfield[0][0][0].y, tempEfield[0][0][0].z);
 
-	for(int i = 0; i < typesNumber; ++i){
-		types[i].injectionLength = types[i].particesDeltaX - 0.0001*deltaX;
+	for (int i = 0; i < typesNumber; ++i) {
+		types[i].injectionLength = types[i].particesDeltaX - 0.0001 * deltaX;
 	}
 
 	while (time * plasma_period < maxTime && currentIteration < maxIteration) {
@@ -73,17 +73,17 @@ void Simulation::simulate() {
 		//printf("tempE.x = %g tempE.y = %g tempE.z = %g\n", tempEfield[0][0][0].x, tempEfield[0][0][0].y, tempEfield[0][0][0].z);
 		moveParticles();
 
-		for(int i = 0; i < typesNumber; ++i){
-			types[i].injectionLength += fabs(V0.x*deltaT);
+		for (int i = 0; i < typesNumber; ++i) {
+			types[i].injectionLength += fabs(V0.x * deltaT);
 		}
-		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH){
-			for(int typeCounter = 0; typeCounter < typesNumber; ++typeCounter){
-				if(types[typeCounter].particlesPerBin > 0){
-					if(types[typeCounter].particlesPerBin*types[typeCounter].injectionLength >= deltaX){
-						int newParticlesCount = types[typeCounter].injectionLength*types[typeCounter].particlesPerBin/deltaX;
-						for(int i = newParticlesCount; i > 0; --i){
-							types[typeCounter].injectionLength -= deltaX/types[typeCounter].particlesPerBin;
-							injectNewParticles(1,types[typeCounter], types[typeCounter].injectionLength);
+		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH) {
+			for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
+				if (types[typeCounter].particlesPerBin > 0) {
+					if (types[typeCounter].particlesPerBin * types[typeCounter].injectionLength >= deltaX) {
+						int newParticlesCount = types[typeCounter].injectionLength * types[typeCounter].particlesPerBin / deltaX;
+						for (int i = newParticlesCount; i > 0; --i) {
+							types[typeCounter].injectionLength -= deltaX / types[typeCounter].particlesPerBin;
+							injectNewParticles(1, types[typeCounter], types[typeCounter].injectionLength);
 						}
 					}
 				}
@@ -302,8 +302,7 @@ double Simulation::volumeE(int i, int j, int k) {
 	double dx = deltaX;
 	if ((boundaryConditionType == PERIODIC) || ((i > 0) && (i < xnumber))) {
 		dx = deltaX;
-	}
-	else {
+	} else {
 		dx = deltaX / 2;
 	}
 	return dx * deltaY * deltaZ;
@@ -787,8 +786,7 @@ void Simulation::updateDensityParameters() {
 					if (particle->type == ELECTRON) {
 						electronConcentration[i][j][k] += correlation * particle->weight;
 						velocityBulkElectron[i][j][k] += particle->momentum * particle->weight * correlation;
-					}
-					else if (particle->type == PROTON) {
+					} else if (particle->type == PROTON) {
 						protonConcentration[i][j][k] += correlation * particle->weight;
 						velocityBulkProton[i][j][k] += particle->momentum * particle->weight * correlation;
 					}
@@ -901,11 +899,9 @@ void Simulation::updateEnergy() {
 Vector3d Simulation::getBfield(int i, int j, int k) {
 	if (i == -1) {
 		i = xnumber - 1;
-	}
-	else if (i == xnumber) {
+	} else if (i == xnumber) {
 		i = 0;
-	}
-	else if (i < -1 || i > xnumber) {
+	} else if (i < -1 || i > xnumber) {
 		printf("i < -1 || i > xnumber in getBfied i = %d\n", i);
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "i = %d, xnumber = %d\n", i, xnumber);
@@ -915,11 +911,9 @@ Vector3d Simulation::getBfield(int i, int j, int k) {
 
 	if (j == -1) {
 		j = ynumber - 1;
-	}
-	else if (j == ynumber) {
+	} else if (j == ynumber) {
 		j = 0;
-	}
-	else if (j < -1 || j > ynumber) {
+	} else if (j < -1 || j > ynumber) {
 		printf("j < -1 || j > ynumber in getBfied i = %d\n", j);
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "j = %d, ynumber = %d\n", j, ynumber);
@@ -929,11 +923,9 @@ Vector3d Simulation::getBfield(int i, int j, int k) {
 
 	if (k == -1) {
 		k = znumber - 1;
-	}
-	else if (k == znumber) {
+	} else if (k == znumber) {
 		k = 0;
-	}
-	else if (k < -1 || k > znumber) {
+	} else if (k < -1 || k > znumber) {
 		printf("k < -1 || k > znumber in getBfied i = %d\n", k);
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "k = %d, znumber = %d\n", k, znumber);
@@ -947,22 +939,19 @@ Vector3d Simulation::getBfield(int i, int j, int k) {
 Vector3d Simulation::getTempEfield(int i, int j, int k) {
 	if (i < 0) {
 		i = xnumber - 1;
-	}
-	else if (i > xnumber) {
+	} else if (i > xnumber) {
 		i = 1;
 	}
 
 	if (j < 0) {
 		j = ynumber - 1;
-	}
-	else if (j > ynumber) {
+	} else if (j > ynumber) {
 		j = 1;
 	}
 
 	if (k < 0) {
 		k = znumber - 1;
-	}
-	else if (k > znumber) {
+	} else if (k > znumber) {
 		k = 1;
 	}
 
@@ -972,22 +961,19 @@ Vector3d Simulation::getTempEfield(int i, int j, int k) {
 Vector3d Simulation::getNewEfield(int i, int j, int k) {
 	if (i < 0) {
 		i = xnumber - 1;
-	}
-	else if (i > xnumber) {
+	} else if (i > xnumber) {
 		i = 1;
 	}
 
 	if (j < 0) {
 		j = ynumber - 1;
-	}
-	else if (j > ynumber) {
+	} else if (j > ynumber) {
 		j = 1;
 	}
 
 	if (k < 0) {
 		k = znumber - 1;
-	}
-	else if (k > znumber) {
+	} else if (k > znumber) {
 		k = 1;
 	}
 
@@ -997,22 +983,19 @@ Vector3d Simulation::getNewEfield(int i, int j, int k) {
 Vector3d Simulation::getEfield(int i, int j, int k) {
 	if (i < 0) {
 		i = xnumber - 1;
-	}
-	else if (i > xnumber) {
+	} else if (i > xnumber) {
 		i = 1;
 	}
 
 	if (j < 0) {
 		j = ynumber - 1;
-	}
-	else if (j > ynumber) {
+	} else if (j > ynumber) {
 		j = 1;
 	}
 
 	if (k < 0) {
 		k = znumber - 1;
-	}
-	else if (k > znumber) {
+	} else if (k > znumber) {
 		k = 1;
 	}
 
@@ -1022,22 +1005,19 @@ Vector3d Simulation::getEfield(int i, int j, int k) {
 Matrix3d Simulation::getPressureTensor(int i, int j, int k) {
 	if (i < 0) {
 		i = xnumber - 1;
-	}
-	else if (i >= xnumber) {
+	} else if (i >= xnumber) {
 		i = 0;
 	}
 
 	if (j < 0) {
 		j = ynumber - 1;
-	}
-	else if (j >= ynumber) {
+	} else if (j >= ynumber) {
 		j = 0;
 	}
 
 	if (k < 0) {
 		k = znumber - 1;
-	}
-	else if (k >= znumber) {
+	} else if (k >= znumber) {
 		k = 0;
 	}
 
@@ -1047,22 +1027,19 @@ Matrix3d Simulation::getPressureTensor(int i, int j, int k) {
 double Simulation::getDensity(int i, int j, int k) {
 	if (i < 0) {
 		i = xnumber - 1;
-	}
-	else if (i >= xnumber) {
+	} else if (i >= xnumber) {
 		i = 0;
 	}
 
 	if (j < 0) {
 		j = ynumber - 1;
-	}
-	else if (j >= ynumber) {
+	} else if (j >= ynumber) {
 		j = 0;
 	}
 
 	if (k < 0) {
 		k = znumber - 1;
-	}
-	else if (k >= znumber) {
+	} else if (k >= znumber) {
 		k = 0;
 	}
 

@@ -82,8 +82,7 @@ double*** arnoldiIterations(std::vector<MatrixElement>** matrix, double** outHes
 				outHessenbergMatrix[i][j] = prevHessenbergMatrix[i][j];
 			}
 			delete[] prevHessenbergMatrix[i];
-		}
-		else {
+		} else {
 			for (int j = 0; j < n - 2; ++j) {
 				outHessenbergMatrix[i][j] = 0;
 			}
@@ -115,8 +114,7 @@ double*** arnoldiIterations(std::vector<MatrixElement>** matrix, double** outHes
 				alertNaNOrInfinity(tempVector[i][l], "tempVector = NaN\n");
 			}
 		}
-	}
-	else {
+	} else {
 		printf("outHessenbergMatrix[n-1][n-2] == 0\n");
 	}
 
@@ -232,8 +230,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>** matrix, doubl
 			oldRmatrix[0][0] = Rmatrix[0][0];
 			oldRmatrix[1][0] = Rmatrix[1][0];
 
-		}
-		else {
+		} else {
 			Rmatrix = new double*[n];
 			for (int i = 0; i < n; ++i) {
 				Rmatrix[i] = new double[n - 1];
@@ -241,8 +238,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>** matrix, doubl
 					for (int j = 0; j < n - 2; ++j) {
 						Rmatrix[i][j] = oldRmatrix[i][j];
 					}
-				}
-				else {
+				} else {
 					for (int j = 0; j < n - 2; ++j) {
 						Rmatrix[i][j] = 0;
 					}
@@ -257,8 +253,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>** matrix, doubl
 						Qmatrix[i][j] = oldQmatrix[i][j];
 					}
 					Qmatrix[i][n - 1] = 0;
-				}
-				else {
+				} else {
 					for (int j = 0; j < n - 1; ++j) {
 						Qmatrix[i][j] = 0;
 					}
@@ -301,8 +296,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>** matrix, doubl
 			}
 			if (Rmatrix[i][i] > 0) {
 				y[i] /= Rmatrix[i][i];
-			}
-			else {
+			} else {
 				y[i] = 0;
 				printf("Rmatrix[%d][%d] = 0\n", i, i);
 			}
@@ -313,7 +307,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>** matrix, doubl
 		for (int i = 0; i < xnumber; ++i) {
 			for (int l = 0; l < lnumber; ++l) {
 				outvector[i][l] = 0;
-				for (int m = 0; m < n-1; ++m) {
+				for (int m = 0; m < n - 1; ++m) {
 					outvector[i][l] += basis[m][i][l] * y[m] * norm;
 					//outvector[i][l] += basis[m][i][l] * y[m];
 				}
@@ -343,7 +337,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>** matrix, doubl
 	for (int i = 0; i < xnumber; ++i) {
 		for (int l = 0; l < lnumber; ++l) {
 			outvector[i][l] = 0;
-			for (int m = 0; m < n-1; ++m) {
+			for (int m = 0; m < n - 1; ++m) {
 				outvector[i][l] += basis[m][i][l] * y[m] * norm;
 				//outvector[i][l] += basis[m][i][l] * y[m];
 			}

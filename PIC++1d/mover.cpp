@@ -10,11 +10,11 @@
 #include "matrix3d.h"
 #include "random.h"
 
-void Simulation::moveParticles(){
+void Simulation::moveParticles() {
 	printf("moving particles\n");
 	int i = 0;
 #pragma omp parallel for private(i) 
-	for(int i = 0; i < particles.size(); ++i){
+	for (int i = 0; i < particles.size(); ++i) {
 		moveParticle(particles[i]);
 	}
 
@@ -23,20 +23,20 @@ void Simulation::moveParticles(){
 	}*/
 }
 
-void Simulation::removeEscapedParticles(){
+void Simulation::removeEscapedParticles() {
 	std::vector<Particle*>::iterator it = particles.end();
 	it = it - 1;
-	while(it != particles.begin()){
+	while (it != particles.begin()) {
 		Particle* particle = *it;
 		std::vector<Particle*>::iterator prev = it - 1;
-		if(particle->escaped){
+		if (particle->escaped) {
 			particles.erase(it);
 		}
 		it = prev;
 	}
 
 	Particle* tempParticle = *particles.begin();
-	if(tempParticle->escaped){
+	if (tempParticle->escaped) {
 		particles.erase(particles.begin());
 	}
 }
@@ -95,9 +95,9 @@ void Simulation::removeEscapedParticles(){
 	correctParticlePosition(particle);
 }*/
 
-void Simulation::moveParticle(Particle* particle){
-	Vector3d E = correlationTempEfield(particle)*fieldScale;
-	Vector3d B = correlationBfield(particle)*fieldScale;
+void Simulation::moveParticle(Particle* particle) {
+	Vector3d E = correlationTempEfield(particle) * fieldScale;
+	Vector3d B = correlationBfield(particle) * fieldScale;
 	//Vector3d E = Vector3d(0, 0, 0);
 	//Vector3d B = Vector3d(0, 0, 0);
 
@@ -105,36 +105,36 @@ void Simulation::moveParticle(Particle* particle){
 	Vector3d newVelocity = velocity;
 	Vector3d middleVelocity = velocity;
 
-	Vector3d electricForce = E*particle->charge*deltaT;
-	Vector3d lorentzForce = (velocity.vectorMult(B)/speed_of_light_normalized)*particle->charge*deltaT;
+	Vector3d electricForce = E * particle->charge * deltaT;
+	Vector3d lorentzForce = (velocity.vectorMult(B) / speed_of_light_normalized) * particle->charge * deltaT;
 
 	//see Noguchi
-	double beta = 0.5*particle->charge*deltaT/particle->mass;
-	double Gamma = (beta*(E.scalarMult(velocity))/speed_of_light_normalized_sqr) + particle->gammaFactor(speed_of_light_normalized);
-	double betaShift = beta/Gamma;
+	double beta = 0.5 * particle->charge * deltaT / particle->mass;
+	double Gamma = (beta * (E.scalarMult(velocity)) / speed_of_light_normalized_sqr) + particle->gammaFactor(speed_of_light_normalized);
+	double betaShift = beta / Gamma;
 
 	int particleIterations = 20;
 
 
 	Particle tempParticle = *particle;
 
-	tempParticle.momentum += (E + (velocity.vectorMult(B)/speed_of_light_normalized))*particle->charge*deltaT;
+	tempParticle.momentum += (E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT;
 
- 	newVelocity = tempParticle.velocity(speed_of_light_normalized);
+	newVelocity = tempParticle.velocity(speed_of_light_normalized);
 
-	tempParticle.x += ((1 - eta)*velocity.x + eta*newVelocity.x)*eta*deltaT;
-	tempParticle.y += ((1 - eta)*velocity.y + eta*newVelocity.y)*eta*deltaT;
-	tempParticle.z += ((1 - eta)*velocity.z + eta*newVelocity.z)*eta*deltaT;
+	tempParticle.x += ((1 - eta) * velocity.x + eta * newVelocity.x) * eta * deltaT;
+	tempParticle.y += ((1 - eta) * velocity.y + eta * newVelocity.y) * eta * deltaT;
+	tempParticle.z += ((1 - eta) * velocity.z + eta * newVelocity.z) * eta * deltaT;
 
-	if(boundaryConditionType != PERIODIC){
-		if(tempParticle.x < xgrid[0]){
-			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-				particle->x = 2*xgrid[0] - tempParticle.x;
+	if (boundaryConditionType != PERIODIC) {
+		if (tempParticle.x < xgrid[0]) {
+			if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+				particle->x = 2 * xgrid[0] - tempParticle.x;
 				particle->y = tempParticle.y;
 				particle->z = tempParticle.z;
 				newVelocity.x = -newVelocity.x;
 				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
-				theoreticalMomentum.x += 2*particle->momentum.x;
+				theoreticalMomentum.x += 2 * particle->momentum.x;
 				return;
 			} else {
 				escapedParticles.push_back(particle);
@@ -146,7 +146,7 @@ void Simulation::moveParticle(Particle* particle){
 				return;
 			}
 		}
-		if(tempParticle.x > xgrid[xnumber]){
+		if (tempParticle.x > xgrid[xnumber]) {
 			escapedParticles.push_back(particle);
 			particle->x = xgrid[xnumber];
 			particle->y = tempParticle.y;
@@ -158,33 +158,33 @@ void Simulation::moveParticle(Particle* particle){
 	}
 
 
-	Vector3d prevVelocity = velocity; 
+	Vector3d prevVelocity = velocity;
 	int i = 0;
 
-	while((prevVelocity - newVelocity).norm() > 1E-16*velocity.norm() && i < particleIterations){
+	while ((prevVelocity - newVelocity).norm() > 1E-16 * velocity.norm() && i < particleIterations) {
 		++i;
 		prevVelocity = newVelocity;
 
 		tempParticle = *particle;
-		Vector3d rotatedE = tempParticle.rotationTensor*E;
+		Vector3d rotatedE = tempParticle.rotationTensor * E;
 
 		//tempParticle.momentum += (E + ((velocity + newVelocity).vectorMult(B)/(2.0*speed_of_light_normalized)))*particle->charge*deltaT;
 
 		//mistake in noguchi - he writes betashift!
-		middleVelocity = (tempParticle.rotationTensor*tempParticle.gammaFactor(speed_of_light_normalized)*velocity) + rotatedE*beta;
+		middleVelocity = (tempParticle.rotationTensor * tempParticle.gammaFactor(speed_of_light_normalized) * velocity) + rotatedE * beta;
 
-		tempParticle.x += (middleVelocity.x*eta*deltaT);
-		if(boundaryConditionType != PERIODIC){
+		tempParticle.x += (middleVelocity.x * eta * deltaT);
+		if (boundaryConditionType != PERIODIC) {
 			//todo more accurate speed!!
-			if(tempParticle.x < xgrid[0]){
-				if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-					particle->x = 2*xgrid[0] - tempParticle.x + fabs(middleVelocity.x*(1 - eta)*deltaT);
-					particle->y = tempParticle.y + middleVelocity.y*(1 - eta)*deltaT;
-					particle->z = tempParticle.z + middleVelocity.z*(1 - eta)*deltaT;
+			if (tempParticle.x < xgrid[0]) {
+				if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+					particle->x = 2 * xgrid[0] - tempParticle.x + fabs(middleVelocity.x * (1 - eta) * deltaT);
+					particle->y = tempParticle.y + middleVelocity.y * (1 - eta) * deltaT;
+					particle->z = tempParticle.z + middleVelocity.z * (1 - eta) * deltaT;
 					newVelocity = middleVelocity;
 					newVelocity.x = -newVelocity.x;
 					particle->setMomentumByV(newVelocity, speed_of_light_normalized);
-					theoreticalMomentum.x += 2*particle->momentum.x;
+					theoreticalMomentum.x += 2 * particle->momentum.x;
 					return;
 				} else {
 					escapedParticles.push_back(particle);
@@ -196,7 +196,7 @@ void Simulation::moveParticle(Particle* particle){
 					return;
 				}
 			}
-			if(tempParticle.x > xgrid[xnumber]){
+			if (tempParticle.x > xgrid[xnumber]) {
 				escapedParticles.push_back(particle);
 				particle->x = xgrid[xnumber];
 				particle->y = tempParticle.y;
@@ -208,10 +208,10 @@ void Simulation::moveParticle(Particle* particle){
 		}
 		correctParticlePosition(tempParticle);
 
-		E = correlationTempEfield(tempParticle)*fieldScale;
-		B = correlationBfield(tempParticle)*fieldScale;
+		E = correlationTempEfield(tempParticle) * fieldScale;
+		B = correlationBfield(tempParticle) * fieldScale;
 
-		tempParticle.momentum += (E + (middleVelocity.vectorMult(B)/speed_of_light_normalized))*particle->charge*deltaT;
+		tempParticle.momentum += (E + (middleVelocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT;
 
 		newVelocity = tempParticle.velocity(speed_of_light_normalized);
 
@@ -220,19 +220,19 @@ void Simulation::moveParticle(Particle* particle){
 	particle->momentum = tempParticle.momentum;
 	//particle->momentum.x = 0;
 
-	particle->x += middleVelocity.x*deltaT;
+	particle->x += middleVelocity.x * deltaT;
 
-	particle->y += middleVelocity.y*deltaT;
-	particle->z += middleVelocity.z*deltaT;
+	particle->y += middleVelocity.y * deltaT;
+	particle->z += middleVelocity.z * deltaT;
 
 	correctParticlePosition(particle);
 }
 
 void Simulation::correctParticlePosition(Particle* particle) {
-	if(boundaryConditionType != PERIODIC){
-		if(particle->x < xgrid[0]){
-			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-				particle->x = 2*xgrid[0] - particle->x;
+	if (boundaryConditionType != PERIODIC) {
+		if (particle->x < xgrid[0]) {
+			if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+				particle->x = 2 * xgrid[0] - particle->x;
 				particle->momentum.x = -particle->momentum.x;
 				return;
 			} else {
@@ -242,28 +242,28 @@ void Simulation::correctParticlePosition(Particle* particle) {
 				return;
 			}
 		}
-		if(particle->x > xgrid[xnumber]){
+		if (particle->x > xgrid[xnumber]) {
 			escapedParticles.push_back(particle);
 			particle->x = xgrid[xnumber];
 			particle->escaped = true;
 			return;
 		}
 	}
-	if(boundaryConditionType == PERIODIC){
-		if(particle->x < xgrid[0]) {
+	if (boundaryConditionType == PERIODIC) {
+		if (particle->x < xgrid[0]) {
 			particle->x = particle->x + xsize;
 		}
-		if(particle->x > xgrid[xnumber]) {
+		if (particle->x > xgrid[xnumber]) {
 			particle->x = particle->x - xsize;
-		}		
+		}
 	}
 }
 
 void Simulation::correctParticlePosition(Particle& particle) {
-	if(boundaryConditionType != PERIODIC){
-		if(particle.x < xgrid[0]){
-			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-				particle.x = 2*xgrid[0] - particle.x;
+	if (boundaryConditionType != PERIODIC) {
+		if (particle.x < xgrid[0]) {
+			if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+				particle.x = 2 * xgrid[0] - particle.x;
 				particle.momentum.x = -particle.momentum.x;
 				return;
 			} else {
@@ -273,33 +273,31 @@ void Simulation::correctParticlePosition(Particle& particle) {
 				return;
 			}
 		}
-		if(particle.x > xgrid[xnumber]){
+		if (particle.x > xgrid[xnumber]) {
 			escapedParticles.push_back(&particle);
 			particle.x = xgrid[xnumber];
 			particle.escaped = true;
 			return;
 		}
 	}
-	if(boundaryConditionType == PERIODIC){
-		if(particle.x < xgrid[0]) {
+	if (boundaryConditionType == PERIODIC) {
+		if (particle.x < xgrid[0]) {
 			particle.x = particle.x + xsize;
 		}
-		if(particle.x > xgrid[xnumber]) {
+		if (particle.x > xgrid[xnumber]) {
 			particle.x = particle.x - xsize;
-		}		
+		}
 	}
 }
 
-void Simulation::evaluateParticlesRotationTensor()
-{
-	for(int i = 0; i < particles.size(); ++i)
-	{
+void Simulation::evaluateParticlesRotationTensor() {
+	for (int i = 0; i < particles.size(); ++i) {
 		Particle* particle = particles[i];
-		double beta = 0.5*particle->charge*deltaT/particle->mass;
+		double beta = 0.5 * particle->charge * deltaT / particle->mass;
 		Vector3d velocity = particle->velocity(speed_of_light_normalized);
 
-		Vector3d oldE = correlationEfield(particle)*fieldScale;
-		Vector3d oldB = correlationBfield(particle)*fieldScale;
+		Vector3d oldE = correlationEfield(particle) * fieldScale;
+		Vector3d oldB = correlationBfield(particle) * fieldScale;
 
 		particle->rotationTensor = evaluateAlphaRotationTensor(beta, velocity, oldE, oldB);
 
@@ -314,14 +312,14 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d velocity,
 	double gamma_factor = 1 / sqrt(1 - (velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z) / speed_of_light_normalized_sqr);
 	double G = ((beta * (EField.scalarMult(velocity)) / speed_of_light_normalized_sqr) + gamma_factor);
 	beta = beta / G;
-	double denominator = G * (1 + beta * beta * BField.scalarMult(BField)/speed_of_light_normalized_sqr);
+	double denominator = G * (1 + beta * beta * BField.scalarMult(BField) / speed_of_light_normalized_sqr);
 
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
-			result.matrix[i][j] = Kronecker.matrix[i][j] + (beta * beta * BField[i] * BField[j]/speed_of_light_normalized_sqr);
+			result.matrix[i][j] = Kronecker.matrix[i][j] + (beta * beta * BField[i] * BField[j] / speed_of_light_normalized_sqr);
 			for (int k = 0; k < 3; ++k) {
 				for (int l = 0; l < 3; ++l) {
-					result.matrix[i][j] -= (beta * LeviCivita[j][k][l] * Kronecker.matrix[i][k] * BField[l]/speed_of_light_normalized);
+					result.matrix[i][j] -= (beta * LeviCivita[j][k][l] * Kronecker.matrix[i][k] * BField[l] / speed_of_light_normalized);
 				}
 			}
 
@@ -333,7 +331,7 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d velocity,
 	return result;
 }
 
-void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContainer, double length){
+void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContainer, double length) {
 	printf("inject new particles\n");
 
 	int n = particles.size();
@@ -342,7 +340,7 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 	double weight = (typeContainer.concentration / typeContainer.particlesPerBin) * volumeB(xnumber - 1);
 	double x = xgrid[xnumber] - length;
 
-	if(typeContainer.type == ELECTRON && preserveCharge){
+	if (typeContainer.type == ELECTRON && preserveCharge) {
 		return;
 	}
 	for (int l = 0; l < count; ++l) {
@@ -353,70 +351,70 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 		particle->addVelocity(V0, speed_of_light_normalized);
 		particle->initialMomentum = particle->momentum;
 		particles.push_back(particle);
-		double en = particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
-		theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
-		theoreticalMomentum += particle->momentum*particle->weight*gyroradius/plasma_period;
-		if(preserveCharge){
+		double en = particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
+		theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
+		theoreticalMomentum += particle->momentum * particle->weight * gyroradius / plasma_period;
+		if (preserveCharge) {
 			int necessaryElectrons = 1;
-			if(type == ALPHA){
+			if (type == ALPHA) {
 				necessaryElectrons = 2;
 			}
-			while(necessaryElectrons > 0){
+			while (necessaryElectrons > 0) {
 				particle = createParticle(n, xnumber - 1, weight, ELECTRON, types[0], temperature);
 				n++;
 				particle->x = x;
 				particle->addVelocity(V0, speed_of_light_normalized);
 				particle->initialMomentum = particle->momentum;
 				particles.push_back(particle);
-				en = particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
-				theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight*sqr(gyroradius/plasma_period);
-				theoreticalMomentum += particle->momentum*particle->weight*gyroradius/plasma_period;
+				en = particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
+				theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
+				theoreticalMomentum += particle->momentum * particle->weight * gyroradius / plasma_period;
 				necessaryElectrons--;
 			}
 		}
 	}
 }
 
-void Simulation::scatterParticle(Particle* particle){
-	double B = correlationBfield(particle).norm()*fieldScale;
-	double lambda = fabs(particle->momentum.norm()*speed_of_light_normalized/(particle->charge*B));
+void Simulation::scatterParticle(Particle* particle) {
+	double B = correlationBfield(particle).norm() * fieldScale;
+	double lambda = fabs(particle->momentum.norm() * speed_of_light_normalized / (particle->charge * B));
 
-	int i = (particle->x - xgrid[0])/deltaX;
+	int i = (particle->x - xgrid[0]) / deltaX;
 	Vector3d oldMomentum = particle->momentum;
 	Vector3d reverseBulkVelocity;
 	Vector3d bulkVelocity;
-	if(particle->type == PROTON || particle->type == ALPHA){
+	if (particle->type == PROTON || particle->type == ALPHA) {
 		bulkVelocity = velocityBulkProton[i];
 		reverseBulkVelocity = Vector3d(-velocityBulkProton[i].x, -velocityBulkProton[i].y, -velocityBulkProton[i].z);
-	} else if(particle->type == ELECTRON || particle->type == POSITRON){
+	} else if (particle->type == ELECTRON || particle->type == POSITRON) {
 		bulkVelocity = velocityBulkElectron[i];
 		reverseBulkVelocity = Vector3d(-velocityBulkElectron[i].x, -velocityBulkElectron[i].y, -velocityBulkElectron[i].z);
 	}
 	particle->addVelocity(reverseBulkVelocity, speed_of_light_normalized);
 	Vector3d particleVelocity = particle->velocity(speed_of_light_normalized);
-	double probability = particleVelocity.norm()*deltaT/lambda;
-	double maxTheta = 2*pi*lambda/particle->velocity(speed_of_light_normalized).norm();
-	if(maxTheta > pi){
+	double probability = particleVelocity.norm() * deltaT / lambda;
+	double maxTheta = 2 * pi * lambda / particle->velocity(speed_of_light_normalized).norm();
+	if (maxTheta > pi) {
 		maxTheta = pi;
 	}
 
 	//if(uniformDistribution() > (1 - probability)){
-		Vector3d newVelocity;
-		Matrix3d* rotation = Matrix3d::createBasisByOneVector(particleVelocity);
-		
-		//newVelocity.x = particleVelocity.norm()*2*(uniformDistribution()-0.5);
-		newVelocity.z = particleVelocity.norm()*(1 - uniformDistribution()*(1 - cos(maxTheta)));
-		double perpendicularVelocity = sqrt(particleVelocity.x* particleVelocity.x + 
-											particleVelocity.y* particleVelocity.y +
-											particleVelocity.z* particleVelocity.z -
-											newVelocity.z*newVelocity.z);
-		double phi = 2*pi*uniformDistribution();
-		newVelocity.y = perpendicularVelocity*cos(phi);
-		newVelocity.x = perpendicularVelocity*sin(phi);
-		newVelocity = (*rotation)*newVelocity;
-		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+	Vector3d newVelocity;
+	Matrix3d* rotation = Matrix3d::createBasisByOneVector(particleVelocity);
 
-		delete rotation;
+	//newVelocity.x = particleVelocity.norm()*2*(uniformDistribution()-0.5);
+	newVelocity.z = particleVelocity.norm() * (1 - uniformDistribution() * (1 - cos(maxTheta)));
+	double perpendicularVelocity = sqrt(particleVelocity.x * particleVelocity.x +
+		particleVelocity.y * particleVelocity.y +
+		particleVelocity.z * particleVelocity.z -
+		newVelocity.z * newVelocity.z);
+	double phi = 2 * pi * uniformDistribution();
+	newVelocity.y = perpendicularVelocity * cos(phi);
+	newVelocity.x = perpendicularVelocity * sin(phi);
+	newVelocity = (*rotation) * newVelocity;
+	particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+
+	delete rotation;
 	//}
 
 	particle->addVelocity(bulkVelocity, speed_of_light_normalized);

@@ -7,16 +7,16 @@
 void Simulation::collectParticlesIntoBins() {
 
 	for (int i = 0; i < xnumber; ++i) {
-				particlesInBbin[i].clear();
+		particlesInBbin[i].clear();
 	}
 
 	for (int i = 0; i < xnumber + 1; ++i) {
-				particlesInEbin[i].clear();
+		particlesInEbin[i].clear();
 	}
 	double fullSum = 0;
 	int pcount = 0;
 
-	#pragma omp parallel for private(pcount) 
+#pragma omp parallel for private(pcount) 
 	for (pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
 		checkParticleInBox(*particle);
@@ -34,10 +34,10 @@ void Simulation::collectParticlesIntoBins() {
 
 		for (int i = xcount - 1; i <= xcount + 1; ++i) {
 			int tempi = i;
-			if( tempi == -1) {
+			if (tempi == -1) {
 				tempi = xnumber - 1;
 			}
-			if(tempi == xnumber + 1) {
+			if (tempi == xnumber + 1) {
 				tempi = 1;
 			}
 			if (particleCrossEbin(*particle, tempi)) {
@@ -55,15 +55,15 @@ void Simulation::pushParticleIntoEbin(Particle* particle, int i) {
 }
 
 void Simulation::pushParticleIntoBbin(Particle* particle, int i) {
-	if (i < 0){
-		if(boundaryConditionType == PERIODIC){
+	if (i < 0) {
+		if (boundaryConditionType == PERIODIC) {
 			i = xnumber - 1;
 		} else {
 			return;
 		}
 	}
-	if (i >= xnumber){
-		if(boundaryConditionType == PERIODIC){
+	if (i >= xnumber) {
+		if (boundaryConditionType == PERIODIC) {
 			i = 0;
 		} else {
 			return;
@@ -74,12 +74,12 @@ void Simulation::pushParticleIntoBbin(Particle* particle, int i) {
 }
 
 bool Simulation::particleCrossBbin(Particle& particle, int i) {
-	if(boundaryConditionType == PERIODIC){
-		if(i < 0) {
+	if (boundaryConditionType == PERIODIC) {
+		if (i < 0) {
 			i = xnumber - 1;
-		} else if(i >= xnumber) {
+		} else if (i >= xnumber) {
 			i = 0;
-		}	
+		}
 
 		if (i == 0) {
 			if ((xgrid[i + 1] < particle.x - particle.dx) && (xgrid[xnumber] > particle.x + particle.dx))
@@ -93,12 +93,12 @@ bool Simulation::particleCrossBbin(Particle& particle, int i) {
 		}
 
 		return true;
-	} else if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-		if(i < 0) {
+	} else if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+		if (i < 0) {
 			return false;
-		} else if(i >= xnumber) {
+		} else if (i >= xnumber) {
 			return false;
-		}	
+		}
 
 		if (i == 0) {
 			if (xgrid[i + 1] < particle.x - particle.dx)
@@ -112,12 +112,12 @@ bool Simulation::particleCrossBbin(Particle& particle, int i) {
 		}
 		return true;
 
-	} else if (boundaryConditionType == FREE_BOTH){
-		if(i < 0) {
+	} else if (boundaryConditionType == FREE_BOTH) {
+		if (i < 0) {
 			return false;
-		} else if(i >= xnumber) {
+		} else if (i >= xnumber) {
 			return false;
-		}	
+		}
 
 		if (i == 0) {
 			if (xgrid[i + 1] < particle.x - particle.dx)
@@ -135,36 +135,36 @@ bool Simulation::particleCrossBbin(Particle& particle, int i) {
 }
 
 bool Simulation::particleCrossEbin(Particle& particle, int i) {
-	if(boundaryConditionType == PERIODIC){
-		if(i == 0){
-			if(xgrid[0] + (deltaX/2) < particle.x - particle.dx && xgrid[xnumber] - (deltaX/2) > particle.x + particle.dx)
+	if (boundaryConditionType == PERIODIC) {
+		if (i == 0) {
+			if (xgrid[0] + (deltaX / 2) < particle.x - particle.dx && xgrid[xnumber] - (deltaX / 2) > particle.x + particle.dx)
 				return false;
-		} else if(i == xnumber){
-			if(xgrid[0] + (deltaX/2) < particle.x - particle.dx && xgrid[xnumber] - (deltaX/2) > particle.x + particle.dx)
-				return false;
-		} else {
-			if ((xgrid[i] - (deltaX / 2) > particle.x + particle.dx) || (xgrid[i + 1] - (deltaX / 2) < particle.x - particle.dx))
-				return false;
-		}
-		return true;
-	} else if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-		if(i == 0){
-			if(xgrid[0] + (deltaX/2) < particle.x - particle.dx)
-				return false;
-		} else if(i == xnumber){
-			if(xgrid[xnumber] - (deltaX/2) > particle.x + particle.dx)
+		} else if (i == xnumber) {
+			if (xgrid[0] + (deltaX / 2) < particle.x - particle.dx && xgrid[xnumber] - (deltaX / 2) > particle.x + particle.dx)
 				return false;
 		} else {
 			if ((xgrid[i] - (deltaX / 2) > particle.x + particle.dx) || (xgrid[i + 1] - (deltaX / 2) < particle.x - particle.dx))
 				return false;
 		}
 		return true;
-	} else if (boundaryConditionType == FREE_BOTH){
-		if(i == 0){
-			if(xgrid[0] + (deltaX/2) < particle.x - particle.dx)
+	} else if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+		if (i == 0) {
+			if (xgrid[0] + (deltaX / 2) < particle.x - particle.dx)
 				return false;
-		} else if(i == xnumber){
-			if(xgrid[xnumber] - (deltaX/2) > particle.x + particle.dx)
+		} else if (i == xnumber) {
+			if (xgrid[xnumber] - (deltaX / 2) > particle.x + particle.dx)
+				return false;
+		} else {
+			if ((xgrid[i] - (deltaX / 2) > particle.x + particle.dx) || (xgrid[i + 1] - (deltaX / 2) < particle.x - particle.dx))
+				return false;
+		}
+		return true;
+	} else if (boundaryConditionType == FREE_BOTH) {
+		if (i == 0) {
+			if (xgrid[0] + (deltaX / 2) < particle.x - particle.dx)
+				return false;
+		} else if (i == xnumber) {
+			if (xgrid[xnumber] - (deltaX / 2) > particle.x + particle.dx)
 				return false;
 		} else {
 			if ((xgrid[i] - (deltaX / 2) > particle.x + particle.dx) || (xgrid[i + 1] - (deltaX / 2) < particle.x - particle.dx))
@@ -210,11 +210,11 @@ Vector3d Simulation::correlationEfield(Particle& particle) {
 
 	return result;*/
 
-	int xcount = floor((particle.x - xgrid[0])/deltaX);
-	double rightWeight = (particle.x - xgrid[xcount])/deltaX;
-	double leftWeight = (xgrid[xcount + 1] - particle.x)/deltaX;
+	int xcount = floor((particle.x - xgrid[0]) / deltaX);
+	double rightWeight = (particle.x - xgrid[xcount]) / deltaX;
+	double leftWeight = (xgrid[xcount + 1] - particle.x) / deltaX;
 
-	return Efield[xcount]*leftWeight + Efield[xcount + 1]*rightWeight;
+	return Efield[xcount] * leftWeight + Efield[xcount + 1] * rightWeight;
 }
 
 Vector3d Simulation::correlationTempEfield(Particle& particle) {
@@ -229,11 +229,11 @@ Vector3d Simulation::correlationTempEfield(Particle& particle) {
 	}
 
 	return result;*/
-	int xcount = floor((particle.x - xgrid[0])/deltaX);
-	double rightWeight = (particle.x - xgrid[xcount])/deltaX;
-	double leftWeight = (xgrid[xcount + 1] - particle.x)/deltaX;
+	int xcount = floor((particle.x - xgrid[0]) / deltaX);
+	double rightWeight = (particle.x - xgrid[xcount]) / deltaX;
+	double leftWeight = (xgrid[xcount + 1] - particle.x) / deltaX;
 
-	return tempEfield[xcount]*leftWeight + tempEfield[xcount + 1]*rightWeight;
+	return tempEfield[xcount] * leftWeight + tempEfield[xcount + 1] * rightWeight;
 }
 
 Vector3d Simulation::correlationNewEfield(Particle& particle) {
@@ -248,21 +248,21 @@ Vector3d Simulation::correlationNewEfield(Particle& particle) {
 	}
 
 	return result;*/
-	int xcount = floor((particle.x - xgrid[0])/deltaX);
-	double rightWeight = (particle.x - xgrid[xcount])/deltaX;
-	double leftWeight = (xgrid[xcount + 1] - particle.x)/deltaX;
+	int xcount = floor((particle.x - xgrid[0]) / deltaX);
+	double rightWeight = (particle.x - xgrid[xcount]) / deltaX;
+	double leftWeight = (xgrid[xcount + 1] - particle.x) / deltaX;
 
-	return newEfield[xcount]*leftWeight + newEfield[xcount + 1]*rightWeight;
+	return newEfield[xcount] * leftWeight + newEfield[xcount + 1] * rightWeight;
 }
 
 Vector3d Simulation::correlationBfield(Particle& particle) {
 
 	double x = particle.x;
-	if(x > xgrid[xnumber]) {
+	if (x > xgrid[xnumber]) {
 		printf("particle out of box in correlationBfield\n");
 		exit(0);
 	}
-	if(x < xgrid[0]) {
+	if (x < xgrid[0]) {
 		printf("particle out of box in correlationBfield\n");
 		exit(0);
 	}
@@ -274,32 +274,32 @@ Vector3d Simulation::correlationBfield(Particle& particle) {
 	double rightWeight;
 	double leftWeight;
 
-	if(xcount > 0 && xcount < xnumber){
-		rightWeight = (particle.x - middleXgrid[xcount-1])/deltaX;
-		leftWeight = (middleXgrid[xcount] - particle.x)/deltaX;
-		leftField = Bfield[xcount-1];
+	if (xcount > 0 && xcount < xnumber) {
+		rightWeight = (particle.x - middleXgrid[xcount - 1]) / deltaX;
+		leftWeight = (middleXgrid[xcount] - particle.x) / deltaX;
+		leftField = Bfield[xcount - 1];
 		rightField = Bfield[xcount];
-	} else if(xcount == 0){
-		leftWeight = (middleXgrid[xcount] - particle.x)/deltaX;
+	} else if (xcount == 0) {
+		leftWeight = (middleXgrid[xcount] - particle.x) / deltaX;
 		rightWeight = 1.0 - leftWeight;
 		rightField = Bfield[xcount];
-		if(boundaryConditionType == PERIODIC){
+		if (boundaryConditionType == PERIODIC) {
 			leftField = Bfield[xnumber - 1];
 		} else {
 			leftField = Bfield[0];
 		}
-	} else if(xcount == xnumber){
-		rightWeight = (particle.x - middleXgrid[xcount-1])/deltaX;
+	} else if (xcount == xnumber) {
+		rightWeight = (particle.x - middleXgrid[xcount - 1]) / deltaX;
 		leftWeight = 1 - rightWeight;
 		leftField = Bfield[xcount - 1];
-		if(boundaryConditionType == PERIODIC){
+		if (boundaryConditionType == PERIODIC) {
 			rightField = Bfield[0];
 		} else {
 			rightField = B0;
 		}
 	}
 
-	return leftField*leftWeight + rightField*rightWeight;
+	return leftField * leftWeight + rightField * rightWeight;
 
 	/*double leftX;
 	double rightX;
@@ -352,11 +352,11 @@ Vector3d Simulation::correlationNewBfield(Particle& particle) {
 
 	int xcount = floor(((x - xgrid[0]) / deltaX) + 0.5);
 
-	if(x > xgrid[xnumber]) {
+	if (x > xgrid[xnumber]) {
 		printf("particle out of box in correlationBfield\n");
 		exit(0);
 	}
-	if(x < xgrid[0]) {
+	if (x < xgrid[0]) {
 		printf("particle out of box in correlationBfield\n");
 		exit(0);
 	}
@@ -367,32 +367,32 @@ Vector3d Simulation::correlationNewBfield(Particle& particle) {
 	double rightWeight;
 	double leftWeight;
 
-	if(xcount > 0 && xcount < xnumber){
-		rightWeight = (particle.x - middleXgrid[xcount-1])/deltaX;
-		leftWeight = (middleXgrid[xcount] - particle.x)/deltaX;
-		leftField = newBfield[xcount-1];
+	if (xcount > 0 && xcount < xnumber) {
+		rightWeight = (particle.x - middleXgrid[xcount - 1]) / deltaX;
+		leftWeight = (middleXgrid[xcount] - particle.x) / deltaX;
+		leftField = newBfield[xcount - 1];
 		rightField = newBfield[xcount];
-	} else if(xcount == 0){
-		leftWeight = (middleXgrid[xcount] - particle.x)/deltaX;
+	} else if (xcount == 0) {
+		leftWeight = (middleXgrid[xcount] - particle.x) / deltaX;
 		rightWeight = 1.0 - leftWeight;
 		rightField = newBfield[xcount];
-		if(boundaryConditionType == PERIODIC){
+		if (boundaryConditionType == PERIODIC) {
 			leftField = newBfield[xnumber - 1];
 		} else {
 			leftField = newBfield[0];
 		}
-	} else if(xcount == xnumber){
-		rightWeight = (particle.x - middleXgrid[xcount-1])/deltaX;
+	} else if (xcount == xnumber) {
+		rightWeight = (particle.x - middleXgrid[xcount - 1]) / deltaX;
 		leftWeight = 1 - rightWeight;
 		leftField = newBfield[xcount - 1];
-		if(boundaryConditionType == PERIODIC){
+		if (boundaryConditionType == PERIODIC) {
 			rightField = newBfield[0];
 		} else {
 			rightField = B0;
 		}
 	}
 
-	return leftField*leftWeight + rightField*rightWeight;
+	return leftField * leftWeight + rightField * rightWeight;
 	/*Vector3d result = Vector3d(0, 0, 0);
 
 	double leftX;
@@ -441,26 +441,26 @@ Vector3d Simulation::correlationNewBfield(Particle& particle) {
 
 double Simulation::correlationWithBbin(Particle& particle, int i) {
 	//if (! particleCrossBbin(particle, i))
-		//return 0.0;
+	//return 0.0;
 
 	double x = particle.x;
 
 	double leftx;
 	double rightx;
 
-	if(i == -1) {
-		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+	if (i == -1) {
+		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 			return 0.0;
 		}
 		if (particle.x - particle.dx > xgrid[0]) {
-			leftx = xgrid[xnumber-1];
+			leftx = xgrid[xnumber - 1];
 			rightx = xgrid[xnumber];
 		} else {
 			leftx = xgrid[0] - deltaX;
 			rightx = xgrid[0];
-		}	
-	} else if(i == 0){
-		if(boundaryConditionType == PERIODIC){
+		}
+	} else if (i == 0) {
+		if (boundaryConditionType == PERIODIC) {
 			if (particle.x - particle.dx > xgrid[1]) {
 				leftx = xgrid[xnumber];
 				rightx = xgrid[xnumber] + deltaX;
@@ -468,15 +468,15 @@ double Simulation::correlationWithBbin(Particle& particle, int i) {
 				leftx = xgrid[0];
 				rightx = xgrid[1];
 			}
-		} else if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-			leftx = xgrid[0] -deltaX;
+		} else if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+			leftx = xgrid[0] - deltaX;
 			rightx = xgrid[1];
 		} else {
 			leftx = xgrid[0];
 			rightx = xgrid[1];
 		}
-	} else if(i == xnumber - 1){
-		if(boundaryConditionType == PERIODIC){
+	} else if (i == xnumber - 1) {
+		if (boundaryConditionType == PERIODIC) {
 			if (particle.x + particle.dx < xgrid[xnumber - 1]) {
 				leftx = xgrid[0] - deltaX;
 				rightx = xgrid[0];
@@ -488,8 +488,8 @@ double Simulation::correlationWithBbin(Particle& particle, int i) {
 			leftx = xgrid[xnumber - 1];
 			rightx = xgrid[xnumber];
 		}
-	} else if(i == xnumber) {
-		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+	} else if (i == xnumber) {
+		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 			return 0.0;
 		}
 		if (particle.x + particle.dx < xgrid[xnumber]) {
@@ -505,7 +505,6 @@ double Simulation::correlationWithBbin(Particle& particle, int i) {
 	}
 
 
-
 	double correlationx = correlationBspline(x, particle.dx, leftx, rightx);
 
 	return correlationx;
@@ -517,57 +516,57 @@ double Simulation::correlationWithEbin(Particle& particle, int i) {
 	double leftx;
 	double rightx;
 
-	if(i == -1) {
-		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+	if (i == -1) {
+		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 			leftx = xgrid[0] - deltaX;
 			rightx = xgrid[0];
 		}
-		if (particle.x - particle.dx > xgrid[0] - deltaX/2) {
-			leftx = xgrid[xnumber - 1] - deltaX/2;
-			rightx = xgrid[xnumber - 1] + deltaX/2;
+		if (particle.x - particle.dx > xgrid[0] - deltaX / 2) {
+			leftx = xgrid[xnumber - 1] - deltaX / 2;
+			rightx = xgrid[xnumber - 1] + deltaX / 2;
 		} else {
-			leftx = xgrid[0] - 3*deltaX/2;
-			rightx = xgrid[0] - deltaX/2;
-		}		
-	} else if(i == 0){
-		if(boundaryConditionType == PERIODIC){
-			if (particle.x - particle.dx > xgrid[0] + deltaX/2) {
-				leftx = xgrid[xnumber] - deltaX/2;
-				rightx = xgrid[xnumber] + deltaX/2;
+			leftx = xgrid[0] - 3 * deltaX / 2;
+			rightx = xgrid[0] - deltaX / 2;
+		}
+	} else if (i == 0) {
+		if (boundaryConditionType == PERIODIC) {
+			if (particle.x - particle.dx > xgrid[0] + deltaX / 2) {
+				leftx = xgrid[xnumber] - deltaX / 2;
+				rightx = xgrid[xnumber] + deltaX / 2;
 			} else {
-				leftx = xgrid[0] - deltaX/2;
-				rightx = xgrid[0] + deltaX/2;
+				leftx = xgrid[0] - deltaX / 2;
+				rightx = xgrid[0] + deltaX / 2;
 			}
-		} else if(boundaryConditionType == FREE_BOTH){
-			leftx = xgrid[0] - deltaX/2;
-			rightx = xgrid[0] + deltaX/2;
+		} else if (boundaryConditionType == FREE_BOTH) {
+			leftx = xgrid[0] - deltaX / 2;
+			rightx = xgrid[0] + deltaX / 2;
 		} else {
 			leftx = xgrid[0];
-			rightx = xgrid[0] + deltaX/2;
+			rightx = xgrid[0] + deltaX / 2;
 		}
 	} else if (i == xnumber) {
-		if(boundaryConditionType == PERIODIC){
-			if (particle.x + particle.dx < xgrid[xnumber] - deltaX/2) {
-				leftx = xgrid[0] - deltaX/2;
-				rightx = xgrid[0] + deltaX/2;
+		if (boundaryConditionType == PERIODIC) {
+			if (particle.x + particle.dx < xgrid[xnumber] - deltaX / 2) {
+				leftx = xgrid[0] - deltaX / 2;
+				rightx = xgrid[0] + deltaX / 2;
 			} else {
-				leftx = xgrid[xnumber] - deltaX/2;
-				rightx = xgrid[xnumber] + deltaX/2;
+				leftx = xgrid[xnumber] - deltaX / 2;
+				rightx = xgrid[xnumber] + deltaX / 2;
 			}
 		} else {
-			leftx = xgrid[xnumber] - deltaX/2;
-			rightx = xgrid[xnumber] + deltaX/2;
+			leftx = xgrid[xnumber] - deltaX / 2;
+			rightx = xgrid[xnumber] + deltaX / 2;
 		}
-	} else if(i == xnumber + 1) {
-		if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+	} else if (i == xnumber + 1) {
+		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 			return 0.0;
 		}
-		if (particle.x + particle.dx < xgrid[xnumber] + deltaX/2) {
-			leftx = xgrid[1] - deltaX/2;
-			rightx = xgrid[1] + deltaX/2;
+		if (particle.x + particle.dx < xgrid[xnumber] + deltaX / 2) {
+			leftx = xgrid[1] - deltaX / 2;
+			rightx = xgrid[1] + deltaX / 2;
 		} else {
-			leftx = xgrid[xnumber] + deltaX/2;
-			rightx = xgrid[xnumber] + 3*deltaX/2;
+			leftx = xgrid[xnumber] + deltaX / 2;
+			rightx = xgrid[xnumber] + 3 * deltaX / 2;
 		}
 	} else {
 		leftx = xgrid[i] - (deltaX / 2);
@@ -580,8 +579,8 @@ double Simulation::correlationWithEbin(Particle& particle, int i) {
 }
 
 double Simulation::correlationBspline(const double& x, const double& dx, const double& leftx, const double& rightx) {
-	double dx2 = dx*dx;
-	double dx3 = dx*dx*dx;
+	double dx2 = dx * dx;
+	double dx3 = dx * dx * dx;
 	if (rightx < leftx) {
 		printf("rightx < leftx\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
@@ -604,55 +603,55 @@ double Simulation::correlationBspline(const double& x, const double& dx, const d
 	if (x > rightx + dx)
 		return 0;
 
-	switch (splineOrder){
-		case 0:
-			if ( x < leftx + dx){
-				correlation = 0.5*(x + dx - leftx)/dx;
-			} else if( x > rightx - dx){
-				correlation = 0.5*(rightx - (x - dx))/dx;
-			} else {
-				correlation = 1;
-			}
-			break;
-		case 1:
-			if( x < leftx){
-				correlation = 0.5*sqr(x + dx - leftx)/dx2;
-			} else if (x < leftx + dx){
-				correlation = 1 - 0.5*sqr(leftx - (x - dx))/dx2;
-			} else if (x > rightx){
-				correlation = 0.5*sqr(rightx - (x - dx))/dx2;
-			} else if (x > rightx - dx){
-				correlation = 1 - 0.5*sqr(x + dx - rightx)/dx2;
-			} else {
-				correlation = 1;
-			}
-			break;
-		case 2:
-			if (x < leftx - dx/2) {
-				correlation = 2*cube(x + dx - leftx)/(3*dx3);
-			} else if(x < leftx){
-				correlation = (1.0/12.0) + ((x + dx/2 - leftx)/dx) - 2*(cube(dx/2) - cube(leftx - x))/(3*dx3);
-			} else if (x > rightx + dx/2) {
-				correlation = 2*cube(rightx - (x - dx))/(3*dx3);
-			} else if(x > rightx){
-				correlation = (1.0/12.0) + ((-(x - dx/2) + rightx)/dx) - 2*(cube(dx/2) - cube(x - rightx))/(3*dx3);
-			} else if (x < leftx + dx/2) {
-				correlation = 0.5 + ((x - leftx)/dx) - 2*(cube(x - leftx))/(3*dx3);
-			} else if(x < leftx + dx){
-				correlation = 11.0/12.0 + 2*(cube(dx/2) - cube(leftx - (x - dx)))/(3*dx3);
-			} else if (x > rightx - dx/2) {
-				correlation = 0.5 + ((rightx - x)/dx) - 2*(cube(rightx - x))/(3*dx3);
-			} else if(x > rightx - dx) {
-				correlation = 11.0/12.0 + 2*(cube(dx/2) - cube(x + dx - rightx))/(3*dx3);
-			}else {
-				correlation = 1;
-			}
-			break;
-		default:
-			errorLogFile = fopen("./output/errorLog.dat", "w");
-			fprintf(errorLogFile, "spline order is wrong");
-			fclose(errorLogFile);
-			exit(0);
+	switch (splineOrder) {
+	case 0:
+		if (x < leftx + dx) {
+			correlation = 0.5 * (x + dx - leftx) / dx;
+		} else if (x > rightx - dx) {
+			correlation = 0.5 * (rightx - (x - dx)) / dx;
+		} else {
+			correlation = 1;
+		}
+		break;
+	case 1:
+		if (x < leftx) {
+			correlation = 0.5 * sqr(x + dx - leftx) / dx2;
+		} else if (x < leftx + dx) {
+			correlation = 1 - 0.5 * sqr(leftx - (x - dx)) / dx2;
+		} else if (x > rightx) {
+			correlation = 0.5 * sqr(rightx - (x - dx)) / dx2;
+		} else if (x > rightx - dx) {
+			correlation = 1 - 0.5 * sqr(x + dx - rightx) / dx2;
+		} else {
+			correlation = 1;
+		}
+		break;
+	case 2:
+		if (x < leftx - dx / 2) {
+			correlation = 2 * cube(x + dx - leftx) / (3 * dx3);
+		} else if (x < leftx) {
+			correlation = (1.0 / 12.0) + ((x + dx / 2 - leftx) / dx) - 2 * (cube(dx / 2) - cube(leftx - x)) / (3 * dx3);
+		} else if (x > rightx + dx / 2) {
+			correlation = 2 * cube(rightx - (x - dx)) / (3 * dx3);
+		} else if (x > rightx) {
+			correlation = (1.0 / 12.0) + ((-(x - dx / 2) + rightx) / dx) - 2 * (cube(dx / 2) - cube(x - rightx)) / (3 * dx3);
+		} else if (x < leftx + dx / 2) {
+			correlation = 0.5 + ((x - leftx) / dx) - 2 * (cube(x - leftx)) / (3 * dx3);
+		} else if (x < leftx + dx) {
+			correlation = 11.0 / 12.0 + 2 * (cube(dx / 2) - cube(leftx - (x - dx))) / (3 * dx3);
+		} else if (x > rightx - dx / 2) {
+			correlation = 0.5 + ((rightx - x) / dx) - 2 * (cube(rightx - x)) / (3 * dx3);
+		} else if (x > rightx - dx) {
+			correlation = 11.0 / 12.0 + 2 * (cube(dx / 2) - cube(x + dx - rightx)) / (3 * dx3);
+		} else {
+			correlation = 1;
+		}
+		break;
+	default:
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "spline order is wrong");
+		fclose(errorLogFile);
+		exit(0);
 	}
 
 	return correlation;
