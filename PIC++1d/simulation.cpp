@@ -18,12 +18,12 @@ void Simulation::simulate() {
 		initialize();
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWave(1, 0.01);
+		initializeAlfvenWave(1, 0.01);
 		//initializeFluxFromRight();
 		//initializeShockWave();
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();
-		createParticles();
+		//createParticles();
 		//initializeMovingLangmuirWave();
 		//fieldsLorentzTransitionX(V0.x);
 	}

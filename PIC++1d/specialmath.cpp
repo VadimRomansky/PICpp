@@ -313,7 +313,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>** matrix, doubl
 		for (int i = 0; i < xnumber; ++i) {
 			for (int l = 0; l < lnumber; ++l) {
 				outvector[i][l] = 0;
-				for (int m = 0; m < n; ++m) {
+				for (int m = 0; m < n-1; ++m) {
 					outvector[i][l] += basis[m][i][l] * y[m] * norm;
 					//outvector[i][l] += basis[m][i][l] * y[m];
 				}
