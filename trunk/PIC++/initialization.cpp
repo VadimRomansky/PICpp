@@ -1592,17 +1592,16 @@ void Simulation::initializeLangmuirWave() {
 void Simulation::initializeFluxFromRight() {
 	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	createParticles();
+	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized);
 	//initializeAlfvenWave(10, 1.0E-4);
-	for (int j = 0; j < ynumber + 1; ++j) {
-		for (int k = 0; k < znumber + 1; ++k) {
-			Efield[xnumber][j][k] = E0;
-			tempEfield[xnumber][j][k] = E0;
-			newEfield[xnumber][j][k] = E0;
-			explicitEfield[xnumber][j][k] = E0;
-			Efield[0][j][k] = E0;
-			tempEfield[0][j][k] = E0;
-			newEfield[0][j][k] = E0;
-			explicitEfield[0][j][k] = E0;
+	for (int i = 0; i < xnumber + 1; ++i) {
+		for (int j = 0; j < ynumber + 1; ++j) {
+			for (int k = 0; k < znumber + 1; ++k) {
+				Efield[i][j][k] = E0;
+				tempEfield[i][j][k] = E0;
+				newEfield[i][j][k] = E0;
+				explicitEfield[i][j][k] = E0;
+			}
 		}
 	}
 
