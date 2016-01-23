@@ -352,15 +352,35 @@ void Simulation::createSuperConductorLeftEquation(int j, int k) {
 		nextK = 0;
 	}
 	//todo!!!
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.25, i, j, k, 0));
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.25, i, nextJ, k, 0));
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.25, i, j, nextK, 0));
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.25, i, nextJ, nextK, 0));
 
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.25, i + 1, j, k, 0));
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.25, i + 1, nextJ, k, 0));
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.25, i + 1, j, nextK, 0));
-	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.25, i + 1, nextJ, nextK, 0));
+	if ((ynumber) > 1 && (znumber > 1)) {
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.25, i, j, k, 0));
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.25, i + 1, j, k, 0));
+
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.25, i, nextJ, k, 0));
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.25, i + 1, nextJ, k, 0));
+
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.25, i, j, nextK, 0));
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.25, i + 1, j, nextK, 0));
+
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.25, i, nextJ, nextK, 0));
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.25, i + 1, nextJ, nextK, 0));
+	} else if (ynumber > 1) {
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.5, i, j, k, 0));
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.5, i + 1, j, k, 0));
+
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.5, i, nextJ, k, 0));
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.5, i + 1, nextJ, k, 0));
+	} else if (znumber > 1) {
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.5, i, j, k, 0));
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.5, i + 1, j, k, 0));
+
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(0.5, i, j, nextK, 0));
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(-0.5, i + 1, j, nextK, 0));
+	} else {
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(1.0, i, j, k, 0));
+		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(1.0, i + 1, j, k, 0));
+	}
 
 	maxwellEquationRightPart[i][j][k][0] = -4 * pi * electricDensity[0][j][k] * deltaX / fieldScale;
 	maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(1.0, i, j, k, 1));

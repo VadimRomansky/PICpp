@@ -55,8 +55,8 @@ figure(1)
 [X, Y] = meshgrid(Yfile, Xfile);
 surf(X, Y, Ex);
 title ('Ex');
-xlabel ('x');
-ylabel ('y');
+xlabel ('y');
+ylabel ('x');
 zlabel ('E gauss');
 grid ;
 
@@ -64,8 +64,8 @@ figure(2)
 [X, Y] = meshgrid(Yfile, Xfile);
 surf(X, Y, Ey);
 title ('Ey');
-xlabel ('x');
-ylabel ('y');
+xlabel ('y');
+ylabel ('x');
 zlabel ('E gauss');
 grid ;
 
@@ -73,8 +73,8 @@ figure(3)
 [X, Y] = meshgrid(Yfile, Xfile);
 surf(X, Y, Ez);
 title ('Ez');
-xlabel ('x');
-ylabel ('y');
+xlabel ('y');
+ylabel ('x');
 zlabel ('E gauss');
 grid ;
 
@@ -82,8 +82,8 @@ figure(4)
 [X, Y] = meshgrid(middleY, middleX);
 surf(X, Y, Bx);
 title ('Bx');
-xlabel ('x');
-ylabel ('y');
+xlabel ('y');
+ylabel ('x');
 zlabel ('B gauss');
 grid ;
 
@@ -91,8 +91,8 @@ figure(5)
 [X, Y] = meshgrid(middleY, middleX);
 surf(X, Y, By);
 title ('By');
-xlabel ('x');
-ylabel ('y');
+xlabel ('y');
+ylabel ('x');
 zlabel ('B gauss');
 grid ;
 
@@ -100,7 +100,7 @@ figure(6)
 [X, Y] = meshgrid(middleY, middleX);
 surf(X, Y, Bz);
 title ('Bz');
-xlabel ('x');
-ylabel ('y');
+xlabel ('y');
+ylabel ('x');
 zlabel ('B gauss');
 grid ;
