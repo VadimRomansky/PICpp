@@ -105,7 +105,7 @@ Simulation::Simulation(int xn, double xsizev, double temp, double rho, double Vx
 
 	double effectiveMass = 1/(((electronsPerBin / massElectron) + (protonsPerBin / massProton) + (positronsPerBin / massElectron) + (alphaPerBin / massAlpha)) / electronsPerBin);
 
-	//plasma_period = sqrt(massElectron / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi)*sqrt(gamma);
+	//plasma_period = sqrt(massElectron / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi)*gamma*sqrt(gamma);
 	plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi) * gamma * sqrt(gamma);
 	double thermal_momentum;
 	if (kBoltzman * temperature > massElectron * speed_of_light * speed_of_light) {
