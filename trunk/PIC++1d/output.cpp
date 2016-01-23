@@ -19,8 +19,7 @@ void outputDistributionUpstream(FILE* outFile, std::vector<Particle*> particles,
 				}
 				if (particles[i]->momentum.norm() * gyroradius / plasma_period < minMomentum) {
 					minMomentum = particles[i]->momentum.norm() * gyroradius / plasma_period;
-				}
-				else {
+				} else {
 					if (particles[i]->momentum.norm() * gyroradius / plasma_period > maxMomentum) {
 						maxMomentum = particles[i]->momentum.norm() * gyroradius / plasma_period;
 					}
@@ -76,8 +75,7 @@ void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int par
 			}
 			if (particles[i]->momentum.norm() * gyroradius / plasma_period < minMomentum) {
 				minMomentum = particles[i]->momentum.norm() * gyroradius / plasma_period;
-			}
-			else {
+			} else {
 				if (particles[i]->momentum.norm() * gyroradius / plasma_period > maxMomentum) {
 					maxMomentum = particles[i]->momentum.norm() * gyroradius / plasma_period;
 				}
@@ -119,7 +117,7 @@ void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int par
 }
 
 void outputTraectory(FILE* outFile, Particle* particle, double time, double plasma_period, double gyroradius) {
-	Vector3d velocity = particle->velocity(speed_of_light*plasma_period/gyroradius);
+	Vector3d velocity = particle->velocity(speed_of_light * plasma_period / gyroradius);
 	fprintf(outFile, "%20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g\n", time, time * plasma_period, particle->x * gyroradius, particle->y * gyroradius, particle->z * gyroradius, particle->momentum.x * gyroradius / plasma_period, particle->momentum.y * gyroradius / plasma_period, particle->momentum.z * gyroradius / plasma_period, particle->momentum.norm() * gyroradius / plasma_period, velocity.x * gyroradius / plasma_period, velocity.y * gyroradius / plasma_period, velocity.z * gyroradius / plasma_period);
 }
 
@@ -169,8 +167,8 @@ void outputArrayParameter(FILE* outFile, double* arrayParameter, int xnumber, do
 void outputGeneral(FILE* outFile, Simulation* simulation) {
 	int particlesCount = simulation->particles.size();
 	fprintf(outFile, "%d %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d\n", simulation->currentIteration, simulation->time, simulation->time * simulation->plasma_period, simulation->particleEnergy,
-	        simulation->electricFieldEnergy, simulation->magneticFieldEnergy, simulation->energy, simulation->momentum.x, simulation->momentum.y, simulation->momentum.z, simulation->theoreticalEnergy, simulation->theoreticalMomentum.x, simulation->theoreticalMomentum.y, 
-			simulation->theoreticalMomentum.z, simulation->maxEfield.norm(), simulation->maxBfield.norm(), simulation->deltaT, particlesCount);
+	        simulation->electricFieldEnergy, simulation->magneticFieldEnergy, simulation->energy, simulation->momentum.x, simulation->momentum.y, simulation->momentum.z, simulation->theoreticalEnergy, simulation->theoreticalMomentum.x, simulation->theoreticalMomentum.y,
+	        simulation->theoreticalMomentum.z, simulation->maxEfield.norm(), simulation->maxBfield.norm(), simulation->deltaT, particlesCount);
 }
 
 void outputDivergenceError(FILE* outFile, Simulation* simulation, double plasma_period, double gyroradius, double fieldScale) {
@@ -224,8 +222,7 @@ void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* p
 	int debugMode = 0;
 	if (simulation->debugMode) {
 		debugMode = 1;
-	}
-	else {
+	} else {
 		debugMode = 0;
 	}
 	fprintf(generalFile, "%d\n", debugMode);
@@ -233,8 +230,7 @@ void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* p
 	int preserveCharge = 0;
 	if (simulation->preserveCharge) {
 		preserveCharge = 1;
-	}
-	else {
+	} else {
 		preserveCharge = 0;
 	}
 
@@ -243,8 +239,7 @@ void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* p
 	int solverType = 0;
 	if (simulation->solverType == IMPLICIT) {
 		solverType = 1;
-	}
-	else {
+	} else {
 		solverType = 0;
 	}
 
@@ -253,8 +248,7 @@ void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* p
 	int boundaryConditionType = 0;
 	if (simulation->boundaryConditionType == PERIODIC) {
 		boundaryConditionType = 1;
-	}
-	else {
+	} else {
 		boundaryConditionType = 0;
 	}
 
@@ -284,14 +278,12 @@ void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPosi
 		double p = particle->momentum.norm() * simulation->gyroradius / simulation->plasma_period;
 		if (particle->type == PROTON) {
 			fprintf(outProtonsFile, "%15.10g %15.10g %15.10g\n", particle->x * simulation->gyroradius, p, particle->momentum.x * simulation->gyroradius / simulation->plasma_period);
-		}
-		else if (particle->type == ELECTRON) {
+		} else if (particle->type == ELECTRON) {
 			fprintf(outElectronsFile, "%15.10g %15.10g %15.10g\n", particle->x * simulation->gyroradius, p, particle->momentum.x * simulation->gyroradius / simulation->plasma_period);
 		}
 		if (particle->type == POSITRON) {
 			fprintf(outPositronsFile, "%15.10g %15.10g %15.10g\n", particle->x * simulation->gyroradius, p, particle->momentum.x * simulation->gyroradius / simulation->plasma_period);
-		}
-		else if (particle->type == ALPHA) {
+		} else if (particle->type == ALPHA) {
 			fprintf(outAlphaFile, "%15.10g %15.10g %15.10g\n", particle->x * simulation->gyroradius, p, particle->momentum.x * simulation->gyroradius / simulation->plasma_period);
 		}
 	}
@@ -312,14 +304,11 @@ void outputBackupParticle(FILE* outFile, Particle* particle) {
 	int type = 0;
 	if (particle->type == ELECTRON) {
 		type = 1;
-	}
-	else if (particle->type == PROTON) {
+	} else if (particle->type == PROTON) {
 		type = 2;
-	}
-	else if (particle->type == POSITRON) {
+	} else if (particle->type == POSITRON) {
 		type = 3;
-	}
-	else if (particle->type == ALPHA) {
+	} else if (particle->type == ALPHA) {
 		type = 4;
 	}
 	fprintf(outFile, "%d ", type);

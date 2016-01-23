@@ -90,14 +90,13 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 
 	double gamma = 1 / sqrt(1 - V0.scalarMult(V0) / sqr(speed_of_light));
 
-	double effectiveMass = 1/(((electronsPerBin / massElectron) + (protonsPerBin / massProton) + (positronsPerBin / massElectron) + (alphaPerBin / massAlpha)) / electronsPerBin);
+	double effectiveMass = 1 / (((electronsPerBin / massElectron) + (protonsPerBin / massProton) + (positronsPerBin / massElectron) + (alphaPerBin / massAlpha)) / electronsPerBin);
 
 	plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi) * gamma * sqrt(gamma);
 	double thermal_momentum;
 	if (kBoltzman * temperature > massElectron * speed_of_light * speed_of_light) {
 		thermal_momentum = kBoltzman * temperature / speed_of_light;
-	}
-	else {
+	} else {
 		thermal_momentum = sqrt(2 * massElectron * kBoltzman * temperature);
 	}
 	thermal_momentum += V0.norm() * massElectron;
@@ -1631,8 +1630,7 @@ void Simulation::fieldsLorentzTransitionX(const double& v) {
 		if (prevI < 0) {
 			if (boundaryConditionType == PERIODIC) {
 				prevI = xnumber - 1;
-			}
-			else {
+			} else {
 				prevI = 0;
 			}
 		}
@@ -1800,8 +1798,8 @@ void Simulation::initializeShockWave() {
 	initializeKolmogorovSpectrum(0, shockWavePoint);
 
 	for (int i = 0; i < xnumber; ++i) {
-		for(int j = 0; j < ynumber; ++j){
-			for(int k = 0; k < znumber; ++k){
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
 				double v = upstreamVelocity.x;
 				if (i < shockWavePoint) {
 					//v = V0.x/4;
@@ -1816,8 +1814,8 @@ void Simulation::initializeShockWave() {
 	}
 
 	for (int i = 0; i < xnumber; ++i) {
-		for(int j = 0; j < ynumber; ++j) {
-			for(int k = 0; k < znumber; ++k){
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
 				double v = upstreamVelocity.x;
 				if (i < shockWavePoint) {
 					//v = V0.x/4;
@@ -1831,21 +1829,21 @@ void Simulation::initializeShockWave() {
 		}
 	}
 
-	for(int i = 0; i < xnumber + 1; ++i) {
-		for(int j = 0; j < ynumber + 1; ++j) {
+	for (int i = 0; i < xnumber + 1; ++i) {
+		for (int j = 0; j < ynumber + 1; ++j) {
 			newEfield[i][j][znumber] = newEfield[i][j][0];
 		}
 	}
 
-	for(int i = 0; i < xnumber + 1; ++i) {
-		for(int k = 0; k < znumber + 1; ++k) {
+	for (int i = 0; i < xnumber + 1; ++i) {
+		for (int k = 0; k < znumber + 1; ++k) {
 			newEfield[i][ynumber][k] = newEfield[i][0][k];
 		}
 	}
 
 	for (int i = 0; i < xnumber + 1; ++i) {
-		for(int j = 0; j < ynumber + 1; ++j) {
-			for(int k = 0; k < znumber + 1; ++k){
+		for (int j = 0; j < ynumber + 1; ++j) {
+			for (int k = 0; k < znumber + 1; ++k) {
 				Efield[i][j][k] = newEfield[i][j][k];
 				tempEfield[i][j][k] = newEfield[i][j][k];
 				explicitEfield[i][j][k] = newEfield[i][j][k];
@@ -1854,8 +1852,8 @@ void Simulation::initializeShockWave() {
 	}
 
 	for (int i = 0; i < xnumber; ++i) {
-		for(int j = 0; j < ynumber; ++j) {
-			for(int k = 0; k < znumber; ++k) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
 				Bfield[i] = newBfield[i];
 			}
 		}
@@ -1880,8 +1878,8 @@ void Simulation::initializeKolmogorovSpectrum(int start, int end) {
 		double phiZ = 2 * pi * uniformDistribution();
 
 		for (int i = start; i < end; ++i) {
-			for(int j = 0; j < ynumber; ++j) {
-				for(int k = 0; k < znumber; ++k){
+			for (int j = 0; j < ynumber; ++j) {
+				for (int k = 0; k < znumber; ++k) {
 					Bfield[i][j][k].y += Bamplitude * sin(k * middleXgrid[i] + phiY);
 					Bfield[i][j][k].z += Bamplitude * sin(k * middleXgrid[i] + phiZ);
 					newBfield[i][j][k] = Bfield[i][j][k];
@@ -1958,8 +1956,7 @@ void Simulation::initializeTwoStream() {
 		if (particle->type == ELECTRON) {
 			if (electronCount % 2 == 0) {
 				particle->addVelocity(electronsVelocityPlus, speed_of_light_normalized);
-			}
-			else {
+			} else {
 				particle->addVelocity(electronsVelocityMinus, speed_of_light_normalized);
 			}
 			electronCount++;
@@ -1998,8 +1995,7 @@ void Simulation::initializeExternalFluxInstability() {
 	if (omega > cyclothronOmegaProton) {
 		printf("omega > cyclothron Omega Proton\n");
 		fprintf(informationFile, "omega > cyclothron Omega Proton\n");
-	}
-	else if (omega > cyclothronOmegaProton / 100.0) {
+	} else if (omega > cyclothronOmegaProton / 100.0) {
 		printf("omega > cyclothrone Omega Proton/100\n");
 		fprintf(informationFile, "omega > cyclothron Omega Proton/100\n");
 	}
@@ -2227,8 +2223,7 @@ void Simulation::createParticleTypes() {
 		summMass += types[i].mass * types[i].particlesPerBin;
 		if (types[i].particlesPerBin > 0) {
 			types[i].particesDeltaX = deltaX / types[i].particlesPerBin;
-		}
-		else {
+		} else {
 			types[i].particesDeltaX = xsize;
 		}
 	}
@@ -2297,8 +2292,7 @@ void Simulation::checkFrequency(double omega) {
 	if (omega > cyclothronOmegaProton) {
 		printf("omega > cyclothron Omega Proton\n");
 		fprintf(informationFile, "omega > cyclothron Omega Proton\n");
-	}
-	else if (omega > cyclothronOmegaProton / 100.0) {
+	} else if (omega > cyclothronOmegaProton / 100.0) {
 		printf("omega > cyclothrone Omega Proton/100\n");
 		fprintf(informationFile, "omega > cyclothron Omega Proton/100\n");
 	}
@@ -2308,8 +2302,7 @@ void Simulation::checkFrequency(double omega) {
 	if (omega > 1.0) {
 		printf("omega > omega plasma\n");
 		fprintf(informationFile, "omega > omega plasma\n");
-	}
-	else if (omega > 0.01) {
+	} else if (omega > 0.01) {
 		printf("omega > omega plasma/100\n");
 		fprintf(informationFile, "omega > omega plasma/100\n");
 	}
@@ -2340,8 +2333,7 @@ void Simulation::checkDebyeParameter() {
 	if (debyeNumber < 1.0) {
 		printf("debye number < 1\n");
 		fprintf(informationFile, "debye number < 1\n");
-	}
-	else if (debyeNumber < 100.0) {
+	} else if (debyeNumber < 100.0) {
 		printf("debye number < 100\n");
 		fprintf(informationFile, "debye number < 100\n");
 	}
@@ -2361,8 +2353,7 @@ void Simulation::checkDebyeParameter() {
 	if (superParticleDebyeNumber < 1.0) {
 		printf("superparticle debye number < 1\n");
 		fprintf(informationFile, "superparticle debye number < 1\n");
-	}
-	else if (superParticleDebyeNumber < 100.0) {
+	} else if (superParticleDebyeNumber < 100.0) {
 		printf("superparticle debye number < 100\n");
 		fprintf(informationFile, "superparticle debye number < 100\n");
 	}
@@ -2414,8 +2405,7 @@ void Simulation::checkCollisionTime(double omega) {
 	if (collisionlessParameter < 1.0) {
 		printf("collisionlessParameter < 1\n");
 		fprintf(informationFile, "collisionlessParameter < 1\n");
-	}
-	else if (collisionlessParameter < 100.0) {
+	} else if (collisionlessParameter < 100.0) {
 		printf("collisionlessParameter < 100\n");
 		fprintf(informationFile, "collisionlessParameter < 100\n");
 	}
@@ -2428,8 +2418,7 @@ void Simulation::checkCollisionTime(double omega) {
 	if (superParticleCollisionlessParameter < 1.0) {
 		printf("superParticleCollisionlessParameter < 1\n");
 		fprintf(informationFile, "superParticleCollisionlessParameter < 1\n");
-	}
-	else if (superParticleCollisionlessParameter < 100.0) {
+	} else if (superParticleCollisionlessParameter < 100.0) {
 		printf("superParticleCollisionlessParameter < 100\n");
 		fprintf(informationFile, "superParticleCollisionlessParameter < 100\n");
 	}
@@ -2454,8 +2443,7 @@ void Simulation::checkMagneticReynolds(double v) {
 	if (magneticReynolds < 1.0) {
 		printf("magneticReynolds < 1\n");
 		fprintf(informationFile, "magneticReynolds < 1\n");
-	}
-	else if (magneticReynolds < 100.0) {
+	} else if (magneticReynolds < 100.0) {
 		printf("magneticReynolds < 100\n");
 		fprintf(informationFile, "magneticReynolds < 100\n");
 	}
@@ -2469,8 +2457,7 @@ void Simulation::checkMagneticReynolds(double v) {
 	if (superParticleMagneticReynolds < 1.0) {
 		printf("superParticleMagneticReynolds < 1\n");
 		fprintf(informationFile, "superParticleMagneticReynolds < 1\n");
-	}
-	else if (superParticleMagneticReynolds < 100.0) {
+	} else if (superParticleMagneticReynolds < 100.0) {
 		printf("superParticleMagneticReynolds < 100\n");
 		fprintf(informationFile, "superParticleMagneticReynolds < 100\n");
 	}
@@ -2499,8 +2486,7 @@ void Simulation::checkDissipation(double k, double alfvenV) {
 	if (kdissipation > k) {
 		printf("kdissipation > k\n");
 		fprintf(informationFile, "kdissipation > k\n");
-	}
-	else if (kdissipation > 0.1 * k) {
+	} else if (kdissipation > 0.1 * k) {
 		printf("kdissipation > 0.1*k\n");
 		fprintf(informationFile, "kdissipation > 0.1*k\n");
 	}
@@ -2516,8 +2502,7 @@ void Simulation::checkDissipation(double k, double alfvenV) {
 	if (superParticleKdissipation > k) {
 		printf("super particle kdissipation > k\n");
 		fprintf(informationFile, "super particle kdissipation > k\n");
-	}
-	else if (superParticleKdissipation > 0.1 * k) {
+	} else if (superParticleKdissipation > 0.1 * k) {
 		printf("super particle kdissipation > 0.1*k\n");
 		fprintf(informationFile, "super particle kdissipation > 0.1*k\n");
 	}
@@ -2554,12 +2539,12 @@ void Simulation::createParticles() {
 		}
 	}
 
-	if(preserveCharge){
+	if (preserveCharge) {
 		moveToPreserveCharge();
 	}
 }
 
-void Simulation::moveToPreserveCharge(){
+void Simulation::moveToPreserveCharge() {
 	Particle* electron = NULL;
 	Particle* notElectron = NULL;
 	Particle* particle;
@@ -2567,29 +2552,29 @@ void Simulation::moveToPreserveCharge(){
 	int notElectronCount = 0;
 	int particleCount = 0;
 
-	while(particleCount < particles.size()){
+	while (particleCount < particles.size()) {
 		particle = particles[particleCount];
-		if(particle->type != ELECTRON){
+		if (particle->type != ELECTRON) {
 			notElectron = particle;
 			notElectronCount = particleCount;
 
 			int necessaryElectrons = 1;
 
-			if(particle->type == ALPHA){
+			if (particle->type == ALPHA) {
 				necessaryElectrons = 2;
 			}
 
-			while(necessaryElectrons > 0){
+			while (necessaryElectrons > 0) {
 				electron = NULL;
-				while( electron == NULL){
-					if(electronCount >= particles.size()){
+				while (electron == NULL) {
+					if (electronCount >= particles.size()) {
 						errorLogFile = fopen("./output/errorLog.dat", "w");
 						printf("error in preserving charge\n");
 						fprintf(errorLogFile, "error in preserving charge\n");
 						fclose(errorLogFile);
 						exit(0);
 					}
-					if(particles[electronCount]->type == ELECTRON){
+					if (particles[electronCount]->type == ELECTRON) {
 						electron = particles[electronCount];
 						electron->coordinates = notElectron->coordinates;
 					}
