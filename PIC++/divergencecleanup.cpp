@@ -11,22 +11,22 @@ void Simulation::cleanupDivergence() {
 	int matrixDimension = xnumber;
 
 	double fullDensity = 0;
-	for (int i = 0; i < xnumber; ++i) {
+	/*for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				fullDensity += chargeDensity[i][j][k] * volumeB(i, j, k);
 			}
 		}
-	}
+	}*/
 	fullDensity /= xsize;
 
-	for (int i = 0; i < xnumber; ++i) {
+	/*for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				chargeDensity[i][j][k] -= fullDensity;
 			}
 		}
-	}
+	}*/
 
 
 	for (int i = 0; i < xnumber; ++i) {
@@ -38,7 +38,7 @@ void Simulation::cleanupDivergence() {
 				divergenceCleanUpRightPart[i][j][k][0] = 0;
 				divergenceCleanUpRightPart[i][j][k][1] = 0;
 				divergenceCleanUpRightPart[i][j][k][2] = 0;
-				if (((i > 0) && (i < xnumber)) || (boundaryConditionType = PERIODIC)) {
+				if (((i > 0) && (i < xnumber)) || (boundaryConditionType == PERIODIC)) {
 					createDivergenceCleanupInternalEquation(i, j, k);
 				} else if (i == 0) {
 					createDivergenceCleanupLeftEquation(j, k);
@@ -93,7 +93,11 @@ void Simulation::updateFieldByCleaning() {
 		}
 	}
 	if (boundaryConditionType == PERIODIC) {
-		newEfield[xnumber] = newEfield[0];
+		for(int j = 0; j < ynumber+1; ++j) {
+			for(int k = 0; k < znumber + 1; ++k) {
+				newEfield[xnumber][j][k] = newEfield[0][j][k];
+			}
+		}
 	}
 }
 
@@ -103,7 +107,11 @@ void Simulation::evaluateDivergenceCleaningField() {
 			for (int k = 0; k < znumber; ++k) {
 				int prevI = i - 1;
 				if (prevI < 0) {
-					prevI = xnumber - 1;
+					if(boundaryConditionType == PERIODIC){
+						prevI = xnumber - 1;
+					} else {
+						prevI = 0;
+					}
 				}
 
 				int prevJ = j - 1;

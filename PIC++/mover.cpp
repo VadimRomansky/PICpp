@@ -162,6 +162,11 @@ void Simulation::moveParticle(Particle* particle) {
 
 		//mistake in noguchi - he writes betashift!
 		middleVelocity = (tempParticle.rotationTensor * tempParticle.gammaFactor(speed_of_light_normalized) * velocity) + rotatedE * beta;
+		if(middleVelocity.norm() > speed_of_light_normalized) {
+			printf("middleVelocity = %g\n", middleVelocity.norm());
+			printf("speed of light = %g\n", speed_of_light_normalized);
+			printf("particle number %d\n", particle->number);
+		}
 
 		tempParticle.coordinates.x += (middleVelocity.x * eta * deltaT);
 		if (boundaryConditionType != PERIODIC) {
@@ -171,16 +176,16 @@ void Simulation::moveParticle(Particle* particle) {
 					particle->coordinates.x = 2 * xgrid[0] - tempParticle.coordinates.x + fabs(middleVelocity.x * (1 - eta) * deltaT);
 					particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
 					particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * (1 - eta) * deltaT;
-					newVelocity = middleVelocity;
-					newVelocity.x = -newVelocity.x;
-					particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+					//newVelocity.x = -newVelocity.x;
+					//particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+					particle->momentum.x = -particle->momentum.x;
 					return;
 				} else {
 					escapedParticles.push_back(particle);
 					particle->coordinates.x = xgrid[0];
 					particle->coordinates.y = tempParticle.coordinates.y;
 					particle->coordinates.z = tempParticle.coordinates.z;
-					particle->setMomentumByV(middleVelocity, speed_of_light_normalized);
+					//particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 					particle->escaped = true;
 					return;
 				}
@@ -190,7 +195,7 @@ void Simulation::moveParticle(Particle* particle) {
 				particle->coordinates.x = xgrid[xnumber];
 				particle->coordinates.y = tempParticle.coordinates.y;
 				particle->coordinates.z = tempParticle.coordinates.z;
-				particle->setMomentumByV(middleVelocity, speed_of_light_normalized);
+				//particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 				particle->escaped = true;
 				return;
 			}

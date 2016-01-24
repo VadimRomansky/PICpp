@@ -39,28 +39,28 @@ for j = 1:Ny,
 end;
 
 figure(1);
-[X, Y] = meshgrid(middleX, middleY);
+[X, Y] = meshgrid(middleY, middleX);
 mesh(X, Y, electron_concentration);
 title ('electrons');
-xlabel ('x');
-ylabel ('y');
+xlabel ('y');
+ylabel ('x');
 zlabel ('n cm^-3');
 grid ;
 
 figure(2);
-[X, Y] = meshgrid(middleX, middleY);
+[X, Y] = meshgrid(middleY, middleX);
 mesh(X, Y, proton_concentration);
 title ('protons');
-xlabel ('x');
-ylabel ('y');
+xlabel ('y');
+ylabel ('x');
 zlabel ('n cm^-3');
 grid ;
 
 figure(3);
-[X, Y] = meshgrid(middleX, middleY);
+[X, Y] = meshgrid(middleY, middleX);
 mesh(X, Y, charge_density);
 title ('charge density');
-xlabel ('x');
-ylabel ('y');
+xlabel ('y');
+ylabel ('x');
 zlabel ('n cm^-3');
 grid ;

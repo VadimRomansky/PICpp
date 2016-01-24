@@ -275,6 +275,9 @@ void Simulation::updateDeltaT() {
 		if (B > 0) {
 			deltaT = min2(deltaT, timeEpsilon * massElectron * speed_of_light_normalized / (electron_charge_normalized * B));
 		}
+		if (B > E) {
+			deltaT = min2(deltaT, timeEpsilon * massElectron * speed_of_light_normalized / (electron_charge_normalized * E));
+		}
 		/*if (E > 0) {
 			deltaT = min2(deltaT, 0.1 * thermalMomentum / (electron_charge_normalized * E));
 		}*/
