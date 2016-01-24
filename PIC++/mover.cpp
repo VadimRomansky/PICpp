@@ -342,7 +342,6 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d velocity,
 
 void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContainer, double length) {
 	printf("inject new particles\n");
-	double concentration = density / (massProton + massElectron);
 
 	int n = particles.size();
 	//Particle* tempParticle = particles[0];
@@ -356,7 +355,7 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 	for (int j = 0; j < ynumber; ++j) {
 		for (int k = 0; k < znumber; ++k) {
 			double weight = (typeContainer.concentration / typeContainer.particlesPerBin) * volumeB(xnumber - 1, j, k);
-			for (int l = 0; l < 2 * count; ++l) {
+			for (int l = 0; l < count; ++l) {
 				ParticleTypes type = typeContainer.type;
 				Particle* particle = createParticle(n, xnumber - 1, j, k, weight, type, typeContainer, temperature);
 				n++;
