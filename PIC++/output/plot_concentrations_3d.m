@@ -40,7 +40,7 @@ end;
 
 figure(1);
 [X, Y] = meshgrid(middleY, middleX);
-mesh(X, Y, electron_concentration);
+surf(X, Y, electron_concentration);
 title ('electrons');
 xlabel ('y');
 ylabel ('x');
@@ -49,7 +49,7 @@ grid ;
 
 figure(2);
 [X, Y] = meshgrid(middleY, middleX);
-mesh(X, Y, proton_concentration);
+surf(X, Y, proton_concentration);
 title ('protons');
 xlabel ('y');
 ylabel ('x');
@@ -58,7 +58,7 @@ grid ;
 
 figure(3);
 [X, Y] = meshgrid(middleY, middleX);
-mesh(X, Y, charge_density);
+surf(X, Y, charge_density);
 title ('charge density');
 xlabel ('y');
 ylabel ('x');
