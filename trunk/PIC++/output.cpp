@@ -205,13 +205,13 @@ void outputGeneral(FILE* outFile, Simulation* simulation) {
 	        simulation->theoreticalMomentum.z, simulation->maxEfield.norm(), simulation->maxBfield.norm(), simulation->deltaT, particlesCount);
 }
 
-void outputDivergenceError(FILE* outFile, Simulation* simulation) {
+void outputDivergenceError(FILE* outFile, Simulation* simulation, double plasma_period, double gyroradius, double fieldScale) {
 	for (int i = 0; i < simulation->xnumber; ++i) {
 		for (int j = 0; j < simulation->ynumber; ++j) {
 			for (int k = 0; k < simulation->znumber; ++k) {
 				double div = simulation->evaluateDivE(i, j, k);
 				double div2 = simulation->evaluateDivTempE(i, j, k);
-				fprintf(outFile, "%g %g %g\n", div, div - 4 * pi * simulation->chargeDensity[i][j][k], div2 - 4 * pi * simulation->electricDensity[i][j][k]);
+				fprintf(outFile, "%g %g %g\n", (4 * pi * simulation->chargeDensity[i][j][k] - div) / (sqrt(cube(gyroradius)) * plasma_period), div / (sqrt(cube(gyroradius)) * plasma_period), 4 * pi * simulation->chargeDensity[i][j][k] / (sqrt(cube(gyroradius)) * plasma_period));
 			}
 		}
 	}

@@ -17,7 +17,7 @@ void outputConcentrations(FILE* outFile, double*** electronConcentration, double
 void outputVelocity(FILE* outFile, FILE* outElectronFile, Vector3d*** velocity, Vector3d*** electronVelocity, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius);
 void outputGeneral(FILE* outFile, Simulation* simulation);
 void outputFlux(FILE* outFile, Vector3d*** electricFlux, Vector3d*** externalElectricFlux, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius, double fieldScale);
-void outputDivergenceError(FILE* outFile, Simulation* simulation);
+void outputDivergenceError(FILE* outFile, Simulation* simulation, double plasma_period, double gyroradius, double fieldScale);
 void outputVectorArray(FILE* outFile, Vector3d*** vector3d, int xnumber, int ynumber, int znumber, double scale = 1.0);
 void outputMatrixArray(FILE* outFile, Matrix3d*** matrix3d, int xnumber, int ynumber, int znumber, double scale = 1.0);
 void outputMaxwellEquationMatrix(std::vector<MatrixElement>****& maxwellEquationMatrix, int xnumber, int ynumber, int znumber, int lnumber);

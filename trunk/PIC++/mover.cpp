@@ -162,11 +162,11 @@ void Simulation::moveParticle(Particle* particle) {
 
 		//mistake in noguchi - he writes betashift!
 		middleVelocity = (tempParticle.rotationTensor * tempParticle.gammaFactor(speed_of_light_normalized) * velocity) + rotatedE * beta;
-		if(middleVelocity.norm() > speed_of_light_normalized) {
+		/*if(middleVelocity.norm() > speed_of_light_normalized) {
 			printf("middleVelocity = %g\n", middleVelocity.norm());
 			printf("speed of light = %g\n", speed_of_light_normalized);
 			printf("particle number %d\n", particle->number);
-		}
+		}*/
 
 		tempParticle.coordinates.x += (middleVelocity.x * eta * deltaT);
 		if (boundaryConditionType != PERIODIC) {

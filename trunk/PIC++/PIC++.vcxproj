@@ -115,7 +115,6 @@
     <ClInclude Include="vector3d.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\PIC++1d\input\input.dat" />
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

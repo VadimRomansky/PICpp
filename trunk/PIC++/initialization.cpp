@@ -105,8 +105,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		gyroradius = 1.0;
 	}
 
-	plasma_period = 1.0;
-	gyroradius = 1.0;
+	//plasma_period = 1.0;
+	//gyroradius = 1.0;
 
 	//gyroradius = xsize;
 
@@ -1598,9 +1598,13 @@ void Simulation::initializeFluxFromRight() {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			for (int k = 0; k < znumber + 1; ++k) {
 				Efield[i][j][k] = E0;
-				tempEfield[i][j][k] = E0;
-				newEfield[i][j][k] = E0;
-				explicitEfield[i][j][k] = E0;
+				if(i==0){
+					Efield[i][j][k].y = 0;
+					Efield[i][j][k].z = 0;
+				}
+				tempEfield[i][j][k] = Efield[i][j][k];
+				newEfield[i][j][k] = Efield[i][j][k];
+				explicitEfield[i][j][k] = Efield[i][j][k];			
 			}
 		}
 	}
@@ -2520,12 +2524,16 @@ void Simulation::createParticles() {
 				for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
 					double weight = (types[typeCounter].concentration / types[typeCounter].particlesPerBin) * volumeB(i, j, k);
 					double x = xgrid[i] + 0.0001 * deltaX;
+					double y = ygrid[j] + 0.0001 * deltaY;
+					double z = zgrid[k] + 0.0001 * deltaZ;
 					double deltaXParticles = types[typeCounter].particesDeltaX;
 					for (int l = 0; l < types[typeCounter].particlesPerBin; ++l) {
 						ParticleTypes type = types[typeCounter].type;
 						Particle* particle = createParticle(n, i, j, k, weight, type, types[typeCounter], temperature);
 						n++;
 						particle->coordinates.x = x + deltaXParticles * l;
+						particle->coordinates.y = y + deltaXParticles * l;
+						particle->coordinates.z = z + deltaXParticles * l;
 						//particle->addVelocity(V0, speed_of_light_normalized);
 						particles.push_back(particle);
 						particlesNumber++;
