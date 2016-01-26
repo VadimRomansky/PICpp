@@ -18,9 +18,9 @@ void Simulation::simulate() {
 		initialize();
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWave(1, 0.01);
+		initializeAlfvenWave(1, 0.01);
 		//initializeRotatedAlfvenWave(1, 0.01);
-		initializeFluxFromRight();
+		//initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeRotatedSimpleElectroMagneticWave(1);
 		//initializeLangmuirWave();
@@ -42,7 +42,7 @@ void Simulation::simulate() {
 	updateDensityParameters();
 
 	evaluateExplicitDerivative();
-	//cleanupDivergence();
+	cleanupDivergence();
 	updateFields();
 	updateEnergy();
 	theoreticalEnergy = energy;
@@ -90,7 +90,7 @@ void Simulation::simulate() {
 			}
 		}
 		updateDensityParameters();
-		//cleanupDivergence();
+		cleanupDivergence();
 		updateFields();
 		updateEnergy();
 		updateParameters();
@@ -161,7 +161,7 @@ void Simulation::output() {
 	fclose(fluxFile);
 
 	divergenceErrorFile = fopen("./output/divergence_error.dat", "a");
-	outputDivergenceError(divergenceErrorFile, this);
+	outputDivergenceError(divergenceErrorFile, this, plasma_period, gyroradius, fieldScale);
 	fclose(divergenceErrorFile);
 
 	double rotBscale = fieldScale / (plasma_period * plasma_period * sqrt(gyroradius));
@@ -875,25 +875,25 @@ void Simulation::updateEnergy() {
 	double concentration = density / (massProton + massElectron);
 
 	if (boundaryConditionType != PERIODIC) {
-		theoreticalEnergy -= (density * V0.scalarMult(V0) / 2.0) * V0.x * deltaT * ysize * zsize;
-		theoreticalEnergy -= (2 * (3.0 / 2.0) * concentration * kBoltzman_normalized * temperature) * V0.x * deltaT * ysize * zsize;
+		//theoreticalEnergy -= (density * V0.scalarMult(V0) / 2.0) * V0.x * deltaT * ysize * zsize * sqr(gyroradius / plasma_period);
+		//theoreticalEnergy -= (2 * (3.0 / 2.0) * concentration * kBoltzman_normalized * temperature) * V0.x * deltaT * ysize * zsize * sqr(gyroradius / plasma_period);
 
-		theoreticalMomentum -= V0 * V0.x * density * deltaT * ysize * zsize;
-		theoreticalMomentum -= Vector3d(1, 0, 0) * (2 * concentration * kBoltzman_normalized * temperature) * deltaT * ysize * zsize;
+		//theoreticalMomentum -= V0 * V0.x * density * deltaT * ysize * zsize * gyroradius / plasma_period;
+		//theoreticalMomentum -= Vector3d(1, 0, 0) * (2 * concentration * kBoltzman_normalized * temperature) * deltaT * ysize * zsize * gyroradius / plasma_period;
 
 		for (int i = 0; i < escapedParticles.size(); ++i) {
 			Particle* particle = escapedParticles[i];
-			theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight;
-			theoreticalMomentum -= particle->momentum * particle->weight;
+			theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
+			theoreticalMomentum -= particle->momentum * particle->weight * gyroradius / plasma_period;
 		}
 
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
-				theoreticalEnergy -= (Efield[xnumber][j][k].vectorMult(Bfield[xnumber - 1][j][k])).x * deltaT * speed_of_light_normalized * deltaX * deltaY / (4 * pi);
-				theoreticalEnergy -= (Efield[0][j][k].vectorMult(Bfield[0][j][k])).x * deltaT * speed_of_light_normalized * deltaX * deltaY / (4 * pi);
+				theoreticalEnergy -= (Efield[xnumber][j][k].vectorMult(Bfield[xnumber - 1][j][k])).x * deltaT * speed_of_light_normalized * deltaZ * deltaY * sqr(gyroradius / plasma_period)/ (4 * pi);
+				theoreticalEnergy += (Efield[0][j][k].vectorMult(Bfield[0][j][k])).x * deltaT * speed_of_light_normalized * deltaZ * deltaY * sqr(gyroradius / plasma_period)/ (4 * pi);
 
-				theoreticalMomentum -= (Efield[xnumber][j][k].vectorMult(Bfield[xnumber - 1][j][k])) * deltaT * deltaX * deltaY / (4 * pi);
-				theoreticalMomentum -= (Efield[0][j][k].vectorMult(Bfield[0][j][k])) * deltaT * deltaX * deltaY / (4 * pi);
+				theoreticalMomentum -= (Efield[xnumber][j][k].vectorMult(Bfield[xnumber - 1][j][k])) * deltaT * deltaZ * deltaY * gyroradius / plasma_period / (4 * pi);
+				theoreticalMomentum += (Efield[0][j][k].vectorMult(Bfield[0][j][k])) * deltaT * deltaZ * deltaY * gyroradius / plasma_period / (4 * pi);
 			}
 		}
 	}

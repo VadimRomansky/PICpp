@@ -101,6 +101,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
-    <None Include="..\PIC++1d\input\input.dat" />
   </ItemGroup>
 </Project>
