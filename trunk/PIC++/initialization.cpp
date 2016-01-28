@@ -105,8 +105,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		gyroradius = 1.0;
 	}
 
-	//plasma_period = 1.0;
-	//gyroradius = 1.0;
+	plasma_period = 1.0;
+	gyroradius = 1.0;
 
 	//gyroradius = xsize;
 

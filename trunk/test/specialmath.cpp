@@ -234,7 +234,7 @@ double* generalizedMinimalResidualMethod(double** matrix, double* rightPart){
 		error = fabs(beta * Qmatrix[n - 1][0]);
 		for (int i = 0; i < number; ++i) {
 			outvector[i] = 0;
-			for (int m = 0; m < n; ++m) {
+			for (int m = 0; m < n-1; ++m) {
 				outvector[i] += basis[m][i] * y[m] *norm;
 				//outvector[i][l] += basis[m][i][l] * y[m];
 			}				
@@ -262,7 +262,7 @@ double* generalizedMinimalResidualMethod(double** matrix, double* rightPart){
 
 	for (int i = 0; i < number; ++i) {
 		outvector[i] = 0;
-		for (int m = 0; m < n; ++m) {
+		for (int m = 0; m < n-1; ++m) {
 			outvector[i] += basis[m][i] * y[m]*norm;
 		}
 	}

@@ -154,11 +154,11 @@ void Simulation::evaluateDivergenceCleaningField() {
 
 void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k) {
 
-	/*if (i == 0 && j == 0 && k == 0) {
+	if (i == 0 && j == 0 && k == 0) {
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(1, i, j, k, 0));
-		divergenceCleanUpRightPart[i][j][k][0] = 0;
+		divergenceCleanUpRightPart[i][j][k][0] = 1;
 		return;
-	}*/
+	}
 
 	/*if (i == xnumber - 1 && j == ynumber - 1 && k == znumber - 1) {
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(1, i, j, k, 0));
@@ -194,7 +194,8 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k) {
 	}
 
 
-	divergenceCleanUpRightPart[i][j][k][0] = -cleanUpRightPart(i, j, k);
+	//divergenceCleanUpRightPart[i][j][k][0] = -cleanUpRightPart(i, j, k);
+	divergenceCleanUpRightPart[i][j][k][0] = -cleanUpRightPart(i, j, k)*deltaX2;
 
 	if((ynumber > 1) && (znumber > 1)){
 		double element = -1 / (2 * deltaX2) - 1 / (2 * deltaY2) - 1 / (2 * deltaZ2);
@@ -242,10 +243,12 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k) {
 	} else if(ynumber > 1){
 	} else if(znumber > 1){
 	} else {
-		double element = -2 / (deltaX2);
+		//double element = -2 / (deltaX2);
+		double element = -2;
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
 
-		element = 1/deltaX2;
+		//element = 1/deltaX2;
+		element = 1;
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
 	}

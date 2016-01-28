@@ -18,18 +18,20 @@ int main()
 		matrix[i] = new double[number];
 		for(int j = 0; j < number; ++j){
 			if(i == j){
-				matrix[i][j] = 0.1;
+				matrix[i][j] = 1;
 			} else {
 				matrix[i][j] = 0;
 			}
 		}
 	}
 	matrix[0][1] = 1;
-	matrix[1][2] = 1;
+	matrix[1][2] = 2;
 	matrix[2][3] = 1;
 	matrix[3][4] = 1;
-	matrix[4][5] = 1;
+	matrix[4][5] = -5;
 	matrix[5][6] = 1;
+	matrix[3][5] = 1;
+	matrix[4][1] = 3;
 
 	for(int i = 0; i < number; ++i){
 		rightPart[i] = 0;
@@ -49,6 +51,15 @@ int main()
 	printf("result\n");
 	for(int i = 0; i < number; ++i) {
 		printf("%15.10lf\n", result[i]);
+	}
+
+	printf("error\n");
+	for(int i = 0; i < number; ++i){
+		double value = -rightPart[i];
+		for(int j = 0; j < number; ++j){
+			value += matrix[i][j]*result[j];
+		}
+		printf("%15.10lf\n", value);
 	}
 
 
