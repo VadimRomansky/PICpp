@@ -73,6 +73,17 @@ void Simulation::cleanupDivergence() {
 
 void Simulation::updateFieldByCleaning() {
 	evaluateDivergenceCleaningField();
+	/*if((ynumber == 1) && (znumber == 1)){
+		divergenceCleaningField[xnumber - 1][0][0][0] = 0;
+		divergenceCleaningField[xnumber - 1][0][0][1] = 0;
+		divergenceCleaningField[xnumber - 1][0][0][2] = 0;
+
+		for (int i = xnumber - 2; i >= 0; --i) {
+			divergenceCleaningField[i][0][0][0] = divergenceCleaningField[i + 1][0][0][0] - cleanUpRightPart(i, 0, 0) * deltaX;
+			divergenceCleaningField[i][0][0][1] = 0;
+			divergenceCleaningField[i][0][0][2] = 0;
+		}
+	}*/
 	/*Vector3d meanField = Vector3d(0, 0, 0);
 	for(int i = 0; i < xnumber; ++i){
 		meanField.x += divergenceCleaningField[i][0];

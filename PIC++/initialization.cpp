@@ -745,7 +745,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 	//double 
 	Ezamplitude = -(omega / kc) * Byamplitude;
 
-	double xshift = 0.0;
+	double xshift = 0;
 
 	//Eyamplitude = 0.0;
 	//VzamplitudeElectron = 0.0;
