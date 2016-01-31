@@ -188,6 +188,10 @@ void Simulation::output() {
 	fclose(particlePositronsFile);
 	fclose(particleAlphaFile);
 
+	maxwellMatrixFile = fopen("./output/maxwellMatrixFile.dat", "w");
+	outputMaxwellEquationMatrixFull(maxwellMatrixFile, maxwellEquationMatrix, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
+	fclose(maxwellMatrixFile);
+
 	generalFile = fopen("./output/general.dat", "a");
 	outputGeneral(generalFile, this);
 	fclose(generalFile);

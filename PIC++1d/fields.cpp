@@ -8,6 +8,7 @@
 #include "constants.h"
 #include "matrix3d.h"
 #include "specialmath.h"
+#include "output.h"
 
 void Simulation::evaluateFields() {
 	printf("evaluating fields\n");
@@ -15,6 +16,10 @@ void Simulation::evaluateFields() {
 	if (solverType == IMPLICIT) {
 
 		evaluateMaxwellEquationMatrix();
+
+		maxwellMatrixFile = fopen("./output/maxwellMatrixFile.dat", "w");
+		outputMaxwellEquationMatrixFull(maxwellMatrixFile, maxwellEquationMatrix, xnumber, maxwellEquationMatrixSize);
+		fclose(maxwellMatrixFile);
 
 		double** gmresOutput = new double*[xnumber];
 		//#pragma omp parallel for

@@ -234,7 +234,7 @@ void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPosi
 	}
 }
 
-void outputMaxwellEquationMatrix(std::vector<MatrixElement>****& maxwellEquationMatrix, int xnumber, int ynumber, int znumber, int lnumber) {
+void outputMaxwellEquationMatrixSimple(std::vector<MatrixElement>****& maxwellEquationMatrix, int xnumber, int ynumber, int znumber, int lnumber) {
 	for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
@@ -244,6 +244,35 @@ void outputMaxwellEquationMatrix(std::vector<MatrixElement>****& maxwellEquation
 						printf("%15.7g", maxwellEquationMatrix[i][j][k][l][m].value);
 					}
 					printf("\n");
+				}
+			}
+		}
+	}
+}
+
+void outputMaxwellEquationMatrixFull(FILE* outFile, std::vector<MatrixElement>****& maxwellEquationMatrix, int xnumber, int ynumber, int znumber, int lnumber) {
+	printf("outputingMatrix\n");
+	for (int i = 0; i < xnumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				for (int l = 0; l < lnumber; ++l) {
+					//printf("%d %d %d %d\n", i,j, k, l);
+					for(int tempI = 0; tempI < xnumber; ++tempI) {
+						for(int tempJ = 0; tempJ < ynumber; ++tempJ) {
+							for(int tempK = 0; tempK < znumber; ++tempK) {
+								for(int tempL = 0; tempL < lnumber; ++tempL){
+									MatrixElement element = MatrixElement(0, tempI, tempJ, tempK, tempL);
+									for (int m = 0; m < maxwellEquationMatrix[i][j][k][l].size(); ++m) {
+										if(element.equalsIndex(maxwellEquationMatrix[i][j][k][l][m])) {
+											element.value = maxwellEquationMatrix[i][j][k][l][m].value;
+										}
+									}
+									fprintf(outFile, "%15.10g ", element.value)
+;								}
+							}
+						}
+					}
+					fprintf(outFile, "\n");
 				}
 			}
 		}

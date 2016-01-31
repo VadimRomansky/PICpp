@@ -191,6 +191,8 @@ public:
 	FILE* rotBFile;
 	FILE* EderivativeFile;
 
+	FILE* maxwellMatrixFile;
+
 	FILE* backupGeneralFile;
 	FILE* backupParticlesFile;
 	FILE* backupEfieldFile;

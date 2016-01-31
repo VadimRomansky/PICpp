@@ -23,6 +23,7 @@ void outputMatrixArray(FILE* outFile, Matrix3d* matrix3d, int number, double sca
 void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile, Simulation* simulation); 
 
 void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPositronsFile, FILE* outAlphaFile, Simulation* simulation);
+void outputMaxwellEquationMatrixFull(FILE* outFile, std::vector<MatrixElement>**& maxwellEquationMatrix, int xnumber, int lnumber);
 
 void outputBackupParticles(FILE* outFile, Simulation* simulation);
 void outputBackupParticle(FILE* outFile, Particle* particle);

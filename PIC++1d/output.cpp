@@ -289,6 +289,27 @@ void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPosi
 	}
 }
 
+void outputMaxwellEquationMatrixFull(FILE* outFile, std::vector<MatrixElement>**& maxwellEquationMatrix, int xnumber, int lnumber) {
+	printf("outputingMatrix\n");
+	for (int i = 0; i < xnumber; ++i) {
+		for (int l = 0; l < lnumber; ++l) {
+			//printf("%d %d %d %d\n", i,j, k, l);
+			for (int tempI = 0; tempI < xnumber; ++tempI) {
+				for (int tempL = 0; tempL < lnumber; ++tempL) {
+					MatrixElement element = MatrixElement(0, tempI, tempL);
+					for (int m = 0; m < maxwellEquationMatrix[i][l].size(); ++m) {
+						if (element.equalsIndex(maxwellEquationMatrix[i][l][m])) {
+							element.value = maxwellEquationMatrix[i][l][m].value;
+						}
+					}
+					fprintf(outFile, "%15.10g ", element.value);
+				}
+			}
+			fprintf(outFile, "\n");
+		}
+	}
+}
+
 void outputBackupParticles(FILE* outFile, Simulation* simulation) {
 	for (int i = 0; i < simulation->particles.size(); ++i) {
 		Particle* particle = simulation->particles[i];
