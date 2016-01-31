@@ -20,7 +20,9 @@ void outputFlux(FILE* outFile, Vector3d*** electricFlux, Vector3d*** externalEle
 void outputDivergenceError(FILE* outFile, Simulation* simulation, double plasma_period, double gyroradius, double fieldScale);
 void outputVectorArray(FILE* outFile, Vector3d*** vector3d, int xnumber, int ynumber, int znumber, double scale = 1.0);
 void outputMatrixArray(FILE* outFile, Matrix3d*** matrix3d, int xnumber, int ynumber, int znumber, double scale = 1.0);
-void outputMaxwellEquationMatrix(std::vector<MatrixElement>****& maxwellEquationMatrix, int xnumber, int ynumber, int znumber, int lnumber);
+void outputMaxwellEquationMatrixSimple(std::vector<MatrixElement>****& maxwellEquationMatrix, int xnumber, int ynumber, int znumber, int lnumber);
+void outputMaxwellEquationMatrixFull(FILE* outFile, std::vector<MatrixElement>****& maxwellEquationMatrix, int xnumber, int ynumber, int znumber, int lnumber);
+
 
 void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile, Simulation* simulation); 
 

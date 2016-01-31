@@ -16,7 +16,11 @@ void Simulation::evaluateFields() {
 	if (solverType == IMPLICIT) {
 
 		evaluateMaxwellEquationMatrix();
-		//outputMaxwellEquationMatrix(maxwellEquationMatrix, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
+
+		maxwellMatrixFile = fopen("./output/maxwellMatrixFile.dat", "w");
+		outputMaxwellEquationMatrixFull(maxwellMatrixFile, maxwellEquationMatrix, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
+		fclose(maxwellMatrixFile);
+		//outputMaxwellEquationMatrixSimple(maxwellEquationMatrix, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
 
 		double**** gmresOutput = new double***[xnumber];
 		//#pragma omp parallel for

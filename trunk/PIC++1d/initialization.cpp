@@ -1444,7 +1444,9 @@ void Simulation::createFiles() {
 	EderivativeFile = fopen("./output/EderivativeFile.dat", "w");
 	fclose(EderivativeFile);
 	dielectricTensorFile = fopen("./output/dielectricTensorFile.dat", "w");
-	fclose(dielectricTensorFile);
+	fclose(dielectricTensorFile);	
+	maxwellMatrixFile = fopen("./output/maxwellMatrixFile.dat", "w");
+	fclose(maxwellMatrixFile);
 	errorLogFile = fopen("./output/errorLog.dat", "w");
 	fclose(errorLogFile);
 	particleProtonsFile = fopen("./output/protons.dat", "w");
