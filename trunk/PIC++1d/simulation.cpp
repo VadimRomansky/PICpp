@@ -41,7 +41,7 @@ void Simulation::simulate() {
 	updateDensityParameters();
 
 	evaluateExplicitDerivative();
-	cleanupDivergence();
+	//cleanupDivergence();
 	updateFields();
 	updateEnergy();
 	theoreticalEnergy = energy;
@@ -87,7 +87,7 @@ void Simulation::simulate() {
 		}
 
 		updateDensityParameters();
-		cleanupDivergence();
+		//cleanupDivergence();
 		updateFields();
 
 		/*if(currentIteration % 100 == 0){

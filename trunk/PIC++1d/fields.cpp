@@ -27,8 +27,19 @@ void Simulation::evaluateFields() {
 			gmresOutput[i] = new double[maxwellEquationMatrixSize];
 		}
 
+		FILE* rightPartFile = fopen("./output/rightPartFile.dat", "w");
+		for(int i = 0; i < xnumber; ++i){
+			fprintf(rightPartFile, "%15.10g %15.10g %15.10g\n", maxwellEquationRightPart[i][0], maxwellEquationRightPart[i][1], maxwellEquationRightPart[i][2]);
+		}
+		fclose(rightPartFile);
+
 		generalizedMinimalResidualMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumber, maxwellEquationMatrixSize);
 		printf("end of GMRES\n");
+		FILE* gmresFile = fopen("./output/gmresFile.dat", "w");
+		for(int i = 0; i < xnumber; ++i){
+			fprintf(gmresFile, "%15.10g %15.10g %15.10g\n", gmresOutput[i][0], gmresOutput[i][1], gmresOutput[i][2]);
+		}
+		fclose(gmresFile);
 		//#pragma omp parallel for
 		for (int i = 0; i < xnumber; ++i) {
 			for (int l = 0; l < 3; ++l) {

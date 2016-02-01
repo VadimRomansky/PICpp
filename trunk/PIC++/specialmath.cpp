@@ -241,7 +241,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 	double relativeError = 1;
 	double maxRelativeError = maxErrorLevel / (matrixDimension);
 
-	while ((relativeError > maxRelativeError && n < min2(maxGMRESIterations, matrixDimension + 3) || (n <= 3))) {
+	while ((relativeError > maxRelativeError && n < min2(maxGMRESIterations, matrixDimension + 3) || (n <= 4))) {
 		printf("GMRES iteration %d\n", n);
 		newHessenbergMatrix = new double*[n];
 		for (int i = 0; i < n; ++i) {

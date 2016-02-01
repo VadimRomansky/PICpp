@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FieldSolver1d", "FieldSolve
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PIC++1d", "PIC++1d\PIC++1d.vcxproj", "{5A8A10E1-4BB5-4B75-97A7-5C8B29514E47}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MatrixCompare", "MatrixCompare\MatrixCompare.vcxproj", "{AB2879FA-82B8-4699-90D0-3D9484834A80}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -31,6 +33,10 @@ Global
 		{5A8A10E1-4BB5-4B75-97A7-5C8B29514E47}.Debug|Win32.Build.0 = Debug|Win32
 		{5A8A10E1-4BB5-4B75-97A7-5C8B29514E47}.Release|Win32.ActiveCfg = Release|Win32
 		{5A8A10E1-4BB5-4B75-97A7-5C8B29514E47}.Release|Win32.Build.0 = Release|Win32
+		{AB2879FA-82B8-4699-90D0-3D9484834A80}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AB2879FA-82B8-4699-90D0-3D9484834A80}.Debug|Win32.Build.0 = Debug|Win32
+		{AB2879FA-82B8-4699-90D0-3D9484834A80}.Release|Win32.ActiveCfg = Release|Win32
+		{AB2879FA-82B8-4699-90D0-3D9484834A80}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

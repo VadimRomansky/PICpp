@@ -2226,8 +2226,12 @@ void Simulation::createParticleTypes() {
 		summMass += types[i].mass * types[i].particlesPerBin;
 		if (types[i].particlesPerBin > 0) {
 			types[i].particesDeltaX = deltaX / types[i].particlesPerBin;
+			types[i].particesDeltaY = deltaY / types[i].particlesPerBin;
+			types[i].particesDeltaZ = deltaZ / types[i].particlesPerBin;
 		} else {
 			types[i].particesDeltaX = xsize;
+			types[i].particesDeltaY = ysize;
+			types[i].particesDeltaZ = zsize;
 		}
 	}
 
@@ -2529,13 +2533,15 @@ void Simulation::createParticles() {
 					double y = ygrid[j] + 0.0001 * deltaY;
 					double z = zgrid[k] + 0.0001 * deltaZ;
 					double deltaXParticles = types[typeCounter].particesDeltaX;
+					double deltaYParticles = types[typeCounter].particesDeltaY;
+					double deltaZParticles = types[typeCounter].particesDeltaZ;
 					for (int l = 0; l < types[typeCounter].particlesPerBin; ++l) {
 						ParticleTypes type = types[typeCounter].type;
 						Particle* particle = createParticle(n, i, j, k, weight, type, types[typeCounter], temperature);
 						n++;
 						particle->coordinates.x = x + deltaXParticles * l;
-						particle->coordinates.y = y + deltaXParticles * l;
-						particle->coordinates.z = z + deltaXParticles * l;
+						particle->coordinates.y = y + deltaYParticles * l;
+						particle->coordinates.z = z + deltaZParticles * l;
 						//particle->addVelocity(V0, speed_of_light_normalized);
 						particles.push_back(particle);
 						particlesNumber++;
@@ -2699,6 +2705,7 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, double weight, 
 		//p = sqrt(energy * energy - sqr(mass * speed_of_light_normalized_sqr)) / speed_of_light_normalized;
 
 	}
+	p = 0;
 
 	double pz = p * (2 * uniformDistribution() - 1);
 	double phi = 2 * pi * uniformDistribution();
