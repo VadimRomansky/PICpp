@@ -12,6 +12,8 @@ public:
 	double charge;
 	int particlesPerBin;
 	double particesDeltaX;
+	double particesDeltaY;
+	double particesDeltaZ;
 	double concentration;
 	double injectionLength;
 };

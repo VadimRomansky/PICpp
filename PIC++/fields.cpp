@@ -34,13 +34,20 @@ void Simulation::evaluateFields() {
 			}
 		}
 
-		//printf("E.x = %g E.y = %g E.z = %g\n", Efield[0][0][0].x, Efield[0][0][0].y, Efield[0][0][0].z);
-		//printf("rotB.x = %g rotB.y = %g rotB.z = %g\n", evaluateRotB(0, 0, 0).x, evaluateRotB(0, 0, 0).y, evaluateRotB(0, 0, 0).z);
-		//printf("J.x = %g J.y = %g J.z = %g\n", electricFlux[0][0][0].x, electricFlux[0][0][0].y, electricFlux[0][0][0].z);
-		//printf("gradDensity.x = %g gradDensity.y = %g gradDensity.z = %g\n", evaluateGradDensity(0, 0, 0).x, evaluateGradDensity(0, 0, 0).y, evaluateGradDensity(0, 0, 0).z);
+		FILE* rightPartFile = fopen("./output/rightPartFile.dat", "w");
+		for(int i = 0; i < xnumber; ++i){
+			fprintf(rightPartFile, "%15.10g %15.10g %15.10g\n", maxwellEquationRightPart[i][0][0][0], maxwellEquationRightPart[i][0][0][1], maxwellEquationRightPart[i][0][0][2]);
+		}
+		fclose(rightPartFile);
 
 		generalizedMinimalResidualMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
 		//#pragma omp parallel for
+
+		FILE* gmresFile = fopen("./output/gmresFile.dat", "w");
+		for(int i = 0; i < xnumber; ++i){
+			fprintf(gmresFile, "%15.10g %15.10g %15.10g\n", gmresOutput[i][0][0][0], gmresOutput[i][0][0][1], gmresOutput[i][0][0][2]);
+		}
+		fclose(gmresFile);
 		for (int i = 0; i < xnumber; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
