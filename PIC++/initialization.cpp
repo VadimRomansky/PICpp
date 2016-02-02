@@ -2532,6 +2532,8 @@ void Simulation::createParticles() {
 					double x = xgrid[i] + 0.0001 * deltaX;
 					double y = ygrid[j] + 0.0001 * deltaY;
 					double z = zgrid[k] + 0.0001 * deltaZ;
+					y = ygrid[0];
+					z = zgrid[0];
 					double deltaXParticles = types[typeCounter].particesDeltaX;
 					double deltaYParticles = types[typeCounter].particesDeltaY;
 					double deltaZParticles = types[typeCounter].particesDeltaZ;
@@ -2540,8 +2542,8 @@ void Simulation::createParticles() {
 						Particle* particle = createParticle(n, i, j, k, weight, type, types[typeCounter], temperature);
 						n++;
 						particle->coordinates.x = x + deltaXParticles * l;
-						particle->coordinates.y = y + deltaYParticles * l;
-						particle->coordinates.z = z + deltaZParticles * l;
+						particle->coordinates.y = y;// + deltaYParticles * l;
+						particle->coordinates.z = z;// + deltaZParticles * l;
 						//particle->addVelocity(V0, speed_of_light_normalized);
 						particles.push_back(particle);
 						particlesNumber++;
