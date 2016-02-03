@@ -215,6 +215,7 @@ void Simulation::outputBackup() {
 
 void Simulation::updateDeltaT() {
 	printf("updating time step\n");
+	//double delta = min2(deltaX, min2(deltaY, deltaZ));
 	double delta = deltaX;
 	deltaT = timeEpsilon * delta / speed_of_light_normalized;
 	if (particles.size() > 0) {
