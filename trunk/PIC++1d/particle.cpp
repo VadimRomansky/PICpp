@@ -152,11 +152,13 @@ void Particle::setMomentumByV(Vector3d v, double c) {
 		fclose(errorLogFile);
 		exit(0);
 	}
-	if (v.norm() < relativisticPrecision * c) {
+	double v2 = v.scalarMult(v);
+	double c2 = c*c;
+	if(v2 < relativisticPrecision*relativisticPrecision*c2){
 		momentum = v * mass;
 		return;
 	}
-	double gamma_factor = 1 / sqrt(1 - v.scalarMult(v) / (c * c));
+	double gamma_factor = 1 / sqrt(1 - v2 / c2);
 	momentum = v * (mass * gamma_factor);
 }
 

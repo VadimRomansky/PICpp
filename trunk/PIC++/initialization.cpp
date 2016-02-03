@@ -745,7 +745,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 	//double 
 	Ezamplitude = -(omega / kc) * Byamplitude;
 
-	double xshift = 0;
+	double xshift = xsize/4;
 
 	//Eyamplitude = 0.0;
 	//VzamplitudeElectron = 0.0;
@@ -873,6 +873,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 		}
 		double beta = velocity.norm() / speed_of_light_normalized;
 		particle->addVelocity(velocity, speed_of_light_normalized);
+		particle->initialMomentum = particle->momentum;
 	}
 
 	updateDeltaT();
