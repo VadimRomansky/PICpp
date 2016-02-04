@@ -36,7 +36,7 @@ void Simulation::evaluateFields() {
 
 		FILE* rightPartFile = fopen("./output/rightPartFile.dat", "w");
 		for(int i = 0; i < xnumber; ++i){
-			fprintf(rightPartFile, "%15.10g %15.10g %15.10g\n", maxwellEquationRightPart[i][0][0][0], maxwellEquationRightPart[i][0][0][1], maxwellEquationRightPart[i][0][0][2]);
+			fprintf(rightPartFile, "%28.22g %28.22g %28.22g\n", maxwellEquationRightPart[i][0][0][0], maxwellEquationRightPart[i][0][0][1], maxwellEquationRightPart[i][0][0][2]);
 		}
 		fclose(rightPartFile);
 
@@ -45,7 +45,7 @@ void Simulation::evaluateFields() {
 
 		FILE* gmresFile = fopen("./output/gmresFile.dat", "w");
 		for(int i = 0; i < xnumber; ++i){
-			fprintf(gmresFile, "%15.10g %15.10g %15.10g\n", gmresOutput[i][0][0][0], gmresOutput[i][0][0][1], gmresOutput[i][0][0][2]);
+			fprintf(gmresFile, "%28.22g %28.22g %28.22g\n", gmresOutput[i][0][0][0], gmresOutput[i][0][0][1], gmresOutput[i][0][0][2]);
 		}
 		fclose(gmresFile);
 		for (int i = 0; i < xnumber; ++i) {
