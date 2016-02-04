@@ -267,7 +267,7 @@ void outputMaxwellEquationMatrixFull(FILE* outFile, std::vector<MatrixElement>**
 											element.value = maxwellEquationMatrix[i][j][k][l][m].value;
 										}
 									}
-									fprintf(outFile, "%15.10g ", element.value)
+									fprintf(outFile, "%28.22g ", element.value)
 ;								}
 							}
 						}
