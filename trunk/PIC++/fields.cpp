@@ -839,9 +839,9 @@ void Simulation::createInternalEquation(int i, int j, int k) {
 	//rightPart = rightPart + (evaluateRotB(i)* speed_of_light_normalized - electricFlux[i]*4*pi/fieldScale) * (theta * deltaT);
 	rightPart = rightPart + (evaluateRotB(i, j, k) * speed_of_light_normalized - (electricFlux[i][j][k] * 4 * pi / fieldScale)) * (theta * deltaT) - (evaluateGradDensity(i, j, k) * speed_of_light_normalized_sqr * theta * theta * deltaT * deltaT * 4 * pi / fieldScale);
 	if(i == 5){
-		fprintf(outputEverythingFile, "rotB5 = %28.22g\n", evaluateRotB(i, j, k));
-		fprintf(outputEverythingFile, "j = %28.22g\n", electricFlux[i][j][k]);
-		fprintf(outputEverythingFile, "grad denasty = %28.22g\n", evaluateGradDensity(i, j, k));
+		fprintf(outputEverythingFile, "rotB5 = %28.22g %28.22g %28.22g\n", evaluateRotB(i, j, k).x, evaluateRotB(i, j, k).y, evaluateRotB(i, j, k).z);
+		fprintf(outputEverythingFile, "j = %28.22g %28.22g %28.22g\n", electricFlux[i][j][k].x, electricFlux[i][j][k].y, electricFlux[i][j][k].z);
+		fprintf(outputEverythingFile, "grad denasty = %28.22g %28.22g %28.22g\n", evaluateGradDensity(i, j, k).x, evaluateGradDensity(i, j, k).y,evaluateGradDensity(i, j, k).z);
 	}
 	//rightPart = rightPart + evaluateRotB(i)*speed_of_light_normalized*theta*deltaT - electricFlux[i]*4*pi*theta*deltaT/fieldScale;
 	createInternalEquationX(i, j, k);
@@ -1474,9 +1474,17 @@ Vector3d Simulation::evaluateGradDensity(int i, int j, int k) {
 	double densityRightZ = (electricDensity[i][j][k] + electricDensity[i][prevJ][k] + electricDensity[prevI][j][k] + electricDensity[prevI][prevJ][k]) * 0.25;
 	double densityLeftZ = (electricDensity[i][j][prevK] + electricDensity[i][prevJ][prevK] + electricDensity[prevI][j][prevK] + electricDensity[prevI][prevJ][prevK]) * 0.25;
 
+	printf("%28.22g\n", densityRightX);
+	printf("%28.22g\n", densityLeftX);
+	printf("%28.22g\n", densityRightY);
+	printf("%28.22g\n", densityLeftY);
+	printf("%28.22g\n", densityRightZ);
+	printf("%28.22g\n", densityLeftZ);
 	double x = (densityRightX - densityLeftX) / deltaX;
 	double y = (densityRightY - densityLeftY) / deltaY;
 	double z = (densityRightZ - densityLeftZ) / deltaZ;
-
+	printf("%28.22g\n", x);
+	printf("%28.22g\n", y);
+	printf("%28.22g\n", z);
 	return Vector3d(x, y, z);
 }
