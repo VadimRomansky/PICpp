@@ -517,6 +517,7 @@ void Simulation::updateElectroMagneticParameters() {
 			double divJ = evaluateDivFlux(i);
 
 			electricDensity[i] -= deltaT * theta * divJ;
+			electricDensity[i] = 0;
 		}
 	}
 	fprintf(outputEverythingFile, "density4 afterFlux = %28.22g\n", electricDensity[4]);
