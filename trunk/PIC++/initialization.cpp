@@ -2294,6 +2294,8 @@ void Simulation::createFiles() {
 	fclose(particlePositronsFile);
 	particleAlphaFile = fopen("./output/alphas.dat", "w");
 	fclose(particleAlphaFile);
+	outputEverythingFile = fopen("./output/everything.dat","w");
+	fclose(outputEverythingFile);
 }
 
 void Simulation::checkFrequency(double omega) {
