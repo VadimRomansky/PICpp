@@ -27,7 +27,9 @@ void Simulation::simulate() {
 		//initializeMovingLangmuirWave();
 		//fieldsLorentzTransitionX(V0.x);
 	}
+	outputEverythingFile = fopen("./output/outputEverythingFile.dat", "w");
 	collectParticlesIntoBins();
+	fclose(outputEverythingFile);
 	updateParameters();
 
 	//double because dielectric tensor needs deltaT;
@@ -383,7 +385,7 @@ void Simulation::updateElectroMagneticParameters() {
 		//checkParticlesInBin();
 	}
 	//collectParticlesIntoBins();
-	fopen("./output/outputEverythingFile.dat","w");
+	fopen("./output/outputEverythingFile.dat","a");
 	for (int i = 0; i < xnumber + 1; ++i) {
 		electricFlux[i] = Vector3d(0, 0, 0);
 		dielectricTensor[i] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -401,7 +403,7 @@ void Simulation::updateElectroMagneticParameters() {
 			double gamma = particle->gammaFactor(speed_of_light_normalized);
 			Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
 
-			if(i == 5){
+			if(i == debugPoint){
 				fprintf(outputEverythingFile, "particle number %d correlation = %28.22g\n", particle->number, correlation);
 				fprintf(outputEverythingFile, "%28.22g %28.22g %28.22g\n", rotatedVelocity.x, rotatedVelocity.y, rotatedVelocity.z);
 			}
@@ -410,8 +412,8 @@ void Simulation::updateElectroMagneticParameters() {
 				electricFlux[i] += rotatedVelocity * (particle->charge * particle->weight * correlation);
 				//electricFlux[i] += velocity * (particle->charge * particle->weight * correlation);
 				dielectricTensor[i] = dielectricTensor[i] - particle->rotationTensor * (particle->weight * theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge * correlation / particle->mass);
-				if(i == 5){
-					fprintf(outputEverythingFile, "electricFlux = %28.22g %28.22g %28.22g\n", electricFlux[i].x, electricFlux[i].y, electricFlux[i].z);
+				if(i == debugPoint){
+					fprintf(outputEverythingFile, "electricFlux %d = %28.22g %28.22g %28.22g\n", i, electricFlux[i].x, electricFlux[i].y, electricFlux[i].z);
 				}
 				Particle tempParticle = *particle;
 				double shiftX = 0.01 * deltaX;
@@ -453,20 +455,20 @@ void Simulation::updateElectroMagneticParameters() {
 		divPressureTensor[xnumber] = divPressureTensor[0];
 	}
 
-	fprintf(outputEverythingFile, "electricFlux5 after boundaries = %28.22g %28.22g %28.22g\n", electricFlux[5].x, electricFlux[5].y, electricFlux[5].z);
+	fprintf(outputEverythingFile, "electricFlux %d after boundaries = %28.22g %28.22g %28.22g\n",debugPoint, electricFlux[debugPoint].x, electricFlux[debugPoint].y, electricFlux[debugPoint].z);
 
 
 	for (int i = 0; i < xnumber; ++i) {
 		electricDensity[i] = 0;
 		pressureTensor[i] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		if (solverType == IMPLICIT) {
-			if(i == 5){
+			if(i == debugPoint){
 				fprintf(outputEverythingFile, "particles in bin %d\n", particlesInBbin[i].size());
 			}
 			for (int pcount = 0; pcount < particlesInBbin[i].size(); ++pcount) {
 				Particle* particle = particlesInBbin[i][pcount];
 				double correlation = correlationWithBbin(*particle, i) / volumeB(i);
-				if(i == 5){
+				if(i == debugPoint){
 					fprintf(outputEverythingFile, "particle number %d correlation = %28.22g\n", particle->number, correlation);
 					fprintf(outputEverythingFile, "%28.22g %28.22g %28.22g\n", particle->x, particle->y, particle->z);
 				}
@@ -476,17 +478,17 @@ void Simulation::updateElectroMagneticParameters() {
 				Vector3d rotatedVelocity = particle->rotationTensor * velocity * gamma;
 
 				electricDensity[i] += particle->weight * particle->charge * correlation;
-				if(i == 5){
-					fprintf(outputEverythingFile, "density5 = %28.22g\n", electricDensity[5]);
+				if(i == debugPoint){
+					fprintf(outputEverythingFile, "density %d = %28.22g\n", debugPoint, electricDensity[debugPoint]);
 				}
 
 				pressureTensor[i] += rotatedVelocity.tensorMult(rotatedVelocity) * particle->weight * particle->charge * correlation;
 			}
 		}
 	}
-	fprintf(outputEverythingFile, "density4 = %28.22g\n", electricDensity[4]);
-	fprintf(outputEverythingFile, "density5 = %28.22g\n", electricDensity[5]);
-	fprintf(outputEverythingFile, "density6 = %28.22g\n", electricDensity[6]);
+	fprintf(outputEverythingFile, "density %d = %28.22g\n", debugPoint - 1, electricDensity[debugPoint - 1]);
+	fprintf(outputEverythingFile, "density %d = %28.22g\n", debugPoint, electricDensity[debugPoint]);
+	fprintf(outputEverythingFile, "density %d = %28.22g\n", debugPoint + 1, electricDensity[debugPoint + 1]);
 
 	//smoothDensity();
 
@@ -500,7 +502,7 @@ void Simulation::updateElectroMagneticParameters() {
 	}
 
 	
-	fprintf(outputEverythingFile, "electricFlux5 after div tensor = %28.22g %28.22g %28.22g\n", electricFlux[5].x, electricFlux[5].y, electricFlux[5].z);
+	fprintf(outputEverythingFile, "electricFlux %d after div tensor = %28.22g %28.22g %28.22g\n",debugPoint, electricFlux[debugPoint].x, electricFlux[debugPoint].y, electricFlux[debugPoint].z);
 
 	FILE* tempFluxFile = fopen("./output/tempFluxFile.dat", "w");
 	for(int i = 0; i < xnumber; ++i){
@@ -520,9 +522,9 @@ void Simulation::updateElectroMagneticParameters() {
 			electricDensity[i] = 0;
 		}
 	}
-	fprintf(outputEverythingFile, "density4 afterFlux = %28.22g\n", electricDensity[4]);
-	fprintf(outputEverythingFile, "density5 afterFlux = %28.22g\n", electricDensity[5]);
-	fprintf(outputEverythingFile, "density6 afterFlux = %28.22g\n", electricDensity[6]);
+	fprintf(outputEverythingFile, "density %d afterFlux = %28.22g\n", debugPoint - 1, electricDensity[debugPoint - 1]);
+	fprintf(outputEverythingFile, "density %d afterFlux = %28.22g\n", debugPoint, electricDensity[debugPoint]);
+	fprintf(outputEverythingFile, "density %d afterFlux = %28.22g\n", debugPoint + 1, electricDensity[debugPoint + 1]);
 
 	FILE* tempDensityFile = fopen("./output/tempDensityFile.dat", "w");
 	for(int i = 0; i < xnumber; ++i){
