@@ -28,4 +28,6 @@ const int maxNewtonIterations = 10;
 const int maxGMRESIterations = 10;
 const int splineOrder = 2;
 
+const int debugPoint = 7;
+
 #endif

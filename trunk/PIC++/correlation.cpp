@@ -5,7 +5,7 @@
 #include "constants.h"
 
 void Simulation::collectParticlesIntoBins() {
-
+	//outputEverythingFile = fopen("./output/outputEverythingFile.dat", "a");
 	for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
@@ -27,6 +27,7 @@ void Simulation::collectParticlesIntoBins() {
 #pragma omp parallel for private(pcount) 
 	for (pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
+		//fprintf(outputEverythingFile, "pcount = %d, particle number = %d\n", pcount, particles[pcount]->number);
 		checkParticleInBox(*particle);
 
 		int xcount = floor((particle->coordinates.x - xgrid[0]) / deltaX);
@@ -295,6 +296,7 @@ void Simulation::collectParticlesIntoBins() {
 			}
 		}
 	}
+	//fclose(outputEverythingFile);
 }
 
 void Simulation::pushParticleIntoEbin(Particle* particle, int i, int j, int k) {
@@ -306,6 +308,10 @@ void Simulation::pushParticleIntoEbin(Particle* particle, int i, int j, int k) {
 
 	if (k < 0) return;
 	if (k > znumber) return;
+
+	//if(i == debugPoint){
+		//fprintf(outputEverythingFile, "particle number %d\n", particle->number);
+	//}
 
 	particlesInEbin[i][j][k].push_back(particle);
 }
