@@ -29,7 +29,7 @@ void Simulation::cleanupDivergence() {
 	}*/
 
 
-	for (int i = 0; i < xnumber; ++i) {
+	/*for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				divergenceCleanUpMatrix[i][j][k][0].clear();
@@ -47,11 +47,11 @@ void Simulation::cleanupDivergence() {
 				}
 			}
 		}
-	}
+	}*/
 
 
 	if (debugMode) {
-		checkEquationMatrix(divergenceCleanUpMatrix, 3);
+		//checkEquationMatrix(divergenceCleanUpMatrix, 3);
 	}
 
 	/*double summRightPart = 0;
@@ -59,11 +59,35 @@ void Simulation::cleanupDivergence() {
 		summRightPart += divergenceCleanUpRightPart[i][0];
 	}*/
 	//double rightPart = cleanUpRightPart(1);
-	generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumber, ynumber, znumber, 1);
+	//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumber, ynumber, znumber, 1, 1E-100, 40000);
 	//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningField, xnumber, ynumber, znumber, 3);
 
 
 	//double** leftPart = multiplySpecialMatrixVector(divergenceCleanUpMatrix, divergenceCleaningPotential, xnumber, 1);
+
+	double*** rightPart = new double**[xnumber];
+	for(int i = 0; i < xnumber; ++i){
+		rightPart[i] = new double*[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			rightPart[i][j] = new double[znumber];
+			for(int k = 0; k < znumber; ++k){
+				rightPart[i][j][k] = -cleanUpRightPart(i, j, k);
+			}
+		}
+	}
+
+	Complex*** rightPartFourier = evaluateFourierTranslation(rightPart);
+
+	for(int i = 0; i < xnumber; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				if(i == 0 && j == 0 && k == 0){
+					rightPartFourier[i][j][k] = Complex(0, 0);
+				} else {
+					rightPartFourier[i][j][k] = rightPartFourier[i][j][k]/(i*i + j*j + k*k)*-1.0;
+			}
+		}
+	}
 
 	updateFieldByCleaning();
 	//double div = evaluateDivCleaningE(1);
@@ -168,6 +192,13 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k) {
 	if (i == 0 && j == 0 && k == 0) {
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(1, i, j, k, 0));
 		divergenceCleanUpRightPart[i][j][k][0] = 1;
+		return;
+	}
+
+	if (i == xnumber - 1 && j == 0 && k == 0) {
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(1, i, j, k, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(-1, i-1, j, k, 0));
+		divergenceCleanUpRightPart[i][j][k][0] = 0;
 		return;
 	}
 
@@ -324,4 +355,52 @@ double Simulation::cleanUpRightPart(int i, int j, int k) {
 	double div = evaluateDivNewE(i, j, k);
 
 	return 4 * pi * chargeDensity[i][j][k] - div;
+}
+
+Complex*** Simulation::evaluateFourierTranslation(double*** a){
+	Complex*** result = new Complex**[xnumber];
+	for(int i = 0; i < xnumber; ++i){
+		result[i] = new Complex*[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			result[i][j] = new Complex[znumber];
+			for(int k = 0; k < znumber; ++k){
+				result[i][j][k] = Complex(0, 0);
+
+				for(int tempi = 0; tempi < xnumber; ++tempi){
+					for(int tempj = 0; tempj < ynumber; ++tempj){
+						for(int tempk = 0; tempk < znumber; ++tempk){
+							result[i][j][k] += complexExp(-2*pi*((i*tempi/xnumber) + (j*tempj/ynumber) + (k*tempk/znumber)))*a[tempi][tempj][tempk];
+						}
+					}
+				}
+
+				result[i][j][k] = result[i][j][k]/(xnumber*ynumber*znumber);
+			}
+		}
+	}
+
+	return result;
+}
+
+double*** Simulation::evaluateReverceFourierTranslation(Complex*** a){
+	double*** result = new double**[xnumber];
+	for(int i = 0; i < xnumber; ++i){
+		result[i] = new double*[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			result[i][j] = new double[znumber];
+			for(int k = 0; k < znumber; ++k){
+				result[i][j][k] = 0;
+
+				for(int tempi = 0; tempi < xnumber; ++tempi){
+					for(int tempj = 0; tempj < ynumber; ++tempj){
+						for(int tempk = 0; tempk < znumber; ++tempk){
+							result[i][j][k] += (complexExp(2*pi*((i*tempi/xnumber) + (j*tempj/ynumber) + (k*tempk/znumber)))*a[tempi][tempj][tempk]).re;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return result;
 }

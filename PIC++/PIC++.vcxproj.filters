@@ -63,6 +63,9 @@
     <ClCompile Include="initialization.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="complex.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="specialmath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="complex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

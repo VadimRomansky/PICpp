@@ -185,16 +185,19 @@ Simulation::~Simulation() {
 			delete[] divergenceCleaningPotential[i][j];
 			delete[] divergenceCleanUpMatrix[i][j];
 			delete[] divergenceCleanUpRightPart[i][j];
+			delete[] divergenceCleaningPotentialFourier[i][j];
 		}
 		delete[] divergenceCleaningField[i];
 		delete[] divergenceCleaningPotential[i];
 		delete[] divergenceCleanUpMatrix[i];
 		delete[] divergenceCleanUpRightPart[i];
+		delete[] divergenceCleaningPotentialFourier[i];
 	}
 	delete[] divergenceCleaningField;
 	delete[] divergenceCleaningPotential;
 	delete[] divergenceCleanUpMatrix;
 	delete[] divergenceCleanUpRightPart;
+	delete[] divergenceCleaningPotentialFourier;
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber + 1; ++j) {
@@ -2033,6 +2036,7 @@ void Simulation::createArrays() {
 
 	divergenceCleaningField = new double***[xnumber];
 	divergenceCleaningPotential = new double***[xnumber];
+	divergenceCleaningPotentialFourier = new double**[xnumber];
 
 	for (int i = 0; i < xnumber; ++i) {
 		Bfield[i] = new Vector3d*[ynumber];
@@ -2098,16 +2102,19 @@ void Simulation::createArrays() {
 		divergenceCleanUpRightPart[i] = new double**[ynumber];
 		divergenceCleaningField[i] = new double**[ynumber];
 		divergenceCleaningPotential[i] = new double**[ynumber];
+		divergenceCleaningPotentialFourier[i] = new double*[ynumber];
 		for (int j = 0; j < ynumber; ++j) {
 			divergenceCleanUpMatrix[i][j] = new std::vector<MatrixElement>*[znumber];
 			divergenceCleanUpRightPart[i][j] = new double*[znumber];
-			divergenceCleaningField[i][j] = new double*[xnumber];
-			divergenceCleaningPotential[i][j] = new double*[xnumber];
+			divergenceCleaningField[i][j] = new double*[znumber];
+			divergenceCleaningPotential[i][j] = new double*[znumber];
+			divergenceCleaningPotentialFourier[i][j] = new double[znumber];
 			for (int k = 0; k < znumber; ++k) {
 				divergenceCleaningField[i][j][j] = new double[3];
 				divergenceCleaningPotential[i][j][k] = new double[1];
 				divergenceCleanUpMatrix[i][j][k] = new std::vector<MatrixElement>[3];
 				divergenceCleanUpRightPart[i][j][k] = new double[3];
+				divergenceCleaningPotentialFourier[i][j][k] = 0;
 			}
 		}
 	}
