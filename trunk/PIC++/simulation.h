@@ -8,6 +8,7 @@
 #include "matrix3d.h"
 #include "matrixElement.h"
 #include "particle.h"
+#include "complex.h"
 
 enum SolverType {EXPLICIT, IMPLICIT};
 
@@ -155,6 +156,8 @@ public:
 	double**** divergenceCleaningField;
 	double**** divergenceCleaningPotential;
 
+	double*** divergenceCleaningPotentialFourier;
+
 	std::vector<Particle*> particles;
 	std::vector<Particle*> escapedParticles;
 
@@ -264,6 +267,8 @@ public:
 	void createDivergenceCleanupLeftEquation(int j, int k);
 	void createDivergenceCleanupRightEquation(int j, int k);
 	double cleanUpRightPart(int i, int j, int k);
+	Complex*** evaluateFourierTranslation(double*** a);
+	double*** evaluateReverceFourierTranslation(Complex*** a);
 
 	void resetNewTempFields();
 

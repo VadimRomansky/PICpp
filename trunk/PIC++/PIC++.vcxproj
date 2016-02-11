@@ -84,6 +84,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="complex.cpp" />
     <ClCompile Include="correlation.cpp" />
     <ClCompile Include="divergencecleanup.cpp" />
     <ClCompile Include="fields.cpp" />
@@ -102,6 +103,7 @@
     <ClCompile Include="vector3d.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="complex.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="matrix3d.h" />

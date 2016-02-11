@@ -41,7 +41,7 @@ void Simulation::evaluateFields() {
 		}
 		fclose(rightPartFile);
 
-		generalizedMinimalResidualMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
+		generalizedMinimalResidualMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumber, ynumber, znumber, maxwellEquationMatrixSize, maxErrorLevel, maxGMRESIterations);
 		//#pragma omp parallel for
 
 		FILE* gmresFile = fopen("./output/gmresFile.dat", "w");

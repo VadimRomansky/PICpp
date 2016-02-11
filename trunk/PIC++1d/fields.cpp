@@ -12,7 +12,7 @@
 
 void Simulation::evaluateFields() {
 	printf("evaluating fields\n");
-	fopen("./output/outputEverythingFile.dat","a");
+	//fopen("./output/outputEverythingFile.dat","a");
 
 	if (solverType == IMPLICIT) {
 
@@ -107,7 +107,7 @@ void Simulation::evaluateFields() {
 			//newEfield[i].x = 0;
 		}
 	}
-	fclose(outputEverythingFile);
+	//fclose(outputEverythingFile);
 }
 
 void Simulation::evaluateExplicitDerivative() {
@@ -509,9 +509,9 @@ void Simulation::createInternalEquation(int i) {
 	//rightPart = rightPart + (evaluateRotB(i)* speed_of_light_normalized - electricFlux[i]*4*pi/fieldScale) * (theta * deltaT);
 	rightPart = rightPart + (evaluateRotB(i) * speed_of_light_normalized - (electricFlux[i] * 4 * pi / fieldScale)) * (theta * deltaT) - (evaluateGradDensity(i) * speed_of_light_normalized_sqr * theta * theta * deltaT * deltaT * 4 * pi / fieldScale);
 	if(i == debugPoint){
-		fprintf(outputEverythingFile, "rotB %d = %28.22g %28.22g %28.22g\n", debugPoint, evaluateRotB(i).x, evaluateRotB(i).y, evaluateRotB(i).z);
-		fprintf(outputEverythingFile, "j = %28.22g %28.22g %28.22g\n", electricFlux[i].x, electricFlux[i].y, electricFlux[i].z);
-		fprintf(outputEverythingFile, "grad denasty = %28.22g %28.22g %28.22g\n", evaluateGradDensity(i).x, evaluateGradDensity(i).y,evaluateGradDensity(i).z);
+		//fprintf(outputEverythingFile, "rotB %d = %28.22g %28.22g %28.22g\n", debugPoint, evaluateRotB(i).x, evaluateRotB(i).y, evaluateRotB(i).z);
+		//fprintf(outputEverythingFile, "j = %28.22g %28.22g %28.22g\n", electricFlux[i].x, electricFlux[i].y, electricFlux[i].z);
+		//fprintf(outputEverythingFile, "grad denasty = %28.22g %28.22g %28.22g\n", evaluateGradDensity(i).x, evaluateGradDensity(i).y,evaluateGradDensity(i).z);
 	}
 	//rightPart = rightPart + evaluateRotB(i)*speed_of_light_normalized*theta*deltaT - electricFlux[i]*4*pi*theta*deltaT/fieldScale;
 	createInternalEquationX(i);

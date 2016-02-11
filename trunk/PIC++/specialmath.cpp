@@ -155,7 +155,7 @@ double***** arnoldiIterations(std::vector<MatrixElement>**** matrix, double** ou
 	return resultBasis;
 }
 
-void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outvector, int xnumber, int ynumber, int znumber, int lnumber) {
+void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outvector, int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration) {
 	printf("start GMRES\n");
 	double norm = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber));
 	//printf("norm = %g\n", norm);
@@ -239,9 +239,10 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 	double module;
 
 	double relativeError = 1;
-	double maxRelativeError = maxErrorLevel / (matrixDimension);
+	//double maxRelativeError = maxErrorLevel / (matrixDimension);
+	double maxRelativeError = precision / (matrixDimension);
 
-	while ((relativeError > maxRelativeError && n < min2(maxGMRESIterations, matrixDimension + 3) || (n <= 4))) {
+	while (((relativeError > maxRelativeError && n < min2(maxIteration, matrixDimension + 3)) || (n <= 4))) {
 		printf("GMRES iteration %d\n", n);
 		newHessenbergMatrix = new double*[n];
 		for (int i = 0; i < n; ++i) {
