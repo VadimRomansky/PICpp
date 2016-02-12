@@ -82,12 +82,16 @@ void testFourier(){
 	int ynumber = 1;
 	int znumber = 1;
 	double*** a = new double**[xnumber];
+	double*** da2 = new double**[xnumber];
 	for(int i = 0; i < xnumber; ++i){
 		a[i] = new double*[ynumber];
+		da2[i] = new double*[ynumber];
 		for(int j = 0; j < ynumber; ++j){
 			a[i][j] = new double[znumber];
+			da2[i][j] = new double[znumber];
 			for(int k = 0; k < znumber; ++k){
 				a[i][j][k] = 0;
+				da2[i][j][k] = 0;
 			}
 		}
 	}
@@ -95,15 +99,60 @@ void testFourier(){
 	a[0][0][0] = 1;
 	a[7][0][0] = 1;
 
+	for(int i = 0; i < xnumber; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				int prevI = i - 1;
+				if(prevI < 0){
+					prevI = xnumber - 1;
+				}
+				int nextI = i + 1;
+				if(nextI >= xnumber){
+					nextI = 0;
+				}
+				int prevJ = j - 1;
+				if(prevJ < 0){
+					prevJ = ynumber - 1;
+				}
+				int nextJ = j + 1;
+				if(nextJ >= ynumber){
+					nextJ = 0;
+				}
+				int prevK = k - 1;
+				if(prevK < 0){
+					prevK = znumber - 1;
+				}
+				int nextK = k + 1;
+				if(nextK >= znumber){
+					nextK = 0;
+				}
+
+				da2[i][j][k] = (-6.0*a[i][j][k] + a[prevI][j][k] + a[nextI][j][k] + a[i][prevJ][k] + a[i][nextJ][k] + a[i][j][prevK] + a[i][j][nextK]);
+			}
+		}
+	}
+
 	Complex*** fourier = evaluateFourierTranslation(a, xnumber, ynumber, znumber);
 
+	Complex*** fourier_da2 = new Complex**[xnumber];
+	for(int i = 0; i < xnumber; ++i){
+		fourier_da2[i] = new Complex*[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			fourier_da2[i][j] = new Complex[znumber];
+			for(int k = 0; k < znumber; ++k){
+				fourier_da2[i][j][k] = fourier[i][j][k]*(-4*pi*pi*((i*i*1.0/(xnumber*xnumber))  + (j*j*1.0/(ynumber*ynumber)) + (k*k*1.0/(znumber*znumber))));
+			}
+		}
+	}
+
 	double*** b = evaluateReverceFourierTranslation(fourier, xnumber, ynumber, znumber);
+	double*** db2 = evaluateReverceFourierTranslation(fourier_da2, xnumber, ynumber, znumber);
 	
 
 	for(int i = 0; i < xnumber; ++i){
 		for(int j = 0; j < ynumber; ++j){
 			for(int k = 0; k < znumber; ++k){
-				printf("a = %g Fa = %g b = %g", a[i][j][k], fourier[i][j][k].re, b[i][j][k]);
+				printf("a = %g Fa = %g b = %g da2 = %g db2 = %g", a[i][j][k], fourier[i][j][k].re, b[i][j][k], da2[i][j][k], db2[i][j][k]);
 			}
 		}
 		printf("\n");
@@ -113,16 +162,25 @@ void testFourier(){
 	for(int i = 0; i < xnumber; ++i){
 		for(int j = 0; j < ynumber; ++j){
 			delete[] a[i][j];
+			delete[] da2[i][j];
 			delete[] b[i][j];
+			delete[] db2[i][j];
 			delete[] fourier[i][j];
+			delete[] fourier_da2[i][j];
 		}
 		delete[] a[i];
+		delete[] da2[i];
 		delete[] b[i];
+		delete[] db2[i];
 		delete[] fourier[i];
+		delete[] fourier_da2[i];
 	}
 	delete[] a;
+	delete[] da2;
 	delete[] b;
+	delete[] db2;
 	delete[] fourier;
+	delete[] fourier_da2;
 }
 
 int main()
