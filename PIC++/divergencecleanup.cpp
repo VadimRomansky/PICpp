@@ -84,10 +84,30 @@ void Simulation::cleanupDivergence() {
 				if(i == 0 && j == 0 && k == 0){
 					rightPartFourier[i][j][k] = Complex(0, 0);
 				} else {
-					rightPartFourier[i][j][k] = rightPartFourier[i][j][k]/(i*i + j*j + k*k)*-1.0;
+					rightPartFourier[i][j][k] = rightPartFourier[i][j][k]/(4*pi*pi*((i*i/(xsize*xsize)) + (j*j/(ysize*ysize)) + (k*k/(zsize*zsize))))*-1.0;
+				}
 			}
 		}
 	}
+
+	double*** potential = evaluateReverceFourierTranslation(rightPartFourier);
+
+	for(int i = 0; i < xnumber; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				divergenceCleaningPotential[i][j][k][0] = potential[i][j][k];
+			}
+			delete[] potential[i][j];
+			delete[] rightPartFourier[i][j];
+			delete[] rightPart[i][j];
+		}
+		delete[] potential[i];
+		delete[] rightPartFourier[i];
+		delete[] rightPart[i];
+	}
+	delete[] potential;
+	delete[] rightPartFourier;
+	delete[] rightPart;
 
 	updateFieldByCleaning();
 	//double div = evaluateDivCleaningE(1);
@@ -369,7 +389,7 @@ Complex*** Simulation::evaluateFourierTranslation(double*** a){
 				for(int tempi = 0; tempi < xnumber; ++tempi){
 					for(int tempj = 0; tempj < ynumber; ++tempj){
 						for(int tempk = 0; tempk < znumber; ++tempk){
-							result[i][j][k] += complexExp(-2*pi*((i*tempi/xnumber) + (j*tempj/ynumber) + (k*tempk/znumber)))*a[tempi][tempj][tempk];
+							result[i][j][k] += complexExp(-2*pi*((i*tempi*1.0/xnumber) + (j*tempj*1.0/ynumber) + (k*tempk*1.0/znumber)))*a[tempi][tempj][tempk];
 						}
 					}
 				}
@@ -394,7 +414,7 @@ double*** Simulation::evaluateReverceFourierTranslation(Complex*** a){
 				for(int tempi = 0; tempi < xnumber; ++tempi){
 					for(int tempj = 0; tempj < ynumber; ++tempj){
 						for(int tempk = 0; tempk < znumber; ++tempk){
-							result[i][j][k] += (complexExp(2*pi*((i*tempi/xnumber) + (j*tempj/ynumber) + (k*tempk/znumber)))*a[tempi][tempj][tempk]).re;
+							result[i][j][k] += (complexExp(2*pi*((i*tempi*1.0/xnumber) + (j*tempj*1.0/ynumber) + (k*tempk*1.0/znumber)))*a[tempi][tempj][tempk]).re;
 						}
 					}
 				}
