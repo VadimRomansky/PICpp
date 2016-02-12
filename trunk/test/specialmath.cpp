@@ -3,8 +3,7 @@
 #include <math.h>
 
 #include "specialmath.h"
-//#include "../PIC++/simulation.h"
-
+#include "complex.h"
 
 double** arnoldiIterations(double** matrix, double** outHessenbergMatrix, int n, double** prevBasis, double** prevHessenbergMatrix){
 	double** resultBasis = new double*[n];
@@ -336,4 +335,52 @@ double polynomValue(double a4, double a3, double a2, double a1, double a0, doubl
 
 double polynomDerivativeValue(double a4, double a3, double a2, double a1, double x){
 	return  ((4*a4*x + 3*a3)*x + 2*a2)*x + a1;
+}
+
+Complex*** evaluateFourierTranslation(double*** a, int xnumber, int ynumber, int znumber){
+	Complex*** result = new Complex**[xnumber];
+	for(int i = 0; i < xnumber; ++i){
+		result[i] = new Complex*[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			result[i][j] = new Complex[znumber];
+			for(int k = 0; k < znumber; ++k){
+				result[i][j][k] = Complex(0, 0);
+
+			for(int tempi = 0; tempi < xnumber; ++tempi){
+					for(int tempj = 0; tempj < ynumber; ++tempj){
+						for(int tempk = 0; tempk < znumber; ++tempk){
+							result[i][j][k] += complexExp(-2*pi*((i*tempi*1.0/xnumber) + (j*tempj*1.0/ynumber) + (k*tempk*1.0/znumber)))*a[tempi][tempj][tempk];
+						}
+					}
+				}
+
+				result[i][j][k] = result[i][j][k]/(xnumber*ynumber*znumber);
+			}
+		}
+	}
+
+	return result;
+}
+
+double*** evaluateReverceFourierTranslation(Complex*** a, int xnumber, int ynumber, int znumber){
+	double*** result = new double**[xnumber];
+	for(int i = 0; i < xnumber; ++i){
+		result[i] = new double*[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			result[i][j] = new double[znumber];
+			for(int k = 0; k < znumber; ++k){
+				result[i][j][k] = 0;
+
+				for(int tempi = 0; tempi < xnumber; ++tempi){
+					for(int tempj = 0; tempj < ynumber; ++tempj){
+						for(int tempk = 0; tempk < znumber; ++tempk){
+							result[i][j][k] += (complexExp(2*pi*((i*tempi*1.0/xnumber) + (j*tempj*1.0/ynumber) + (k*tempk*1.0/znumber)))*a[tempi][tempj][tempk]).re;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return result;
 }

@@ -6,11 +6,9 @@
 #include <math.h>
 
 #include "specialmath.h"
+#include "complex.h"
 
-
-int main()
-{
-	//test GMRES
+void testGMRES(){
 	double** matrix = new double*[number];
 	double* rightPart = new double[number];
 
@@ -61,11 +59,10 @@ int main()
 		}
 		printf("%15.10lf\n", value);
 	}
+}
 
-
-	//test solution of a4*x^4 + a3*x^3 + a2*x^2 + a1*x + a0 = 0
-
-	/*double a4 = 1;
+void testSolve4order(){
+	double a4 = 1;
 	double a3 = 2;
 	double a2 = 3;
 	double a1 = 4;
@@ -78,7 +75,66 @@ int main()
 	double x = solve4orderEquation(a4, a3, a2, a1, a0, 2.0);
 
 	printf("x = %lf\n", x);
+}
 
-	return 0;*/
+void testFourier(){
+	int xnumber = 25;
+	int ynumber = 1;
+	int znumber = 1;
+	double*** a = new double**[xnumber];
+	for(int i = 0; i < xnumber; ++i){
+		a[i] = new double*[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			a[i][j] = new double[znumber];
+			for(int k = 0; k < znumber; ++k){
+				a[i][j][k] = 0;
+			}
+		}
+	}
+	a[1][0][0] = 1;
+	a[0][0][0] = 1;
+	a[7][0][0] = 1;
+
+	Complex*** fourier = evaluateFourierTranslation(a, xnumber, ynumber, znumber);
+
+	double*** b = evaluateReverceFourierTranslation(fourier, xnumber, ynumber, znumber);
+	
+
+	for(int i = 0; i < xnumber; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				printf("a = %g Fa = %g b = %g", a[i][j][k], fourier[i][j][k].re, b[i][j][k]);
+			}
+		}
+		printf("\n");
+	}
+
+
+	for(int i = 0; i < xnumber; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			delete[] a[i][j];
+			delete[] b[i][j];
+			delete[] fourier[i][j];
+		}
+		delete[] a[i];
+		delete[] b[i];
+		delete[] fourier[i];
+	}
+	delete[] a;
+	delete[] b;
+	delete[] fourier;
+}
+
+int main()
+{
+	//test GMRES
+	//testGMRES();
+
+	//test solution of a4*x^4 + a3*x^3 + a2*x^2 + a1*x + a0 = 0
+	//testSolve4order();
+
+	testFourier();
+
+	return 0;
 }
 

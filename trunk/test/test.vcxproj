@@ -75,9 +75,11 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="complex.h" />
     <ClInclude Include="specialmath.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="complex.cpp" />
     <ClCompile Include="specialmath.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
