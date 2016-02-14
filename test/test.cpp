@@ -81,6 +81,15 @@ void testFourier(){
 	int xnumber = 25;
 	int ynumber = 1;
 	int znumber = 1;
+
+	double xsize = xnumber;
+	double ysize = ynumber;
+	double zsize = znumber;
+
+	double deltaX = xsize/xnumber;
+	double deltaY = ysize/ynumber;
+	double deltaZ = zsize/znumber;
+
 	double*** a = new double**[xnumber];
 	double*** da2 = new double**[xnumber];
 	for(int i = 0; i < xnumber; ++i){
@@ -127,7 +136,7 @@ void testFourier(){
 					nextK = 0;
 				}
 
-				da2[i][j][k] = (-6.0*a[i][j][k] + a[prevI][j][k] + a[nextI][j][k] + a[i][prevJ][k] + a[i][nextJ][k] + a[i][j][prevK] + a[i][j][nextK]);
+				da2[i][j][k] = (-(2.0*a[i][j][k]/deltaX) - (2.0*a[i][j][k]/deltaY) - (2.0*a[i][j][k]/deltaZ) + ((a[prevI][j][k] + a[nextI][j][k])/deltaX) + ((a[i][prevJ][k] + a[i][nextJ][k])/deltaY) + ((a[i][j][prevK] + a[i][j][nextK])/deltaZ));
 			}
 		}
 	}
@@ -140,7 +149,7 @@ void testFourier(){
 		for(int j = 0; j < ynumber; ++j){
 			fourier_da2[i][j] = new Complex[znumber];
 			for(int k = 0; k < znumber; ++k){
-				fourier_da2[i][j][k] = fourier[i][j][k]*(-4*pi*pi*((i*i*1.0/(xnumber*xnumber))  + (j*j*1.0/(ynumber*ynumber)) + (k*k*1.0/(znumber*znumber))));
+				fourier_da2[i][j][k] = fourier[i][j][k]*(-4*pi*pi*((i*i*1.0/(xsize*xsize))  + (j*j*1.0/(ysize*ysize)) + (k*k*1.0/(zsize*zsize))));
 			}
 		}
 	}
