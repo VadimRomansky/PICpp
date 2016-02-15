@@ -83,8 +83,10 @@ void Simulation::cleanupDivergence() {
 			for(int k = 0; k < znumber; ++k){
 				if(i == 0 && j == 0 && k == 0){
 					rightPartFourier[i][j][k] = Complex(0, 0);
+				} else if(i < xnumber/2.0){
+					rightPartFourier[i][j][k] = rightPartFourier[i][j][k]*(-4*pi*pi*((i*i*1.0/(xsize*xsize))  + (j*j*1.0/(ysize*ysize)) + (k*k*1.0/(zsize*zsize))));
 				} else {
-					rightPartFourier[i][j][k] = rightPartFourier[i][j][k]/(4*pi*pi*((i*i/(xsize*xsize)) + (j*j/(ysize*ysize)) + (k*k/(zsize*zsize))))*-1.0;
+					rightPartFourier[i][j][k] = rightPartFourier[i][j][k]*(-4*pi*pi*(((xnumber - i - 2)*(xnumber - i - 2)*1.0/(xsize*xsize))  + (j*j*1.0/(ysize*ysize)) + (k*k*1.0/(zsize*zsize))));
 				}
 			}
 		}
@@ -414,7 +416,11 @@ double*** Simulation::evaluateReverceFourierTranslation(Complex*** a){
 				for(int tempi = 0; tempi < xnumber; ++tempi){
 					for(int tempj = 0; tempj < ynumber; ++tempj){
 						for(int tempk = 0; tempk < znumber; ++tempk){
-							result[i][j][k] += (complexExp(2*pi*((i*tempi*1.0/xnumber) + (j*tempj*1.0/ynumber) + (k*tempk*1.0/znumber)))*a[tempi][tempj][tempk]).re;
+							if(tempi < xnumber/2.0){
+								result[i][j][k] += (complexExp(2*pi*((i*tempi*1.0/xnumber) + (j*tempj*1.0/ynumber) + (k*tempk*1.0/znumber)))*a[tempi][tempj][tempk]).re;
+							} else {
+								result[i][j][k] += (complexExp(-2*pi*((i*(tempi - xnumber + 2)*1.0/xnumber) + (j*tempj*1.0/ynumber) + (k*tempk*1.0/znumber)))*a[tempi][tempj][tempk]).re;
+							}
 						}
 					}
 				}

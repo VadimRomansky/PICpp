@@ -78,7 +78,7 @@ void testSolve4order(){
 }
 
 void testFourier(){
-	int xnumber = 25;
+	int xnumber = 24;
 	int ynumber = 1;
 	int znumber = 1;
 
@@ -100,13 +100,14 @@ void testFourier(){
 			da2[i][j] = new double[znumber];
 			for(int k = 0; k < znumber; ++k){
 				a[i][j][k] = 0;
+				a[i][j][k] = sin(2*pi*i*1.0/xnumber);
 				da2[i][j][k] = 0;
 			}
 		}
 	}
-	a[1][0][0] = 1;
-	a[0][0][0] = 1;
-	a[7][0][0] = 1;
+	//a[1][0][0] = 1;
+	//a[0][0][0] = 1;
+	//a[7][0][0] = 1;
 
 	for(int i = 0; i < xnumber; ++i){
 		for(int j = 0; j < ynumber; ++j){
@@ -136,7 +137,8 @@ void testFourier(){
 					nextK = 0;
 				}
 
-				da2[i][j][k] = (-(2.0*a[i][j][k]/deltaX) - (2.0*a[i][j][k]/deltaY) - (2.0*a[i][j][k]/deltaZ) + ((a[prevI][j][k] + a[nextI][j][k])/deltaX) + ((a[i][prevJ][k] + a[i][nextJ][k])/deltaY) + ((a[i][j][prevK] + a[i][j][nextK])/deltaZ));
+				//da2[i][j][k] = (-(2.0*a[i][j][k]/deltaX) - (2.0*a[i][j][k]/deltaY) - (2.0*a[i][j][k]/deltaZ) + ((a[prevI][j][k] + a[nextI][j][k])/deltaX) + ((a[i][prevJ][k] + a[i][nextJ][k])/deltaY) + ((a[i][j][prevK] + a[i][j][nextK])/deltaZ));
+				da2[i][j][k] = (-(2.0*a[i][j][k]/deltaX) + ((a[prevI][j][k] + a[nextI][j][k])/deltaX));
 			}
 		}
 	}
@@ -149,7 +151,11 @@ void testFourier(){
 		for(int j = 0; j < ynumber; ++j){
 			fourier_da2[i][j] = new Complex[znumber];
 			for(int k = 0; k < znumber; ++k){
-				fourier_da2[i][j][k] = fourier[i][j][k]*(-4*pi*pi*((i*i*1.0/(xsize*xsize))  + (j*j*1.0/(ysize*ysize)) + (k*k*1.0/(zsize*zsize))));
+				if(i < xnumber/2.0){
+					fourier_da2[i][j][k] = fourier[i][j][k]*(-4*pi*pi*((i*i*1.0/(xsize*xsize))  + (j*j*1.0/(ysize*ysize)) + (k*k*1.0/(zsize*zsize))));
+				} else {
+					fourier_da2[i][j][k] = fourier[i][j][k]*(-4*pi*pi*(((xnumber - i - 2)*(xnumber - i - 2)*1.0/(xsize*xsize))  + (j*j*1.0/(ysize*ysize)) + (k*k*1.0/(zsize*zsize))));
+				}
 			}
 		}
 	}
@@ -161,7 +167,7 @@ void testFourier(){
 	for(int i = 0; i < xnumber; ++i){
 		for(int j = 0; j < ynumber; ++j){
 			for(int k = 0; k < znumber; ++k){
-				printf("a = %g Fa = %g b = %g da2 = %g db2 = %g", a[i][j][k], fourier[i][j][k].re, b[i][j][k], da2[i][j][k], db2[i][j][k]);
+				printf("a = %g Fa = %g b = %g da2 = %g db2 = %g", a[i][j][k], fourier[i][j][k].module(), b[i][j][k], da2[i][j][k], db2[i][j][k]);
 			}
 		}
 		printf("\n");
