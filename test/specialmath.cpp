@@ -374,7 +374,11 @@ double*** evaluateReverceFourierTranslation(Complex*** a, int xnumber, int ynumb
 				for(int tempi = 0; tempi < xnumber; ++tempi){
 					for(int tempj = 0; tempj < ynumber; ++tempj){
 						for(int tempk = 0; tempk < znumber; ++tempk){
-							result[i][j][k] += (complexExp(2*pi*((i*tempi*1.0/xnumber) + (j*tempj*1.0/ynumber) + (k*tempk*1.0/znumber)))*a[tempi][tempj][tempk]).re;
+							if(tempi < xnumber/2.0){
+								result[i][j][k] += (complexExp(2*pi*((i*tempi*1.0/xnumber) + (j*tempj*1.0/ynumber) + (k*tempk*1.0/znumber)))*a[tempi][tempj][tempk]).re;
+							} else {
+								result[i][j][k] += (complexExp(-2*pi*((i*(tempi - xnumber + 2)*1.0/xnumber) + (j*tempj*1.0/ynumber) + (k*tempk*1.0/znumber)))*a[tempi][tempj][tempk]).re;
+							}
 						}
 					}
 				}
