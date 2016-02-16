@@ -2031,12 +2031,6 @@ void Simulation::createArrays() {
 	Ederivative = new Vector3d**[xnumber + 1];
 	Bfield = new Vector3d**[xnumber];
 	newBfield = new Vector3d**[xnumber];
-	//tempBfield = new Vector3d**[xnumber];
-
-
-	divergenceCleaningField = new double***[xnumber];
-	divergenceCleaningPotential = new double***[xnumber];
-	divergenceCleaningPotentialFourier = new double**[xnumber];
 
 	for (int i = 0; i < xnumber; ++i) {
 		Bfield[i] = new Vector3d*[ynumber];
@@ -2091,11 +2085,14 @@ void Simulation::createArrays() {
 		}
 	}
 
+	printf("creating arrays for divergence\n");
+
 	divergenceCleanUpMatrix = new std::vector<MatrixElement>***[xnumber];
 	divergenceCleanUpRightPart = new double***[xnumber];
 
 	divergenceCleaningField = new double***[xnumber];
 	divergenceCleaningPotential = new double***[xnumber];
+	divergenceCleaningPotentialFourier = new double**[xnumber];
 
 	for (int i = 0; i < xnumber; ++i) {
 		divergenceCleanUpMatrix[i] = new std::vector<MatrixElement>**[ynumber];
@@ -2110,7 +2107,7 @@ void Simulation::createArrays() {
 			divergenceCleaningPotential[i][j] = new double*[znumber];
 			divergenceCleaningPotentialFourier[i][j] = new double[znumber];
 			for (int k = 0; k < znumber; ++k) {
-				divergenceCleaningField[i][j][j] = new double[3];
+				divergenceCleaningField[i][j][k] = new double[3];
 				divergenceCleaningPotential[i][j][k] = new double[1];
 				divergenceCleanUpMatrix[i][j][k] = new std::vector<MatrixElement>[3];
 				divergenceCleanUpRightPart[i][j][k] = new double[3];
@@ -2301,8 +2298,8 @@ void Simulation::createFiles() {
 	fclose(particlePositronsFile);
 	particleAlphaFile = fopen("./output/alphas.dat", "w");
 	fclose(particleAlphaFile);
-	outputEverythingFile = fopen("./output/everything.dat","w");
-	fclose(outputEverythingFile);
+	//outputEverythingFile = fopen("./output/everything.dat","w");
+	//fclose(outputEverythingFile);
 }
 
 void Simulation::checkFrequency(double omega) {
