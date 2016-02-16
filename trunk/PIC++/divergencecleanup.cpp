@@ -83,10 +83,20 @@ void Simulation::cleanupDivergence() {
 			for(int k = 0; k < znumber; ++k){
 				if(i == 0 && j == 0 && k == 0){
 					rightPartFourier[i][j][k] = Complex(0, 0);
-				} else if(i < xnumber/2.0){
-					rightPartFourier[i][j][k] = rightPartFourier[i][j][k]*(-4*pi*pi*((i*i*1.0/(xsize*xsize))  + (j*j*1.0/(ysize*ysize)) + (k*k*1.0/(zsize*zsize))));
 				} else {
-					rightPartFourier[i][j][k] = rightPartFourier[i][j][k]*(-4*pi*pi*(((xnumber - i - 2)*(xnumber - i - 2)*1.0/(xsize*xsize))  + (j*j*1.0/(ysize*ysize)) + (k*k*1.0/(zsize*zsize))));
+					double kx = i;
+					if(i >= xnumber/2.0){
+						kx = xnumber - i - 2;
+					} 
+					double ky = j;
+					if(j >= ynumber/2.0){
+						ky = ynumber - j - 2;
+					}
+					double kz = k;
+					if(k >= znumber/2.0){
+						kz = znumber - k - 2;
+					}
+					rightPartFourier[i][j][k] = rightPartFourier[i][j][k]*(-4*pi*pi*((kx*kx/(xsize*xsize))  + (ky*ky/(ysize*ysize)) + (kz*kz/(zsize*zsize))));
 				}
 			}
 		}
@@ -416,11 +426,21 @@ double*** Simulation::evaluateReverceFourierTranslation(Complex*** a){
 				for(int tempi = 0; tempi < xnumber; ++tempi){
 					for(int tempj = 0; tempj < ynumber; ++tempj){
 						for(int tempk = 0; tempk < znumber; ++tempk){
-							if(tempi < xnumber/2.0){
-								result[i][j][k] += (complexExp(2*pi*((i*tempi*1.0/xnumber) + (j*tempj*1.0/ynumber) + (k*tempk*1.0/znumber)))*a[tempi][tempj][tempk]).re;
-							} else {
-								result[i][j][k] += (complexExp(-2*pi*((i*(tempi - xnumber + 2)*1.0/xnumber) + (j*tempj*1.0/ynumber) + (k*tempk*1.0/znumber)))*a[tempi][tempj][tempk]).re;
+							double kx = 2*pi*tempi;
+							if(tempi >= xnumber/2.0){
+								kx = -2*pi*(tempi - xnumber + 2);
 							}
+
+							double ky = 2*pi*tempj;
+							if(tempj >= ynumber/2.0){
+								ky = -2*pi*(tempj - ynumber + 2);
+							}
+
+							double kz = 2*pi*tempk;
+							if(tempk >= znumber/2.0){
+								kz = -2*pi*(tempk - znumber + 2);
+							}
+							result[i][j][k] += (complexExp(((i*kx/xnumber) + (j*ky/ynumber) + (k*kz/znumber)))*a[tempi][tempj][tempk]).re;
 						}
 					}
 				}

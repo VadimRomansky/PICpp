@@ -18,8 +18,8 @@ void Simulation::simulate() {
 		initialize();
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
-		initializeAlfvenWave(1, 0.01);
-		//initializeRotatedAlfvenWave(1, 0.01);
+		//initializeAlfvenWave(1, 0.01);
+		initializeRotatedAlfvenWave(1, 0.01);
 		//initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeRotatedSimpleElectroMagneticWave(1);
@@ -655,7 +655,7 @@ void Simulation::updateElectroMagneticParameters() {
 		}
 	}
 
-	fprintf(outputEverythingFile, "electricFlux %d after div tensor = %28.22g %28.22g %28.22g\n", debugPoint, electricFlux[debugPoint][0][0].x, electricFlux[debugPoint][0][0].y, electricFlux[debugPoint][0][0].z);
+	//fprintf(outputEverythingFile, "electricFlux %d after div tensor = %28.22g %28.22g %28.22g\n", debugPoint, electricFlux[debugPoint][0][0].x, electricFlux[debugPoint][0][0].y, electricFlux[debugPoint][0][0].z);
 
 	//smoothFlux();
 
