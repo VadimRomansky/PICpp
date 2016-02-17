@@ -18,9 +18,9 @@ void Simulation::evaluateFields() {
 
 		evaluateMaxwellEquationMatrix();
 
-		maxwellMatrixFile = fopen("./output/maxwellMatrixFile.dat", "w");
-		outputMaxwellEquationMatrixFull(maxwellMatrixFile, maxwellEquationMatrix, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
-		fclose(maxwellMatrixFile);
+		//maxwellMatrixFile = fopen("./output/maxwellMatrixFile.dat", "w");
+		//outputMaxwellEquationMatrixFull(maxwellMatrixFile, maxwellEquationMatrix, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
+		//fclose(maxwellMatrixFile);
 		//outputMaxwellEquationMatrixSimple(maxwellEquationMatrix, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
 
 		double**** gmresOutput = new double***[xnumber];
@@ -35,20 +35,20 @@ void Simulation::evaluateFields() {
 			}
 		}
 
-		FILE* rightPartFile = fopen("./output/rightPartFile.dat", "w");
-		for(int i = 0; i < xnumber; ++i){
-			fprintf(rightPartFile, "%28.22g %28.22g %28.22g\n", maxwellEquationRightPart[i][0][0][0], maxwellEquationRightPart[i][0][0][1], maxwellEquationRightPart[i][0][0][2]);
-		}
-		fclose(rightPartFile);
+		//FILE* rightPartFile = fopen("./output/rightPartFile.dat", "w");
+		//for(int i = 0; i < xnumber; ++i){
+			//fprintf(rightPartFile, "%28.22g %28.22g %28.22g\n", maxwellEquationRightPart[i][0][0][0], maxwellEquationRightPart[i][0][0][1], maxwellEquationRightPart[i][0][0][2]);
+	//	}
+		//fclose(rightPartFile);
 
 		generalizedMinimalResidualMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumber, ynumber, znumber, maxwellEquationMatrixSize, maxErrorLevel, maxGMRESIterations);
 		//#pragma omp parallel for
 
-		FILE* gmresFile = fopen("./output/gmresFile.dat", "w");
-		for(int i = 0; i < xnumber; ++i){
-			fprintf(gmresFile, "%28.22g %28.22g %28.22g\n", gmresOutput[i][0][0][0], gmresOutput[i][0][0][1], gmresOutput[i][0][0][2]);
-		}
-		fclose(gmresFile);
+		//FILE* gmresFile = fopen("./output/gmresFile.dat", "w");
+		//for(int i = 0; i < xnumber; ++i){
+			//fprintf(gmresFile, "%28.22g %28.22g %28.22g\n", gmresOutput[i][0][0][0], gmresOutput[i][0][0][1], gmresOutput[i][0][0][2]);
+		//}
+		//fclose(gmresFile);
 		for (int i = 0; i < xnumber; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
