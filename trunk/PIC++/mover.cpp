@@ -8,6 +8,7 @@
 #include "particle.h"
 #include "constants.h"
 #include "matrix3d.h"
+#include "random.h"
 
 void Simulation::moveParticles() {
 	printf("moving particles\n");
@@ -347,6 +348,8 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 	//Particle* tempParticle = particles[0];
 
 	double x = xgrid[xnumber] - length;
+	double tempDeltaY = deltaY*uniformDistribution();
+	double tempDeltaZ = deltaZ*uniformDistribution();
 
 	if (typeContainer.type == ELECTRON && preserveCharge) {
 		return;
@@ -360,6 +363,8 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 				Particle* particle = createParticle(n, xnumber - 1, j, k, weight, type, typeContainer, temperature);
 				n++;
 				particle->coordinates.x = x;
+				particle->coordinates.y = ygrid[j] + tempDeltaY;
+				particle->coordinates.z = zgrid[j] + tempDeltaZ;
 				particle->addVelocity(V0, speed_of_light_normalized);
 				particle->initialMomentum = particle->momentum;
 				particles.push_back(particle);

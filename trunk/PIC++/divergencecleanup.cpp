@@ -11,14 +11,50 @@ void Simulation::cleanupDivergence() {
 	int matrixDimension = xnumber;
 
 	double fullDensity = 0;
-	/*for (int i = 0; i < xnumber; ++i) {
+	for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				fullDensity += chargeDensity[i][j][k] * volumeB(i, j, k);
 			}
 		}
-	}*/
-	fullDensity /= xsize;
+	}
+	fullDensity /= (xsize*ysize*zsize);
+
+	if(boundaryConditionType == PERIODIC){
+		for (int i = 0; i < xnumber; ++i) {
+			for (int j = 0; j < ynumber; ++j) {
+				for (int k = 0; k < znumber; ++k) {
+					chargeDensity[i][j][k] -= fullDensity;
+				}
+			}
+		}
+		/*for (int i = 0; i < xnumber; ++i) {
+			for (int j = 0; j < ynumber; ++j) {
+				for (int k = 0; k < znumber; ++k) {
+					fullDensity += chargeDensity[i][j][k] * volumeB(i, j, k);
+				}
+			}
+		}
+		fullDensity /= (xsize*ysize*zsize);*/
+	} else {
+		double Elinear = -4*pi*fullDensity*xsize + Efield[xnumber][0][0].x - Efield[0][0][0].x;
+		for(int i = 0; i < xnumber + 1; ++i){
+			for(int j = 0; j< ynumber + 1; ++j){
+				for(int k = 0; k < znumber + 1; ++k){
+					double factor = (xsize - xgrid[i])/xsize;
+					newEfield[i][j][k].x = newEfield[i][j][k].x + Elinear*factor;
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < xnumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				chargeDensity[i][j][k] -= fullDensity;
+			}
+		}
+	}
 
 	/*for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -203,7 +239,7 @@ void Simulation::evaluateDivergenceCleaningField() {
 		}
 	}
 
-	Vector3d constantField;
+	/*Vector3d constantField;
 	constantField.x = divergenceCleaningField[xnumber - 1][0][0][0];
 	constantField.y = divergenceCleaningField[xnumber - 1][0][0][1];
 	constantField.z = divergenceCleaningField[xnumber - 1][0][0][2];
@@ -216,7 +252,7 @@ void Simulation::evaluateDivergenceCleaningField() {
 				divergenceCleaningField[i][j][k][2] -= constantField.z;
 			}
 		}
-	}
+	}*/
 }
 
 void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k) {
