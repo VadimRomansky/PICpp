@@ -364,7 +364,7 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 				n++;
 				particle->coordinates.x = x;
 				particle->coordinates.y = ygrid[j] + tempDeltaY;
-				particle->coordinates.z = zgrid[j] + tempDeltaZ;
+				particle->coordinates.z = zgrid[k] + tempDeltaZ;
 				particle->addVelocity(V0, speed_of_light_normalized);
 				particle->initialMomentum = particle->momentum;
 				particles.push_back(particle);
