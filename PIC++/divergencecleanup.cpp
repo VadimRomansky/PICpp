@@ -37,11 +37,11 @@ void Simulation::cleanupDivergence() {
 		}
 		fullDensity /= (xsize*ysize*zsize);*/
 	} else {
-		double Elinear = -4*pi*fullDensity*xsize + Efield[xnumber][0][0].x - Efield[0][0][0].x;
+		double Elinear = -4*pi*fullDensity*xsize + newEfield[xnumber][0][0].x - newEfield[0][0][0].x;
 		for(int i = 0; i < xnumber + 1; ++i){
 			for(int j = 0; j< ynumber + 1; ++j){
 				for(int k = 0; k < znumber + 1; ++k){
-					double factor = (xsize - xgrid[i])/xsize;
+					double factor = (xgrid[xnumber] - xgrid[i])/xsize;
 					newEfield[i][j][k].x = newEfield[i][j][k].x + Elinear*factor;
 				}
 			}
@@ -210,11 +210,11 @@ void Simulation::evaluateDivergenceCleaningField() {
 			for (int k = 0; k < znumber; ++k) {
 				int prevI = i - 1;
 				if (prevI < 0) {
-					if(boundaryConditionType == PERIODIC){
+					//if(boundaryConditionType == PERIODIC){
 						prevI = xnumber - 1;
-					} else {
-						prevI = 0;
-					}
+					//} else {
+						//prevI = 0;
+					//}
 				}
 
 				int prevJ = j - 1;
