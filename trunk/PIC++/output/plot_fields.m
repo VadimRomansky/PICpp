@@ -11,7 +11,7 @@ Nz = size(Zfile, 1);
 
 NE = Nx*Ny*Nz;
 NB = (Nx-1)*(Ny-1)*(Nz-1);
-Nt = (size(Efield, 1)/NE)-4;
+Nt = (size(Efield, 1)/NE)-1;
 NtB = (size(Bfield, 1)/NB)-1;
 ynumber = 1;
 znumber = 1;
