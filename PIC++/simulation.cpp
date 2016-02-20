@@ -19,8 +19,8 @@ void Simulation::simulate() {
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWave(1, 0.01);
-		//initializeRotatedAlfvenWave(1, 0.01);
-		initializeFluxFromRight();
+		initializeRotatedAlfvenWave(1, 0.01);
+		//initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeRotatedSimpleElectroMagneticWave(1);
 		//initializeLangmuirWave();
@@ -44,7 +44,7 @@ void Simulation::simulate() {
 	updateDensityParameters();
 
 	evaluateExplicitDerivative();
-	//cleanupDivergence();
+	cleanupDivergence();
 	updateFields();
 	updateEnergy();
 	theoreticalEnergy = energy;
@@ -92,7 +92,7 @@ void Simulation::simulate() {
 			}
 		}
 		updateDensityParameters();
-		//cleanupDivergence();
+		cleanupDivergence();
 		updateFields();
 		updateEnergy();
 		updateParameters();
