@@ -1,11 +1,11 @@
-25 1 1                 grid numbers
-25E9 1E0 1E0         gridsizes
-1E-10                    temperature
+200 3 3                 grid numbers
+2E11 3E9 3E9         gridsizes
+1E0                    temperature
 1.67E-28               density
-0 0 0                  velocity
+-3E9 0 0                  velocity
 0 0 0                  elecctricField
-1E-5 0 0                  magneticField
-1000000000               max iterations
+0 0 1E-4                  magneticField
+100000000               max iterations
 1E15                   max time
 100                 electrons per bin
 0                  positrons per bin
