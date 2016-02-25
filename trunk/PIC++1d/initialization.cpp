@@ -391,7 +391,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 		exit(0);
 	}
 
-	double fakeOmega = (kw * electron_charge_normalized * B0.x * fieldScale / massProton) * (sqrt(discriminant) - b) / (2.0 * a);
+	double fakeOmega = (kw * electron_charge_normalized * B0.norm() * fieldScale / massProton) * (sqrt(discriminant) - b) / (2.0 * a);
 
 	//a4*x^4 + a3*x^3 + a2*x^2 + a1*x + a0 = 0
 
