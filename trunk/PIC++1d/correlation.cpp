@@ -54,7 +54,7 @@ void Simulation::pushParticleIntoEbin(Particle* particle, int i) {
 	if (i > xnumber) return;
 
 	if(i == debugPoint){
-		fprintf(outputEverythingFile, "particle number %d\n", particle->number);
+		//fprintf(outputEverythingFile, "particle number %d\n", particle->number);
 	}
 
 	particlesInEbin[i].push_back(particle);

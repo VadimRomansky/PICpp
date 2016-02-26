@@ -12,6 +12,7 @@
 
 void Simulation::moveParticles() {
 	printf("moving particles\n");
+	printLog("moving particles\n");
 	int i = 0;
 #pragma omp parallel for private(i) 
 	for (int i = 0; i < particles.size(); ++i) {
