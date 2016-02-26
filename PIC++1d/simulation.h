@@ -187,7 +187,7 @@ public:
 	FILE* backupEfieldFile;
 	FILE* backupBfieldFile;
 
-	FILE* outputEverythingFile;
+	//FILE* outputEverythingFile;
 
 	FILE* errorLogFile;
 
