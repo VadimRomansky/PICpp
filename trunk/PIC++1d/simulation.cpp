@@ -43,7 +43,7 @@ void Simulation::simulate() {
 	updateDensityParameters();
 
 	evaluateExplicitDerivative();
-	//cleanupDivergence();
+	cleanupDivergence();
 	updateFields();
 	updateEnergy();
 	theoreticalEnergy = energy;
@@ -89,7 +89,7 @@ void Simulation::simulate() {
 		}
 
 		updateDensityParameters();
-		//cleanupDivergence();
+		cleanupDivergence();
 		updateFields();
 
 		/*if(currentIteration % 100 == 0){
@@ -394,6 +394,9 @@ void Simulation::updateElectroMagneticParameters() {
 			double correlation = correlationWithEbin(*particle, i);
 			if (correlation > 1.0) {
 				printf("correlation > 1\n");
+				errorLogFile = fopen("./output/errorLog.dat","w");
+				fprintf(errorLogFile, "correlation = %22.16g\n", correlation);
+				fclose(errorLogFile);
 				exit(0);
 			}
 			correlation /= volumeE(i);
@@ -518,7 +521,7 @@ void Simulation::updateElectroMagneticParameters() {
 			double divJ = evaluateDivFlux(i);
 
 			electricDensity[i] -= deltaT * theta * divJ;
-			electricDensity[i] = 0;
+			//electricDensity[i] = 0;
 		}
 	}
 	//fprintf(outputEverythingFile, "density %d afterFlux = %28.22g\n", debugPoint - 1, electricDensity[debugPoint - 1]);

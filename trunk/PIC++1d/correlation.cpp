@@ -266,10 +266,18 @@ Vector3d Simulation::correlationBfield(Particle& particle) {
 	double x = particle.x;
 	if (x > xgrid[xnumber]) {
 		printf("particle out of box in correlationBfield\n");
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "particle out of box in correlationBfield\n");
+		fprintf(errorLogFile, "x = %g\n", x);
+		fclose(errorLogFile);
 		exit(0);
 	}
 	if (x < xgrid[0]) {
 		printf("particle out of box in correlationBfield\n");
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "particle out of box in correlationBfield\n");
+		fprintf(errorLogFile, "x = %g\n", x);
+		fclose(errorLogFile);
 		exit(0);
 	}
 
@@ -360,10 +368,18 @@ Vector3d Simulation::correlationNewBfield(Particle& particle) {
 
 	if (x > xgrid[xnumber]) {
 		printf("particle out of box in correlationBfield\n");
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "particle out of box in correlationBfield\n");
+		fprintf(errorLogFile, "x = %g\n", x);
+		fclose(errorLogFile);
 		exit(0);
 	}
 	if (x < xgrid[0]) {
 		printf("particle out of box in correlationBfield\n");
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "particle out of box in correlationBfield\n");
+		fprintf(errorLogFile, "x = %g\n", x);
+		fclose(errorLogFile);
 		exit(0);
 	}
 

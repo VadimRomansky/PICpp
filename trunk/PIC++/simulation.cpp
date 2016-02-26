@@ -672,7 +672,7 @@ void Simulation::updateElectroMagneticParameters() {
 					double divJ = evaluateDivFlux(i, j, k);
 
 					electricDensity[i][j][k] -= deltaT * theta * divJ;
-					electricDensity[i][j][k] = 0;
+					//electricDensity[i][j][k] = 0;
 				}
 			}
 		}
