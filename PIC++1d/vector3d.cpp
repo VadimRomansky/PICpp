@@ -104,6 +104,9 @@ double& Vector3d::operator[](int i) {
 		return z;
 	default:
 		printf("i must be 0 < i < 3\n");
+		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "i must be 0 < i < 3\n");
+		fclose(errorLogFile);
 		exit(0);
 	}
 }

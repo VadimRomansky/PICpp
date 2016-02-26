@@ -367,6 +367,9 @@ void readParticles(FILE* particlesFile, Simulation& simulation) {
 			particleType = ALPHA;
 		} else {
 			printf("particle type must be 1 2 3 4\n");
+			FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+			fprintf(errorLogFile, "particle type must be 1 2 3 4\n");
+			fclose(errorLogFile);
 			exit(0);
 		}
 		ParticleTypeContainer typeContainer = simulation.types[type - 1];
