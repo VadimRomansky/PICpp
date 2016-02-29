@@ -1460,7 +1460,7 @@ void Simulation::createFiles() {
 	fclose(particleAlphaFile);
 	//outputEverythingFile = fopen("./output/everything.dat","w");
 	//fclose(outputEverythingFile);
-	FILE* logFile = fopen("./output/log.gat", "w");
+	FILE* logFile = fopen("./output/log.dat", "w");
 	fclose(logFile);
 }
 

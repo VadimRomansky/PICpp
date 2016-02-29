@@ -59,6 +59,7 @@ void Simulation::simulate() {
 
 	while (time * plasma_period < maxTime && currentIteration < maxIteration) {
 		printf("iteration number %d time = %15.10g\n", currentIteration, time * plasma_period);
+		printLog("start iteration\n");
 		printf(" dt/plasma_period = %15.10g\n", deltaT);
 
 		if (currentIteration % writeParameter == 0) {
@@ -108,6 +109,7 @@ void Simulation::simulate() {
 
 void Simulation::output() {
 	printf("outputing\n");
+	printLog("outputing\n");
 
 	if (particles.size() > 0) {
 		distributionFileProton = fopen("./output/distribution_protons.dat", "a");
@@ -201,6 +203,7 @@ void Simulation::output() {
 
 void Simulation::outputBackup() {
 	printf("writing backup\n");
+	printLog("writing backup\n");
 
 	backupGeneralFile = fopen("./backup/general.dat", "w");
 	backupEfieldFile = fopen("./backup/Efield.dat", "w");
@@ -217,6 +220,7 @@ void Simulation::outputBackup() {
 
 void Simulation::updateDeltaT() {
 	printf("updating time step\n");
+	printLog("supdating time step\n");
 	//double delta = min2(deltaX, min2(deltaY, deltaZ));
 	double delta = deltaX;
 	deltaT = timeEpsilon * delta / speed_of_light_normalized;
@@ -466,6 +470,7 @@ void Simulation::checkParticlesInBin() {
 
 void Simulation::updateElectroMagneticParameters() {
 	printf("updating flux, density snd dielectric tensor\n");
+	printLog("updating flux, density and dielectric tensor\n");
 	//check particle only in one boundary box
 	if (debugMode) {
 		//checkParticlesInBin();
