@@ -11,6 +11,8 @@ double min3(double a, double b, double c);
 void alertNaNOrInfinity(double value, const char* s);
 void alertNotPositive(double value, const char* s);
 void alertNegative(double value, const char* s);
+void printErrorAndExit(const char* s);
+void printLog(const char* s);
 //int trunc(double value);
 double Bspline(double xcenter, double dx, double xvalue);
 

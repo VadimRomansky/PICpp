@@ -81,6 +81,21 @@ void alertNegative(double value, const char* s) {
 	}
 }
 
+void printErrorAndExit(const char* s){
+	printf("%s", s);
+	printf("\n");
+	FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+	fprintf(errorLogFile, "%s", s);
+	fclose(errorLogFile);
+	exit(0);
+}
+
+void printLog(const char* s){
+	FILE* logFile = fopen("./output/log.dat", "a");
+	fprintf(logFile, "%s", s);
+	fclose(logFile);
+}
+
 /*int trunc(double value){
 	int round = value;
 	if(round > value){

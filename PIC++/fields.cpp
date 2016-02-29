@@ -12,6 +12,7 @@
 
 void Simulation::evaluateFields() {
 	printf("evaluating fields\n");
+	printLog("evaluzting fields\n");
 	//fopen("./output/outputEverythingFile.dat","a");
 
 	if (solverType == IMPLICIT) {

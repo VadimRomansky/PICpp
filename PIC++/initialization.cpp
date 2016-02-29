@@ -291,6 +291,7 @@ void Simulation::rescaleConstants() {
 
 void Simulation::initialize() {
 	printf("initialization\n");
+	printLog("initialization\n");
 
 	deltaX = xsize / (xnumber);
 	deltaY = ysize / (ynumber);
@@ -2015,6 +2016,7 @@ void Simulation::initializeExternalFluxInstability() {
 
 void Simulation::createArrays() {
 	printf("creating arrays\n");
+	printLog("creating arrays\n");
 	xgrid = new double[xnumber + 1];
 	ygrid = new double[ynumber + 1];
 	zgrid = new double[znumber + 1];
@@ -2086,6 +2088,7 @@ void Simulation::createArrays() {
 	}
 
 	printf("creating arrays for divergence\n");
+	printLog("creating arrays for divergence\n");
 
 	divergenceCleanUpMatrix = new std::vector<MatrixElement>***[xnumber];
 	divergenceCleanUpRightPart = new double***[xnumber];
@@ -2248,6 +2251,9 @@ void Simulation::createParticleTypes() {
 
 void Simulation::createFiles() {
 	printf("creating files\n");
+	FILE* logFile = fopen("./output/log.dat","w");
+	fclose(logFile);
+	printLog("creatingFiles\n");
 	protonTraectoryFile = fopen("./output/traectory_proton.dat", "w");
 	fclose(protonTraectoryFile);
 	electronTraectoryFile = fopen("./output/traectory_electron.dat", "w");
@@ -2530,6 +2536,7 @@ void Simulation::checkDissipation(double k, double alfvenV) {
 
 void Simulation::createParticles() {
 	printf("creating particles\n");
+	printLog("creating particles\n");
 	double concentration = density / (massProton + massElectron);
 	int n = 0;
 	for (int i = 0; i < xnumber; ++i) {
