@@ -7,6 +7,6 @@
 0 0 1E-4                  magneticField
 1000000000              max iterations
 1E15                   max time
-100                 electrons per bin
+50                 electrons per bin
 0                  positrons per bin
 0                  alpha per bin (protons - electrons - positron - 2*alpha)
