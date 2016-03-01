@@ -22,17 +22,17 @@ for i=1:Np,
    Pp(i,2) = distribution_protons(i + b*Np,1);
    Pp(i,3) = distribution_protons(i + c*Np,1);
    
-   Fp(i,1) = distribution_protons(i + a*Np, 2);
-   Fp(i,2) = distribution_protons(i + b*Np, 2);
-   Fp(i,3) = distribution_protons(i + c*Np, 2);
+   Fp(i,1) = distribution_protons(i + a*Np, 2)*Pp(i,1)*Pp(i,1);
+   Fp(i,2) = distribution_protons(i + b*Np, 2)*Pp(i,2)*Pp(i,2);
+   Fp(i,3) = distribution_protons(i + c*Np, 2)*Pp(i,3)*Pp(i,3);
    
    Pe(i,1) = distribution_electrons(i + a*Np,1);
    Pe(i,2) = distribution_electrons(i + b*Np,1);
    Pe(i,3) = distribution_electrons(i + c*Np,1);
    
-   Fe(i,1) = distribution_electrons(i + a*Np, 2);
-   Fe(i,2) = distribution_electrons(i + b*Np, 2);
-   Fe(i,3) = distribution_electrons(i + c*Np, 2);
+   Fe(i,1) = distribution_electrons(i + a*Np, 2)*Pe(i,1)*Pe(i,1);
+   Fe(i,2) = distribution_electrons(i + b*Np, 2)*Pe(i,2)*Pe(i,2);
+   Fe(i,3) = distribution_electrons(i + c*Np, 2)*Pe(i,3)*Pe(i,3);
 end;
 
 figure(1);

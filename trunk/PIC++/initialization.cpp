@@ -2542,28 +2542,29 @@ void Simulation::createParticles() {
 	for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
-				for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
-					double weight = (types[typeCounter].concentration / types[typeCounter].particlesPerBin) * volumeB(i, j, k);
-					double x = xgrid[i] + 0.0001 * deltaX;
-					double y = ygrid[j] + 0.0001 * deltaY;
-					double z = zgrid[k] + 0.0001 * deltaZ;
-					//y = ygrid[0];
-					//z = zgrid[0];
-					double deltaXParticles = types[typeCounter].particesDeltaX;
-					double deltaYParticles = types[typeCounter].particesDeltaY;
-					double deltaZParticles = types[typeCounter].particesDeltaZ;
-					for (int l = 0; l < types[typeCounter].particlesPerBin; ++l) {
-						ParticleTypes type = types[typeCounter].type;
-						Particle* particle = createParticle(n, i, j, k, weight, type, types[typeCounter], temperature);
-						n++;
-						particle->coordinates.x = x + deltaXParticles * l;
-						particle->coordinates.y = y + deltaYParticles * l;
-						particle->coordinates.z = z + deltaZParticles * l;
-						//particle->addVelocity(V0, speed_of_light_normalized);
-						particles.push_back(particle);
-						particlesNumber++;
-						if (particlesNumber % 1000 == 0) {
-							printf("create particle number %d\n", particlesNumber);
+				int maxParticlesPerBin = types[0].particlesPerBin;
+				double x = xgrid[i] + 0.0001 * deltaX;
+				double y = ygrid[j] + 0.0001 * deltaY;
+				double z = zgrid[k] + 0.0001 * deltaZ;
+				for(int l = 0; l < maxParticlesPerBin; ++l){
+					for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
+						double weight = (types[typeCounter].concentration / types[typeCounter].particlesPerBin) * volumeB(i, j, k);
+						double deltaXParticles = types[typeCounter].particesDeltaX;
+						double deltaYParticles = types[typeCounter].particesDeltaY;
+						double deltaZParticles = types[typeCounter].particesDeltaZ;
+						if( l < types[typeCounter].particlesPerBin) {
+							ParticleTypes type = types[typeCounter].type;
+							Particle* particle = createParticle(n, i, j, k, weight, type, types[typeCounter], temperature);
+							n++;
+							particle->coordinates.x = x + deltaXParticles * l;
+							particle->coordinates.y = y + deltaYParticles * l;
+							particle->coordinates.z = z + deltaZParticles * l;
+							//particle->addVelocity(V0, speed_of_light_normalized);
+							particles.push_back(particle);
+							particlesNumber++;
+							if (particlesNumber % 1000 == 0) {
+								printf("create particle number %d\n", particlesNumber);
+							}
 						}
 					}
 				}

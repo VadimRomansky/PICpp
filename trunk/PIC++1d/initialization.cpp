@@ -1696,22 +1696,27 @@ void Simulation::checkDissipation(double k, double alfvenV) {
 
 void Simulation::createParticles() {
 	printf("creating particles\n");
+	printLog("creating particles\n");
+	double concentration = density / (massProton + massElectron);
 	int n = 0;
 	for (int i = 0; i < xnumber; ++i) {
-		for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
-			double weight = (types[typeCounter].concentration / types[typeCounter].particlesPerBin) * volumeB(i);
-			double x = xgrid[i] + 0.0001 * deltaX;
-			double deltaXParticles = types[typeCounter].particesDeltaX;
-			for (int l = 0; l < types[typeCounter].particlesPerBin; ++l) {
-				ParticleTypes type = types[typeCounter].type;
-				Particle* particle = createParticle(n, i, weight, type, types[typeCounter], temperature);
-				n++;
-				particle->x = x + deltaXParticles * l;
-				//particle->addVelocity(V0, speed_of_light_normalized);
-				particles.push_back(particle);
-				particlesNumber++;
-				if (particlesNumber % 1000 == 0) {
-					printf("create particle number %d\n", particlesNumber);
+		int maxParticlesPerBin = types[0].particlesPerBin;
+		double x = xgrid[i] + 0.0001 * deltaX;
+		for(int l = 0; l < maxParticlesPerBin; ++l){
+			for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
+				double weight = (types[typeCounter].concentration / types[typeCounter].particlesPerBin) * volumeB(i);
+				double deltaXParticles = types[typeCounter].particesDeltaX;
+				if( l < types[typeCounter].particlesPerBin) {
+					ParticleTypes type = types[typeCounter].type;
+					Particle* particle = createParticle(n, i, weight, type, types[typeCounter], temperature);
+					n++;
+					particle->x = x + deltaXParticles * l;
+					//particle->addVelocity(V0, speed_of_light_normalized);
+					particles.push_back(particle);
+					particlesNumber++;
+					if (particlesNumber % 1000 == 0) {
+						printf("create particle number %d\n", particlesNumber);
+					}
 				}
 			}
 		}
