@@ -1,5 +1,5 @@
-1000 1 1                 grid numbers
-1E11 1E8 1E8         gridsizes
+100 1 1                 grid numbers
+1E10 1E8 1E8         gridsizes
 1E0                    temperature
 1.67E-28               density
 -3E9 0 0                  velocity
@@ -7,6 +7,6 @@
 0 0 1E-4                  magneticField
 1000000000              max iterations
 1E15                   max time
-50                 electrons per bin
+25                 electrons per bin
 0                  positrons per bin
 0                  alpha per bin (protons - electrons - positron - 2*alpha)

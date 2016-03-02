@@ -203,6 +203,7 @@ void Simulation::moveParticle(Particle* particle) {
 			}
 		}
 		correctParticlePosition(tempParticle);
+		checkParticleInBox(tempParticle);
 
 		E = correlationTempEfield(tempParticle) * fieldScale;
 		B = correlationBfield(tempParticle) * fieldScale;
