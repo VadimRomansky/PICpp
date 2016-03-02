@@ -331,6 +331,9 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		printf("particle.x < 0\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "particle.x = %15.10g < 0\n", particle.coordinates.x);
+		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
+		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.velocity(speed_of_light_normalized).norm()/speed_of_light_normalized));
 		fclose(errorLogFile);
 		exit(0);
 	}
@@ -338,6 +341,9 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		printf("particle.x > xsize\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "particle.x = %15.10g > %15.10g\n", particle.coordinates.x, xgrid[xnumber]);
+		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
+		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.velocity(speed_of_light_normalized).norm()/speed_of_light_normalized));
 		fclose(errorLogFile);
 		exit(0);
 	}
@@ -346,6 +352,9 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		printf("particle.y < 0\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "particle.y = %15.10g < 0\n", particle.coordinates.y);
+		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
+		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.velocity(speed_of_light_normalized).norm()/speed_of_light_normalized));
 		fclose(errorLogFile);
 		exit(0);
 	}
@@ -353,6 +362,9 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		printf("particle.y > ysize\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "particle.y = %15.10g > %15.10g\n", particle.coordinates.y, ygrid[ynumber]);
+		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
+		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.velocity(speed_of_light_normalized).norm()/speed_of_light_normalized));
 		fclose(errorLogFile);
 		exit(0);
 	}
@@ -361,6 +373,9 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		printf("particle.z < 0\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "particle.z = %15.10g < 0\n", particle.coordinates.z);
+		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
+		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.velocity(speed_of_light_normalized).norm()/speed_of_light_normalized));
 		fclose(errorLogFile);
 		exit(0);
 	}
@@ -368,6 +383,9 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		printf("particle.z > zsize\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "particle.z = %15.10g > %15.10g\n", particle.coordinates.z, zgrid[znumber]);
+		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
+		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.velocity(speed_of_light_normalized).norm()/speed_of_light_normalized));
 		fclose(errorLogFile);
 		exit(0);
 	}
