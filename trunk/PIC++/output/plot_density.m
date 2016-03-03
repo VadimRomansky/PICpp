@@ -5,14 +5,14 @@ load Yfile.dat;
 load Zfile.dat;
 load divergence_error.dat;
 
-Nx = size(Xfile, 1);
-Ny = size(Yfile, 1);
-Nz = size(Zfile, 1);
+Nx = size(Xfile, 1)-1;
+Ny = size(Yfile, 1)-1;
+Nz = size(Zfile, 1)-1;
 
-N = Nx*Ny*Nz;
-Nt = size(concentrations, 1)/N;
+N = (Nx)*(Ny)*(Nz);
+Nt = size(concentrations, 1)/N - 1;
 
-ynumber = 1;
+ynumber =1;
 znumber = 1;
 
 a = 0;
