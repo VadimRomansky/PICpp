@@ -19,15 +19,26 @@ void Simulation::cleanupDivergence() {
 		}
 	}
 	fullDensity /= (xsize*ysize*zsize);
+	printf("full density = %22.15g\n", fullDensity);
+	printf("density[0][0][0] = %22.15g\n", chargeDensity[0][0][0]);
+
+
+	for (int i = 0; i < xnumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				chargeDensity[i][j][k] -= fullDensity;
+			}
+		}
+	}
 
 	if(boundaryConditionType == PERIODIC){
-		for (int i = 0; i < xnumber; ++i) {
+		/*for (int i = 0; i < xnumber; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
 					chargeDensity[i][j][k] -= fullDensity;
 				}
 			}
-		}
+		}*/
 		/*for (int i = 0; i < xnumber; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
@@ -37,21 +48,14 @@ void Simulation::cleanupDivergence() {
 		}
 		fullDensity /= (xsize*ysize*zsize);*/
 	} else {
-		double Elinear = -4*pi*fullDensity*xsize + newEfield[xnumber][0][0].x - newEfield[0][0][0].x;
+		//double Elinear = -4*pi*fullDensity*xsize + newEfield[xnumber][0][0].x - newEfield[0][0][0].x;
+		double Elinear = 0;
 		for(int i = 0; i < xnumber + 1; ++i){
 			for(int j = 0; j< ynumber + 1; ++j){
 				for(int k = 0; k < znumber + 1; ++k){
 					double factor = (xgrid[xnumber] - xgrid[i])/xsize;
 					newEfield[i][j][k].x = newEfield[i][j][k].x + Elinear*factor;
 				}
-			}
-		}
-	}
-
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				chargeDensity[i][j][k] -= fullDensity;
 			}
 		}
 	}
