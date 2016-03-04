@@ -54,7 +54,7 @@ void Simulation::cleanupDivergence() {
 			for(int j = 0; j< ynumber + 1; ++j){
 				for(int k = 0; k < znumber + 1; ++k){
 					double factor = (xgrid[xnumber] - xgrid[i])/xsize;
-					newEfield[i][j][k].x = newEfield[i][j][k].x + Elinear*factor;
+					newEfield[i][j][k].x = newEfield[i][j][k].x + Elinear*(factor - 1.0);
 				}
 			}
 		}
