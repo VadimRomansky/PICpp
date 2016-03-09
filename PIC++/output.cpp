@@ -125,8 +125,8 @@ void outputGrid(FILE* outFile, double* grid, int number, double scale) {
 	}
 }
 
-void outputFields(FILE* outEfile, FILE* outBfile, Vector3d*** Efield, Vector3d*** Bfield, int xnumber, int ynumber, int znumber, double plasma_preiod, double gyroradius, double fieldScale) {
-	double scale = 1.0 / (plasma_preiod * gyroradius);
+void outputFields(FILE* outEfile, FILE* outBfile, Vector3d*** Efield, Vector3d*** Bfield, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius, double fieldScale) {
+	double scale = 1.0 / (plasma_period * gyroradius);
 	for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
