@@ -406,17 +406,19 @@ void Simulation::createSuperConductorLeftEquation(int j, int k) {
 }
 
 void Simulation::createFreeRightEquation(int j, int k) {
-	//Vector3d rightPart = Vector3d(0, 0, 0);
 	Vector3d rightPart = E0;
+	//Vector3d rightPart = Efield[xnumber - 1][j][k];
+	Vector3d rightPart2 = Bfield[xnumber - 1][j][k];
+
+	rightPart = rightPart + (evaluateRotB(xnumber - 1, j, k) * speed_of_light_normalized - (electricFlux[xnumber - 1][j][k] * 4 * pi / fieldScale)) * (theta * deltaT) - (evaluateGradDensity(xnumber - 1, j, k) * speed_of_light_normalized_sqr * theta * theta * deltaT * deltaT * 4 * pi / fieldScale);
+
+	//createFreeRightEquationX(j, k, rightPart);
+	//createFreeRightEquationY(j, k, rightPart);
+	//createFreeRightEquationZ(j, k, rightPart);
 
 	maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(1.0, xnumber - 1, j, k, 0));
 	maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(1.0, xnumber - 1, j, k, 1));
 	maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(1.0, xnumber - 1, j, k, 2));
-
-	//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(-1.0, xnumber - 2, j, k, 0));
-	//maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(-1.0, xnumber - 2, j, k, 1));
-	//maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(-1.0, xnumber - 2, j, k, 2));
-
 
 	alertNaNOrInfinity(rightPart.x, "right part x = NaN");
 	alertNaNOrInfinity(rightPart.y, "right part y = NaN");
@@ -425,6 +427,421 @@ void Simulation::createFreeRightEquation(int j, int k) {
 	maxwellEquationRightPart[xnumber - 1][j][k][0] = rightPart.x;
 	maxwellEquationRightPart[xnumber - 1][j][k][1] = rightPart.y;
 	maxwellEquationRightPart[xnumber - 1][j][k][2] = rightPart.z;
+}
+
+void Simulation::createFreeRightEquationX(int j, int k, Vector3d& rightPart){
+	Vector3d rightField = E0;
+	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT);
+	double element = 1.0 - dielectricTensor[xnumber - 1][j][k].matrix[0][0] + c_theta_deltaT2 * ((2.0 - 2 * dielectricTensor[xnumber - 1][j][k].matrix[0][0]) / deltaX2);
+	if (ynumber > 1) {
+		element += c_theta_deltaT2 * 2.0 / deltaY2;
+	}
+	if (znumber > 1) {
+		element += c_theta_deltaT2 * 2.0 / deltaZ2;
+	}
+
+	maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, xnumber - 1, j, k, 0));
+
+	element = -dielectricTensor[xnumber - 1][j][k].matrix[0][1] - c_theta_deltaT2 * 2 * dielectricTensor[xnumber - 1][j][k].matrix[0][1] / deltaX2;
+	maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, xnumber - 1, j, k, 1));
+
+	element = -dielectricTensor[xnumber - 1][j][k].matrix[0][2] - c_theta_deltaT2 * 2 * dielectricTensor[xnumber - 1][j][k].matrix[0][2] / deltaX2;
+	maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, xnumber - 1, j, k, 2));
+
+	int prevI = xnumber - 2;
+
+	int nextJ = j + 1;
+	if (nextJ >= ynumber) {
+		nextJ = 0;
+	}
+	int prevJ = j - 1;
+	if (prevJ < 0) {
+		prevJ = ynumber - 1;
+	}
+
+	int nextK = k + 1;
+	if (nextK >= znumber) {
+		nextK = 0;
+	}
+	int prevK = k - 1;
+	if (prevK < 0) {
+		prevK = znumber - 1;
+	}
+
+	element = c_theta_deltaT2 * (-1.0 + dielectricTensor[xnumber][j][k].matrix[0][0]) / deltaX2;
+	rightPart.x -= element*E0.x;
+	//maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
+	element = c_theta_deltaT2 * dielectricTensor[xnumber][j][k].matrix[0][1] / deltaX2;
+	rightPart.x -= element*E0.y;
+	//maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 1));
+	element = c_theta_deltaT2 * dielectricTensor[xnumber][j][k].matrix[0][2] / deltaX2;
+	rightPart.x -= element*E0.z;
+	//maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 2));
+
+	element = c_theta_deltaT2 * (-1.0 + dielectricTensor[prevI][j][k].matrix[0][0]) / deltaX2;
+	maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
+	element = c_theta_deltaT2 * dielectricTensor[prevI][j][k].matrix[0][1] / deltaX2;
+	maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, j, k, 1));
+	element = c_theta_deltaT2 * dielectricTensor[prevI][j][k].matrix[0][2] / deltaX2;
+	maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, j, k, 2));
+
+	if (ynumber > 1) {
+		element = -c_theta_deltaT2 / deltaY2;
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, xnumber - 1, nextJ, k, 0));
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, xnumber - 1, prevJ, k, 0));
+	}
+
+	if (znumber > 1) {
+		element = -c_theta_deltaT2 / deltaZ2;
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, xnumber - 1, j, nextK, 0));
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, xnumber - 1, j, prevK, 0));
+	}
+
+	if (ynumber > 1) {
+		element = c_theta_deltaT2 * dielectricTensor[xnumber][nextJ][k].matrix[1][0] / (4 * deltaX * deltaY);
+		rightPart.x -= element*E0.x;
+		//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, nextI, nextJ, k, 0));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber][nextJ][k].matrix[1][1] / (4 * deltaX * deltaY);
+		rightPart.x -= element*E0.y;
+		//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, nextI, nextJ, k, 1));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber][nextJ][k].matrix[1][2] / (4 * deltaX * deltaY);
+		rightPart.x -= element*E0.z;
+		//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, nextI, nextJ, k, 2));
+
+		element = c_theta_deltaT2 * dielectricTensor[prevI][prevJ][k].matrix[1][0] / (4 * deltaX * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, prevJ, k, 0));
+		element = c_theta_deltaT2 * dielectricTensor[prevI][prevJ][k].matrix[1][1] / (4 * deltaX * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, prevJ, k, 1));
+		element = c_theta_deltaT2 * dielectricTensor[prevI][prevJ][k].matrix[1][2] / (4 * deltaX * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, prevJ, k, 2));
+
+		element = -c_theta_deltaT2 * dielectricTensor[prevI][nextJ][k].matrix[1][0] / (4 * deltaX * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, nextJ, k, 0));
+		element = -c_theta_deltaT2 * dielectricTensor[prevI][nextJ][k].matrix[1][1] / (4 * deltaX * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, nextJ, k, 1));
+		element = -c_theta_deltaT2 * dielectricTensor[prevI][nextJ][k].matrix[1][2] / (4 * deltaX * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, nextJ, k, 2));
+
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber][prevJ][k].matrix[1][0] / (4 * deltaX * deltaY);
+		rightPart.x -= element*E0.x;
+		//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, nextI, prevJ, k, 0));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber][prevJ][k].matrix[1][1] / (4 * deltaX * deltaY);
+		rightPart.x -= element*E0.y;
+		//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, nextI, prevJ, k, 1));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber][prevJ][k].matrix[1][2] / (4 * deltaX * deltaY);
+		rightPart.x -= element*E0.z;
+		//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, nextI, prevJ, k, 2));
+	}
+
+	if (znumber > 1) {
+		element = c_theta_deltaT2 * dielectricTensor[xnumber][j][nextK].matrix[2][0] / (4 * deltaX * deltaZ);
+		rightPart.x -= element*E0.x;
+		//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, nextI, j, nextK, 0));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber][j][nextK].matrix[2][1] / (4 * deltaX * deltaZ);
+		rightPart.x -= element*E0.y;
+		//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, nextI, j, nextK, 1));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber][j][nextK].matrix[2][2] / (4 * deltaX * deltaZ);
+		rightPart.x -= element*E0.z;
+		//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, nextI, j, nextK, 2));
+
+		element = c_theta_deltaT2 * dielectricTensor[prevI][j][prevK].matrix[2][0] / (4 * deltaX * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, j, prevK, 0));
+		element = c_theta_deltaT2 * dielectricTensor[prevI][j][prevK].matrix[2][1] / (4 * deltaX * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, j, prevK, 1));
+		element = c_theta_deltaT2 * dielectricTensor[prevI][j][prevK].matrix[2][2] / (4 * deltaX * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, j, prevK, 2));
+
+		element = -c_theta_deltaT2 * dielectricTensor[prevI][j][nextK].matrix[2][0] / (4 * deltaX * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, j, nextK, 0));
+		element = -c_theta_deltaT2 * dielectricTensor[prevI][j][nextK].matrix[2][1] / (4 * deltaX * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, j, nextK, 1));
+		element = -c_theta_deltaT2 * dielectricTensor[prevI][j][nextK].matrix[2][2] / (4 * deltaX * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, prevI, j, nextK, 2));
+
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber][j][prevK].matrix[2][0] / (4 * deltaX * deltaZ);
+		rightPart.x -= element*E0.x;
+		//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, nextI, j, prevK, 0));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber][j][prevK].matrix[2][1] / (4 * deltaX * deltaZ);
+		rightPart.x -= element*E0.y;
+		//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, nextI, j, prevK, 1));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber][j][prevK].matrix[2][2] / (4 * deltaX * deltaZ);
+		rightPart.x -= element*E0.z;
+		//maxwellEquationMatrix[xnumber - 1][j][k][0].push_back(MatrixElement(element, nextI, j, prevK, 2));
+	}
+}
+
+void Simulation::createFreeRightEquationY(int j, int k, Vector3d& rightPart){
+	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT);
+	double element = 1.0 - dielectricTensor[xnumber-1][j][k].matrix[1][1] + c_theta_deltaT2 * (2.0 / deltaX2);
+	if (ynumber > 1) {
+		element += c_theta_deltaT2 * (2.0 - 2 * dielectricTensor[xnumber-1][j][k].matrix[1][1]) / deltaY2;
+	}
+	if (znumber > 1) {
+		element += c_theta_deltaT2 * 2.0 / deltaZ2;
+	}
+	maxwellEquationMatrix[xnumber-1][j][k][1].push_back(MatrixElement(element, xnumber-1, j, k, 1));
+
+	element = -dielectricTensor[xnumber-1][j][k].matrix[1][0];
+	if (ynumber > 1) {
+		element -= c_theta_deltaT2 * 2 * dielectricTensor[xnumber-1][j][k].matrix[1][0] / deltaY2;
+	}
+	maxwellEquationMatrix[xnumber-1][j][k][1].push_back(MatrixElement(element, xnumber-1, j, k, 0));
+
+	element = -dielectricTensor[xnumber-1][j][k].matrix[1][2];
+	if (ynumber > 1) {
+		element -= c_theta_deltaT2 * 2 * dielectricTensor[xnumber-1][j][k].matrix[1][2] / deltaY2;
+	}
+	maxwellEquationMatrix[xnumber-1][j][k][1].push_back(MatrixElement(element, xnumber-1, j, k, 2));
+
+	int prevI = xnumber - 2;
+
+	int nextJ = j + 1;
+	if (nextJ >= ynumber) {
+		nextJ = 0;
+	}
+	int prevJ = j - 1;
+	if (prevJ < 0) {
+		prevJ = ynumber - 1;
+	}
+
+	int nextK = k + 1;
+	if (nextK >= znumber) {
+		nextK = 0;
+	}
+	int prevK = k - 1;
+	if (prevK < 0) {
+		prevK = znumber - 1;
+	}
+
+	if (ynumber > 1) {
+		element = c_theta_deltaT2 * (-1.0 + dielectricTensor[xnumber - 1][nextJ][k].matrix[1][1]) / deltaY2;
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, nextJ, k, 1));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][k].matrix[1][0] / deltaY2;
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, nextJ, k, 0));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][k].matrix[1][2] / deltaY2;
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, nextJ, k, 2));
+
+		element = c_theta_deltaT2 * (-1.0 + dielectricTensor[xnumber - 1][prevJ][k].matrix[1][1]) / deltaY2;
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, prevJ, k, 1));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][k].matrix[1][0] / deltaY2;
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, prevJ, k, 0));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][k].matrix[1][2] / deltaY2;
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, prevJ, k, 2));
+	}
+
+	element = -c_theta_deltaT2 / deltaX2;
+	//maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(element, nextI, j, k, 1));
+	rightPart.y -= element*E0.y;
+	maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, prevI, j, k, 1));
+
+	if (znumber > 1) {
+		element = -c_theta_deltaT2 / deltaZ2;
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, j, nextK, 1));
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, j, prevK, 1));
+	}
+
+	if (ynumber > 1) {
+		element = c_theta_deltaT2 * dielectricTensor[xnumber][nextJ][k].matrix[0][0] / (4 * deltaX * deltaY);
+		rightPart.y -= element*E0.x;
+		//maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(element, nextI, nextJ, k, 0));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber][nextJ][k].matrix[0][1] / (4 * deltaX * deltaY);
+		rightPart.y -= element*E0.y;
+		//maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(element, nextI, nextJ, k, 1));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber][nextJ][k].matrix[0][2] / (4 * deltaX * deltaY);
+		rightPart.y -= element*E0.z;
+		//maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(element, nextI, nextJ, k, 2));
+
+		element = c_theta_deltaT2 * dielectricTensor[prevI][prevJ][k].matrix[0][0] / (4 * deltaX * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, prevI, prevJ, k, 0));
+		element = c_theta_deltaT2 * dielectricTensor[prevI][prevJ][k].matrix[0][1] / (4 * deltaX * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, prevI, prevJ, k, 1));
+		element = c_theta_deltaT2 * dielectricTensor[prevI][prevJ][k].matrix[0][2] / (4 * deltaX * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, prevI, prevJ, k, 2));
+
+		element = -c_theta_deltaT2 * dielectricTensor[prevI][nextJ][k].matrix[0][0] / (4 * deltaX * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, prevI, nextJ, k, 0));
+		element = -c_theta_deltaT2 * dielectricTensor[prevI][nextJ][k].matrix[0][1] / (4 * deltaX * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, prevI, nextJ, k, 1));
+		element = -c_theta_deltaT2 * dielectricTensor[prevI][nextJ][k].matrix[0][2] / (4 * deltaX * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, prevI, nextJ, k, 2));
+
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber][prevJ][k].matrix[0][0] / (4 * deltaX * deltaY);
+		rightPart.y -= element*E0.x;
+		//maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(element, nextI, prevJ, k, 0));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber][prevJ][k].matrix[0][1] / (4 * deltaX * deltaY);
+		rightPart.y -= element*E0.y;
+		//maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(element, nextI, prevJ, k, 1));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber][prevJ][k].matrix[0][2] / (4 * deltaX * deltaY);
+		rightPart.y -= element*E0.z;
+		//maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(element, nextI, prevJ, k, 2));
+	}
+
+	if ((znumber > 1) && (ynumber > 1)) {
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][nextK].matrix[2][0] / (4 * deltaY * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, nextJ, nextK, 0));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][nextK].matrix[2][1] / (4 * deltaY * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, nextJ, nextK, 1));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][nextK].matrix[2][2] / (4 * deltaY * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, nextJ, nextK, 2));
+
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][prevK].matrix[2][0] / (4 * deltaY * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, prevJ, prevK, 0));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][prevK].matrix[2][1] / (4 * deltaY * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, prevJ, prevK, 1));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][prevK].matrix[2][2] / (4 * deltaY * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, prevJ, prevK, 2));
+
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][nextK].matrix[2][0] / (4 * deltaY * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, prevJ, nextK, 0));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][nextK].matrix[2][1] / (4 * deltaY * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, prevJ, nextK, 1));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][nextK].matrix[2][2] / (4 * deltaY * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, prevJ, nextK, 2));
+
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][prevK].matrix[2][0] / (4 * deltaY * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, nextJ, prevK, 0));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][prevK].matrix[2][1] / (4 * deltaY * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, nextJ, prevK, 1));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][prevK].matrix[2][2] / (4 * deltaY * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][1].push_back(MatrixElement(element, xnumber - 1, nextJ, prevK, 2));
+	}
+}
+
+void Simulation::createFreeRightEquationZ(int j, int k, Vector3d& rightPart){
+	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT);
+	double element = 1.0 - dielectricTensor[xnumber - 1][j][k].matrix[2][2] + c_theta_deltaT2 * (2.0 / deltaX2);
+	if (ynumber > 1) {
+		element += c_theta_deltaT2 * 2.0 / deltaY2;
+	}
+	if (znumber > 1) {
+		element += c_theta_deltaT2 * (2.0 - 2 * dielectricTensor[xnumber - 1][j][k].matrix[2][2]) / deltaZ2;
+	}
+	maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, j, k, 2));
+
+	element = -dielectricTensor[xnumber - 1][j][k].matrix[2][0];
+	if (znumber > 1) {
+		element -= c_theta_deltaT2 * 2 * dielectricTensor[xnumber - 1][j][k].matrix[2][0] / deltaZ2;
+	}
+	maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, j, k, 0));
+
+	element = -dielectricTensor[xnumber - 1][j][k].matrix[2][1];
+	if (znumber > 1) {
+		element -= c_theta_deltaT2 * 2 * dielectricTensor[xnumber - 1][j][k].matrix[2][1] / deltaZ2;
+	}
+	maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, j, k, 1));
+
+	int prevI = xnumber - 2;
+
+	int nextJ = j + 1;
+	if (nextJ >= ynumber) {
+		nextJ = 0;
+	}
+	int prevJ = j - 1;
+	if (prevJ < 0) {
+		prevJ = ynumber - 1;
+	}
+
+	int nextK = k + 1;
+	if (nextK >= znumber) {
+		nextK = 0;
+	}
+	int prevK = k - 1;
+	if (prevK < 0) {
+		prevK = znumber - 1;
+	}
+
+	if (znumber > 1) {
+		element = c_theta_deltaT2 * (-1.0 + dielectricTensor[xnumber - 1][j][nextK].matrix[2][2]) / deltaZ2;
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, j, nextK, 2));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][j][nextK].matrix[2][1] / deltaZ2;
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, j, nextK, 1));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][j][nextK].matrix[2][0] / deltaZ2;
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, j, nextK, 0));
+
+		element = c_theta_deltaT2 * (-1.0 + dielectricTensor[xnumber - 1][j][prevK].matrix[2][2]) / deltaZ2;
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, j, prevK, 2));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][j][prevK].matrix[2][1] / deltaZ2;
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, j, prevK, 1));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][j][prevK].matrix[2][0] / deltaZ2;
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, j, prevK, 0));
+	}
+
+	if (ynumber > 1) {
+		element = -c_theta_deltaT2 / deltaY2;
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, nextJ, k, 2));
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, prevJ, k, 2));
+	}
+
+	element = -c_theta_deltaT2 / deltaX2;
+	rightPart.z -= element*E0.z;
+	//maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, nextI, j, k, 2));
+	maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, prevI, j, k, 2));
+
+	if ((ynumber > 1) && (znumber > 1)) {
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][nextK].matrix[1][0] / (4 * deltaZ * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, nextJ, nextK, 0));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][nextK].matrix[1][1] / (4 * deltaZ * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, nextJ, nextK, 1));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][nextK].matrix[1][2] / (4 * deltaZ * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, nextJ, nextK, 2));
+
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][prevK].matrix[1][0] / (4 * deltaZ * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, prevJ, prevK, 0));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][prevK].matrix[1][1] / (4 * deltaZ * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, prevJ, prevK, 1));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][prevK].matrix[1][2] / (4 * deltaZ * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, prevJ, prevK, 2));
+
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][nextK].matrix[1][0] / (4 * deltaZ * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, prevJ, nextK, 0));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][nextK].matrix[1][1] / (4 * deltaZ * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, prevJ, nextK, 1));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber - 1][prevJ][nextK].matrix[1][2] / (4 * deltaZ * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, prevJ, nextK, 2));
+
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][prevK].matrix[1][0] / (4 * deltaZ * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, nextJ, prevK, 0));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][prevK].matrix[1][1] / (4 * deltaZ * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, nextJ, prevK, 1));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber - 1][nextJ][prevK].matrix[1][2] / (4 * deltaZ * deltaY);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, xnumber - 1, nextJ, prevK, 2));
+	}
+
+	if (znumber > 1) {
+		element = c_theta_deltaT2 * dielectricTensor[xnumber][j][nextK].matrix[0][0] / (4 * deltaX * deltaZ);
+		rightPart.z -= element*E0.x;
+		//maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, nextI, j, nextK, 0));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber][j][nextK].matrix[0][1] / (4 * deltaX * deltaZ);
+		rightPart.z -= element*E0.y;
+		//maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, nextI, j, nextK, 1));
+		element = c_theta_deltaT2 * dielectricTensor[xnumber][j][nextK].matrix[0][2] / (4 * deltaX * deltaZ);
+		rightPart.z -= element*E0.z;
+		//maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, nextI, j, nextK, 2));
+
+		element = c_theta_deltaT2 * dielectricTensor[prevI][j][prevK].matrix[0][0] / (4 * deltaX * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, prevI, j, prevK, 0));
+		element = c_theta_deltaT2 * dielectricTensor[prevI][j][prevK].matrix[0][1] / (4 * deltaX * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, prevI, j, prevK, 1));
+		element = c_theta_deltaT2 * dielectricTensor[prevI][j][prevK].matrix[0][2] / (4 * deltaX * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, prevI, j, prevK, 2));
+
+		element = -c_theta_deltaT2 * dielectricTensor[prevI][j][nextK].matrix[0][0] / (4 * deltaX * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, prevI, j, nextK, 0));
+		element = -c_theta_deltaT2 * dielectricTensor[prevI][j][nextK].matrix[0][1] / (4 * deltaX * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, prevI, j, nextK, 1));
+		element = -c_theta_deltaT2 * dielectricTensor[prevI][j][nextK].matrix[0][2] / (4 * deltaX * deltaZ);
+		maxwellEquationMatrix[xnumber - 1][j][k][2].push_back(MatrixElement(element, prevI, j, nextK, 2));
+
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber][j][prevK].matrix[0][0] / (4 * deltaX * deltaZ);
+		rightPart.z -= element*E0.x;
+		//maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, nextI, j, prevK, 0));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber][j][prevK].matrix[0][1] / (4 * deltaX * deltaZ);
+		rightPart.z -= element*E0.y;
+		//maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, nextI, j, prevK, 1));
+		element = -c_theta_deltaT2 * dielectricTensor[xnumber][j][prevK].matrix[0][2] / (4 * deltaX * deltaZ);
+		rightPart.z -= element*E0.z;
+		//maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, nextI, j, prevK, 2));
+	}
 }
 
 void Simulation::createInternalEquationX(int i, int j, int k) {
@@ -538,9 +955,9 @@ void Simulation::createInternalEquationX(int i, int j, int k) {
 
 		element = c_theta_deltaT2 * dielectricTensor[prevI][j][prevK].matrix[2][0] / (4 * deltaX * deltaZ);
 		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, prevK, 0));
-		element = c_theta_deltaT2 * dielectricTensor[nextI][j][nextK].matrix[2][1] / (4 * deltaX * deltaZ);
+		element = c_theta_deltaT2 * dielectricTensor[prevI][j][prevK].matrix[2][1] / (4 * deltaX * deltaZ);
 		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, prevK, 1));
-		element = c_theta_deltaT2 * dielectricTensor[nextI][j][prevK].matrix[2][2] / (4 * deltaX * deltaZ);
+		element = c_theta_deltaT2 * dielectricTensor[prevI][j][prevK].matrix[2][2] / (4 * deltaX * deltaZ);
 		maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, prevK, 2));
 
 		element = -c_theta_deltaT2 * dielectricTensor[prevI][j][nextK].matrix[2][0] / (4 * deltaX * deltaZ);

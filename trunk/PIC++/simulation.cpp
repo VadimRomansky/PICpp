@@ -220,10 +220,11 @@ void Simulation::outputBackup() {
 
 void Simulation::updateDeltaT() {
 	printf("updating time step\n");
-	printLog("supdating time step\n");
+	printLog("updating time step\n");
 	//double delta = min2(deltaX, min2(deltaY, deltaZ));
 	double delta = deltaX;
 	deltaT = timeEpsilon * delta / speed_of_light_normalized;
+	printLog("dx/c\n");
 	if (particles.size() > 0) {
 		double B = B0.norm();
 		double E = E0.norm();
@@ -259,6 +260,7 @@ void Simulation::updateDeltaT() {
 				}
 			}
 		}
+		printLog("evaluatd E and minFlux\n");
 
 		/*if(E > 0 && minFlux > 0){
 			double maxResistance = 0;
@@ -293,6 +295,8 @@ void Simulation::updateDeltaT() {
 
 		double thermalMomentum = sqrt(massElectron * kBoltzman_normalized * temperature) + massElectron * V0.norm();
 
+		printLog("evaluzted omega\n");
+
 		if (B > 0) {
 			deltaT = min2(deltaT, timeEpsilon * massElectron * speed_of_light_normalized / (electron_charge_normalized * B));
 		}
@@ -309,6 +313,7 @@ void Simulation::updateDeltaT() {
 		/*if(minDeltaT > deltaT){
 			printf("deltaT < dx/Vthermal\n");
 		}*/
+		printLog("end updating time step\n");
 	}
 }
 
