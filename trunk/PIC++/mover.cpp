@@ -216,6 +216,8 @@ void Simulation::moveParticle(Particle* particle) {
 
 	}
 
+	Vector3d prevCoordinates = particle->coordinates;
+
 	particle->momentum = tempParticle.momentum;
 	//particle->momentum.x = 0;
 
@@ -225,6 +227,24 @@ void Simulation::moveParticle(Particle* particle) {
 	particle->coordinates.z += middleVelocity.z * deltaT;
 
 	correctParticlePosition(particle);
+
+	if (particle->coordinates.y > ygrid[ynumber]) {
+		double scale = 1.0 / (plasma_period * gyroradius);
+		printf("particle.y > ysize\n");
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "particle.y = %15.10g > %15.10g\n", particle->coordinates.y, ygrid[ynumber]);
+		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle->coordinates.x, particle->coordinates.y, particle->coordinates.z);
+		fprintf(errorLogFile, "particle.prev coordinates = %15.10g %15.10g %15.10g\n", prevCoordinates.x, prevCoordinates.y, prevCoordinates.z);
+		fprintf(errorLogFile, "particle.n = %d\n", particle->number);
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle->velocity(speed_of_light_normalized).norm()/speed_of_light_normalized));
+		fprintf(errorLogFile, "particle.v/c = %15.10g %15.10g %15.10g\n", (particle->velocity(speed_of_light_normalized).x/speed_of_light_normalized), (particle->velocity(speed_of_light_normalized).y/speed_of_light_normalized), (particle->velocity(speed_of_light_normalized).z/speed_of_light_normalized));
+		fprintf(errorLogFile, "particle.middleVelocity/c = %15.10g\n", (middleVelocity.norm()/speed_of_light_normalized));
+		fprintf(errorLogFile, "particle.middleVelocity/c = %15.10g %15.10g %15.10g\n", (middleVelocity.x/speed_of_light_normalized), (middleVelocity.y/speed_of_light_normalized), (middleVelocity.z/speed_of_light_normalized));
+		fprintf(errorLogFile, "E = %15.10g %15.10g %15.10g\n", scale*E.x, scale*E.y, scale*E.z);
+		fprintf(errorLogFile, "B = %15.10g %15.10g %15.10g\n", scale*B.x, scale*B.y, scale*B.z);
+		fclose(errorLogFile);
+		exit(0);
+	}
 }
 
 void Simulation::correctParticlePosition(Particle* particle) {
