@@ -332,7 +332,7 @@ double Simulation::volumeB(int i, int j, int k) {
 }
 
 void Simulation::checkParticleInBox(Particle& particle) {
-	if (particle.coordinates.x < 0) {
+	if (particle.coordinates.x < xgrid[0]) {
 		printf("particle.x < 0\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "particle.x = %15.10g < 0\n", particle.coordinates.x);
@@ -353,10 +353,10 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		exit(0);
 	}
 
-	if (particle.coordinates.y < 0) {
-		printf("particle.y < 0\n");
+	if (particle.coordinates.y < ygrid[0]) {
+		printf("particle.y < ygrid[0]\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
-		fprintf(errorLogFile, "particle.y = %15.10g < 0\n", particle.coordinates.y);
+		fprintf(errorLogFile, "particle.y = %15.10g < ygrid[0]\n", particle.coordinates.y);
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.velocity(speed_of_light_normalized).norm()/speed_of_light_normalized));
@@ -374,10 +374,10 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		exit(0);
 	}
 
-	if (particle.coordinates.z < 0) {
-		printf("particle.z < 0\n");
+	if (particle.coordinates.z < zgrid[0]) {
+		printf("particle.z < zgrid[0]\n");
 		errorLogFile = fopen("./output/errorLog.dat", "w");
-		fprintf(errorLogFile, "particle.z = %15.10g < 0\n", particle.coordinates.z);
+		fprintf(errorLogFile, "particle.z = %15.10g < zgrid[0]\n", particle.coordinates.z);
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.velocity(speed_of_light_normalized).norm()/speed_of_light_normalized));
