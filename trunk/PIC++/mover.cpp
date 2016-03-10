@@ -22,6 +22,8 @@ void Simulation::moveParticles() {
 	if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 		removeEscapedParticles();
 	}
+	printf("end moving particles\n");
+	printLog("end moving particles\n");
 }
 
 void Simulation::removeEscapedParticles() {
@@ -245,6 +247,22 @@ void Simulation::moveParticle(Particle* particle) {
 		fclose(errorLogFile);
 		exit(0);
 	}
+
+	if(particle->number == 1497){
+		double scale = 1.0 / (plasma_period * gyroradius);
+		FILE* particleFile = fopen("./output/particle.dat", "w");
+		fprintf(particleFile, "particle.y = %15.10g > %15.10g\n", particle->coordinates.y, ygrid[ynumber]);
+		fprintf(particleFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle->coordinates.x, particle->coordinates.y, particle->coordinates.z);
+		fprintf(particleFile, "particle.prev coordinates = %15.10g %15.10g %15.10g\n", prevCoordinates.x, prevCoordinates.y, prevCoordinates.z);
+		fprintf(particleFile, "particle.n = %d\n", particle->number);
+		fprintf(particleFile, "particle.v/c = %15.10g\n", (particle->velocity(speed_of_light_normalized).norm()/speed_of_light_normalized));
+		fprintf(particleFile, "particle.v/c = %15.10g %15.10g %15.10g\n", (particle->velocity(speed_of_light_normalized).x/speed_of_light_normalized), (particle->velocity(speed_of_light_normalized).y/speed_of_light_normalized), (particle->velocity(speed_of_light_normalized).z/speed_of_light_normalized));
+		fprintf(particleFile, "particle.middleVelocity/c = %15.10g\n", (middleVelocity.norm()/speed_of_light_normalized));
+		fprintf(particleFile, "particle.middleVelocity/c = %15.10g %15.10g %15.10g\n", (middleVelocity.x/speed_of_light_normalized), (middleVelocity.y/speed_of_light_normalized), (middleVelocity.z/speed_of_light_normalized));
+		fprintf(particleFile, "E = %15.10g %15.10g %15.10g\n", scale*E.x, scale*E.y, scale*E.z);
+		fprintf(particleFile, "B = %15.10g %15.10g %15.10g\n", scale*B.x, scale*B.y, scale*B.z);
+		fclose(particleFile);
+	}
 }
 
 void Simulation::correctParticlePosition(Particle* particle) {
@@ -387,6 +405,12 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 				particle->coordinates.x = x;
 				particle->coordinates.y = ygrid[j] + tempDeltaY;
 				particle->coordinates.z = zgrid[k] + tempDeltaZ;
+				double y = particle->coordinates.y;
+				double z = particle->coordinates.z;
+				if(y > ygrid[ynumber]){
+					printf("y inlected > ysize\n");
+					printErrorAndExit("y injected > ysize\n");
+				}
 				particle->addVelocity(V0, speed_of_light_normalized);
 				particle->initialMomentum = particle->momentum;
 				particles.push_back(particle);
@@ -402,6 +426,8 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 						particle = createParticle(n, xnumber - 1, j, k, weight, ELECTRON, types[0], temperature);
 						n++;
 						particle->coordinates.x = x;
+						particle->coordinates.y = y;
+						particle->coordinates.z = z;
 						particle->addVelocity(V0, speed_of_light_normalized);
 						particle->initialMomentum = particle->momentum;
 						particles.push_back(particle);

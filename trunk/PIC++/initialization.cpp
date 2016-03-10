@@ -18,6 +18,7 @@ Simulation::Simulation() {
 	maxBfield = Vector3d(0, 0, 0);
 
 	shockWavePoint = 0;
+	chargeBalance = 0;
 
 	Kronecker = Matrix3d(1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0);
 
@@ -53,6 +54,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	particleEnergy = 0;
 	electricFieldEnergy = 0;
 	magneticFieldEnergy = 0;
+	chargeBalance = 0;
 
 	momentum = Vector3d(0, 0, 0);
 
@@ -2204,6 +2206,7 @@ void Simulation::createParticleTypes() {
 
 	type.type = ELECTRON;
 	type.mass = massElectron;
+	type.chargeCount -1;
 	type.charge = -electron_charge_normalized;
 	type.particlesPerBin = electronsPerBin;
 
@@ -2211,6 +2214,7 @@ void Simulation::createParticleTypes() {
 
 	type.type = PROTON;
 	type.mass = massProton;
+	type.chargeCount =1;
 	type.charge = electron_charge_normalized;
 	type.particlesPerBin = protonsPerBin;
 
@@ -2218,6 +2222,7 @@ void Simulation::createParticleTypes() {
 
 	type.type = POSITRON;
 	type.mass = massElectron;
+	type.chargeCount = 1;
 	type.charge = electron_charge_normalized;
 	type.particlesPerBin = positronsPerBin;
 
@@ -2225,7 +2230,8 @@ void Simulation::createParticleTypes() {
 
 	type.type = ALPHA;
 	type.mass = massAlpha;
-	type.charge = 2.0 * electron_charge_normalized;
+	type.chargeCount = 2;
+	type.charge = 2*electron_charge_normalized;
 	type.particlesPerBin = alphaPerBin;
 
 	types[3] = type;
@@ -2620,6 +2626,41 @@ void Simulation::moveToPreserveCharge() {
 	}
 }
 
+void Simulation::preserveChargeGlobal(){
+	int n = particles.size();
+	if(chargeBalance == 0){
+		return;
+	}
+
+	if(chargeBalance > 0){
+		double weight = (types[0].concentration / types[0].particlesPerBin) * volumeB(xnumber - 1, 0, 0);
+		for(int i = 0; i < chargeBalance; ++i){
+			Particle* particle = createParticle(n, xnumber - 1, 0, 0, weight, types[0].type, types[0], temperature);
+			particle->coordinates.x = xgrid[xnumber] - 0.0001*deltaX;
+			particle->coordinates.y = ygrid[0] + ysize*uniformDistribution();
+			particle->coordinates.z = zgrid[0] + zsize*uniformDistribution();
+			n++;
+		}
+	} else {
+		int typeN = 1;
+		for(int i = 1; i < typesNumber; ++i){
+			if((types[i].particlesPerBin > types[typeN].particlesPerBin) && (types[i].chargeCount == 1)){
+				typeN = i;
+			}
+		}
+		double weight = (types[typeN].concentration / types[typeN].particlesPerBin) * volumeB(xnumber - 1, 0, 0);
+		for(int i = 0; i < -chargeBalance; ++i){
+			Particle* particle = createParticle(n, xnumber - 1, 0, 0, weight, types[typeN].type, types[typeN], temperature);
+			particle->coordinates.x = xgrid[xnumber] - 0.0001*deltaX;
+			particle->coordinates.y = ygrid[0] + ysize*uniformDistribution();
+			particle->coordinates.z = zgrid[0] + zsize*uniformDistribution();
+			n++;
+		}
+	}
+
+	chargeBalance = 0;
+}
+
 Particle* Simulation::getFirstProton() {
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
@@ -2699,6 +2740,7 @@ Particle* Simulation::getElectron(int n) {
 }
 
 Particle* Simulation::createParticle(int n, int i, int j, int k, double weight, ParticleTypes type, ParticleTypeContainer typeContainer, double localTemparature) {
+	int chargeCount = typeContainer.chargeCount;
 	double charge = typeContainer.charge;
 	double mass = typeContainer.mass;
 
@@ -2732,7 +2774,7 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, double weight, 
 	double py = pnormal * sin(phi);
 	//px = 0;
 
-	Particle* particle = new Particle(n, mass, charge, weight, type, typeContainer, x, y, z, px, py, pz, dx, dy, dz);
+	Particle* particle = new Particle(n, mass, chargeCount, charge, weight, type, typeContainer, x, y, z, px, py, pz, dx, dy, dz);
 
 	return particle;
 }

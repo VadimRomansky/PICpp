@@ -6,10 +6,11 @@
 #include "particle.h"
 #include "util.h"
 
-Particle::Particle(int n, double m, double q, double w, ParticleTypes t, ParticleTypeContainer type_container, double x0, double y0, double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0) {
+Particle::Particle(int n, double m, int qcount, double q, double w, ParticleTypes t, ParticleTypeContainer type_container, double x0, double y0, double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0) {
 	number = n;
 
 	mass = m;
+	chargeCount = qcount;
 	charge = q;
 	weight = w;
 	type = t;
@@ -36,6 +37,7 @@ Particle::Particle(const Particle& particle) {
 
 	mass = particle.mass;
 	charge = particle.charge;
+	chargeCount = particle.chargeCount;
 	weight = particle.weight;
 	type = particle.type;
 

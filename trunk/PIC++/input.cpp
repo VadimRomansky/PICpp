@@ -381,7 +381,7 @@ void readParticles(FILE* particlesFile, Simulation& simulation) {
 		}
 		ParticleTypeContainer typeContainer = simulation.types[type - 1];
 
-		Particle* particle = new Particle(number, mass, charge, weight, particleType, typeContainer, x, y, z, px, py, pz, dx, dy, dz);
+		Particle* particle = new Particle(number, mass, typeContainer.chargeCount, typeContainer.charge, weight, particleType, typeContainer, x, y, z, px, py, pz, dx, dy, dz);
 
 		simulation.particles.push_back(particle);
 	}

@@ -10,6 +10,7 @@ public:
 	ParticleTypes type;
 	double mass;
 	double charge;
+	int chargeCount;
 	int particlesPerBin;
 	double particesDeltaX;
 	double particesDeltaY;
@@ -24,6 +25,7 @@ public:
 
 	double mass;
 	double charge;
+	int chargeCount;
 	double weight;
 	ParticleTypes type;
 	ParticleTypeContainer typeContainer; //maybe unnecessary
@@ -42,7 +44,7 @@ public:
 	double dy;
 	double dz;
 
-	Particle(int n, double m, double q, double w, ParticleTypes type, ParticleTypeContainer typeContainer, double x0, double y0, double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0);
+	Particle(int n, double m, int qcount, double q, double w, ParticleTypes type, ParticleTypeContainer typeContainer, double x0, double y0, double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0);
 	Particle(const Particle& particle);
 
 	double shapeFunctionX(const double& xvalue);

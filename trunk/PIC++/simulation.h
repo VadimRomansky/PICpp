@@ -78,6 +78,8 @@ public:
 	double theoreticalEnergy;
 	Vector3d theoreticalMomentum;
 
+	int chargeBalance;
+
 	double extJ;
 
 	Vector3d momentum;
@@ -305,6 +307,7 @@ public:
 
 	void createParticles();
 	void moveToPreserveCharge();
+	void preserveChargeGlobal();
 	Particle* getFirstProton();
 	Particle* getFirstElectron();
 	Particle* getLastProton();
@@ -320,6 +323,7 @@ public:
 	void correctParticlePosition(Particle& particle);
 	void evaluateParticlesRotationTensor();
 	void injectNewParticles(int count, ParticleTypeContainer typeContainer, double length);
+	
 
 	void collectParticlesIntoBins();
 	void pushParticleIntoEbin(Particle* particle, int i, int j, int k);
