@@ -92,6 +92,9 @@ void Simulation::simulate() {
 				}
 			}
 		}
+		if(preserveChargeGlobal){
+			addToPreserveChargeGlobal();
+		}
 		updateDensityParameters();
 		cleanupDivergence();
 		updateFields();

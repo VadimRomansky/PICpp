@@ -33,6 +33,7 @@ void Simulation::removeEscapedParticles() {
 		Particle* particle = *it;
 		std::vector<Particle*>::iterator prev = it - 1;
 		if (particle->escaped) {
+			chargeBalance += particle->chargeCount;
 			particles.erase(it);
 		}
 		it = prev;
@@ -127,6 +128,18 @@ void Simulation::moveParticle(Particle* particle) {
 				particle->coordinates.x = 2 * xgrid[0] - tempParticle.coordinates.x;
 				particle->coordinates.y = tempParticle.coordinates.y;
 				particle->coordinates.z = tempParticle.coordinates.z;
+				if(particle->coordinates.y > ygrid[ynumber]){
+					particle->coordinates.y -= ysize;
+				}
+				if(particle->coordinates.y < ygrid[0]){
+					particle->coordinates.y += ysize;
+				}
+				if(particle->coordinates.z > zgrid[znumber]){
+					particle->coordinates.z -= zsize;
+				}
+				if(particle->coordinates.z < zgrid[0]){
+					particle->coordinates.z += zsize;
+				}
 				newVelocity.x = -newVelocity.x;
 				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 				return;
@@ -135,6 +148,18 @@ void Simulation::moveParticle(Particle* particle) {
 				particle->coordinates.x = xgrid[0];
 				particle->coordinates.y = tempParticle.coordinates.y;
 				particle->coordinates.z = tempParticle.coordinates.z;
+				if(particle->coordinates.y > ygrid[ynumber]){
+					particle->coordinates.y -= ysize;
+				}
+				if(particle->coordinates.y < ygrid[0]){
+					particle->coordinates.y += ysize;
+				}
+				if(particle->coordinates.z > zgrid[znumber]){
+					particle->coordinates.z -= zsize;
+				}
+				if(particle->coordinates.z < zgrid[0]){
+					particle->coordinates.z += zsize;
+				}
 				particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 				particle->escaped = true;
 				return;
@@ -145,6 +170,18 @@ void Simulation::moveParticle(Particle* particle) {
 			particle->coordinates.x = xgrid[xnumber];
 			particle->coordinates.y = tempParticle.coordinates.y;
 			particle->coordinates.z = tempParticle.coordinates.z;
+			if(particle->coordinates.y > ygrid[ynumber]){
+				particle->coordinates.y -= ysize;
+			}
+			if(particle->coordinates.y < ygrid[0]){
+				particle->coordinates.y += ysize;
+			}
+			if(particle->coordinates.z > zgrid[znumber]){
+				particle->coordinates.z -= zsize;
+			}
+			if(particle->coordinates.z < zgrid[0]){
+				particle->coordinates.z += zsize;
+			}
 			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 			particle->escaped = true;
 			return;
@@ -180,6 +217,18 @@ void Simulation::moveParticle(Particle* particle) {
 					particle->coordinates.x = 2 * xgrid[0] - tempParticle.coordinates.x + fabs(middleVelocity.x * (1 - eta) * deltaT);
 					particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
 					particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * (1 - eta) * deltaT;
+					if(particle->coordinates.y > ygrid[ynumber]){
+						particle->coordinates.y -= ysize;
+					}
+					if(particle->coordinates.y < ygrid[0]){
+						particle->coordinates.y += ysize;
+					}
+					if(particle->coordinates.z > zgrid[znumber]){
+						particle->coordinates.z -= zsize;
+					}
+					if(particle->coordinates.z < zgrid[0]){
+						particle->coordinates.z += zsize;
+					}
 					//newVelocity.x = -newVelocity.x;
 					//particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 					particle->momentum.x = -particle->momentum.x;
@@ -188,7 +237,19 @@ void Simulation::moveParticle(Particle* particle) {
 					escapedParticles.push_back(particle);
 					particle->coordinates.x = xgrid[0];
 					particle->coordinates.y = tempParticle.coordinates.y;
+					if(particle->coordinates.y > ygrid[ynumber]){
+						particle->coordinates.y -= ysize;
+					}
+					if(particle->coordinates.y < ygrid[0]){
+						particle->coordinates.y += ysize;
+					}
 					particle->coordinates.z = tempParticle.coordinates.z;
+					if(particle->coordinates.z > zgrid[znumber]){
+						particle->coordinates.z -= zsize;
+					}
+					if(particle->coordinates.z < zgrid[0]){
+						particle->coordinates.z += zsize;
+					}
 					//particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 					particle->escaped = true;
 					return;
@@ -198,7 +259,19 @@ void Simulation::moveParticle(Particle* particle) {
 				escapedParticles.push_back(particle);
 				particle->coordinates.x = xgrid[xnumber];
 				particle->coordinates.y = tempParticle.coordinates.y;
+				if(particle->coordinates.y > ygrid[ynumber]){
+					particle->coordinates.y -= ysize;
+				}
+				if(particle->coordinates.y < ygrid[0]){
+					particle->coordinates.y += ysize;
+				}
 				particle->coordinates.z = tempParticle.coordinates.z;
+				if(particle->coordinates.z > zgrid[znumber]){
+					particle->coordinates.z -= zsize;
+				}
+				if(particle->coordinates.z < zgrid[0]){
+					particle->coordinates.z += zsize;
+				}
 				//particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 				particle->escaped = true;
 				return;
@@ -229,40 +302,6 @@ void Simulation::moveParticle(Particle* particle) {
 	particle->coordinates.z += middleVelocity.z * deltaT;
 
 	correctParticlePosition(particle);
-
-	if (particle->coordinates.y > ygrid[ynumber]) {
-		double scale = 1.0 / (plasma_period * gyroradius);
-		printf("particle.y > ysize\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
-		fprintf(errorLogFile, "particle.y = %15.10g > %15.10g\n", particle->coordinates.y, ygrid[ynumber]);
-		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle->coordinates.x, particle->coordinates.y, particle->coordinates.z);
-		fprintf(errorLogFile, "particle.prev coordinates = %15.10g %15.10g %15.10g\n", prevCoordinates.x, prevCoordinates.y, prevCoordinates.z);
-		fprintf(errorLogFile, "particle.n = %d\n", particle->number);
-		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle->velocity(speed_of_light_normalized).norm()/speed_of_light_normalized));
-		fprintf(errorLogFile, "particle.v/c = %15.10g %15.10g %15.10g\n", (particle->velocity(speed_of_light_normalized).x/speed_of_light_normalized), (particle->velocity(speed_of_light_normalized).y/speed_of_light_normalized), (particle->velocity(speed_of_light_normalized).z/speed_of_light_normalized));
-		fprintf(errorLogFile, "particle.middleVelocity/c = %15.10g\n", (middleVelocity.norm()/speed_of_light_normalized));
-		fprintf(errorLogFile, "particle.middleVelocity/c = %15.10g %15.10g %15.10g\n", (middleVelocity.x/speed_of_light_normalized), (middleVelocity.y/speed_of_light_normalized), (middleVelocity.z/speed_of_light_normalized));
-		fprintf(errorLogFile, "E = %15.10g %15.10g %15.10g\n", scale*E.x, scale*E.y, scale*E.z);
-		fprintf(errorLogFile, "B = %15.10g %15.10g %15.10g\n", scale*B.x, scale*B.y, scale*B.z);
-		fclose(errorLogFile);
-		exit(0);
-	}
-
-	if(particle->number == 1497){
-		double scale = 1.0 / (plasma_period * gyroradius);
-		FILE* particleFile = fopen("./output/particle.dat", "w");
-		fprintf(particleFile, "particle.y = %15.10g > %15.10g\n", particle->coordinates.y, ygrid[ynumber]);
-		fprintf(particleFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle->coordinates.x, particle->coordinates.y, particle->coordinates.z);
-		fprintf(particleFile, "particle.prev coordinates = %15.10g %15.10g %15.10g\n", prevCoordinates.x, prevCoordinates.y, prevCoordinates.z);
-		fprintf(particleFile, "particle.n = %d\n", particle->number);
-		fprintf(particleFile, "particle.v/c = %15.10g\n", (particle->velocity(speed_of_light_normalized).norm()/speed_of_light_normalized));
-		fprintf(particleFile, "particle.v/c = %15.10g %15.10g %15.10g\n", (particle->velocity(speed_of_light_normalized).x/speed_of_light_normalized), (particle->velocity(speed_of_light_normalized).y/speed_of_light_normalized), (particle->velocity(speed_of_light_normalized).z/speed_of_light_normalized));
-		fprintf(particleFile, "particle.middleVelocity/c = %15.10g\n", (middleVelocity.norm()/speed_of_light_normalized));
-		fprintf(particleFile, "particle.middleVelocity/c = %15.10g %15.10g %15.10g\n", (middleVelocity.x/speed_of_light_normalized), (middleVelocity.y/speed_of_light_normalized), (middleVelocity.z/speed_of_light_normalized));
-		fprintf(particleFile, "E = %15.10g %15.10g %15.10g\n", scale*E.x, scale*E.y, scale*E.z);
-		fprintf(particleFile, "B = %15.10g %15.10g %15.10g\n", scale*B.x, scale*B.y, scale*B.z);
-		fclose(particleFile);
-	}
 }
 
 void Simulation::correctParticlePosition(Particle* particle) {
@@ -391,7 +430,7 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 	double tempDeltaY = deltaY*uniformDistribution();
 	double tempDeltaZ = deltaZ*uniformDistribution();
 
-	if (typeContainer.type == ELECTRON && preserveCharge) {
+	if (typeContainer.type == ELECTRON && preserveChargeLocal) {
 		return;
 	}
 
@@ -417,7 +456,7 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 				double en = particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
 				theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
 				theoreticalMomentum += particle->momentum * particle->weight * gyroradius / plasma_period;
-				if (preserveCharge) {
+				if (preserveChargeLocal) {
 					int necessaryElectrons = 1;
 					if (type == ALPHA) {
 						necessaryElectrons = 2;
