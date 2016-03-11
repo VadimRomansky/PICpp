@@ -266,11 +266,17 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 
 	simulation.debugMode = (debugMode == 1);
 
-	int preserveCharge = 0;
+	int preserveChargeLocal = 0;
 
-	fscanf(generalFile, "%d", &preserveCharge);
+	fscanf(generalFile, "%d", &preserveChargeLocal);
 
-	simulation.preserveCharge = (preserveCharge == 1);
+	simulation.preserveChargeLocal = (preserveChargeLocal == 1);
+
+	int preserveChargeGlobal = 0;
+
+	fscanf(generalFile, "%d", &preserveChargeGlobal);
+
+	simulation.preserveChargeGlobal = (preserveChargeGlobal == 1);
 
 	int solverType = 0;
 
@@ -307,8 +313,12 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 	fscanf(generalFile, "%lf", &simulation.B0.z);
 
 	simulation.deltaX = simulation.xsize / (simulation.xnumber);
+	simulation.deltaY = simulation.ysize / (simulation.ynumber);
+	simulation.deltaZ = simulation.zsize / (simulation.znumber);
 
 	simulation.deltaX2 = simulation.deltaX * simulation.deltaX;
+	simulation.deltaY2 = simulation.deltaY * simulation.deltaY;
+	simulation.deltaZ2 = simulation.deltaZ * simulation.deltaZ;
 
 	simulation.createArrays();
 
@@ -318,8 +328,24 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 		simulation.xgrid[i] = i * simulation.deltaX;
 	}
 
+	for (int i = 0; i <= simulation.ynumber; ++i) {
+		simulation.ygrid[i] = i * simulation.deltaY;
+	}
+
+	for (int i = 0; i <= simulation.znumber; ++i) {
+		simulation.zgrid[i] = i * simulation.deltaZ;
+	}
+
 	for (int i = 0; i < simulation.xnumber; ++i) {
 		simulation.middleXgrid[i] = (simulation.xgrid[i] + simulation.xgrid[i + 1]) / 2;
+	}
+
+	for (int i = 0; i < simulation.ynumber; ++i) {
+		simulation.middleYgrid[i] = (simulation.ygrid[i] + simulation.ygrid[i + 1]) / 2;
+	}
+
+	for (int i = 0; i < simulation.znumber; ++i) {
+		simulation.middleZgrid[i] = (simulation.zgrid[i] + simulation.zgrid[i + 1]) / 2;
 	}
 
 	readFields(Efile, Bfile, simulation);
@@ -382,7 +408,7 @@ void readParticles(FILE* particlesFile, Simulation& simulation) {
 		ParticleTypeContainer typeContainer = simulation.types[type - 1];
 
 		Particle* particle = new Particle(number, mass, typeContainer.chargeCount, typeContainer.charge, weight, particleType, typeContainer, x, y, z, px, py, pz, dx, dy, dz);
-
+		simulation.chargeBalance += particle->chargeCount;
 		simulation.particles.push_back(particle);
 	}
 }

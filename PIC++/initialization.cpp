@@ -13,6 +13,7 @@
 
 Simulation::Simulation() {
 	newlyStarted = false;
+	preserveChargeGlobal = true;
 
 	maxEfield = Vector3d(0, 0, 0);
 	maxBfield = Vector3d(0, 0, 0);
@@ -41,6 +42,7 @@ Simulation::Simulation() {
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int electronsPerBinV, int positronsPerBinV, int alphaPerBinV) {
 	debugMode = true;
 	newlyStarted = true;
+	preserveChargeGlobal = true;
 	solverType = IMPLICIT; //неявный
 	//solverType = EXPLICIT; //явный
 	boundaryConditionType = PERIODIC;
@@ -2578,12 +2580,12 @@ void Simulation::createParticles() {
 		}
 	}
 
-	if (preserveCharge) {
-		moveToPreserveCharge();
+	if (preserveChargeLocal) {
+		moveToPreserveChargeLocal();
 	}
 }
 
-void Simulation::moveToPreserveCharge() {
+void Simulation::moveToPreserveChargeLocal() {
 	Particle* electron = NULL;
 	Particle* notElectron = NULL;
 	Particle* particle;
@@ -2626,7 +2628,7 @@ void Simulation::moveToPreserveCharge() {
 	}
 }
 
-void Simulation::preserveChargeGlobal(){
+void Simulation::addToPreserveChargeGlobal(){
 	int n = particles.size();
 	if(chargeBalance == 0){
 		return;

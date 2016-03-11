@@ -64,7 +64,8 @@ public:
 	bool debugMode;
 
 	bool newlyStarted;
-	bool preserveCharge;
+	bool preserveChargeLocal;
+	bool preserveChargeGlobal;
 
 	SolverType solverType;
 	BoundaryConditionType boundaryConditionType;
@@ -306,8 +307,8 @@ public:
 	double getDensity(int i, int j, int k);
 
 	void createParticles();
-	void moveToPreserveCharge();
-	void preserveChargeGlobal();
+	void moveToPreserveChargeLocal();
+	void addToPreserveChargeGlobal();
 	Particle* getFirstProton();
 	Particle* getFirstElectron();
 	Particle* getLastProton();

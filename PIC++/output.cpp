@@ -317,14 +317,23 @@ void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* p
 
 	fprintf(generalFile, "%d\n", debugMode);
 
-	int preserveCharge = 0;
-	if (simulation->preserveCharge) {
-		preserveCharge = 1;
+	int preserveChargeLocal = 0;
+	if (simulation->preserveChargeLocal) {
+		preserveChargeLocal = 1;
 	} else {
-		preserveCharge = 0;
+		preserveChargeLocal = 0;
 	}
 
-	fprintf(generalFile, "%d\n", preserveCharge);
+	fprintf(generalFile, "%d\n", preserveChargeLocal);
+
+	int preserveChargeGlobal = 0;
+	if (simulation->preserveChargeGlobal) {
+		preserveChargeGlobal = 1;
+	} else {
+		preserveChargeGlobal = 0;
+	}
+
+	fprintf(generalFile, "%d\n", preserveChargeGlobal);
 
 	int solverType = 0;
 	if (simulation->solverType == IMPLICIT) {
