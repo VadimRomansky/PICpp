@@ -2641,6 +2641,8 @@ void Simulation::addToPreserveChargeGlobal(){
 			particle->coordinates.x = xgrid[xnumber] - 0.0001*deltaX;
 			particle->coordinates.y = ygrid[0] + ysize*uniformDistribution();
 			particle->coordinates.z = zgrid[0] + zsize*uniformDistribution();
+			theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
+			theoreticalMomentum += particle->momentum * particle->weight * gyroradius / plasma_period;
 			n++;
 		}
 	} else {
@@ -2656,6 +2658,8 @@ void Simulation::addToPreserveChargeGlobal(){
 			particle->coordinates.x = xgrid[xnumber] - 0.0001*deltaX;
 			particle->coordinates.y = ygrid[0] + ysize*uniformDistribution();
 			particle->coordinates.z = zgrid[0] + zsize*uniformDistribution();
+			theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
+			theoreticalMomentum += particle->momentum * particle->weight * gyroradius / plasma_period;
 			n++;
 		}
 	}
