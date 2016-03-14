@@ -961,6 +961,7 @@ void Simulation::updateEnergy() {
 
 		//theoreticalMomentum -= V0 * V0.x * density * deltaT * ysize * zsize * gyroradius / plasma_period;
 		//theoreticalMomentum -= Vector3d(1, 0, 0) * (2 * concentration * kBoltzman_normalized * temperature) * deltaT * ysize * zsize * gyroradius / plasma_period;
+		//it is taken in account in inject new particle
 
 		for (int i = 0; i < escapedParticles.size(); ++i) {
 			Particle* particle = escapedParticles[i];

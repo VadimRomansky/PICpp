@@ -33,7 +33,7 @@ void Simulation::removeEscapedParticles() {
 		Particle* particle = *it;
 		std::vector<Particle*>::iterator prev = it - 1;
 		if (particle->escaped) {
-			chargeBalance += particle->chargeCount;
+			chargeBalance -= particle->chargeCount;
 			particles.erase(it);
 		}
 		it = prev;
