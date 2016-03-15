@@ -922,7 +922,7 @@ void Simulation::updateEnergy() {
 	for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
-				Vector3d B = (Bfield[i][j][k] - B0) * fieldScale;
+				Vector3d B = Bfield[i][j][k] * fieldScale;
 				magneticFieldEnergy += B.scalarMult(B) * volumeB(i, j, k) / (8 * pi);
 			}
 		}
