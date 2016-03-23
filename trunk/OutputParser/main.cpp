@@ -49,12 +49,12 @@ int main() {
     FILE* alphasFile = fopen("../../PIC++/output/alphas.dat", "r");
     FILE* divergenceFile = fopen("../../PIC++/output/divergence_error.dat", "r");
     FILE* distributionProtonsFile = fopen("../../PIC++/output/distribution_protons.dat", "r");
-    FILE* distributionElectronsFile = fopen("../../PIC++/output/divergence_electrons.dat", "r");
+    FILE* distributionElectronsFile = fopen("../../PIC++/output/distribution_electrons.dat", "r");
 
     FILE* gleXFile = fopen("../output/Xfile.dat","w");
     FILE* gleYFile = fopen("../output/Yfile.dat","w");
     FILE* gleZFile = fopen("../output/Zfile.dat","w");
-    FILE* gleBFile = fopen("..output/Bfield.dat","w");
+    FILE* gleBFile = fopen("../output/Bfield.dat","w");
     FILE* gleEFile = fopen("../output/Efield.dat", "w");
     FILE* gleConcentrationFile = fopen("../output/concentrations.dat", "w");
     FILE* gleVelocityFile = fopen("../output/velocity.dat", "w");
@@ -73,6 +73,10 @@ int main() {
     int Nz = countNumbers(ZFile);
 
     int NE = countNumbersLine(EFile, 3);
+    rewind(XFile);
+    rewind(YFile);
+    rewind(ZFile);
+    rewind(EFile);
     int Nt = NE/(Nx*Ny*Nz);
 
     int ypoint = 0;
@@ -89,9 +93,11 @@ int main() {
     double** Efield = new double*[Nx*Ny*Nz*Nt];
     double* Xgrid = new double[Nx];
     double* middleX = new double[Nx - 1];
-    fscanf(XFile, "%lf", Xgrid[0]);
+    fscanf(XFile, "%lf", &Xgrid[0]);
     for(int i = 1; i < Nx; ++i){
-        fscanf(XFile, "%lf", Xgrid[i]);
+        double a;
+        fscanf(XFile, "%lf", &a);
+        Xgrid[i] = a;
         middleX[i-1] = (Xgrid[i-1] + Xgrid[i])/2;
     }
 
@@ -100,7 +106,7 @@ int main() {
     }
 
     for(int i = 0; i < Nx*Ny*Nz*Nt; ++i){
-        fscanf(EFile, "%lf %lf %lf", Efield[i][0], Efield[i][1], Efield[i][2]);
+        fscanf(EFile, "%lf %lf %lf", &Efield[i][0], &Efield[i][1], &Efield[i][2]);
     }
 
     for(int i = 0; i < Nx; ++i) {
@@ -127,10 +133,10 @@ int main() {
     }
 
     for(int i = 0; i < (Nx-1)*(Ny-1)*(Nz-1)*Nt; ++i){
-        fscanf(BFile, "%lf %lf %lf", Bfield[i][0], Bfield[i][1], Bfield[i][2]);
-        fscanf(velocityProtonFile, "%lf %lf %lf", velocity[i][0], velocity[i][1], velocity[i][2]);
-        fscanf(velocityElectronFile, "%lf %lf %lf", velocity[i][3], velocity[i][4], velocity[i][5]);
-        fscanf(concentrationFile, "%lf %lf %lf %lf", concentrations[i][0], concentrations[i][1], concentrations[i][2], concentrations[i][3]);
+        fscanf(BFile, "%lf %lf %lf", &Bfield[i][0], &Bfield[i][1], &Bfield[i][2]);
+        fscanf(velocityProtonFile, "%lf %lf %lf", &velocity[i][0], &velocity[i][1], &velocity[i][2]);
+        fscanf(velocityElectronFile, "%lf %lf %lf", &velocity[i][3], &velocity[i][4], &velocity[i][5]);
+        fscanf(concentrationFile, "%lf %lf %lf %lf", &concentrations[i][0], &concentrations[i][1], &concentrations[i][2], &concentrations[i][3]);
     }
 
     for(int i = 0; i < Nx-1; ++i) {
