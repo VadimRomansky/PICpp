@@ -200,7 +200,8 @@ void outputMatrixArray(FILE* outFile, Matrix3d*** matrix3d, int xnumber, int ynu
 
 void outputGeneral(FILE* outFile, Simulation* simulation) {
 	int particlesCount = simulation->particles.size();
-	fprintf(outFile, "%d %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d\n", simulation->currentIteration, simulation->time, simulation->time * simulation->plasma_period, simulation->particleEnergy,
+	fprintf(outFile, "%d %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d\n",
+			simulation->currentIteration, simulation->time, simulation->time * simulation->plasma_period, simulation->particleEnergy,
 	        simulation->electricFieldEnergy, simulation->magneticFieldEnergy, simulation->energy, simulation->momentum.x, simulation->momentum.y, simulation->momentum.z, simulation->theoreticalEnergy, simulation->theoreticalMomentum.x, simulation->theoreticalMomentum.y,
 	        simulation->theoreticalMomentum.z, simulation->maxEfield.norm(), simulation->maxBfield.norm(), simulation->deltaT, particlesCount);
 }
