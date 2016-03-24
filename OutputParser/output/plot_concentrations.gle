@@ -1,0 +1,58 @@
+size 21 60
+set font texcmr hei 0.6
+amove 4 2
+begin graph
+  size 16 16
+  fullsize
+  data   "concentrations.dat"
+  d1 lstyle 1 lwidth 0.05 color red
+  d5 lstyle 1 lwidth 0.05 color green
+  d9 lstyle 1 lwidth 0.05 color blue
+end graph
+amove 4 22
+begin graph
+  size 16 16
+  fullsize
+  data   "concentrations.dat"
+  d2 lstyle 1 lwidth 0.05 color red
+  d6 lstyle 1 lwidth 0.05 color green
+  d10 lstyle 1 lwidth 0.05 color blue 
+end graph
+amove 4 42
+begin graph
+  size 16 16
+  fullsize
+  data   "concentrations.dat"
+  d3 lstyle 1 lwidth 0.05 color red
+  d7 lstyle 1 lwidth 0.05 color green
+  d11 lstyle 1 lwidth 0.05 color blue 
+end graph
+  amove 10 59
+  begin tex 
+  $concentrations$
+  end tex
+  amove 3 19
+  begin tex
+  $n_{p}$ $cm^{-3}$
+  end tex
+  amove 20.3 2.0
+  begin tex
+  $x$
+  end tex
+  amove 3 39
+  begin tex 
+  $n_{e}$ $cm^{-3}$
+  end tex
+  amove 20.3 22.0
+  begin tex
+  $x$
+  end tex
+  amove 3 59
+  begin tex 
+  $\rho$ $cgs$ $cm^{-3}$
+  end tex
+  amove 20.3 42.0
+  begin tex
+  $x$
+  end tex
+
