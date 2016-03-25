@@ -1,0 +1,36 @@
+size 23 41
+set font texcmr hei 0.6
+amove 4 2
+begin graph
+  size 16 16
+  fullsize
+  data   "distribution_protons.dat"
+  xaxis log
+  yaxis log min 1E-20
+  d1 lstyle 1 lwidth 0.05 color red
+end graph
+amove 4 22
+begin graph
+  size 16 16
+  fullsize
+  data   "distribution_electrons.dat"  
+  xaxis log
+  yaxis log min 1E-20
+  d1 lstyle 1 lwidth 0.05 color red
+end graph
+  amove 3 19
+  begin tex
+  $F_p(p) p^4$
+  end tex
+  amove 20.3 2.0
+  begin tex
+  $p$ ${g cm}/s$
+  end tex
+  amove 3 39
+  begin tex 
+  $F_e(p) p^4$
+  end tex
+  amove 20.3 22.0
+  begin tex
+  $p$ ${g cm}/s$
+  end tex

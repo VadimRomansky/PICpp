@@ -41,8 +41,8 @@ int main() {
     FILE* concentrationFile = fopen("../../PIC++/output/concentrations.dat", "r");
     FILE* velocityElectronFile = fopen("../../PIC++/output/velocity_electron.dat", "r");
     FILE* velocityProtonFile = fopen("../../PIC++/output/velocity.dat", "r");
-    FILE* traectoryProtonFile = fopen("../../PIC++/output/traectory_proton.dat", "r");
-    FILE* traectoryElectronFile = fopen("../../PIC++/output/traectory_electron.dat", "r");
+    FILE* trajectoryProtonFile = fopen("../../PIC++/output/traectory_proton.dat", "r");
+    FILE* trajectoryElectronFile = fopen("../../PIC++/output/traectory_electron.dat", "r");
     FILE* protonsFile = fopen("../../PIC++/output/protons.dat", "r");
     FILE* electronsFile = fopen("../../PIC++/output/electrons.dat", "r");
     FILE* positronsFile = fopen("../../PIC++/output/positrons.dat", "r");
@@ -59,8 +59,8 @@ int main() {
     FILE* gleEFile = fopen("../output/Efield.dat", "w");
     FILE* gleConcentrationFile = fopen("../output/concentrations.dat", "w");
     FILE* gleVelocityFile = fopen("../output/velocity.dat", "w");
-    FILE* gleTraectoryProtonFile = fopen("../output/traectory_proton.dat", "w");
-    FILE* gleTraectoryElectronFile = fopen("../output/traectory_electron.dat", "w");
+    FILE* gleTrajectoryProtonFile = fopen("../output/trajectory_proton.dat", "w");
+    FILE* gleTrajectoryElectronFile = fopen("../output/trajectory_electron.dat", "w");
     FILE* gleProtonsFile = fopen("../output/protons.dat", "w");
     FILE* gleElectronsFile = fopen("../output/electrons.dat", "w");
     FILE* glePositronsFile = fopen("../output/positrons.dat", "w");
@@ -182,29 +182,81 @@ int main() {
     /////// arrays with dimensions Nt //////
 
     double** general = new double*[Nt];
+    double** protonTraectory = new double*[Nt];
+    double** electronTraectory = new double*[Nt];
     for(int i = 0; i < Nt; ++i){
         general[i] = new double[18];
+        protonTraectory[i] = new double[8];
+        electronTraectory[i] = new double[8];
     }
 
     for(int i = 0; i < Nt; i++){
         for(int j = 0; j < 18; ++j){
             fscanf(generalFile, "%lf", &general[i][j]);
         }
+        for(int j = 0; j < 8; ++j){
+            fscanf(trajectoryProtonFile, "%lf", &protonTraectory[i][j]);
+            fscanf(gleTrajectoryElectronFile, "%lf", &electronTraectory[i][j]);
+        }
     }
 
     for(int i = 0; i < Nt; i++){
         for(int j = 1; j < 18; ++j) {
-            fprintf(gleGeneralFile, "%20.15g", &general[i][j]);
+            fprintf(gleGeneralFile, "%20.15g", general[i][j]);
+        }
+        for(int j = 0; j < 8; ++j){
+            fprintf(gleTrajectoryProtonFile, "%20.15g", protonTraectory[i][j]);
+            fprintf(gleTrajectoryElectronFile, "%20.15g", electronTraectory[i][j]);
         }
         fprintf(gleGeneralFile, "\n");
+        fprintf(gleTrajectoryProtonFile, "\n");
+        fprintf(gleTrajectoryElectronFile, "\n");
     }
 
     for(int i = 0; i < Nt; ++i){
         delete[] general[i];
+        delete[] protonTraectory[i];
+        delete[] electronTraectory[i];
     }
     delete[] general;
+    delete[] protonTraectory;
+    delete[] electronTraectory;
     /////// arrays with dimensions Np*Nt //////
 
+    double** distributionProtons = new double*[Np*Nt];
+    double** distributionElectrons = new double*[Np*Nt];
+    for(int i = 0; i < Np*Nt; ++i){
+        distributionProtons[i] = new double[2];
+        distributionElectrons[i] = new double[2];
+    }
+
+    for(int i = 0; i < Np*Nt; ++i){
+        for(int j = 0; j < 2; ++j) {
+            fscanf(distributionProtonsFile, "%lf", &distributionProtons[i][j]);
+            fscanf(distributionElectronsFile, "%lf", &distributionElectrons[i][j]);
+        }
+    }
+
+    for(int i = 0; i < Np; ++i){
+        double Fp = distributionProtons[i + (Nt - 1) * Np][1] * distributionProtons[i + (Nt - 1) * Np][0] * distributionProtons[i + (Nt - 1) * Np][0];
+        if(fabs(Fp) < 1E-100){
+            Fp = 1E-100;
+        }
+        fprintf(gleDistributionProtonsFile, "%20.15g %20.15g\n", distributionProtons[i + (Nt-1)*Np][0], Fp);
+        double Fe = distributionElectrons[i + (Nt - 1) * Np][1] * distributionElectrons[i + (Nt - 1) * Np][0] * distributionElectrons[i + (Nt - 1) * Np][0];
+        if(fabs(Fe) < 1E-100){
+            Fe = 1E-100;
+        }
+        fprintf(gleDistributionElectronsFile, "%20.15g %20.15g\n", distributionElectrons[i + (Nt - 1) * Np][0], Fe);
+    }
+
+
+    for(int i = 0; i < Np*Nt; ++i){
+        delete[] distributionProtons[i];
+        delete[] distributionElectrons[i];
+    }
+    delete[] distributionProtons;
+    delete[] distributionElectrons;
 
     fclose(XFile);
     fclose(YFile);
@@ -214,8 +266,8 @@ int main() {
     fclose(concentrationFile);
     fclose(velocityElectronFile);
     fclose(velocityProtonFile);
-    fclose(traectoryElectronFile);
-    fclose(traectoryProtonFile);
+    fclose(trajectoryElectronFile);
+    fclose(trajectoryProtonFile);
     fclose(protonsFile);
     fclose(electronsFile);
     fclose(positronsFile);
@@ -232,8 +284,8 @@ int main() {
     fclose(gleEFile);
     fclose(gleConcentrationFile);
     fclose(gleVelocityFile);
-    fclose(gleTraectoryElectronFile);
-    fclose(gleTraectoryProtonFile);
+    fclose(gleTrajectoryElectronFile);
+    fclose(gleTrajectoryProtonFile);
     fclose(gleProtonsFile);
     fclose(gleElectronsFile);
     fclose(glePositronsFile);
