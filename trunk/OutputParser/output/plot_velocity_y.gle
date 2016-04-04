@@ -1,0 +1,112 @@
+size 42 60
+set font texcmr hei 0.6
+amove 4 2
+begin graph
+  size 16 16
+  fullsize
+  data   "velocity_y.dat"
+  d1 lstyle 1 lwidth 0.05 color red
+  d7 lstyle 1 lwidth 0.05 color green
+  d13 lstyle 1 lwidth 0.05 color blue
+end graph
+amove 4 22
+begin graph
+  size 16 16
+  fullsize
+  data   "velocity_y.dat"
+  d2 lstyle 1 lwidth 0.05 color red
+  d8 lstyle 1 lwidth 0.05 color green
+  d14 lstyle 1 lwidth 0.05 color blue 
+end graph
+amove 4 42
+begin graph
+  size 16 16
+  fullsize
+  data   "velocity_y.dat"
+  d3 lstyle 1 lwidth 0.05 color red
+  d9 lstyle 1 lwidth 0.05 color green
+  d15 lstyle 1 lwidth 0.05 color blue 
+end graph
+amove 24 2
+begin graph
+  size 16 16
+  fullsize
+  data   "velocity_y.dat"
+  d4 lstyle 1 lwidth 0.05 color red
+  d10 lstyle 1 lwidth 0.05 color green
+  d16 lstyle 1 lwidth 0.05 color blue 
+end graph
+amove 24 22
+begin graph
+  size 16 16
+  fullsize
+  data   "velocity_y.dat"
+  d5 lstyle 1 lwidth 0.05 color red
+  d11 lstyle 1 lwidth 0.05 color green
+  d17 lstyle 1 lwidth 0.05 color blue  
+end graph
+amove 24 42
+begin graph
+  size 16 16
+  fullsize
+  data   "velocity_y.dat"
+  d6 lstyle 1 lwidth 0.05 color red
+  d12 lstyle 1 lwidth 0.05 color green
+  d18 lstyle 1 lwidth 0.05 color blue 
+end graph
+  amove 10 59
+  begin tex 
+  $Protons$
+  end tex
+  amove 3 19
+  begin tex 
+  $V_{x}(y)$
+  end tex
+  amove 20.3 2.0
+  begin tex
+  $y$
+  end tex
+  amove 3 39
+  begin tex 
+  $V_{y}(y)$
+  end tex
+  amove 20.3 22.0
+  begin tex
+  $y$
+  end tex
+  amove 3 59
+  begin tex 
+  $V_{z}(y)$
+  end tex
+  amove 20.3 42.0
+  begin tex
+  $y$
+  end tex
+  amove 30 59
+  begin tex 
+  $Electrons$
+  end tex
+  amove 23 19
+  begin tex 
+  $V_{x}(y)$
+  end tex
+  amove 40.3 2.0
+  begin tex
+  $y$
+  end tex
+  amove 23 39
+  begin tex 
+  $V_{y}(y)$
+  end tex
+  amove 40.3 22.0
+  begin tex
+  $y$
+  end tex
+  amove 23 59
+  begin tex 
+  $V_{z}(y)$
+  end tex
+  amove 40.3 42.0
+  begin tex
+  $y$
+  end tex
