@@ -1,0 +1,112 @@
+size 42 60
+set font texcmr hei 0.6
+amove 4 2
+begin graph
+  size 16 16
+  fullsize
+  data   "Efield_x.dat"
+  d1 lstyle 1 lwidth 0.05 color red
+  d4 lstyle 1 lwidth 0.05 color green
+  d7 lstyle 1 lwidth 0.05 color blue
+end graph
+amove 4 22
+begin graph
+  size 16 16
+  fullsize
+  data   "Efield_x.dat"
+  d2 lstyle 1 lwidth 0.05 color red
+  d5 lstyle 1 lwidth 0.05 color green
+  d8 lstyle 1 lwidth 0.05 color blue 
+end graph
+amove 4 42
+begin graph
+  size 16 16
+  fullsize
+  data   "Efield_x.dat"
+  d3 lstyle 1 lwidth 0.05 color red
+  d6 lstyle 1 lwidth 0.05 color green
+  d9 lstyle 1 lwidth 0.05 color blue 
+end graph
+amove 24 2
+begin graph
+  size 16 16
+  fullsize
+  data   "Bfield_x.dat"
+  d1 lstyle 1 lwidth 0.05 color red
+  d4 lstyle 1 lwidth 0.05 color green
+  d7 lstyle 1 lwidth 0.05 color blue 
+end graph
+amove 24 22
+begin graph
+  size 16 16
+  fullsize
+  data   "Bfield_x.dat"
+  d2 lstyle 1 lwidth 0.05 color red
+  d5 lstyle 1 lwidth 0.05 color green
+  d8 lstyle 1 lwidth 0.05 color blue  
+end graph
+amove 24 42
+begin graph
+  size 16 16
+  fullsize
+  data   "Bfield_x.dat"
+  d3 lstyle 1 lwidth 0.05 color red
+  d6 lstyle 1 lwidth 0.05 color green
+  d9 lstyle 1 lwidth 0.05 color blue 
+end graph
+  amove 10 59
+  begin tex 
+  $Electric field$
+  end tex
+  amove 3 19
+  begin tex 
+  $E_{x}(x)\mbox{, G}$
+  end tex
+  amove 20.3 2.0
+  begin tex
+  $x$
+  end tex
+  amove 3 39
+  begin tex 
+  $E_{y}(x)\mbox{, G}$
+  end tex
+  amove 20.3 22.0
+  begin tex
+  $x$
+  end tex
+  amove 3 59
+  begin tex 
+  $E_{z}(x)\mbox{, G}$
+  end tex
+  amove 20.3 42.0
+  begin tex
+  $x$
+  end tex
+  amove 30 59
+  begin tex 
+  $Magnetic field$
+  end tex
+  amove 23 19
+  begin tex 
+  $B_{x}(x)\mbox{, G}$
+  end tex
+  amove 40.3 2.0
+  begin tex
+  $x$
+  end tex
+  amove 23 39
+  begin tex 
+  $B_{y}(x)\mbox{, G}$
+  end tex
+  amove 40.3 22.0
+  begin tex
+  $x$
+  end tex
+  amove 23 59
+  begin tex 
+  $B_{z}(x)\mbox{, G}$
+  end tex
+  amove 40.3 42.0
+  begin tex
+  $x$
+  end tex

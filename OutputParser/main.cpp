@@ -55,17 +55,27 @@ int main() {
     FILE* gleXFile = fopen("../output/Xfile.dat","w");
     FILE* gleYFile = fopen("../output/Yfile.dat","w");
     FILE* gleZFile = fopen("../output/Zfile.dat","w");
-    FILE* gleBFile = fopen("../output/Bfield.dat","w");
-    FILE* gleEFile = fopen("../output/Efield.dat", "w");
-    FILE* gleConcentrationFile = fopen("../output/concentrations.dat", "w");
-    FILE* gleVelocityFile = fopen("../output/velocity.dat", "w");
+    FILE* gleBFileX = fopen("../output/Bfield_x.dat","w");
+    FILE* gleBFileY = fopen("../output/Bfield_y.dat","w");
+    FILE* gleBFileZ = fopen("../output/Bfield_z.dat","w");
+    FILE* gleEFileX = fopen("../output/Efield_x.dat", "w");
+    FILE* gleEFileY = fopen("../output/Efield_y.dat", "w");
+    FILE* gleEFileZ = fopen("../output/Efield_z.dat", "w");
+    FILE* gleConcentrationFileX = fopen("../output/concentrations_x.dat", "w");
+    FILE* gleConcentrationFileY = fopen("../output/concentrations_y.dat", "w");
+    FILE* gleConcentrationFileZ = fopen("../output/concentrations_z.dat", "w");
+    FILE* gleVelocityFileX = fopen("../output/velocity_x.dat", "w");
+    FILE* gleVelocityFileY = fopen("../output/velocity_y.dat", "w");
+    FILE* gleVelocityFileZ = fopen("../output/velocity_z.dat", "w");
     FILE* gleTrajectoryProtonFile = fopen("../output/trajectory_proton.dat", "w");
     FILE* gleTrajectoryElectronFile = fopen("../output/trajectory_electron.dat", "w");
     FILE* gleProtonsFile = fopen("../output/protons.dat", "w");
     FILE* gleElectronsFile = fopen("../output/electrons.dat", "w");
     FILE* glePositronsFile = fopen("../output/positrons.dat", "w");
     FILE* gleAlphasFile = fopen("../output/alphas.dat", "w");
-    FILE* gleDivergenceFile = fopen("../output/divergence_error.dat", "w");
+    FILE* gleDivergenceFileX = fopen("../output/divergence_error_x.dat", "w");
+    FILE* gleDivergenceFileY = fopen("../output/divergence_error_y.dat", "w");
+    FILE* gleDivergenceFileZ = fopen("../output/divergence_error_z.dat", "w");
     FILE* gleDistributionProtonsFile = fopen("../output/distribution_protons.dat", "w");
     FILE* gleDistributionElectronsFile = fopen("../output/distribution_electrons.dat", "w");
     FILE* gleGeneralFile = fopen("../output/general.dat", "w");
@@ -81,6 +91,7 @@ int main() {
     rewind(EFile);
     int Nt = NE/(Nx*Ny*Nz);
 
+    int xpoint = 0;
     int ypoint = 0;
     int zpoint = 0;
 
@@ -96,12 +107,32 @@ int main() {
     double** Efield = new double*[Nx*Ny*Nz*Nt];
     double* Xgrid = new double[Nx];
     double* middleX = new double[Nx - 1];
+    double* Ygrid = new double[Ny];
+    double* middleY = new double[Ny - 1];
+    double* Zgrid = new double[Nz];
+    double* middleZ = new double[Nz - 1];
     fscanf(XFile, "%lf", &Xgrid[0]);
     for(int i = 1; i < Nx; ++i){
         double a;
         fscanf(XFile, "%lf", &a);
         Xgrid[i] = a;
         middleX[i-1] = (Xgrid[i-1] + Xgrid[i])/2;
+    }
+
+    fscanf(YFile, "%lf", &Ygrid[0]);
+    for(int i = 1; i < Ny; ++i){
+        double a;
+        fscanf(YFile, "%lf", &a);
+        Ygrid[i] = a;
+        middleY[i-1] = (Ygrid[i-1] + Ygrid[i])/2;
+    }
+
+    fscanf(ZFile, "%lf", &Zgrid[0]);
+    for(int i = 1; i < Nz; ++i){
+        double a;
+        fscanf(ZFile, "%lf", &a);
+        Zgrid[i] = a;
+        middleZ[i-1] = (Zgrid[i-1] + Zgrid[i])/2;
     }
 
     for(int i = 0; i < Nx*Ny*Nz*Nt; ++i){
@@ -113,12 +144,30 @@ int main() {
     }
 
     for(int i = 0; i < Nx; ++i) {
-        fprintf(gleEFile, "%20.15g ", Xgrid[i]);
+        fprintf(gleEFileX, "%20.15g ", Xgrid[i]);
         for(int j = 0; j < timePointsCount; ++j){
             int number = timePoints[j]*Nx*Ny*Nz + Nz*Ny*i + Nz*ypoint + zpoint;
-            fprintf(gleEFile, "%20.15g %20.15g %20.15g", Efield[number][0], Efield[number][1], Efield[number][2]);
+            fprintf(gleEFileX, "%20.15g %20.15g %20.15g", Efield[number][0], Efield[number][1], Efield[number][2]);
         }
-        fprintf(gleEFile, "\n");
+        fprintf(gleEFileX, "\n");
+    }
+
+    for(int i = 0; i < Ny; ++i) {
+        fprintf(gleEFileY, "%20.15g ", Ygrid[i]);
+        for(int j = 0; j < timePointsCount; ++j){
+            int number = timePoints[j]*Nx*Ny*Nz + Nz*Ny*xpoint + Nz*i + zpoint;
+            fprintf(gleEFileX, "%20.15g %20.15g %20.15g", Efield[number][0], Efield[number][1], Efield[number][2]);
+        }
+        fprintf(gleEFileY, "\n");
+    }
+
+    for(int i = 0; i < Nz; ++i) {
+        fprintf(gleEFileZ, "%20.15g ", Zgrid[i]);
+        for(int j = 0; j < timePointsCount; ++j){
+            int number = timePoints[j]*Nx*Ny*Nz + Nz*Ny*xpoint + Nz*ypoint + i;
+            fprintf(gleEFileZ, "%20.15g %20.15g %20.15g", Efield[number][0], Efield[number][1], Efield[number][2]);
+        }
+        fprintf(gleEFileZ, "\n");
     }
 
     for(int i = 0; i < Nx*Ny*Nz*Nt; ++i){
@@ -148,25 +197,66 @@ int main() {
     }
 
     for(int i = 0; i < Nx-1; ++i) {
-        fprintf(gleBFile, "%20.15g ", middleX[i]);
-        fprintf(gleVelocityFile, "%20.15g ", Xgrid[i]);
-        fprintf(gleConcentrationFile, "%20.15g ", middleX[i]);
-        fprintf(gleDivergenceFile, "%20.15g ", middleX[i]);
+        fprintf(gleBFileX, "%20.15g ", middleX[i]);
+        fprintf(gleVelocityFileX, "%20.15g ", Xgrid[i]);
+        fprintf(gleConcentrationFileX, "%20.15g ", middleX[i]);
+        fprintf(gleDivergenceFileX, "%20.15g ", middleX[i]);
         for(int j = 0; j < timePointsCount; ++j){
             int number = timePoints[j]*(Nx-1)*(Ny-1)*(Nz-1) + (Nz-1)*(Ny-1)*i + (Nz-1)*ypoint + zpoint;
-            fprintf(gleBFile, "%20.15g %20.15g %20.15g", Bfield[number][0], Bfield[number][1], Bfield[number][2]);
-            fprintf(gleVelocityFile, "%20.15g %20.15g %20.15g %20.15g %20.15g %20.15g", velocity[number][0], velocity[number][1],velocity[number][2], velocity[number][3], velocity[number][4],velocity[number][5]);
-            fprintf(gleConcentrationFile, "%20.15g %20.15g %20.15g %20.15g", concentrations[number][0], concentrations[number][1], concentrations[number][2],concentrations[number][3]);
-            fprintf(gleDivergenceFile, "%20.15g %20.15g %20.15g", divergence[number][0], divergence[number][1], divergence[number][2]);
+            fprintf(gleBFileX, "%20.15g %20.15g %20.15g", Bfield[number][0], Bfield[number][1], Bfield[number][2]);
+            fprintf(gleVelocityFileX, "%20.15g %20.15g %20.15g %20.15g %20.15g %20.15g", velocity[number][0], velocity[number][1],velocity[number][2], velocity[number][3], velocity[number][4],velocity[number][5]);
+            fprintf(gleConcentrationFileX, "%20.15g %20.15g %20.15g %20.15g", concentrations[number][0], concentrations[number][1], concentrations[number][2],concentrations[number][3]);
+            fprintf(gleDivergenceFileX, "%20.15g %20.15g %20.15g", divergence[number][0], divergence[number][1], divergence[number][2]);
         }
-        fprintf(gleBFile, "\n");
-        fprintf(gleVelocityFile, "\n");
-        fprintf(gleConcentrationFile, "\n");
-        fprintf(gleDivergenceFile, "\n");
+        fprintf(gleBFileX, "\n");
+        fprintf(gleVelocityFileX, "\n");
+        fprintf(gleConcentrationFileX, "\n");
+        fprintf(gleDivergenceFileX, "\n");
+    }
+
+    for(int i = 0; i < Ny-1; ++i) {
+        fprintf(gleBFileY, "%20.15g ", middleY[i]);
+        fprintf(gleVelocityFileY, "%20.15g ", Ygrid[i]);
+        fprintf(gleConcentrationFileY, "%20.15g ", middleY[i]);
+        fprintf(gleDivergenceFileY, "%20.15g ", middleY[i]);
+        for(int j = 0; j < timePointsCount; ++j){
+            int number = timePoints[j]*(Nx-1)*(Ny-1)*(Nz-1) + (Nz-1)*(Ny-1)*xpoint + (Nz-1)*i + zpoint;
+            fprintf(gleBFileY, "%20.15g %20.15g %20.15g", Bfield[number][0], Bfield[number][1], Bfield[number][2]);
+            fprintf(gleVelocityFileY, "%20.15g %20.15g %20.15g %20.15g %20.15g %20.15g", velocity[number][0], velocity[number][1],velocity[number][2], velocity[number][3], velocity[number][4],velocity[number][5]);
+            fprintf(gleConcentrationFileY, "%20.15g %20.15g %20.15g %20.15g", concentrations[number][0], concentrations[number][1], concentrations[number][2],concentrations[number][3]);
+            fprintf(gleDivergenceFileY, "%20.15g %20.15g %20.15g", divergence[number][0], divergence[number][1], divergence[number][2]);
+        }
+        fprintf(gleBFileY, "\n");
+        fprintf(gleVelocityFileY, "\n");
+        fprintf(gleConcentrationFileY, "\n");
+        fprintf(gleDivergenceFileY, "\n");
+    }
+
+    for(int i = 0; i < Nz-1; ++i) {
+        fprintf(gleBFileZ, "%20.15g ", middleZ[i]);
+        fprintf(gleVelocityFileZ, "%20.15g ", Zgrid[i]);
+        fprintf(gleConcentrationFileZ, "%20.15g ", middleZ[i]);
+        fprintf(gleDivergenceFileZ, "%20.15g ", middleZ[i]);
+        for(int j = 0; j < timePointsCount; ++j){
+            int number = timePoints[j]*(Nx-1)*(Ny-1)*(Nz-1) + (Nz-1)*(Ny-1)*xpoint + (Nz-1)*ypoint + i;
+            fprintf(gleBFileX, "%20.15g %20.15g %20.15g", Bfield[number][0], Bfield[number][1], Bfield[number][2]);
+            fprintf(gleVelocityFileX, "%20.15g %20.15g %20.15g %20.15g %20.15g %20.15g", velocity[number][0], velocity[number][1],velocity[number][2], velocity[number][3], velocity[number][4],velocity[number][5]);
+            fprintf(gleConcentrationFileX, "%20.15g %20.15g %20.15g %20.15g", concentrations[number][0], concentrations[number][1], concentrations[number][2],concentrations[number][3]);
+            fprintf(gleDivergenceFileX, "%20.15g %20.15g %20.15g", divergence[number][0], divergence[number][1], divergence[number][2]);
+        }
+        fprintf(gleBFileZ, "\n");
+        fprintf(gleVelocityFileZ, "\n");
+        fprintf(gleConcentrationFileZ, "\n");
+        fprintf(gleDivergenceFileZ, "\n");
     }
 
     delete[] Xgrid;
     delete[] middleX;
+    delete[] Ygrid;
+    delete[] middleY;
+    delete[] Zgrid;
+    delete[] middleZ;
+
 
     for(int i = 0; i < (Nx-1)*(Ny-1)*(Nz-1)*Nt; ++i){
         delete[] Bfield[i];
@@ -280,17 +370,27 @@ int main() {
     fclose(gleXFile);
     fclose(gleYFile);
     fclose(gleZFile);
-    fclose(gleBFile);
-    fclose(gleEFile);
-    fclose(gleConcentrationFile);
-    fclose(gleVelocityFile);
+    fclose(gleBFileX);
+    fclose(gleBFileY);
+    fclose(gleBFileZ);
+    fclose(gleEFileX);
+    fclose(gleEFileY);
+    fclose(gleEFileZ);
+    fclose(gleConcentrationFileX);
+    fclose(gleConcentrationFileY);
+    fclose(gleConcentrationFileZ);
+    fclose(gleVelocityFileX);
+    fclose(gleVelocityFileY);
+    fclose(gleVelocityFileZ);
     fclose(gleTrajectoryElectronFile);
     fclose(gleTrajectoryProtonFile);
     fclose(gleProtonsFile);
     fclose(gleElectronsFile);
     fclose(glePositronsFile);
     fclose(gleAlphasFile);
-    fclose(gleDivergenceFile);
+    fclose(gleDivergenceFileX);
+    fclose(gleDivergenceFileY);
+    fclose(gleDivergenceFileZ);
     fclose(gleDistributionProtonsFile);
     fclose(gleDistributionElectronsFile);
     fclose(gleGeneralFile);
