@@ -43,8 +43,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	debugMode = true;
 	newlyStarted = true;
 	preserveChargeGlobal = true;
-	solverType = IMPLICIT; //неявный
-	//solverType = EXPLICIT; //явный
+	solverType = IMPLICIT; //пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	//solverType = EXPLICIT; //пїЅпїЅпїЅпїЅпїЅ
 	boundaryConditionType = PERIODIC;
 	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
@@ -2262,9 +2262,9 @@ void Simulation::createFiles() {
 	FILE* logFile = fopen("./output/log.dat","w");
 	fclose(logFile);
 	printLog("creatingFiles\n");
-	protonTraectoryFile = fopen("./output/traectory_proton.dat", "w");
+	protonTraectoryFile = fopen("./output/trajectory_proton.dat", "w");
 	fclose(protonTraectoryFile);
-	electronTraectoryFile = fopen("./output/traectory_electron.dat", "w");
+	electronTraectoryFile = fopen("./output/trajectory_electron.dat", "w");
 	fclose(electronTraectoryFile);
 	distributionFileProton = fopen("./output/distribution_protons.dat", "w");
 	fclose(distributionFileProton);
