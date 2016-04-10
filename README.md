@@ -1,4 +1,4 @@
-# PIC-
+# PIC++
 implicit particle in cell code
 
 This code is designed for simulation of processes in astrophysical colisionless plasma. 
