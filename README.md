@@ -14,9 +14,9 @@ https://code.google.com/archive/p/celeste/
 not relativistic c++ code
 https://github.com/CmPA/iPic3D
 
-[1] G. Lapenta, J. Brackbill, P. Ricci, Phys. Plasmas 13, 055904 2006.
+[1] G. Lapenta, J. Brackbill, P. Ricci, Phys. Plasmas 13, 055904 (2006).
 
-[2] K. Noguchi, C. Tronci, G. Zuccaro, G. Lapenta, Phys. Plasmas 14, 042308 2007.
+[2] K. Noguchi, C. Tronci, G. Zuccaro, G. Lapenta, Phys. Plasmas 14, 042308 (2007).
 
 [3] S. Markidis, G. Lapenta, Rizwan-uddin, Mathematics and Computers in Simulation 80 (2010) 1509–1519.
 
