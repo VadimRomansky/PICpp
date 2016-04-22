@@ -117,7 +117,8 @@ double Particle::velocityZ(double c) {
 void Particle::addVelocity(Vector3d& v, double c) {
 	if (v.norm() > c) {
 		printf("ERROR v > c\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
+		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "v/c > 1 in addVelocity\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -158,7 +159,8 @@ void Particle::setMomentumByV(Vector3d v, double c) {
 		printf("ERROR v > c\n");
 		printf("v = %g\n", v.norm());
 		printf("c = %g\n", c);
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
 		fprintf(errorLogFile, "v/c > 1 in setMomentumByV\n");
 		fclose(errorLogFile);
 		exit(0);

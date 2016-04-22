@@ -35,7 +35,7 @@ int main() {
     const int timePointsCount = 3; //must be >= 2
     const int Np = 1000;
     //std::string inputDir = "../../PIC++/output/";
-    std::string inputDir = "../../../../iPic3D (copy)/data/";
+    std::string inputDir = "../../../../iPic3D/data/";
     FILE* XFile = fopen((inputDir + "Xfile.dat").c_str(),"r");
     FILE* YFile = fopen((inputDir + "Yfile.dat").c_str(),"r");
     FILE* ZFile = fopen((inputDir + "Zfile.dat").c_str(),"r");
@@ -99,9 +99,9 @@ int main() {
     rewind(EFile);
     int Nt = NE/(Nx*Ny*Nz);
 
-    int xpoint = 0;
-    int ypoint = 0;
-    int zpoint = 0;
+    int xpoint = Nx/2;
+    int ypoint = Ny/2;
+    int zpoint = Nz/2;
 
     int timePoints[timePointsCount];
     timePoints[0] = 0;
@@ -219,20 +219,20 @@ int main() {
     }
 
     for(int i = 0; i < Nx-1; ++i) {
-        fprintf(gleBFileX, "%20.15g ", middleX[i]);
-        fprintf(gleVelocityFileX, "%20.15g ", Xgrid[i]);
-        fprintf(gleConcentrationFileX, "%20.15g ", middleX[i]);
-        fprintf(gleDivergenceFileX, "%20.15g ", middleX[i]);
+        fprintf(gleBFileX, "%20.15g", middleX[i]);
+        fprintf(gleVelocityFileX, "%20.15g", Xgrid[i]);
+        fprintf(gleConcentrationFileX, "%20.15g", middleX[i]);
+        fprintf(gleDivergenceFileX, "%20.15g", middleX[i]);
         for(int j = 0; j < timePointsCount; ++j){
             int number = timePoints[j]*(Nx-1)*(Ny-1)*(Nz-1) + (Nz-1)*(Ny-1)*i + (Nz-1)*ypoint + zpoint;
-            fprintf(gleBFileX, "%20.15g %20.15g %20.15g", Bfield[number][0], Bfield[number][1], Bfield[number][2]);
-            fprintf(gleVelocityFileX, "%20.15g %20.15g %20.15g %20.15g %20.15g %20.15g", velocity[number][0], velocity[number][1],velocity[number][2], velocity[number][3], velocity[number][4],velocity[number][5]);
+            fprintf(gleBFileX, "% 20.15g %20.15g %20.15g", Bfield[number][0], Bfield[number][1], Bfield[number][2]);
+            fprintf(gleVelocityFileX, "% 20.15g %20.15g %20.15g %20.15g %20.15g %20.15g", velocity[number][0], velocity[number][1],velocity[number][2], velocity[number][3], velocity[number][4],velocity[number][5]);
             fprintf(gleConcentrationFileX, "%20.15g %20.15g %20.15g", concentrations[number][0], concentrations[number][1], concentrations[number][2]);
-            fprintf(gleDivergenceFileX, "%20.15g %20.15g %20.15g", divergence[number][0], divergence[number][1], divergence[number][2]);
+            fprintf(gleDivergenceFileX, "% 20.15g %20.15g %20.15g", divergence[number][0], divergence[number][1], divergence[number][2]);
         }
         fprintf(gleBFileX, "\n");
         fprintf(gleVelocityFileX, "\n");
-        fprintf(gleConcentrationFileX, "\n");
+        fprintf(gleConcentrationFileX, "\r\n");
         fprintf(gleDivergenceFileX, "\n");
     }
 
@@ -245,7 +245,7 @@ int main() {
             int number = timePoints[j]*(Nx-1)*(Ny-1)*(Nz-1) + (Nz-1)*(Ny-1)*xpoint + (Nz-1)*i + zpoint;
             fprintf(gleBFileY, "%20.15g %20.15g %20.15g", Bfield[number][0], Bfield[number][1], Bfield[number][2]);
             fprintf(gleVelocityFileY, "%20.15g %20.15g %20.15g %20.15g %20.15g %20.15g", velocity[number][0], velocity[number][1],velocity[number][2], velocity[number][3], velocity[number][4],velocity[number][5]);
-            fprintf(gleConcentrationFileY, "%20.15g %20.15g %20.15g %20.15g", concentrations[number][0], concentrations[number][1], concentrations[number][2],concentrations[number][3]);
+            fprintf(gleConcentrationFileY, "%20.15g %20.15g %20.15g", concentrations[number][0], concentrations[number][1], concentrations[number][2]);
             fprintf(gleDivergenceFileY, "%20.15g %20.15g %20.15g", divergence[number][0], divergence[number][1], divergence[number][2]);
         }
         fprintf(gleBFileY, "\n");
@@ -263,7 +263,7 @@ int main() {
             int number = timePoints[j]*(Nx-1)*(Ny-1)*(Nz-1) + (Nz-1)*(Ny-1)*xpoint + (Nz-1)*ypoint + i;
             fprintf(gleBFileZ, "%20.15g %20.15g %20.15g", Bfield[number][0], Bfield[number][1], Bfield[number][2]);
             fprintf(gleVelocityFileZ, "%20.15g %20.15g %20.15g %20.15g %20.15g %20.15g", velocity[number][0], velocity[number][1],velocity[number][2], velocity[number][3], velocity[number][4],velocity[number][5]);
-            fprintf(gleConcentrationFileZ, "%20.15g %20.15g %20.15g %20.15g", concentrations[number][0], concentrations[number][1], concentrations[number][2],concentrations[number][3]);
+            fprintf(gleConcentrationFileZ, "%20.15g %20.15g %20.15g", concentrations[number][0], concentrations[number][1], concentrations[number][2]);
             fprintf(gleDivergenceFileZ, "%20.15g %20.15g %20.15g", divergence[number][0], divergence[number][1], divergence[number][2]);
         }
         fprintf(gleBFileZ, "\n");

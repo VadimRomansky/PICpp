@@ -22,7 +22,7 @@ int main() {
 
 	if (startNew) {
 		printf("open input\n");
-		FILE* inputFile = fopen("./input/input.dat", "r");
+		FILE* inputFile = fopen("../input/input.dat", "r");
 		printf("read input\n");
 		Simulation simulation = readInput(inputFile);
 		printf("close input\n");

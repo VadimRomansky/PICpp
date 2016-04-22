@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "util.h"
+#include "constants.h"
 
 double power(double v, double p) {
 	return exp(p * log(v));
@@ -51,7 +52,8 @@ void alertNaNOrInfinity(double value, const char* s) {
 	if (value != value || 0 * value != 0 * value) {
 		printf("%s", s);
 		printf("\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
 		fprintf(errorLogFile, "%s", s);
 		fclose(errorLogFile);
 		exit(0);
@@ -63,7 +65,8 @@ void alertNotPositive(double value, const char* s) {
 	if (value <= 0) {
 		printf("%s", s);
 		printf("\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
 		fprintf(errorLogFile, "%s", s);
 		fclose(errorLogFile);
 		exit(0);
@@ -74,7 +77,8 @@ void alertNegative(double value, const char* s) {
 	if (value < 0) {
 		printf("%s", s);
 		printf("\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
 		fprintf(errorLogFile, "%s", s);
 		fclose(errorLogFile);
 		exit(0);
@@ -84,14 +88,16 @@ void alertNegative(double value, const char* s) {
 void printErrorAndExit(const char* s){
 	printf("%s", s);
 	printf("\n");
-	FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+	//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+	FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
 	fprintf(errorLogFile, "%s", s);
 	fclose(errorLogFile);
 	exit(0);
 }
 
 void printLog(const char* s){
-	FILE* logFile = fopen("./output/log.dat", "a");
+	//FILE* logFile = fopen("./output/log.dat", "a");
+	FILE* logFile = fopen("../output/log.dat", "a");
 	fprintf(logFile, "%s", s);
 	fclose(logFile);
 }
@@ -122,7 +128,8 @@ double McDonaldFunction(double x, double index) {
 	//todo approximation with small x!!!
 	if (x < 0) {
 		printf("x in McDonald < 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
 		fprintf(errorLogFile, "x in McDonald < 0\n");
 		fclose(errorLogFile);
 		exit(0);

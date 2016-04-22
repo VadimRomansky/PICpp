@@ -115,80 +115,80 @@ void Simulation::output() {
 	printLog("outputing\n");
 
 	if (particles.size() > 0) {
-		distributionFileProton = fopen("./output/distribution_protons.dat", "a");
+		distributionFileProton = fopen((outputDir + "distribution_protons.dat").c_str(), "a");
 		outputDistribution(distributionFileProton, particles, PROTON, gyroradius, plasma_period);
 		fclose(distributionFileProton);
-		distributionFileElectron = fopen("./output/distribution_electrons.dat", "a");
+		distributionFileElectron = fopen((outputDir + "distribution_electrons.dat").c_str(), "a");
 		outputDistribution(distributionFileElectron, particles, ELECTRON, gyroradius, plasma_period);
 		fclose(distributionFileElectron);
-		distributionFileProtonUpstream = fopen("./output/distribution_protons_upstream.dat", "a");
+		distributionFileProtonUpstream = fopen((outputDir + "distribution_protons_upstream.dat").c_str(), "a");
 		outputDistributionUpstream(distributionFileProtonUpstream, particles, PROTON, xgrid[shockWavePoint], gyroradius, plasma_period);
 		fclose(distributionFileProtonUpstream);
-		distributionFileElectronUpstream = fopen("./output/distribution_electrons_upstream.dat", "a");
+		distributionFileElectronUpstream = fopen((outputDir + "distribution_electrons_upstream.dat").c_str(), "a");
 		outputDistributionUpstream(distributionFileElectronUpstream, particles, ELECTRON, xgrid[shockWavePoint], gyroradius, plasma_period);
 		fclose(distributionFileElectronUpstream);
-		protonTraectoryFile = fopen("./output/trajectory_proton.dat", "a");
-		outputTraectory(protonTraectoryFile, getFirstProton(), time, plasma_period, gyroradius);
+		protonTraectoryFile = fopen((outputDir + "trajectory_proton.dat").c_str(), "a");
+		outputTrajectory(protonTraectoryFile, getFirstProton(), time, plasma_period, gyroradius);
 		fclose(protonTraectoryFile);
-		electronTraectoryFile = fopen("./output/trajectory_electron.dat", "a");
-		outputTraectory(electronTraectoryFile, getFirstElectron(), time, plasma_period, gyroradius);
+		electronTraectoryFile = fopen((outputDir + "trajectory_electron.dat").c_str(), "a");
+		outputTrajectory(electronTraectoryFile, getFirstElectron(), time, plasma_period, gyroradius);
 		fclose(electronTraectoryFile);
 	}
 
-	EfieldFile = fopen("./output/Efield.dat", "a");
-	BfieldFile = fopen("./output/Bfield.dat", "a");
+	EfieldFile = fopen((outputDir + "Efield.dat").c_str(), "a");
+	BfieldFile = fopen((outputDir + "Bfield.dat").c_str(), "a");
 	outputFields(EfieldFile, BfieldFile, Efield, Bfield, xnumber, ynumber, znumber, plasma_period, gyroradius, fieldScale);
 	fclose(EfieldFile);
 	fclose(BfieldFile);
 
-	Xfile = fopen("./output/Xfile.dat", "w");
+	Xfile = fopen((outputDir + "Xfile.dat").c_str(), "w");
 	outputGrid(Xfile, xgrid, xnumber, gyroradius);
 	fclose(Xfile);
 
-	Yfile = fopen("./output/Yfile.dat", "w");
+	Yfile = fopen((outputDir + "Yfile.dat").c_str(), "w");
 	outputGrid(Yfile, ygrid, ynumber, gyroradius);
 	fclose(Yfile);
 
-	Zfile = fopen("./output/Zfile.dat", "w");
+	Zfile = fopen((outputDir + "Zfile.dat").c_str(), "w");
 	outputGrid(Zfile, zgrid, znumber, gyroradius);
 	fclose(Zfile);
 
-	densityFile = fopen("./output/concentrations.dat", "a");
+	densityFile = fopen((outputDir + "concentrations.dat").c_str(), "a");
 	outputConcentrations(densityFile, electronConcentration, protonConcentration, chargeDensity, electricDensity, xnumber, ynumber, znumber, plasma_period, gyroradius, fieldScale);
 	fclose(densityFile);
 
-	velocityFile = fopen("./output/velocity.dat", "a");
-	velocityElectronFile = fopen("./output/velocity_electron.dat", "a");
+	velocityFile = fopen((outputDir + "velocity.dat").c_str(), "a");
+	velocityElectronFile = fopen((outputDir + "velocity_electron.dat").c_str(), "a");
 	outputVelocity(velocityFile, velocityElectronFile, velocityBulkProton, velocityBulkElectron, xnumber, ynumber, znumber, plasma_period, gyroradius);
 	fclose(velocityFile);
 	fclose(velocityElectronFile);
 
-	fluxFile = fopen("./output/fluxFile.dat", "a");
+	fluxFile = fopen((outputDir + "fluxFile.dat").c_str(), "a");
 	outputFlux(fluxFile, electricFlux, externalElectricFlux, xnumber + 1, ynumber + 1, znumber + 1, plasma_period, gyroradius, fieldScale);
 	fclose(fluxFile);
 
-	divergenceErrorFile = fopen("./output/divergence_error.dat", "a");
+	divergenceErrorFile = fopen((outputDir + "divergence_error.dat").c_str(), "a");
 	outputDivergenceError(divergenceErrorFile, this, plasma_period, gyroradius, fieldScale);
 	fclose(divergenceErrorFile);
 
 	double rotBscale = fieldScale / (plasma_period * plasma_period * sqrt(gyroradius));
 
-	rotBFile = fopen("./output/rotBFile.dat", "a");
+	rotBFile = fopen((outputDir + "rotBFile.dat").c_str(), "a");
 	outputVectorArray(rotBFile, rotB, xnumber + 1, ynumber + 1, znumber + 1, rotBscale);
 	fclose(rotBFile);
 
-	EderivativeFile = fopen("./output/EderivativeFile.dat", "a");
+	EderivativeFile = fopen((outputDir + "EderivativeFile.dat").c_str(), "a");
 	outputVectorArray(EderivativeFile, Ederivative, xnumber + 1, ynumber + 1, znumber + 1, rotBscale);
 	fclose(EderivativeFile);
 
-	dielectricTensorFile = fopen("./output/dielectricTensorFile.dat", "a");
+	dielectricTensorFile = fopen((outputDir + "dielectricTensorFile.dat").c_str(), "a");
 	outputMatrixArray(dielectricTensorFile, dielectricTensor, xnumber + 1, ynumber + 1, znumber + 1);
 	fclose(dielectricTensorFile);
 
-	particleProtonsFile = fopen("./output/protons.dat", "w");
-	particleElectronsFile = fopen("./output/electrons.dat", "w");
-	particlePositronsFile = fopen("./output/positrons.dat", "w");
-	particleAlphaFile = fopen("./output/alphas.dat", "w");
+	particleProtonsFile = fopen((outputDir + "protons.dat").c_str(), "w");
+	particleElectronsFile = fopen((outputDir + "electrons.dat").c_str(), "w");
+	particlePositronsFile = fopen((outputDir + ".positrons.dat").c_str(), "w");
+	particleAlphaFile = fopen((outputDir + "alphas.dat").c_str(), "w");
 	outputParticles(particleProtonsFile, particleElectronsFile, particlePositronsFile, particleAlphaFile, this);
 	fclose(particleProtonsFile);
 	fclose(particleElectronsFile);
@@ -199,7 +199,7 @@ void Simulation::output() {
 	outputMaxwellEquationMatrixFull(maxwellMatrixFile, maxwellEquationMatrix, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
 	fclose(maxwellMatrixFile);*/
 
-	generalFile = fopen("./output/general.dat", "a");
+	generalFile = fopen((outputDir + "general.dat").c_str(), "a");
 	outputGeneral(generalFile, this);
 	fclose(generalFile);
 }
@@ -337,7 +337,7 @@ double Simulation::volumeB(int i, int j, int k) {
 void Simulation::checkParticleInBox(Particle& particle) {
 	if (particle.coordinates.x < xgrid[0]) {
 		printf("particle.x < 0\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "particle.x = %15.10g < 0\n", particle.coordinates.x);
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
@@ -347,7 +347,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 	}
 	if (particle.coordinates.x > xgrid[xnumber]) {
 		printf("particle.x > xsize\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "particle.x = %15.10g > %15.10g\n", particle.coordinates.x, xgrid[xnumber]);
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
@@ -358,7 +358,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 
 	if (particle.coordinates.y < ygrid[0]) {
 		printf("particle.y < ygrid[0]\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "particle.y = %15.10g < ygrid[0]\n", particle.coordinates.y);
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
@@ -368,7 +368,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 	}
 	if (particle.coordinates.y > ygrid[ynumber]) {
 		printf("particle.y > ysize\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "particle.y = %15.10g > %15.10g\n", particle.coordinates.y, ygrid[ynumber]);
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
@@ -379,7 +379,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 
 	if (particle.coordinates.z < zgrid[0]) {
 		printf("particle.z < zgrid[0]\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "particle.z = %15.10g < zgrid[0]\n", particle.coordinates.z);
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
@@ -389,7 +389,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 	}
 	if (particle.coordinates.z > zgrid[znumber]) {
 		printf("particle.z > zsize\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "particle.z = %15.10g > %15.10g\n", particle.coordinates.z, zgrid[znumber]);
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x, particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
@@ -407,7 +407,7 @@ void Simulation::checkParticlesInBin() {
 				for (int pcountRight = 0; pcountRight < particlesInEbin[xnumber][j][k].size(); ++pcountRight) {
 					if (particle == particlesInEbin[xnumber][j][k][pcountRight]) {
 						printf("particle is in 0 and xnumber bin\n");
-						errorLogFile = fopen("./output/errorLog.dat", "w");
+						errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 						fprintf(errorLogFile, "particle is in 0 and xnumber bin, particle.x = %15.10g xmax = %15.10g\n", particle->coordinates.x, xgrid[xnumber]);
 						fclose(errorLogFile);
 						exit(0);
@@ -424,7 +424,7 @@ void Simulation::checkParticlesInBin() {
 				for (int pcountRight = 0; pcountRight < particlesInEbin[i][ynumber][k].size(); ++pcountRight) {
 					if (particle == particlesInEbin[i][ynumber][k][pcountRight]) {
 						printf("particle is in 0 and ynumber bin\n");
-						errorLogFile = fopen("./output/errorLog.dat", "w");
+						errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 						fprintf(errorLogFile, "particle is in 0 and ynumber bin, particle.y = %15.10g ymax = %15.10g\n", particle->coordinates.y, ygrid[ynumber]);
 						fclose(errorLogFile);
 						exit(0);
@@ -441,7 +441,7 @@ void Simulation::checkParticlesInBin() {
 				for (int pcountRight = 0; pcountRight < particlesInEbin[i][j][znumber].size(); ++pcountRight) {
 					if (particle == particlesInEbin[i][j][znumber][pcountRight]) {
 						printf("particle is in 0 and znumber bin\n");
-						errorLogFile = fopen("./output/errorLog.dat", "w");
+						errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 						fprintf(errorLogFile, "particle is in 0 and znumber bin, particle.z = %15.10g zmax = %15.10g\n", particle->coordinates.z, zgrid[znumber]);
 						fclose(errorLogFile);
 						exit(0);
@@ -460,7 +460,7 @@ void Simulation::checkParticlesInBin() {
 						for (int pcount2 = pcount + 1; pcount2 < particlesInEbin[i][j][k].size(); ++pcount2) {
 							if (particle == particlesInEbin[i][j][k][pcount2]) {
 								printf("particle is twice in Ebin number %d %d %d\n", i, j, k);
-								errorLogFile = fopen("./output/errorLog.dat", "w");
+								errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 								fprintf(errorLogFile, "particle is twice in Ebin number %d %d %d\n", i, j, k);
 								fclose(errorLogFile);
 								exit(0);
@@ -481,7 +481,7 @@ void Simulation::checkParticlesInBin() {
 						for (int pcount2 = pcount + 1; pcount2 < particlesInBbin[i][j][k].size(); ++pcount2) {
 							if (particle == particlesInBbin[i][j][k][pcount2]) {
 								printf("particle is twice in Bbin number %d %d %d\n", i, j, k);
-								errorLogFile = fopen("./output/errorLog.dat", "w");
+								errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 								fprintf(errorLogFile, "particle is twice in Bbi number %d %d 5d\n", i, j, k);
 								fclose(errorLogFile);
 								exit(0);
@@ -690,7 +690,7 @@ void Simulation::updateElectroMagneticParameters() {
 
 	//smoothFlux();
 
-	FILE* tempFluxFile = fopen("./output/tempFluxFile.dat", "w");
+	FILE* tempFluxFile = fopen((outputDir + "tempFluxFile.dat").c_str(), "w");
 	for(int i = 0; i < xnumber; ++i){
 		fprintf(tempFluxFile, "%28.22g %28.22g %28.22g\n", electricFlux[i][0][0][0], electricFlux[i][0][0][1], electricFlux[i][0][0][2]);
 	}
@@ -712,7 +712,7 @@ void Simulation::updateElectroMagneticParameters() {
 	//fprintf(outputEverythingFile, "density %d afterFlux = %28.22g\n", electricDensity[debugPoint][0][0]);
 	//fprintf(outputEverythingFile, "density %d afterFlux = %28.22g\n", electricDensity[debugPoint + 1][0][0]);
 
-	FILE* tempDensityFile = fopen("./output/tempDensityFile.dat", "w");
+	FILE* tempDensityFile = fopen((outputDir + "tempDensityFile.dat").c_str(), "w");
 	for(int i = 0; i < xnumber; ++i){
 		fprintf(tempDensityFile, "%28.22g\n", electricDensity[i][0][0]);
 	}
@@ -988,7 +988,7 @@ Vector3d Simulation::getBfield(int i, int j, int k) {
 		i = 0;
 	} else if (i < -1 || i > xnumber) {
 		printf("i < -1 || i > xnumber in getBfied i = %d\n", i);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "i = %d, xnumber = %d\n", i, xnumber);
 		fclose(errorLogFile);
 		exit(0);
@@ -1000,7 +1000,7 @@ Vector3d Simulation::getBfield(int i, int j, int k) {
 		j = 0;
 	} else if (j < -1 || j > ynumber) {
 		printf("j < -1 || j > ynumber in getBfied i = %d\n", j);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "j = %d, ynumber = %d\n", j, ynumber);
 		fclose(errorLogFile);
 		exit(0);
@@ -1012,7 +1012,7 @@ Vector3d Simulation::getBfield(int i, int j, int k) {
 		k = 0;
 	} else if (k < -1 || k > znumber) {
 		printf("k < -1 || k > znumber in getBfied i = %d\n", k);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "k = %d, znumber = %d\n", k, znumber);
 		fclose(errorLogFile);
 		exit(0);

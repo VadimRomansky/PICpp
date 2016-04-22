@@ -292,14 +292,14 @@ void Simulation::checkEquationMatrix(std::vector<MatrixElement>**** matrix, int 
 						MatrixElement element = matrix[i][j][k][l][m];
 						if (element.i < 0) {
 							printf("element i < 0\n");
-							errorLogFile = fopen("./output/errorLog.dat", "w");
+							errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 							fprintf(errorLogFile, "element i = %d < 0\n", element.i);
 							fclose(errorLogFile);
 							exit(0);
 						}
 						if (element.i >= xnumber) {
 							printf("element i >= xnumber");
-							errorLogFile = fopen("./output/errorLog.dat", "w");
+							errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 							fprintf(errorLogFile, "element i = %d >= xnumber = %d\n", element.i, xnumber);
 							fclose(errorLogFile);
 							exit(0);
@@ -307,14 +307,14 @@ void Simulation::checkEquationMatrix(std::vector<MatrixElement>**** matrix, int 
 
 						if (element.j < 0) {
 							printf("element j < 0\n");
-							errorLogFile = fopen("./output/errorLog.dat", "w");
+							errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 							fprintf(errorLogFile, "element j = %d < 0\n", element.j);
 							fclose(errorLogFile);
 							exit(0);
 						}
 						if (element.j >= ynumber) {
 							printf("element j >= ynumber");
-							errorLogFile = fopen("./output/errorLog.dat", "w");
+							errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 							fprintf(errorLogFile, "element j = %d >= ynumber = %d\n", element.j, ynumber);
 							fclose(errorLogFile);
 							exit(0);
@@ -322,14 +322,14 @@ void Simulation::checkEquationMatrix(std::vector<MatrixElement>**** matrix, int 
 
 						if (element.k < 0) {
 							printf("element k < 0\n");
-							errorLogFile = fopen("./output/errorLog.dat", "w");
+							errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 							fprintf(errorLogFile, "element k = %d < 0\n", element.k);
 							fclose(errorLogFile);
 							exit(0);
 						}
 						if (element.k >= znumber) {
 							printf("element k >= znumber");
-							errorLogFile = fopen("./output/errorLog.dat", "w");
+							errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 							fprintf(errorLogFile, "element k = %d >= xnumber = %d\n", element.k, znumber);
 							fclose(errorLogFile);
 							exit(0);
@@ -341,7 +341,7 @@ void Simulation::checkEquationMatrix(std::vector<MatrixElement>**** matrix, int 
 								printf("equals indexes\n");
 								printf("current = %d %d %d %d\n", i, j, k, l);
 								printf("temp = %d %d %d %d\n", tempElement.i, tempElement.j, tempElement.k, tempElement.l);
-								errorLogFile = fopen("./output/errorLog.dat", "w");
+								errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 								fprintf(errorLogFile, "equal indexes current = %d %d %d %d temp = %d %d %d %d\n", i, j, k, l, element.i, element.j, element.k, element.l);
 								fclose(errorLogFile);
 								exit(0);
@@ -1396,7 +1396,7 @@ Vector3d Simulation::evaluateRotB(int i, int j, int k) {
 	if (debugMode) {
 		if ((i < 0) || ((i == 0) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT))) {
 			printf("i < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d < 0 in evaluateRotB\n", i);
 			fclose(errorLogFile);
 			exit(0);
@@ -1404,7 +1404,7 @@ Vector3d Simulation::evaluateRotB(int i, int j, int k) {
 
 		if ((i > xnumber) || ((i == xnumber) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT))) {
 			printf("i >= xnumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d > xnumber = %d in evaluzteRotB\n", i, xnumber);
 			fclose(errorLogFile);
 			exit(0);
@@ -1470,7 +1470,7 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 	if (debugMode) {
 		if (i < 0) {
 			printf("i < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d < 0 in evaluateRotTempE\n", i);
 			fclose(errorLogFile);
 			exit(0);
@@ -1478,7 +1478,7 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 
 		if (i >= xnumber) {
 			printf("x >= xnumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d >= xnumber = %d in evaluateRotTempE\n", i, xnumber);
 			fclose(errorLogFile);
 			exit(0);
@@ -1486,7 +1486,7 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 
 		if (j < 0) {
 			printf("j < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d < 0 in evaluateRotTempE\n", j);
 			fclose(errorLogFile);
 			exit(0);
@@ -1494,7 +1494,7 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 
 		if (j >= ynumber) {
 			printf("y >= ynumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d >= ynumber = %d in evaluateRotTempE\n", j, ynumber);
 			fclose(errorLogFile);
 			exit(0);
@@ -1502,7 +1502,7 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 
 		if (k < 0) {
 			printf("k < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d < 0 in evaluateRotTempE\n", k);
 			fclose(errorLogFile);
 			exit(0);
@@ -1510,7 +1510,7 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 
 		if (k >= znumber) {
 			printf("z >= znumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d >= znumber = %d in evaluateRotTempE\n", k, znumber);
 			fclose(errorLogFile);
 			exit(0);
@@ -1549,7 +1549,7 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 	if (debugMode) {
 		if (i < 0) {
 			printf("i < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d < 0 in evaluateRotTempE\n", i);
 			fclose(errorLogFile);
 			exit(0);
@@ -1557,7 +1557,7 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 
 		if (i >= xnumber) {
 			printf("x >= xnumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d >= xnumber = %d in evaluateRotTempE\n", i, xnumber);
 			fclose(errorLogFile);
 			exit(0);
@@ -1565,7 +1565,7 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 
 		if (j < 0) {
 			printf("j < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d < 0 in evaluateRotTempE\n", j);
 			fclose(errorLogFile);
 			exit(0);
@@ -1573,7 +1573,7 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 
 		if (j >= ynumber) {
 			printf("y >= ynumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d >= ynumber = %d in evaluateRotTempE\n", j, ynumber);
 			fclose(errorLogFile);
 			exit(0);
@@ -1581,7 +1581,7 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 
 		if (k < 0) {
 			printf("k < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d < 0 in evaluateRotTempE\n", k);
 			fclose(errorLogFile);
 			exit(0);
@@ -1589,7 +1589,7 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 
 		if (k >= znumber) {
 			printf("z >= znumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d >= znumber = %d in evaluateRotTempE\n", k, znumber);
 			fclose(errorLogFile);
 			exit(0);
@@ -1628,7 +1628,7 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 	if (debugMode) {
 		if (i < 0) {
 			printf("i < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d < 0 in evaluateRotTempE\n", i);
 			fclose(errorLogFile);
 			exit(0);
@@ -1636,7 +1636,7 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 
 		if (i >= xnumber) {
 			printf("x >= xnumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d >= xnumber = %d in evaluateRotTempE\n", i, xnumber);
 			fclose(errorLogFile);
 			exit(0);
@@ -1644,7 +1644,7 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 
 		if (j < 0) {
 			printf("j < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d < 0 in evaluateRotTempE\n", j);
 			fclose(errorLogFile);
 			exit(0);
@@ -1652,7 +1652,7 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 
 		if (j >= ynumber) {
 			printf("y >= ynumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d >= ynumber = %d in evaluateRotTempE\n", j, ynumber);
 			fclose(errorLogFile);
 			exit(0);
@@ -1660,7 +1660,7 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 
 		if (k < 0) {
 			printf("k < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d < 0 in evaluateRotTempE\n", k);
 			fclose(errorLogFile);
 			exit(0);
@@ -1668,7 +1668,7 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 
 		if (k >= znumber) {
 			printf("z >= znumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d >= znumber = %d in evaluateRotTempE\n", k, znumber);
 			fclose(errorLogFile);
 			exit(0);
@@ -1760,7 +1760,7 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 	if (debugMode) {
 		if (i < 0) {
 			printf("i < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d < 0 in evaluateDivFlux\n", i);
 			fclose(errorLogFile);
 			exit(0);
@@ -1768,7 +1768,7 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 
 		if (i >= xnumber) {
 			printf("x >= xnumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d >= xnumber = %d in evaluateDivFlux\n", i, xnumber);
 			fclose(errorLogFile);
 			exit(0);
@@ -1776,7 +1776,7 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 
 		if (j < 0) {
 			printf("i < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d < 0 in evaluateDivFlux\n", j);
 			fclose(errorLogFile);
 			exit(0);
@@ -1784,7 +1784,7 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 
 		if (j >= ynumber) {
 			printf("y >= ynumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d >= ynumber = %d in evaluateDivFlux\n", j, ynumber);
 			fclose(errorLogFile);
 			exit(0);
@@ -1792,7 +1792,7 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 
 		if (k < 0) {
 			printf("k < 0\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d < 0 in evaluateDivFlux\n", k);
 			fclose(errorLogFile);
 			exit(0);
@@ -1800,7 +1800,7 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 
 		if (k >= znumber) {
 			printf("z >= znumber\n");
-			errorLogFile = fopen("./output/errorLog.dat", "w");
+			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d >= znumber = %d in evaluateDivFlux\n", k, znumber);
 			fclose(errorLogFile);
 			exit(0);

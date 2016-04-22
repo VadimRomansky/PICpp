@@ -35,7 +35,8 @@ double maxwellJuttnerDistribution(double temperature, double mass, double c, dou
 double solveInverceJuttnerFunction(double x, double theta, double besselK) {
 	if (x >= 1) {
 		printf("distribution function can not be more than 1\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
 		fprintf(errorLogFile, "distribution function can not be more than 1\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -57,7 +58,8 @@ double solveInverceJuttnerFunction(double x, double theta, double besselK) {
 double solveInverceJuttnerFunction(double x, double theta, double besselK, double left, double right) {
 	if (right < left) {
 		printf("right < left\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
 		fprintf(errorLogFile, "right < left in solveInverceJuttnerFunction\n");
 		fclose(errorLogFile);
 		exit(0);

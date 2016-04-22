@@ -4,13 +4,22 @@
 #include "input.h"
 
 Simulation readInput(FILE* inputFile) {
-	int xnumber;
+	std::string outputDir = "../output/";
+	int inputType;
 	char ch = ' ';
+
+	fscanf(inputFile, "%d", &inputType);
+
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
+	int xnumber;
 	fscanf(inputFile, "%d", &xnumber);
 
 	if (xnumber < 0) {
 		printf("xnumber must be > 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "xnumber must be > 0\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -21,7 +30,7 @@ Simulation readInput(FILE* inputFile) {
 
 	if (ynumber < 0) {
 		printf("ynumber must be > 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "ynumber must be > 0\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -31,12 +40,13 @@ Simulation readInput(FILE* inputFile) {
 	fscanf(inputFile, "%d", &znumber);
 	if (znumber < 0) {
 		printf("znumber must be > 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "znumber must be > 0\n");
 		fclose(errorLogFile);
 		exit(0);
 	}
 
+	ch = ' ';
 	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
@@ -45,7 +55,7 @@ Simulation readInput(FILE* inputFile) {
 	fscanf(inputFile, "%lf", &xsize);
 	if (xsize < 0) {
 		printf("xsize must be > 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "xsize must be > 0\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -55,7 +65,7 @@ Simulation readInput(FILE* inputFile) {
 	fscanf(inputFile, "%lf", &ysize);
 	if (ysize < 0) {
 		printf("ysize must be > 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "ysize must be > 0\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -65,7 +75,7 @@ Simulation readInput(FILE* inputFile) {
 	fscanf(inputFile, "%lf", &zsize);
 	if (zsize < 0) {
 		printf("zsize must be > 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "zsize must be > 0\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -81,7 +91,7 @@ Simulation readInput(FILE* inputFile) {
 
 	if (temperature < 0) {
 		printf("temperature must be > 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "v/c > 1 in setMomentumByV\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -97,7 +107,7 @@ Simulation readInput(FILE* inputFile) {
 
 	if (density < 0) {
 		printf("density must be > 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "density must be > 0\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -154,7 +164,7 @@ Simulation readInput(FILE* inputFile) {
 
 	if (maxIterations < 0) {
 		printf("max iterations must be > 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "maxIterations mast be > 0\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -170,7 +180,7 @@ Simulation readInput(FILE* inputFile) {
 
 	if (maxTime < 0) {
 		printf("max time must be > 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "maxTime must be > 0\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -186,7 +196,7 @@ Simulation readInput(FILE* inputFile) {
 
 	if (particlesPerBin < 0) {
 		printf("particles per bin must be > 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "particles per bin must be > 0\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -202,7 +212,7 @@ Simulation readInput(FILE* inputFile) {
 
 	if (positronsPerBin < 0) {
 		printf("positrons per bin must be >= 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "positrons per bin must be >= 0\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -218,7 +228,7 @@ Simulation readInput(FILE* inputFile) {
 
 	if (alphaPerBin < 0) {
 		printf("alpha per bin must be >= 0\n");
-		FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "alpha per bin must be >= 0\n");
 		fclose(errorLogFile);
 		exit(0);
@@ -229,15 +239,27 @@ Simulation readInput(FILE* inputFile) {
 		fscanf(inputFile, "%c", &ch);
 	}
 
-	return Simulation(xnumber, ynumber, znumber, xsize, ysize, zsize, temperature, density, Vx, Vy, Vz, Ex, Ey, Ez, Bx, By, Bz, maxIterations, maxTime, particlesPerBin, positronsPerBin, alphaPerBin);
+	return Simulation(xnumber, ynumber, znumber, xsize, ysize, zsize, temperature, density, Vx, Vy, Vz, Ex, Ey, Ez, Bx, By, Bz, maxIterations, maxTime, particlesPerBin, positronsPerBin, alphaPerBin, inputType);
 }
 
 Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile) {
 	Simulation simulation = Simulation();
-
-	int xnumber = 0;
-	fscanf(generalFile, "%d", &xnumber);
-	simulation.xnumber = xnumber;
+	int inputType = 0;
+	fscanf(generalFile, "%d", &inputType);
+	if(inputType == 0){
+		simulation.inputType = CGS;
+	} else if(inputType == 1){
+		simulation.inputType = Theoretical;
+	} else {
+		printf("input type must be 1 or 0\n");
+		FILE* errorLogFile = fopen((simulation.outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "input type must be 1 or 0\n");
+		fclose(errorLogFile);
+		exit(0);
+	}
+	fscanf(generalFile, "%d", &simulation.xnumber);
+	fscanf(generalFile, "%d", &simulation.ynumber);
+	fscanf(generalFile, "%d", &simulation.znumber);
 	fscanf(generalFile, "%d", &simulation.particlesNumber);
 	fscanf(generalFile, "%d", &simulation.electronsPerBin);
 	fscanf(generalFile, "%d", &simulation.protonsPerBin);
@@ -257,6 +279,8 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 	fscanf(generalFile, "%d", &simulation.maxIteration);
 
 	fscanf(generalFile, "%lf", &simulation.xsize);
+	fscanf(generalFile, "%lf", &simulation.ysize);
+	fscanf(generalFile, "%lf", &simulation.zsize);
 	fscanf(generalFile, "%lf", &simulation.theta);
 	fscanf(generalFile, "%lf", &simulation.eta);
 

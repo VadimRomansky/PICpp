@@ -115,7 +115,7 @@ void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int par
 	}
 }
 
-void outputTraectory(FILE* outFile, Particle* particle, double time, double plasma_period, double gyroradius) {
+void outputTrajectory(FILE* outFile, Particle* particle, double time, double plasma_period, double gyroradius) {
 	fprintf(outFile, "%g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g\n", time, particle->coordinates.x, particle->coordinates.y, particle->coordinates.z, particle->momentum.x, particle->momentum.y, particle->momentum.z, particle->momentum.norm());
 }
 
@@ -281,7 +281,13 @@ void outputMaxwellEquationMatrixFull(FILE* outFile, std::vector<MatrixElement>**
 }
 
 void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile, Simulation* simulation) {
-
+	int inputType = 2;
+	if(simulation->inputType == CGS){
+		inputType = 0;
+	} else if(simulation->inputType == Theoretical){
+		inputType = 1;
+	}
+	fprintf(generalFile, "%d\n", inputType);
 	fprintf(generalFile, "%d\n", simulation->xnumber);
 	fprintf(generalFile, "%d\n", simulation->ynumber);
 	fprintf(generalFile, "%d\n", simulation->znumber);

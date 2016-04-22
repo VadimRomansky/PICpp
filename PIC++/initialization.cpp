@@ -39,15 +39,30 @@ Simulation::Simulation() {
 	typesNumber = 4;
 }
 
-Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int electronsPerBinV, int positronsPerBinV, int alphaPerBinV) {
+Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int electronsPerBinV, int positronsPerBinV, int alphaPerBinV, int inType) {
+	if(inType == 0){
+		inputType = CGS;
+	} else if(inType == 1){
+		inputType = Theoretical;
+	} else {
+		printf("input type must be 1 or 0\n");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "input type must be 1 or 0\n");
+		fclose(errorLogFile);
+		exit(0);
+	}
 	debugMode = true;
 	newlyStarted = true;
 	preserveChargeGlobal = true;
-	solverType = IMPLICIT; //�������
-	//solverType = EXPLICIT; //�����
+	solverType = IMPLICIT; //не явный
+	//solverType = EXPLICIT; //явный
 	boundaryConditionType = PERIODIC;
 	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
+
+	massProton = massProtonReal;
+	massElectron = 100*massElectronReal;
+	massAlpha = massAlphaReal;
 
 	currentIteration = 0;
 	time = 0;
@@ -96,7 +111,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 
 	double effectiveMass = 1 / (((electronsPerBin / massElectron) + (protonsPerBin / massProton) + (positronsPerBin / massElectron) + (alphaPerBin / massAlpha)) / electronsPerBin);
 
-	plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi) * gamma * sqrt(gamma);
+	//plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi) * gamma * sqrt(gamma);
+	plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * gamma * sqrt(gamma);
 	double thermal_momentum;
 	if (kBoltzman * temperature > massElectron * speed_of_light * speed_of_light) {
 		thermal_momentum = kBoltzman * temperature / speed_of_light;
@@ -104,11 +120,11 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		thermal_momentum = sqrt(2 * massElectron * kBoltzman * temperature);
 	}
 	thermal_momentum += V0.norm() * massElectron;
-	gyroradius = thermal_momentum * speed_of_light / (electron_charge * B0.norm());
-	if (B0.norm() <= 0) {
-		gyroradius = 1.0;
-	}
-
+	//gyroradius = thermal_momentum * speed_of_light / (electron_charge * B0.norm());
+	//if (B0.norm() <= 0) {
+		//gyroradius = 1.0;
+	//}
+	gyroradius = speed_of_light * plasma_period;
 	plasma_period = 1.0;
 	gyroradius = 1.0;
 
@@ -364,7 +380,7 @@ void Simulation::initialize() {
 	omegaPlasmaProton = sqrt(4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massProton);
 	omegaPlasmaElectron = sqrt(4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
 
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	if (omegaPlasmaElectron * xsize / speed_of_light_normalized < 5) {
 		printf("omegaPlasmaElectron*xsize/speed_of_light_normalized < 5\n");
 		fprintf(informationFile, "omegaPlasmaElectron*xsize/speed_of_light_normalized < 5\n");
@@ -560,14 +576,14 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 	createParticles();
 	E0 = Vector3d(0, 0, 0);
 
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	double alfvenV = B0.norm() * fieldScale / sqrt(4 * pi * density);
 	if (alfvenV > speed_of_light_normalized) {
 		printf("alfven velocity > c\n");
 		fprintf(informationFile, "alfven velocity > c\n");
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "alfvenV/c = %15.10g > 1\n", alfvenV / speed_of_light_normalized);
 		fclose(errorLogFile);
 		exit(0);
@@ -613,7 +629,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 		printf("discriminant < 0\n");
 		fprintf(informationFile, "discriminant < 0\n");
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "discriminant = %15.10g\n", discriminant);
 		fclose(errorLogFile);
 		exit(0);
@@ -667,7 +683,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 		printf("omega^2 < 0\n");
 		fprintf(informationFile, "omega^2 < 0\n");
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
 		fclose(errorLogFile);
 		exit(0);
@@ -688,7 +704,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 		printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 		fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 		//fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
 		fclose(errorLogFile);
 		//exit(0);
@@ -709,7 +725,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 
 	checkFrequency(omega);
 
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	//checkCollisionTime(omega);
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
@@ -818,7 +834,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 		printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeProton/c = %15.10g > 1\n", VzamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
 		exit(0);
@@ -832,7 +848,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 		printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeElectron/c = %15.10g > 1\n", VzamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
 		exit(0);
@@ -846,7 +862,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 		printf("VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
 		fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeProton/c = %15.10g > 1\n", VyamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
 		exit(0);
@@ -858,7 +874,7 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 		printf("VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
 		fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeElectron/c = %15.10g > 1\n", VyamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
 		exit(0);
@@ -1008,14 +1024,14 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 	createParticles();
 	E0 = Vector3d(0, 0, 0);
 
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	double alfvenV = B0.norm() * fieldScale / sqrt(4 * pi * density);
 	if (alfvenV > speed_of_light_normalized) {
 		printf("alfven velocity > c\n");
 		fprintf(informationFile, "alfven velocity > c\n");
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "alfvenV/c = %15.10g > 1\n", alfvenV / speed_of_light_normalized);
 		fclose(errorLogFile);
 		exit(0);
@@ -1066,7 +1082,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		printf("discriminant < 0\n");
 		fprintf(informationFile, "discriminant < 0\n");
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "discriminant = %15.10g\n", discriminant);
 		fclose(errorLogFile);
 		exit(0);
@@ -1120,7 +1136,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		printf("omega^2 < 0\n");
 		fprintf(informationFile, "omega^2 < 0\n");
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
 		fclose(errorLogFile);
 		exit(0);
@@ -1141,7 +1157,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 		fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 		//fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
 		fclose(errorLogFile);
 		//exit(0);
@@ -1162,7 +1178,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 
 	checkFrequency(omega);
 
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	//checkCollisionTime(omega);
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
@@ -1290,7 +1306,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeProton/c = %15.10g > 1\n", VzamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
 		exit(0);
@@ -1304,7 +1320,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeElectron/c = %15.10g > 1\n", VzamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
 		exit(0);
@@ -1318,7 +1334,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		printf("VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
 		fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeProton/c = %15.10g > 1\n", VyamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
 		exit(0);
@@ -1330,7 +1346,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		printf("VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
 		fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
 		fclose(informationFile);
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeElectron/c = %15.10g > 1\n", VyamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
 		exit(0);
@@ -1481,12 +1497,12 @@ void Simulation::initializeLangmuirWave() {
 	double langmuirV = omega / kw;
 
 	checkDebyeParameter();
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	fprintf(informationFile, "lengmuir V = %lf\n", langmuirV * gyroradius / plasma_period);
 	fclose(informationFile);
 	if (langmuirV > speed_of_light_normalized) {
 		printf("langmuirV > c\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "langmuireV/c = %15.10g > 1\n", langmuirV / speed_of_light_normalized);
 		fclose(errorLogFile);
 		exit(0);
@@ -1629,7 +1645,7 @@ void Simulation::initializeFluxFromRight() {
 	double magneticEnergy = B0.scalarMult(B0) / (8 * pi);
 	double kineticEnergy = density * V0.scalarMult(V0) / 2;
 
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	fprintf(informationFile, "magneticEnergy/kineticEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
 	printf("magneticEnergy/kinetikEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
 	fclose(informationFile);
@@ -1919,7 +1935,7 @@ void Simulation::initializeTwoStream() {
 
 	double kw = 2 * pi / xsize;
 
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	if (xsize * omegaPlasmaElectron / speed_of_light_normalized < 5) {
 		printf("xsize*omegaPlasmaElectron/speed_of_light_normalized < 5\n");
@@ -1996,7 +2012,7 @@ void Simulation::initializeExternalFluxInstability() {
 
 
 	checkGyroRadius();
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	fprintf(informationFile, "alfven V = %g\n", alfvenV * gyroradius / plasma_period);
 	fprintf(informationFile, "phase V = %g\n", phaseV * gyroradius / plasma_period);
 	fprintf(informationFile, "alfven V/c = %g\n", alfvenV / speed_of_light_normalized);
@@ -2259,65 +2275,65 @@ void Simulation::createParticleTypes() {
 
 void Simulation::createFiles() {
 	printf("creating files\n");
-	FILE* logFile = fopen("./output/log.dat","w");
+	FILE* logFile = fopen((outputDir + "log.dat").c_str(),"w");
 	fclose(logFile);
 	printLog("creatingFiles\n");
-	protonTraectoryFile = fopen("./output/trajectory_proton.dat", "w");
+	protonTraectoryFile = fopen((outputDir + "trajectory_proton.dat").c_str(), "w");
 	fclose(protonTraectoryFile);
-	electronTraectoryFile = fopen("./output/trajectory_electron.dat", "w");
+	electronTraectoryFile = fopen((outputDir + "trajectory_electron.dat").c_str(), "w");
 	fclose(electronTraectoryFile);
-	distributionFileProton = fopen("./output/distribution_protons.dat", "w");
+	distributionFileProton = fopen((outputDir + "distribution_protons.dat").c_str(), "w");
 	fclose(distributionFileProton);
-	distributionFileElectron = fopen("./output/distribution_electrons.dat", "w");
+	distributionFileElectron = fopen((outputDir + "distribution_electrons.dat").c_str(), "w");
 	fclose(distributionFileElectron);
-	EfieldFile = fopen("./output/Efield.dat", "w");
+	EfieldFile = fopen((outputDir + ".Efield.dat").c_str(), "w");
 	fclose(EfieldFile);
-	BfieldFile = fopen("./output/Bfield.dat", "w");
+	BfieldFile = fopen((outputDir + "Bfield.dat").c_str(), "w");
 	fclose(BfieldFile);
-	velocityFile = fopen("./output/velocity.dat", "w");
+	velocityFile = fopen((outputDir + "velocity.dat").c_str(), "w");
 	fclose(velocityFile);
-	velocityElectronFile = fopen("./output/velocity_electron.dat", "w");
+	velocityElectronFile = fopen((outputDir + "velocity_electron.dat").c_str(), "w");
 	fclose(velocityElectronFile);
-	Xfile = fopen("./output/Xfile.dat", "w");
+	Xfile = fopen((outputDir + "Xfile.dat").c_str(), "w");
 	fclose(Xfile);
-	Yfile = fopen("./output/Yfile.dat", "w");
+	Yfile = fopen((outputDir + "Yfile.dat").c_str(), "w");
 	fclose(Yfile);
-	Zfile = fopen("./output/Zfile.dat", "w");
+	Zfile = fopen((outputDir + "Zfile.dat").c_str(), "w");
 	fclose(Zfile);
-	generalFile = fopen("./output/general.dat", "w");
+	generalFile = fopen((outputDir + "general.dat").c_str(), "w");
 	fclose(generalFile);
-	densityFile = fopen("./output/concentrations.dat", "w");
+	densityFile = fopen((outputDir + "concentrations.dat").c_str(), "w");
 	fclose(densityFile);
-	divergenceErrorFile = fopen("./output/divergence_error.dat", "w");
+	divergenceErrorFile = fopen((outputDir + "divergence_error.dat").c_str(), "w");
 	fclose(divergenceErrorFile);
-	informationFile = fopen("./output/information.dat", "w");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "w");
 	fclose(informationFile);
-	fluxFile = fopen("./output/fluxFile.dat", "w");
+	fluxFile = fopen((outputDir + "fluxFile.dat").c_str(), "w");
 	fclose(fluxFile);
-	rotBFile = fopen("./output/rotBFile.dat", "w");
+	rotBFile = fopen((outputDir + "rotBFile.dat").c_str(), "w");
 	fclose(rotBFile);
-	EderivativeFile = fopen("./output/EderivativeFile.dat", "w");
+	EderivativeFile = fopen((outputDir + "EderivativeFile.dat").c_str(), "w");
 	fclose(EderivativeFile);
-	dielectricTensorFile = fopen("./output/dielectricTensorFile.dat", "w");
+	dielectricTensorFile = fopen((outputDir + "dielectricTensorFile.dat").c_str(), "w");
 	fclose(dielectricTensorFile);
-	maxwellMatrixFile = fopen("./output/maxwellMatrixFile.dat", "w");
+	maxwellMatrixFile = fopen((outputDir + "maxwellMatrixFile.dat").c_str(), "w");
 	fclose(maxwellMatrixFile);
-	errorLogFile = fopen("./output/errorLog.dat", "w");
+	errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 	fclose(errorLogFile);
-	particleProtonsFile = fopen("./output/protons.dat", "w");
+	particleProtonsFile = fopen((outputDir + "protons.dat").c_str(), "w");
 	fclose(particleProtonsFile);
-	particleElectronsFile = fopen("./output/electrons.dat", "w");
+	particleElectronsFile = fopen((outputDir + "electrons.dat").c_str(), "w");
 	fclose(particleElectronsFile);
-	particlePositronsFile = fopen("./output/positrons.dat", "w");
+	particlePositronsFile = fopen((outputDir + "positrons.dat").c_str(), "w");
 	fclose(particlePositronsFile);
-	particleAlphaFile = fopen("./output/alphas.dat", "w");
+	particleAlphaFile = fopen((outputDir + "alphas.dat").c_str(), "w");
 	fclose(particleAlphaFile);
 	//outputEverythingFile = fopen("./output/everything.dat","w");
 	//fclose(outputEverythingFile);
 }
 
 void Simulation::checkFrequency(double omega) {
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	double cyclothronOmegaElectron = electron_charge_normalized * B0.norm() * fieldScale / (massElectron * speed_of_light_normalized);
 	double cyclothronOmegaProton = electron_charge_normalized * B0.norm() * fieldScale / (massProton * speed_of_light_normalized);
 	if (omega > cyclothronOmegaProton) {
@@ -2344,7 +2360,7 @@ void Simulation::checkFrequency(double omega) {
 }
 
 void Simulation::checkDebyeParameter() {
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	double concentration = density / (massProton + massElectron);
 	double weight = concentration * volumeB(0, 0, 0) / electronsPerBin;
 	double superParticleCharge = electron_charge_normalized * weight;
@@ -2394,7 +2410,7 @@ void Simulation::checkDebyeParameter() {
 }
 
 void Simulation::checkGyroRadius() {
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	if (B0.norm() > 0) {
 		double thermalMomentumElectron = sqrt(massElectron * kBoltzman_normalized * temperature) + massElectron * V0.norm();
@@ -2422,7 +2438,7 @@ void Simulation::checkGyroRadius() {
 }
 
 void Simulation::checkCollisionTime(double omega) {
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	double concentration = density / (massProton + massElectron);
 	double weight = concentration * volumeB(0, 0, 0) / electronsPerBin;
 	double superParticleCharge = electron_charge_normalized * weight;
@@ -2459,7 +2475,7 @@ void Simulation::checkCollisionTime(double omega) {
 }
 
 void Simulation::checkMagneticReynolds(double v) {
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	double concentration = density / (massProton + massElectron);
 	double weight = concentration * volumeB(0, 0, 0) / electronsPerBin;
 	double superParticleCharge = electron_charge_normalized * weight;
@@ -2498,7 +2514,7 @@ void Simulation::checkMagneticReynolds(double v) {
 }
 
 void Simulation::checkDissipation(double k, double alfvenV) {
-	informationFile = fopen("./output/information.dat", "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	double omega = k * alfvenV;
 
 	double concentration = density / (massProton + massElectron);
@@ -2609,7 +2625,7 @@ void Simulation::moveToPreserveChargeLocal() {
 				electron = NULL;
 				while (electron == NULL) {
 					if (electronCount >= particles.size()) {
-						errorLogFile = fopen("./output/errorLog.dat", "w");
+						errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 						printf("error in preserving charge\n");
 						fprintf(errorLogFile, "error in preserving charge\n");
 						fclose(errorLogFile);
@@ -2718,7 +2734,7 @@ Particle* Simulation::getProton(int n) {
 			}
 		}
 	}
-	errorLogFile = fopen("./output/errorLog.dat", "w");
+	errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 	fprintf(errorLogFile, "can not find proton number %d\n", n);
 	printf("can not find proton number %d\n", n);
 	fclose(errorLogFile);
@@ -2737,7 +2753,7 @@ Particle* Simulation::getElectron(int n) {
 			}
 		}
 	}
-	errorLogFile = fopen("./output/errorLog.dat", "w");
+	errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 	fprintf(errorLogFile, "can not find electron number %d\n", n);
 	printf("can not find electron number %d\n", n);
 	fclose(errorLogFile);

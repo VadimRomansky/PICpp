@@ -1222,14 +1222,14 @@ double Simulation::correlationBspline(const double& x, const double& dx, const d
 	double dx3 = dx * dx * dx;
 	if (rightx < leftx) {
 		printf("rightx < leftx\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "rightx = %15.10g < leftx = %15.10g\n", rightx, leftx);
 		fclose(errorLogFile);
 		exit(0);
 	}
 	if (dx > rightx - leftx) {
 		printf("dx > rightx - leftx\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "dx = %15.10g > rightx - leftx = %15.10g\n", dx, rightx - leftx);
 		fclose(errorLogFile);
 		exit(0);
@@ -1287,7 +1287,7 @@ double Simulation::correlationBspline(const double& x, const double& dx, const d
 		}
 		break;
 	default:
-		errorLogFile = fopen("./output/errorLog.dat", "w");
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "spline order is wrong");
 		fclose(errorLogFile);
 		exit(0);

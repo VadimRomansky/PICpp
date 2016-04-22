@@ -1,6 +1,7 @@
 #ifndef _SIMULATION_H_
 #define _SIMULATION_H_
 
+#include <string>
 #include "stdlib.h"
 #include "stdio.h"
 #include "vector"
@@ -11,11 +12,13 @@
 #include "complex.h"
 
 enum SolverType {EXPLICIT, IMPLICIT};
+enum InputType {CGS, Theoretical};
 
 enum BoundaryConditionType {PERIODIC, SUPER_CONDUCTOR_LEFT, FREE_BOTH};
 
 class Simulation{
 public:
+	std::string outputDir  = "../output/";
 	int xnumber;
 	int ynumber;
 	int znumber;
@@ -24,6 +27,10 @@ public:
 	int protonsPerBin;
 	int positronsPerBin;
 	int alphaPerBin;
+
+	double massProton;
+	double massElectron;
+	double massAlpha;
 
 	double density;
 	double temperature;
@@ -67,6 +74,7 @@ public:
 	bool preserveChargeLocal;
 	bool preserveChargeGlobal;
 
+	InputType inputType;
 	SolverType solverType;
 	BoundaryConditionType boundaryConditionType;
 	int maxwellEquationMatrixSize;
@@ -210,7 +218,7 @@ public:
 
 	//Simulation();
 	Simulation();
-	Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV, int positronsPerBinV, int alphaPerBinV);
+	Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV, int positronsPerBinV, int alphaPerBinV, int inputType);
 	~Simulation();
 
 	void initialize();
