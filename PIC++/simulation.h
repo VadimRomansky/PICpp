@@ -18,7 +18,7 @@ enum BoundaryConditionType {PERIODIC, SUPER_CONDUCTOR_LEFT, FREE_BOTH};
 
 class Simulation{
 public:
-	std::string outputDir  = "../output/";
+	std::string outputDir;
 	int xnumber;
 	int ynumber;
 	int znumber;
@@ -37,7 +37,7 @@ public:
 
 	double plasma_period;
 	double plasma_period2;
-	double gyroradius;
+	double scaleFactor;
 	double fieldScale;
 
 	double speed_of_light_normalized;
@@ -241,6 +241,7 @@ public:
 	void output();
 	void outputBackup();
 	void rescaleConstants();
+	void rescaleConstantsToTheoretical();
 
 	void checkDebyeParameter();
 	void checkGyroRadius();
@@ -248,8 +249,8 @@ public:
 	void checkMagneticReynolds(double v);
 	void checkDissipation(double k, double alfvenV);
 	Matrix3d evaluateAlphaRotationTensor(double beta, Vector3d velocity, Vector3d EField, Vector3d BField);
-	void updateDeltaT();
 
+	void updateDeltaT();
 	void evaluateFields();
 	void updateEfield();
 	void updateBfield();
@@ -265,9 +266,9 @@ public:
 	void createInternalEquationZ(int i, int j, int k);
 	void createInternalEquation(int i, int j, int k);
 	void evaluateMaxwellEquationMatrix();
+
+
 	void evaluateMagneticField();
-
-
 	void updateBoundaries();
 	void updateBoundariesOldField();
 	void updateBoundariesNewField();
@@ -279,10 +280,10 @@ public:
 	void createDivergenceCleanupRightEquation(int j, int k);
 	double cleanUpRightPart(int i, int j, int k);
 	Complex*** evaluateFourierTranslation(double*** a);
+
 	double*** evaluateReverceFourierTranslation(Complex*** a);
 
 	void resetNewTempFields();
-
 	double volumeE(int i, int j, int k);
 	double volumeB(int i, int j, int k);
 	void checkParticleInBox(Particle& particle);
@@ -305,15 +306,15 @@ public:
 	double evaluateDivNewE(int i, int j, int k);
 	double evaluateDivFlux(int i, int j, int k);
 	Vector3d evaluateDivPressureTensor(int i, int j, int k);
-	Vector3d evaluateGradDensity(int i, int j, int k);
 
+	Vector3d evaluateGradDensity(int i, int j, int k);
 	Vector3d getBfield(int i, int j, int k);
 	Vector3d getTempEfield(int i, int j, int k);
 	Vector3d getNewEfield(int i, int j, int k);
 	Vector3d getEfield(int i, int j, int k);
 	Matrix3d getPressureTensor(int i, int j, int k);
-	double getDensity(int i, int j, int k);
 
+	double getDensity(int i, int j, int k);
 	void createParticles();
 	void moveToPreserveChargeLocal();
 	void addToPreserveChargeGlobal();
@@ -323,17 +324,17 @@ public:
 	Particle* getLastElectron();
 	Particle* getProton(int n);
 	Particle* getElectron(int n);
-	Particle* createParticle(int n, int i, int j, int k, double weight, ParticleTypes type, ParticleTypeContainer typeContainer, double temperature);
 
+	Particle* createParticle(int n, int i, int j, int k, double weight, ParticleTypes type, ParticleTypeContainer typeContainer, double temperature);
 	void moveParticles();
 	void removeEscapedParticles();
 	void moveParticle(Particle* particle);
 	void correctParticlePosition(Particle* particle);
 	void correctParticlePosition(Particle& particle);
 	void evaluateParticlesRotationTensor();
-	void injectNewParticles(int count, ParticleTypeContainer typeContainer, double length);
-	
 
+
+	void injectNewParticles(int count, ParticleTypeContainer typeContainer, double length);
 	void collectParticlesIntoBins();
 	void pushParticleIntoEbin(Particle* particle, int i, int j, int k);
 	void pushParticleIntoBbin(Particle* particle, int i, int j, int k);
@@ -357,6 +358,7 @@ public:
 	Vector3d correlationEfield(Particle& particle);
 	double correlationWithBbin(Particle& particle, int i, int j, int k);
 	double correlationWithEbin(Particle& particle, int i, int j, int k);
+
 	double correlationBspline(const double& x, const double& dx, const double& leftx, const double& rightx);
 };
 

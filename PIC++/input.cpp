@@ -2,9 +2,10 @@
 #include "simulation.h"
 
 #include "input.h"
+#include "constants.h"
 
 Simulation readInput(FILE* inputFile) {
-	std::string outputDir = "../output/";
+	std::string outputDir = outputDirectory;
 	int inputType;
 	char ch = ' ';
 
@@ -269,7 +270,7 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 	fscanf(generalFile, "%lf", &simulation.density);
 	fscanf(generalFile, "%lf", &simulation.temperature);
 	fscanf(generalFile, "%lf", &simulation.plasma_period);
-	fscanf(generalFile, "%lf", &simulation.gyroradius);
+	fscanf(generalFile, "%lf", &simulation.scaleFactor);
 	fscanf(generalFile, "%lf", &simulation.fieldScale);
 
 	fscanf(generalFile, "%lf", &simulation.time);

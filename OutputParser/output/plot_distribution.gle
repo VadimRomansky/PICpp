@@ -6,7 +6,7 @@ begin graph
   fullsize
   data   "distribution_protons.dat"
   xaxis log
-  yaxis log min 1E-20
+  yaxis log min 1E-15
   d1 lstyle 1 lwidth 0.05 color red
 end graph
 amove 4 22
@@ -15,9 +15,13 @@ begin graph
   fullsize
   data   "distribution_electrons.dat"  
   xaxis log
-  yaxis log min 1E-20
-  d1 lstyle 1 lwidth 0.05 color red
+  yaxis log min 1E-15
+  d1 lstyle 1 lwidth 0.05 color blue
 end graph
+  amove 11 19
+  begin tex
+  $Protons$
+  end tex
   amove 3 19
   begin tex
   $F_p(p) p^4$
@@ -25,6 +29,10 @@ end graph
   amove 20.3 2.0
   begin tex
   $p$ ${g cm}/s$
+  end tex
+  amove 11 39
+  begin tex
+  $Electrons$
   end tex
   amove 3 39
   begin tex 

@@ -116,62 +116,62 @@ void Simulation::output() {
 
 	if (particles.size() > 0) {
 		distributionFileProton = fopen((outputDir + "distribution_protons.dat").c_str(), "a");
-		outputDistribution(distributionFileProton, particles, PROTON, gyroradius, plasma_period);
+		outputDistribution(distributionFileProton, particles, PROTON, scaleFactor, plasma_period);
 		fclose(distributionFileProton);
 		distributionFileElectron = fopen((outputDir + "distribution_electrons.dat").c_str(), "a");
-		outputDistribution(distributionFileElectron, particles, ELECTRON, gyroradius, plasma_period);
+		outputDistribution(distributionFileElectron, particles, ELECTRON, scaleFactor, plasma_period);
 		fclose(distributionFileElectron);
 		distributionFileProtonUpstream = fopen((outputDir + "distribution_protons_upstream.dat").c_str(), "a");
-		outputDistributionUpstream(distributionFileProtonUpstream, particles, PROTON, xgrid[shockWavePoint], gyroradius, plasma_period);
+		outputDistributionUpstream(distributionFileProtonUpstream, particles, PROTON, xgrid[shockWavePoint], scaleFactor, plasma_period);
 		fclose(distributionFileProtonUpstream);
 		distributionFileElectronUpstream = fopen((outputDir + "distribution_electrons_upstream.dat").c_str(), "a");
-		outputDistributionUpstream(distributionFileElectronUpstream, particles, ELECTRON, xgrid[shockWavePoint], gyroradius, plasma_period);
+		outputDistributionUpstream(distributionFileElectronUpstream, particles, ELECTRON, xgrid[shockWavePoint], scaleFactor, plasma_period);
 		fclose(distributionFileElectronUpstream);
 		protonTraectoryFile = fopen((outputDir + "trajectory_proton.dat").c_str(), "a");
-		outputTrajectory(protonTraectoryFile, getFirstProton(), time, plasma_period, gyroradius);
+		outputTrajectory(protonTraectoryFile, getFirstProton(), time, plasma_period, scaleFactor);
 		fclose(protonTraectoryFile);
 		electronTraectoryFile = fopen((outputDir + "trajectory_electron.dat").c_str(), "a");
-		outputTrajectory(electronTraectoryFile, getFirstElectron(), time, plasma_period, gyroradius);
+		outputTrajectory(electronTraectoryFile, getFirstElectron(), time, plasma_period, scaleFactor);
 		fclose(electronTraectoryFile);
 	}
 
 	EfieldFile = fopen((outputDir + "Efield.dat").c_str(), "a");
 	BfieldFile = fopen((outputDir + "Bfield.dat").c_str(), "a");
-	outputFields(EfieldFile, BfieldFile, Efield, Bfield, xnumber, ynumber, znumber, plasma_period, gyroradius, fieldScale);
+	outputFields(EfieldFile, BfieldFile, Efield, Bfield, xnumber, ynumber, znumber, plasma_period, scaleFactor, fieldScale);
 	fclose(EfieldFile);
 	fclose(BfieldFile);
 
 	Xfile = fopen((outputDir + "Xfile.dat").c_str(), "w");
-	outputGrid(Xfile, xgrid, xnumber, gyroradius);
+	outputGrid(Xfile, xgrid, xnumber, scaleFactor);
 	fclose(Xfile);
 
 	Yfile = fopen((outputDir + "Yfile.dat").c_str(), "w");
-	outputGrid(Yfile, ygrid, ynumber, gyroradius);
+	outputGrid(Yfile, ygrid, ynumber, scaleFactor);
 	fclose(Yfile);
 
 	Zfile = fopen((outputDir + "Zfile.dat").c_str(), "w");
-	outputGrid(Zfile, zgrid, znumber, gyroradius);
+	outputGrid(Zfile, zgrid, znumber, scaleFactor);
 	fclose(Zfile);
 
 	densityFile = fopen((outputDir + "concentrations.dat").c_str(), "a");
-	outputConcentrations(densityFile, electronConcentration, protonConcentration, chargeDensity, electricDensity, xnumber, ynumber, znumber, plasma_period, gyroradius, fieldScale);
+	outputConcentrations(densityFile, electronConcentration, protonConcentration, chargeDensity, electricDensity, xnumber, ynumber, znumber, plasma_period, scaleFactor, fieldScale);
 	fclose(densityFile);
 
 	velocityFile = fopen((outputDir + "velocity.dat").c_str(), "a");
 	velocityElectronFile = fopen((outputDir + "velocity_electron.dat").c_str(), "a");
-	outputVelocity(velocityFile, velocityElectronFile, velocityBulkProton, velocityBulkElectron, xnumber, ynumber, znumber, plasma_period, gyroradius);
+	outputVelocity(velocityFile, velocityElectronFile, velocityBulkProton, velocityBulkElectron, xnumber, ynumber, znumber, plasma_period, scaleFactor);
 	fclose(velocityFile);
 	fclose(velocityElectronFile);
 
-	fluxFile = fopen((outputDir + "fluxFile.dat").c_str(), "a");
-	outputFlux(fluxFile, electricFlux, externalElectricFlux, xnumber + 1, ynumber + 1, znumber + 1, plasma_period, gyroradius, fieldScale);
+	fluxFile = fopen((outputDir + "flux.dat").c_str(), "a");
+	outputFlux(fluxFile, electricFlux, externalElectricFlux, xnumber + 1, ynumber + 1, znumber + 1, plasma_period, scaleFactor, fieldScale);
 	fclose(fluxFile);
 
 	divergenceErrorFile = fopen((outputDir + "divergence_error.dat").c_str(), "a");
-	outputDivergenceError(divergenceErrorFile, this, plasma_period, gyroradius, fieldScale);
+	outputDivergenceError(divergenceErrorFile, this, plasma_period, scaleFactor, fieldScale);
 	fclose(divergenceErrorFile);
 
-	double rotBscale = fieldScale / (plasma_period * plasma_period * sqrt(gyroradius));
+	double rotBscale = fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor));
 
 	rotBFile = fopen((outputDir + "rotBFile.dat").c_str(), "a");
 	outputVectorArray(rotBFile, rotB, xnumber + 1, ynumber + 1, znumber + 1, rotBscale);
@@ -208,10 +208,11 @@ void Simulation::outputBackup() {
 	printf("writing backup\n");
 	printLog("writing backup\n");
 
-	backupGeneralFile = fopen("./backup/general.dat", "w");
-	backupEfieldFile = fopen("./backup/Efield.dat", "w");
-	backupBfieldFile = fopen("./backup/Bfield.dat", "w");
-	backupParticlesFile = fopen("./backup/particles.dat", "w");
+	std::string backupDir = backupDirectory;
+	FILE* backupGeneralFile = fopen((backupDir + "general.dat").c_str(), "r");
+	FILE* backupEfieldFile = fopen((backupDir + "Efield.dat").c_str(), "r");
+	FILE* backupBfieldFile = fopen((backupDir + "Bfield.dat").c_str(), "r");
+	FILE* backupParticlesFile = fopen((backupDir + "particles.dat").c_str(), "r");
 
 	outputSimulationBackup(backupGeneralFile, backupEfieldFile, backupBfieldFile, backupParticlesFile, this);
 
@@ -482,7 +483,7 @@ void Simulation::checkParticlesInBin() {
 							if (particle == particlesInBbin[i][j][k][pcount2]) {
 								printf("particle is twice in Bbin number %d %d %d\n", i, j, k);
 								errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-								fprintf(errorLogFile, "particle is twice in Bbi number %d %d 5d\n", i, j, k);
+								fprintf(errorLogFile, "particle is twice in Bbi number %d %d %d\n", i, j, k);
 								fclose(errorLogFile);
 								exit(0);
 							}
@@ -897,8 +898,8 @@ void Simulation::updateDensityParameters() {
 		}
 	}
 	full_density /= xsize;
-	full_p_concentration /= (xsize * gyroradius);
-	full_e_concentration /= (xsize * gyroradius);
+	full_p_concentration /= (xsize * scaleFactor);
+	full_e_concentration /= (xsize * scaleFactor);
 	//fprintf(debugFile, "charge %15.10g proton %15.10g electron %15.10g\n", full_density, full_p_concentration, full_e_concentration);
 	//fclose(debugFile);
 }
@@ -945,10 +946,10 @@ void Simulation::updateEnergy() {
 	}
 
 
-	particleEnergy *= sqr(gyroradius / plasma_period);
-	electricFieldEnergy *= sqr(gyroradius / plasma_period);
-	magneticFieldEnergy *= sqr(gyroradius / plasma_period);
-	momentum = momentum * gyroradius / plasma_period;
+	particleEnergy *= sqr(scaleFactor / plasma_period);
+	electricFieldEnergy *= sqr(scaleFactor / plasma_period);
+	magneticFieldEnergy *= sqr(scaleFactor / plasma_period);
+	momentum = momentum * scaleFactor / plasma_period;
 
 
 	energy = particleEnergy + electricFieldEnergy + magneticFieldEnergy;
@@ -956,26 +957,26 @@ void Simulation::updateEnergy() {
 	double concentration = density / (massProton + massElectron);
 
 	if (boundaryConditionType != PERIODIC) {
-		//theoreticalEnergy -= (density * V0.scalarMult(V0) / 2.0) * V0.x * deltaT * ysize * zsize * sqr(gyroradius / plasma_period);
-		//theoreticalEnergy -= (2 * (3.0 / 2.0) * concentration * kBoltzman_normalized * temperature) * V0.x * deltaT * ysize * zsize * sqr(gyroradius / plasma_period);
+		//theoreticalEnergy -= (density * V0.scalarMult(V0) / 2.0) * V0.x * deltaT * ysize * zsize * sqr(scaleFactor / plasma_period);
+		//theoreticalEnergy -= (2 * (3.0 / 2.0) * concentration * kBoltzman_normalized * temperature) * V0.x * deltaT * ysize * zsize * sqr(scaleFactor / plasma_period);
 
-		//theoreticalMomentum -= V0 * V0.x * density * deltaT * ysize * zsize * gyroradius / plasma_period;
-		//theoreticalMomentum -= Vector3d(1, 0, 0) * (2 * concentration * kBoltzman_normalized * temperature) * deltaT * ysize * zsize * gyroradius / plasma_period;
+		//theoreticalMomentum -= V0 * V0.x * density * deltaT * ysize * zsize * scaleFactor / plasma_period;
+		//theoreticalMomentum -= Vector3d(1, 0, 0) * (2 * concentration * kBoltzman_normalized * temperature) * deltaT * ysize * zsize * scaleFactor / plasma_period;
 		//it is taken in account in inject new particle
 
 		for (int i = 0; i < escapedParticles.size(); ++i) {
 			Particle* particle = escapedParticles[i];
-			theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
-			theoreticalMomentum -= particle->momentum * particle->weight * gyroradius / plasma_period;
+			theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight * sqr(scaleFactor / plasma_period);
+			theoreticalMomentum -= particle->momentum * particle->weight * scaleFactor / plasma_period;
 		}
 
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
-				theoreticalEnergy -= (Efield[xnumber][j][k].vectorMult(Bfield[xnumber - 1][j][k])).x * deltaT * speed_of_light_normalized * deltaZ * deltaY * sqr(gyroradius / plasma_period)/ (4 * pi);
-				theoreticalEnergy += (Efield[0][j][k].vectorMult(Bfield[0][j][k])).x * deltaT * speed_of_light_normalized * deltaZ * deltaY * sqr(gyroradius / plasma_period)/ (4 * pi);
+				theoreticalEnergy -= (Efield[xnumber][j][k].vectorMult(Bfield[xnumber - 1][j][k])).x * deltaT * speed_of_light_normalized * deltaZ * deltaY * sqr(scaleFactor / plasma_period)/ (4 * pi);
+				theoreticalEnergy += (Efield[0][j][k].vectorMult(Bfield[0][j][k])).x * deltaT * speed_of_light_normalized * deltaZ * deltaY * sqr(scaleFactor / plasma_period)/ (4 * pi);
 
-				theoreticalMomentum -= (Efield[xnumber][j][k].vectorMult(Bfield[xnumber - 1][j][k])) * deltaT * deltaZ * deltaY * gyroradius / plasma_period / (4 * pi);
-				theoreticalMomentum += (Efield[0][j][k].vectorMult(Bfield[0][j][k])) * deltaT * deltaZ * deltaY * gyroradius / plasma_period / (4 * pi);
+				theoreticalMomentum -= (Efield[xnumber][j][k].vectorMult(Bfield[xnumber - 1][j][k])) * deltaT * deltaZ * deltaY * scaleFactor / plasma_period / (4 * pi);
+				theoreticalMomentum += (Efield[0][j][k].vectorMult(Bfield[0][j][k])) * deltaT * deltaZ * deltaY * scaleFactor / plasma_period / (4 * pi);
 			}
 		}
 	}

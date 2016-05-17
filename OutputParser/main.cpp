@@ -33,9 +33,9 @@ int countNumbersLine(FILE* file, int numbersPerLine) {
 
 int main() {
     const int timePointsCount = 3; //must be >= 2
-    const int Np = 1000;
-    //std::string inputDir = "../../PIC++/output/";
-    std::string inputDir = "../../../../iPic3D/data/";
+    const int Np = 200;
+    std::string inputDir = "../../PIC++/output/";
+    //std::string inputDir = "../../../../iPic3D/data/";
     FILE* XFile = fopen((inputDir + "Xfile.dat").c_str(),"r");
     FILE* YFile = fopen((inputDir + "Yfile.dat").c_str(),"r");
     FILE* ZFile = fopen((inputDir + "Zfile.dat").c_str(),"r");
@@ -99,9 +99,9 @@ int main() {
     rewind(EFile);
     int Nt = NE/(Nx*Ny*Nz);
 
-    int xpoint = Nx/2;
-    int ypoint = Ny/2;
-    int zpoint = Nz/2;
+    int xpoint = Nx/2 - 1;
+    int ypoint = Ny/2 - 1;
+    int zpoint = Nz/2 - 1;
 
     int timePoints[timePointsCount];
     timePoints[0] = 0;
@@ -206,7 +206,7 @@ int main() {
     for(int i = 0; i < (Nx-1)*(Ny-1)*(Nz-1)*Nt; ++i){
         Bfield[i] =  new double[3];
         velocity[i] =  new double[6];
-        concentrations[i] = new double[3];
+        concentrations[i] = new double[4];
         divergence[i] = new double[3];
     }
 
@@ -214,7 +214,7 @@ int main() {
         fscanf(BFile, "%lf %lf %lf", &Bfield[i][0], &Bfield[i][1], &Bfield[i][2]);
         fscanf(velocityProtonFile, "%lf %lf %lf", &velocity[i][0], &velocity[i][1], &velocity[i][2]);
         fscanf(velocityElectronFile, "%lf %lf %lf", &velocity[i][3], &velocity[i][4], &velocity[i][5]);
-        fscanf(concentrationFile, "%lf %lf %lf", &concentrations[i][0], &concentrations[i][1], &concentrations[i][2]);
+        fscanf(concentrationFile, "%lf %lf %lf %lf", &concentrations[i][0], &concentrations[i][1], &concentrations[i][2], &concentrations[i][3]);
         fscanf(divergenceFile, "%lf %lf %lf", &divergence[i][0], &divergence[i][1], &divergence[i][2]);
     }
 
@@ -304,6 +304,7 @@ int main() {
 
     for(int i = 0; i < Nt; i++){
         for(int j = 0; j < 18; ++j){
+        //for(int j = 0; j < 7; ++j){
             fscanf(generalFile, "%lf", &general[i][j]);
         }
         for(int j = 0; j < 8; ++j){
@@ -314,6 +315,7 @@ int main() {
 
     for(int i = 0; i < Nt; i++){
         for(int j = 1; j < 18; ++j) {
+        //for(int j = 1; j < 7; ++j) {
             fprintf(gleGeneralFile, "%20.15g", general[i][j]);
         }
         for(int j = 0; j < 8; ++j){

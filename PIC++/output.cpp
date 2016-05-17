@@ -221,16 +221,16 @@ void outputDivergenceError(FILE* outFile, Simulation* simulation, double plasma_
 void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPositronsFile, FILE* outAlphaFile, Simulation* simulation) {
 	for (int i = 0; i < simulation->particles.size(); ++i) {
 		Particle* particle = simulation->particles[i];
-		double p = particle->momentum.norm() * simulation->gyroradius / simulation->plasma_period;
+		double p = particle->momentum.norm() * simulation->scaleFactor / simulation->plasma_period;
 		if (particle->type == PROTON) {
-			fprintf(outProtonsFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->gyroradius, p, particle->momentum.x * simulation->gyroradius / simulation->plasma_period);
+			fprintf(outProtonsFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
 		} else if (particle->type == ELECTRON) {
-			fprintf(outElectronsFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->gyroradius, p, particle->momentum.x * simulation->gyroradius / simulation->plasma_period);
+			fprintf(outElectronsFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
 		}
 		if (particle->type == POSITRON) {
-			fprintf(outPositronsFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->gyroradius, p, particle->momentum.x * simulation->gyroradius / simulation->plasma_period);
+			fprintf(outPositronsFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
 		} else if (particle->type == ALPHA) {
-			fprintf(outAlphaFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->gyroradius, p, particle->momentum.x * simulation->gyroradius / simulation->plasma_period);
+			fprintf(outAlphaFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
 		}
 	}
 }
@@ -300,7 +300,7 @@ void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* p
 	fprintf(generalFile, "%15.10g\n", simulation->density);
 	fprintf(generalFile, "%15.10g\n", simulation->temperature);
 	fprintf(generalFile, "%15.10g\n", simulation->plasma_period);
-	fprintf(generalFile, "%15.10g\n", simulation->gyroradius);
+	fprintf(generalFile, "%15.10g\n", simulation->scaleFactor);
 	fprintf(generalFile, "%15.10g\n", simulation->fieldScale);
 
 	fprintf(generalFile, "%15.10g\n", simulation->time);

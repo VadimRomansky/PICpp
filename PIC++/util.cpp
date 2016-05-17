@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string>
 #include "util.h"
 #include "constants.h"
 
@@ -50,10 +51,11 @@ double min3(double a, double b, double c) {
 
 void alertNaNOrInfinity(double value, const char* s) {
 	if (value != value || 0 * value != 0 * value) {
+		std::string outputDir = outputDirectory;
 		printf("%s", s);
 		printf("\n");
 		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
-		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "%s", s);
 		fclose(errorLogFile);
 		exit(0);
@@ -63,10 +65,11 @@ void alertNaNOrInfinity(double value, const char* s) {
 
 void alertNotPositive(double value, const char* s) {
 	if (value <= 0) {
+		std::string outputDir = outputDirectory;
 		printf("%s", s);
 		printf("\n");
 		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
-		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "%s", s);
 		fclose(errorLogFile);
 		exit(0);
@@ -75,10 +78,11 @@ void alertNotPositive(double value, const char* s) {
 
 void alertNegative(double value, const char* s) {
 	if (value < 0) {
+		std::string outputDir = outputDirectory;
 		printf("%s", s);
 		printf("\n");
 		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
-		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "%s", s);
 		fclose(errorLogFile);
 		exit(0);
@@ -86,18 +90,20 @@ void alertNegative(double value, const char* s) {
 }
 
 void printErrorAndExit(const char* s){
+	std::string outputDir = outputDirectory;
 	printf("%s", s);
 	printf("\n");
 	//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
-	FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
+	FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 	fprintf(errorLogFile, "%s", s);
 	fclose(errorLogFile);
 	exit(0);
 }
 
 void printLog(const char* s){
+	std::string outputDir = outputDirectory;
 	//FILE* logFile = fopen("./output/log.dat", "a");
-	FILE* logFile = fopen("../output/log.dat", "a");
+	FILE* logFile = fopen((outputDir + "log.dat").c_str(), "a");
 	fprintf(logFile, "%s", s);
 	fclose(logFile);
 }
@@ -128,8 +134,9 @@ double McDonaldFunction(double x, double index) {
 	//todo approximation with small x!!!
 	if (x < 0) {
 		printf("x in McDonald < 0\n");
+		std::string outputDir = outputDirectory;
 		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
-		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "x in McDonald < 0\n");
 		fclose(errorLogFile);
 		exit(0);

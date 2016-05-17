@@ -14,9 +14,11 @@
 Simulation::Simulation() {
 	newlyStarted = false;
 	preserveChargeGlobal = true;
+	outputDir = outputDirectory;
 
 	maxEfield = Vector3d(0, 0, 0);
 	maxBfield = Vector3d(0, 0, 0);
+	fieldScale = 1.0;
 
 	shockWavePoint = 0;
 	chargeBalance = 0;
@@ -40,6 +42,7 @@ Simulation::Simulation() {
 }
 
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int electronsPerBinV, int positronsPerBinV, int alphaPerBinV, int inType) {
+	outputDir = outputDirectory;
 	if(inType == 0){
 		inputType = CGS;
 	} else if(inType == 1){
@@ -59,10 +62,6 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	boundaryConditionType = PERIODIC;
 	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
-
-	massProton = massProtonReal;
-	massElectron = 100*massElectronReal;
-	massAlpha = massAlphaReal;
 
 	currentIteration = 0;
 	time = 0;
@@ -104,54 +103,77 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 
 	B0 = Vector3d(Bx, By, Bz);
 	E0 = Vector3d(Ex, Ey, Ez);
+	if(inputType == CGS) {
+		massProton = massProtonReal;
+		massElectron = 100 * massElectronReal;
+		massAlpha = massAlphaReal;
 
-	double concentration = density * electronsPerBin / (protonsPerBin * massProton + electronsPerBin * massElectron + positronsPerBin * massElectron + alphaPerBin * massAlpha);
+		double concentration = density * electronsPerBin /
+							   (protonsPerBin * massProton + electronsPerBin * massElectron +
+								positronsPerBin * massElectron + alphaPerBin * massAlpha);
 
-	double gamma = 1 / sqrt(1 - V0.scalarMult(V0) / sqr(speed_of_light));
+		double gamma = 1 / sqrt(1 - V0.scalarMult(V0) / sqr(speed_of_light));
 
-	double effectiveMass = 1 / (((electronsPerBin / massElectron) + (protonsPerBin / massProton) + (positronsPerBin / massElectron) + (alphaPerBin / massAlpha)) / electronsPerBin);
+		double effectiveMass = 1 / (((electronsPerBin / massElectron) + (protonsPerBin / massProton) +
+									 (positronsPerBin / massElectron) + (alphaPerBin / massAlpha)) / electronsPerBin);
 
-	//plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi) * gamma * sqrt(gamma);
-	plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * gamma * sqrt(gamma);
-	double thermal_momentum;
-	if (kBoltzman * temperature > massElectron * speed_of_light * speed_of_light) {
-		thermal_momentum = kBoltzman * temperature / speed_of_light;
+		//plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi) * gamma * sqrt(gamma);
+		plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * gamma * sqrt(gamma);
+		double thermal_momentum;
+		if (kBoltzman * temperature > massElectron * speed_of_light * speed_of_light) {
+			thermal_momentum = kBoltzman * temperature / speed_of_light;
+		} else {
+			thermal_momentum = sqrt(2 * massElectron * kBoltzman * temperature);
+		}
+		thermal_momentum += V0.norm() * massElectron;
+		//scaleFactor = thermal_momentum * speed_of_light / (electron_charge * B0.norm());
+		//if (B0.norm() <= 0) {
+		//scaleFactor = 1.0;
+		//}
+		scaleFactor = speed_of_light * plasma_period;
+
+		plasma_period = 1.0;
+		scaleFactor = 1.0;
+
+		//scaleFactor = xsize;
+
+
+		E0 = E0 * (plasma_period * sqrt(scaleFactor));
+		B0 = B0 * (plasma_period * sqrt(scaleFactor));
+		V0 = V0 * plasma_period / scaleFactor;
+
+		fieldScale = max2(B0.norm(), E0.norm());
+        if (fieldScale <= 0) {
+            fieldScale = 1.0;
+        }
+        fieldScale = 1.0;
+
+        E0 = E0 / fieldScale;
+        B0 = B0 / fieldScale;
+
+		rescaleConstants();
+
+		density = density * cube(scaleFactor);
+
+		xsize /= scaleFactor;
+		ysize /= scaleFactor;
+		zsize /= scaleFactor;
+		printf("xsize/scaleFactor = %lf\n", xsize);
 	} else {
-		thermal_momentum = sqrt(2 * massElectron * kBoltzman * temperature);
-	}
-	thermal_momentum += V0.norm() * massElectron;
-	//gyroradius = thermal_momentum * speed_of_light / (electron_charge * B0.norm());
-	//if (B0.norm() <= 0) {
-		//gyroradius = 1.0;
-	//}
-	gyroradius = speed_of_light * plasma_period;
-	plasma_period = 1.0;
-	gyroradius = 1.0;
-
-	//gyroradius = xsize;
-
-
-	E0 = E0 * (plasma_period * sqrt(gyroradius));
-	B0 = B0 * (plasma_period * sqrt(gyroradius));
-	V0 = V0 * plasma_period / gyroradius;
-
-	fieldScale = max2(B0.norm(), E0.norm());
-	if (fieldScale <= 0) {
+		massProton = 1.0;
+		massElectron = massProton/256;
+		massAlpha = massProton*massAlphaReal/massProtonReal;
+		double protonScale = massProton/massProtonReal;
+		plasma_period = cube(speed_of_light)/(protonScale * electron_charge);
+		scaleFactor = speed_of_light*plasma_period;
+		rescaleConstantsToTheoretical();
+		double densityForUnits = massElectron*(massProton + massElectron)/(4*pi*electron_charge_normalized*electron_charge_normalized);
+		if(fabs(density - densityForUnits)/(densityForUnits + densityForUnits) > 1E-3){
+			printf("density must be changed\n");
+			printf("density = %g, must be = %g\n", density, densityForUnits);
+		}
 		fieldScale = 1.0;
 	}
-	fieldScale = 1.0;
-
-	E0 = E0 / fieldScale;
-	B0 = B0 / fieldScale;
-
-	rescaleConstants();
-
-	density = density * cube(gyroradius);
-
-	xsize /= gyroradius;
-	ysize /= gyroradius;
-	zsize /= gyroradius;
-	printf("xsize/gyroradius = %lf\n", xsize);
 
 	maxEfield = Vector3d(0, 0, 0);
 	maxBfield = Vector3d(0, 0, 0);
@@ -303,10 +325,18 @@ Simulation::~Simulation() {
 }
 
 void Simulation::rescaleConstants() {
-	kBoltzman_normalized = kBoltzman * plasma_period * plasma_period / (gyroradius * gyroradius);
-	speed_of_light_normalized = speed_of_light * plasma_period / gyroradius;
+	kBoltzman_normalized = kBoltzman * plasma_period * plasma_period / (scaleFactor * scaleFactor);
+	speed_of_light_normalized = speed_of_light * plasma_period / scaleFactor;
 	speed_of_light_normalized_sqr = speed_of_light_normalized * speed_of_light_normalized;
-	electron_charge_normalized = electron_charge * (plasma_period / sqrt(cube(gyroradius)));
+	electron_charge_normalized = electron_charge * (plasma_period / sqrt(cube(scaleFactor)));
+}
+
+void Simulation::rescaleConstantsToTheoretical() {
+	//kBoltzman_normalized = kBoltzman * plasma_period * plasma_period / (scaleFactor * scaleFactor);
+	kBoltzman_normalized = kBoltzman * (plasma_period * plasma_period / (scaleFactor * scaleFactor)) * massProton/massProtonReal;
+	speed_of_light_normalized = 1.0;
+	speed_of_light_normalized_sqr = 1.0;
+	electron_charge_normalized = 1.0;
 }
 
 void Simulation::initialize() {
@@ -588,14 +618,12 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 		fclose(errorLogFile);
 		exit(0);
 	}
-	fprintf(informationFile, "alfven V = %lf\n", alfvenV * gyroradius / plasma_period);
+	fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
 	fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
-	printf("alfven V = %lf\n", alfvenV * gyroradius / plasma_period);
+	printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
 	printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
 
 	double kw = wavesCount * 2 * pi / xsize;
-
-	double weight = concentration * volumeB(0, 0, 0) / electronsPerBin;
 
 	omegaPlasmaProton = sqrt(4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massProton);
 	omegaPlasmaElectron = sqrt(4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
@@ -932,73 +960,73 @@ void Simulation::initializeAlfvenWave(int wavesCount, double amplitudeRelation) 
 	fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
 	fprintf(informationFile, "\n");
 
-	fprintf(informationFile, "Bz amplitude = %g\n", Bzamplitude * fieldScale / (plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "By amplitude = %g\n", Byamplitude * fieldScale / (plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "Vz amplitude p = %g\n", VzamplitudeProton * gyroradius / plasma_period);
-	fprintf(informationFile, "Vz amplitude e = %g\n", VzamplitudeElectron * gyroradius / plasma_period);
-	fprintf(informationFile, "Vy amplitude p = %g\n", VyamplitudeProton * gyroradius / plasma_period);
-	fprintf(informationFile, "Vy amplitude e = %g\n", VyamplitudeElectron * gyroradius / plasma_period);
-	fprintf(informationFile, "Ey amplitude = %g\n", Eyamplitude * fieldScale / (plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "Ez amplitude = %g\n", Ezamplitude * fieldScale / (plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "Bz amplitude = %g\n", Bzamplitude * fieldScale / (plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "By amplitude = %g\n", Byamplitude * fieldScale / (plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "Vz amplitude p = %g\n", VzamplitudeProton * scaleFactor / plasma_period);
+	fprintf(informationFile, "Vz amplitude e = %g\n", VzamplitudeElectron * scaleFactor / plasma_period);
+	fprintf(informationFile, "Vy amplitude p = %g\n", VyamplitudeProton * scaleFactor / plasma_period);
+	fprintf(informationFile, "Vy amplitude e = %g\n", VyamplitudeElectron * scaleFactor / plasma_period);
+	fprintf(informationFile, "Ey amplitude = %g\n", Eyamplitude * fieldScale / (plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "Ez amplitude = %g\n", Ezamplitude * fieldScale / (plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "By/Ez = %g\n", Byamplitude / Ezamplitude);
 	fprintf(informationFile, "Bz/Ey = %g\n", Bzamplitude / Eyamplitude);
-	fprintf(informationFile, "4*pi*Jy amplitude = %g\n", 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "c*rotBy amplitude = %g\n", speed_of_light_normalized * kw * Bzamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "4*pi*Jz amplitude = %g\n", 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "c*rotBz amplitude = %g\n", speed_of_light_normalized * kw * Byamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "4*pi*Jy amplitude = %g\n", 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "c*rotBy amplitude = %g\n", speed_of_light_normalized * kw * Bzamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "4*pi*Jz amplitude = %g\n", 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "c*rotBz amplitude = %g\n", speed_of_light_normalized * kw * Byamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
-	fprintf(informationFile, "derivative By amplitude = %g\n", -omega * Byamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "-c*rotEy = %g\n", speed_of_light_normalized * kw * Ezamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "derivative By amplitude = %g\n", -omega * Byamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "-c*rotEy = %g\n", speed_of_light_normalized * kw * Ezamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
-	fprintf(informationFile, "derivative Bz amplitude = %g\n", omega * Bzamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "-c*rotEz = %g\n", speed_of_light_normalized * kw * Eyamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "derivative Bz amplitude = %g\n", omega * Bzamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "-c*rotEz = %g\n", speed_of_light_normalized * kw * Eyamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
-	fprintf(informationFile, "derivative Ey amplitude = %g\n", omega * Eyamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n", (speed_of_light_normalized * kw * Bzamplitude * fieldScale - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "derivative Ey amplitude = %g\n", omega * Eyamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n", (speed_of_light_normalized * kw * Bzamplitude * fieldScale - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
-	fprintf(informationFile, "derivative Ez amplitude = %g\n", -omega * Ezamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n", (speed_of_light_normalized * kw * Byamplitude * fieldScale - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "derivative Ez amplitude = %g\n", -omega * Ezamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n", (speed_of_light_normalized * kw * Byamplitude * fieldScale - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
 
 	double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) * omega;
-	fprintf(informationFile, "w*Jy amplitude = %g\n", derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "w*Jy amplitude = %g\n", derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
 	double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * fieldScale * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * fieldScale * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) / speed_of_light_normalized);
-	fprintf(informationFile, "dJy/dt amplitude = %g\n", electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "dJy/dt amplitude = %g\n", electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
 	double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omega;
-	fprintf(informationFile, "w*Jz amplitude = %g\n", derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "w*Jz amplitude = %g\n", derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
 	double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * fieldScale * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * fieldScale * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) / speed_of_light_normalized);
-	fprintf(informationFile, "dJz/dt amplitude = %g\n", electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "dJz/dt amplitude = %g\n", electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
 
 	double derivativVyp = -omega * VyamplitudeProton;
-	fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * scaleFactor / sqr(plasma_period));
 
 	double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude * fieldScale + B0.norm() * fieldScale * VzamplitudeProton / speed_of_light_normalized) / massProton;
-	fprintf(informationFile, "dVyp/dt amplitude = %g\n", derivativeVelocityProtonY * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "dVyp/dt amplitude = %g\n", derivativeVelocityProtonY * scaleFactor / sqr(plasma_period));
 	fprintf(informationFile, "\n");
 
 	double derivativVzp = omega * VzamplitudeProton;
-	fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * scaleFactor / sqr(plasma_period));
 
 	double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude * fieldScale - B0.norm() * fieldScale * VyamplitudeProton / speed_of_light_normalized) / massProton;
-	fprintf(informationFile, "dVzp/dt amplitude = %g\n", derivativeVelocityProtonZ * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "dVzp/dt amplitude = %g\n", derivativeVelocityProtonZ * scaleFactor / sqr(plasma_period));
 	fprintf(informationFile, "\n");
 
 	double derivativVye = -omega * VyamplitudeElectron;
-	fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * scaleFactor / sqr(plasma_period));
 
 	double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude * fieldScale + B0.norm() * fieldScale * VzamplitudeElectron / speed_of_light_normalized) / massElectron;
-	fprintf(informationFile, "dVye/dt amplitude = %g\n", derivativeVelocityElectronY * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "dVye/dt amplitude = %g\n", derivativeVelocityElectronY * scaleFactor / sqr(plasma_period));
 	fprintf(informationFile, "\n");
 
 	double derivativVze = omega * VzamplitudeElectron;
-	fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * scaleFactor / sqr(plasma_period));
 
 	double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude * fieldScale - B0.norm() * fieldScale * VyamplitudeElectron / speed_of_light_normalized) / massElectron;
-	fprintf(informationFile, "dVze/dt amplitude = %g\n", derivativeVelocityElectronZ * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "dVze/dt amplitude = %g\n", derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
 	fprintf(informationFile, "\n");
 
 	fclose(informationFile);
@@ -1036,9 +1064,9 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		fclose(errorLogFile);
 		exit(0);
 	}
-	fprintf(informationFile, "alfven V = %lf\n", alfvenV * gyroradius / plasma_period);
+	fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
 	fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
-	printf("alfven V = %lf\n", alfvenV * gyroradius / plasma_period);
+	printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
 	printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
 
 	double kx = wavesCount * 2 * pi / xsize;
@@ -1187,8 +1215,8 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 
 	double alfvenVReal = omega / kw;
 
-	fprintf(informationFile, "alfven V real = %15.10g\n", alfvenVReal * gyroradius / plasma_period);
-	fprintf(informationFile, "alfven V real x = %15.10g\n", alfvenVReal * (kx / kw) * gyroradius / plasma_period);
+	fprintf(informationFile, "alfven V real = %15.10g\n", alfvenVReal * scaleFactor / plasma_period);
+	fprintf(informationFile, "alfven V real x = %15.10g\n", alfvenVReal * (kx / kw) * scaleFactor / plasma_period);
 
 	//double 
 	Bzamplitude = B0.norm() * epsilonAmplitude;
@@ -1404,73 +1432,73 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 	fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
 	fprintf(informationFile, "\n");
 
-	fprintf(informationFile, "Bz amplitude = %g\n", Bzamplitude * fieldScale / (plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "By amplitude = %g\n", Byamplitude * fieldScale / (plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "Vz amplitude p = %g\n", VzamplitudeProton * gyroradius / plasma_period);
-	fprintf(informationFile, "Vz amplitude e = %g\n", VzamplitudeElectron * gyroradius / plasma_period);
-	fprintf(informationFile, "Vy amplitude p = %g\n", VyamplitudeProton * gyroradius / plasma_period);
-	fprintf(informationFile, "Vy amplitude e = %g\n", VyamplitudeElectron * gyroradius / plasma_period);
-	fprintf(informationFile, "Ey amplitude = %g\n", Eyamplitude * fieldScale / (plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "Ez amplitude = %g\n", Ezamplitude * fieldScale / (plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "Bz amplitude = %g\n", Bzamplitude * fieldScale / (plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "By amplitude = %g\n", Byamplitude * fieldScale / (plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "Vz amplitude p = %g\n", VzamplitudeProton * scaleFactor / plasma_period);
+	fprintf(informationFile, "Vz amplitude e = %g\n", VzamplitudeElectron * scaleFactor / plasma_period);
+	fprintf(informationFile, "Vy amplitude p = %g\n", VyamplitudeProton * scaleFactor / plasma_period);
+	fprintf(informationFile, "Vy amplitude e = %g\n", VyamplitudeElectron * scaleFactor / plasma_period);
+	fprintf(informationFile, "Ey amplitude = %g\n", Eyamplitude * fieldScale / (plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "Ez amplitude = %g\n", Ezamplitude * fieldScale / (plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "By/Ez = %g\n", Byamplitude / Ezamplitude);
 	fprintf(informationFile, "Bz/Ey = %g\n", Bzamplitude / Eyamplitude);
-	fprintf(informationFile, "4*pi*Jy amplitude = %g\n", 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "c*rotBy amplitude = %g\n", speed_of_light_normalized * kw * Bzamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "4*pi*Jz amplitude = %g\n", 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "c*rotBz amplitude = %g\n", speed_of_light_normalized * kw * Byamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "4*pi*Jy amplitude = %g\n", 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "c*rotBy amplitude = %g\n", speed_of_light_normalized * kw * Bzamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "4*pi*Jz amplitude = %g\n", 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "c*rotBz amplitude = %g\n", speed_of_light_normalized * kw * Byamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
-	fprintf(informationFile, "derivative By amplitude = %g\n", -omega * Byamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "-c*rotEy = %g\n", speed_of_light_normalized * kw * Ezamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "derivative By amplitude = %g\n", -omega * Byamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "-c*rotEy = %g\n", speed_of_light_normalized * kw * Ezamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
-	fprintf(informationFile, "derivative Bz amplitude = %g\n", omega * Bzamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "-c*rotEz = %g\n", speed_of_light_normalized * kw * Eyamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "derivative Bz amplitude = %g\n", omega * Bzamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "-c*rotEz = %g\n", speed_of_light_normalized * kw * Eyamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
-	fprintf(informationFile, "derivative Ey amplitude = %g\n", omega * Eyamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n", (speed_of_light_normalized * kw * Bzamplitude * fieldScale - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "derivative Ey amplitude = %g\n", omega * Eyamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n", (speed_of_light_normalized * kw * Bzamplitude * fieldScale - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
-	fprintf(informationFile, "derivative Ez amplitude = %g\n", -omega * Ezamplitude * fieldScale / (plasma_period * plasma_period * sqrt(gyroradius)));
-	fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n", (speed_of_light_normalized * kw * Byamplitude * fieldScale - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "derivative Ez amplitude = %g\n", -omega * Ezamplitude * fieldScale / (plasma_period * plasma_period * sqrt(scaleFactor)));
+	fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n", (speed_of_light_normalized * kw * Byamplitude * fieldScale - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
 
 	double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) * omega;
-	fprintf(informationFile, "w*Jy amplitude = %g\n", derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "w*Jy amplitude = %g\n", derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
 	double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * fieldScale * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * fieldScale * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) / speed_of_light_normalized);
-	fprintf(informationFile, "dJy/dt amplitude = %g\n", electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "dJy/dt amplitude = %g\n", electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
 	double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omega;
-	fprintf(informationFile, "w*Jz amplitude = %g\n", derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "w*Jz amplitude = %g\n", derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
 	double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * fieldScale * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * fieldScale * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) / speed_of_light_normalized);
-	fprintf(informationFile, "dJz/dt amplitude = %g\n", electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period * plasma_period * sqrt(gyroradius)));
+	fprintf(informationFile, "dJz/dt amplitude = %g\n", electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 	fprintf(informationFile, "\n");
 
 	double derivativVyp = -omega * VyamplitudeProton;
-	fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * scaleFactor / sqr(plasma_period));
 
 	double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude * fieldScale + B0.norm() * fieldScale * VzamplitudeProton / speed_of_light_normalized) / massProton;
-	fprintf(informationFile, "dVyp/dt amplitude = %g\n", derivativeVelocityProtonY * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "dVyp/dt amplitude = %g\n", derivativeVelocityProtonY * scaleFactor / sqr(plasma_period));
 	fprintf(informationFile, "\n");
 
 	double derivativVzp = omega * VzamplitudeProton;
-	fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * scaleFactor / sqr(plasma_period));
 
 	double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude * fieldScale - B0.norm() * fieldScale * VyamplitudeProton / speed_of_light_normalized) / massProton;
-	fprintf(informationFile, "dVzp/dt amplitude = %g\n", derivativeVelocityProtonZ * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "dVzp/dt amplitude = %g\n", derivativeVelocityProtonZ * scaleFactor / sqr(plasma_period));
 	fprintf(informationFile, "\n");
 
 	double derivativVye = -omega * VyamplitudeElectron;
-	fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * scaleFactor / sqr(plasma_period));
 
 	double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude * fieldScale + B0.norm() * fieldScale * VzamplitudeElectron / speed_of_light_normalized) / massElectron;
-	fprintf(informationFile, "dVye/dt amplitude = %g\n", derivativeVelocityElectronY * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "dVye/dt amplitude = %g\n", derivativeVelocityElectronY * scaleFactor / sqr(plasma_period));
 	fprintf(informationFile, "\n");
 
 	double derivativVze = omega * VzamplitudeElectron;
-	fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * scaleFactor / sqr(plasma_period));
 
 	double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude * fieldScale - B0.norm() * fieldScale * VyamplitudeElectron / speed_of_light_normalized) / massElectron;
-	fprintf(informationFile, "dVze/dt amplitude = %g\n", derivativeVelocityElectronZ * gyroradius / sqr(plasma_period));
+	fprintf(informationFile, "dVze/dt amplitude = %g\n", derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
 	fprintf(informationFile, "\n");
 
 	fclose(informationFile);
@@ -1498,7 +1526,7 @@ void Simulation::initializeLangmuirWave() {
 
 	checkDebyeParameter();
 	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
-	fprintf(informationFile, "lengmuir V = %lf\n", langmuirV * gyroradius / plasma_period);
+	fprintf(informationFile, "lengmuir V = %lf\n", langmuirV * scaleFactor / plasma_period);
 	fclose(informationFile);
 	if (langmuirV > speed_of_light_normalized) {
 		printf("langmuirV > c\n");
@@ -1927,7 +1955,7 @@ void Simulation::initializeTwoStream() {
 	Vector3d electronsVelocityMinus = Vector3d(0, -u, 0);
 	B0 = Vector3d(0, 0, 0);
 
-	double Bamplitude = 1E-12 * (plasma_period * sqrt(gyroradius));
+	double Bamplitude = 1E-12 * (plasma_period * sqrt(scaleFactor));
 	//Bamplitude = 0;
 	double Eamplitude = 0;
 
@@ -2005,19 +2033,19 @@ void Simulation::initializeExternalFluxInstability() {
 	extJ = 0.001 * electron_charge_normalized * alfvenV * concentration;
 	checkDebyeParameter();
 
-	double Byamplitude = 4 * pi * sqr(alfvenV) * extJ / (speed_of_light_normalized * kw * (sqr(phaseV) - sqr(alfvenV))) / (plasma_period * sqrt(gyroradius));
-	double Uyamplitude = B0.norm() * fieldScale * phaseV * extJ / (kw * density * speed_of_light_normalized * (sqr(phaseV) - sqr(alfvenV))) * (gyroradius / plasma_period);
+	double Byamplitude = 4 * pi * sqr(alfvenV) * extJ / (speed_of_light_normalized * kw * (sqr(phaseV) - sqr(alfvenV))) / (plasma_period * sqrt(scaleFactor));
+	double Uyamplitude = B0.norm() * fieldScale * phaseV * extJ / (kw * density * speed_of_light_normalized * (sqr(phaseV) - sqr(alfvenV))) * (scaleFactor / plasma_period);
 	double cyclothronOmegaElectron = electron_charge_normalized * B0.norm() * fieldScale / (massElectron * speed_of_light_normalized);
 	double cyclothronOmegaProton = electron_charge_normalized * B0.norm() * fieldScale / (massProton * speed_of_light_normalized);
 
 
 	checkGyroRadius();
 	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
-	fprintf(informationFile, "alfven V = %g\n", alfvenV * gyroradius / plasma_period);
-	fprintf(informationFile, "phase V = %g\n", phaseV * gyroradius / plasma_period);
+	fprintf(informationFile, "alfven V = %g\n", alfvenV * scaleFactor / plasma_period);
+	fprintf(informationFile, "phase V = %g\n", phaseV * scaleFactor / plasma_period);
 	fprintf(informationFile, "alfven V/c = %g\n", alfvenV / speed_of_light_normalized);
 	fprintf(informationFile, "phase V/c = %g\n", phaseV / speed_of_light_normalized);
-	fprintf(informationFile, "external flux = %g\n", extJ * plasma_period * plasma_period * sqrt(gyroradius));
+	fprintf(informationFile, "external flux = %g\n", extJ * plasma_period * plasma_period * sqrt(scaleFactor));
 	fprintf(informationFile, "By max amplitude = %g\n", Byamplitude);
 	fprintf(informationFile, "Uy max amplitude = %g\n", Uyamplitude);
 	fprintf(informationFile, "omega/omega_plasma = %g\n", omega);
@@ -2286,7 +2314,7 @@ void Simulation::createFiles() {
 	fclose(distributionFileProton);
 	distributionFileElectron = fopen((outputDir + "distribution_electrons.dat").c_str(), "w");
 	fclose(distributionFileElectron);
-	EfieldFile = fopen((outputDir + ".Efield.dat").c_str(), "w");
+	EfieldFile = fopen((outputDir + "Efield.dat").c_str(), "w");
 	fclose(EfieldFile);
 	BfieldFile = fopen((outputDir + "Bfield.dat").c_str(), "w");
 	fclose(BfieldFile);
@@ -2308,7 +2336,7 @@ void Simulation::createFiles() {
 	fclose(divergenceErrorFile);
 	informationFile = fopen((outputDir + "information.dat").c_str(), "w");
 	fclose(informationFile);
-	fluxFile = fopen((outputDir + "fluxFile.dat").c_str(), "w");
+	fluxFile = fopen((outputDir + "flux.dat").c_str(), "w");
 	fclose(fluxFile);
 	rotBFile = fopen((outputDir + "rotBFile.dat").c_str(), "w");
 	fclose(rotBFile);
@@ -2657,8 +2685,8 @@ void Simulation::addToPreserveChargeGlobal(){
 			particle->coordinates.x = xgrid[xnumber] - 0.0001*deltaX;
 			particle->coordinates.y = ygrid[0] + ysize*uniformDistribution();
 			particle->coordinates.z = zgrid[0] + zsize*uniformDistribution();
-			theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
-			theoreticalMomentum += particle->momentum * particle->weight * gyroradius / plasma_period;
+			theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(scaleFactor / plasma_period);
+			theoreticalMomentum += particle->momentum * particle->weight * scaleFactor / plasma_period;
 			n++;
 		}
 	} else {
@@ -2674,8 +2702,8 @@ void Simulation::addToPreserveChargeGlobal(){
 			particle->coordinates.x = xgrid[xnumber] - 0.0001*deltaX;
 			particle->coordinates.y = ygrid[0] + ysize*uniformDistribution();
 			particle->coordinates.z = zgrid[0] + zsize*uniformDistribution();
-			theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
-			theoreticalMomentum += particle->momentum * particle->weight * gyroradius / plasma_period;
+			theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(scaleFactor / plasma_period);
+			theoreticalMomentum += particle->momentum * particle->weight * scaleFactor / plasma_period;
 			n++;
 		}
 	}

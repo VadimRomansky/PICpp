@@ -1,3 +1,4 @@
+#include <string>
 #include "stdlib.h"
 #include "stdio.h"
 #include "math.h"
@@ -117,7 +118,8 @@ double Particle::velocityZ(double c) {
 void Particle::addVelocity(Vector3d& v, double c) {
 	if (v.norm() > c) {
 		printf("ERROR v > c\n");
-		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
+		std::string outputDir = outputDirectory;
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "v/c > 1 in addVelocity\n");
 		fclose(errorLogFile);
@@ -159,8 +161,9 @@ void Particle::setMomentumByV(Vector3d v, double c) {
 		printf("ERROR v > c\n");
 		printf("v = %g\n", v.norm());
 		printf("c = %g\n", c);
+		std::string outputDir = outputDirectory;
 		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
-		FILE* errorLogFile = fopen("../output/errorLog.dat", "w");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "v/c > 1 in setMomentumByV\n");
 		fclose(errorLogFile);
 		exit(0);

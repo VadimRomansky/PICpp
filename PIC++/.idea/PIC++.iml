@@ -4,16 +4,16 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/input.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/vector3d.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/particle.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/simulation.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/matrix3d.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/initialization.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/input.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/particle.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/complex.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/random.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/matrixelement.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/matrix3d.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/simulation.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/initialization.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/util.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/correlation.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/specialmath.h" isTestSource="false" />
@@ -23,9 +23,9 @@
       <sourceFolder url="file://$MODULE_DIR$/simulation.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/divergencecleanup.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/constants.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/particle.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/output.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/vector3d.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/util.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/mover.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/complex.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/main.cpp" isTestSource="false" />

@@ -1,7 +1,5 @@
 #include "simulation.h"
-#include "util.h"
 #include "constants.h"
-#include "specialmath.h"
 
 
 void Simulation::cleanupDivergence() {

@@ -115,6 +115,10 @@ void Simulation::moveParticle(Particle* particle) {
 	Particle tempParticle = *particle;
 
 	tempParticle.momentum += (E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT;
+	alertNaNOrInfinity(tempParticle.momentum.x, "p.x = naN\n");
+	alertNaNOrInfinity(tempParticle.momentum.y, "p.y = naN\n");
+	alertNaNOrInfinity(tempParticle.momentum.z, "p.z = naN\n");
+
 
 	newVelocity = tempParticle.velocity(speed_of_light_normalized);
 
@@ -286,7 +290,9 @@ void Simulation::moveParticle(Particle* particle) {
 		//printf("B = %g %g %g\n", B.x, B.y, B.z);
 
 		tempParticle.momentum += (E + (middleVelocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT;
-
+		alertNaNOrInfinity(tempParticle.momentum.x, "p.x = naN\n");
+		alertNaNOrInfinity(tempParticle.momentum.y, "p.y = naN\n");
+		alertNaNOrInfinity(tempParticle.momentum.z, "p.z = naN\n");
 		newVelocity = tempParticle.velocity(speed_of_light_normalized);
 
 	}
@@ -294,6 +300,9 @@ void Simulation::moveParticle(Particle* particle) {
 	Vector3d prevCoordinates = particle->coordinates;
 
 	particle->momentum = tempParticle.momentum;
+	alertNaNOrInfinity(particle->momentum.x, "p.x = naN\n");
+	alertNaNOrInfinity(particle->momentum.y, "p.y = naN\n");
+	alertNaNOrInfinity(particle->momentum.z, "p.z = naN\n");
 	//particle->momentum.x = 0;
 
 	particle->coordinates.x += middleVelocity.x * deltaT;
@@ -453,9 +462,9 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 				particle->addVelocity(V0, speed_of_light_normalized);
 				particle->initialMomentum = particle->momentum;
 				particles.push_back(particle);
-				double en = particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
-				theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
-				theoreticalMomentum += particle->momentum * particle->weight * gyroradius / plasma_period;
+				double en = particle->energy(speed_of_light_normalized) * particle->weight * sqr(scaleFactor / plasma_period);
+				theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(scaleFactor / plasma_period);
+				theoreticalMomentum += particle->momentum * particle->weight * scaleFactor / plasma_period;
 				if (preserveChargeLocal) {
 					int necessaryElectrons = 1;
 					if (type == ALPHA) {
@@ -470,9 +479,9 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 						particle->addVelocity(V0, speed_of_light_normalized);
 						particle->initialMomentum = particle->momentum;
 						particles.push_back(particle);
-						en = particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
-						theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(gyroradius / plasma_period);
-						theoreticalMomentum += particle->momentum * particle->weight * gyroradius / plasma_period;
+						en = particle->energy(speed_of_light_normalized) * particle->weight * sqr(scaleFactor / plasma_period);
+						theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(scaleFactor / plasma_period);
+						theoreticalMomentum += particle->momentum * particle->weight * scaleFactor / plasma_period;
 						necessaryElectrons--;
 					}
 				}

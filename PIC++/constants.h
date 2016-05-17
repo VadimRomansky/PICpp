@@ -3,6 +3,9 @@
 
 const int randomSeed = 1024;
 const int numThreads = 6;
+const char* const outputDirectory = "../output/";
+const char* const inputDirectory = "../input/";
+const char* const backupDirectory = "../backup/";
 
 const double massProtonReal = 1.67262177E-24;
 const double massAlphaReal = 6.644656E-24;
@@ -17,7 +20,7 @@ const double timeEpsilon = 0.05;
 const double relativisticPrecision = 0.00001;
 const double initialTheta = 0.6;
 const int pnumber = 1000;
-const int writeParameter = 10;
+const int writeParameter = 200;
 const int writeBackupParameter = 100000;
 const int maxNewtonIterations = 10;
 const int maxGMRESIterations = 10;

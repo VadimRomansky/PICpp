@@ -22,7 +22,8 @@ int main() {
 
 	if (startNew) {
 		printf("open input\n");
-		FILE* inputFile = fopen("../input/input.dat", "r");
+		std::string inputDir = inputDirectory;
+		FILE* inputFile = fopen((inputDir + "input.dat").c_str(), "r");
 		printf("read input\n");
 		Simulation simulation = readInput(inputFile);
 		printf("close input\n");
@@ -34,10 +35,11 @@ int main() {
 	} else {
 		printf("reading backup\n");
 
-		FILE* backupGeneralFile = fopen("./backup/general.dat", "r");
-		FILE* backupEfieldFile = fopen("./backup/Efield.dat", "r");
-		FILE* backupBfieldFile = fopen("./backup/Bfield.dat", "r");
-		FILE* backupParticlesFile = fopen("./backup/particles.dat", "r");
+		std::string backupDir = backupDirectory;
+		FILE* backupGeneralFile = fopen((backupDir + "general.dat").c_str(), "r");
+		FILE* backupEfieldFile = fopen((backupDir + "Efield.dat").c_str(), "r");
+		FILE* backupBfieldFile = fopen((backupDir + "Bfield.dat").c_str(), "r");
+		FILE* backupParticlesFile = fopen((backupDir + "particles.dat").c_str(), "r");
 
 		Simulation simulation = readBackup(backupGeneralFile, backupEfieldFile, backupBfieldFile, backupParticlesFile);
 
