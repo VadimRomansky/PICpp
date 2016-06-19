@@ -448,11 +448,13 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 			double weight = (typeContainer.concentration / typeContainer.particlesPerBin) * volumeB(xnumber - 1, j, k);
 			for (int l = 0; l < count; ++l) {
 				ParticleTypes type = typeContainer.type;
-				Particle* particle = createParticle(n, xnumber - 1, j, k, weight, type, typeContainer, temperature);
+				Particle* particle = createParticle(n, xnumber - 1, j, k, weight, type, typeContainer, typeContainer.temperatureX, typeContainer.temperatureY, typeContainer.temperatureZ);
 				n++;
 				particle->coordinates.x = x;
-				particle->coordinates.y = ygrid[j] + tempDeltaY;
-				particle->coordinates.z = zgrid[k] + tempDeltaZ;
+				//particle->coordinates.y = ygrid[j] + tempDeltaY;
+				//particle->coordinates.z = zgrid[k] + tempDeltaZ;
+				particle->coordinates.y = middleYgrid[j];
+				particle->coordinates.z = middleZgrid[k];
 				double y = particle->coordinates.y;
 				double z = particle->coordinates.z;
 				if(y > ygrid[ynumber]){
@@ -471,7 +473,7 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 						necessaryElectrons = 2;
 					}
 					while (necessaryElectrons > 0) {
-						particle = createParticle(n, xnumber - 1, j, k, weight, ELECTRON, types[0], temperature);
+						particle = createParticle(n, xnumber - 1, j, k, weight, ELECTRON, types[0], types[0].temperatureX, types[0].temperatureY, types[0].temperatureZ);
 						n++;
 						particle->coordinates.x = x;
 						particle->coordinates.y = y;

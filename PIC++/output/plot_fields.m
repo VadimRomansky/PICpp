@@ -95,7 +95,7 @@ grid ;
 figure(6);
 plot (middleX(1:Nx-1),Bz(1:Nx-1, 1), 'red', middleX(1:Nx-1),Bz(1:Nx-1, 2), 'green', middleX(1:Nx-1),Bz(1:Nx-1, 3), 'blue');
 title ('Bz');
-xlabel ('x/r_g');
+xlabel ('x');
 ylabel ('B gauss');
 grid ;
 

@@ -34,8 +34,8 @@ void Simulation::collectParticlesIntoBins() {
 		int ycount = floor((particle->coordinates.y - ygrid[0]) / deltaY);
 		int zcount = floor((particle->coordinates.z - zgrid[0]) / deltaZ);
 
-		bool crossPrevX = particleCrossBbinX(*particle, xcount - 1);
-		bool crossNextX = particleCrossBbinX(*particle, xcount + 1);
+		bool crossPrevX = particleCrossBbinX(*particle, xcount - 1)&& (xnumber > 1);
+		bool crossNextX = particleCrossBbinX(*particle, xcount + 1)&& (xnumber > 1);
 
 		bool crossPrevY = particleCrossBbinY(*particle, ycount - 1) && (ynumber > 1);
 		bool crossNextY = particleCrossBbinY(*particle, ycount + 1) && (ynumber > 1);
@@ -181,8 +181,8 @@ void Simulation::collectParticlesIntoBins() {
 			nextZ = 1;
 		}
 
-		crossPrevX = particleCrossEbinX(*particle, prevX);
-		crossNextX = particleCrossEbinX(*particle, nextX);
+		crossPrevX = particleCrossEbinX(*particle, prevX) && (xnumber > 1);
+		crossNextX = particleCrossEbinX(*particle, nextX) && (xnumber > 1);
 
 		crossPrevY = particleCrossEbinY(*particle, prevY) && (ynumber > 1);
 		crossNextY = particleCrossEbinY(*particle, nextY) && (ynumber > 1);
@@ -1050,6 +1050,9 @@ double Simulation::correlationWithBbin(Particle& particle, int i, int j, int k) 
 
 
 	double correlationx = correlationBspline(x, particle.dx, leftx, rightx);
+	if(xnumber == 1){
+		correlationx = 1.0;
+	}
 	double correlationy = correlationBspline(y, particle.dy, lefty, righty);
 	if (ynumber == 1) {
 		correlationy = 1.0;
@@ -1205,6 +1208,9 @@ double Simulation::correlationWithEbin(Particle& particle, int i, int j, int k) 
 	}
 
 	double correlationx = correlationBspline(x, particle.dx, leftx, rightx);
+	if (xnumber == 1) {
+		correlationx = 1.0;
+	}
 	double correlationy = correlationBspline(y, particle.dy, lefty, righty);
 	if (ynumber == 1) {
 		correlationy = 1.0;

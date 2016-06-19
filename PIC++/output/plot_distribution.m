@@ -4,7 +4,6 @@ load distribution_electrons.dat;
 
 Np = 1000;
 
-
 Nt = size(distribution_protons, 1)/Np;
 
 a = 0;

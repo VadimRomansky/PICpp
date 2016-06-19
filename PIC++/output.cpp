@@ -115,6 +115,40 @@ void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int par
 	}
 }
 
+void outputAnisotropy(FILE* outFile, Simulation* simulation, int particleType, double gyroradius, double plasma_period) {
+	for(int i = 0; i < simulation->xnumber; ++i){
+		for(int j = 0; j < simulation->ynumber; ++j){
+			for(int k = 0; k < simulation->znumber; ++k){
+				Vector3d meanV = Vector3d(0, 0, 0);
+				double concentration = 0;
+				for(int pcount = 0; pcount < simulation->particlesInBbin[i][j][k].size(); ++pcount){
+					Particle* particle = simulation->particlesInBbin[i][j][k][pcount];
+					double correlation = simulation->correlationWithBbin(*particle, i, j, k)/simulation->volumeB(i, j, k);
+					if(particle->type == particleType){
+						meanV = meanV + particle->velocity(simulation->speed_of_light_normalized)*particle->weight*correlation;
+						concentration += particle->weight*correlation;
+					}
+				}
+				meanV = meanV/concentration;
+
+				double parallelV2 = 0;
+				double normalV2 = 0;
+
+				for(int pcount = 0; pcount < simulation->particlesInBbin[i][j][k].size(); ++pcount){
+					Particle* particle = simulation->particlesInBbin[i][j][k][pcount];
+					double correlation = simulation->correlationWithBbin(*particle, i, j, k)/simulation->volumeB(i, j, k);
+					if(particle->type == particleType){
+						parallelV2 = parallelV2 + sqr(particle->velocityX(simulation->speed_of_light_normalized) - meanV.x)*particle->weight*correlation;
+						normalV2 = normalV2 + (sqr(particle->velocityY(simulation->speed_of_light_normalized) - meanV.y) + sqr(particle->velocityZ(simulation->speed_of_light_normalized)) - meanV.z)*particle->weight*correlation;
+					}
+				}
+
+				fprintf(outFile, "%g\n", (0.5*normalV2/parallelV2) - (2*parallelV2/normalV2));
+			}
+		}
+	}
+}
+
 void outputTrajectory(FILE* outFile, Particle* particle, double time, double plasma_period, double gyroradius) {
 	fprintf(outFile, "%g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g\n", time, particle->coordinates.x, particle->coordinates.y, particle->coordinates.z, particle->momentum.x, particle->momentum.y, particle->momentum.z, particle->momentum.norm());
 }

@@ -81,6 +81,44 @@ double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, do
 	return result;
 }
 
+void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber) {
+	int i = 0;
+#pragma omp parallel for shared(result, matrix, vector, xnumber, lnumber) private(i)
+	for (i = 0; i < xnumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				for (int l = 0; l < lnumber; ++l) {
+					result[i][j][k][l] = 0;
+					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+						MatrixElement element = matrix[i][j][k][l][m];
+
+						result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
+					}
+				}
+			}
+		}
+	}
+}
+
+void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber) {
+	int i = 0;
+#pragma omp parallel for shared(result, matrix, vector, xnumber, lnumber) private(i)
+	for (i = 0; i < xnumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) { ;
+			for (int k = 0; k < znumber; ++k) {
+				for (int l = 0; l < lnumber; ++l) {
+					result[i][j][k][l] = 0;
+					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+						MatrixElement element = matrix[i][j][k][l][m];
+
+						result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
+					}
+				}
+			}
+		}
+	}
+}
+
 double***** arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessenbergMatrix, int n, double***** prevBasis, double** prevHessenbergMatrix, int xnumber, int ynumber, int znumber, int lnumber) {
 	double***** resultBasis = new double****[n];
 	for (int m = 0; m < n - 1; ++m) {
@@ -476,6 +514,22 @@ double scalarMultiplyLargeVectors(Vector3d*** a, Vector3d*** b, int xnumber, int
 	return result;
 }
 
+void transposeSpecialMatrix(std::vector<MatrixElement>**** result, std::vector<MatrixElement>**** matrix, int xnumber, int ynumber, int znumber, int lnumber) {
+	for(int i = 0; i < xnumber; ++i) {
+		for(int j =  0; j < ynumber; ++j) {
+			for(int k = 0; k < znumber; ++k) {
+				for(int l = 0; l < lnumber; ++l){
+					for(int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+						MatrixElement element = matrix[i][j][k][l][m];
+
+						result[element.i][element.j][element.k][element.l].push_back(MatrixElement(element.value, i, j, k, l));
+					}
+				}
+			}
+		}
+	}
+}
+
 //a4*x^4 + a3*x^3 + a2*x^2 + a1*x + a0 = 0
 double solve4orderEquation(double a4, double a3, double a2, double a1, double a0, double startX) {
 	double nextX = startX;
@@ -528,4 +582,863 @@ double polynomDerivativeValue(const double* coefficients, double x, int n) {
 	}
 	return result;
 }
+
+Complex*** fastFourierTransition(double*** a, int xnumber, int ynumber, int znumber){
+	int kx = xnumber;
+	while(kx > 1) {
+		if(kx%2 != 0) {
+			printf("xnumber is not 2^N\n");
+		}
+		kx = kx/2;
+	}
+	int ky = ynumber;
+	while(ky > 1) {
+		if(ky%2 != 0) {
+			printf("ynumber is not 2^N\n");
+		}
+		ky = ky/2;
+	}
+	int kz = znumber;
+	while(kx > 1) {
+		if(kx%2 != 0) {
+			printf("znumber is not 2^N\n");
+		}
+		kz = kz/2;
+	}
+
+	Complex*** result = new Complex**[xnumber];
+	for(int i = 0; i < xnumber; ++i){
+		result[i] = new Complex*[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			result[i][j] = new Complex[znumber];
+			for(int k = 0; k < znumber; ++k){
+				result[i][j][k] = Complex(a[i][j][k], 0);
+			}
+		}
+	}
+	sortInputFastFourierX(result, xnumber, ynumber, znumber);
+
+	Complex* tempResult;
+	if(xnumber > 1) {
+		tempResult = new Complex[xnumber];
+		for (int ycount = 0; ycount < ynumber; ++ycount) {
+			for (int zcount = 0; zcount < znumber; ++zcount) {
+				for (int i = 0; i < xnumber / 2; ++i) {
+					result[i * 2][ycount][zcount] = result[i * 2][ycount][zcount] + result[i * 2 + 1][ycount][zcount];
+					result[i * 2 + 1][ycount][zcount] = result[i * 2][ycount][zcount] - result[i * 2 + 1][ycount][zcount];
+				}
+
+				int k = 4;
+				while (k <= xnumber) {
+					int l = xnumber / k;
+					for (int i = 0; i < l; ++i) {
+						for (int m = 0; m < k / 2; ++m) {
+							tempResult[i * k + m] = result[i * k + m][ycount][zcount] + result[i * k + (k / 2) + m][ycount][zcount] * complexExp(
+								-2 * pi * m / k);
+							tempResult[i * k + (k / 2) + m] = result[i * k + m][ycount][zcount] - result[i * k + (k / 2) + m][ycount][zcount] * complexExp(
+								-2 * pi * m / k);
+						}
+					}
+
+					for (int i = 0; i < xnumber; ++i) {
+						result[i][ycount][zcount] = tempResult[i];
+					}
+					k = k * 2;
+				}
+			}
+		}
+		delete[] tempResult;
+	}
+
+	if(ynumber > 1) {
+		sortInputFastFourierY(result, xnumber, ynumber, znumber);
+		tempResult = new Complex[ynumber];
+		for (int xcount = 0; xcount < xnumber; ++xcount) {
+			for (int zcount = 0; zcount < znumber; ++zcount) {
+				for (int i = 0; i < ynumber / 2; ++i) {
+					result[xcount][i * 2][zcount] = result[xcount][i * 2][zcount] + result[xcount][i * 2 + 1][zcount];
+					result[xcount][i * 2 + 1][zcount] = result[xcount][i * 2][zcount] - result[xcount][i * 2 + 1][zcount];
+				}
+
+				int k = 4;
+				while (k <= ynumber) {
+					int l = ynumber / k;
+					for (int i = 0; i < l; ++i) {
+						for (int m = 0; m < k / 2; ++m) {
+							tempResult[i * k + m] = result[xcount][i * k + m][zcount] + result[xcount][i * k + (k / 2) + m][zcount] * complexExp(
+								-2 * pi * m / k);
+							tempResult[i * k + (k / 2) + m] = result[xcount][i * k + m][zcount] - result[xcount][i * k + (k / 2) + m][zcount] * complexExp(
+								-2 * pi * m / k);
+						}
+					}
+
+					for (int i = 0; i < ynumber; ++i) {
+						result[xcount][i][zcount] = tempResult[i];
+					}
+					k = k * 2;
+				}
+			}
+		}
+		delete[] tempResult;
+	}
+
+	if(znumber > 1) {
+		sortInputFastFourierY(result, xnumber, ynumber, znumber);
+		tempResult = new Complex[znumber];
+		for (int xcount = 0; xcount < xnumber; ++xcount) {
+			for (int ycount = 0; ycount < ynumber; ++ycount) {
+				for (int i = 0; i < znumber / 2; ++i) {
+					result[xcount][ycount][i * 2] = result[xcount][ycount][i * 2] + result[xcount][ycount][i * 2 + 1];
+					result[xcount][ycount][i * 2 + 1] = result[xcount][ycount][i * 2] - result[xcount][ycount][i * 2 + 1];
+				}
+
+				int k = 4;
+				while (k <= znumber) {
+					int l = znumber / k;
+					for (int i = 0; i < l; ++i) {
+						for (int m = 0; m < k / 2; ++m) {
+							tempResult[i * k + m] = result[xcount][ycount][i * k + m] + result[xcount][ycount][i * k + (k / 2) + m] * complexExp(
+								-2 * pi * m / k);
+							tempResult[i * k + (k / 2) + m] = result[xcount][ycount][i * k + m] - result[xcount][ycount][i * k + (k / 2) + m] * complexExp(
+								-2 * pi * m / k);
+						}
+					}
+
+					for (int i = 0; i < znumber; ++i) {
+						result[xcount][ycount][i] = tempResult[i];
+					}
+					k = k * 2;
+				}
+			}
+		}
+		delete[] tempResult;
+	}
+
+
+	return result;
+}
+
+void sortInputFastFourierX(double*** a, int xnumber, int ynumber, int znumber){
+	double* tempA = new double[xnumber];
+	for(int ycount = 0; ycount < ynumber; ++ycount) {
+		for (int zcount = 0; zcount < znumber; ++zcount) {
+			int k = xnumber;
+
+			while (k > 2) {
+				int m = xnumber / k;
+
+				for (int i = 0; i < m; ++i) {
+					for (int j = 0; j < k / 2; ++j) {
+						tempA[i * k + j] = a[i * k + 2 * j][ycount][zcount];
+						tempA[i * k + (k / 2) + j] = a[i * k + 2 * j + 1][ycount][zcount];
+					}
+				}
+
+				for (int i = 0; i < xnumber; ++i) {
+					a[i][ycount][zcount] = tempA[i];
+				}
+
+				k = k / 2;
+			}
+		}
+	}
+	delete[] tempA;
+}
+
+void sortInputFastFourierY(double*** a, int xnumber, int ynumber, int znumber){
+	double* tempA = new double[ynumber];
+	for(int xcount = 0; xcount < xnumber; ++xcount) {
+		for (int zcount = 0; zcount < znumber; ++zcount) {
+			int k = ynumber;
+
+			while (k > 2) {
+				int m = ynumber / k;
+
+				for (int i = 0; i < m; ++i) {
+					for (int j = 0; j < k / 2; ++j) {
+						tempA[i * k + j] = a[xcount][i * k + 2 * j][zcount];
+						tempA[i * k + (k / 2) + j] = a[xcount][i * k + 2 * j + 1][zcount];
+					}
+				}
+
+				for (int i = 0; i < ynumber; ++i) {
+					a[xcount][i][zcount] = tempA[i];
+				}
+
+				k = k / 2;
+			}
+		}
+	}
+	delete[] tempA;
+}
+
+void sortInputFastFourierZ(double*** a, int xnumber, int ynumber, int znumber){
+	double* tempA = new double[znumber];
+	for(int xcount = 0; xcount < xnumber; ++xcount) {
+		for (int ycount = 0; ycount < ynumber; ++ycount) {
+			int k = znumber;
+
+			while (k > 2) {
+				int m = znumber / k;
+
+				for (int i = 0; i < m; ++i) {
+					for (int j = 0; j < k / 2; ++j) {
+						tempA[i * k + j] = a[xcount][ycount][i * k + 2 * j];
+						tempA[i * k + (k / 2) + j] = a[xcount][ycount][i * k + 2 * j + 1];
+					}
+				}
+
+				for (int i = 0; i < znumber; ++i) {
+					a[xcount][ycount][i] = tempA[i];
+				}
+
+				k = k / 2;
+			}
+		}
+	}
+	delete[] tempA;
+}
+
+double*** fastFourierReverceTransition(Complex ***a, int xnumber, int ynumber, int znumber) {
+	int kx = xnumber;
+	while(kx > 1) {
+		if(kx%2 != 0) {
+			printf("xnumber is not 2^N\n");
+		}
+		kx = kx/2;
+	}
+	int ky = ynumber;
+	while(ky > 1) {
+		if(ky%2 != 0) {
+			printf("ynumber is not 2^N\n");
+		}
+		ky = ky/2;
+	}
+	int kz = znumber;
+	while(kx > 1) {
+		if(kx%2 != 0) {
+			printf("znumber is not 2^N\n");
+		}
+		kz = kz/2;
+	}
+
+	Complex*** result = new Complex**[xnumber];
+	for(int i = 0; i < xnumber; ++i){
+		result[i] = new Complex*[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			result[i][j] = new Complex[znumber];
+			for(int k = 0; k < znumber; ++k){
+				result[i][j][k] = a[i][j][k];
+			}
+		}
+	}
+	sortInputFastFourierX(result, xnumber, ynumber, znumber);
+
+	Complex* tempResult;
+	if(xnumber > 1) {
+		tempResult = new Complex[xnumber];
+		for (int ycount = 0; ycount < ynumber; ++ycount) {
+			for (int zcount = 0; zcount < znumber; ++zcount) {
+				for (int i = 0; i < xnumber / 2; ++i) {
+					result[i * 2][ycount][zcount] = result[i * 2][ycount][zcount] + result[i * 2 + 1][ycount][zcount];
+					result[i * 2 + 1][ycount][zcount] = result[i * 2][ycount][zcount] - result[i * 2 + 1][ycount][zcount];
+				}
+
+				int k = 4;
+				while (k <= xnumber) {
+					int l = xnumber / k;
+					for (int i = 0; i < l; ++i) {
+						for (int m = 0; m < k / 2; ++m) {
+							tempResult[i * k + m] = result[i * k + m][ycount][zcount] + result[i * k + (k / 2) + m][ycount][zcount] * complexExp(
+								2 * pi * m / k);
+							tempResult[i * k + (k / 2) + m] = result[i * k + m][ycount][zcount] - result[i * k + (k / 2) + m][ycount][zcount] * complexExp(
+								2 * pi * m / k);
+						}
+					}
+
+					for (int i = 0; i < xnumber; ++i) {
+						result[i][ycount][zcount] = tempResult[i];
+					}
+					k = k * 2;
+				}
+			}
+		}
+		delete[] tempResult;
+	}
+
+	if(ynumber > 1) {
+		sortInputFastFourierY(result, xnumber, ynumber, znumber);
+		tempResult = new Complex[ynumber];
+		for (int xcount = 0; xcount < xnumber; ++xcount) {
+			for (int zcount = 0; zcount < znumber; ++zcount) {
+				for (int i = 0; i < ynumber / 2; ++i) {
+					result[xcount][i * 2][zcount] = result[xcount][i * 2][zcount] + result[xcount][i * 2 + 1][zcount];
+					result[xcount][i * 2 + 1][zcount] = result[xcount][i * 2][zcount] - result[xcount][i * 2 + 1][zcount];
+				}
+
+				int k = 4;
+				while (k <= ynumber) {
+					int l = ynumber / k;
+					for (int i = 0; i < l; ++i) {
+						for (int m = 0; m < k / 2; ++m) {
+							tempResult[i * k + m] = result[xcount][i * k + m][zcount] + result[xcount][i * k + (k / 2) + m][zcount] * complexExp(
+								2 * pi * m / k);
+							tempResult[i * k + (k / 2) + m] = result[xcount][i * k + m][zcount] - result[xcount][i * k + (k / 2) + m][zcount] * complexExp(
+								2 * pi * m / k);
+						}
+					}
+
+					for (int i = 0; i < ynumber; ++i) {
+						result[xcount][i][zcount] = tempResult[i];
+					}
+					k = k * 2;
+				}
+			}
+		}
+		delete[] tempResult;
+	}
+
+	if(znumber > 1) {
+		sortInputFastFourierY(result, xnumber, ynumber, znumber);
+		tempResult = new Complex[znumber];
+		for (int xcount = 0; xcount < xnumber; ++xcount) {
+			for (int ycount = 0; ycount < ynumber; ++ycount) {
+				for (int i = 0; i < znumber / 2; ++i) {
+					result[xcount][ycount][i * 2] = result[xcount][ycount][i * 2] + result[xcount][ycount][i * 2 + 1];
+					result[xcount][ycount][i * 2 + 1] = result[xcount][ycount][i * 2] - result[xcount][ycount][i * 2 + 1];
+				}
+
+				int k = 4;
+				while (k <= znumber) {
+					int l = znumber / k;
+					for (int i = 0; i < l; ++i) {
+						for (int m = 0; m < k / 2; ++m) {
+							tempResult[i * k + m] = result[xcount][ycount][i * k + m] + result[xcount][ycount][i * k + (k / 2) + m] * complexExp(
+								2 * pi * m / k);
+							tempResult[i * k + (k / 2) + m] = result[xcount][ycount][i * k + m] - result[xcount][ycount][i * k + (k / 2) + m] * complexExp(
+								2 * pi * m / k);
+						}
+					}
+
+					for (int i = 0; i < znumber; ++i) {
+						result[xcount][ycount][i] = tempResult[i];
+					}
+					k = k * 2;
+				}
+			}
+		}
+		delete[] tempResult;
+	}
+
+	double*** realPart = new double**[xnumber];
+	for(int i = 0; i < xnumber; ++i){
+		realPart[i] = new double*[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			realPart[i][j] = new double[znumber];
+			for(int k = 0; k < znumber; ++k){
+				realPart[i][j][k] = result[i][j][k].re/(xnumber*ynumber*znumber);
+			}
+			delete[] result[i][j];
+		}
+		delete[] result[i];
+	}
+
+	delete[] result;
+
+	return realPart;
+}
+
+void sortInputFastFourierX(Complex ***a, int xnumber, int ynumber, int znumber) {
+	Complex* tempA = new Complex[xnumber];
+	for(int ycount = 0; ycount < ynumber; ++ycount) {
+		for (int zcount = 0; zcount < znumber; ++zcount) {
+			int k = xnumber;
+
+			while (k > 2) {
+				int m = xnumber / k;
+
+				for (int i = 0; i < m; ++i) {
+					for (int j = 0; j < k / 2; ++j) {
+						tempA[i * k + j] = a[i * k + 2 * j][ycount][zcount];
+						tempA[i * k + (k / 2) + j] = a[i * k + 2 * j + 1][ycount][zcount];
+					}
+				}
+
+				for (int i = 0; i < xnumber; ++i) {
+					a[i][ycount][zcount] = tempA[i];
+				}
+
+				k = k / 2;
+			}
+		}
+	}
+	delete[] tempA;
+}
+
+void sortInputFastFourierY(Complex ***a, int xnumber, int ynumber, int znumber) {
+	Complex* tempA = new Complex[ynumber];
+	for(int xcount = 0; xcount < xnumber; ++xcount) {
+		for (int zcount = 0; zcount < znumber; ++zcount) {
+			int k = ynumber;
+
+			while (k > 2) {
+				int m = ynumber / k;
+
+				for (int i = 0; i < m; ++i) {
+					for (int j = 0; j < k / 2; ++j) {
+						tempA[i * k + j] = a[xcount][i * k + 2 * j][zcount];
+						tempA[i * k + (k / 2) + j] = a[xcount][i * k + 2 * j + 1][zcount];
+					}
+				}
+
+				for (int i = 0; i < ynumber; ++i) {
+					a[xcount][i][zcount] = tempA[i];
+				}
+
+				k = k / 2;
+			}
+		}
+	}
+	delete[] tempA;
+}
+
+void sortInputFastFourierZ(Complex ***a, int xnumber, int ynumber, int znumber) {
+	Complex* tempA = new Complex[znumber];
+	for(int xcount = 0; xcount < xnumber; ++xcount) {
+		for (int ycount = 0; ycount < ynumber; ++ycount) {
+			int k = znumber;
+
+			while (k > 2) {
+				int m = znumber / k;
+
+				for (int i = 0; i < m; ++i) {
+					for (int j = 0; j < k / 2; ++j) {
+						tempA[i * k + j] = a[xcount][ycount][i * k + 2 * j];
+						tempA[i * k + (k / 2) + j] = a[xcount][ycount][i * k + 2 * j + 1];
+					}
+				}
+
+				for (int i = 0; i < znumber; ++i) {
+					a[xcount][ycount][i] = tempA[i];
+				}
+
+				k = k / 2;
+			}
+		}
+	}
+	delete[] tempA;
+}
+
+void conjugateGradientMethod(std::vector<MatrixElement> ****matrix, double ****rightPart, double ****outVector,
+							 int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration) {
+
+	printf("start conjugate gradient\n");
+	double**** residual = new double***[xnumber];
+	double**** prevResidual = new double***[xnumber];
+	double**** z = new double***[xnumber];
+	double**** tempVector = new double***[xnumber];
+
+	for(int i = 0; i < xnumber; ++i){
+		residual[i] = new double**[ynumber];
+		prevResidual[i] = new double**[ynumber];
+		z[i] = new double**[ynumber];
+		tempVector[i] = new double**[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			residual[i][j] = new double*[znumber];
+			prevResidual[i][j] = new double*[znumber];
+			z[i][j] = new double*[znumber];
+			tempVector[i][j] = new double*[znumber];
+			for(int k = 0; k < znumber; ++k){
+				residual[i][j][k] = new double[lnumber];
+				prevResidual[i][j][k] = new double[lnumber];
+				z[i][j][k] = new double[lnumber];
+				tempVector[i][j][k] = new double[lnumber];
+				for(int l = 0; l < lnumber; ++l){
+					outVector[i][j][k][l] = 0;
+					prevResidual[i][j][k][l] = rightPart[i][j][k][l];
+					z[i][j][k][l] = rightPart[i][j][k][l];
+					tempVector[i][j][k][l] = 0;
+				}
+			}
+		}
+	}
+
+
+	/*for (int i = 0; i < xnumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				for (int l = 0; l < lnumber; ++l) {
+					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+						MatrixElement element = matrix[i][j][k][l][m];
+						prevResidual[i][j][k][l] += element.value * outVector[element.i][element.j][element.k][element.l];
+					}
+				}
+			}
+		}
+	}*/
+
+	int iteration = 0;
+
+
+    double prevResidualNorm2 = scalarMultiplyLargeVectors(prevResidual, prevResidual, xnumber, ynumber, znumber, lnumber);
+    double residualNorm2 = prevResidualNorm2;
+	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber);
+
+	double relativeError = sqrt(residualNorm2/rightPartNorm2);
+
+	while((iteration < maxIteration) && (iteration < xnumber*ynumber*znumber*lnumber) && (relativeError > (precision/(xnumber*ynumber*znumber*lnumber)))){
+		printf("conjugate gradient iteration %d\n", iteration);
+
+		multiplySpecialMatrixVector(tempVector, matrix, z, xnumber, ynumber, znumber, lnumber);
+
+		double alpha = prevResidualNorm2/scalarMultiplyLargeVectors(tempVector, z, xnumber, ynumber, znumber, lnumber);
+
+		for(int i = 0; i < xnumber; ++i){
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					for(int l = 0; l < lnumber; ++l){
+						outVector[i][j][k][l] += alpha*z[i][j][k][l];
+						residual[i][j][k][l] = prevResidual[i][j][k][l] - alpha*tempVector[i][j][k][l];
+					}
+				}
+			}
+		}
+
+        residualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumber, ynumber, znumber, lnumber);
+
+		double beta  = residualNorm2/prevResidualNorm2;
+
+		for(int i = 0; i < xnumber; ++i){
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					for(int l = 0; l < lnumber; ++l){
+						z[i][j][k][l] = residual[i][j][k][l] + beta*z[i][j][k][l];
+					}
+				}
+			}
+		}
+
+		prevResidualNorm2 = residualNorm2;
+
+		relativeError = sqrt(residualNorm2/rightPartNorm2);
+		iteration++;
+	}
+
+	for(int i = 0; i < xnumber; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				delete[] residual[i][j][k];
+				delete[] prevResidual[i][j][k];
+				delete[] z[i][j][k];
+				delete[] tempVector[i][j][k];
+			}
+			delete[] residual[i][j];
+			delete[] prevResidual[i][j];
+			delete[] z[i][j];
+			delete[] tempVector[i][j];
+		}
+		delete[] residual[i];
+		delete[] prevResidual[i];
+		delete[] z[i];
+		delete[] tempVector[i];
+	}
+	delete[] residual;
+	delete[] prevResidual;
+	delete[] z;
+	delete[] tempVector;
+}
+
+void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration) {
+	printf("start biconjugate gradient\n");
+	double**** residual = new double***[xnumber];
+	double**** prevResidual = new double***[xnumber];
+	double**** z = new double***[xnumber];
+	double**** p = new double***[xnumber];
+	double**** s = new double***[xnumber];
+	double**** tempVector = new double***[xnumber];
+	double**** tempVector2 = new double***[xnumber];
+	std::vector<MatrixElement>**** transposedMatrix = new std::vector<MatrixElement>***[xnumber];
+
+	for(int i = 0; i < xnumber; ++i){
+		residual[i] = new double**[ynumber];
+		prevResidual[i] = new double**[ynumber];
+		z[i] = new double**[ynumber];
+		p[i] = new double**[ynumber];
+		s[i] = new double**[ynumber];
+		tempVector[i] = new double**[ynumber];
+		tempVector2[i] = new double**[ynumber];
+		transposedMatrix[i] = new std::vector<MatrixElement>**[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			residual[i][j] = new double*[znumber];
+			prevResidual[i][j] = new double*[znumber];
+			z[i][j] = new double*[znumber];
+			p[i][j] = new double*[znumber];
+			s[i][j] = new double*[znumber];
+			tempVector[i][j] = new double*[znumber];
+			tempVector2[i][j] = new double*[znumber];
+			transposedMatrix[i][j] = new std::vector<MatrixElement>*[znumber];
+			for(int k = 0; k < znumber; ++k){
+				residual[i][j][k] = new double[lnumber];
+				prevResidual[i][j][k] = new double[lnumber];
+				z[i][j][k] = new double[lnumber];
+				p[i][j][k] = new double[lnumber];
+				s[i][j][k] = new double[lnumber];
+				tempVector[i][j][k] = new double[lnumber];
+				tempVector2[i][j][k] = new double[lnumber];
+				transposedMatrix[i][j][k] = new std::vector<MatrixElement>[lnumber];
+				for(int l = 0; l < lnumber; ++l){
+					outVector[i][j][k][l] = 0;
+					prevResidual[i][j][k][l] = rightPart[i][j][k][l];
+					z[i][j][k][l] = rightPart[i][j][k][l];
+					p[i][j][k][l] = rightPart[i][j][k][l];
+					s[i][j][k][l] = rightPart[i][j][k][l];
+					tempVector[i][j][k][l] = 0;
+					tempVector2[i][j][k][l] = 0;
+				}
+			}
+		}
+	}
+
+	transposeSpecialMatrix(transposedMatrix, matrix, xnumber, ynumber, znumber, lnumber);
+
+
+
+	int iteration = 0;
+
+
+    double prevResidualNorm2 = scalarMultiplyLargeVectors(p, prevResidual, xnumber, ynumber, znumber, lnumber);
+    double residualNorm2 = prevResidualNorm2;
+	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber);
+
+	double relativeError = sqrt(residualNorm2/rightPartNorm2);
+
+	while((iteration < maxIteration) && (iteration < xnumber*ynumber*znumber*lnumber) && (relativeError > (precision/(xnumber*ynumber*znumber*lnumber)))){
+		printf("biconjugate gradient iteration %d\n", iteration);
+
+		multiplySpecialMatrixVector(tempVector, matrix, z, xnumber, ynumber, znumber, lnumber);
+		multiplySpecialMatrixVector(tempVector2, transposedMatrix, s, xnumber, ynumber, znumber, lnumber);
+
+		double alpha = prevResidualNorm2/scalarMultiplyLargeVectors(tempVector, s, xnumber, ynumber, znumber, lnumber);
+
+		for(int i = 0; i < xnumber; ++i){
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					for(int l = 0; l < lnumber; ++l){
+						outVector[i][j][k][l] += alpha*z[i][j][k][l];
+						residual[i][j][k][l] = prevResidual[i][j][k][l] - alpha*tempVector[i][j][k][l];
+						p[i][j][k][l] = p[i][j][k][l] - alpha*tempVector2[i][j][k][l];
+					}
+				}
+			}
+		}
+
+        residualNorm2 = scalarMultiplyLargeVectors(p, residual, xnumber, ynumber, znumber, lnumber);
+
+		double beta  = residualNorm2/prevResidualNorm2;
+
+		for(int i = 0; i < xnumber; ++i){
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					for(int l = 0; l < lnumber; ++l){
+						z[i][j][k][l] = residual[i][j][k][l] + beta*z[i][j][k][l];
+						s[i][j][k][l] = p[i][j][k][l] + beta*s[i][j][k][l];
+					}
+				}
+			}
+		}
+
+		prevResidualNorm2 = residualNorm2;
+
+		relativeError = sqrt(residualNorm2/rightPartNorm2);
+		iteration++;
+	}
+
+	for(int i = 0; i < xnumber; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				delete[] residual[i][j][k];
+				delete[] prevResidual[i][j][k];
+				delete[] z[i][j][k];
+				delete[] p[i][j][k];
+				delete[] s[i][j][k];
+				delete[] tempVector[i][j][k];
+				delete[] tempVector2[i][j][k];
+				delete[] transposedMatrix[i][j][k];
+			}
+			delete[] residual[i][j];
+			delete[] prevResidual[i][j];
+			delete[] z[i][j];
+			delete[] p[i][j];
+			delete[] s[i][j];
+			delete[] tempVector[i][j];
+			delete[] tempVector2[i][j];
+			delete[] transposedMatrix[i][j];
+		}
+		delete[] residual[i];
+		delete[] prevResidual[i];
+		delete[] z[i];
+		delete[] p[i];
+		delete[] s[i];
+		delete[] tempVector[i];
+		delete[] tempVector2[i];
+		delete[] transposedMatrix[i];
+	}
+	delete[] residual;
+	delete[] prevResidual;
+	delete[] z;
+	delete[] p;
+	delete[] s;
+	delete[] tempVector;
+	delete[] tempVector2;
+	delete[] transposedMatrix;
+}
+
+void biconjugateStabilizedGradientMethod(std::vector<MatrixElement> ****matrix, double ****rightPart,
+										 double ****outVector, int xnumber, int ynumber, int znumber, int lnumber,
+										 double precision, int maxIteration) {
+	printf("start biconjugate gradient\n");
+	double**** residual = new double***[xnumber];
+	double**** firstResidual = new double***[xnumber];
+	double**** p = new double***[xnumber];
+	double**** v = new double***[xnumber];
+	double**** s = new double***[xnumber];
+	double**** t = new double***[xnumber];
+
+	double alpha = 1;
+	double rho = 1;
+	double omega = 1;
+
+	for(int i = 0; i < xnumber; ++i){
+		residual[i] = new double**[ynumber];
+		firstResidual[i] = new double**[ynumber];
+		v[i] = new double**[ynumber];
+		p[i] = new double**[ynumber];
+		s[i] = new double**[ynumber];
+		t[i] = new double**[ynumber];
+		for(int j = 0; j < ynumber; ++j){
+			residual[i][j] = new double*[znumber];
+			firstResidual[i][j] = new double*[znumber];
+			v[i][j] = new double*[znumber];
+			p[i][j] = new double*[znumber];
+			s[i][j] = new double*[znumber];
+			t[i][j] = new double*[znumber];
+			for(int k = 0; k < znumber; ++k){
+				residual[i][j][k] = new double[lnumber];
+				firstResidual[i][j][k] = new double[lnumber];
+				v[i][j][k] = new double[lnumber];
+				p[i][j][k] = new double[lnumber];
+				s[i][j][k] = new double[lnumber];
+				t[i][j][k] = new double[lnumber];
+				for(int l = 0; l < lnumber; ++l){
+					outVector[i][j][k][l] = 0;
+					firstResidual[i][j][k][l] = rightPart[i][j][k][l];
+					residual[i][j][k][l] = rightPart[i][j][k][l];
+					v[i][j][k][l] = 0;
+					p[i][j][k][l] = 0;
+					s[i][j][k][l] = 0;
+					t[i][j][k][l] = 0;
+				}
+			}
+		}
+	}
+
+
+
+	int iteration = 0;
+
+
+	double prevResidualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumber, ynumber, znumber, lnumber);
+	double residualNorm2 = prevResidualNorm2;
+	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber);
+
+	double relativeError = sqrt(residualNorm2/rightPartNorm2);
+
+	while((iteration < maxIteration) && (iteration < xnumber*ynumber*znumber*lnumber) && (relativeError > (precision/(xnumber*ynumber*znumber*lnumber)))){
+		printf("biconjugate gradient iteration %d\n", iteration);
+
+		double newRho = scalarMultiplyLargeVectors(firstResidual, residual, xnumber, ynumber, znumber, lnumber);
+
+		double beta = (newRho/rho)*(alpha/omega);
+		rho = newRho;
+
+		for(int i = 0; i < xnumber; ++i){
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					for(int l = 0; l < lnumber; ++l){
+						p[i][j][k][l] = residual[i][j][k][l] + beta*(p[i][j][k][l] - omega*v[i][j][k][l]);
+					}
+				}
+			}
+		}
+		multiplySpecialMatrixVector(v, matrix, p, xnumber, ynumber, znumber, lnumber);
+
+		alpha = rho/scalarMultiplyLargeVectors(firstResidual, v, xnumber, ynumber, znumber, lnumber);
+
+		for(int i = 0; i < xnumber; ++i){
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					for(int l = 0; l < lnumber; ++l){
+						s[i][j][k][l] = residual[i][j][k][l] - alpha*v[i][j][k][l];
+					}
+				}
+			}
+		}
+
+		multiplySpecialMatrixVector(t, matrix, s, xnumber, ynumber, znumber, lnumber);
+
+		omega = scalarMultiplyLargeVectors(t, s, xnumber, ynumber, znumber, lnumber)/scalarMultiplyLargeVectors(t, t, xnumber, ynumber, znumber, lnumber);
+
+		for(int i = 0; i < xnumber; ++i){
+			for(int j = 0; j < ynumber; ++j){
+				for(int k = 0; k < znumber; ++k){
+					for(int l = 0; l < lnumber; ++l){
+						outVector[i][j][k][l] = outVector[i][j][k][l] + omega*s[i][j][k][l] + alpha*p[i][j][k][l];
+						residual[i][j][k][l] = s[i][j][k][l] - omega*t[i][j][k][l];
+					}
+				}
+			}
+		}
+
+		residualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumber, ynumber, znumber, lnumber);
+
+		prevResidualNorm2 = residualNorm2;
+
+		relativeError = sqrt(residualNorm2/rightPartNorm2);
+		iteration++;
+	}
+
+	for(int i = 0; i < xnumber; ++i){
+		for(int j = 0; j < ynumber; ++j){
+			for(int k = 0; k < znumber; ++k){
+				delete[] residual[i][j][k];
+				delete[] firstResidual[i][j][k];
+				delete[] v[i][j][k];
+				delete[] p[i][j][k];
+				delete[] s[i][j][k];
+				delete[] t[i][j][k];
+			}
+			delete[] residual[i][j];
+			delete[] firstResidual[i][j];
+			delete[] v[i][j];
+			delete[] p[i][j];
+			delete[] s[i][j];
+			delete[] t[i][j];
+		}
+		delete[] residual[i];
+		delete[] firstResidual[i];
+		delete[] v[i];
+		delete[] p[i];
+		delete[] s[i];
+		delete[] t[i];
+	}
+	delete[] residual;
+	delete[] firstResidual;
+	delete[] v;
+	delete[] p;
+	delete[] s;
+	delete[] t;
+}
+
+
+
 

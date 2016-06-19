@@ -10,6 +10,7 @@
 
 void outputDistributionUpstream(FILE* outFile, std::vector<Particle*> particles, int particleType, double shockWavePoint, double plasma_period, double gyroradius);
 void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int particleType, double plasma_period, double gyroradius);
+void outputAnisotropy(FILE* outFile, Simulation* simulation, int particleType, double gyroradius, double plasma_period);
 void outputTrajectory(FILE *outFile, Particle *particle, double time, double plasma_period, double gyroradius);
 void outputGrid(FILE* outFile, double* grid, int number, double scale = 1.0);
 void outputFields(FILE* outEfile, FILE* outBfile, Vector3d*** Efield, Vector3d*** Bfield, int xnumber, int ynumber, int znumber, double plasma_priod, double gyroradius, double fieldScale);

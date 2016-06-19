@@ -23,6 +23,8 @@ int main() {
 	if (startNew) {
 		printf("open input\n");
 		std::string inputDir = inputDirectory;
+		/*FILE* tempFile = fopen((inputDir + "temp.dat").c_str(), "w");
+		fclose(tempFile);*/
 		FILE* inputFile = fopen((inputDir + "input.dat").c_str(), "r");
 		printf("read input\n");
 		Simulation simulation = readInput(inputFile);

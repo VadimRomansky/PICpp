@@ -184,6 +184,10 @@ public:
 	FILE* distributionFileElectron;
 	FILE* distributionFileProtonUpstream;
 	FILE* distributionFileElectronUpstream;
+	FILE* anisotropyFileProton;
+	FILE* anisotropyFileElectron;
+	FILE* anisotropyFileAlpha;
+	FILE* anisotropyFilePositron;
 	FILE* EfieldFile;
 	FILE* BfieldFile;
 	FILE* Xfile;
@@ -225,7 +229,8 @@ public:
 	void initializeSimpleElectroMagneticWave();
 	void initializeRotatedSimpleElectroMagneticWave(int wavesCount);
 	void checkFrequency(double omega);
-	void initializeAlfvenWave(int wavesCount, double amplitudeRelation);
+	void initializeAlfvenWaveX(int wavesCount, double amplitudeRelation);
+	void initializeAlfvenWaveY(int wavesCount, double amplitudeRelation);
 	void initializeRotatedAlfvenWave(int wavesCount, double amplitudeRelation);
 	void initializeLangmuirWave();
 	void initializeTwoStream();
@@ -233,6 +238,7 @@ public:
 	void initializeFluxFromRight();
 	void fieldsLorentzTransitionX(const double& v);
 	void initializeShockWave();
+	void initializeAnisotropic();
 	void initializeKolmogorovSpectrum(int start, int end);
 	void createArrays();
 	void createParticleTypes();
@@ -241,15 +247,15 @@ public:
 	void output();
 	void outputBackup();
 	void rescaleConstants();
-	void rescaleConstantsToTheoretical();
 
+	void rescaleConstantsToTheoretical();
 	void checkDebyeParameter();
 	void checkGyroRadius();
 	void checkCollisionTime(double omega);
 	void checkMagneticReynolds(double v);
 	void checkDissipation(double k, double alfvenV);
-	Matrix3d evaluateAlphaRotationTensor(double beta, Vector3d velocity, Vector3d EField, Vector3d BField);
 
+	Matrix3d evaluateAlphaRotationTensor(double beta, Vector3d velocity, Vector3d EField, Vector3d BField);
 	void updateDeltaT();
 	void evaluateFields();
 	void updateEfield();
@@ -265,9 +271,9 @@ public:
 	void createInternalEquationY(int i, int j, int k);
 	void createInternalEquationZ(int i, int j, int k);
 	void createInternalEquation(int i, int j, int k);
+
+
 	void evaluateMaxwellEquationMatrix();
-
-
 	void evaluateMagneticField();
 	void updateBoundaries();
 	void updateBoundariesOldField();
@@ -279,10 +285,10 @@ public:
 	void createDivergenceCleanupLeftEquation(int j, int k);
 	void createDivergenceCleanupRightEquation(int j, int k);
 	double cleanUpRightPart(int i, int j, int k);
+
 	Complex*** evaluateFourierTranslation(double*** a);
 
 	double*** evaluateReverceFourierTranslation(Complex*** a);
-
 	void resetNewTempFields();
 	double volumeE(int i, int j, int k);
 	double volumeB(int i, int j, int k);
@@ -305,15 +311,15 @@ public:
 	double evaluateDivTempE(int i, int j, int k);
 	double evaluateDivNewE(int i, int j, int k);
 	double evaluateDivFlux(int i, int j, int k);
-	Vector3d evaluateDivPressureTensor(int i, int j, int k);
 
+	Vector3d evaluateDivPressureTensor(int i, int j, int k);
 	Vector3d evaluateGradDensity(int i, int j, int k);
 	Vector3d getBfield(int i, int j, int k);
 	Vector3d getTempEfield(int i, int j, int k);
 	Vector3d getNewEfield(int i, int j, int k);
 	Vector3d getEfield(int i, int j, int k);
-	Matrix3d getPressureTensor(int i, int j, int k);
 
+	Matrix3d getPressureTensor(int i, int j, int k);
 	double getDensity(int i, int j, int k);
 	void createParticles();
 	void moveToPreserveChargeLocal();
@@ -323,17 +329,17 @@ public:
 	Particle* getLastProton();
 	Particle* getLastElectron();
 	Particle* getProton(int n);
-	Particle* getElectron(int n);
 
-	Particle* createParticle(int n, int i, int j, int k, double weight, ParticleTypes type, ParticleTypeContainer typeContainer, double temperature);
+	Particle* getElectron(int n);
+	Particle* createParticle(int n, int i, int j, int k, double weight, ParticleTypes type, ParticleTypeContainer typeContainer, double temperatureX, double temperatureY, double temperatureZ);
 	void moveParticles();
 	void removeEscapedParticles();
 	void moveParticle(Particle* particle);
 	void correctParticlePosition(Particle* particle);
 	void correctParticlePosition(Particle& particle);
+
+
 	void evaluateParticlesRotationTensor();
-
-
 	void injectNewParticles(int count, ParticleTypeContainer typeContainer, double length);
 	void collectParticlesIntoBins();
 	void pushParticleIntoEbin(Particle* particle, int i, int j, int k);
@@ -357,6 +363,7 @@ public:
 	Vector3d correlationNewBfield(Particle& particle);
 	Vector3d correlationEfield(Particle& particle);
 	double correlationWithBbin(Particle& particle, int i, int j, int k);
+
 	double correlationWithEbin(Particle& particle, int i, int j, int k);
 
 	double correlationBspline(const double& x, const double& dx, const double& leftx, const double& rightx);

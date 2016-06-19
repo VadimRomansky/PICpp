@@ -1,7 +1,7 @@
 clear;
 load rotBFile.dat;
 load EderivativeFile.dat;
-load fluxFile.dat
+load flux.dat
 load Xfile.dat;
 load Yfile.dat;
 load Zfile.dat;
@@ -11,7 +11,7 @@ Ny = size(Yfile, 1);
 Nz = size(Zfile, 1);
 
 NE = Nx*Ny*Nz;
-Nt = (size(fluxFile, 1)/NE)-1;
+Nt = (size(flux, 1)/NE)-1;
 
 ynumber = 1;
 znumber = 1;
@@ -36,15 +36,15 @@ derEz(1:Nx, 1:3) = 0;
 
 
 for i=1:Nx,
-   Jx(i,1) = 4*3.14*fluxFile((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + a*NE, 1);
-   Jx(i,2) = 4*3.14*fluxFile((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + b*NE, 1);
-   Jx(i,3) = 4*3.14*fluxFile((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + c*NE, 1);
-   Jy(i,1) = 4*3.14*fluxFile((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + a*NE, 2);
-   Jy(i,2) = 4*3.14*fluxFile((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + b*NE, 2);
-   Jy(i,3) = 4*3.14*fluxFile((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + c*NE, 2);
-   Jz(i,1) = 4*3.14*fluxFile((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + a*NE, 3);
-   Jz(i,2) = 4*3.14*fluxFile((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + b*NE, 3);
-   Jz(i,3) = 4*3.14*fluxFile((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + c*NE, 3);
+   Jx(i,1) = 4*3.14*flux((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + a*NE, 1);
+   Jx(i,2) = 4*3.14*flux((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + b*NE, 1);
+   Jx(i,3) = 4*3.14*flux((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + c*NE, 1);
+   Jy(i,1) = 4*3.14*flux((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + a*NE, 2);
+   Jy(i,2) = 4*3.14*flux((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + b*NE, 2);
+   Jy(i,3) = 4*3.14*flux((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + c*NE, 2);
+   Jz(i,1) = 4*3.14*flux((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + a*NE, 3);
+   Jz(i,2) = 4*3.14*flux((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + b*NE, 3);
+   Jz(i,3) = 4*3.14*flux((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + c*NE, 3);
    
    rotBx(i,1) = rotBFile((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + a*NE, 1);
    rotBx(i,2) = rotBFile((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + b*NE, 1);

@@ -1,0 +1,13 @@
+0                        input type CGS or Lapenta
+1024 8 1                 grid numbers
+4096E7 32E7 4E7         gridsizes
+1E-10                    temperature
+1.67E-28               density
+-1E10 0 0                  velocity
+0 0 0                  elecctricField
+0 0 1E-4                  magneticField
+10000000              max iterations
+1E100                   max time
+100                 electrons per bin
+0                  positrons per bin
+0                  alpha per bin (protons - electrons - positron - 2*alpha)

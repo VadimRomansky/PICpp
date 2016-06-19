@@ -17,6 +17,9 @@ public:
 	double particesDeltaZ;
 	double concentration;
 	double injectionLength;
+	double temperatureX;
+	double temperatureY;
+	double temperatureZ;
 };
 
 class Particle{

@@ -18,8 +18,9 @@ void Simulation::simulate() {
 		initialize();
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWave(1, 0.01);
+		//initializeAlfvenWaveX(1, 0.01);
 		//initializeRotatedAlfvenWave(1, 0.01);
+		//initializeAnisotropic();
 		initializeFluxFromRight();
 		//initializeSimpleElectroMagneticWave();
 		//initializeRotatedSimpleElectroMagneticWave(1);
@@ -98,6 +99,12 @@ void Simulation::simulate() {
 		updateDensityParameters();
 		cleanupDivergence();
 		updateFields();
+		/*cleanupDivergence();
+		updateFields();
+		cleanupDivergence();
+		updateFields();
+		cleanupDivergence();
+		updateFields();*/
 		updateEnergy();
 		updateParameters();
 
@@ -133,6 +140,18 @@ void Simulation::output() {
 		electronTraectoryFile = fopen((outputDir + "trajectory_electron.dat").c_str(), "a");
 		outputTrajectory(electronTraectoryFile, getFirstElectron(), time, plasma_period, scaleFactor);
 		fclose(electronTraectoryFile);
+		anisotropyFileElectron = fopen((outputDir + "anisotropy_electrons.dat").c_str(), "a");
+		outputAnisotropy(anisotropyFileElectron, this, ELECTRON, scaleFactor, plasma_period);
+		fclose(anisotropyFileElectron);
+		anisotropyFileProton = fopen((outputDir + "anisotropy_protons.dat").c_str(), "a");
+		outputAnisotropy(anisotropyFileProton, this, PROTON, scaleFactor, plasma_period);
+		fclose(anisotropyFileProton);
+		anisotropyFileAlpha = fopen((outputDir + "anisotropy_alphas.dat").c_str(), "a");
+		outputAnisotropy(anisotropyFileAlpha, this, ALPHA, scaleFactor, plasma_period);
+		fclose(anisotropyFileAlpha);
+		anisotropyFilePositron = fopen((outputDir + "anisotropy_positrons.dat").c_str(), "a");
+		outputAnisotropy(anisotropyFilePositron, this, POSITRON, scaleFactor, plasma_period);
+		fclose(anisotropyFilePositron);
 	}
 
 	EfieldFile = fopen((outputDir + "Efield.dat").c_str(), "a");
@@ -924,7 +943,7 @@ void Simulation::updateEnergy() {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				Vector3d B = Bfield[i][j][k] * fieldScale;
-				magneticFieldEnergy += B.scalarMult(B) * volumeB(i, j, k) / (8 * pi);
+				magneticFieldEnergy += (B.scalarMult(B))* volumeB(i, j, k)/ (8 * pi);
 			}
 		}
 	}
@@ -1134,13 +1153,16 @@ double Simulation::getDensity(int i, int j, int k) {
 }
 
 void Simulation::updateParameters() {
-	maxBfield = Bfield[0][0][0];
+	maxBfield = Bfield[0][0][0] - Vector3d(1, 0, 0)*Bfield[0][0][0].x;
 	maxEfield = Efield[0][0][0];
 	for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
-				if (Bfield[i][j][k].norm() > maxBfield.norm()) {
-					maxBfield = Bfield[i][j][k];
+				Vector3d normalField = Bfield[i][j][k] - Vector3d(1, 0, 0)*Bfield[i][j][k].x;
+				//if (Bfield[i][j][k].norm() > maxBfield.norm()) {
+				if (normalField.norm() > maxBfield.norm()) {
+					//maxBfield = Bfield[i][j][k];
+					maxBfield = normalField;
 				}
 			}
 		}

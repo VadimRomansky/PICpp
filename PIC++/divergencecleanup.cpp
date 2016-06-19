@@ -1,5 +1,7 @@
 #include "simulation.h"
 #include "constants.h"
+#include "specialmath.h"
+#include "util.h"
 
 
 void Simulation::cleanupDivergence() {
@@ -66,98 +68,108 @@ void Simulation::cleanupDivergence() {
 		}
 	}*/
 
+	bool fourier = false;
 
-	/*for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				divergenceCleanUpMatrix[i][j][k][0].clear();
-				divergenceCleanUpMatrix[i][j][k][1].clear();
-				divergenceCleanUpMatrix[i][j][k][2].clear();
-				divergenceCleanUpRightPart[i][j][k][0] = 0;
-				divergenceCleanUpRightPart[i][j][k][1] = 0;
-				divergenceCleanUpRightPart[i][j][k][2] = 0;
-				if (((i > 0) && (i < xnumber)) || (boundaryConditionType == PERIODIC)) {
-					createDivergenceCleanupInternalEquation(i, j, k);
-				} else if (i == 0) {
-					createDivergenceCleanupLeftEquation(j, k);
-				} else {
-					createDivergenceCleanupRightEquation(j, k);
+	if(!fourier) {
+
+		for (int i = 0; i < xnumber; ++i) {
+			for (int j = 0; j < ynumber; ++j) {
+				for (int k = 0; k < znumber; ++k) {
+					divergenceCleanUpMatrix[i][j][k][0].clear();
+					divergenceCleanUpMatrix[i][j][k][1].clear();
+					divergenceCleanUpMatrix[i][j][k][2].clear();
+					divergenceCleanUpRightPart[i][j][k][0] = 0;
+					divergenceCleanUpRightPart[i][j][k][1] = 0;
+					divergenceCleanUpRightPart[i][j][k][2] = 0;
+					//if (((i > 0) && (i < xnumber)) || (boundaryConditionType == PERIODIC)) {
+						createDivergenceCleanupInternalEquation(i, j, k);
+					//} else if (i == 0) {
+						//createDivergenceCleanupLeftEquation(j, k);
+					//} else {
+						//createDivergenceCleanupRightEquation(j, k);
+					//}
 				}
 			}
 		}
-	}*/
 
 
-	if (debugMode) {
-		//checkEquationMatrix(divergenceCleanUpMatrix, 3);
-	}
-
-	/*double summRightPart = 0;
-	for(int i = 0; i < xnumber; ++i){
-		summRightPart += divergenceCleanUpRightPart[i][0];
-	}*/
-	//double rightPart = cleanUpRightPart(1);
-	//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumber, ynumber, znumber, 1, 1E-100, 40000);
-	//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningField, xnumber, ynumber, znumber, 3);
-
-
-	//double** leftPart = multiplySpecialMatrixVector(divergenceCleanUpMatrix, divergenceCleaningPotential, xnumber, 1);
-
-	double*** rightPart = new double**[xnumber];
-	for(int i = 0; i < xnumber; ++i){
-		rightPart[i] = new double*[ynumber];
-		for(int j = 0; j < ynumber; ++j){
-			rightPart[i][j] = new double[znumber];
-			for(int k = 0; k < znumber; ++k){
-				rightPart[i][j][k] = -cleanUpRightPart(i, j, k);
-			}
+		if (debugMode) {
+			checkEquationMatrix(divergenceCleanUpMatrix, 3);
 		}
-	}
 
-	Complex*** rightPartFourier = evaluateFourierTranslation(rightPart);
+		/*double summRightPart = 0;
+        for(int i = 0; i < xnumber; ++i){
+            summRightPart += divergenceCleanUpRightPart[i][0];
+        }*/
+		//double rightPart = cleanUpRightPart(1);
+		//conjugateGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumber, ynumber, znumber, 1, 1E-10, xnumber * ynumber * znumber);
+		generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumber, ynumber, znumber, 1, 1E-8, maxGMRESIterations);
 
-	for(int i = 0; i < xnumber; ++i){
-		for(int j = 0; j < ynumber; ++j){
-			for(int k = 0; k < znumber; ++k){
-				if(i == 0 && j == 0 && k == 0){
-					rightPartFourier[i][j][k] = Complex(0, 0);
-				} else {
-					double kx = i;
-					if(i >= xnumber/2.0){
-						kx = xnumber - i - 2;
-					} 
-					double ky = j;
-					if(j >= ynumber/2.0){
-						ky = ynumber - j - 2;
-					}
-					double kz = k;
-					if(k >= znumber/2.0){
-						kz = znumber - k - 2;
-					}
-					rightPartFourier[i][j][k] = rightPartFourier[i][j][k]*(-4*pi*pi*((kx*kx/(xsize*xsize))  + (ky*ky/(ysize*ysize)) + (kz*kz/(zsize*zsize))));
+
+
+		//double** leftPart = multiplySpecialMatrixVector(divergenceCleanUpMatrix, divergenceCleaningPotential, xnumber, 1);
+	} else {
+		double ***rightPart = new double **[xnumber];
+		for (int i = 0; i < xnumber; ++i) {
+			rightPart[i] = new double *[ynumber];
+			for (int j = 0; j < ynumber; ++j) {
+				rightPart[i][j] = new double[znumber];
+				for (int k = 0; k < znumber; ++k) {
+					rightPart[i][j][k] = -cleanUpRightPart(i, j, k);
 				}
 			}
 		}
-	}
 
-	double*** potential = evaluateReverceFourierTranslation(rightPartFourier);
+		//Complex*** rightPartFourier = evaluateFourierTranslation(rightPart);
+		Complex ***rightPartFourier = fastFourierTransition(rightPart, xnumber, ynumber, znumber);
 
-	for(int i = 0; i < xnumber; ++i){
-		for(int j = 0; j < ynumber; ++j){
-			for(int k = 0; k < znumber; ++k){
-				divergenceCleaningPotential[i][j][k][0] = potential[i][j][k];
+		for (int i = 0; i < xnumber; ++i) {
+			for (int j = 0; j < ynumber; ++j) {
+				for (int k = 0; k < znumber; ++k) {
+					if (i == 0 && j == 0 && k == 0) {
+						rightPartFourier[i][j][k] = Complex(0, 0);
+					} else {
+						double kx = i;
+						/*if(i >= xnumber/2.0){
+                            kx = xnumber - i;// - 2;
+                        }*/
+						double ky = j;
+						/*if(j >= ynumber/2.0){
+                            ky = ynumber - j;
+                        }*/
+						double kz = k;
+						/*if(k >= znumber/2.0){
+                            kz = znumber - k;
+                        }*/
+						rightPartFourier[i][j][k] = rightPartFourier[i][j][k] * 2 / (-4 * pi * pi * ((kx * kx / (xsize * xsize)) + (ky * ky / (ysize * ysize)) + (kz * kz / (zsize * zsize))));
+						//rightPartFourier[i][j][k] = rightPartFourier[i][j][k]/(-4*pi*pi*((kx*kx*1.0/(xnumber*xnumber))  + (ky*ky/(ysize*ysize)) + (kz*kz/(zsize*zsize))));
+						alertNaNOrInfinity(rightPartFourier[i][j][k].re, "divergence cleaning right part = NaN\n");
+						alertNaNOrInfinity(rightPartFourier[i][j][k].im, "divergence cleaning right part = NaN\n");
+					}
+				}
 			}
-			delete[] potential[i][j];
-			delete[] rightPartFourier[i][j];
-			delete[] rightPart[i][j];
 		}
-		delete[] potential[i];
-		delete[] rightPartFourier[i];
-		delete[] rightPart[i];
+
+		//double*** potential = evaluateReverceFourierTranslation(rightPartFourier);
+		double ***potential = fastFourierReverceTransition(rightPartFourier, xnumber, ynumber, znumber);
+
+		for (int i = 0; i < xnumber; ++i) {
+			for (int j = 0; j < ynumber; ++j) {
+				for (int k = 0; k < znumber; ++k) {
+					divergenceCleaningPotential[i][j][k][0] = potential[i][j][k];
+				}
+				delete[] potential[i][j];
+				delete[] rightPartFourier[i][j];
+				delete[] rightPart[i][j];
+			}
+			delete[] potential[i];
+			delete[] rightPartFourier[i];
+			delete[] rightPart[i];
+		}
+		delete[] potential;
+		delete[] rightPartFourier;
+		delete[] rightPart;
 	}
-	delete[] potential;
-	delete[] rightPartFourier;
-	delete[] rightPart;
 
 	updateFieldByCleaning();
 	//double div = evaluateDivCleaningE(1);
@@ -167,7 +179,8 @@ void Simulation::cleanupDivergence() {
 
 void Simulation::updateFieldByCleaning() {
 	evaluateDivergenceCleaningField();
-	/*if((ynumber == 1) && (znumber == 1)){
+
+	if((ynumber == 1) && (znumber == 1)){
 		divergenceCleaningField[xnumber - 1][0][0][0] = 0;
 		divergenceCleaningField[xnumber - 1][0][0][1] = 0;
 		divergenceCleaningField[xnumber - 1][0][0][2] = 0;
@@ -177,23 +190,28 @@ void Simulation::updateFieldByCleaning() {
 			divergenceCleaningField[i][0][0][1] = 0;
 			divergenceCleaningField[i][0][0][2] = 0;
 		}
-	}*/
-	/*Vector3d meanField = Vector3d(0, 0, 0);
-	for(int i = 0; i < xnumber; ++i){
-		meanField.x += divergenceCleaningField[i][0];
-		meanField.y += divergenceCleaningField[i][1];
-		meanField.z += divergenceCleaningField[i][2];
 	}
-	meanField.x /= xnumber;
-	meanField.y /= xnumber;
-	meanField.z /= xnumber;*/
+	Vector3d meanField = Vector3d(0, 0, 0);
+	//if((ynumber == 1) && (znumber == 1)) {
+	for(int j = 0; j < ynumber; ++j) {
+		for (int k = 0; k < znumber; ++k) {
+			for (int i = 0; i < xnumber; ++i) {
+				meanField.x += divergenceCleaningField[i][j][k][0];
+				meanField.y += divergenceCleaningField[i][j][k][1];
+				meanField.z += divergenceCleaningField[i][j][k][2];
+			}
+		}
+	}
+	meanField.x /= xnumber*ynumber*znumber;
+	meanField.y /= xnumber*ynumber*znumber;
+	meanField.z /= xnumber*ynumber*znumber;
 	for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				newEfield[i][j][k].x += divergenceCleaningField[i][j][k][0];
 				newEfield[i][j][k].y += divergenceCleaningField[i][j][k][1];
 				newEfield[i][j][k].z += divergenceCleaningField[i][j][k][2];
-				//newEfield[i] -= meanField;
+				newEfield[i][j][k] -= meanField;
 			}
 		}
 	}
@@ -202,6 +220,18 @@ void Simulation::updateFieldByCleaning() {
 			for(int k = 0; k < znumber + 1; ++k) {
 				newEfield[xnumber][j][k] = newEfield[0][j][k];
 			}
+		}
+	}
+
+	for(int i = 0; i < xnumber+1; ++i) {
+		for(int k = 0; k < znumber + 1; ++k) {
+			newEfield[i][ynumber][k] = newEfield[i][0][k];
+		}
+	}
+
+	for(int i = 0; i < xnumber+1; ++i) {
+		for(int j = 0; j < ynumber + 1; ++j) {
+			newEfield[i][j][znumber] = newEfield[i][j][0];
 		}
 	}
 }
@@ -259,9 +289,9 @@ void Simulation::evaluateDivergenceCleaningField() {
 
 void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k) {
 
-	if (i == 0 && j == 0 && k == 0) {
+	/*if (i == 0 && j == 0 && k == 0) {
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(1, i, j, k, 0));
-		divergenceCleanUpRightPart[i][j][k][0] = 1;
+		divergenceCleanUpRightPart[i][j][k][0] = 0;
 		return;
 	}
 
@@ -270,7 +300,7 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k) {
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(-1, i-1, j, k, 0));
 		divergenceCleanUpRightPart[i][j][k][0] = 0;
 		return;
-	}
+	}*/
 
 	/*if (i == xnumber - 1 && j == ynumber - 1 && k == znumber - 1) {
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(1, i, j, k, 0));
@@ -306,8 +336,8 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k) {
 	}
 
 
-	//divergenceCleanUpRightPart[i][j][k][0] = -cleanUpRightPart(i, j, k);
-	divergenceCleanUpRightPart[i][j][k][0] = -cleanUpRightPart(i, j, k)*deltaX2;
+	divergenceCleanUpRightPart[i][j][k][0] = -cleanUpRightPart(i, j, k);
+	//divergenceCleanUpRightPart[i][j][k][0] = -cleanUpRightPart(i, j, k)*deltaX2;
 
 	if((ynumber > 1) && (znumber > 1)){
 		double element = -1 / (2 * deltaX2) - 1 / (2 * deltaY2) - 1 / (2 * deltaZ2);
@@ -353,14 +383,49 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k) {
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
 	} else if(ynumber > 1){
-	} else if(znumber > 1){
-	} else {
-		//double element = -2 / (deltaX2);
-		double element = -2;
+		double element = -1 / (deltaX2) - 1 / (deltaY2);
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
 
-		//element = 1/deltaX2;
-		element = 1;
+		element = 1 / (4 * deltaX2) + 1 / (4 * deltaY2) ;
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, nextJ, k, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, prevJ, k, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, nextJ, k, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, prevJ, k, 0));
+
+		element = 1 / (2 * deltaX2) - 1 / (2 * deltaY2);
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
+
+		element = - 1 / (2 * deltaX2) + 1 / (2 * deltaY2);
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, k, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, k, 0));
+
+	} else if(znumber > 1){
+		double element = -1 / (deltaX2) - 1 / (deltaZ2);
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
+
+
+		element = 1 / (4 * deltaX2) + 1 / (4 * deltaZ2);
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, nextK, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, prevK, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, nextK, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, prevK, 0));
+
+
+		element = 1 / (2 * deltaX2) - 1 / (2 * deltaZ2);
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
+
+		element = - 1 / (2 * deltaX2) + 1 / (2 * deltaZ2);
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
+	} else {
+		double element = -2 / (deltaX2);
+		//double element = -2;
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
+
+		element = 1/deltaX2;
+		//element = 1;
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
 	}
@@ -368,6 +433,11 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k) {
 
 void Simulation::createDivergenceCleanupLeftEquation(int j, int k) {
 	int i = 0;
+	if (i == 0 && j == 0 && k == 0) {
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(1, i, j, k, 0));
+		divergenceCleanUpRightPart[i][j][k][0] = 0;
+		return;
+	}
 
 	int nextI = i + 1;
 
@@ -391,7 +461,7 @@ void Simulation::createDivergenceCleanupLeftEquation(int j, int k) {
 
 	//div for x
 
-	divergenceCleanUpRightPart[i][0] = 0;
+	divergenceCleanUpRightPart[i][j][k][0] = 0;
 }
 
 void Simulation::createDivergenceCleanupRightEquation(int j, int k) {
@@ -418,7 +488,7 @@ void Simulation::createDivergenceCleanupRightEquation(int j, int k) {
 	//div for x
 
 
-	divergenceCleanUpRightPart[i][2] = 0;
+	divergenceCleanUpRightPart[i][j][k][0] = 0;
 }
 
 double Simulation::cleanUpRightPart(int i, int j, int k) {
