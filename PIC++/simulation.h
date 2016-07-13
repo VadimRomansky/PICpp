@@ -31,6 +31,11 @@ public:
 	double massProton;
 	double massElectron;
 	double massAlpha;
+	double massDeuterium;
+	double massHelium3;
+
+	double* concentrations;
+	int* particlesPerBin;
 
 	double density;
 	double temperature;
@@ -188,6 +193,8 @@ public:
 	FILE* anisotropyFileElectron;
 	FILE* anisotropyFileAlpha;
 	FILE* anisotropyFilePositron;
+	FILE* anisotropyFileDeuterium;
+	FILE* anisotropyFileHelium3;
 	FILE* EfieldFile;
 	FILE* BfieldFile;
 	FILE* Xfile;
@@ -205,6 +212,8 @@ public:
 	FILE* particleElectronsFile;
 	FILE* particlePositronsFile;
 	FILE* particleAlphaFile;
+	FILE* particleDeuteriumFile;
+	FILE* particleHelium3File;
 
 	FILE* rotBFile;
 	FILE* EderivativeFile;
@@ -222,7 +231,10 @@ public:
 
 	//Simulation();
 	Simulation();
-	Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double rho, double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz, int maxIterations, double maxTimeV, int particlesPerBinV, int positronsPerBinV, int alphaPerBinV, int inputType);
+	Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp,
+			   double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By,
+			   double Bz, int maxIterations, double maxTimeV, int typesNumberV, int* particlesperBin, double* concentrations,
+			   int inputType);
 	~Simulation();
 
 	void initialize();

@@ -3,7 +3,7 @@
 
 #include "vector3d.h"
 
-enum ParticleTypes {PROTON, ELECTRON, POSITRON, ALPHA};
+enum ParticleTypes {PROTON, ELECTRON, POSITRON, ALPHA, DEUTERIUM, HELIUM3};
 
 class ParticleTypeContainer {
 public:

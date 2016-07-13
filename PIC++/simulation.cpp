@@ -21,8 +21,8 @@ void Simulation::simulate() {
 		//initializeAlfvenWaveX(1, 0.01);
 		//initializeRotatedAlfvenWave(1, 0.01);
 		//initializeAnisotropic();
-		initializeFluxFromRight();
-		//initializeSimpleElectroMagneticWave();
+		//initializeFluxFromRight();
+		initializeSimpleElectroMagneticWave();
 		//initializeRotatedSimpleElectroMagneticWave(1);
 		//initializeLangmuirWave();
 		//createParticles();

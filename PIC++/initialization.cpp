@@ -41,10 +41,9 @@ Simulation::Simulation() {
     typesNumber = 4;
 }
 
-Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double rho,
+Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp,
                        double Vx, double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By,
-                       double Bz, int maxIterations, double maxTimeV, int electronsPerBinV, int positronsPerBinV,
-                       int alphaPerBinV, int inType) {
+                       double Bz, int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV, double* concentrationsV, int inType) {
     outputDir = outputDirectory;
     if (inType == 0) {
         inputType = CGS;
@@ -65,6 +64,18 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
     boundaryConditionType = PERIODIC;
     //boundaryConditionType = SUPER_CONDUCTOR_LEFT;
     maxwellEquationMatrixSize = 3;
+
+    typesNumber = typesNumberV;
+    if(typesNumber != 6){
+        printf("PIC++ support only 6 types of ions, typesNumber must be = 6. if you need less, ypu can initialize them with 0 concentration\n");
+        fflush(stdout);
+        errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+        fprintf(errorLogFile, "PIC++ support only 6 types of ions, typesNumber must be = 6. if you need less, ypu can initialize them with 0 concentration\n");
+        fclose(errorLogFile);
+        exit(0);
+    }
+    concentrations = concentrationsV;
+    particlesPerBin = particlesPerBinV;
 
     currentIteration = 0;
     time = 0;
@@ -90,15 +101,9 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
     zsize = zsizev;
 
     temperature = temp;
-    density = rho;
 
     maxIteration = maxIterations;
     maxTime = maxTimeV;
-
-    electronsPerBin = electronsPerBinV;
-    positronsPerBin = positronsPerBinV;
-    alphaPerBin = alphaPerBinV;
-    protonsPerBin = electronsPerBin - positronsPerBin - 2 * alphaPerBin;
 
     extJ = 0;
 
@@ -109,17 +114,25 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
     if (inputType == CGS) {
         massProton = massProtonReal;
         massElectron = 100 * massElectronReal;
-        //massAlpha = massAlphaReal;
-        massAlpha = massAlphaReal/4;
+        massAlpha = massAlphaReal;
+        massDeuterium = massDeuteriumReal;
+        massHelium3 = massHelium3Real;
 
-        double concentration = density * electronsPerBin /
-                               (protonsPerBin * massProton + electronsPerBin * massElectron +
-                                positronsPerBin * massElectron + alphaPerBin * massAlpha);
+        double concentration = concentrations[0];
 
         double gamma = 1 / sqrt(1 - V0.scalarMult(V0) / sqr(speed_of_light));
 
-        double effectiveMass = 1 / (((electronsPerBin / massElectron) + (protonsPerBin / massProton) +
-                                     (positronsPerBin / massElectron) + (alphaPerBin / massAlpha)) / electronsPerBin);
+        double sum = 0;
+
+        sum += particlesPerBin[0]/massElectron;
+        sum += particlesPerBin[1]/massProton;
+        sum += particlesPerBin[2]/massElectron;
+        sum += particlesPerBin[3]/massAlpha;
+        sum += particlesPerBin[4]/massDeuterium;
+        sum += particlesPerBin[5]/massHelium3;
+
+
+        double effectiveMass = 1 / (sum/ particlesPerBin[0]);
 
         //plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * (2 * pi) * gamma * sqrt(gamma);
         plasma_period = sqrt(effectiveMass / (4 * pi * concentration * sqr(electron_charge))) * gamma * sqrt(gamma);
@@ -167,6 +180,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
         massProton = 1.0;
         massElectron = massProton / 256;
         massAlpha = massProton * massAlphaReal / massProtonReal;
+        massDeuterium = massProton * massDeuteriumReal / massProtonReal;
+        massHelium3 = massProton * massHelium3Real / massProtonReal;
         double protonScale = massProton / massProtonReal;
         plasma_period = cube(speed_of_light) / (protonScale * electron_charge);
         scaleFactor = speed_of_light * plasma_period;
@@ -198,7 +213,6 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
     LeviCivita[1][2][0] = 1.0;
     LeviCivita[2][0][1] = 1.0;
     LeviCivita[2][1][0] = -1.0;
-    typesNumber = 4;
 }
 
 Simulation::~Simulation() {
