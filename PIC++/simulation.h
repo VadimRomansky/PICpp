@@ -253,7 +253,7 @@ public:
 	void initializeAnisotropic();
 	void initializeKolmogorovSpectrum(int start, int end);
 	void createArrays();
-	void createParticleTypes();
+	void createParticleTypes(double *concentrations, int *particlesPerBin);
 	void createFiles();
 	void simulate();
 	void output();

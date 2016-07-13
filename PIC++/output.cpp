@@ -252,7 +252,7 @@ void outputDivergenceError(FILE* outFile, Simulation* simulation, double plasma_
 	}
 }
 
-void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPositronsFile, FILE* outAlphaFile, Simulation* simulation) {
+void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPositronsFile, FILE* outAlphaFile, FILE* outDeuteriumFile, FILE* outHelium3File, Simulation* simulation) {
 	for (int i = 0; i < simulation->particles.size(); ++i) {
 		Particle* particle = simulation->particles[i];
 		double p = particle->momentum.norm() * simulation->scaleFactor / simulation->plasma_period;
@@ -260,11 +260,14 @@ void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPosi
 			fprintf(outProtonsFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
 		} else if (particle->type == ELECTRON) {
 			fprintf(outElectronsFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
-		}
-		if (particle->type == POSITRON) {
+		} else if (particle->type == POSITRON) {
 			fprintf(outPositronsFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
 		} else if (particle->type == ALPHA) {
 			fprintf(outAlphaFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
+		} else if (particle->type == DEUTERIUM) {
+			fprintf(outDeuteriumFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
+		} else if (particle->type == HELIUM3) {
+			fprintf(outHelium3File, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
 		}
 	}
 }

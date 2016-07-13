@@ -27,7 +27,7 @@ void outputMaxwellEquationMatrixFull(FILE* outFile, std::vector<MatrixElement>**
 
 void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile, Simulation* simulation); 
 
-void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPositronsFile, FILE* outAlphaFile, Simulation* simulation);
+void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPositronsFile, FILE* outAlphaFile, FILE* outDeuteriumFile, FILE* outHelium3File,  Simulation* simulation);
 
 void outputBackupParticles(FILE* outFile, Simulation* simulation);
 void outputBackupParticle(FILE* outFile, Particle* particle);

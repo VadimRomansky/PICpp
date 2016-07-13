@@ -20,9 +20,9 @@ void Simulation::simulate() {
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWaveX(1, 0.01);
 		//initializeRotatedAlfvenWave(1, 0.01);
-		//initializeAnisotropic();
+		initializeAnisotropic();
 		//initializeFluxFromRight();
-		initializeSimpleElectroMagneticWave();
+		//initializeSimpleElectroMagneticWave();
 		//initializeRotatedSimpleElectroMagneticWave(1);
 		//initializeLangmuirWave();
 		//createParticles();
@@ -97,7 +97,7 @@ void Simulation::simulate() {
 			addToPreserveChargeGlobal();
 		}
 		updateDensityParameters();
-		cleanupDivergence();
+		//cleanupDivergence();
 		updateFields();
 		/*cleanupDivergence();
 		updateFields();
@@ -134,12 +134,16 @@ void Simulation::output() {
 		distributionFileElectronUpstream = fopen((outputDir + "distribution_electrons_upstream.dat").c_str(), "a");
 		outputDistributionUpstream(distributionFileElectronUpstream, particles, ELECTRON, xgrid[shockWavePoint], scaleFactor, plasma_period);
 		fclose(distributionFileElectronUpstream);
-		protonTraectoryFile = fopen((outputDir + "trajectory_proton.dat").c_str(), "a");
-		outputTrajectory(protonTraectoryFile, getFirstProton(), time, plasma_period, scaleFactor);
-		fclose(protonTraectoryFile);
-		electronTraectoryFile = fopen((outputDir + "trajectory_electron.dat").c_str(), "a");
-		outputTrajectory(electronTraectoryFile, getFirstElectron(), time, plasma_period, scaleFactor);
-		fclose(electronTraectoryFile);
+		if(types[1].particlesPerBin > 0) {
+			protonTraectoryFile = fopen((outputDir + "trajectory_proton.dat").c_str(), "a");
+			outputTrajectory(protonTraectoryFile, getFirstProton(), time, plasma_period, scaleFactor);
+			fclose(protonTraectoryFile);
+		}
+		if(types[0].particlesPerBin > 0) {
+			electronTraectoryFile = fopen((outputDir + "trajectory_electron.dat").c_str(), "a");
+			outputTrajectory(electronTraectoryFile, getFirstElectron(), time, plasma_period, scaleFactor);
+			fclose(electronTraectoryFile);
+		}
 		anisotropyFileElectron = fopen((outputDir + "anisotropy_electrons.dat").c_str(), "a");
 		outputAnisotropy(anisotropyFileElectron, this, ELECTRON, scaleFactor, plasma_period);
 		fclose(anisotropyFileElectron);
@@ -152,6 +156,12 @@ void Simulation::output() {
 		anisotropyFilePositron = fopen((outputDir + "anisotropy_positrons.dat").c_str(), "a");
 		outputAnisotropy(anisotropyFilePositron, this, POSITRON, scaleFactor, plasma_period);
 		fclose(anisotropyFilePositron);
+		anisotropyFileDeuterium = fopen((outputDir + "anisotropy_deuterium.dat").c_str(), "a");
+		outputAnisotropy(anisotropyFileDeuterium, this, POSITRON, scaleFactor, plasma_period);
+		fclose(anisotropyFileDeuterium);
+		anisotropyFileHelium3 = fopen((outputDir + "anisotropy_helium3.dat").c_str(), "a");
+		outputAnisotropy(anisotropyFileHelium3, this, POSITRON, scaleFactor, plasma_period);
+		fclose(anisotropyFileHelium3);
 	}
 
 	EfieldFile = fopen((outputDir + "Efield.dat").c_str(), "a");
@@ -208,11 +218,15 @@ void Simulation::output() {
 	particleElectronsFile = fopen((outputDir + "electrons.dat").c_str(), "w");
 	particlePositronsFile = fopen((outputDir + ".positrons.dat").c_str(), "w");
 	particleAlphaFile = fopen((outputDir + "alphas.dat").c_str(), "w");
-	outputParticles(particleProtonsFile, particleElectronsFile, particlePositronsFile, particleAlphaFile, this);
+	particleDeuteriumFile = fopen((outputDir + "deuterium.dat").c_str(), "w");
+	particleHelium3File = fopen((outputDir + "helium3.dat").c_str(), "w");
+	outputParticles(particleProtonsFile, particleElectronsFile, particlePositronsFile, particleAlphaFile, particleDeuteriumFile, particleHelium3File, this);
 	fclose(particleProtonsFile);
 	fclose(particleElectronsFile);
 	fclose(particlePositronsFile);
 	fclose(particleAlphaFile);
+	fclose(particleDeuteriumFile);
+	fclose(particleHelium3File);
 
 	/*maxwellMatrixFile = fopen("./output/maxwellMatrixFile.dat", "w");
 	outputMaxwellEquationMatrixFull(maxwellMatrixFile, maxwellEquationMatrix, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
@@ -935,6 +949,7 @@ void Simulation::updateEnergy() {
 			for (int k = 0; k < znumber; ++k) {
 				Vector3d E = Efield[i][j][k] * fieldScale;
 				electricFieldEnergy += E.scalarMult(E) * volumeE(i, j, k) / (8 * pi);
+				electricFieldEnergy -= E0.scalarMult(E0) * volumeE(i, j, k) / (8 * pi);
 			}
 		}
 	}
@@ -944,6 +959,7 @@ void Simulation::updateEnergy() {
 			for (int k = 0; k < znumber; ++k) {
 				Vector3d B = Bfield[i][j][k] * fieldScale;
 				magneticFieldEnergy += (B.scalarMult(B))* volumeB(i, j, k)/ (8 * pi);
+				magneticFieldEnergy -= (B0.scalarMult(B0))* volumeB(i, j, k)/ (8 * pi);
 			}
 		}
 	}

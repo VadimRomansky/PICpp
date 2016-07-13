@@ -38,7 +38,10 @@ Simulation::Simulation() {
     LeviCivita[1][2][0] = 1.0;
     LeviCivita[2][0][1] = 1.0;
     LeviCivita[2][1][0] = -1.0;
-    typesNumber = 4;
+    typesNumber = 6;
+    types = new ParticleTypeContainer[typesNumber];
+    concentrations = new double[typesNumber];
+    particlesPerBin = new int[typesNumber];
 }
 
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp,
@@ -419,7 +422,11 @@ void Simulation::initialize() {
             }
         }
     }
-    createParticleTypes();
+    createParticleTypes(concentrations, particlesPerBin);
+    density = 0;
+    for(int i = 0; i < typesNumber; ++i){
+        density += types[i].concentration*types[i].mass;
+    }
 
     checkDebyeParameter();
 
@@ -2715,12 +2722,28 @@ void Simulation::initializeExternalFluxInstability() {
 
 void Simulation::initializeAnisotropic() {
     boundaryConditionType = PERIODIC;
-    double Tx = temperature*10;
+    /*double Tx = temperature*10;
     double Ty = temperature*1000;
-    double Tz = temperature*1000;
-    types[3].temperatureX = Tx;
-    types[3].temperatureY = Ty;
-    types[3].temperatureZ = Tz;
+    double Tz = temperature*1000;*/
+
+    double temperatureIon = 6.9E7;
+    double temperatureElectron = 6.9E7;
+    double temperatureParallelMinority = 4.63E8;
+    double temperatureNormalMinority = 115.9E8;
+
+    for(int i = 0; i < typesNumber; ++i){
+        types[i].temperatureX = temperatureIon;
+        types[i].temperatureY = temperatureIon;
+        types[i].temperatureZ = temperatureIon;
+    }
+
+    types[0].temperatureX = temperatureElectron;
+    types[0].temperatureY = temperatureElectron;
+    types[0].temperatureZ = temperatureElectron;
+
+    types[5].temperatureX = temperatureParallelMinority;
+    types[5].temperatureY = temperatureNormalMinority;
+    types[5].temperatureZ = temperatureNormalMinority;
 
     createParticles();
 
@@ -2735,17 +2758,7 @@ void Simulation::initializeAnisotropic() {
     double omegaGyroAlpha = B0.norm() * fieldScale * electron_charge_normalized / (massAlpha * speed_of_light_normalized);
 
     double kmin = 2*pi/xsize;
-    double kmax = pi/deltaX;
-
-    double vthermalProton = sqrt(kBoltzman_normalized*types[1].temperatureX/massProton);
-
-    printf("delta Omega/kmax vth = %g\n", (omegaGyroAlpha - omegaGyroProton)/(kmax*vthermalProton));
-    printf("delta Omega/kmin vth = %g\n", (omegaGyroAlpha - omegaGyroProton)/(kmin*vthermalProton));
-
-    printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton/omegaGyroProton);
-    printf("omega plasma/gyro omega alphas = %g\n", omegaPlasmaAlpha/omegaGyroAlpha);
-    printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron/omegaGyroElectron);
-}
+    double kmax = pi/deltaX;}
 
 void Simulation::createArrays() {
     printf("creating arrays\n");
@@ -2931,15 +2944,16 @@ void Simulation::createArrays() {
 }
 
 //add new particle types here
-void Simulation::createParticleTypes() {
+void Simulation::createParticleTypes(double *concentrations, int *particlesPerBin) {
     types = new ParticleTypeContainer[typesNumber];
     ParticleTypeContainer type;
 
     type.type = ELECTRON;
     type.mass = massElectron;
-    type.chargeCount - 1;
+    type.chargeCount = - 1;
     type.charge = -electron_charge_normalized;
-    type.particlesPerBin = electronsPerBin;
+    type.particlesPerBin = particlesPerBin[0];
+    type.concentration = concentrations[0];
 
     types[0] = type;
 
@@ -2947,7 +2961,8 @@ void Simulation::createParticleTypes() {
     type.mass = massProton;
     type.chargeCount = 1;
     type.charge = electron_charge_normalized;
-    type.particlesPerBin = protonsPerBin;
+    type.particlesPerBin = particlesPerBin[1];
+    type.concentration = concentrations[1];
 
     types[1] = type;
 
@@ -2955,7 +2970,8 @@ void Simulation::createParticleTypes() {
     type.mass = massElectron;
     type.chargeCount = 1;
     type.charge = electron_charge_normalized;
-    type.particlesPerBin = positronsPerBin;
+    type.particlesPerBin = particlesPerBin[2];
+    type.concentration = concentrations[2];
 
     types[2] = type;
 
@@ -2963,13 +2979,30 @@ void Simulation::createParticleTypes() {
     type.mass = massAlpha;
     type.chargeCount = 2;
     type.charge = 2 * electron_charge_normalized;
-    type.particlesPerBin = alphaPerBin;
+    type.particlesPerBin = particlesPerBin[3];
+    type.concentration = concentrations[3];
 
     types[3] = type;
 
-    double summMass = 0;
+    type.type = DEUTERIUM;
+    type.mass = massDeuterium;
+    type.chargeCount = 1;
+    type.charge = electron_charge_normalized;
+    type.particlesPerBin = particlesPerBin[4];
+    type.concentration = concentrations[4];
+
+    types[4] = type;
+
+    type.type = HELIUM3;
+    type.mass = massHelium3;
+    type.chargeCount = 2;
+    type.charge = 2 * electron_charge_normalized;
+    type.particlesPerBin = particlesPerBin[5];
+    type.concentration = concentrations[5];
+
+    types[5] = type;
+
     for (int i = 0; i < typesNumber; ++i) {
-        summMass += types[i].mass * types[i].particlesPerBin;
         if (types[i].particlesPerBin > 0) {
             types[i].particesDeltaX = deltaX / types[i].particlesPerBin;
             types[i].particesDeltaY = deltaY / types[i].particlesPerBin;
@@ -2983,15 +3016,13 @@ void Simulation::createParticleTypes() {
         types[i].temperatureY = temperature;
         types[i].temperatureZ = temperature;
     }
-
-    for (int i = 0; i < typesNumber; ++i) {
-        types[i].concentration = types[i].particlesPerBin * density / summMass;
-    }
 }
 
 void Simulation::createFiles() {
     printf("creating files\n");
+    fflush(stdout);
     FILE *logFile = fopen((outputDir + "log.dat").c_str(), "w");
+    fflush(logFile);
     fclose(logFile);
     printLog("creatingFiles\n");
     protonTraectoryFile = fopen((outputDir + "trajectory_proton.dat").c_str(), "w");
@@ -3010,6 +3041,10 @@ void Simulation::createFiles() {
     fclose(anisotropyFileAlpha);
     anisotropyFilePositron = fopen((outputDir + "anisotropy_positrons.dat").c_str(), "w");
     fclose(anisotropyFilePositron);
+    anisotropyFileDeuterium = fopen((outputDir + "anisotropy_deuterium.dat").c_str(), "w");
+    fclose(anisotropyFileDeuterium);
+    anisotropyFileHelium3 = fopen((outputDir + "anisotropy_helium3.dat").c_str(), "w");
+    fclose(anisotropyFileHelium3);
     EfieldFile = fopen((outputDir + "Efield.dat").c_str(), "w");
     fclose(EfieldFile);
     BfieldFile = fopen((outputDir + "Bfield.dat").c_str(), "w");
@@ -3052,8 +3087,10 @@ void Simulation::createFiles() {
     fclose(particlePositronsFile);
     particleAlphaFile = fopen((outputDir + "alphas.dat").c_str(), "w");
     fclose(particleAlphaFile);
-    //outputEverythingFile = fopen("./output/everything.dat","w");
-    //fclose(outputEverythingFile);
+    particleDeuteriumFile = fopen((outputDir + "deuterium.dat").c_str(), "w");
+    fclose(particleDeuteriumFile);
+    particleHelium3File = fopen((outputDir + "helium3.dat").c_str(), "w");
+    fclose(particleHelium3File);
 }
 
 void Simulation::checkFrequency(double omega) {
