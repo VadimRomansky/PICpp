@@ -11,7 +11,7 @@ Nz = size(Zfile, 1);
 
 NE = Nx*Ny*Nz;
 NB = (Nx-1)*(Ny-1)*(Nz-1);
-Nt = fix(size(Efield, 1)/NE)-5;
+Nt = fix(size(Efield, 1)/NE)-1;
 znumber = 1;
 
 a = 0;
@@ -86,7 +86,6 @@ xlabel ('y');
 ylabel ('x');
 zlabel ('B gauss');
 grid ;
-
 figure(5)
 [X, Y] = meshgrid(middleY, middleX);
 surf(X, Y, By);

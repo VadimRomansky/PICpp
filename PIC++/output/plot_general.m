@@ -9,8 +9,9 @@ N3 = Nsaturation + 20;
 linearField(1:N2) = 0;
 linearEnergy(1:N2) = 0;
 beta = 0.2;
-gamma = beta*2*3.14*sqrt(sqrt(1 - beta*beta));
+%gamma = beta*2*3.14*sqrt(sqrt(1 - beta*beta));
 %gamma = beta*2*3.14;
+gamma = 0.01*1.98*10^8;
 
 linearField(1) = general(Nsaturation, 16)/exp(gamma*general(Nsaturation,2));
 linearEnergy(1) = general(Nsaturation, 6)/exp(2*gamma*general(Nsaturation,2));
@@ -42,13 +43,13 @@ legend('x', 'y','z','Location','northeast');
 grid ;
 
 figure(3);
-%plot (general(1:N2,2), general(1:N2,16), 'red', general(1:N3,2), linearField(1:N3),'blue');
-plot (general(1:N2,2), general(1:N2,15), 'red', general(1:N2,2), general(1:N2,16), 'green');
+plot (general(1:N2,2), general(1:N2,16), 'red', general(1:N2,2), linearField(1:N2),'blue');
+%plot (general(1:N2,2), general(1:N2,15), 'red', general(1:N2,2), general(1:N2,16), 'green');
 title ('max field');
 xlabel ('{{t \omega_p}/{2\pi}}');
 ylabel ('gauss');
-legend('electric field', 'magnetic field','Location','southeast');
-%legend('magnetic field', 'magnetic field with linear increment {{u}/{c} {\omega_p}}','Location','northwest');
+%legend('electric field', 'magnetic field','Location','southeast');
+legend('magnetic field', 'magnetic field with linear increment {{u}/{c} {\omega_p}}','Location','northwest');
 grid ;
 
 figure(4);

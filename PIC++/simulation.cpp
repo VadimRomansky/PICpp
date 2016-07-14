@@ -97,7 +97,7 @@ void Simulation::simulate() {
 			addToPreserveChargeGlobal();
 		}
 		updateDensityParameters();
-		//cleanupDivergence();
+		cleanupDivergence();
 		updateFields();
 		/*cleanupDivergence();
 		updateFields();
@@ -1169,12 +1169,12 @@ double Simulation::getDensity(int i, int j, int k) {
 }
 
 void Simulation::updateParameters() {
-	maxBfield = Bfield[0][0][0] - Vector3d(1, 0, 0)*Bfield[0][0][0].x;
+	maxBfield = Bfield[0][0][0] - B0;
 	maxEfield = Efield[0][0][0];
 	for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
-				Vector3d normalField = Bfield[i][j][k] - Vector3d(1, 0, 0)*Bfield[i][j][k].x;
+				Vector3d normalField = Bfield[i][j][k] - B0;
 				//if (Bfield[i][j][k].norm() > maxBfield.norm()) {
 				if (normalField.norm() > maxBfield.norm()) {
 					//maxBfield = Bfield[i][j][k];
