@@ -3561,7 +3561,7 @@ Particle *Simulation::createParticle(int n, int i, int j, int k, double weight, 
 
     double thetaParamter = kBoltzman_normalized * localTemparatureX / (mass * speed_of_light_normalized_sqr);
 
-    if (thetaParamter < 0.01) {
+    if (thetaParamter < 0.1) {
         //energy = maxwellDistribution(localTemparature, kBoltzman_normalized);
         px = sqrt(mass*kBoltzman_normalized*localTemparatureX)*normalDistribution();
         py = sqrt(mass*kBoltzman_normalized*localTemparatureY)*normalDistribution();
@@ -3569,7 +3569,7 @@ Particle *Simulation::createParticle(int n, int i, int j, int k, double weight, 
         p = sqrt(px*px + py*py + pz*pz);
     } else {
         energy = maxwellJuttnerDistribution(localTemparatureX, mass, speed_of_light_normalized, kBoltzman_normalized);
-        //p = sqrt(energy * energy - sqr(mass * speed_of_light_normalized_sqr)) / speed_of_light_normalized;
+        p = sqrt(energy * energy - sqr(mass * speed_of_light_normalized_sqr)) / speed_of_light_normalized;
 
 
         //p = 0;

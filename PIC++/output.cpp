@@ -116,34 +116,54 @@ void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int par
 }
 
 void outputAnisotropy(FILE* outFile, Simulation* simulation, int particleType, double gyroradius, double plasma_period) {
-	for(int i = 0; i < simulation->xnumber; ++i){
-		for(int j = 0; j < simulation->ynumber; ++j){
-			for(int k = 0; k < simulation->znumber; ++k){
+	for (int i = 0; i < simulation->xnumber; ++i) {
+		for (int j = 0; j < simulation->ynumber; ++j) {
+			for (int k = 0; k < simulation->znumber; ++k) {
 				Vector3d meanV = Vector3d(0, 0, 0);
 				double concentration = 0;
-				for(int pcount = 0; pcount < simulation->particlesInBbin[i][j][k].size(); ++pcount){
-					Particle* particle = simulation->particlesInBbin[i][j][k][pcount];
-					double correlation = simulation->correlationWithBbin(*particle, i, j, k)/simulation->volumeB(i, j, k);
-					if(particle->type == particleType){
-						meanV = meanV + particle->velocity(simulation->speed_of_light_normalized)*particle->weight*correlation;
-						concentration += particle->weight*correlation;
+				int particleCount = 0;
+				if(simulation->particlesInBbin[i][j][k].size() > 0) {
+					for (int pcount = 0; pcount < simulation->particlesInBbin[i][j][k].size(); ++pcount) {
+						Particle *particle = simulation->particlesInBbin[i][j][k][pcount];
+						double correlation = simulation->correlationWithBbin(*particle, i, j,
+																			 k) / simulation->volumeB(
+							i, j, k);
+						if (particle->type == particleType) {
+							meanV = meanV + particle->velocity(
+								simulation->speed_of_light_normalized) * particle->weight * correlation;
+							concentration += particle->weight * correlation;
+							particleCount++;
+						}
 					}
-				}
-				meanV = meanV/concentration;
+					if(particleCount > 0) {
+						meanV = meanV / concentration;
+						//printf("i = %d meanv = %g %g %g\n", i, meanV.x, meanV.y, meanV.z);
 
-				double parallelV2 = 0;
-				double normalV2 = 0;
+						double parallelV2 = 0;
+						double normalV2 = 0;
 
-				for(int pcount = 0; pcount < simulation->particlesInBbin[i][j][k].size(); ++pcount){
-					Particle* particle = simulation->particlesInBbin[i][j][k][pcount];
-					double correlation = simulation->correlationWithBbin(*particle, i, j, k)/simulation->volumeB(i, j, k);
-					if(particle->type == particleType){
-						parallelV2 = parallelV2 + sqr(particle->velocityX(simulation->speed_of_light_normalized) - meanV.x)*particle->weight*correlation;
-						normalV2 = normalV2 + (sqr(particle->velocityY(simulation->speed_of_light_normalized) - meanV.y) + sqr(particle->velocityZ(simulation->speed_of_light_normalized)) - meanV.z)*particle->weight*correlation;
+						for (int pcount = 0; pcount < simulation->particlesInBbin[i][j][k].size(); ++pcount) {
+							Particle *particle = simulation->particlesInBbin[i][j][k][pcount];
+							double correlation = simulation->correlationWithBbin(*particle, i, j,
+																				 k) / simulation->volumeB(
+								i, j, k);
+							if (particle->type == particleType) {
+								parallelV2 = parallelV2 + sqr(particle->velocityX(
+									simulation->speed_of_light_normalized) - meanV.x) * particle->weight * correlation;
+								normalV2 = normalV2 + (sqr(
+									particle->velocityY(simulation->speed_of_light_normalized) - meanV.y) + sqr(
+									particle->velocityZ(
+										simulation->speed_of_light_normalized)) - meanV.z) * particle->weight * correlation;
+							}
+						}
+
+						fprintf(outFile, "%g\n", (0.5 * normalV2 / parallelV2) - (2 * parallelV2 / normalV2));
+					} else {
+						fprintf(outFile, "%g\n", 0.0);
 					}
+				} else {
+					fprintf(outFile, "%g\n", 0.0);
 				}
-
-				fprintf(outFile, "%g\n", (0.5*normalV2/parallelV2) - (2*parallelV2/normalV2));
 			}
 		}
 	}

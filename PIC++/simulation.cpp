@@ -157,10 +157,10 @@ void Simulation::output() {
 		outputAnisotropy(anisotropyFilePositron, this, POSITRON, scaleFactor, plasma_period);
 		fclose(anisotropyFilePositron);
 		anisotropyFileDeuterium = fopen((outputDir + "anisotropy_deuterium.dat").c_str(), "a");
-		outputAnisotropy(anisotropyFileDeuterium, this, POSITRON, scaleFactor, plasma_period);
+		outputAnisotropy(anisotropyFileDeuterium, this, DEUTERIUM, scaleFactor, plasma_period);
 		fclose(anisotropyFileDeuterium);
 		anisotropyFileHelium3 = fopen((outputDir + "anisotropy_helium3.dat").c_str(), "a");
-		outputAnisotropy(anisotropyFileHelium3, this, POSITRON, scaleFactor, plasma_period);
+		outputAnisotropy(anisotropyFileHelium3, this, HELIUM3, scaleFactor, plasma_period);
 		fclose(anisotropyFileHelium3);
 	}
 
