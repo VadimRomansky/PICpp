@@ -1,3 +1,6 @@
+//#include <crtdbg.h>
+
+//#include "memory_debug.h"
 #include "matrixElement.h"
 
 MatrixElement::MatrixElement() {

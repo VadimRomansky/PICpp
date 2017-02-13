@@ -3,35 +3,57 @@
 
 #include "vector"
 #include "stdio.h"
+#include "particle.h"
 
-#include "vector3d.h"
-#include "simulation.h"
-#include "matrixElement.h"
+class Simulation;
+class Vector3d;
+class Particle;
+class Matrix3d;
+class MatrixElement;
 
-void outputDistributionUpstream(FILE* outFile, std::vector<Particle*> particles, int particleType, double shockWavePoint, double plasma_period, double gyroradius);
-void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int particleType, double plasma_period, double gyroradius);
-void outputAnisotropy(FILE* outFile, Simulation* simulation, int particleType, double gyroradius, double plasma_period);
-void outputTrajectory(FILE *outFile, Particle *particle, double time, double plasma_period, double gyroradius);
-void outputGrid(FILE* outFile, double* grid, int number, double scale = 1.0);
-void outputFields(FILE* outEfile, FILE* outBfile, Vector3d*** Efield, Vector3d*** Bfield, int xnumber, int ynumber, int znumber, double plasma_priod, double gyroradius, double fieldScale);
-void outputConcentrations(FILE* outFile, double*** electronConcentration, double*** protonConcentration, double*** chargeDensity, double*** shiftChargeDensity, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius, double fieldScale);
-void outputVelocity(FILE* outFile, FILE* outElectronFile, Vector3d*** velocity, Vector3d*** electronVelocity, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius);
-void outputGeneral(FILE* outFile, Simulation* simulation);
-void outputFlux(FILE* outFile, Vector3d*** electricFlux, Vector3d*** externalElectricFlux, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius, double fieldScale);
-void outputDivergenceError(FILE* outFile, Simulation* simulation, double plasma_period, double gyroradius, double fieldScale);
-void outputVectorArray(FILE* outFile, Vector3d*** vector3d, int xnumber, int ynumber, int znumber, double scale = 1.0);
-void outputMatrixArray(FILE* outFile, Matrix3d*** matrix3d, int xnumber, int ynumber, int znumber, double scale = 1.0);
-void outputMaxwellEquationMatrixSimple(std::vector<MatrixElement>****& maxwellEquationMatrix, int xnumber, int ynumber, int znumber, int lnumber);
-void outputMaxwellEquationMatrixFull(FILE* outFile, std::vector<MatrixElement>****& maxwellEquationMatrix, int xnumber, int ynumber, int znumber, int lnumber);
+void outputDistribution(const char *outFileName, std::vector<Particle *> &particles, int particleType, double plasma_period,
+                        double gyroradius, int verbosity);
+void outputDistributionShiftedSystem(const char* outFileName, std::vector<Particle *>& particles, Vector3d& shiftV, double& speed_of_light_normalized, int particleType, double gyroradius,
+                        double plasma_period, int verbosity);
+//void outputAnisotropy(const char *outFileName, Simulation *simulation, int particleType, double gyroradius,
+//                      double plasma_period);
+void outputTrajectoryByNumber(const char* outFileName, int number, const Simulation* simulation);
+void outputTrajectory(const char *outFileName, Particle *particle, double time, double plasma_period, double gyroradius);
+void outputGridSimple(const char *outFileName, double *grid, int number, double scale = 1.0);
+
+void outputGrid(const char *outFileName, double *grid, int number, double scale = 1.0);
+void outputFields(const char *outEfileName, const char *outBfileName, Vector3d ***Efield, Vector3d ***Bfield, int xnumber,
+                  int ynumber, int znumber, double plasma_priod, double gyroradius);
+void outputConcentrations(const char *outFileName, double ****particleConcentrations, double ***chargeDensity,
+                          double ***shiftChargeDensity, int xnumber, int ynumber, int znumber, int typesNumber,
+                          double plasma_period, double gyroradius);
+void outputVelocity(const char *outFileName, Vector3d ****velocity, ParticleTypeContainer* types,
+                    int xnumber, int ynumber, int znumber, int typesNumber, double plasma_period,
+                    double gyroradius);
+void outputGeneral(const char *outFileName, Simulation *simulation);
+void outputGeneralAnisotropy(const char *outFileName, Simulation *simulation);
+void outputFlux(const char *outFileName, Vector3d ***electricFlux, Vector3d ***externalElectricFlux, int xnumber,
+                int ynumber, int znumber, double plasma_period, double gyroradius);
+void outputDivergenceError(const char *outFileName, Simulation *simulation, double plasma_period, double gyroradius);
+void outputVectorNodeArraySimple(const char *outFileName, Vector3d ***vector3d, int xnumber, int ynumber, int znumber,
+                           double scale = 1.0);
+void outputVectorNodeArray(const char *outFileName, Vector3d ***vector3d, int xnumber, int ynumber, int znumber,
+                           double scale = 1.0);
+void outputVectorCellArray(const char *outFileName, Vector3d ***vector3d, int xnumber, int ynumber, int znumber,
+                           double scale = 1.0);
+void outputMatrixArray(const char *outFileName, Matrix3d ***matrix3d, int xnumber, int ynumber, int znumber,
+                       double scale = 1.0);
 
 
-void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile, Simulation* simulation); 
+void outputSimulationBackup(const char *generalFileName, const char *EfileName, const char *BfileName,
+                            const char *particlesFileName, Simulation *simulation);
 
-void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPositronsFile, FILE* outAlphaFile, FILE* outDeuteriumFile, FILE* outHelium3File,  Simulation* simulation);
+void outputParticles(const char* outFileName, Simulation* simulation, ParticleTypes type);
 
-void outputBackupParticles(FILE* outFile, Simulation* simulation);
+
+void outputBackupParticles(const char *outFileName, Simulation *simulation);
 void outputBackupParticle(FILE* outFile, Particle* particle);
 
-
+void outputGeneralInitialParameters(const char* outFileName, const char* outFileNameWithText, Simulation* simulation);
 
 #endif

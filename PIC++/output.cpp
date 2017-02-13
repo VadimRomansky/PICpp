@@ -1,6 +1,9 @@
 #include "stdio.h"
 #include "math.h"
 #include "vector"
+//#include <crtdbg.h>
+
+//#include "memory_debug.h"
 
 #include "output.h"
 #include "particle.h"
@@ -8,82 +11,51 @@
 #include "matrix3d.h"
 #include "vector3d.h"
 #include "util.h"
+#include "simulation.h"
+#include "matrixElement.h"
 
-void outputDistributionUpstream(FILE* outFile, std::vector<Particle*> particles, int particleType, double shockWavePoint, double plasma_period, double gyroradius) {
-	double minMomentum = 0; //todo something else
-	double maxMomentum = 0;
-	for (int i = 0; i < particles.size(); ++i) {
-		if (particles[i]->coordinates.x > shockWavePoint) {
-			if (particles[i]->type == particleType) {
-				if (minMomentum <= 0) {
-					minMomentum = particles[i]->momentum.norm() * gyroradius / plasma_period;
-				}
-				if (particles[i]->momentum.norm() * gyroradius / plasma_period < minMomentum) {
-					minMomentum = particles[i]->momentum.norm() * gyroradius / plasma_period;
-				} else {
-					if (particles[i]->momentum.norm() * gyroradius / plasma_period > maxMomentum) {
-						maxMomentum = particles[i]->momentum.norm() * gyroradius / plasma_period;
-					}
-				}
-			}
-		}
-	}
-
-	double pgrid[pnumber + 1];
-	double distribution[pnumber];
-	double logMinMomentum = log(minMomentum);
-	pgrid[0] = minMomentum;
-	distribution[0] = 0;
-	double deltaLogP = (log(maxMomentum) - log(minMomentum)) / (pnumber);
-	for (int i = 1; i < pnumber; ++i) {
-		distribution[i] = 0;
-		pgrid[i] = exp(logMinMomentum + i * deltaLogP);
-	}
-	pgrid[pnumber] = maxMomentum;
-
-	double weight = 0;
-
-	for (int i = 0; i < particles.size(); ++i) {
-		if (particles[i]->coordinates.x > shockWavePoint) {
-			if (particles[i]->type == particleType) {
-				int j = (log(particles[i]->momentum.norm() * gyroradius / plasma_period) - logMinMomentum) / deltaLogP;
-				if (j >= 0 && j < pnumber) {
-					distribution[j] += particles[i]->weight;
-					weight += particles[i]->weight;
-				}
-			}
-		}
-	}
-
-	for (int i = 0; i < pnumber; ++i) {
-		distribution[i] /= (weight * (pgrid[i + 1] - pgrid[i]));
-	}
-
-	for (int i = 0; i < pnumber; ++i) {
-		fprintf(outFile, "%20.15g %20.15g\n", (pgrid[i] + pgrid[i + 1]) / 2, distribution[i]);
-	}
-}
-
-void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int particleType, double gyroradius, double plasma_period) {
+void outputDistribution(const char* outFileName, std::vector<Particle *>& particles, int particleType, double gyroradius,
+                        double plasma_period, int verbosity) {
 	double minMomentum = 0; //todo something else
 	double maxMomentum = 0;
 	for (int i = 0; i < particles.size(); ++i) {
 		if (particles[i]->type == particleType) {
+			Vector3d momentum = particles[i]->getMomentum();
 			if (minMomentum <= 0) {
-				minMomentum = particles[i]->momentum.norm() * gyroradius / plasma_period;
+				minMomentum = momentum.norm() * gyroradius / plasma_period;
 			}
-			if (particles[i]->momentum.norm() * gyroradius / plasma_period < minMomentum) {
-				minMomentum = particles[i]->momentum.norm() * gyroradius / plasma_period;
+			if ((momentum.norm() * gyroradius / plasma_period < minMomentum) && (momentum.norm() > 0)) {
+				minMomentum = momentum.norm() * gyroradius / plasma_period;
 			} else {
-				if (particles[i]->momentum.norm() * gyroradius / plasma_period > maxMomentum) {
-					maxMomentum = particles[i]->momentum.norm() * gyroradius / plasma_period;
+				if (momentum.norm() * gyroradius / plasma_period > maxMomentum) {
+					maxMomentum = momentum.norm() * gyroradius / plasma_period;
 				}
 			}
 		}
 	}
 
+	if ((verbosity > 2)) printf("send minmax p\n");
+	double minMaxP[2];
+	if (maxMomentum - minMomentum < 1E-8 * maxMomentum) {
+		maxMomentum = maxMomentum * 2;
+		minMomentum = minMomentum / 2;
+	}
+
+	minMaxP[0] = minMomentum;
+	minMaxP[1] = maxMomentum;
+
+
+	if ((verbosity > 2)) printf("bcast minmax p\n");
+
+	minMomentum = minMaxP[0];
+	maxMomentum = minMaxP[1];
+
+	if ((verbosity > 2)) printf("evaluate distribution\n");
+
+
 	double pgrid[pnumber + 1];
 	double distribution[pnumber];
+	double tempDistribution[pnumber];
 	double logMinMomentum = log(minMomentum);
 	pgrid[0] = minMomentum;
 	distribution[0] = 0;
@@ -94,352 +66,647 @@ void outputDistribution(FILE* outFile, std::vector<Particle*> particles, int par
 	}
 	pgrid[pnumber] = maxMomentum;
 
-	double weight = 0;
+	double weight[1];
+	weight[0] = 0;
 
 	for (int i = 0; i < particles.size(); ++i) {
 		if (particles[i]->type == particleType) {
-			int j = (log(particles[i]->momentum.norm() * gyroradius / plasma_period) - logMinMomentum) / deltaLogP;
+			int j = (log(particles[i]->getMomentum().norm() * gyroradius / plasma_period) - logMinMomentum) / deltaLogP;
 			if (j >= 0 && j < pnumber) {
 				distribution[j] += particles[i]->weight;
-				weight += particles[i]->weight;
+				weight[0] += particles[i]->weight;
 			}
 		}
 	}
 
-	for (int i = 0; i < pnumber; ++i) {
-		distribution[i] /= (weight * (pgrid[i + 1] - pgrid[i]));
-	}
+
+	if ((verbosity > 2)) printf("write distribution\n");
+
 
 	for (int i = 0; i < pnumber; ++i) {
-		fprintf(outFile, "%20.15g %20.15g\n", (pgrid[i] + pgrid[i + 1]) / 2, distribution[i]);
+		distribution[i] /= (weight[0] * (pgrid[i + 1] - pgrid[i]));
+		//todo check
+		if (maxMomentum <= 0 || minMomentum <= 0) {
+			distribution[i] = 0;
+			pgrid[i] = 0;
+		}
 	}
+
+	FILE* outFile = fopen(outFileName, "a");
+	for (int i = 0; i < pnumber; ++i) {
+		fprintf(outFile, "%22.15g %22.15g\n", (pgrid[i] + pgrid[i + 1]) / 2, distribution[i]);
+	}
+	fclose(outFile);
+
 }
 
-void outputAnisotropy(FILE* outFile, Simulation* simulation, int particleType, double gyroradius, double plasma_period) {
-	for (int i = 0; i < simulation->xnumber; ++i) {
-		for (int j = 0; j < simulation->ynumber; ++j) {
-			for (int k = 0; k < simulation->znumber; ++k) {
-				Vector3d meanV = Vector3d(0, 0, 0);
-				double concentration = 0;
-				int particleCount = 0;
-				if(simulation->particlesInBbin[i][j][k].size() > 0) {
-					for (int pcount = 0; pcount < simulation->particlesInBbin[i][j][k].size(); ++pcount) {
-						Particle *particle = simulation->particlesInBbin[i][j][k][pcount];
-						double correlation = simulation->correlationWithBbin(*particle, i, j,
-																			 k) / simulation->volumeB(
-							i, j, k);
-						if (particle->type == particleType) {
-							meanV = meanV + particle->velocity(
-								simulation->speed_of_light_normalized) * particle->weight * correlation;
-							concentration += particle->weight * correlation;
-							particleCount++;
-						}
-					}
-					if(particleCount > 0) {
-						meanV = meanV / concentration;
-						//printf("i = %d meanv = %g %g %g\n", i, meanV.x, meanV.y, meanV.z);
+void outputDistributionShiftedSystem(const char* outFileName, std::vector<Particle *>& particles, Vector3d& shiftV, double& speed_of_light_normalized, int particleType, double gyroradius,
+                                     double plasma_period, int verbosity) {
 
-						double parallelV2 = 0;
-						double normalV2 = 0;
-
-						for (int pcount = 0; pcount < simulation->particlesInBbin[i][j][k].size(); ++pcount) {
-							Particle *particle = simulation->particlesInBbin[i][j][k][pcount];
-							double correlation = simulation->correlationWithBbin(*particle, i, j,
-																				 k) / simulation->volumeB(
-								i, j, k);
-							if (particle->type == particleType) {
-								parallelV2 = parallelV2 + sqr(particle->velocityX(
-									simulation->speed_of_light_normalized) - meanV.x) * particle->weight * correlation;
-								normalV2 = normalV2 + (sqr(
-									particle->velocityY(simulation->speed_of_light_normalized) - meanV.y) + sqr(
-									particle->velocityZ(
-										simulation->speed_of_light_normalized)) - meanV.z) * particle->weight * correlation;
-							}
-						}
-
-						fprintf(outFile, "%g\n", (0.5 * normalV2 / parallelV2) - (2 * parallelV2 / normalV2));
-					} else {
-						fprintf(outFile, "%g\n", 0.0);
-					}
-				} else {
-					fprintf(outFile, "%g\n", 0.0);
+	double minMomentum = 0; //todo something else
+	double maxMomentum = 0;
+	for (int i = 0; i < particles.size(); ++i) {
+		if (particles[i]->type == particleType) {
+			Particle tempParticle = *particles[i];
+			tempParticle.addVelocity(shiftV, speed_of_light_normalized);
+			Vector3d momentum = tempParticle.getMomentum();
+			if (minMomentum <= 0) {
+				minMomentum = momentum.norm() * gyroradius / plasma_period;
+			}
+			if ((momentum.norm() * gyroradius / plasma_period < minMomentum) && (momentum.norm() > 0)) {
+				minMomentum = momentum.norm() * gyroradius / plasma_period;
+			} else {
+				if (momentum.norm() * gyroradius / plasma_period > maxMomentum) {
+					maxMomentum = momentum.norm() * gyroradius / plasma_period;
 				}
 			}
 		}
 	}
+
+	if ((verbosity > 2)) printf("send minmax p\n");
+	double minMaxP[2];
+
+
+	if (maxMomentum - minMomentum < 1E-8 * maxMomentum) {
+		maxMomentum = maxMomentum * 2;
+		minMomentum = minMomentum / 2;
+	}
+
+	minMaxP[0] = minMomentum;
+	minMaxP[1] = maxMomentum;
+
+
+	if ((verbosity > 2)) printf("bcast minmax p\n");
+
+	minMomentum = minMaxP[0];
+	maxMomentum = minMaxP[1];
+
+	if ((verbosity > 2)) printf("evaluate distribution\n");
+
+
+	double pgrid[pnumber + 1];
+	double distribution[pnumber];
+	double tempDistribution[pnumber];
+	double logMinMomentum = log(minMomentum);
+	pgrid[0] = minMomentum;
+	distribution[0] = 0;
+	double deltaLogP = (log(maxMomentum) - log(minMomentum)) / (pnumber);
+	for (int i = 1; i < pnumber; ++i) {
+		distribution[i] = 0;
+		pgrid[i] = exp(logMinMomentum + i * deltaLogP);
+	}
+	pgrid[pnumber] = maxMomentum;
+
+	double weight[1];
+	weight[0] = 0;
+
+	for (int i = 0; i < particles.size(); ++i) {
+		if (particles[i]->type == particleType) {
+			Particle tempParticle = *particles[i];
+			tempParticle.addVelocity(shiftV, speed_of_light_normalized);
+			int j = (log(tempParticle.getMomentum().norm() * gyroradius / plasma_period) - logMinMomentum) / deltaLogP;
+			if (j >= 0 && j < pnumber) {
+				distribution[j] += particles[i]->weight;
+				weight[0] += particles[i]->weight;
+			}
+		}
+	}
+
+
+	if ((verbosity > 2)) printf("write distribution\n");
+
+
+	for (int i = 0; i < pnumber; ++i) {
+		distribution[i] /= (weight[0] * (pgrid[i + 1] - pgrid[i]));
+		//todo check
+		if (maxMomentum <= 0 || minMomentum <= 0) {
+			distribution[i] = 0;
+			pgrid[i] = 0;
+		}
+	}
+
+	FILE* outFile = fopen(outFileName, "a");
+	for (int i = 0; i < pnumber; ++i) {
+		fprintf(outFile, "%22.15g %22.15g\n", (pgrid[i] + pgrid[i + 1]) / 2, distribution[i]);
+	}
+	fclose(outFile);
+
 }
 
-void outputTrajectory(FILE* outFile, Particle* particle, double time, double plasma_period, double gyroradius) {
-	fprintf(outFile, "%g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g\n", time, particle->coordinates.x, particle->coordinates.y, particle->coordinates.z, particle->momentum.x, particle->momentum.y, particle->momentum.z, particle->momentum.norm());
+/*void outputAnisotropy(const char* outFileName, Simulation* simulation, int particleType, double gyroradius,
+                      double plasma_period) {
+	int rank;
+	int size;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	int minI = 1;
+	if (rank == 0) {
+		minI = 0;
+	}
+    int maxI = simulation->xnumber;
+    if(rank == size - 1){
+        maxI = simulation->xnumber + 1;
+    }
+
+	for (int procCount = 0; procCount < size; ++procCount) {
+		MPI_Barrier(MPI_COMM_WORLD);
+		if (procCount == rank) {
+			FILE* outFile = fopen(outFileName, "a");
+			for (int i = minI; i < maxI; ++i) {
+				for (int j = 0; j < simulation->ynumber; ++j) {
+					for (int k = 0; k < simulation->znumber; ++k) {
+						Vector3d meanV = Vector3d(0, 0, 0);
+						double concentration = 0;
+						int particleCount = 0;
+						if (simulation->particlesInBbin[i][j][k].size() > 0) {
+							for (int pcount = 0; pcount < simulation->particlesInBbin[i][j][k].size(); ++pcount) {
+								Particle* particle = simulation->particlesInBbin[i][j][k][pcount];
+								double correlation = simulation->correlationWithBbin(*particle, i, j,
+								                                                     k) / simulation->volumeB(
+									i, j, k);
+								if (particle->type == particleType) {
+									//meanV = meanV + particle->velocity(
+									//	simulation->speed_of_light_normalized) * particle->weight * correlation;
+									concentration += particle->weight * correlation;
+									particleCount++;
+								}
+							}
+							if (particleCount > 0) {
+								meanV = meanV / concentration;
+								//printf("i = %d meanv = %g %g %g\n", i, meanV.x, meanV.y, meanV.z);
+
+								double parallelV2 = 0;
+								double normalV2 = 0;
+
+								for (int pcount = 0; pcount < simulation->particlesInBbin[i][j][k].size(); ++pcount) {
+									Particle* particle = simulation->particlesInBbin[i][j][k][pcount];
+									double correlation = simulation->correlationWithBbin(*particle, i, j,
+									                                                     k) / simulation->volumeB(
+										i, j, k);
+									if (particle->type == particleType) {
+										parallelV2 = parallelV2 + sqr(particle->velocityX(
+											simulation->speed_of_light_normalized) - meanV.x) * particle->weight * correlation;
+										normalV2 = normalV2 + (sqr(
+											particle->velocityY(simulation->speed_of_light_normalized) - meanV.y) + sqr(
+											particle->velocityZ(
+												simulation->speed_of_light_normalized)) - meanV.z) * particle->weight * correlation;
+									}
+								}
+
+								fprintf(outFile, "%g %d\n", (0.5 * normalV2 / parallelV2) - (2 * parallelV2 / normalV2), particleCount);
+							} else {
+								fprintf(outFile, "%g %d\n", 0.0, 0);
+							}
+						} else {
+							fprintf(outFile, "%g\n", 0.0);
+						}
+					}
+				}
+			}
+			fclose(outFile);
+		}
+	}
+}*/
+
+void outputTrajectoryByNumber(const char* outFileName, int number, const Simulation* simulation) {
+	const int parametersNumber = 9;
+	double parameters[parametersNumber];
+	for (int i = 0; i < parametersNumber; ++i) {
+		parameters[i] = 0;
+	}
+	int rankWithParticle = 0;
+	parameters[0] = simulation->time;
+	parameters[1] = simulation->time * simulation->plasma_period;
+
+	for (int p = 0; p < simulation->particles.size(); ++p) {
+		Particle* particle = simulation->particles[p];
+		if (particle->number == number) {
+			parameters[2] = particle->coordinates.x * simulation->scaleFactor;
+			parameters[3] = particle->coordinates.y * simulation->scaleFactor;
+			parameters[4] = particle->coordinates.z * simulation->scaleFactor;
+
+			Vector3d momentum = particle->getMomentum();
+			parameters[5] = momentum.x * simulation->scaleFactor / simulation->plasma_period;
+			parameters[6] = momentum.y * simulation->scaleFactor / simulation->plasma_period;
+			parameters[7] = momentum.z * simulation->scaleFactor / simulation->plasma_period;
+
+			parameters[8] = momentum.norm() * simulation->scaleFactor / simulation->plasma_period;
+
+			break;
+		}
+	}
+
+	FILE* outFile = fopen(outFileName, "a");
+	for (int i = 0; i < parametersNumber; ++i) {
+		fprintf(outFile, "%20.15g  ", parameters[i]);
+	}
+	fprintf(outFile, "%d", rankWithParticle);
+	fprintf(outFile, "\n");
+	fclose(outFile);
+
 }
 
-void outputGrid(FILE* outFile, double* grid, int number, double scale) {
+void outputTrajectory(const char* outFileName, Particle* particle, double time, double plasma_period, double gyroradius) {
+	FILE* outFile = fopen(outFileName, "a");
+	Vector3d momentum = particle->getMomentum();
+	fprintf(outFile, "%20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %d\n", time, time * plasma_period, particle->coordinates.x * gyroradius, particle->coordinates.y * gyroradius, particle->coordinates.z * gyroradius, momentum.x * gyroradius / plasma_period, momentum.y * gyroradius / plasma_period, momentum.z * gyroradius / plasma_period, momentum.norm() * gyroradius / plasma_period, particle->number);
+	fclose(outFile);
+}
+
+void outputGridSimple(const char* outFileName, double* grid, int number, double scale) {
+	FILE* outFile = fopen(outFileName, "w");
 	for (int i = 0; i <= number; ++i) {
 		fprintf(outFile, "%15.10g\n", grid[i] * scale);
 	}
+	fclose(outFile);
 }
 
-void outputFields(FILE* outEfile, FILE* outBfile, Vector3d*** Efield, Vector3d*** Bfield, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius, double fieldScale) {
-	double scale = 1.0 / (plasma_period * gyroradius);
-	for (int i = 0; i < xnumber; ++i) {
+void outputGrid(const char* outFileName, double* grid, int number, double scale) {
+	int minI = 0;
+	int maxI = number + 1;
+
+
+	FILE* outFile;
+
+	outFile = fopen(outFileName, "w");
+	fclose(outFile);
+
+	outFile = fopen(outFileName, "a");
+	for (int i = minI; i <= maxI; ++i) {
+		fprintf(outFile, "%15.10g\n", grid[i] * scale);
+	}
+	fclose(outFile);
+
+
+}
+
+void outputFields(const char* outEfileName, const char* outBfileName, Vector3d*** Efield, Vector3d*** Bfield, int xnumber,
+                  int ynumber, int znumber, double plasma_period, double gyroradius) {
+	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
+	int minI = 0;
+	int maxI = xnumber + 1;
+
+	FILE* outBfile = fopen(outBfileName, "a");
+	for (int i = minI; i < maxI; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
-				fprintf(outBfile, "%15.10g %15.10g %15.10g\n", scale * Bfield[i][j][k].x, scale * Bfield[i][j][k].y, scale * Bfield[i][j][k].z);
+				fprintf(outBfile, "%15.10g %15.10g %15.10g\n", scale * Bfield[i][j][k].x,
+				        scale * Bfield[i][j][k].y, scale * Bfield[i][j][k].z);
 			}
 		}
 	}
+	fclose(outBfile);
 
-	for (int i = 0; i <= xnumber; ++i) {
+
+	minI = 0;
+
+	FILE* outEfile = fopen(outEfileName, "a");
+	for (int i = minI; i <= maxI; ++i) {
 		for (int j = 0; j <= ynumber; ++j) {
 			for (int k = 0; k <= znumber; ++k) {
-				fprintf(outEfile, "%15.10g %15.10g %15.10g\n", scale * Efield[i][j][k].x, scale * Efield[i][j][k].y, scale * Efield[i][j][k].z);
+				fprintf(outEfile, "%15.10g %15.10g %15.10g\n", scale * Efield[i][j][k].x,
+				        scale * Efield[i][j][k].y, scale * Efield[i][j][k].z);
 			}
 		}
 	}
+	fclose(outEfile);
+
+
 }
 
-void outputConcentrations(FILE* outFile, double*** electronConcentration, double*** protonConcentration, double*** chargeDensity, double*** shiftChargeDensity, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius, double fieldScale) {
-	for (int i = 0; i < xnumber; ++i) {
+void outputConcentrations(const char* outFileName, double**** particleConcentrations, double*** chargeDensity,
+                          double*** shiftChargeDensity, int xnumber, int ynumber, int znumber, int typesNumber,
+                          double plasma_period, double gyroradius) {
+	//int minI = 1;
+	int minI = 0;
+	//int maxI = xnumber;
+	int maxI = xnumber + 1;
+
+	FILE* outFile = fopen(outFileName, "a");
+	for (int i = minI; i < maxI; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
-				fprintf(outFile, "%15.10g %15.10g %15.10g %15.10g\n", electronConcentration[i][j][k] / cube(gyroradius), protonConcentration[i][j][k] / cube(gyroradius), chargeDensity[i][j][k] / (sqrt(cube(gyroradius)) * plasma_period), shiftChargeDensity[i][j][k] / (sqrt(cube(gyroradius)) * plasma_period));
-			}
-		}
-	}
-}
-
-void outputVelocity(FILE* outFile, FILE* outElectronFile, Vector3d*** velocity, Vector3d*** electronVelocity, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius) {
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				fprintf(outFile, "%15.10g %15.10g %15.10g\n", velocity[i][j][k].x * gyroradius / plasma_period, velocity[i][j][k].y * gyroradius / plasma_period, velocity[i][j][k].z * gyroradius / plasma_period);
-				fprintf(outElectronFile, "%15.10g %15.10g %15.10g\n", electronVelocity[i][j][k].x * gyroradius / plasma_period, electronVelocity[i][j][k].y * gyroradius / plasma_period, electronVelocity[i][j][k].z * gyroradius / plasma_period);
-			}
-		}
-	}
-}
-
-void outputFlux(FILE* outFile, Vector3d*** electricFlux, Vector3d*** externalElectricFlux, int xnumber, int ynumber, int znumber, double plasma_period, double gyroradius, double fieldScale) {
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				fprintf(outFile, "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g\n", electricFlux[i][j][k].x, electricFlux[i][j][k].y, electricFlux[i][j][k].z, externalElectricFlux[i][j][k].x, externalElectricFlux[i][j][k].y, externalElectricFlux[i][j][k].z);
-			}
-		}
-	}
-}
-
-void outputVectorArray(FILE* outFile, Vector3d*** vector3d, int xnumber, int ynumber, int znumber, double scale) {
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				fprintf(outFile, "%15.10g %15.10g %15.10g\n", vector3d[i][j][k].x * scale, vector3d[i][j][k].y * scale, vector3d[i][j][k].z * scale);
-			}
-		}
-	}
-}
-
-void outputMatrixArray(FILE* outFile, Matrix3d*** matrix3d, int xnumber, int ynumber, int znumber, double scale) {
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				fprintf(outFile, "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g\n",
-				        matrix3d[i][j][k].matrix[0][0] * scale, matrix3d[i][j][k].matrix[0][1] * scale, matrix3d[i][j][k].matrix[0][2] * scale,
-				        matrix3d[i][j][k].matrix[1][0] * scale, matrix3d[i][j][k].matrix[1][1] * scale, matrix3d[i][j][k].matrix[1][2] * scale,
-				        matrix3d[i][j][k].matrix[2][0] * scale, matrix3d[i][j][k].matrix[2][1] * scale, matrix3d[i][j][k].matrix[2][2] * scale);
-			}
-		}
-	}
-}
-
-void outputGeneral(FILE* outFile, Simulation* simulation) {
-	int particlesCount = simulation->particles.size();
-	fprintf(outFile, "%d %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d\n",
-			simulation->currentIteration, simulation->time, simulation->time * simulation->plasma_period, simulation->particleEnergy,
-	        simulation->electricFieldEnergy, simulation->magneticFieldEnergy, simulation->energy, simulation->momentum.x, simulation->momentum.y, simulation->momentum.z, simulation->theoreticalEnergy, simulation->theoreticalMomentum.x, simulation->theoreticalMomentum.y,
-	        simulation->theoreticalMomentum.z, simulation->maxEfield.norm(), simulation->maxBfield.norm(), simulation->deltaT, particlesCount);
-}
-
-void outputDivergenceError(FILE* outFile, Simulation* simulation, double plasma_period, double gyroradius, double fieldScale) {
-	for (int i = 0; i < simulation->xnumber; ++i) {
-		for (int j = 0; j < simulation->ynumber; ++j) {
-			for (int k = 0; k < simulation->znumber; ++k) {
-				double div = simulation->evaluateDivE(i, j, k);
-				double div2 = simulation->evaluateDivTempE(i, j, k);
-				fprintf(outFile, "%g %g %g\n", (4 * pi * simulation->chargeDensity[i][j][k] - div) / (sqrt(cube(gyroradius)) * plasma_period), div / (sqrt(cube(gyroradius)) * plasma_period), 4 * pi * simulation->chargeDensity[i][j][k] / (sqrt(cube(gyroradius)) * plasma_period));
-			}
-		}
-	}
-}
-
-void outputParticles(FILE* outProtonsFile, FILE* outElectronsFile, FILE* outPositronsFile, FILE* outAlphaFile, FILE* outDeuteriumFile, FILE* outHelium3File, Simulation* simulation) {
-	for (int i = 0; i < simulation->particles.size(); ++i) {
-		Particle* particle = simulation->particles[i];
-		double p = particle->momentum.norm() * simulation->scaleFactor / simulation->plasma_period;
-		if (particle->type == PROTON) {
-			fprintf(outProtonsFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
-		} else if (particle->type == ELECTRON) {
-			fprintf(outElectronsFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
-		} else if (particle->type == POSITRON) {
-			fprintf(outPositronsFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
-		} else if (particle->type == ALPHA) {
-			fprintf(outAlphaFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
-		} else if (particle->type == DEUTERIUM) {
-			fprintf(outDeuteriumFile, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
-		} else if (particle->type == HELIUM3) {
-			fprintf(outHelium3File, "%15.10g %15.10g %15.10g\n", particle->coordinates.x * simulation->scaleFactor, p, particle->momentum.x * simulation->scaleFactor / simulation->plasma_period);
-		}
-	}
-}
-
-void outputMaxwellEquationMatrixSimple(std::vector<MatrixElement>****& maxwellEquationMatrix, int xnumber, int ynumber, int znumber, int lnumber) {
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				for (int l = 0; l < lnumber; ++l) {
-					//printf("%d %d %d %d\n", i,j, k, l);
-					for (int m = 0; m < maxwellEquationMatrix[i][j][k][l].size(); ++m) {
-						printf("%15.7g", maxwellEquationMatrix[i][j][k][l][m].value);
-					}
-					printf("\n");
+				fprintf(outFile, "%15.10g %15.10g ",
+				        chargeDensity[i][j][k] / (sqrt(cube(gyroradius)) * plasma_period),
+				        shiftChargeDensity[i][j][k] / (sqrt(cube(gyroradius)) * plasma_period));
+				for (int t = 0; t < typesNumber; ++t) {
+					fprintf(outFile, "%15.10g ", particleConcentrations[t][i][j][k] / cube(gyroradius));
 				}
+				fprintf(outFile, "\n");
 			}
 		}
 	}
+	fclose(outFile);
 }
 
-void outputMaxwellEquationMatrixFull(FILE* outFile, std::vector<MatrixElement>****& maxwellEquationMatrix, int xnumber, int ynumber, int znumber, int lnumber) {
-	printf("outputingMatrix\n");
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				for (int l = 0; l < lnumber; ++l) {
-					//printf("%d %d %d %d\n", i,j, k, l);
-					for(int tempI = 0; tempI < xnumber; ++tempI) {
-						for(int tempJ = 0; tempJ < ynumber; ++tempJ) {
-							for(int tempK = 0; tempK < znumber; ++tempK) {
-								for(int tempL = 0; tempL < lnumber; ++tempL){
-									MatrixElement element = MatrixElement(0, tempI, tempJ, tempK, tempL);
-									for (int m = 0; m < maxwellEquationMatrix[i][j][k][l].size(); ++m) {
-										if(element.equalsIndex(maxwellEquationMatrix[i][j][k][l][m])) {
-											element.value = maxwellEquationMatrix[i][j][k][l][m].value;
-										}
-									}
-									fprintf(outFile, "%28.22g ", element.value)
-;								}
-							}
+void outputVelocity(const char* outFileName, Vector3d**** velocity, ParticleTypeContainer* types,
+                    int xnumber, int ynumber, int znumber, int typesNumber, double plasma_period,
+                    double gyroradius) {
+
+	int minI = 0;
+	int maxI = xnumber + 1;
+
+	FILE* outFile = fopen(outFileName, "a");
+			for (int i = minI; i < maxI; ++i) {
+				for (int j = 0; j < ynumber; ++j) {
+					for (int k = 0; k < znumber; ++k) {
+						for (int t = 0; t < typesNumber; ++t) {
+							fprintf(outFile, "%15.10g %15.10g %15.10g ",
+							        velocity[t][i][j][k].x * gyroradius / plasma_period,
+							        velocity[t][i][j][k].y * gyroradius / plasma_period,
+							        velocity[t][i][j][k].z * gyroradius / plasma_period);
 						}
+						fprintf(outFile, "\n");
 					}
-					fprintf(outFile, "\n");
 				}
+			}
+			fclose(outFile);
+}
+
+void outputFlux(const char* outFileName, Vector3d*** electricFlux, Vector3d*** externalElectricFlux, int xnumber,
+                int ynumber, int znumber, double plasma_period, double gyroradius) {
+	int minI = 0;
+	int maxI = xnumber+1;
+
+
+			FILE* outFile = fopen(outFileName, "a");
+			for (int i = minI; i < maxI; ++i) {
+				for (int j = 0; j < ynumber; ++j) {
+					for (int k = 0; k < znumber; ++k) {
+						fprintf(outFile, "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g\n", electricFlux[i][j][k].x,
+						        electricFlux[i][j][k].y, electricFlux[i][j][k].z, externalElectricFlux[i][j][k].x,
+						        externalElectricFlux[i][j][k].y, externalElectricFlux[i][j][k].z);
+					}
+				}
+			}
+			fclose(outFile);
+}
+
+void outputVectorNodeArraySimple(const char* outFileName, Vector3d*** vector3d, int xnumber, int ynumber, int znumber,
+                                 double scale) {
+	FILE* outFile = fopen(outFileName, "w");
+	for (int i = 0; i < xnumber + 2; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				fprintf(outFile, "%15.10g %15.10g %15.10g\n", vector3d[i][j][k].x * scale,
+				        vector3d[i][j][k].y * scale, vector3d[i][j][k].z * scale);
 			}
 		}
 	}
+	fclose(outFile);
 }
 
-void outputSimulationBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile, Simulation* simulation) {
-	int inputType = 2;
-	if(simulation->inputType == CGS){
-		inputType = 0;
-	} else if(simulation->inputType == Theoretical){
-		inputType = 1;
-	}
-	fprintf(generalFile, "%d\n", inputType);
-	fprintf(generalFile, "%d\n", simulation->xnumber);
-	fprintf(generalFile, "%d\n", simulation->ynumber);
-	fprintf(generalFile, "%d\n", simulation->znumber);
-	fprintf(generalFile, "%d\n", simulation->particlesNumber);
-	fprintf(generalFile, "%d\n", simulation->electronsPerBin);
-	fprintf(generalFile, "%d\n", simulation->protonsPerBin);
-	fprintf(generalFile, "%d\n", simulation->positronsPerBin);
-	fprintf(generalFile, "%d\n", simulation->alphaPerBin);
+void outputVectorNodeArray(const char* outFileName, Vector3d*** vector3d, int xnumber, int ynumber, int znumber,
+                           double scale) {
+	int minI = 0;
+	int maxI = xnumber + 1;
 
-	fprintf(generalFile, "%15.10g\n", simulation->density);
-	fprintf(generalFile, "%15.10g\n", simulation->temperature);
-	fprintf(generalFile, "%15.10g\n", simulation->plasma_period);
-	fprintf(generalFile, "%15.10g\n", simulation->scaleFactor);
-	fprintf(generalFile, "%15.10g\n", simulation->fieldScale);
-
-	fprintf(generalFile, "%15.10g\n", simulation->time);
-	fprintf(generalFile, "%15.10g\n", simulation->maxTime);
-
-	fprintf(generalFile, "%d\n", simulation->currentIteration);
-	fprintf(generalFile, "%d\n", simulation->maxIteration);
-
-	fprintf(generalFile, "%15.10g\n", simulation->xsize);
-	fprintf(generalFile, "%15.10g\n", simulation->ysize);
-	fprintf(generalFile, "%15.10g\n", simulation->zsize);
-	fprintf(generalFile, "%15.10g\n", simulation->theta);
-	fprintf(generalFile, "%15.10g\n", simulation->eta);
-
-	int debugMode = 0;
-	if (simulation->debugMode) {
-		debugMode = 1;
-	} else {
-		debugMode = 0;
-	}
-
-	fprintf(generalFile, "%d\n", debugMode);
-
-	int preserveChargeLocal = 0;
-	if (simulation->preserveChargeLocal) {
-		preserveChargeLocal = 1;
-	} else {
-		preserveChargeLocal = 0;
-	}
-
-	fprintf(generalFile, "%d\n", preserveChargeLocal);
-
-	int preserveChargeGlobal = 0;
-	if (simulation->preserveChargeGlobal) {
-		preserveChargeGlobal = 1;
-	} else {
-		preserveChargeGlobal = 0;
-	}
-
-	fprintf(generalFile, "%d\n", preserveChargeGlobal);
-
-	int solverType = 0;
-	if (simulation->solverType == IMPLICIT) {
-		solverType = 1;
-	} else {
-		solverType = 0;
-	}
-
-	fprintf(generalFile, "%d\n", solverType);
-
-	int boundaryConditionType = 0;
-	if (simulation->boundaryConditionType == PERIODIC) {
-		boundaryConditionType = 1;
-	} else {
-		boundaryConditionType = 0;
-	}
-
-	fprintf(generalFile, "%d\n", boundaryConditionType);
-
-	fprintf(generalFile, "%d\n", simulation->maxwellEquationMatrixSize);
-
-	fprintf(generalFile, "%15.10g\n", simulation->extJ);
-
-	fprintf(generalFile, "%15.10g\n", simulation->V0.x);
-	fprintf(generalFile, "%15.10g\n", simulation->V0.y);
-	fprintf(generalFile, "%15.10g\n", simulation->V0.z);
-	fprintf(generalFile, "%15.10g\n", simulation->E0.x);
-	fprintf(generalFile, "%15.10g\n", simulation->E0.y);
-	fprintf(generalFile, "%15.10g\n", simulation->E0.z);
-	fprintf(generalFile, "%15.10g\n", simulation->B0.x);
-	fprintf(generalFile, "%15.10g\n", simulation->B0.y);
-	fprintf(generalFile, "%15.10g\n", simulation->B0.z);
-
-	outputFields(Efile, Bfile, simulation->Efield, simulation->Bfield, simulation->xnumber, simulation->ynumber, simulation->znumber, 1.0, 1.0, 1.0);
-	outputBackupParticles(particlesFile, simulation);
+			FILE* outFile = fopen(outFileName, "a");
+			for (int i = minI; i < maxI; ++i) {
+				for (int j = 0; j < ynumber; ++j) {
+					for (int k = 0; k < znumber; ++k) {
+						fprintf(outFile, "%15.10g %15.10g %15.10g\n", vector3d[i][j][k].x * scale,
+						        vector3d[i][j][k].y * scale, vector3d[i][j][k].z * scale);
+					}
+				}
+			}
+			fclose(outFile);
 }
 
-void outputBackupParticles(FILE* outFile, Simulation* simulation) {
-	for (int i = 0; i < simulation->particles.size(); ++i) {
-		Particle* particle = simulation->particles[i];
-		outputBackupParticle(outFile, particle);
+void outputVectorCellArray(const char* outFileName, Vector3d*** vector3d, int xnumber, int ynumber, int znumber,
+                           double scale) {
+	int minI = 0;
+	int maxI = xnumber+1;
+
+			FILE* outFile = fopen(outFileName, "a");
+			for (int i = minI; i < maxI; ++i) {
+				for (int j = 0; j < ynumber; ++j) {
+					for (int k = 0; k < znumber; ++k) {
+						fprintf(outFile, "%15.10g %15.10g %15.10g\n", vector3d[i][j][k].x * scale,
+						        vector3d[i][j][k].y * scale, vector3d[i][j][k].z * scale);
+					}
+				}
+			}
+			fclose(outFile);
+}
+
+void outputMatrixArray(const char* outFileName, Matrix3d*** matrix3d, int xnumber, int ynumber, int znumber,
+                       double scale) {
+	int minI = 0;
+	int maxI = xnumber+1;
+
+			FILE* outFile = fopen(outFileName, "a");
+			for (int i = minI; i < maxI; ++i) {
+				for (int j = 0; j < ynumber; ++j) {
+					for (int k = 0; k < znumber; ++k) {
+						fprintf(outFile, "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g\n",
+						        matrix3d[i][j][k].matrix[0][0] * scale, matrix3d[i][j][k].matrix[0][1] * scale,
+						        matrix3d[i][j][k].matrix[0][2] * scale,
+						        matrix3d[i][j][k].matrix[1][0] * scale, matrix3d[i][j][k].matrix[1][1] * scale,
+						        matrix3d[i][j][k].matrix[1][2] * scale,
+						        matrix3d[i][j][k].matrix[2][0] * scale, matrix3d[i][j][k].matrix[2][1] * scale,
+						        matrix3d[i][j][k].matrix[2][2] * scale);
+					}
+				}
+			}
+			fclose(outFile);
+}
+
+void outputGeneral(const char* outFileName, Simulation* simulation) {
+	FILE* outFile = fopen(outFileName, "a");
+	int particlesCount = simulation->particlesNumber;
+	double fieldFactor = simulation->plasma_period * sqrt(simulation->scaleFactor);
+	fprintf(outFile, "%d %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d %15.10g\n",
+	        simulation->currentIteration, simulation->time, simulation->time * simulation->plasma_period, simulation->particleEnergy,
+	        simulation->electricFieldEnergy, simulation->magneticFieldEnergy, simulation->energy, simulation->globalMomentum.x, simulation->globalMomentum.y, simulation->globalMomentum.z, simulation->generalTheoreticalEnergy, simulation->generalTheoreticalMomentum.x, simulation->generalTheoreticalMomentum.y,
+	        simulation->generalTheoreticalMomentum.z, simulation->maxEfield.norm() / fieldFactor, simulation->maxBfield.norm() / fieldFactor, simulation->deltaT, particlesCount, simulation->shockWaveX);
+	fclose(outFile);
+}
+
+void outputGeneralAnisotropy(const char* outFileName, Simulation* simulation) {
+	FILE* outFile = fopen(outFileName, "a");
+	fprintf(outFile, "%d %15.10g %15.10g ",
+	        simulation->currentIteration, simulation->time, simulation->time * simulation->plasma_period);
+	for (int t = 0; t < simulation->typesNumber; ++ t) {
+		fprintf(outFile, "%15.10g %15.10g %15.10g ", simulation->types[t].anisotropy, simulation->types[t].parallelTemperatureEvaluated, simulation->types[t].normalTemperatureEvaluated);
 	}
+	fprintf(outFile, "\n");
+	fclose(outFile);
+}
+
+void outputDivergenceError(const char* outFileName, Simulation* simulation, double plasma_period, double gyroradius) {
+	int minI = 0;
+	int maxI = simulation->xnumber+1;
+
+			FILE* outFile = fopen(outFileName, "a");
+			for (int i = minI; i < maxI; ++i) {
+				for (int j = 0; j < simulation->ynumber; ++j) {
+					for (int k = 0; k < simulation->znumber; ++k) {
+						double div = simulation->evaluateDivE(i, j, k);
+						double div2 = simulation->evaluateDivTempE(i, j, k);
+						fprintf(outFile, "%g %g %g\n", (4 * pi * simulation->chargeDensity[i][j][k] - div) / (sqrt(
+							        cube(gyroradius)) * plasma_period), div / (sqrt(cube(gyroradius)) * plasma_period),
+						        4 * pi * simulation->chargeDensity[i][j][k] / (sqrt(cube(gyroradius)) * plasma_period));
+					}
+				}
+			}
+			fclose(outFile);
+}
+
+void outputParticles(const char* outFileName, Simulation* simulation, ParticleTypes type) {
+
+	FILE* outFile;
+
+		outFile = fopen(outFileName, "w");
+		fclose(outFile);
+
+			outFile = fopen(outFileName, "a");
+
+			int typeCount = 0;
+
+			for (int i = 0; i < simulation->particles.size(); ++i) {
+				Particle* particle = simulation->particles[i];
+				Vector3d momentum = particle->getMomentum();
+				double p = momentum.norm() * simulation->scaleFactor / simulation->plasma_period;
+				if (particle->type == type) {
+					if (typeCount % writeParticleNumber == 0) {
+						fprintf(outFile, "%15.10g %15.10g %15.10g %d\n",
+						        particle->coordinates.x * simulation->scaleFactor, p,
+						        momentum.x * simulation->scaleFactor / simulation->plasma_period, particle->number);
+					}
+					typeCount++;
+				}
+			}
+			fclose(outFile);
+}
+
+void outputSimulationBackup(const char* generalFileName, const char* EfileName, const char* BfileName,
+                            const char* particlesFileName, Simulation* simulation) {
+
+	if (simulation->rank == 0) {
+		FILE* generalFile = fopen(generalFileName, "w");
+		FILE* Efile = fopen(EfileName, "w");
+		FILE* Bfile = fopen(BfileName, "w");
+		fclose(Efile);
+		fclose(Bfile);
+
+		int inputType = 2;
+		if (simulation->inputType == CGS) {
+			inputType = 0;
+		} else if (simulation->inputType == Theoretical) {
+			inputType = 1;
+		}
+		fprintf(generalFile, "%d\n", inputType);
+		fprintf(generalFile, "%d\n", simulation->xnumberGeneral);
+		fprintf(generalFile, "%d\n", simulation->ynumber);
+		fprintf(generalFile, "%d\n", simulation->znumber);
+		fprintf(generalFile, "%d\n", simulation->particlesNumber);
+		fprintf(generalFile, "%d\n", simulation->types[0].particlesPerBin);
+		fprintf(generalFile, "%d\n", simulation->types[1].particlesPerBin);
+		fprintf(generalFile, "%d\n", simulation->types[2].particlesPerBin);
+		fprintf(generalFile, "%d\n", simulation->types[3].particlesPerBin);
+		fprintf(generalFile, "%d\n", simulation->types[4].particlesPerBin);
+		fprintf(generalFile, "%d\n", simulation->types[5].particlesPerBin);
+
+		fprintf(generalFile, "%lf\n", simulation->types[0].concentration);
+		fprintf(generalFile, "%lf\n", simulation->types[1].concentration);
+		fprintf(generalFile, "%lf\n", simulation->types[2].concentration);
+		fprintf(generalFile, "%lf\n", simulation->types[3].concentration);
+		fprintf(generalFile, "%lf\n", simulation->types[4].concentration);
+		fprintf(generalFile, "%lf\n", simulation->types[5].concentration);
+
+		fprintf(generalFile, "%15.10g\n", simulation->temperature);
+		fprintf(generalFile, "%15.10g\n", simulation->plasma_period);
+		fprintf(generalFile, "%15.10g\n", simulation->scaleFactor);
+
+		fprintf(generalFile, "%15.10g\n", simulation->time);
+		fprintf(generalFile, "%15.10g\n", simulation->maxTime);
+
+		fprintf(generalFile, "%d\n", simulation->currentIteration);
+		fprintf(generalFile, "%d\n", simulation->maxIteration);
+
+		fprintf(generalFile, "%15.10g\n", simulation->xsizeGeneral);
+		fprintf(generalFile, "%15.10g\n", simulation->ysizeGeneral);
+		fprintf(generalFile, "%15.10g\n", simulation->zsizeGeneral);
+		fprintf(generalFile, "%15.10g\n", simulation->theta);
+		fprintf(generalFile, "%15.10g\n", simulation->eta);
+
+		int debugMode = 0;
+		if (simulation->debugMode) {
+			debugMode = 1;
+		} else {
+			debugMode = 0;
+		}
+
+		fprintf(generalFile, "%d\n", debugMode);
+
+		/*int preserveChargeLocal = 0;
+		if (simulation->preserveChargeLocal) {
+			preserveChargeLocal = 1;
+		} else {
+			preserveChargeLocal = 0;
+		}
+
+		fprintf(generalFile, "%d\n", preserveChargeLocal);
+
+		int preserveChargeGlobal = 0;
+		if (simulation->preserveChargeGlobal) {
+			preserveChargeGlobal = 1;
+		} else {
+			preserveChargeGlobal = 0;
+		}
+
+		fprintf(generalFile, "%d\n", preserveChargeGlobal);*/
+
+		int solverType = 0;
+		if (simulation->solverType == IMPLICIT) {
+			solverType = 1;
+		} else {
+			solverType = 0;
+		}
+
+		fprintf(generalFile, "%d\n", solverType);
+
+		int boundaryConditionType = 0;
+		if (simulation->boundaryConditionType == PERIODIC) {
+			boundaryConditionType = 1;
+		} else {
+			boundaryConditionType = 0;
+		}
+
+		fprintf(generalFile, "%d\n", boundaryConditionType);
+
+		fprintf(generalFile, "%d\n", simulation->maxwellEquationMatrixSize);
+
+		fprintf(generalFile, "%15.10g\n", simulation->extJ);
+
+		fprintf(generalFile, "%15.10g\n", simulation->V0.x);
+		fprintf(generalFile, "%15.10g\n", simulation->V0.y);
+		fprintf(generalFile, "%15.10g\n", simulation->V0.z);
+		fprintf(generalFile, "%15.10g\n", simulation->E0.x);
+		fprintf(generalFile, "%15.10g\n", simulation->E0.y);
+		fprintf(generalFile, "%15.10g\n", simulation->E0.z);
+		fprintf(generalFile, "%15.10g\n", simulation->B0.x);
+		fprintf(generalFile, "%15.10g\n", simulation->B0.y);
+		fprintf(generalFile, "%15.10g\n", simulation->B0.z);
+
+		fclose(generalFile);
+	}
+
+	outputFields(EfileName, BfileName, simulation->Efield, simulation->Bfield, simulation->xnumber, simulation->ynumber,
+	             simulation->znumber, 1.0, 1.0);
+	outputBackupParticles(particlesFileName, simulation);
+}
+
+void outputBackupParticles(const char* outFileName, Simulation* simulation) {
+
+			FILE* outFile= fopen(outFileName, "w");
+			
+			for (int i = 0; i < simulation->particles.size(); ++i) {
+				Particle* particle = simulation->particles[i];
+				outputBackupParticle(outFile, particle);
+			}
+			fclose(outFile);
 }
 
 void outputBackupParticle(FILE* outFile, Particle* particle) {
@@ -447,24 +714,136 @@ void outputBackupParticle(FILE* outFile, Particle* particle) {
 	fprintf(outFile, "%15.10g ", particle->mass);
 	fprintf(outFile, "%15.10g ", particle->charge);
 	fprintf(outFile, "%15.10g ", particle->weight);
-	int type = 0;
+	int type;
 	if (particle->type == ELECTRON) {
-		type = 1;
+		type = 0;
 	} else if (particle->type == PROTON) {
-		type = 2;
+		type = 1;
 	} else if (particle->type == POSITRON) {
-		type = 3;
+		type = 2;
 	} else if (particle->type == ALPHA) {
-		type = 4;
+		type = 3;
 	}
 	fprintf(outFile, "%d ", type);
 	fprintf(outFile, "%15.10g ", particle->coordinates.x);
 	fprintf(outFile, "%15.10g ", particle->coordinates.y);
 	fprintf(outFile, "%15.10g ", particle->coordinates.z);
-
-	fprintf(outFile, "%15.10g ", particle->momentum.x);
-	fprintf(outFile, "%15.10g ", particle->momentum.y);
-	fprintf(outFile, "%15.10g ", particle->momentum.z);
+	Vector3d momentum = particle->getMomentum();
+	fprintf(outFile, "%15.10g ", momentum.x);
+	fprintf(outFile, "%15.10g ", momentum.y);
+	fprintf(outFile, "%15.10g ", momentum.z);
 
 	fprintf(outFile, "%15.10g\n", particle->dx);
+}
+
+void outputGeneralInitialParameters(const char* outFileName, const char* outFileNameWithText, Simulation* simulation) {
+	if (simulation->rank == 0) {
+		FILE* outFile = fopen(outFileName, "w");
+		FILE* outFileWithText = fopen(outFileNameWithText, "w");
+		fprintf(outFileWithText, "1 X size general = %g\n", simulation->xsizeGeneral * simulation->scaleFactor);
+		fprintf(outFileWithText, "2 Y size general = %g\n", simulation->ysizeGeneral * simulation->scaleFactor);
+		fprintf(outFileWithText, "3 Z size general = %g\n", simulation->zsizeGeneral * simulation->scaleFactor);
+		fprintf(outFile, "%g\n", simulation->xsizeGeneral * simulation->scaleFactor);
+		fprintf(outFile, "%g\n", simulation->ysizeGeneral * simulation->scaleFactor);
+		fprintf(outFile, "%g\n", simulation->zsizeGeneral * simulation->scaleFactor);
+
+		fprintf(outFileWithText, "4 X number general = %d\n", simulation->xnumberGeneral);
+		fprintf(outFileWithText, "5 Y number general = %d\n", simulation->ynumberGeneral);
+		fprintf(outFileWithText, "6 Z number general = %d\n", simulation->znumberGeneral);
+		fprintf(outFile, "%d\n", simulation->xnumberGeneral);
+		fprintf(outFile, "%d\n", simulation->ynumberGeneral);
+		fprintf(outFile, "%d\n", simulation->znumberGeneral);
+
+		fprintf(outFileWithText, "7 dx = %g\n", simulation->deltaX * simulation->scaleFactor);
+		fprintf(outFileWithText, "8 dy = %g\n", simulation->deltaY * simulation->scaleFactor);
+		fprintf(outFileWithText, "9 dz = %g\n", simulation->deltaZ * simulation->scaleFactor);
+		fprintf(outFile, "%g\n", simulation->deltaX * simulation->scaleFactor);
+		fprintf(outFile, "%g\n", simulation->deltaY * simulation->scaleFactor);
+		fprintf(outFile, "%g\n", simulation->deltaZ * simulation->scaleFactor);
+
+		fprintf(outFileWithText, "10 c = %g\n", speed_of_light);
+		fprintf(outFile, "%g\n", speed_of_light);
+
+		fprintf(outFileWithText, "11 Vx = %g\n", simulation->V0.x * simulation->scaleFactor / simulation->plasma_period);
+		fprintf(outFileWithText, "12 Vy = %g\n", simulation->V0.y * simulation->scaleFactor / simulation->plasma_period);
+		fprintf(outFileWithText, "13 Vz = %g\n", simulation->V0.z * simulation->scaleFactor / simulation->plasma_period);
+		fprintf(outFile, "%g\n", simulation->V0.x * simulation->scaleFactor / simulation->plasma_period);
+		fprintf(outFile, "%g\n", simulation->V0.y * simulation->scaleFactor / simulation->plasma_period);
+		fprintf(outFile, "%g\n", simulation->V0.z * simulation->scaleFactor / simulation->plasma_period);
+
+		double fieldScale = 1.0 / (simulation->plasma_period * sqrt(simulation->scaleFactor));
+		fprintf(outFileWithText, "14 Ex = %g\n", simulation->E0.x * fieldScale);
+		fprintf(outFileWithText, "15 Ey = %g\n", simulation->E0.y * fieldScale);
+		fprintf(outFileWithText, "16 Ez = %g\n", simulation->E0.z * fieldScale);
+		fprintf(outFile, "%g\n", simulation->E0.x * fieldScale);
+		fprintf(outFile, "%g\n", simulation->E0.y * fieldScale);
+		fprintf(outFile, "%g\n", simulation->E0.z * fieldScale);
+
+		fprintf(outFileWithText, "17 Bx = %g\n", simulation->B0.x * fieldScale);
+		fprintf(outFileWithText, "18 By = %g\n", simulation->B0.y * fieldScale);
+		fprintf(outFileWithText, "19 Bz = %g\n", simulation->B0.z * fieldScale);
+		fprintf(outFile, "%g\n", simulation->B0.x * fieldScale);
+		fprintf(outFile, "%g\n", simulation->B0.y * fieldScale);
+		fprintf(outFile, "%g\n", simulation->B0.z * fieldScale);
+
+		double omegaPlasmaElectron = sqrt(4 * pi * simulation->electron_charge_normalized * simulation->electron_charge_normalized * simulation->types[0].concentration / simulation->types[0].mass) / simulation->plasma_period;
+		fprintf(outFileWithText, "20 plasma electron frequency = %g\n", omegaPlasmaElectron);
+		fprintf(outFile, "%g\n", omegaPlasmaElectron);
+		double omega2 = 0;
+		for (int i = 0; i < simulation->typesNumber; ++i) {
+			omega2 += 4 * pi * simulation->types[i].charge * simulation->types[i].charge * simulation->types[i].concentration / simulation->types[i].mass;
+		}
+		double omegaPlasma = sqrt(omega2) / simulation->plasma_period;
+		fprintf(outFileWithText, "21 plasma frequency = %g\n", omegaPlasma);
+		fprintf(outFile, "%g\n", omegaPlasma);
+
+		double d2 = 0;
+		for (int i = 0; i < simulation->typesNumber; ++i) {
+			d2 += 4 * pi * simulation->types[i].charge * simulation->types[i].charge * simulation->types[i].concentration / (simulation->kBoltzman_normalized * simulation->types[i].temperatureX);
+		}
+		double debyeLength = simulation->scaleFactor / sqrt(d2);
+		fprintf(outFileWithText, "22 debye length = %g\n", debyeLength);
+		fprintf(outFile, "%g\n", debyeLength);
+
+		Vector3d V = simulation->V0 * (simulation->scaleFactor / simulation->plasma_period);
+		Vector3d B = simulation->B0;
+		double gamma = 1 / sqrt(1 - V.scalarMult(V) / (speed_of_light * speed_of_light));
+
+		//todo relativistic temperature
+		double omegaGyroElectron = (simulation->types[0].charge * simulation->B0.norm() / (simulation->types[0].mass * simulation->speed_of_light_normalized)) / simulation->plasma_period;
+		double omegaGyroProton = (simulation->types[1].charge * simulation->B0.norm() / (simulation->types[1].mass * simulation->speed_of_light_normalized)) / simulation->plasma_period;
+		//double gyroRadiusElectron = ((simulation->types[0].mass*simulation->V0.norm()*gamma + sqrt(simulation->types[0].mass*simulation->types[0].temperatureX*simulation->kBoltzman_normalized))*simulation->speed_of_light_normalized/(simulation->types[0].charge*simulation->B0.norm()))*simulation->scaleFactor;
+		//double gyroRadiusProton = ((simulation->types[1].mass*simulation->V0.norm()*gamma + sqrt(simulation->types[1].mass*simulation->types[1].temperatureX*simulation->kBoltzman_normalized))*simulation->speed_of_light_normalized/(simulation->types[1].charge*simulation->B0.norm()))*simulation->scaleFactor;
+		double gyroRadiusElectron = ((simulation->types[0].mass * simulation->V0.norm() * gamma) * simulation->speed_of_light_normalized / (simulation->types[0].charge * simulation->B0.norm())) * simulation->scaleFactor;
+		double gyroRadiusProton = ((simulation->types[1].mass * simulation->V0.norm() * gamma) * simulation->speed_of_light_normalized / (simulation->types[1].charge * simulation->B0.norm())) * simulation->scaleFactor;
+
+		fprintf(outFileWithText, "23 electron gyro frequency = %g\n", omegaGyroElectron);
+		fprintf(outFileWithText, "24 proton gyro frequency = %g\n", omegaGyroProton);
+		fprintf(outFileWithText, "25 electron gyro radius = %g\n", gyroRadiusElectron);
+		fprintf(outFileWithText, "26 proton gyro radius = %g\n", gyroRadiusProton);
+		fprintf(outFile, "%g\n", omegaGyroElectron);
+		fprintf(outFile, "%g\n", omegaGyroProton);
+		fprintf(outFile, "%g\n", gyroRadiusElectron);
+		fprintf(outFile, "%g\n", gyroRadiusProton);
+
+		double electronSkinDepth = speed_of_light / omegaPlasmaElectron;
+		fprintf(outFileWithText, "27 electron skin depth = %g\n", electronSkinDepth);
+		fprintf(outFile, "%g\n", electronSkinDepth);
+
+		double density = 0;
+
+		for (int i = 0; i < simulation->typesNumber; ++i) {
+			density += simulation->types[i].concentration * simulation->types[i].mass;
+		}
+
+		double alfvenV = simulation->B0.norm() / sqrt(4 * pi * density);
+
+		double alfvenMach = simulation->V0.norm() / alfvenV;
+
+		fprintf(outFileWithText, "28 alfven Mach = %g\n", alfvenMach);
+		fprintf(outFile, "%g\n", alfvenMach);
+
+		fclose(outFile);
+		fclose(outFileWithText);
+	}
 }

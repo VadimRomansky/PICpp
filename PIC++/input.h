@@ -2,11 +2,11 @@
 #define _INPUT_H_
 
 #include "stdio.h"
-#include "simulation.h"
+class Simulation;
 
 Simulation readInput(FILE* input_file);
-Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile);
-void readFields(FILE* Efile, FILE* Bfile, Simulation& simulation);
-void readParticles(FILE* particlesFile, Simulation& simulation);
+Simulation readBackup(const char* generalFileName, const char* EfileName, const char* BfileName, const char* particlesFileName);
+void readFields(const char* Efile, const char* Bfile, Simulation& simulation);
+void readParticles(const char* particlesFile, Simulation& simulation);
 
 #endif 

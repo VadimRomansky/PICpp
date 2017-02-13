@@ -66,6 +66,12 @@
     <ClCompile Include="complex.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="dichotomousSolver.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="correlationMap.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h">
@@ -102,6 +108,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="complex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mpi_util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="memory_debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dichotomousSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

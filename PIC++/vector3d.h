@@ -3,8 +3,6 @@
 
 #include "stdio.h"
 
-#include "matrix3d.h"
-
 class Matrix3d;
 
 class Vector3d{
@@ -19,18 +17,19 @@ public:
 
 	Vector3d& operator=(const Vector3d& vector);
 
-	double norm();
-	Vector3d operator-(const Vector3d& vector);
-	Vector3d operator+(const Vector3d& vector);
+	double norm() const;
+	Vector3d operator-(const Vector3d& vector) const;
+	Vector3d operator+(const Vector3d& vector) const;
 	Vector3d& operator+=(const Vector3d& vector);
 	Vector3d& operator-=(const Vector3d& vector);
-	Vector3d operator*(const double& value);
-	Vector3d operator/(const double& value);
-	double scalarMult(const Vector3d& vector);
-	Vector3d vectorMult(const Vector3d& vector);
-	Matrix3d tensorMult(const Vector3d& vector);
+	Vector3d operator*(const double& value) const;
+	Vector3d operator/(const double& value) const;
+	double scalarMult(const Vector3d& vector) const;
+	Vector3d vectorMult(const Vector3d& vector) const;
+	Matrix3d tensorMult(const Vector3d& vector) const;
 
 	double& operator[](int i);
 };
+
 
 #endif

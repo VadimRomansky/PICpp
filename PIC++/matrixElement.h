@@ -1,8 +1,9 @@
 #ifndef _MATRIX_ELEMENT_H_
 #define _MATRIX_ELEMENT_H_
 
-struct MatrixElement
+class MatrixElement
 {
+public:
 	double value;
 	int i;
 	int j;

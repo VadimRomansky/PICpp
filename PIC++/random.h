@@ -9,5 +9,8 @@ double solveInverceJuttnerFunction(double x, double theta, double besselK);
 double solveInverceJuttnerFunction(double x, double theta, double besselK, double left, double right);
 double maxwellJuttnerFunction(double gamma, double theta, double besselK);
 double maxwellJuttnerIntegral(double gamma, double theta, double besselK);
+void anisotropicMaxwellJuttnerDistribution(double &momentumNormal, double &momentumParallel, double alphaNormal,
+                                           double alphaParallel, double m_c);
+double anisotropicMaxwellJuttnerFunction(double p1, double p2, double alpha1, double alpha2);
 
 #endif

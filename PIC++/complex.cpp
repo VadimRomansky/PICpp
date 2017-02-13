@@ -1,6 +1,9 @@
 #include "math.h"
 #include "stdlib.h"
 #include "stdio.h"
+//#include <crtdbg.h>
+
+//#include "memory_debug.h"
 
 #include "complex.h"
 

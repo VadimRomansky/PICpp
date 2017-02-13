@@ -4,24 +4,41 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "vector"
-#include "matrix3d.h"
-#include "matrixElement.h"
 
-void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outvector, int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration);
-double***** arnoldiIterations(std::vector<MatrixElement>**** matrix,double** outHessenbergMatrix, int n, double***** prevBasis, double** prevHessenbergMatrix, int xnumber, int ynumber, int znumber, int lnumber);
-double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber);
-double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber);
-void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber);
-void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber);
+class MatrixElement;
+class Vector3d;
+class Complex;
+
+void generalizedMinimalResidualMethod(std::vector<MatrixElement> ****matrix, double ****rightPart, double ****outvector,
+                                      int xnumber, int ynumber, int znumber, int lnumber, int xnumberGeneral,
+                                      int znumberGeneral, int ynumberGeneral, double precision, int maxIteration,
+                                      bool periodic, int verbocity);
+double *****arnoldiIterations(std::vector<MatrixElement> ****matrix, double **outHessenbergMatrix, int n,
+                              double *****prevBasis, double **prevHessenbergMatrix, int xnumber, int ynumber,
+                              int znumber, int lnumber, bool periodic, int rank, int nprocs);
+double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic, int rank, int nprocs);
+double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic, int rank, int nprocs);
+void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic, int rank, int nprocs);
+void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic, int rank, int nprocs);
 double evaluateError(double**** hessenbergMatrix, double*** vector, double beta, int n);
-double scalarMultiplyLargeVectors(double**** a, double**** b, int xnumber, int ynumber, int znumber, int lnumber);
-double scalarMultiplyLargeVectors(Vector3d*** a, Vector3d*** b, int xnumber, int ynumber, int znumber, int lnumber);
+double scalarMultiplyLargeVectors(double ****a, double ****b, int xnumber, int ynumber, int znumber, int lnumber,
+                                  bool periodic, int rank, int nprocs);
+double scalarMultiplyLargeVectors(Vector3d ***a, Vector3d ***b, int xnumber, int ynumber, int znumber, int lnumber,
+                                  bool periodic, int rank, int nprocs);
 
-void conjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration);
+void conjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration, bool periodic, int verbosity);
 
-void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration);
-void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration);
+void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration, bool periodic, int verbosity);
+void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration, bool periodic, int verbosity);
 void transposeSpecialMatrix(std::vector<MatrixElement>**** result, std::vector<MatrixElement>**** matrix, int xnumber, int ynumber, int znumber, int lnumber);
+
+void gaussSeidelMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumber, int ynumber, int znumber, int lnumber, int xnumberGeneral,
+                       int znumberGeneral, int ynumberGeneral, double precision, int maxIteration,
+                       bool periodic, int verbocity);
+
+bool indexLower(const MatrixElement& element, int i, int j, int k, int l);
+bool indexEqual(const MatrixElement& element, int i, int j, int k, int l);
+bool indexUpper(const MatrixElement& element, int i, int j, int k, int l);
 
 double solve4orderEquation(double a4, double a3, double a2, double a1, double a0, double startX);
 double polynom4Value(double a4, double a3, double a2, double a1, double a0, double x);

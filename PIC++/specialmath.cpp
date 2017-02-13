@@ -1,12 +1,17 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
-#include <omp.h>
+//#include <crtdbg.h>
 
+//#include "memory_debug.h"
+#include "complex.h"
+#include "particle.h"
 #include "simulation.h"
 #include "util.h"
 #include "constants.h"
+#include "matrixElement.h"
+#include "random.h"
 #include "specialmath.h"
+#include "mpi_util.h"
 
 double evaluateError(double** hessenbergMatrix, double* vector, double beta, int n) {
 	double* resVector = new double[n + 1];
@@ -31,11 +36,12 @@ double evaluateError(double** hessenbergMatrix, double* vector, double beta, int
 	return sqrt(norm);
 }
 
-double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber) {
-	double**** result = new double***[xnumber];
+double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic, int rank, int nprocs) {
+	double**** result = new double***[xnumber+1];
 	int i = 0;
-#pragma omp parallel for shared(result, matrix, vector, xnumber, lnumber) private(i)
-	for (i = 0; i < xnumber; ++i) {
+
+	for (i = 0; i < xnumber+1; ++i) {
+	//for (i = 1; i < xnumber; ++i) {
 		result[i] = new double**[ynumber];
 		for (int j = 0; j < ynumber; ++j) {
 			result[i][j] = new double*[znumber];
@@ -43,10 +49,12 @@ double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Ve
 				result[i][j][k] = new double[lnumber];
 				for (int l = 0; l < lnumber; ++l) {
 					result[i][j][k][l] = 0;
-					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
-						MatrixElement element = matrix[i][j][k][l][m];
+					if((i != 0 && i != xnumber) || ((i == 0) && (rank == 0) &&(!periodic)) || ((i == xnumber) && (rank == nprocs - 1)&&(!periodic))) {
+						for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+							MatrixElement element = matrix[i][j][k][l][m];
 
-						result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
+							result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
+						}
 					}
 				}
 			}
@@ -56,11 +64,11 @@ double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Ve
 	return result;
 }
 
-double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber) {
-	double**** result = new double***[xnumber];
-	int i = 0;
-#pragma omp parallel for shared(result, matrix, vector, xnumber, lnumber) private(i)
-	for (i = 0; i < xnumber; ++i) {
+double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic, int rank, int nprocs) {
+	double**** result = new double***[xnumber+1];
+	//printf("multiply\n");
+	//for (int i = 1; i < xnumber; ++i) {
+	for (int i = 0; i < xnumber+1; ++i) {
 		result[i] = new double**[ynumber];
 		for (int j = 0; j < ynumber; ++j) {
 			result[i][j] = new double*[znumber];
@@ -68,10 +76,12 @@ double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, do
 				result[i][j][k] = new double[lnumber];
 				for (int l = 0; l < lnumber; ++l) {
 					result[i][j][k][l] = 0;
-					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
-						MatrixElement element = matrix[i][j][k][l][m];
+					if((i != 0 && i != xnumber) || ((i == 0) && (rank == 0) &&(!periodic)) || ((i == xnumber) && (rank == nprocs - 1)&&(!periodic))) {
+						for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+							MatrixElement element = matrix[i][j][k][l][m];
 
-						result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
+							result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
+						}
 					}
 				}
 			}
@@ -81,18 +91,20 @@ double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, do
 	return result;
 }
 
-void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber) {
-	int i = 0;
-#pragma omp parallel for shared(result, matrix, vector, xnumber, lnumber) private(i)
-	for (i = 0; i < xnumber; ++i) {
+void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic, int rank, int nprocs) {
+
+	//for (int i = 1; i < xnumber; ++i) {
+	for (int i = 0; i < xnumber+1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
 					result[i][j][k][l] = 0;
-					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
-						MatrixElement element = matrix[i][j][k][l][m];
+					if((i != 0 && i != xnumber) || ((i == 0) && (rank == 0) &&(!periodic)) || ((i == xnumber) && (rank == nprocs - 1)&&(!periodic))) {
+						for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+							MatrixElement element = matrix[i][j][k][l][m];
 
-						result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
+							result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
+						}
 					}
 				}
 			}
@@ -100,18 +112,21 @@ void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**
 	}
 }
 
-void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber) {
-	int i = 0;
-#pragma omp parallel for shared(result, matrix, vector, xnumber, lnumber) private(i)
-	for (i = 0; i < xnumber; ++i) {
+void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic, int rank, int nprocs) {
+
+
+	for (int i = 0; i < xnumber+1; ++i) {
+	//for (int i = 1; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) { ;
 			for (int k = 0; k < znumber; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
 					result[i][j][k][l] = 0;
-					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
-						MatrixElement element = matrix[i][j][k][l][m];
+					if((i != 0 && i != xnumber) || ((i == 0) && (rank == 0) &&(!periodic)) || ((i == xnumber) && (rank == nprocs - 1)&&(!periodic))) {
+						for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+							MatrixElement element = matrix[i][j][k][l][m];
 
-						result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
+							result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
+						}
 					}
 				}
 			}
@@ -119,7 +134,11 @@ void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**
 	}
 }
 
-double***** arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessenbergMatrix, int n, double***** prevBasis, double** prevHessenbergMatrix, int xnumber, int ynumber, int znumber, int lnumber) {
+double *****arnoldiIterations(std::vector<MatrixElement> ****matrix, double **outHessenbergMatrix, int n,
+                              double *****prevBasis, double **prevHessenbergMatrix, int xnumber, int ynumber,
+                              int znumber, int lnumber, bool periodic, int rank, int nprocs) {
+
+	MPI_Barrier(MPI_COMM_WORLD);
 	double***** resultBasis = new double****[n];
 	for (int m = 0; m < n - 1; ++m) {
 		resultBasis[m] = prevBasis[m];
@@ -139,26 +158,74 @@ double***** arnoldiIterations(std::vector<MatrixElement>**** matrix, double** ou
 		}
 	}
 	delete[] prevHessenbergMatrix;
+	//printf("update hessenberg\n");
+	double**** tempVector = multiplySpecialMatrixVector(matrix, resultBasis[n - 2], xnumber, ynumber, znumber, lnumber, periodic, rank, nprocs);
+	//printf("mult special matrix");
+	double* bufferRightSend = new double[ynumber*znumber*lnumber];
+	double* bufferRightRecv = new double[ynumber*znumber*lnumber];
+	double* bufferLeftSend = new double[ynumber*znumber*lnumber];
+	double* bufferLeftRecv = new double[ynumber*znumber*lnumber];
 
-	double**** tempVector = multiplySpecialMatrixVector(matrix, resultBasis[n - 2], xnumber, ynumber, znumber, lnumber);
-	/*for(int i = 0; i < xnumber; ++i) {
-		for(int j = 0; j < ynumber; ++j) {
-			for(int k = 0; k < znumber; ++k) {
-				for(int l = 0; l < lnumber; ++l){
-					printf("%g\n", tempVector[i][j][k][l]);
-				}
-			}
-		}
+	//printf("start exchange\n");
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	if( (periodic) || (rank > 0)) sendGMRESTempVectorToLeft(tempVector, bufferLeftSend, xnumber, ynumber, znumber, lnumber);
+	if( (periodic) || (rank < nprocs-1)) sendGMRESTempVectorToRight(tempVector, bufferRightSend, xnumber, ynumber, znumber, lnumber);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	//printf("finish sending\n");
+
+	if( (periodic) || (rank < nprocs-1)) receiveGMRESTempVectorFromRight(tempVector, bufferRightRecv, xnumber, ynumber, znumber, lnumber);
+	if( (periodic) || (rank > 0)) receiveGMRESTempVectorFromLeft(tempVector, bufferLeftRecv, xnumber, ynumber, znumber, lnumber);
+
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	/*if(rank == 0){
+		printf("tempVector = %15.10g\n", tempVector[0][0][0][1]);
+		printf("tempVector = %15.10g\n", tempVector[1][0][0][1]);
+		printf("tempVector left = %15.10g\n", tempVector[xnumber - 1][0][0][1]);
+		printf("tempVector left = %15.10g\n", tempVector[xnumber][0][0][1]);
+	} else {
+
 	}*/
+	//printf("finish exchange\n");
+
+	delete[] bufferRightSend;
+	delete[] bufferRightRecv;
+	delete[] bufferLeftSend;
+	delete[] bufferLeftRecv;
 
 
 	for (int m = 0; m < n - 1; ++m) {
-		double a = scalarMultiplyLargeVectors(resultBasis[m], tempVector, xnumber, ynumber, znumber, lnumber);
-		outHessenbergMatrix[m][n - 2] = scalarMultiplyLargeVectors(resultBasis[m], tempVector, xnumber, ynumber, znumber, lnumber);
+		//double a = scalarMultiplyLargeVectors(resultBasis[m], tempVector, xnumber, ynumber, znumber, lnumber);
+		outHessenbergMatrix[m][n - 2] = scalarMultiplyLargeVectors(resultBasis[m], tempVector, xnumber, ynumber,
+		                                                           znumber, lnumber, periodic, rank, nprocs);
 		//printf("outHessenbergMatrix[%d][%d] = %g\n", m, n-2, outHessenbergMatrix[m][n - 2]);
-		int i = 0;
-#pragma omp parallel for shared(tempVector, outHessenbergMatrix, resultBasis, lnumber, ynumber, znumber, m, n) private(i)
-		for (i = 0; i < xnumber; ++i) {
+
+		//for (int i = 0; i < xnumber+1; ++i) {
+		if(rank == 0 && !periodic){
+			for (int j = 0; j < ynumber; ++j) {
+				for (int k = 0; k < znumber; ++k) {
+					for (int l = 0; l < lnumber; ++l) {
+						tempVector[0][j][k][l] -= outHessenbergMatrix[m][n - 2] * resultBasis[m][0][j][k][l];
+						alertNaNOrInfinity(tempVector[0][j][k][l], "tempVector = NaN\n");
+						//printf("tempvector[%d][%d][%d][%d] = %g\n", i, j, k, l, tempVector[i][j][k][l]);
+					}
+				}
+			}
+		} else {
+			for (int j = 0; j < ynumber; ++j) {
+				for (int k = 0; k < znumber; ++k) {
+					for (int l = 0; l < lnumber; ++l) {
+						tempVector[0][j][k][l] = 0;
+					}
+				}
+			}
+		}
+		for (int i = 1; i < xnumber; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
 					for (int l = 0; l < lnumber; ++l) {
@@ -169,11 +236,44 @@ double***** arnoldiIterations(std::vector<MatrixElement>**** matrix, double** ou
 				}
 			}
 		}
+		if(rank == nprocs - 1 && !periodic){
+			for (int j = 0; j < ynumber; ++j) {
+				for (int k = 0; k < znumber; ++k) {
+					for (int l = 0; l < lnumber; ++l) {
+						tempVector[xnumber][j][k][l] -= outHessenbergMatrix[m][n - 2] * resultBasis[m][xnumber][j][k][l];
+						alertNaNOrInfinity(tempVector[xnumber][j][k][l], "tempVector = NaN\n");
+						//printf("tempvector[%d][%d][%d][%d] = %g\n", i, j, k, l, tempVector[i][j][k][l]);
+					}
+				}
+			}
+		} else {
+			for (int j = 0; j < ynumber; ++j) {
+				for (int k = 0; k < znumber; ++k) {
+					for (int l = 0; l < lnumber; ++l) {
+						tempVector[xnumber][j][k][l] = 0;
+					}
+				}
+			}
+		}
 	}
-	outHessenbergMatrix[n - 1][n - 2] = sqrt(scalarMultiplyLargeVectors(tempVector, tempVector, xnumber, ynumber, znumber, lnumber));
+	//printf("finish orthogonalisation\n");
+	outHessenbergMatrix[n - 1][n - 2] = sqrt(
+		scalarMultiplyLargeVectors(tempVector, tempVector, xnumber, ynumber, znumber, lnumber, periodic, rank, nprocs));
 	//printf("outHessenbergMatrix[%d][%d] = %g\n", n-1, n-2, outHessenbergMatrix[n - 1][n - 2]);
 	if (outHessenbergMatrix[n - 1][n - 2] > 0) {
-		for (int i = 0; i < xnumber; ++i) {
+        if(rank == 0 && !periodic){
+            for (int j = 0; j < ynumber; ++j) {
+                for (int k = 0; k < znumber; ++k) {
+                    for (int l = 0; l < lnumber; ++l) {
+                        tempVector[0][j][k][l] /= outHessenbergMatrix[n - 1][n - 2];
+                        alertNaNOrInfinity(tempVector[0][j][k][l], "tempVector = NaN\n");
+                        //printf("tempvector[%d][%d][%d][%d] = %g\n", i, j, k, l, tempVector[0][j][k][l]);
+                    }
+                }
+            }
+        }
+		//for (int i = 0; i < xnumber+1; ++i) {
+		for (int i = 1; i < xnumber; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
 					for (int l = 0; l < lnumber; ++l) {
@@ -184,22 +284,61 @@ double***** arnoldiIterations(std::vector<MatrixElement>**** matrix, double** ou
 				}
 			}
 		}
+        if(rank == nprocs-1 && !periodic){
+            for (int j = 0; j < ynumber; ++j) {
+                for (int k = 0; k < znumber; ++k) {
+                    for (int l = 0; l < lnumber; ++l) {
+                        tempVector[xnumber][j][k][l] /= outHessenbergMatrix[n - 1][n - 2];
+                        alertNaNOrInfinity(tempVector[xnumber][j][k][l], "tempVector = NaN\n");
+                        //printf("tempvector[%d][%d][%d][%d] = %g\n", i, j, k, l, tempVector[0][j][k][l]);
+                    }
+                }
+            }
+        }
 	} else {
 		printf("outHessenbergMatrix[n-1][n-2] == 0\n");
 	}
+	//printf("finish normalization\n");
 
 	resultBasis[n - 1] = tempVector;
+	//printf("arnolsi end\n");
 
 	return resultBasis;
 }
 
-void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outvector, int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration) {
-	printf("start GMRES\n");
-	double norm = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber));
+void generalizedMinimalResidualMethod(std::vector<MatrixElement> ****matrix, double ****rightPart, double ****outvector,
+                                      int xnumber, int ynumber, int znumber, int lnumber, int xnumberGeneral,
+                                      int znumberGeneral, int ynumberGeneral, double precision, int maxIteration,
+                                      bool periodic, int verbocity) {
+	int rank;
+	int nprocs;
+	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	if((rank == 0) && (verbocity > 0)) printf("start GMRES\n");
+
+	double* bufferRightSend = new double[ynumber*znumber*lnumber];
+	double* bufferRightRecv = new double[ynumber*znumber*lnumber];
+	double* bufferLeftSend = new double[ynumber*znumber*lnumber];
+	double* bufferLeftRecv = new double[ynumber*znumber*lnumber];
+
+	if( (periodic) || (rank > 0)) sendGMRESTempVectorToLeft(rightPart, bufferLeftSend, xnumber, ynumber, znumber, lnumber);
+	if( (periodic) || (rank < nprocs-1)) sendGMRESTempVectorToRight(rightPart, bufferRightSend, xnumber, ynumber, znumber, lnumber);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	//printf("finish sending\n");
+
+	if( (periodic) || (rank > 0)) receiveGMRESTempVectorFromLeft(rightPart, bufferLeftRecv, xnumber, ynumber, znumber, lnumber);
+	if( (periodic) || (rank < nprocs-1)) receiveGMRESTempVectorFromRight(rightPart, bufferRightRecv, xnumber, ynumber, znumber, lnumber);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	double norm = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber, periodic, rank, nprocs));
 	//printf("norm = %g\n", norm);
 
 	if (norm == 0) {
-		for (int i = 0; i < xnumber; ++i) {
+		for (int i = 0; i < xnumber + 1; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
 					for (int l = 0; l < lnumber; ++l) {
@@ -212,27 +351,25 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 	}
 
 	//#pragma omp parallel for
-	for (int i = 0; i < xnumber; ++i) {
+	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
 					rightPart[i][j][k][l] /= norm;
-					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
-						double value = matrix[i][j][k][l][m].value;
-						//matrix[i][l][m].value /= norm;
-						value = matrix[i][j][k][l][m].value;
-					}
 				}
 			}
 		}
 	}
 
-	int matrixDimension = lnumber * xnumber * ynumber * znumber;
+
+
+	int matrixDimension = lnumber * xnumberGeneral * ynumberGeneral * znumberGeneral;
 
 	double** hessenbergMatrix;
 	double** newHessenbergMatrix;
 	hessenbergMatrix = new double*[1];
 	hessenbergMatrix[0] = new double[1];
+    hessenbergMatrix[0][0] = 0;
 
 	double** Qmatrix = new double*[2];
 	double** Rmatrix = new double*[2];
@@ -247,11 +384,13 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 	Rmatrix[0] = new double[1];
 	Rmatrix[1] = new double[1];
 	oldRmatrix[0] = new double[1];
+	//oldQmatrix[0] = new double[1];
 	oldRmatrix[1] = new double[1];
 
 	double***** basis = new double****[1];
-	basis[0] = new double***[xnumber];
-	for (int i = 0; i < xnumber; ++i) {
+	basis[0] = new double***[xnumber+1];
+	for (int i = 0; i < xnumber+1; ++i) {
+	//for (int i = 1; i < xnumber; ++i) {
 		basis[0][i] = new double**[ynumber];
 		for (int j = 0; j < ynumber; ++j) {
 			basis[0][i][j] = new double*[znumber];
@@ -281,12 +420,13 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 	double maxRelativeError = precision / (matrixDimension);
 
 	while (((relativeError > maxRelativeError && n < min2(maxIteration, matrixDimension + 3)) || (n <= 4))) {
-		printf("GMRES iteration %d\n", n);
+		if((rank == 0) && (verbocity > 1)) printf("GMRES iteration %d\n", n);
 		newHessenbergMatrix = new double*[n];
 		for (int i = 0; i < n; ++i) {
 			newHessenbergMatrix[i] = new double[n - 1];
 		}
-		newBasis = arnoldiIterations(matrix, newHessenbergMatrix, n, basis, hessenbergMatrix, xnumber, ynumber, znumber, lnumber);
+		newBasis = arnoldiIterations(matrix, newHessenbergMatrix, n, basis, hessenbergMatrix, xnumber, ynumber, znumber,
+		                             lnumber, periodic, rank, nprocs);
 
 		hessenbergMatrix = newHessenbergMatrix;
 		basis = newBasis;
@@ -393,7 +533,25 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 		}
 
 		error = fabs(beta * Qmatrix[n - 1][0]);
-		for (int i = 0; i < xnumber; ++i) {
+		//for (int i = 0; i < xnumber+1; ++i) {
+        /*for (int j = 0; j < ynumber; ++j) {
+            for (int k = 0; k < znumber; ++k) {
+                for (int l = 0; l < lnumber; ++l) {
+                    outvector[0][j][k][l] = 0;
+                    if(rank == 0 && !periodic){
+						for (int m = 0; m < n - 1; ++m) {
+							outvector[0][j][k][l] += basis[m][0][j][k][l] * y[m] * norm;
+							//printf("outvector[%d][%d][%d][%d] %d = %g\n", i, j, k, l, m, outvector[i][j][k][l]);
+							//printf("norm = %g\n", norm);
+							//printf("y[%d] = %g\n", m, y[m]);
+							//outvector[i][l] += basis[m][i][l] * y[m];
+						}
+						//printf("outvector[%d][%d][%d][%d] = %g\n", i, j, k, l, outvector[i][j][k][l]);
+					}
+				}
+			}
+		}
+		for (int i = 1; i < xnumber; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
 					for (int l = 0; l < lnumber; ++l) {
@@ -411,12 +569,35 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 			}
 		}
 
-		double normRightPart = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber));
+        for (int j = 0; j < ynumber; ++j) {
+            for (int k = 0; k < znumber; ++k) {
+                for (int l = 0; l < lnumber; ++l) {
+                    outvector[xnumber][j][k][l] = 0;
+                    if(rank == nprocs - 1 && !periodic){
+						for (int m = 0; m < n - 1; ++m) {
+							outvector[xnumber][j][k][l] += basis[m][xnumber][j][k][l] * y[m] * norm;
+							//printf("outvector[%d][%d][%d][%d] %d = %g\n", i, j, k, l, m, outvector[i][j][k][l]);
+							//printf("norm = %g\n", norm);
+							//printf("y[%d] = %g\n", m, y[m]);
+							//outvector[i][l] += basis[m][i][l] * y[m];
+						}
+						//printf("outvector[%d][%d][%d][%d] = %g\n", i, j, k, l, outvector[i][j][k][l]);
+					}
+				}
+			}
+		}*/
+
+		double normRightPart = sqrt(
+			scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber, periodic, rank, nprocs));
 		relativeError = error / normRightPart;
 
-		for (int i = 0; i < n - 1; ++i) {
+		for (int i = 0; i < n-1; ++i) {
 			delete[] oldQmatrix[i];
 			delete[] oldRmatrix[i];
+		}
+		if(n==2) {
+			delete[] oldQmatrix[1];
+			delete[] oldRmatrix[1];
 		}
 		delete[] oldQmatrix;
 		delete[] oldRmatrix;
@@ -428,10 +609,28 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 	}
 
 	n = n - 1;
+	//if(rank == 0) printf("total GMRES iteration = %d\n", n);
 
 	//out result
 
-	for (int i = 0; i < xnumber; ++i) {
+    for (int j = 0; j < ynumber; ++j) {
+        for (int k = 0; k < znumber; ++k) {
+            for (int l = 0; l < lnumber; ++l) {
+                outvector[0][j][k][l] = 0;
+                if(rank == 0 && !periodic){
+                    for (int m = 0; m < n - 1; ++m) {
+                        outvector[0][j][k][l] += basis[m][0][j][k][l] * y[m] * norm;
+                        //printf("outvector[%d][%d][%d][%d] %d = %g\n", i, j, k, l, m, outvector[i][j][k][l]);
+                        //printf("norm = %g\n", norm);
+                        //printf("y[%d] = %g\n", m, y[m]);
+                        //outvector[i][l] += basis[m][i][l] * y[m];
+                    }
+                    //printf("outvector[%d][%d][%d][%d] = %g\n", i, j, k, l, outvector[i][j][k][l]);
+                }
+            }
+        }
+    }
+	for (int i = 1; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
@@ -444,6 +643,55 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 			}
 		}
 	}
+    if(rank == nprocs - 1 && !periodic){
+        for (int j = 0; j < ynumber; ++j) {
+            for (int k = 0; k < znumber; ++k) {
+                for (int l = 0; l < lnumber; ++l) {
+                    outvector[xnumber][j][k][l] = 0;
+                    for (int m = 0; m < n - 1; ++m) {
+                        outvector[xnumber][j][k][l] += basis[m][xnumber][j][k][l] * y[m] * norm;
+                        //printf("outvector[%d][%d][%d][%d] %d = %g\n", i, j, k, l, m, outvector[i][j][k][l]);
+                        //printf("norm = %g\n", norm);
+                        //printf("y[%d] = %g\n", m, y[m]);
+                        //outvector[i][l] += basis[m][i][l] * y[m];
+                    }
+                    //printf("outvector[%d][%d][%d][%d] = %g\n", i, j, k, l, outvector[i][j][k][l]);
+                }
+            }
+        }
+    }
+
+    //printf("rank = %d outvector[0][0][0][1] = %g\n", rank, outvector[0][0][0][1]);
+    //printf("rank = %d outvector[1][0][0][1] = %g\n", rank, outvector[1][0][0][1]);
+    //printf("rank = %d outvector[2][0][0][1] = %g\n", rank, outvector[2][0][0][1]);
+    //printf("rank = %d outvector[xnumber - 2][0][0][1] = %g\n", rank, outvector[xnumber - 2][0][0][1]);
+    //printf("rank = %d outvector[xnumber - 1][0][0][1] = %g\n", rank, outvector[xnumber - 1][0][0][1]);
+    //printf("rank = %d outvector[xnumber][0][0][1] = %g\n", rank, outvector[xnumber][0][0][1]);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	if( (periodic) || (rank > 0)) sendGMRESTempVectorToLeft(outvector, bufferLeftSend, xnumber, ynumber, znumber, lnumber);
+	if( (periodic) || (rank < nprocs-1)) sendGMRESTempVectorToRight(outvector, bufferRightSend, xnumber, ynumber, znumber, lnumber);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	//printf("finish sending\n");
+
+	if( (periodic) || (rank > 0)) receiveGMRESTempVectorFromLeft(outvector, bufferLeftRecv, xnumber, ynumber, znumber, lnumber);
+	if( (periodic) || (rank < nprocs-1)) receiveGMRESTempVectorFromRight(outvector, bufferRightRecv, xnumber, ynumber, znumber, lnumber);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+    //printf("rank = %d outvector[0][0][0][1] = %g\n", rank, outvector[0][0][0][1]);
+    //printf("rank = %d outvector[1][0][0][1] = %g\n", rank, outvector[1][0][0][1]);
+    //printf("rank = %d outvector[2][0][0][1] = %g\n", rank, outvector[2][0][0][1]);
+    //printf("rank = %d outvector[xnumber - 2][0][0][1] = %g\n", rank, outvector[xnumber - 2][0][0][1]);
+    //printf("rank = %d outvector[xnumber - 1][0][0][1] = %g\n", rank, outvector[xnumber - 1][0][0][1]);
+    //printf("rank = %d outvector[xnumber][0][0][1] = %g\n", rank, outvector[xnumber][0][0][1]);
+
+	delete[] bufferLeftSend;
+	delete[] bufferLeftRecv;
+	delete[] bufferRightSend;
+	delete[] bufferRightRecv;
 
 	for (int i = 0; i < n; ++i) {
 		delete[] Qmatrix[i];
@@ -455,7 +703,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 	delete[] hessenbergMatrix;
 
 	for (int m = 0; m < n; ++m) {
-		for (int i = 0; i < xnumber; ++i) {
+		for (int i = 0; i < xnumber+1; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
 					delete[] basis[m][i][j][k];
@@ -470,7 +718,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 
 	delete[] y;
 
-	for (int i = 0; i < xnumber; ++i) {
+	for (int i = 0; i < xnumber+1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
@@ -486,32 +734,129 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 	}
 }
 
-double scalarMultiplyLargeVectors(double**** a, double**** b, int xnumber, int ynumber, int znumber, int lnumber) {
-	double result = 0;
-	for (int i = 0; i < xnumber; ++i) {
+double scalarMultiplyLargeVectors(double ****a, double ****b, int xnumber, int ynumber, int znumber, int lnumber,
+                                  bool periodic, int rank, int nprocs) {
+	double result[1];
+	result[0] = 0;
+	if((rank == 0) && (!periodic)){
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
-					result += a[i][j][k][l] * b[i][j][k][l];
+					result[0] += a[0][j][k][l] * b[0][j][k][l];
 				}
 			}
 		}
 	}
-	return result;
+	for (int i = 1; i < xnumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				for (int l = 0; l < lnumber; ++l) {
+					result[0] += a[i][j][k][l] * b[i][j][k][l];
+				}
+			}
+		}
+	}
+	if((rank == nprocs - 1) && (!periodic)){
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				for (int l = 0; l < lnumber; ++l) {
+					result[0] += a[xnumber][j][k][l] * b[xnumber][j][k][l];
+				}
+			}
+		}
+	}
+	if(nprocs > 1) {
+		MPI_Barrier(MPI_COMM_WORLD);
+		if (rank != 0) {
+			MPI_Send(result, 1, MPI_DOUBLE, 0, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD);
+			//printf("send double rank = %d\n", rank);
+		} else {
+			for (int i = 1; i < nprocs; ++i) {
+				double temp[1];
+				MPI_Status status;
+				MPI_Recv(temp, 1, MPI_DOUBLE, i, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD, &status);
+				result[0] += temp[0];
+				//printf("recv double rnk = 0 from %d\n", i);
+			}
+		}
+		MPI_Barrier(MPI_COMM_WORLD);
+		if (rank == 0) {
+			for (int i = 1; i < nprocs; ++i) {
+				MPI_Send(result, 1, MPI_DOUBLE, i, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD);
+				//printf("send double rank = 0 to %d\n", i);
+			}
+		} else {
+			double temp[1];
+			MPI_Status status;
+			MPI_Recv(temp, 1, MPI_DOUBLE, 0, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD, &status);
+			//printf("recv double rank = %d\n", rank);
+			result[0] = temp[0];
+		}
+	}
+	double res = result[0];
+	MPI_Barrier(MPI_COMM_WORLD);
+	return res;
 }
 
-double scalarMultiplyLargeVectors(Vector3d*** a, Vector3d*** b, int xnumber, int ynumber, int znumber, int lnumber) {
-	double result = 0;
-	for (int i = 0; i < xnumber; ++i) {
+double scalarMultiplyLargeVectors(Vector3d ***a, Vector3d ***b, int xnumber, int ynumber, int znumber, int lnumber,
+                                  bool periodic, int rank, int nprocs) {
+	double result[1];
+	result[0] = 0;
+	if(rank == 0 && !periodic){
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
-					result += a[i][j][k][l] * b[i][j][k][l];
+					result[0] += a[0][j][k][l] * b[0][j][k][l];
 				}
 			}
 		}
 	}
-	return result;
+	for (int i = 1; i < xnumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				for (int l = 0; l < lnumber; ++l) {
+					result[0] += a[i][j][k][l] * b[i][j][k][l];
+				}
+			}
+		}
+	}
+	if(rank == nprocs - 1 && !periodic){
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				for (int l = 0; l < lnumber; ++l) {
+					result[0] += a[xnumber][j][k][l] * b[xnumber][j][k][l];
+				}
+			}
+		}
+	}
+
+	if(nprocs > 1) {
+		MPI_Barrier(MPI_COMM_WORLD);
+		if (rank != 0) {
+			MPI_Send(result, 1, MPI_DOUBLE, 0, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD);
+		} else {
+			for (int i = 1; i < nprocs; ++i) {
+				double temp[1];
+				MPI_Status status;
+				MPI_Recv(temp, 1, MPI_DOUBLE, i, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD, &status);
+				result[0] += temp[0];
+
+			}
+		}
+		MPI_Barrier(MPI_COMM_WORLD);
+		if (rank == 0) {
+			for (int i = 1; i < nprocs; ++i) {
+				MPI_Send(result, 1, MPI_DOUBLE, i, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD);
+			}
+		} else {
+			double temp[1];
+			MPI_Status status;
+			MPI_Recv(temp, 1, MPI_DOUBLE, 0, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD, &status);
+			result[0] = temp[0];
+		}
+	}
+	double res = result[0];
+	return res;
 }
 
 void transposeSpecialMatrix(std::vector<MatrixElement>**** result, std::vector<MatrixElement>**** matrix, int xnumber, int ynumber, int znumber, int lnumber) {
@@ -1030,15 +1375,19 @@ void sortInputFastFourierZ(Complex ***a, int xnumber, int ynumber, int znumber) 
 }
 
 void conjugateGradientMethod(std::vector<MatrixElement> ****matrix, double ****rightPart, double ****outVector,
-							 int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration) {
+                             int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration, bool periodic, int verbosity) {
+	int rank;
+	int nprocs;
+	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	if(rank == 0 && verbosity > 0) printf("start conjugate gradient\n");
 
-	printf("start conjugate gradient\n");
-	double**** residual = new double***[xnumber];
-	double**** prevResidual = new double***[xnumber];
-	double**** z = new double***[xnumber];
-	double**** tempVector = new double***[xnumber];
+	double**** residual = new double***[xnumber+1];
+	double**** prevResidual = new double***[xnumber+1];
+	double**** z = new double***[xnumber+1];
+	double**** tempVector = new double***[xnumber+1];
 
-	for(int i = 0; i < xnumber; ++i){
+	for(int i = 0; i < xnumber+1; ++i){
 		residual[i] = new double**[ynumber];
 		prevResidual[i] = new double**[ynumber];
 		z[i] = new double**[ynumber];
@@ -1080,20 +1429,22 @@ void conjugateGradientMethod(std::vector<MatrixElement> ****matrix, double ****r
 	int iteration = 0;
 
 
-    double prevResidualNorm2 = scalarMultiplyLargeVectors(prevResidual, prevResidual, xnumber, ynumber, znumber, lnumber);
+    double prevResidualNorm2 = scalarMultiplyLargeVectors(prevResidual, prevResidual, xnumber, ynumber, znumber,
+                                                          lnumber, false, rank, nprocs);
     double residualNorm2 = prevResidualNorm2;
-	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber);
+	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber, false, rank, nprocs);
 
 	double relativeError = sqrt(residualNorm2/rightPartNorm2);
 
 	while((iteration < maxIteration) && (iteration < xnumber*ynumber*znumber*lnumber) && (relativeError > (precision/(xnumber*ynumber*znumber*lnumber)))){
-		printf("conjugate gradient iteration %d\n", iteration);
+		if(rank == 0 && verbosity > 1) printf("conjugate gradient iteration %d\n", iteration);
 
-		multiplySpecialMatrixVector(tempVector, matrix, z, xnumber, ynumber, znumber, lnumber);
+		multiplySpecialMatrixVector(tempVector, matrix, z, xnumber, ynumber, znumber, lnumber, periodic, rank, nprocs);
 
-		double alpha = prevResidualNorm2/scalarMultiplyLargeVectors(tempVector, z, xnumber, ynumber, znumber, lnumber);
+		double alpha = prevResidualNorm2/ scalarMultiplyLargeVectors(tempVector, z, xnumber, ynumber, znumber, lnumber,
+		                                                             false, rank, nprocs);
 
-		for(int i = 0; i < xnumber; ++i){
+		for(int i = 0; i < xnumber+1; ++i){
 			for(int j = 0; j < ynumber; ++j){
 				for(int k = 0; k < znumber; ++k){
 					for(int l = 0; l < lnumber; ++l){
@@ -1104,11 +1455,11 @@ void conjugateGradientMethod(std::vector<MatrixElement> ****matrix, double ****r
 			}
 		}
 
-        residualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumber, ynumber, znumber, lnumber);
+        residualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumber, ynumber, znumber, lnumber, false, rank, nprocs);
 
 		double beta  = residualNorm2/prevResidualNorm2;
 
-		for(int i = 0; i < xnumber; ++i){
+		for(int i = 0; i < xnumber+1; ++i){
 			for(int j = 0; j < ynumber; ++j){
 				for(int k = 0; k < znumber; ++k){
 					for(int l = 0; l < lnumber; ++l){
@@ -1124,7 +1475,7 @@ void conjugateGradientMethod(std::vector<MatrixElement> ****matrix, double ****r
 		iteration++;
 	}
 
-	for(int i = 0; i < xnumber; ++i){
+	for(int i = 0; i < xnumber+1; ++i){
 		for(int j = 0; j < ynumber; ++j){
 			for(int k = 0; k < znumber; ++k){
 				delete[] residual[i][j][k];
@@ -1148,18 +1499,22 @@ void conjugateGradientMethod(std::vector<MatrixElement> ****matrix, double ****r
 	delete[] tempVector;
 }
 
-void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration) {
-	printf("start biconjugate gradient\n");
-	double**** residual = new double***[xnumber];
-	double**** prevResidual = new double***[xnumber];
-	double**** z = new double***[xnumber];
-	double**** p = new double***[xnumber];
-	double**** s = new double***[xnumber];
-	double**** tempVector = new double***[xnumber];
-	double**** tempVector2 = new double***[xnumber];
-	std::vector<MatrixElement>**** transposedMatrix = new std::vector<MatrixElement>***[xnumber];
+void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumber, int ynumber, int znumber, int lnumber, double precision, int maxIteration, bool periodic, int verbosity) {
+	int rank;
+	int nprocs;
+	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	if(rank == 0 && verbosity > 0) printf("start biconjugate gradient\n");
+	double**** residual = new double***[xnumber+1];
+	double**** prevResidual = new double***[xnumber+1];
+	double**** z = new double***[xnumber+1];
+	double**** p = new double***[xnumber+1];
+	double**** s = new double***[xnumber+1];
+	double**** tempVector = new double***[xnumber+1];
+	double**** tempVector2 = new double***[xnumber+1];
+	std::vector<MatrixElement>**** transposedMatrix = new std::vector<MatrixElement>***[xnumber+1];
 
-	for(int i = 0; i < xnumber; ++i){
+	for(int i = 0; i < xnumber+1; ++i){
 		residual[i] = new double**[ynumber];
 		prevResidual[i] = new double**[ynumber];
 		z[i] = new double**[ynumber];
@@ -1206,21 +1561,22 @@ void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double****
 	int iteration = 0;
 
 
-    double prevResidualNorm2 = scalarMultiplyLargeVectors(p, prevResidual, xnumber, ynumber, znumber, lnumber);
+    double prevResidualNorm2 = scalarMultiplyLargeVectors(p, prevResidual, xnumber, ynumber, znumber, lnumber, false, rank, nprocs);
     double residualNorm2 = prevResidualNorm2;
-	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber);
+	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber, false, rank, nprocs);
 
 	double relativeError = sqrt(residualNorm2/rightPartNorm2);
 
 	while((iteration < maxIteration) && (iteration < xnumber*ynumber*znumber*lnumber) && (relativeError > (precision/(xnumber*ynumber*znumber*lnumber)))){
-		printf("biconjugate gradient iteration %d\n", iteration);
+		if(rank == 0 && verbosity > 1) printf("biconjugate gradient iteration %d\n", iteration);
 
-		multiplySpecialMatrixVector(tempVector, matrix, z, xnumber, ynumber, znumber, lnumber);
-		multiplySpecialMatrixVector(tempVector2, transposedMatrix, s, xnumber, ynumber, znumber, lnumber);
+		multiplySpecialMatrixVector(tempVector, matrix, z, xnumber, ynumber, znumber, lnumber, periodic, rank, nprocs);
+		multiplySpecialMatrixVector(tempVector2, transposedMatrix, s, xnumber, ynumber, znumber, lnumber, periodic, rank, nprocs);
 
-		double alpha = prevResidualNorm2/scalarMultiplyLargeVectors(tempVector, s, xnumber, ynumber, znumber, lnumber);
+		double alpha = prevResidualNorm2/ scalarMultiplyLargeVectors(tempVector, s, xnumber, ynumber, znumber, lnumber,
+		                                                             false, rank, nprocs);
 
-		for(int i = 0; i < xnumber; ++i){
+		for(int i = 0; i < xnumber+1; ++i){
 			for(int j = 0; j < ynumber; ++j){
 				for(int k = 0; k < znumber; ++k){
 					for(int l = 0; l < lnumber; ++l){
@@ -1232,11 +1588,11 @@ void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double****
 			}
 		}
 
-        residualNorm2 = scalarMultiplyLargeVectors(p, residual, xnumber, ynumber, znumber, lnumber);
+        residualNorm2 = scalarMultiplyLargeVectors(p, residual, xnumber, ynumber, znumber, lnumber, false, rank, nprocs);
 
 		double beta  = residualNorm2/prevResidualNorm2;
 
-		for(int i = 0; i < xnumber; ++i){
+		for(int i = 0; i < xnumber+1; ++i){
 			for(int j = 0; j < ynumber; ++j){
 				for(int k = 0; k < znumber; ++k){
 					for(int l = 0; l < lnumber; ++l){
@@ -1253,7 +1609,7 @@ void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double****
 		iteration++;
 	}
 
-	for(int i = 0; i < xnumber; ++i){
+	for(int i = 0; i < xnumber+1; ++i){
 		for(int j = 0; j < ynumber; ++j){
 			for(int k = 0; k < znumber; ++k){
 				delete[] residual[i][j][k];
@@ -1294,21 +1650,25 @@ void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double****
 }
 
 void biconjugateStabilizedGradientMethod(std::vector<MatrixElement> ****matrix, double ****rightPart,
-										 double ****outVector, int xnumber, int ynumber, int znumber, int lnumber,
-										 double precision, int maxIteration) {
-	printf("start biconjugate gradient\n");
-	double**** residual = new double***[xnumber];
-	double**** firstResidual = new double***[xnumber];
-	double**** p = new double***[xnumber];
-	double**** v = new double***[xnumber];
-	double**** s = new double***[xnumber];
-	double**** t = new double***[xnumber];
+                                         double ****outVector, int xnumber, int ynumber, int znumber, int lnumber,
+                                         double precision, int maxIteration, bool periodic, int verbosity) {
+	int rank;
+	int nprocs;
+	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	if(rank == 0 && verbosity > 0)printf("start biconjugate gradient\n");
+	double**** residual = new double***[xnumber+1];
+	double**** firstResidual = new double***[xnumber+1];
+	double**** p = new double***[xnumber+1];
+	double**** v = new double***[xnumber+1];
+	double**** s = new double***[xnumber+1];
+	double**** t = new double***[xnumber+1];
 
 	double alpha = 1;
 	double rho = 1;
 	double omega = 1;
 
-	for(int i = 0; i < xnumber; ++i){
+	for(int i = 0; i < xnumber+1; ++i){
 		residual[i] = new double**[ynumber];
 		firstResidual[i] = new double**[ynumber];
 		v[i] = new double**[ynumber];
@@ -1347,21 +1707,21 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement> ****matrix, 
 	int iteration = 0;
 
 
-	double prevResidualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumber, ynumber, znumber, lnumber);
+	double prevResidualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumber, ynumber, znumber, lnumber, false, rank, nprocs);
 	double residualNorm2 = prevResidualNorm2;
-	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber);
+	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber, false, rank, nprocs);
 
 	double relativeError = sqrt(residualNorm2/rightPartNorm2);
 
 	while((iteration < maxIteration) && (iteration < xnumber*ynumber*znumber*lnumber) && (relativeError > (precision/(xnumber*ynumber*znumber*lnumber)))){
-		printf("biconjugate gradient iteration %d\n", iteration);
+		if(rank == 0 && verbosity > 1) printf("biconjugate gradient iteration %d\n", iteration);
 
-		double newRho = scalarMultiplyLargeVectors(firstResidual, residual, xnumber, ynumber, znumber, lnumber);
+		double newRho = scalarMultiplyLargeVectors(firstResidual, residual, xnumber, ynumber, znumber, lnumber, false, rank, nprocs);
 
 		double beta = (newRho/rho)*(alpha/omega);
 		rho = newRho;
 
-		for(int i = 0; i < xnumber; ++i){
+		for(int i = 0; i < xnumber+1; ++i){
 			for(int j = 0; j < ynumber; ++j){
 				for(int k = 0; k < znumber; ++k){
 					for(int l = 0; l < lnumber; ++l){
@@ -1370,11 +1730,11 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement> ****matrix, 
 				}
 			}
 		}
-		multiplySpecialMatrixVector(v, matrix, p, xnumber, ynumber, znumber, lnumber);
+		multiplySpecialMatrixVector(v, matrix, p, xnumber, ynumber, znumber, lnumber, periodic, rank, nprocs);
 
-		alpha = rho/scalarMultiplyLargeVectors(firstResidual, v, xnumber, ynumber, znumber, lnumber);
+		alpha = rho/ scalarMultiplyLargeVectors(firstResidual, v, xnumber, ynumber, znumber, lnumber, false, rank, nprocs);
 
-		for(int i = 0; i < xnumber; ++i){
+		for(int i = 0; i < xnumber+1; ++i){
 			for(int j = 0; j < ynumber; ++j){
 				for(int k = 0; k < znumber; ++k){
 					for(int l = 0; l < lnumber; ++l){
@@ -1384,11 +1744,17 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement> ****matrix, 
 			}
 		}
 
-		multiplySpecialMatrixVector(t, matrix, s, xnumber, ynumber, znumber, lnumber);
+		multiplySpecialMatrixVector(t, matrix, s, xnumber, ynumber, znumber, lnumber, periodic, rank, nprocs);
 
-		omega = scalarMultiplyLargeVectors(t, s, xnumber, ynumber, znumber, lnumber)/scalarMultiplyLargeVectors(t, t, xnumber, ynumber, znumber, lnumber);
+		omega = scalarMultiplyLargeVectors(t, s, xnumber, ynumber, znumber, lnumber, false, rank, nprocs) / scalarMultiplyLargeVectors(
+			t, t,
+			xnumber,
+			ynumber,
+			znumber,
+			lnumber,
+			false, rank, nprocs);
 
-		for(int i = 0; i < xnumber; ++i){
+		for(int i = 0; i < xnumber+1; ++i){
 			for(int j = 0; j < ynumber; ++j){
 				for(int k = 0; k < znumber; ++k){
 					for(int l = 0; l < lnumber; ++l){
@@ -1399,7 +1765,7 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement> ****matrix, 
 			}
 		}
 
-		residualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumber, ynumber, znumber, lnumber);
+		residualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumber, ynumber, znumber, lnumber, false, rank, nprocs);
 
 		prevResidualNorm2 = residualNorm2;
 
@@ -1407,7 +1773,7 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement> ****matrix, 
 		iteration++;
 	}
 
-	for(int i = 0; i < xnumber; ++i){
+	for(int i = 0; i < xnumber+1; ++i){
 		for(int j = 0; j < ynumber; ++j){
 			for(int k = 0; k < znumber; ++k){
 				delete[] residual[i][j][k];
@@ -1437,6 +1803,109 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement> ****matrix, 
 	delete[] p;
 	delete[] s;
 	delete[] t;
+}
+
+void gaussSeidelMethod(std::vector<MatrixElement> ****matrix, double ****rightPart, double ****outVector, int xnumber,
+                       int ynumber, int znumber, int lnumber, int xnumberGeneral, int znumberGeneral,
+                       int ynumberGeneral, double precision, int maxIteration, bool periodic, int verbocity) {
+	int rank;
+	int nprocs;
+	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	double* bufferRightSend = new double[ynumber*znumber*lnumber];
+	double* bufferRightRecv = new double[ynumber*znumber*lnumber];
+	double* bufferLeftSend = new double[ynumber*znumber*lnumber];
+	double* bufferLeftRecv = new double[ynumber*znumber*lnumber];
+	if((rank == 0) && (verbocity > 0)) printf("start gauss-seidel\n");
+	double normRightPart = scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber, periodic, rank, nprocs)/(xnumberGeneral*ynumberGeneral*znumberGeneral*lnumber);
+    for(int i = 0 ; i < xnumber + 1; ++i){
+        for(int j = 0; j < ynumber; ++j){
+            for(int k = 0; k < znumber; ++k){
+                for(int l = 0; l < lnumber; ++l){
+                    //outVector[i][j][k][l] = uniformDistribution()*normRightPart/matrix[0][0][0][0][0].vfalue;
+                    outVector[i][j][k][l] = 0;
+                }
+            }
+        }
+    }
+
+
+    int curIteration = 0;
+    while(curIteration < maxIteration) {
+		if((rank == 0) && (verbocity > 1)) printf("Gauss-Seidel iteration %d\n", curIteration);
+		if(rank > 0) receiveGMRESTempVectorFromLeft(rightPart, bufferLeftRecv, xnumber, ynumber, znumber, lnumber);
+        for (int i = 0; i < xnumber + 1; ++i) {
+            for (int j = 0; j < ynumber; ++j) {
+                for (int k = 0; k < znumber; ++k) {
+                    for (int l = 0; l < lnumber; ++l) {
+                        double sum = rightPart[i][j][k][l];
+                        double a = 1;
+                        for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+                            MatrixElement element = matrix[i][j][k][l][m];
+                            if (!indexEqual(element, i, j, k, l)) {
+                                sum -= element.value * outVector[element.i][element.j][element.k][element.l];
+                            } else {
+                                a = element.value;
+                            }
+                        }
+                        outVector[i][j][k][l] = sum / a;
+                    }
+                }
+            }
+        }
+		if(rank < nprocs - 1) sendGMRESTempVectorToRight(rightPart, bufferRightSend, xnumber, ynumber, znumber, lnumber);
+
+		MPI_Barrier(MPI_COMM_WORLD);
+
+		if(rank > 0) sendGMRESTempVectorToLeft(rightPart, bufferLeftSend, xnumber, ynumber, znumber, lnumber);
+		if(rank < nprocs - 1) receiveGMRESTempVectorFromRight(rightPart, bufferRightRecv, xnumber, ynumber, znumber, lnumber);
+
+		MPI_Barrier(MPI_COMM_WORLD);
+
+        curIteration++;
+    }
+
+	delete[] bufferLeftSend;
+	delete[] bufferRightRecv;
+	delete[] bufferRightSend;
+	delete[] bufferLeftRecv;
+}
+
+bool indexLower(const MatrixElement& element, int i, int j, int k, int l){
+    if(element.i < i){
+        return true;
+    }
+    if(element.i > i){
+        return false;
+    }
+    if(element.j < j){
+        return true;
+    }
+    if(element.j > j){
+        return false;
+    }
+    if(element.k < k){
+        return true;
+    }
+    if(element.k > k){
+        return false;
+    }
+    if(element.l < l){
+        return true;
+    }
+    if(element.l > l){
+        return false;
+    }
+
+    return false;
+}
+
+bool indexEqual(const MatrixElement& element, int i, int j, int k, int l){
+    return (element.i == i)&&(element.j == j)&&(element.k == k)&&(element.l == l);
+}
+
+bool indexUpper(const MatrixElement& element, int i, int j, int k, int l){
+    return ((!indexEqual(element, i, j, k, l)) && (!indexLower(element, i, j, k, l)));
 }
 
 

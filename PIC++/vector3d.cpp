@@ -1,6 +1,9 @@
 #include "math.h"
 #include "stdlib.h"
 #include "stdio.h"
+//#include <crtdbg.h>
+
+//#include "memory_debug.h"
 
 #include "vector3d.h"
 #include "matrix3d.h"
@@ -31,11 +34,11 @@ Vector3d& Vector3d::operator=(Vector3d const& vector) {
 	return *this;
 }
 
-double Vector3d::norm() {
+double Vector3d::norm() const{
 	return sqrt(x * x + y * y + z * z);
 }
 
-Vector3d Vector3d::operator+(const Vector3d& vector) {
+Vector3d Vector3d::operator+(const Vector3d& vector) const{
 	return Vector3d(x + vector.x, y + vector.y, z + vector.z);
 }
 
@@ -55,23 +58,23 @@ Vector3d& Vector3d::operator-=(Vector3d const& vector) {
 	return *this;
 }
 
-Vector3d Vector3d::operator-(const Vector3d& vector) {
+Vector3d Vector3d::operator-(const Vector3d& vector) const {
 	return Vector3d(x - vector.x, y - vector.y, z - vector.z);
 }
 
-Vector3d Vector3d::operator*(const double& value) {
+Vector3d Vector3d::operator*(const double& value) const {
 	return Vector3d(x * value, y * value, z * value);
 }
 
-Vector3d Vector3d::operator/(const double& value) {
+Vector3d Vector3d::operator/(const double& value) const {
 	return Vector3d(x / value, y / value, z / value);
 }
 
-double Vector3d::scalarMult(const Vector3d& vector) {
+double Vector3d::scalarMult(const Vector3d& vector) const {
 	return x * vector.x + y * vector.y + z * vector.z;
 }
 
-Vector3d Vector3d::vectorMult(const Vector3d& vector) {
+Vector3d Vector3d::vectorMult(const Vector3d& vector) const {
 	double vx = y * vector.z - z * vector.y;
 	double vy = -x * vector.z + z * vector.x;
 	double vz = x * vector.y - y * vector.x;
@@ -79,7 +82,7 @@ Vector3d Vector3d::vectorMult(const Vector3d& vector) {
 	return Vector3d(vx, vy, vz);
 }
 
-Matrix3d Vector3d::tensorMult(const Vector3d& vector) {
+Matrix3d Vector3d::tensorMult(const Vector3d& vector) const {
 	Matrix3d result;
 	result.matrix[0][0] = x * vector.x;
 	result.matrix[0][1] = x * vector.y;
@@ -94,7 +97,7 @@ Matrix3d Vector3d::tensorMult(const Vector3d& vector) {
 	return result;
 }
 
-double& Vector3d::operator[](int i) {
+double& Vector3d::operator[](int i){
 	switch (i) {
 	case 0:
 		return x;
@@ -104,6 +107,7 @@ double& Vector3d::operator[](int i) {
 		return z;
 	default:
 		printf("i must be 0 < i < 3\n");
+			MPI_Finalize();
 		exit(0);
 	}
 }

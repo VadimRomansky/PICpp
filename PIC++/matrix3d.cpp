@@ -1,17 +1,19 @@
 #include "math.h"
 #include "stdio.h"
 #include "cmath"
+//#include <crtdbg.h>
+
+//#include "memory_debug.h"
 
 #include "matrix3d.h"
 #include "vector3d.h"
 #include "constants.h"
 
 Matrix3d::Matrix3d() {
-	int i, j;
-	matrix = new double* [3];
-	for (i = 0; i < 3; ++i) {
-		matrix[i] = new double [3];
-		for (j = 0; j < 3; ++j) {
+	//matrix = new double* [3];
+	for (int i = 0; i < 3; ++i) {
+		//matrix[i] = new double [3];
+		for (int j = 0; j < 3; ++j) {
 			if (i == j) {
 				matrix[i][j] = 1;
 			} else {
@@ -23,9 +25,9 @@ Matrix3d::Matrix3d() {
 
 Matrix3d::Matrix3d(const Matrix3d& m) {
 	int i, j;
-	matrix = new double* [3];
+	//matrix = new double* [3];
 	for (i = 0; i < 3; ++i) {
-		matrix[i] = new double [3];
+		//matrix[i] = new double [3];
 		for (j = 0; j < 3; ++j) {
 			matrix[i][j] = m.matrix[i][j];
 		}
@@ -33,10 +35,10 @@ Matrix3d::Matrix3d(const Matrix3d& m) {
 }
 
 Matrix3d::Matrix3d(double m11, double m12, double m13, double m21, double m22, double m23, double m31, double m32, double m33) {
-	matrix = new double* [3];
+	/*matrix = new double* [3];
 	for (int i = 0; i < 3; ++i) {
 		matrix[i] = new double [3];
-	}
+	}*/
 	matrix[0][0] = m11;
 	matrix[0][1] = m12;
 	matrix[0][2] = m13;
@@ -49,11 +51,11 @@ Matrix3d::Matrix3d(double m11, double m12, double m13, double m21, double m22, d
 }
 
 Matrix3d::~Matrix3d() {
-	int i;
+	/*int i;
 	for (i = 0; i < 3; ++i) {
 		delete[] matrix[i];
 	}
-	delete[] matrix;
+	delete[] matrix;*/
 }
 
 Matrix3d* Matrix3d::Inverse() {
@@ -125,7 +127,7 @@ Matrix3d Matrix3d::operator*(const Matrix3d& matr) {
 	return newMatrix;
 }
 
-Matrix3d Matrix3d::operator*(const double v) {
+Matrix3d Matrix3d::operator*(const double& v) {
 	Matrix3d newMatrix;
 	int i;
 	int j;
@@ -137,7 +139,7 @@ Matrix3d Matrix3d::operator*(const double v) {
 	return newMatrix;
 }
 
-Matrix3d Matrix3d::operator/(const double v) {
+Matrix3d Matrix3d::operator/(const double& v) {
 	Matrix3d newMatrix;
 	int i;
 	int j;
