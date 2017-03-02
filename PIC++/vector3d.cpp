@@ -107,7 +107,6 @@ double& Vector3d::operator[](int i){
 		return z;
 	default:
 		printf("i must be 0 < i < 3\n");
-			MPI_Finalize();
 		exit(0);
 	}
 }

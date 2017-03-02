@@ -19,8 +19,6 @@
 #include "simulation.h"
 
 Simulation::Simulation() {
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 	newlyStarted = false;
 	preserveChargeGlobal = true;
 	arrayCreated = false;
@@ -77,52 +75,12 @@ Simulation::Simulation() {
 }
 
 void Simulation::setSpaceForProc() {
-	int tempXnumber = ((xnumberGeneral) / nprocs) + 1;
-	int modXnumber = (xnumberGeneral) % nprocs;
+	int tempXnumber = xnumberGeneral  + 1;
 
-	if (rank >= nprocs - modXnumber) {
-		xnumber = tempXnumber + 1;
-		firstAbsoluteXindex = xnumberGeneral - (xnumber - 1) * (nprocs - rank);
-	}
-	else {
-		xnumber = tempXnumber;
-		firstAbsoluteXindex = (xnumber - 1) * rank;
+	xnumber = tempXnumber;
+	firstAbsoluteXindex = 0;
 
-	}
 
-	//todo boundary conditiontype
-	if (nprocs > 5) {
-		int firstSmallRegions = 2 * nprocs / 3;
-		int firstSmallXnumber = xnumberGeneral / 3;
-		int lastLargeRegions = nprocs - firstSmallRegions;
-		int lastLargeXnumber = xnumberGeneral - firstSmallXnumber;
-		if (rank < firstSmallRegions) {
-			tempXnumber = firstSmallXnumber / firstSmallRegions + 1;
-			modXnumber = firstSmallXnumber % firstSmallRegions;
-			if (rank >= firstSmallRegions - modXnumber) {
-				xnumber = tempXnumber + 1;
-				firstAbsoluteXindex = firstSmallXnumber - (xnumber - 1) * (firstSmallRegions - rank);
-			}
-			else {
-				xnumber = tempXnumber;
-				firstAbsoluteXindex = (xnumber - 1) * rank;
-			}
-		}
-		else {
-			tempXnumber = lastLargeXnumber / lastLargeRegions + 1;
-			modXnumber = lastLargeXnumber % lastLargeRegions;
-			if (rank >= nprocs - modXnumber) {
-				xnumber = tempXnumber + 1;
-				firstAbsoluteXindex = xnumberGeneral - (xnumber - 1) * (nprocs - rank);
-			}
-			else {
-				xnumber = tempXnumber;
-				firstAbsoluteXindex = firstSmallXnumber + (xnumber - 1) * (rank - firstSmallRegions);
-			}
-		}
-
-	}
-	//printf("xnumber = %d\n", xnumber);
 
 
 	xsize = xnumber * xsizeGeneral / xnumberGeneral;
@@ -149,9 +107,7 @@ void Simulation::setSpaceForProc() {
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                        double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                        int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
-                       double* concentrationsV, int inType, int nprocsV, int verbosityV) {
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	nprocs = nprocsV;
+                       double* concentrationsV, int inType, int verbosityV) {
 	arrayCreated = false;
 	timing = true;
 	outputDir = std::string(outputDirectory);
@@ -167,7 +123,6 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "input type must be 1 or 0\n");
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 	debugMode = false;
@@ -189,7 +144,6 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		fprintf(errorLogFile,
 		        "PIC++ support only 8 types of ions, typesNumber must be = 8. if you need less, ypu can initialize them with 0 concentration\n");
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 	concentrations = concentrationsV;
@@ -306,7 +260,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		ysizeGeneral /= scaleFactor;
 		zsize /= scaleFactor;
 		zsizeGeneral /= scaleFactor;
-		if (rank == 0) printf("xsize/scaleFactor = %lf\n", xsize);
+		printf("xsize/scaleFactor = %lf\n", xsize);
 		//fflush(stdout);
 	}
 	else {
@@ -321,8 +275,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		rescaleConstantsToTheoretical();
 		double densityForUnits = massElectron * (massProton + massElectron) / (4 * pi * electron_charge_normalized * electron_charge_normalized);
 		if (fabs(density - densityForUnits) / (densityForUnits + densityForUnits) > 1E-3) {
-			if (rank == 0) printf("density must be changed\n");
-			if (rank == 0) printf("density = %g, must be = %g\n", density, densityForUnits);
+			printf("density must be changed\n");
+			printf("density = %g, must be = %g\n", density, densityForUnits);
 			fflush(stdout);
 		}
 	}
@@ -371,184 +325,10 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	electronNumber9 = 0;
 }
 
-Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
-                       double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
-                       int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
-                       double* concentrationsV, int inType, int nprocsV, int verbosityV, double plasmaPeriodV,
-                       double scaleFactorV) {
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	nprocs = nprocsV;
-	arrayCreated = false;
-	timing = true;
-	outputDir = std::string(outputDirectory);
-	if (inType == 0) {
-		inputType = CGS;
-	}
-	else if (inType == 1) {
-		inputType = Theoretical;
-	}
-	else {
-		printf("input type must be 1 or 0\n");
-		fflush(stdout);
-		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		fprintf(errorLogFile, "input type must be 1 or 0\n");
-		fclose(errorLogFile);
-		MPI_Finalize();
-		exit(0);
-	}
-	debugMode = false;
-	newlyStarted = true;
-	preserveChargeGlobal = true;
-	solverType = IMPLICIT; //не явный
-	//solverType = EXPLICIT; //явный
-	boundaryConditionType = PERIODIC;
-	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	maxwellEquationMatrixSize = 3;
-	verbosity = verbosityV;
-
-	typesNumber = typesNumberV;
-	if (typesNumber != 8) {
-		printf(
-			"PIC++ support only 8 types of ions, typesNumber must be = 8. if you need less, ypu can initialize them with 0 concentration\n");
-		fflush(stdout);
-		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		fprintf(errorLogFile,
-		        "PIC++ support only 8 types of ions, typesNumber must be = 8. if you need less, ypu can initialize them with 0 concentration\n");
-		fclose(errorLogFile);
-		MPI_Finalize();
-		exit(0);
-	}
-	concentrations = concentrationsV;
-	particlesPerBin = particlesPerBinV;
-
-	currentIteration = 0;
-	time = 0;
-	particlesNumber = 0;
-
-	particleEnergy = 0;
-	electricFieldEnergy = 0;
-	magneticFieldEnergy = 0;
-	chargeBalance = 0;
-
-	globalMomentum = Vector3d(0, 0, 0);
-
-
-	theta = initialTheta;
-	//eta = theta;
-	eta = 0.5;
-
-	xnumberGeneral = xn;
-	ynumberGeneral = yn;
-	znumberGeneral = zn;
-
-	ynumber = yn;
-	znumber = zn;
-
-	xsizeGeneral = xsizev;
-	ysizeGeneral = ysizev;
-	zsizeGeneral = zsizev;
-
-	setSpaceForProc();
-
-	temperature = temp;
-
-	maxIteration = maxIterations;
-	maxTime = maxTimeV;
-
-	extJ = 0;
-
-	V0 = Vector3d(Vx, Vy, Vz);
-
-	B0 = Vector3d(Bx, By, Bz);
-	E0 = Vector3d(Ex, Ey, Ez);
-
-	additionalBinNumber = (splineOrder + 1) / 2;
-
-	if (inputType == CGS) {
-		massProton = massProtonReal;
-		massElectron = massElectronFactor * massElectronReal;
-		massAlpha = massAlphaReal;
-		massDeuterium = massDeuteriumReal;
-		massHelium3 = massHelium3Real;
-
-
-		plasma_period = plasmaPeriodV;
-
-		scaleFactor = scaleFactorV;
-
-
-		rescaleConstants();
-
-
-		printf("scaleFactor = %lf\n", scaleFactor);
-
-		if (rank == 0) printf("xsize/scaleFactor = %lf\n", xsize);
-		//fflush(stdout);
-	}
-	else {
-		massProton = 1.0;
-		massElectron = massProton / 256;
-		massAlpha = massProton * massAlphaReal / massProtonReal;
-		massDeuterium = massProton * massDeuteriumReal / massProtonReal;
-		massHelium3 = massProton * massHelium3Real / massProtonReal;
-		double protonScale = massProton / massProtonReal;
-		plasma_period = plasmaPeriodV;
-		scaleFactor = scaleFactorV;
-		rescaleConstantsToTheoretical();
-		double densityForUnits = massElectron * (massProton + massElectron) / (4 * pi * electron_charge_normalized * electron_charge_normalized);
-		if (fabs(density - densityForUnits) / (densityForUnits + densityForUnits) > 1E-3) {
-			if (rank == 0) printf("density must be changed\n");
-			if (rank == 0) printf("density = %g, must be = %g\n", density, densityForUnits);
-			fflush(stdout);
-		};
-	}
-
-	maxEfield = Vector3d(0, 0, 0);
-	maxBfield = Vector3d(0, 0, 0);
-	shockWavePoint = 0;
-
-	Kronecker = Matrix3d(1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0);
-
-	for (int i = 0; i < 3; ++i) {
-		for (int j = 0; j < 3; ++j) {
-			for (int k = 0; k < 3; ++k) {
-				LeviCivita[i][j][k] = 0;
-			}
-		}
-	}
-	LeviCivita[0][1][2] = 1.0;
-	LeviCivita[0][2][1] = -1.0;
-	LeviCivita[1][0][2] = -1.0;
-	LeviCivita[1][2][0] = 1.0;
-	LeviCivita[2][0][1] = 1.0;
-	LeviCivita[2][1][0] = -1.0;
-	shockWaveX = -1.0;
-	if (rank == 0) printf("end constructor\n");
-	fflush(stdout);
-	protonNumber = 0;
-	protonNumber1 = 0;
-	protonNumber2 = 0;
-	protonNumber3 = 0;
-	protonNumber4 = 0;
-	protonNumber5 = 0;
-	protonNumber6 = 0;
-	protonNumber7 = 0;
-	protonNumber8 = 0;
-	protonNumber9 = 0;
-	electronNumber = 0;
-	electronNumber1 = 0;
-	electronNumber2 = 0;
-	electronNumber3 = 0;
-	electronNumber4 = 0;
-	electronNumber5 = 0;
-	electronNumber6 = 0;
-	electronNumber7 = 0;
-	electronNumber8 = 0;
-	electronNumber9 = 0;
-}
-
 Simulation::~Simulation() {
 	if (arrayCreated) {
+		delete gmresMaxwellBasis;
+		delete gmresCleanupBasis;
 		delete[] types;
 		delete[] concentrations;
 		delete[] particlesPerBin;
@@ -717,10 +497,20 @@ Simulation::~Simulation() {
 		delete[] zgrid;
 		delete[] middleZgrid;
 
-		delete[] rightEbuffer;
-		delete[] rightEinBuffer;
-		delete[] leftEbuffer;
-		delete[] leftEoutBuffer;
+		delete[] rightOutVectorNodeBuffer;
+		delete[] rightInVectorNodeBuffer;
+		delete[] leftOutVectorNodeBuffer;
+		delete[] leftInVectorNodeBuffer;
+
+		delete[] rightOutVectorCellBuffer;
+		delete[] rightInVectorCellBuffer;
+		delete[] leftOutVectorCellBuffer;
+		delete[] leftInVectorCellBuffer;
+
+		delete[] rightOutGmresBuffer;
+		delete[] rightInGmresBuffer;
+		delete[] leftOutGmresBuffer;
+		delete[] leftInGmresBuffer;
 
 		if (additionalBinNumber > 0) {
 			for (int i = 0; i < additionalBinNumber; ++i) {
@@ -904,9 +694,9 @@ void Simulation::rescaleConstantsToTheoretical() {
 }
 
 void Simulation::initialize() {
-	if (rank == 0) printf("initialization\n");
+	printf("initialization\n");
 	fflush(stdout);
-	if (rank == 0) printLog("initialization\n");
+	printLog("initialization\n");
 
 	xgrid[0] = leftX;
 
@@ -985,32 +775,28 @@ void Simulation::initialize() {
 	omegaPlasmaElectron = sqrt(
 		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
 
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	if (omegaPlasmaElectron * xsize / speed_of_light_normalized < 5) {
-		if (rank == 0) printf("omegaPlasmaElectron*xsize/speed_of_light_normalized < 5\n");
-		if (rank == 0) fprintf(informationFile, "omegaPlasmaElectron*xsize/speed_of_light_normalized < 5\n");
+		printf("omegaPlasmaElectron*xsize/speed_of_light_normalized < 5\n");
+		fprintf(informationFile, "omegaPlasmaElectron*xsize/speed_of_light_normalized < 5\n");
 	}
-	if (rank == 0)
 		printf("omegaPlasmaElectron*xsize/speed_of_light_normalized = %g\n",
 		       omegaPlasmaElectron * xsize / speed_of_light_normalized);
 	fflush(stdout);
-	if (rank == 0)
 		fprintf(informationFile, "omegaPlasmaElectron*xsize/speed_of_light_normalized = %g\n",
 		        omegaPlasmaElectron * xsize / speed_of_light_normalized);
 
 	if (omegaPlasmaElectron * deltaX / speed_of_light_normalized > 1) {
-		if (rank == 0) printf("omegaPlasmaElectron*deltaX/speed_of_light_normalized > 1\n");
+		printf("omegaPlasmaElectron*deltaX/speed_of_light_normalized > 1\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omegaPlasmaElectron*deltaX/speed_of_light_normalized > 1\n");
+		fprintf(informationFile, "omegaPlasmaElectron*deltaX/speed_of_light_normalized > 1\n");
 	}
-	if (rank == 0)
 		printf("omegaPlasmaElectron*deltaX/speed_of_light_normalized = %g\n",
 		       omegaPlasmaElectron * deltaX / speed_of_light_normalized);
 	fflush(stdout);
-	if (rank == 0)
 		fprintf(informationFile, "omegaPlasmaElectron*deltaX/speed_of_light_normalized = %g\n",
 		        omegaPlasmaElectron * deltaX / speed_of_light_normalized);
-	if (rank == 0) fclose(informationFile);
+	fclose(informationFile);
 
 	//checkDebyeParameter();
 	checkGyroRadius();
@@ -1050,7 +836,6 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 		}
 	}
 
-	if (nprocs == 1) {
 		for (int k = 0; k < znumber; ++k) {
 			for (int j = 0; j < ynumber; ++j) {
 				Efield[xnumber][j][k] = Efield[1][j][k];
@@ -1059,7 +844,7 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 				explicitEfield[xnumber][j][k] = explicitEfield[1][j][k];
 			}
 		}
-	}
+	
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -1180,7 +965,7 @@ void Simulation::initializeRotatedSimpleElectroMagneticWave(int wavesCount) {
 
 void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation) {
 	boundaryConditionType = PERIODIC;
-	if (rank == 0) printf("initialization alfven wave\n");
+	printf("initialization alfven wave\n");
 	fflush(stdout);
 
 
@@ -1197,23 +982,22 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	createParticles();
 	E0 = Vector3d(0, 0, 0);
 
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	double alfvenV = B0.norm() / sqrt(4 * pi * density);
 	if (alfvenV > speed_of_light_normalized) {
 		printf("alfven velocity > c\n");
-		if (rank == 0) fprintf(informationFile, "alfven velocity > c\n");
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "alfven velocity > c\n");
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "alfvenV/c = %15.10g > 1\n", alfvenV / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
-	if (rank == 0) fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
-	if (rank == 0) fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
-	if (rank == 0) printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
-	if (rank == 0) printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
 	fflush(stdout);
 
 	double kw = (wavesCount * 2 * pi / xsizeGeneral);
@@ -1226,28 +1010,26 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
 	if (omegaGyroProton < 5 * speed_of_light_normalized * kw) {
-		if (rank == 0) printf("omegaGyroProton < 5*k*c\n");
+		printf("omegaGyroProton < 5*k*c\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
+		fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
 		//fclose(informationFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
+	printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
 	fflush(stdout);
-	if (rank == 0)
 		fprintf(informationFile, "omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
 
 	if (omegaPlasmaProton < 5 * omegaGyroProton) {
-		if (rank == 0) printf("omegaPlasmaProton < 5*omegaGyroProton\n");
+		printf("omegaPlasmaProton < 5*omegaGyroProton\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
+		fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
 		//fclose(informationFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
 	fflush(stdout);
-	if (rank == 0)
-		fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
 
 	//w = q*kw*B/mP * 0.5*(sqrt(d)+-b)/a
 	double b = speed_of_light_normalized * kw * (massProton - massElectron) / massProton;
@@ -1260,12 +1042,11 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	if (discriminant < 0) {
 		printf("discriminant < 0\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "discriminant < 0\n");
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "discriminant < 0\n");
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "discriminant = %15.10g\n", discriminant);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
@@ -1309,39 +1090,38 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	a1 = a1 / a0;
 	a0 = 1.0;
 
-	if (rank == 0) printf("a4 = %g\n", a4);
-	if (rank == 0) fprintf(informationFile, "a4 = %g\n", a4);
-	if (rank == 0) printf("a3 = %g\n", a3);
-	if (rank == 0) fprintf(informationFile, "a3 = %g\n", a3);
-	if (rank == 0) printf("a2 = %g\n", a2);
-	if (rank == 0) fprintf(informationFile, "a2 = %g\n", a2);
-	if (rank == 0) printf("a1 = %g\n", a1);
-	if (rank == 0) fprintf(informationFile, "a1 = %g\n", a1);
-	if (rank == 0) printf("a0 = %g\n", a0);
-	if (rank == 0) fprintf(informationFile, "a0 = %g\n", a0);
+	printf("a4 = %g\n", a4);
+	fprintf(informationFile, "a4 = %g\n", a4);
+	printf("a3 = %g\n", a3);
+	fprintf(informationFile, "a3 = %g\n", a3);
+	printf("a2 = %g\n", a2);
+	fprintf(informationFile, "a2 = %g\n", a2);
+	printf("a1 = %g\n", a1);
+	fprintf(informationFile, "a1 = %g\n", a1);
+	printf("a0 = %g\n", a0);
+	fprintf(informationFile, "a0 = %g\n", a0);
 	fflush(stdout);
 
 	double fakeOmega1 = kw * alfvenV;
-	if (rank == 0) printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	double realOmega2 = solve4orderEquation(a4, a3, a2, a1, a0, 1.0);
 	if (realOmega2 < 0) {
 		printf("omega^2 < 0\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega^2 < 0\n");
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "omega^2 < 0\n");
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
 	double error = (((a4 * realOmega2 + a3) * realOmega2 + a2) * realOmega2 + a1) * realOmega2 + a0;
-	if (rank == 0) printf("error = %15.10g\n", error);
+	printf("error = %15.10g\n", error);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "error = %15.10g\n", error);
+	fprintf(informationFile, "error = %15.10g\n", error);
 	//double
 	omega = sqrt(realOmega2) * fakeOmega;
 	if (omega < 0) {
@@ -1349,39 +1129,39 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	}
 
 	if (omega > speed_of_light_normalized * kw / 5.0) {
-		if (rank == 0) printf("omega > k*c/5\n");
+		printf("omega > k*c/5\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > k*c/5\n");
-		if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		fprintf(informationFile, "omega > k*c/5\n");
+		printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 		//fclose(informationFile);
-		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		if (rank == 0) fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
-		if (rank == 0) fclose(errorLogFile);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
+		fclose(errorLogFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omega = %g\n", omega / plasma_period);
+	printf("omega = %g\n", omega / plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega = %g\n", omega / plasma_period);
+	fprintf(informationFile, "omega = %g\n", omega / plasma_period);
 
-	if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 
 	if (fabs(omega) > omegaGyroProton / 2) {
-		if (rank == 0) printf("omega > omegaGyroProton/2\n");
+		printf("omega > omegaGyroProton/2\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > omegaGyroProton/2\n");
+		fprintf(informationFile, "omega > omegaGyroProton/2\n");
 	}
-	if (rank == 0) printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
-	if (rank == 0) fclose(informationFile);
+	fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	fclose(informationFile);
 
 	checkFrequency(omega);
 
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	//checkCollisionTime(omega);
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
@@ -1447,7 +1227,6 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 		}
 	}
 
-	if (nprocs == 1) {
 		for (int k = 0; k < znumber; ++k) {
 			for (int j = 0; j < ynumber; ++j) {
 				Efield[xnumber][j][k] = Efield[1][j][k];
@@ -1461,7 +1240,7 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 				explicitEfield[xnumber - 1][j][k] = explicitEfield[0][j][k];
 			}
 		}
-	}
+	
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -1495,72 +1274,62 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	if (fabs(VzamplitudeProton) > speed_of_light_normalized) {
 		printf("VzamplitudeProton > speed_of_light_normalized\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
+		fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
 		printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 		fflush(stdout);
-		if (rank == 0)
-			fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeProton/c = %15.10g > 1\n", VzamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
-	if (rank == 0) printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 	fflush(stdout);
-	if (rank == 0)
-		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 
 	if (fabs(VzamplitudeElectron) > speed_of_light_normalized) {
 		printf("VzamplitudeElectron > speed_of_light_normalized\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
+		fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
 		printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 		fflush(stdout);
-		if (rank == 0)
-			fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeElectron/c = %15.10g > 1\n", VzamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
-	if (rank == 0) printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 	fflush(stdout);
-	if (rank == 0)
-		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 
 	if (fabs(VyamplitudeProton) > speed_of_light_normalized) {
 		printf("VyamplitudeProton > speed_of_light_normalized\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
+		fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
 		printf("VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
 		fflush(stdout);
-		if (rank == 0)
-			fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeProton/c = %15.10g > 1\n", VyamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
 	if (fabs(VyamplitudeElectron) > speed_of_light_normalized) {
 		printf("VyamplitudeElectron > speed_of_light_normalized\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
+		fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
 		printf("VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
 		fflush(stdout);
-		if (rank == 0)
-			fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeElectron/c = %15.10g > 1\n", VyamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
@@ -1593,28 +1362,28 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 
 	updateDeltaT();
 
-	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
-	if (rank == 0) printf("dt = %g\n", deltaT * plasma_period);
+	printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	printf("dt = %g\n", deltaT * plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
-	if (rank == 0) fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
+	fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
 
 	double Vthermal = sqrt(2 * kBoltzman_normalized * temperature / massElectron);
 	double thermalFlux = Vthermal * concentration * electron_charge_normalized / sqrt(1.0 * types[0].particlesPerBin);
 	double alfvenFlux = (VyamplitudeProton - VyamplitudeElectron) * concentration * electron_charge_normalized;
 	if (thermalFlux > alfvenFlux / 2) {
-		if (rank == 0) printf("thermalFlux > alfvenFlux/2\n");
+		printf("thermalFlux > alfvenFlux/2\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
+		fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
 	}
-	if (rank == 0) printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
 	double minDeltaT = deltaX / Vthermal;
 	if (minDeltaT > deltaT) {
-		if (rank == 0) printf("deltaT < dx/Vthermal\n");
+		printf("deltaT < dx/Vthermal\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "deltaT < dx/Vthermal\n");
+		fprintf(informationFile, "deltaT < dx/Vthermal\n");
 
 		//printf("deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
 		//fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
@@ -1622,7 +1391,7 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 		//fclose(informationFile);
 		//exit(0);
 	}
-	if (rank == 0) {
+	
 		printf("deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
 		fflush(stdout);
 		fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
@@ -1726,16 +1495,15 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 		fprintf(informationFile, "dVze/dt amplitude = %g\n",
 		        derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
-	}
+	
 
-	if (rank == 0) fclose(informationFile);
+	fclose(informationFile);
 }
 
 
 void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation) {
 	boundaryConditionType = PERIODIC;
-	if (rank == 0)printf("initialization alfven wave\n");
-	fflush(stdout);
+	printf("initialization alfven wave\n");
 
 	double concentration = density / (massProton + massElectron);
 	types[1].particesDeltaX = types[0].particesDeltaX;
@@ -1750,24 +1518,23 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	createParticles();
 	E0 = Vector3d(0, 0, 0);
 
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	double alfvenV = B0.norm() / sqrt(4 * pi * density);
 	if (alfvenV > speed_of_light_normalized) {
 		printf("alfven velocity > c\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "alfven velocity > c\n");
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "alfven velocity > c\n");
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "alfvenV/c = %15.10g > 1\n", alfvenV / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
-	if (rank == 0) fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
-	if (rank == 0) fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
-	if (rank == 0) printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
-	if (rank == 0) printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
 	fflush(stdout);
 
 	//double kw = wavesCount * 2 * pi / xsize;
@@ -1781,28 +1548,26 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
 	if (omegaGyroProton < 5 * speed_of_light_normalized * kw) {
-		if (rank == 0) printf("omegaGyroProton < 5*k*c\n");
+		printf("omegaGyroProton < 5*k*c\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
+		fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
 		//fclose(informationFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
+	printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
 	fflush(stdout);
-	if (rank == 0)
-		fprintf(informationFile, "omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
+	fprintf(informationFile, "omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
 
 	if (omegaPlasmaProton < 5 * omegaGyroProton) {
-		if (rank == 0) printf("omegaPlasmaProton < 5*omegaGyroProton\n");
+		printf("omegaPlasmaProton < 5*omegaGyroProton\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
+		fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
 		//fclose(informationFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
 	fflush(stdout);
-	if (rank == 0)
-		fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
 
 	//w = q*kw*B/mP * 0.5*(sqrt(d)+-b)/a
 	double b = speed_of_light_normalized * kw * (massProton - massElectron) / massProton;
@@ -1815,12 +1580,11 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	if (discriminant < 0) {
 		printf("discriminant < 0\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "discriminant < 0\n");
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "discriminant < 0\n");
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "discriminant = %15.10g\n", discriminant);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
@@ -1864,39 +1628,38 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	a1 = a1 / a0;
 	a0 = 1.0;
 
-	if (rank == 0) printf("a4 = %g\n", a4);
-	if (rank == 0) fprintf(informationFile, "a4 = %g\n", a4);
-	if (rank == 0) printf("a3 = %g\n", a3);
-	if (rank == 0) fprintf(informationFile, "a3 = %g\n", a3);
-	if (rank == 0) printf("a2 = %g\n", a2);
-	if (rank == 0) fprintf(informationFile, "a2 = %g\n", a2);
-	if (rank == 0) printf("a1 = %g\n", a1);
-	if (rank == 0) fprintf(informationFile, "a1 = %g\n", a1);
-	if (rank == 0) printf("a0 = %g\n", a0);
-	if (rank == 0) fprintf(informationFile, "a0 = %g\n", a0);
+	printf("a4 = %g\n", a4);
+	fprintf(informationFile, "a4 = %g\n", a4);
+	printf("a3 = %g\n", a3);
+	fprintf(informationFile, "a3 = %g\n", a3);
+	printf("a2 = %g\n", a2);
+	fprintf(informationFile, "a2 = %g\n", a2);
+	printf("a1 = %g\n", a1);
+	fprintf(informationFile, "a1 = %g\n", a1);
+	printf("a0 = %g\n", a0);
+	fprintf(informationFile, "a0 = %g\n", a0);
 	fflush(stdout);
 
 	double fakeOmega1 = kw * alfvenV;
-	if (rank == 0) printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	double realOmega2 = solve4orderEquation(a4, a3, a2, a1, a0, 1.0);
 	if (realOmega2 < 0) {
 		printf("omega^2 < 0\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega^2 < 0\n");
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "omega^2 < 0\n");
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
 	double error = (((a4 * realOmega2 + a3) * realOmega2 + a2) * realOmega2 + a1) * realOmega2 + a0;
-	if (rank == 0) printf("error = %15.10g\n", error);
+	printf("error = %15.10g\n", error);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "error = %15.10g\n", error);
+	fprintf(informationFile, "error = %15.10g\n", error);
 	//double
 	omega = sqrt(realOmega2) * fakeOmega;
 	if (omega < 0) {
@@ -1905,38 +1668,32 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 
 	if (omega > speed_of_light_normalized * kw / 5.0) {
 		printf("omega > k*c/5\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > k*c/5\n");
-		if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		fprintf(informationFile, "omega > k*c/5\n");
+		printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 		//fclose(informationFile);
-		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		if (rank == 0) fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
-		if (rank == 0) fclose(errorLogFile);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
+		fclose(errorLogFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omega = %g\n", omega / plasma_period);
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega = %g\n", omega / plasma_period);
+	printf("omega = %g\n", omega / plasma_period);
+	fprintf(informationFile, "omega = %g\n", omega / plasma_period);
 
-	if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 
 	if (fabs(omega) > omegaGyroProton / 2) {
-		if (rank == 0) printf("omega > omegaGyroProton/2\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > omegaGyroProton/2\n");
+		printf("omega > omegaGyroProton/2\n");
+		fprintf(informationFile, "omega > omegaGyroProton/2\n");
 	}
-	if (rank == 0) printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
-	if (rank == 0) fclose(informationFile);
+	printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	fclose(informationFile);
 
 	checkFrequency(omega);
 
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	//checkCollisionTime(omega);
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
@@ -2004,7 +1761,6 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		}
 	}
 
-	if (nprocs == 1) {
 		for (int k = 0; k < znumber; ++k) {
 			for (int j = 0; j < ynumber; ++j) {
 				Efield[xnumber][j][k] = Efield[0][j][k];
@@ -2013,7 +1769,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 				explicitEfield[xnumber][j][k] = explicitEfield[0][j][k];
 			}
 		}
-	}
+	
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -2050,72 +1806,61 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	if (fabs(VzamplitudeProton) > speed_of_light_normalized) {
 		printf("VzamplitudeProton > speed_of_light_normalized\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
+		fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
 		printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 		fflush(stdout);
-		if (rank == 0)
-			fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeProton/c = %15.10g > 1\n", VzamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
-	if (rank == 0) printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 	fflush(stdout);
-	if (rank == 0)
-		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 
 	if (fabs(VzamplitudeElectron) > speed_of_light_normalized) {
 		printf("VzamplitudeElectron > speed_of_light_normalized\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
+		fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
 		printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 		fflush(stdout);
-		if (rank == 0)
-			fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeElectron/c = %15.10g > 1\n", VzamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
-	if (rank == 0) printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
-	fflush(stdout);
-	if (rank == 0)
-		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 
 	if (fabs(VyamplitudeProton) > speed_of_light_normalized) {
 		printf("VyamplitudeProton > speed_of_light_normalized\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
+		fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
 		printf("VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
 		fflush(stdout);
-		if (rank == 0)
-			fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeProton/c = %15.10g > 1\n", VyamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
 	if (fabs(VyamplitudeElectron) > speed_of_light_normalized) {
 		printf("VyamplitudeElectron > speed_of_light_normalized\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
+		fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
 		printf("VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
 		fflush(stdout);
-		if (rank == 0)
-			fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeElectron/c = %15.10g > 1\n", VyamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
@@ -2150,28 +1895,26 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 
 	updateDeltaT();
 
-	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
-	if (rank == 0) printf("dt = %g\n", deltaT * plasma_period);
+	printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	printf("dt = %g\n", deltaT * plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
-	if (rank == 0) fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
+	fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
 
 	double Vthermal = sqrt(2 * kBoltzman_normalized * temperature / massElectron);
 	double thermalFlux = Vthermal * concentration * electron_charge_normalized / sqrt(1.0 * types[0].particlesPerBin);
 	double alfvenFlux = (VyamplitudeProton - VyamplitudeElectron) * concentration * electron_charge_normalized;
 	if (thermalFlux > alfvenFlux / 2) {
-		if (rank == 0) printf("thermalFlux > alfvenFlux/2\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
+		printf("thermalFlux > alfvenFlux/2\n");
+		fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
 	}
-	if (rank == 0) printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
 	double minDeltaT = deltaX / Vthermal;
 	if (minDeltaT > deltaT) {
-		if (rank == 0) printf("deltaT < dx/Vthermal\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "deltaT < dx/Vthermal\n");
+		printf("deltaT < dx/Vthermal\n");
+		fprintf(informationFile, "deltaT < dx/Vthermal\n");
 
 		//printf("deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
 		//fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
@@ -2179,7 +1922,6 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		//fclose(informationFile);
 		//exit(0);
 	}
-	if (rank == 0) {
 		printf("deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
 		fflush(stdout);
 		fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
@@ -2283,15 +2025,14 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "dVze/dt amplitude = %g\n",
 		        derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
-	}
+	
 
-	if (rank == 0) fclose(informationFile);
+	fclose(informationFile);
 }
 
 void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRelation) {
 	boundaryConditionType = PERIODIC;
-	if (rank == 0) printf("initialization alfven wave\n");
-	fflush(stdout);
+	printf("initialization alfven wave\n");
 
 	double concentration = density / (massProton + massElectron);
 	types[1].particesDeltaX = types[0].particesDeltaX;
@@ -2306,25 +2047,22 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 	createParticles();
 	E0 = Vector3d(0, 0, 0);
 
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	double alfvenV = B0.norm() / sqrt(4 * pi * density);
 	if (alfvenV > speed_of_light_normalized) {
 		printf("alfven velocity > c\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "alfven velocity > c\n");
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "alfven velocity > c\n");
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "alfvenV/c = %15.10g > 1\n", alfvenV / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
-	if (rank == 0) fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
-	if (rank == 0) fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
-	if (rank == 0) printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
-	if (rank == 0) printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
-	fflush(stdout);
+	fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
 
 	double kx = wavesCount * 2 * pi / xsize;
 	double ky = wavesCount * 2 * pi / ysize;
@@ -2343,28 +2081,22 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
 	if (omegaGyroProton < 5 * speed_of_light_normalized * kw) {
-		if (rank == 0) printf("omegaGyroProton < 5*k*c\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
+		printf("omegaGyroProton < 5*k*c\n");
+		fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
 		//fclose(informationFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
-	fflush(stdout);
-	if (rank == 0)
-		fprintf(informationFile, "omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
+	printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
+	fprintf(informationFile, "omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
 
 	if (omegaPlasmaProton < 5 * omegaGyroProton) {
-		if (rank == 0) printf("omegaPlasmaProton < 5*omegaGyroProton\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
+		printf("omegaPlasmaProton < 5*omegaGyroProton\n");
+		fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
 		//fclose(informationFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
-	fflush(stdout);
-	if (rank == 0)
-		fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
 
 	//w = q*kw*B/mP * 0.5*(sqrt(d)+-b)/a
 	double b = speed_of_light_normalized * kw * (massProton - massElectron) / massProton;
@@ -2376,13 +2108,11 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 
 	if (discriminant < 0) {
 		printf("discriminant < 0\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "discriminant < 0\n");
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "discriminant < 0\n");
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "discriminant = %15.10g\n", discriminant);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
@@ -2426,39 +2156,34 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 	a1 = a1 / a0;
 	a0 = 1.0;
 
-	if (rank == 0) printf("a4 = %g\n", a4);
-	if (rank == 0) fprintf(informationFile, "a4 = %g\n", a4);
-	if (rank == 0) printf("a3 = %g\n", a3);
-	if (rank == 0) fprintf(informationFile, "a3 = %g\n", a3);
-	if (rank == 0) printf("a2 = %g\n", a2);
-	if (rank == 0) fprintf(informationFile, "a2 = %g\n", a2);
-	if (rank == 0) printf("a1 = %g\n", a1);
-	if (rank == 0) fprintf(informationFile, "a1 = %g\n", a1);
-	if (rank == 0) printf("a0 = %g\n", a0);
-	if (rank == 0) fprintf(informationFile, "a0 = %g\n", a0);
-	fflush(stdout);
+	printf("a4 = %g\n", a4);
+	fprintf(informationFile, "a4 = %g\n", a4);
+	printf("a3 = %g\n", a3);
+	fprintf(informationFile, "a3 = %g\n", a3);
+	printf("a2 = %g\n", a2);
+	fprintf(informationFile, "a2 = %g\n", a2);
+	printf("a1 = %g\n", a1);
+	fprintf(informationFile, "a1 = %g\n", a1);
+	printf("a0 = %g\n", a0);
+	fprintf(informationFile, "a0 = %g\n", a0);
 
 	double fakeOmega1 = kw * alfvenV;
-	if (rank == 0) printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	double realOmega2 = solve4orderEquation(a4, a3, a2, a1, a0, 1.0);
 	if (realOmega2 < 0) {
 		printf("omega^2 < 0\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega^2 < 0\n");
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "omega^2 < 0\n");
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
 	double error = (((a4 * realOmega2 + a3) * realOmega2 + a2) * realOmega2 + a1) * realOmega2 + a0;
-	if (rank == 0) printf("error = %15.10g\n", error);
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "error = %15.10g\n", error);
+	printf("error = %15.10g\n", error);
+	fprintf(informationFile, "error = %15.10g\n", error);
 	//double
 	omega = sqrt(realOmega2) * fakeOmega;
 	if (omega < 0) {
@@ -2466,39 +2191,33 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 	}
 
 	if (omega > speed_of_light_normalized * kw / 5.0) {
-		if (rank == 0) printf("omega > k*c/5\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > k*c/5\n");
-		if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		printf("omega > k*c/5\n");
+		fprintf(informationFile, "omega > k*c/5\n");
+		printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 		//fclose(informationFile);
-		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		if (rank == 0) fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
-		if (rank == 0) fclose(errorLogFile);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
+		fclose(errorLogFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omega = %g\n", omega / plasma_period);
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega = %g\n", omega / plasma_period);
+	printf("omega = %g\n", omega / plasma_period);
+	fprintf(informationFile, "omega = %g\n", omega / plasma_period);
 
-	if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 
 	if (fabs(omega) > omegaGyroProton / 2) {
-		if (rank == 0) printf("omega > omegaGyroProton/2\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > omegaGyroProton/2\n");
+		printf("omega > omegaGyroProton/2\n");
+		fprintf(informationFile, "omega > omegaGyroProton/2\n");
 	}
-	if (rank == 0) printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
-	if (rank == 0) fclose(informationFile);
+	printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	fclose(informationFile);
 
 	checkFrequency(omega);
 
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	//checkCollisionTime(omega);
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
@@ -2507,9 +2226,8 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 
 	double alfvenVReal = omega / kw;
 
-	if (rank == 0) fprintf(informationFile, "alfven V real = %15.10g\n", alfvenVReal * scaleFactor / plasma_period);
-	if (rank == 0)
-		fprintf(informationFile, "alfven V real x = %15.10g\n", alfvenVReal * (kx / kw) * scaleFactor / plasma_period);
+	fprintf(informationFile, "alfven V real = %15.10g\n", alfvenVReal * scaleFactor / plasma_period);
+	fprintf(informationFile, "alfven V real x = %15.10g\n", alfvenVReal * (kx / kw) * scaleFactor / plasma_period);
 
 	//double
 	Bzamplitude = B0.norm() * epsilonAmplitude;
@@ -2585,7 +2303,6 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 	}
 
 
-	if (nprocs == 1) {
 		for (int k = 0; k < znumber; ++k) {
 			for (int j = 0; j < ynumber; ++j) {
 				Efield[xnumber][j][k] = Efield[1][j][k];
@@ -2594,7 +2311,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 				explicitEfield[xnumber][j][k] = explicitEfield[1][j][k];
 			}
 		}
-	}
+	
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -2629,73 +2346,53 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 
 	if (fabs(VzamplitudeProton) > speed_of_light_normalized) {
 		printf("VzamplitudeProton > speed_of_light_normalized\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
+		fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
 		printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
-		fflush(stdout);
-		if (rank == 0)
-			fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeProton/c = %15.10g > 1\n", VzamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
-	if (rank == 0) printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
-	fflush(stdout);
-	if (rank == 0)
-		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 
 	if (fabs(VzamplitudeElectron) > speed_of_light_normalized) {
 		printf("VzamplitudeElectron > speed_of_light_normalized\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
+		fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
 		printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
-		fflush(stdout);
-		if (rank == 0)
-			fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeElectron/c = %15.10g > 1\n", VzamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
-	if (rank == 0) printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
-	fflush(stdout);
-	if (rank == 0)
-		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 
 	if (fabs(VyamplitudeProton) > speed_of_light_normalized) {
 		printf("VyamplitudeProton > speed_of_light_normalized\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
+		fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
 		printf("VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
-		fflush(stdout);
-		if (rank == 0)
-			fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeProton/c = %15.10g > 1\n", VyamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
 	if (fabs(VyamplitudeElectron) > speed_of_light_normalized) {
 		printf("VyamplitudeElectron > speed_of_light_normalized\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
+		fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
 		printf("VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
-		fflush(stdout);
-		if (rank == 0)
-			fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
-		if (rank == 0) fclose(informationFile);
+		fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
+		fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeElectron/c = %15.10g > 1\n", VyamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
@@ -2750,28 +2447,25 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 
 	updateDeltaT();
 
-	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
-	if (rank == 0) printf("dt = %g\n", deltaT * plasma_period);
+	printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	printf("dt = %g\n", deltaT * plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
-	if (rank == 0) fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
+	fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
 
 	double Vthermal = sqrt(2 * kBoltzman_normalized * temperature / massElectron);
 	double thermalFlux = Vthermal * concentration * electron_charge_normalized / sqrt(1.0 * types[0].particlesPerBin);
 	double alfvenFlux = (VyamplitudeProton - VyamplitudeElectron) * concentration * electron_charge_normalized;
 	if (thermalFlux > alfvenFlux / 2) {
-		if (rank == 0) printf("thermalFlux > alfvenFlux/2\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
+		printf("thermalFlux > alfvenFlux/2\n");
+		fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
 	}
-	if (rank == 0) printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
 	double minDeltaT = deltaX / Vthermal;
 	if (minDeltaT > deltaT) {
-		if (rank == 0) printf("deltaT < dx/Vthermal\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "deltaT < dx/Vthermal\n");
+		printf("deltaT < dx/Vthermal\n");
+		fprintf(informationFile, "deltaT < dx/Vthermal\n");
 
 		//printf("deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
 		//fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
@@ -2779,7 +2473,6 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		//fclose(informationFile);
 		//exit(0);
 	}
-	if (rank == 0) {
 		printf("deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
 		fflush(stdout);
 		fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
@@ -2883,9 +2576,9 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		fprintf(informationFile, "dVze/dt amplitude = %g\n",
 		        derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
-	}
+	
 
-	if (rank == 0) fclose(informationFile);
+	fclose(informationFile);
 }
 
 void Simulation::initializeLangmuirWave() {
@@ -2906,90 +2599,22 @@ void Simulation::initializeLangmuirWave() {
 	double langmuirV = omega / kw;
 
 	checkDebyeParameter();
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
-	if (rank == 0) fprintf(informationFile, "lengmuir V = %lf\n", langmuirV * scaleFactor / plasma_period);
-	if (rank == 0) fclose(informationFile);
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	fprintf(informationFile, "lengmuir V = %lf\n", langmuirV * scaleFactor / plasma_period);
+	fclose(informationFile);
 	if (langmuirV > speed_of_light_normalized) {
 		printf("langmuirV > c\n");
-		fflush(stdout);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "langmuireV/c = %15.10g > 1\n", langmuirV / speed_of_light_normalized);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
-	if (rank == 0) printf("creating particles\n");
-	fflush(stdout);
+	printf("creating particles\n");
 	int nproton = 0;
 	int nelectron = 0;
 	double weight = (concentration / types[0].particlesPerBin) * volumeB(0, 0, 0);
-	/*for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-		    for (int k = 0; k < znumber; ++k) {
-		        double x;
-		        for (int l = 0; l < particlesPerBin; ++l) {
-		            ParticleTypes type;
-		            type = PROTON;
-		            Particle* particle = createParticle(particlesNumber, i, j, k, weight, type, temperature);
-		            nproton++;
-		            particles.push_back(particle);
-		            particlesNumber++;
-		            if (particlesNumber % 1000 == 0) {
-		                printf("create particle number %d\n", particlesNumber);
-		            }
-		        }
-		        for (int l = 0; l < particlesPerBin * (1 + epsilon * cos(kw * middleXgrid[i])); ++l) {
-		            ParticleTypes type;
-		            type = ELECTRON;
-		            Particle* particle = createParticle(particlesNumber, i, j, k, weight, type, temperature);
-		            nelectron++;
-		            particles.push_back(particle);
-		            particlesNumber++;
-		            if (particlesNumber % 1000 == 0) {
-		                printf("create particle number %d\n", particlesNumber);
-		            }
-		        }
-		    }
-		}
-	}
-	if (nproton != nelectron) {
-		printf("nproton != nelectron\n");
-		int n;
-		ParticleTypes type;
-		if (nproton > nelectron) {
-		    n = nproton - nelectron;
-		    type = ELECTRON;
-		}
-		else {
-		    n = nelectron - nproton;
-		    type = PROTON;
-		}
-		int i = 0;
-		while (n > 0) {
-		    Particle* particle = createParticle(particlesNumber, i, 0, 0, weight, type, temperature);
-		    particles.push_back(particle);
-		    particlesNumber++;
-		    ++i;
-		    n--;
-		    if (i >= xnumber) {
-		        i = 0;
-		    }
-		    if (type == PROTON) {
-		        nproton++;
-		    }
-		    else {
-		        nelectron++;
-		    }
-		}
-	}
-	if (nproton != nelectron) {
-		printf("nproton != nelectron\n");
-		errorLogFile = fopen("./output/errorLog.dat", "w");
-		fprintf(errorLogFile, "nproton = %d nelectron = %d\n", nproton, nelectron);
-		fclose(errorLogFile);
-		exit(0);
-	}*/
+	
 	createParticles();
 
 	double chargeDensityAmplitude = epsilon * concentration * electron_charge_normalized;
@@ -3026,12 +2651,10 @@ void Simulation::initializeLangmuirWave() {
 		}
 	}
 
-	if (rank == 0) {
-		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
-		fprintf(incrementFile, "%g %g %g %g\n", 0.0, 0.0, 1.0, 1.0);
-		fclose(incrementFile);
-	}
-	MPI_Barrier(MPI_COMM_WORLD);
+	incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
+	fprintf(incrementFile, "%g %g %g %g\n", 0.0, 0.0, 1.0, 1.0);
+	fclose(incrementFile);
+	
 }
 
 void Simulation::initializeFluxFromRight() {
@@ -3044,12 +2667,10 @@ void Simulation::initializeFluxFromRight() {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			for (int k = 0; k < znumber + 1; ++k) {
 				Efield[i][j][k] = E0;
-				if (rank == 0) {
 					if (i == 0 || i == 1) {
 						Efield[i][j][k].y = 0;
 						Efield[i][j][k].z = 0;
 					}
-				}
 				tempEfield[i][j][k] = Efield[i][j][k];
 				newEfield[i][j][k] = Efield[i][j][k];
 				explicitEfield[i][j][k] = Efield[i][j][k];
@@ -3060,13 +2681,7 @@ void Simulation::initializeFluxFromRight() {
 	for (int i = 0; i < additionalBinNumber; ++i) {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			for (int k = 0; k < znumber + 1; ++k) {
-				if (rank == 0) {
-					additionalEfieldLeft[i][j][k] = Vector3d(0, 0, 0);
-				}
-				else {
-					additionalEfieldLeft[i][j][k] = E0;
-				}
-				additionalEfieldRight[i][j][k] = E0;
+				additionalEfieldLeft[i][j][k] = Vector3d(0, 0, 0);
 			}
 		}
 	}
@@ -3080,31 +2695,18 @@ void Simulation::initializeFluxFromRight() {
 		}
 	}
 
-	//fieldsLorentzTransitionX(V0.x);
-
-	/*for (int i = 0; i < particles.size(); ++i) {
-		Particle* particle = particles[i];
-		particle->addVelocity(V0, speed_of_light_normalized);
-	}*/
-
 	double magneticEnergy = B0.scalarMult(B0) / (8 * pi);
 	double kineticEnergy = density * V0.scalarMult(V0) / 2;
 
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
-	if (rank == 0) fprintf(informationFile, "magneticEnergy/kineticEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
-	if (rank == 0) printf("magneticEnergy/kinetikEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
-	fflush(stdout);
-	if (rank == 0) fclose(informationFile);
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	fprintf(informationFile, "magneticEnergy/kineticEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
+	printf("magneticEnergy/kinetikEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
+	fclose(informationFile);
 
 	checkDebyeParameter();
-
-	MPI_Barrier(MPI_COMM_WORLD);
-	if (rank == 0) {
-		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
-		fprintf(incrementFile, "%g %g %g %g\n", 0.0, 0.0, 1.0, 1.0);
-		fclose(incrementFile);
-	}
-	MPI_Barrier(MPI_COMM_WORLD);
+	incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
+	fprintf(incrementFile, "%g %g %g %g\n", 0.0, 0.0, 1.0, 1.0);
+	fclose(incrementFile);
 }
 
 void Simulation::fieldsLorentzTransitionX(const double& v) {
@@ -3209,8 +2811,7 @@ void Simulation::initializeShockWave() {
 		}
 	}
 
-	if (rank == 0) printf("creating particles\n");
-	fflush(stdout);
+	printf("creating particles\n");
 	double concentration = density / (massProton + massElectron);
 	double downstreamTemperature = 1000 * temperature;
 	double upstreamTemperature = temperature;
@@ -3220,19 +2821,16 @@ void Simulation::initializeShockWave() {
 	double soundVelectron = sqrt(5 * kBoltzman_normalized * downstreamTemperature / (3 * massElectron));
 
 	if (alfvenV > V0.norm()) {
-		if (rank == 0) printf("alfvenV > V0\n");
-		fflush(stdout);
+		printf("alfvenV > V0\n");
 	}
 
-	if (rank == 0) printf("alfvenV/V0 = %15.10g\n", alfvenV / V0.norm());
-	fflush(stdout);
+	printf("alfvenV/V0 = %15.10g\n", alfvenV / V0.norm());
 
 	if (soundVelectron > V0.norm()) {
-		if (rank == 0) printf("soundV > V0\n");
-		fflush(stdout);
+		printf("soundV > V0\n");
+
 	}
-	if (rank == 0) printf("soundV/V0 = %15.10g\n", soundVelectron / V0.norm());
-	fflush(stdout);
+	printf("soundV/V0 = %15.10g\n", soundVelectron / V0.norm());
 	//Vector3d downstreamVelocity = Vector3d(0, 0, 0);
 	shockWavePoint = xnumber / 2;
 	int n = 0;
@@ -3276,8 +2874,7 @@ void Simulation::initializeShockWave() {
 						particles.push_back(particle);
 						particlesNumber++;
 						if (particlesNumber % 1000 == 0) {
-							if (rank == 0) printf("create particle number %d\n", particlesNumber);
-							fflush(stdout);
+							printf("create particle number %d\n", particlesNumber);
 						}
 					}
 				}
@@ -3376,16 +2973,10 @@ void Simulation::initializeKolmogorovSpectrum(int first, int last, double turbul
 
 	double* phases = new double[2 * (last - first + 1)];
 
-	if (rank == 0) {
-		for (int i = 0; i < 2 * (last - first + 1); ++i) {
-			phases[i] = 2 * pi * uniformDistribution();
-		}
+	for (int i = 0; i < 2 * (last - first + 1); ++i) {
+		phases[i] = 2 * pi * uniformDistribution();
 	}
-
-
-	MPI_Barrier(MPI_COMM_WORLD);
-	MPI_Bcast(phases, 2 * (last - first + 1), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Barrier(MPI_COMM_WORLD);
+	
 
 	for (int harmCounter = first; harmCounter <= last; ++harmCounter) {
 		double kw = 2 * pi * harmCounter / length;
@@ -3427,75 +3018,43 @@ void Simulation::initializeTwoStream() {
 
 	double kw = 2 * pi / xsize;
 
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	if (xsize * omegaPlasmaElectron / speed_of_light_normalized < 5) {
-		if (rank == 0) printf("xsize*omegaPlasmaElectron/speed_of_light_normalized < 5\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "xsize*omegaPlasmaElectron/speed_of_light_normalized < 5\n");
+		printf("xsize*omegaPlasmaElectron/speed_of_light_normalized < 5\n");
+		fprintf(informationFile, "xsize*omegaPlasmaElectron/speed_of_light_normalized < 5\n");
 	}
-	if (rank == 0)
 		printf("xsize*omegaPlasmaElectron/speed_of_light_normalized = %g\n",
 		       xsize * omegaPlasmaElectron / speed_of_light_normalized);
-	fflush(stdout);
-	if (rank == 0)
 		fprintf(informationFile, "xsize*omegaPlasmaElectron/speed_of_light_normalized = %g\n",
 		        xsize * omegaPlasmaElectron / speed_of_light_normalized);
 
 	if (deltaX * omegaPlasmaElectron / speed_of_light_normalized > 0.2) {
-		if (rank == 0) printf("deltaX*omegaPlasmaElectron/speed_of_light_normalized > 0.2\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "deltaX*omegaPlasmaElectron/speed_of_light_normalized > 0.2\n");
+		printf("deltaX*omegaPlasmaElectron/speed_of_light_normalized > 0.2\n");
+		fprintf(informationFile, "deltaX*omegaPlasmaElectron/speed_of_light_normalized > 0.2\n");
 	}
-	if (rank == 0)
 		printf("deltaX*omegaPlasmaElectron/speed_of_light_normalized = %g\n",
 		       xsize * omegaPlasmaElectron / speed_of_light_normalized);
-	fflush(stdout);
-	if (rank == 0)
 		fprintf(informationFile, "deltaX*omegaPlasmaElectron/speed_of_light_normalized = %g\n",
 		        xsize * omegaPlasmaElectron / speed_of_light_normalized);
 
 	if (kw > omegaPlasmaElectron / u) {
-		if (rank == 0) printf("k > omegaPlasmaElectron/u\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "k > omegaPlasmaElectron/u\n");
+		printf("k > omegaPlasmaElectron/u\n");
+		fprintf(informationFile, "k > omegaPlasmaElectron/u\n");
 	}
 
-	if (rank == 0) printf("k u/omegaPlasmaElectron = %g\n", kw * u / omegaPlasmaElectron);
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "k u/omegaPlasmaElectron = %g\n", kw * u / omegaPlasmaElectron);
-	if (rank == 0) fclose(informationFile);
+	printf("k u/omegaPlasmaElectron = %g\n", kw * u / omegaPlasmaElectron);
+	fprintf(informationFile, "k u/omegaPlasmaElectron = %g\n", kw * u / omegaPlasmaElectron);
+	fclose(informationFile);
 
 	double omegaGyroHelium = B0.norm() * electron_charge_normalized / (massHelium3 * speed_of_light_normalized);
 
-	if (rank == 0) {
-		double increment = (u * omegaPlasmaElectron / (speed_of_light_normalized)) / sqrt(gamma);
+	double increment = (u * omegaPlasmaElectron / (speed_of_light_normalized)) / sqrt(gamma);
 
-		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
-		fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, 1.0, 1.0);
-		fclose(incrementFile);
-	}
-	MPI_Barrier(MPI_COMM_WORLD);
-
-	/*for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-		    for (int k = 0; k < znumber; ++k) {
-		        Bfield[i][j][k] += Vector3d(0, 1, 0) * Bamplitude * cos(kw * middleXgrid[i]);
-		        newBfield[i][j][k] = Bfield[i][j][k];
-		    }
-		}
-	}*/
-
-	/*for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-		    for (int k = 0; k < znumber + 1; ++k) {
-		        Efield[i][j][k] = Vector3d(0, 0, 1) * Eamplitude * cos(kw * xgrid[i]);
-		        tempEfield[i][j][k] = Efield[i][j][k];
-		        newEfield[i][j][k] = Efield[i][j][k];
-		        explicitEfield[i][j][k] = Efield[i][j][k];
-		    }
-		}
-	}*/
+	incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
+	fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, 1.0, 1.0);
+	fclose(incrementFile);
+	
 	int electronCount = 0;
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
@@ -3532,7 +3091,6 @@ void Simulation::initializeExternalFluxInstability() {
 
 
 	checkGyroRadius();
-	if (rank == 0) {
 		informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 		fprintf(informationFile, "alfven V = %g\n", alfvenV * scaleFactor / plasma_period);
 		fprintf(informationFile, "phase V = %g\n", phaseV * scaleFactor / plasma_period);
@@ -3556,7 +3114,6 @@ void Simulation::initializeExternalFluxInstability() {
 		fprintf(informationFile, "omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
 
 		fclose(informationFile);
-	}
 }
 
 void Simulation::initializeAnisotropic() {
@@ -3606,27 +3163,24 @@ void Simulation::initializeAnisotropic() {
 
 	double vthermalProton = sqrt(kBoltzman_normalized * types[1].temperatureX / massProton);
 
-	if (rank == 0) printf("delta Omega/kmax vth = %g\n", (omegaGyroAlpha - omegaGyroProton) / (kmax * vthermalProton));
-	if (rank == 0) printf("delta Omega/kmin vth = %g\n", (omegaGyroAlpha - omegaGyroProton) / (kmin * vthermalProton));
+	printf("delta Omega/kmax vth = %g\n", (omegaGyroAlpha - omegaGyroProton) / (kmax * vthermalProton));
+	printf("delta Omega/kmin vth = %g\n", (omegaGyroAlpha - omegaGyroProton) / (kmin * vthermalProton));
 
-	if (rank == 0) printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
-	if (rank == 0) printf("omega plasma/gyro omega alphas = %g\n", omegaPlasmaAlpha / omegaGyroAlpha);
-	if (rank == 0) printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
-	fflush(stdout);
+	printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
+	printf("omega plasma/gyro omega alphas = %g\n", omegaPlasmaAlpha / omegaGyroAlpha);
+	printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 
 	initializeKolmogorovSpectrum(1, 100, 0.0000001);
 
 	double omegaGyroHelium = B0.norm() * electron_charge_normalized / (massHelium3 * speed_of_light_normalized);
 
-	if (rank == 0) {
-		double increment = 0.01 * omegaGyroHelium;
+	double increment = 0.01 * omegaGyroHelium;
 
-		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
-		//todo length
-		fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, 0.0, 0.0);
-		fclose(incrementFile);
-	}
-	MPI_Barrier(MPI_COMM_WORLD);
+	incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
+	//todo length
+	fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, 0.0, 0.0);
+	fclose(incrementFile);
+	
 }
 
 void Simulation::initializeAnisotropicSilicon() {
@@ -3679,7 +3233,6 @@ void Simulation::initializeAnisotropicSilicon() {
 
 	initializeKolmogorovSpectrum(1, 100, 0.0000001);
 
-	if (rank == 0) {
 		double increment = 0.011 * omegaGyroSilicon;
 		double length = 180 * speed_of_light_normalized / omegaPlasmaOxygen;
 
@@ -3687,8 +3240,6 @@ void Simulation::initializeAnisotropicSilicon() {
 		//todo length
 		fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, length, length * scaleFactor);
 		fclose(incrementFile);
-	}
-	MPI_Barrier(MPI_COMM_WORLD);
 }
 
 
@@ -3727,13 +3278,12 @@ void Simulation::initializeWeibel() {
 	omegaGyroProton = B0.norm() * electron_charge_normalized / (massProton * speed_of_light_normalized);
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
-	if (rank == 0) printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
-	if (rank == 0) printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
+	printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
+	printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 
 	initializeKolmogorovSpectrum(1, 100, 0.0000001);
 
-	if (rank == 0) printf("evaluating increment\n");
-	if (rank == 0) {
+	printf("evaluating increment\n");
 		double alphaNormal = types[0].alphaNormal;
 		double alphaParallel = types[0].alphaParallel;
 
@@ -3771,9 +3321,8 @@ void Simulation::initializeWeibel() {
 		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
 		fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, length, length / scaleFactor);
 		fclose(incrementFile);
-	}
-	MPI_Barrier(MPI_COMM_WORLD);
-	if (rank == 0) printf("finish initialize weibel\n");
+
+	printf("finish initialize weibel\n");
 }
 
 
@@ -3801,9 +3350,8 @@ void Simulation::initializeRingWeibel() {
 	omegaGyroProton = B0.norm() * electron_charge_normalized / (massProton * speed_of_light_normalized);
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
-	if (rank == 0) printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
-	if (rank == 0) printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
-	fflush(stdout);
+	printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
+	printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 
 	initializeKolmogorovSpectrum(1, 100, 0.0000001);
 
@@ -3831,8 +3379,6 @@ void Simulation::initializeRingWeibel() {
 
 	double G = 0.5 * (log((1 + betaParallel) / (1 - betaParallel))) / betaParallel;
 
-
-	if (rank == 0) {
 
 		double increment;
 		double length;
@@ -3875,8 +3421,6 @@ void Simulation::initializeRingWeibel() {
 		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
 		fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, length, length / scaleFactor);
 		fclose(incrementFile);
-	}
-	MPI_Barrier(MPI_COMM_WORLD);
 }
 
 void Simulation::initializeHomogenouseFlow() {
@@ -3919,12 +3463,12 @@ void Simulation::initializeHomogenouseFlow() {
 }
 
 void Simulation::createArrays() {
-	if (rank == 0) printf("creating arrays\n");
-	if (rank == 0) fflush(stdout);
+	printf("creating arrays\n");
+	fflush(stdout);
 	//if(rank == 0) printLog("creating arrays\n");
 
-	if (rank == 0) printf("creating grid arrays\n");
-	if (rank == 0) fflush(stdout);
+	printf("creating grid arrays\n");
+	fflush(stdout);
 	// if(rank == 0) printLog("creating grid arrays\n");
 	xgrid = new double[xnumber + 2];
 	ygrid = new double[ynumber + 1];
@@ -3934,8 +3478,8 @@ void Simulation::createArrays() {
 	middleYgrid = new double[ynumber];
 	middleZgrid = new double[znumber];
 
-	if (rank == 0) printf("creating gmresOutput arrays\n");
-	if (rank == 0) fflush(stdout);
+	printf("creating gmresOutput arrays\n");
+	fflush(stdout);
 
 	gmresOutput = new double ***[xnumber + 1];
 	for (int i = 0; i < xnumber + 1; ++i) {
@@ -3948,8 +3492,11 @@ void Simulation::createArrays() {
 		}
 	}
 
-	if (rank == 0) printf("creating fields arrays\n");
-	if (rank == 0) fflush(stdout);
+	gmresMaxwellBasis = new LargeVectorBasis(20, xnumber+1, ynumber, znumber, 3);
+	gmresCleanupBasis = new LargeVectorBasis(20, xnumber, ynumber, znumber, 1);
+
+	printf("creating fields arrays\n");
+	fflush(stdout);
 	// if(rank == 0) printLog("creating fields arrays\n");
 
 	Efield = new Vector3d **[xnumber + 2];
@@ -4019,8 +3566,7 @@ void Simulation::createArrays() {
 		}
 	}
 
-	if (rank == 0) printf("creating maxwellequation matrix arrays\n");
-	fflush(stdout);
+	printf("creating maxwellequation matrix arrays\n");
 	//if(rank == 0) printLog("creating maxwell equation matrix arrays\n");
 
 	maxwellEquationMatrix = new std::vector<MatrixElement> ***[xnumber + 1];
@@ -4040,8 +3586,7 @@ void Simulation::createArrays() {
 		}
 	}
 
-	if (rank == 0) printf("creating arrays for divergence\n");
-	if (rank == 0) fflush(stdout);
+	printf("creating arrays for divergence\n");
 	//if(rank == 0) printLog("creating arrays for divergence\n");
 
 	divergenceCleanUpMatrix = new std::vector<MatrixElement> ***[xnumber + 2];
@@ -4092,11 +3637,9 @@ void Simulation::createArrays() {
 		}
 	}
 
-	if (rank == 0) printf("creating arrays for particlesInBins\n");
-	if (rank == 0) fflush(stdout);
+	printf("creating arrays for particlesInBins\n");
 
-	if (rank == 0) printf("creating arrays for parameters\n");
-	fflush(stdout);
+	printf("creating arrays for parameters\n");
 	//if(rank == 0) printLog("creating arrays for parameters\n");
 
 	particleConcentrations = new double ***[typesNumber];
@@ -4244,8 +3787,7 @@ void Simulation::createArrays() {
 		}
 	}
 
-	if (rank == 0) printf("creating arrays for fluxes\n");
-	fflush(stdout);
+	printf("creating arrays for fluxes\n");
 	//if(rank == 0) printLog("creating arrays for fluxes\n");
 
 	electricFlux = new Vector3d **[xnumber + 2];
@@ -4343,14 +3885,23 @@ void Simulation::createArrays() {
 		}
 	}
 
-	if (rank == 0) printf("creating arrays for buffers\n");
-	fflush(stdout);
+	printf("creating arrays for buffers\n");
 	//if(rank == 0) printLog("creating arrays for buffers\n");
 
-	rightEbuffer = new double[(ynumber + 1) * (znumber + 1) * 3];
-	leftEbuffer = new double[(ynumber + 1) * (znumber + 1) * 3];
-	leftEoutBuffer = new double[(ynumber + 1) * (znumber + 1) * 3];
-	rightEinBuffer = new double[(ynumber + 1) * (znumber + 1) * 3];
+	rightOutVectorNodeBuffer = new double[(ynumber + 1) * (znumber + 1) * 3 * (1 + additionalBinNumber)];
+	leftOutVectorNodeBuffer = new double[(ynumber + 1) * (znumber + 1) * 3 * (1 + additionalBinNumber)];
+	leftInVectorNodeBuffer = new double[(ynumber + 1) * (znumber + 1) * 3 * (1 + additionalBinNumber)];
+	rightInVectorNodeBuffer = new double[(ynumber + 1) * (znumber + 1) * 3 * (1 + additionalBinNumber)];
+
+	rightOutVectorCellBuffer = new double[(ynumber) * (znumber) * 3 * (1 + additionalBinNumber)];
+	leftOutVectorCellBuffer = new double[(ynumber) * (znumber) * 3 * (1 + additionalBinNumber)];
+	leftInVectorCellBuffer = new double[(ynumber) * (znumber) * 3 * (1 + additionalBinNumber)];
+	rightInVectorCellBuffer = new double[(ynumber) * (znumber) * 3 * (1 + additionalBinNumber)];
+
+	rightOutGmresBuffer = new double[(ynumber) * (znumber) * 3];
+	leftOutGmresBuffer = new double[(ynumber) * (znumber) * 3];
+	leftInGmresBuffer = new double[(ynumber) * (znumber) * 3];
+	rightInGmresBuffer = new double[(ynumber) * (znumber) * 3];
 
 	tempCellParameterLeft = new double **[2 + additionalBinNumber];
 	tempCellParameterRight = new double **[2 + additionalBinNumber];
@@ -4412,8 +3963,7 @@ void Simulation::createArrays() {
 
 	arrayCreated = true;
 
-	if (rank == 0) printf("finish creating arrays\n");
-	fflush(stdout);
+	printf("finish creating arrays\n");
 	// if(rank == 0) printLog("finish creating arrays\n");
 }
 
@@ -4528,17 +4078,15 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 		types[i].generalWeight = 0;
 	}
 
-	if (rank == 0) {
-		particleTypesFile = fopen((outputDir + "particleTypes.dat").c_str(), "w");
-		for (int t = 0; t < typesNumber; ++t) {
-			fprintf(particleTypesFile, "%d\n", types[t].particlesPerBin);
-		}
-		fclose(particleTypesFile);
+	particleTypesFile = fopen((outputDir + "particleTypes.dat").c_str(), "w");
+	for (int t = 0; t < typesNumber; ++t) {
+		fprintf(particleTypesFile, "%d\n", types[t].particlesPerBin);
 	}
+	fclose(particleTypesFile);
+	
 }
 
 void Simulation::createFiles() {
-	if (rank == 0) {
 		printf("creating files\n");
 		fflush(stdout);
 		FILE* logFile = fopen((outputDir + "log.dat").c_str(), "w");
@@ -4689,46 +4237,39 @@ void Simulation::createFiles() {
 		fclose(particleHelium3File);
 		//outputEverythingFile = fopen("./output/everything.dat","w");
 		//fclose(outputEverythingFile);
-	}
 }
 
 void Simulation::checkFrequency(double omega) {
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	double cyclothronOmegaElectron = electron_charge_normalized * B0.norm() / (massElectron * speed_of_light_normalized);
 	double cyclothronOmegaProton = electron_charge_normalized * B0.norm() / (massProton * speed_of_light_normalized);
 	if (omega > cyclothronOmegaProton) {
-		if (rank == 0) printf("omega > cyclothron Omega Proton\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > cyclothron Omega Proton\n");
+		printf("omega > cyclothron Omega Proton\n");
+		fprintf(informationFile, "omega > cyclothron Omega Proton\n");
 	}
 	else if (omega > cyclothronOmegaProton / 100.0) {
-		if (rank == 0) printf("omega > cyclothrone Omega Proton/100\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > cyclothron Omega Proton/100\n");
+		printf("omega > cyclothrone Omega Proton/100\n");
+		fprintf(informationFile, "omega > cyclothron Omega Proton/100\n");
 	}
-	if (rank == 0) printf("omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
+	printf("omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
+	fprintf(informationFile, "omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
 
 	if (omega > 1.0) {
-		if (rank == 0) printf("omega > omega plasma\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > omega plasma\n");
+		printf("omega > omega plasma\n");
+		fprintf(informationFile, "omega > omega plasma\n");
 	}
 	else if (omega > 0.01) {
-		if (rank == 0) printf("omega > omega plasma/100\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > omega plasma/100\n");
+		printf("omega > omega plasma/100\n");
+		fprintf(informationFile, "omega > omega plasma/100\n");
 	}
-	if (rank == 0) printf("omega/omega plasma = %g\n", omega);
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/omega plasma = %g\n", omega);
+	printf("omega/omega plasma = %g\n", omega);
+	fprintf(informationFile, "omega/omega plasma = %g\n", omega);
 
-	if (rank == 0) fclose(informationFile);
+	fclose(informationFile);
 }
 
 void Simulation::checkDebyeParameter() {
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 
 	double debyeLength2 = 0;
@@ -4746,58 +4287,28 @@ void Simulation::checkDebyeParameter() {
 	}
 
 	if (debyeLength < deltaX) {
-		if (rank == 0) printf("debye length < deltaX\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "debye length < deltaX\n");
+		printf("debye length < deltaX\n");
+		fprintf(informationFile, "debye length < deltaX\n");
 	}
-	if (rank == 0) printf("debye length/deltaX = %g\n", debyeLength / deltaX);
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "debye length/deltaX = %g\n", debyeLength / deltaX);
+	printf("debye length/deltaX = %g\n", debyeLength / deltaX);
+	fprintf(informationFile, "debye length/deltaX = %g\n", debyeLength / deltaX);
 
 	if (debyeNumber < 1.0) {
-		if (rank == 0) printf("debye number < 1\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "debye number < 1\n");
+		printf("debye number < 1\n");
+		fprintf(informationFile, "debye number < 1\n");
 	}
 	else if (debyeNumber < 100.0) {
-		if (rank == 0) printf("debye number < 100\n");
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "debye number < 100\n");
+		printf("debye number < 100\n");
+		fprintf(informationFile, "debye number < 100\n");
 	}
-	if (rank == 0) printf("debye number = %g\n", debyeNumber);
-	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "debye number = %g\n", debyeNumber);
+	printf("debye number = %g\n", debyeNumber);
+	fprintf(informationFile, "debye number = %g\n", debyeNumber);
 
-	/*double superParticleDebyeLength = 1 / sqrt(
-		4 * pi * superParticleCharge * superParticleCharge * superParticleConcentration / (kBoltzman_normalized * superParticleTemperature));
-	double superParticleDebyeNumber = 4 * pi * cube(superParticleDebyeLength) * superParticleConcentration / 3;
-
-	if (superParticleDebyeLength > deltaX) {
-		if(rank == 0) printf("super particle debye length > deltaX\n");
-		fflush(stdout);
-		if(rank == 0) fprintf(informationFile, "super particle debye length > deltaX\n");
-	}
-	if(rank == 0) printf("super particle debye length/deltaX = %g\n", superParticleDebyeLength / deltaX);
-	fflush(stdout);
-	if(rank == 0) fprintf(informationFile, "super particle debye length/deltaX = %g\n", superParticleDebyeLength / deltaX);
-
-	if (superParticleDebyeNumber < 1.0) {
-		if(rank == 0) printf("superparticle debye number < 1\n");
-		fflush(stdout);
-		if(rank == 0) fprintf(informationFile, "superparticle debye number < 1\n");
-	} else if (superParticleDebyeNumber < 100.0) {
-		if(rank == 0) printf("superparticle debye number < 100\n");
-		fflush(stdout);
-		if(rank == 0) fprintf(informationFile, "superparticle debye number < 100\n");
-	}
-	if(rank == 0) printf("superparticle debye number = %g\n", superParticleDebyeNumber);
-	fflush(stdout);
-	if(rank == 0) fprintf(informationFile, "superparticle debye number = %g\n", superParticleDebyeNumber);*/
-	if (rank == 0) fclose(informationFile);
+	fclose(informationFile);
 }
 
 void Simulation::checkGyroRadius() {
-	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	if (B0.norm() > 0) {
 		double thermalMomentumElectron = sqrt(
@@ -4806,34 +4317,29 @@ void Simulation::checkGyroRadius() {
 		double thermalMomentumProton = sqrt(massProton * kBoltzman_normalized * temperature) + massProton * V0.norm();
 		double gyroRadiusProton = thermalMomentumProton * speed_of_light_normalized / (electron_charge_normalized * B0.norm());
 		if (deltaX > 0.5 * gyroRadiusElectron) {
-			if (rank == 0) printf("deltaX > 0.5*gyroRadiusElectron\n");
-			fflush(stdout);
-			if (rank == 0) fprintf(informationFile, "deltaX > 0.5*gyroRadiusElectron\n");
+			printf("deltaX > 0.5*gyroRadiusElectron\n");
+			fprintf(informationFile, "deltaX > 0.5*gyroRadiusElectron\n");
 		}
 
-		if (rank == 0) printf("deltaX/gyroRadiusElectron = %g\n", deltaX / gyroRadiusElectron);
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "deltaX/gyroRadiusElectron = %g\n", deltaX / gyroRadiusElectron);
+		printf("deltaX/gyroRadiusElectron = %g\n", deltaX / gyroRadiusElectron);
+		fprintf(informationFile, "deltaX/gyroRadiusElectron = %g\n", deltaX / gyroRadiusElectron);
 
 		if (xsize < 2 * gyroRadiusProton) {
-			if (rank == 0) printf("xsize < 2*gyroRadiusProton\n");
-			fflush(stdout);
-			if (rank == 0) fprintf(informationFile, "xsize < 2*gyroRadiusProton\n");
+			printf("xsize < 2*gyroRadiusProton\n");
+			fprintf(informationFile, "xsize < 2*gyroRadiusProton\n");
 		}
 
-		if (rank == 0) printf("xsize/gyroRadiusProton= %g\n", xsize / gyroRadiusProton);
-		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "xsize/gyroRadiusProton = %g\n", xsize / gyroRadiusProton);
+		printf("xsize/gyroRadiusProton= %g\n", xsize / gyroRadiusProton);
+		fprintf(informationFile, "xsize/gyroRadiusProton = %g\n", xsize / gyroRadiusProton);
 	}
 
-	if (rank == 0) fclose(informationFile);
+	fclose(informationFile);
 }
 
 void Simulation::createParticles() {
 	evaluateParticleTypesAlpha();
-	if (rank == 0) printf("creating particles\n");
-	fflush(stdout);
-	if (rank == 0) printLog("creating particles\n");
+	printf("creating particles\n");
+	printLog("creating particles\n");
 	int n = 0;
 	//for (int i = 0; i < xnumber; ++i) {
 	for (int i = 1; i < xnumber; ++i) {
@@ -4871,7 +4377,7 @@ void Simulation::createParticles() {
 						particles.push_back(particle);
 						particlesNumber++;
 						if (particlesNumber % 1000 == 0) {
-							if ((rank == 0) && (verbosity > 0))printf("create particle number %d\n", particlesNumber);
+							if ((verbosity > 0))printf("create particle number %d\n", particlesNumber);
 						}
 						alertNaNOrInfinity(particle->coordinates.x,"particle.x = NaN in createParticles\n");
 						alertNaNOrInfinity(particle->coordinates.y,"particle.y = NaN in createParticles\n");
@@ -4907,7 +4413,7 @@ void Simulation::createParticles() {
 	electronNumber8 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[0].particlesPerBin * 0.40, ELECTRON);
 	electronNumber9 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[0].particlesPerBin * 0.45, ELECTRON);
 
-	printf("rank = %d p0 = %d p1 = %d p2 = %d e0 = %d e1 = %d e2 = %d Np = %d\n", rank, protonNumber, protonNumber1, protonNumber2, electronNumber, electronNumber1, electronNumber2, particlesNumber);
+	//printf("rank = %d p0 = %d p1 = %d p2 = %d e0 = %d e1 = %d e2 = %d Np = %d\n", rank, protonNumber, protonNumber1, protonNumber2, electronNumber, electronNumber1, electronNumber2, particlesNumber);
 
 	/*if (preserveChargeLocal) {
 		moveToPreserveChargeLocal();
@@ -4943,7 +4449,6 @@ void Simulation::moveToPreserveChargeLocal() {
 						fflush(stdout);
 						fprintf(errorLogFile, "error in preserving charge\n");
 						fclose(errorLogFile);
-						MPI_Finalize();
 						exit(0);
 					}
 					if (particles[electronCount]->type == ELECTRON) {
@@ -4960,7 +4465,6 @@ void Simulation::moveToPreserveChargeLocal() {
 }
 
 void Simulation::addToPreserveChargeGlobal() {
-	if (rank == nprocs - 1) {
 		for (int i = 0; i < escapedParticlesRight.size(); ++i) {
 			Particle* particle = escapedParticlesRight[i];
 			int typeNumber = getTypeNumber(particle);
@@ -4980,13 +4484,10 @@ void Simulation::addToPreserveChargeGlobal() {
 				sqr(scaleFactor / plasma_period);
 			theoreticalMomentum += newParticle->getMomentum() * newParticle->weight * scaleFactor / plasma_period;
 			particlesNumber++;
-		}
 	}
-	if ((rank == 0) && (verbosity > 1)) printf("exchanging particles number\n");
-	MPI_Barrier(MPI_COMM_WORLD);
+	if ((verbosity > 1)) printf("exchanging particles number\n");
 	int tempParticleNumber[1];
 	tempParticleNumber[0] = particlesNumber;
-	MPI_Bcast(tempParticleNumber, 1, MPI_INT, nprocs - 1, MPI_COMM_WORLD);
 	particlesNumber = tempParticleNumber[0];
 }
 
@@ -5046,7 +4547,6 @@ Particle* Simulation::getProton(int n) {
 	printf("can not find proton number %d\n", n);
 	fflush(stdout);
 	fclose(errorLogFile);
-	MPI_Finalize();
 	exit(0);
 	return NULL;
 }
@@ -5067,7 +4567,6 @@ Particle* Simulation::getElectron(int n) {
 	printf("can not find electron number %d\n", n);
 	fflush(stdout);
 	fclose(errorLogFile);
-	MPI_Finalize();
 	exit(0);
 	return NULL;
 }
@@ -5078,11 +4577,6 @@ int Simulation::getParticleNumber(int n, const ParticleTypes& type) {
 	int particleNumber = -1;
 	tempParticleNumber[0] = -1;
 	curParticleNumber[0] = 0;
-
-	if (rank > 0) {
-		MPI_Status status;
-		MPI_Recv(curParticleNumber, 1, MPI_INT, rank - 1, MPI_SEND_INTEGER_NUMBER_RIGHT, MPI_COMM_WORLD, &status);
-	}
 
 	if (curParticleNumber[0] > -1) {
 		for (int p = 0; p < particles.size(); ++p) {
@@ -5098,32 +4592,6 @@ int Simulation::getParticleNumber(int n, const ParticleTypes& type) {
 			}
 		}
 	}
-
-	if (rank < nprocs - 1) {
-		MPI_Send(curParticleNumber, 1, MPI_INT, rank + 1, MPI_SEND_INTEGER_NUMBER_RIGHT, MPI_COMM_WORLD);
-	}
-
-	MPI_Barrier(MPI_COMM_WORLD);
-
-	if (rank > 0) {
-		MPI_Send(tempParticleNumber, 1, MPI_INT, 0, MPI_SEND_INTEGER_ALL_TO_FIRST, MPI_COMM_WORLD);
-	}
-	else {
-		particleNumber = tempParticleNumber[0];
-		for (int i = 1; i < nprocs; ++i) {
-			MPI_Status status;
-			MPI_Recv(tempParticleNumber, 1, MPI_INT, i, MPI_SEND_INTEGER_ALL_TO_FIRST, MPI_COMM_WORLD, &status);
-			if (tempParticleNumber[0] >= 0) {
-				particleNumber = tempParticleNumber[0];
-			}
-		}
-	}
-
-	tempParticleNumber[0] = particleNumber;
-
-	MPI_Bcast(tempParticleNumber, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-	particleNumber = tempParticleNumber[0];
 
 	return particleNumber;
 }
@@ -5202,7 +4670,6 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 		printf("can not find electron number %d\n", n);
 		fflush(stdout);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
@@ -5223,7 +4690,6 @@ int Simulation::getTypeNumber(Particle* particle) {
 	printf("particle has no type\n");
 	fflush(stdout);
 	fclose(errorLogFile);
-	MPI_Finalize();
 	exit(0);
 
 	return -1;
@@ -5231,7 +4697,6 @@ int Simulation::getTypeNumber(Particle* particle) {
 
 void Simulation::evaluateParticleTypesAlpha() {
 	double* alphas = new double[2 * typesNumber];
-	if (rank == 0) {
 		for (int i = 0; i < typesNumber; ++i) {
 			if (types[i].particlesPerBin > 0) {
 				double alphaNormal = types[i].mass * speed_of_light_normalized_sqr / (kBoltzman_normalized * types[i].temperatureY);
@@ -5264,61 +4729,21 @@ void Simulation::evaluateParticleTypesAlpha() {
 			alphas[2 * i] = types[i].alphaNormal;
 			alphas[2 * i + 1] = types[i].alphaParallel;
 		}
-	}
-	MPI_Barrier(MPI_COMM_WORLD);
-	MPI_Bcast(alphas, 2 * typesNumber, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	
 
-	MPI_Barrier(MPI_COMM_WORLD);
 	for (int i = 0; i < typesNumber; ++i) {
 		types[i].alphaNormal = alphas[2 * i];
 		types[i].alphaParallel = alphas[2 * i + 1];
 	}
-	MPI_Barrier(MPI_COMM_WORLD);
 
 	delete[] alphas;
 }
 
 void Simulation::synchronizeParticleNumber() {
-	if (nprocs > 1) {
-		int particleCount[1];
-		particleCount[0] = 0;
-		if (rank > 0) {
-			particleCount[0] = particles.size();
-			MPI_Send(particleCount, 1, MPI_INT, 0, MPI_SEND_INTEGER_ALL_TO_FIRST, MPI_COMM_WORLD);
-		}
-		else {
-			particlesNumber = particles.size();
-			for (int i = 1; i < nprocs; ++i) {
-				MPI_Status status;
-				MPI_Recv(particleCount, 1, MPI_INT, i, MPI_SEND_INTEGER_ALL_TO_FIRST, MPI_COMM_WORLD, &status);
-				particlesNumber += particleCount[0];
-			}
-		}
-		particleCount[0] = particlesNumber;
-		MPI_Bcast(particleCount, 1, MPI_INT, 0, MPI_COMM_WORLD);
-		particlesNumber = particleCount[0];
-
-		particleCount[0] = 0;
-
-		if (rank > 0) {
-			MPI_Status status;
-			MPI_Recv(particleCount, 1, MPI_INT, rank - 1, MPI_SEND_INTEGER_NUMBER_RIGHT, MPI_COMM_WORLD, &status);
-		}
-		for (int p = 0; p < particles.size(); ++p) {
-			Particle* particle = particles[p];
-			particle->number = particleCount[0] + p;
-		}
-		particleCount[0] = particleCount[0] + particles.size();
-		if (rank < nprocs - 1) {
-			MPI_Send(particleCount, 1, MPI_INT, rank + 1, MPI_SEND_INTEGER_NUMBER_RIGHT, MPI_COMM_WORLD);
-		}
-	}
-	else {
-		particlesNumber = particles.size();
-		for (int p = 0; p < particles.size(); ++p) {
-			Particle* particle = particles[p];
-			particle->number = p;
-		}
+	particlesNumber = particles.size();
+	for (int p = 0; p < particles.size(); ++p) {
+		Particle* particle = particles[p];
+		particle->number = p;
 	}
 }
 

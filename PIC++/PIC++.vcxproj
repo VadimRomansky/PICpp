@@ -177,6 +177,7 @@
     <ClCompile Include="fields.cpp" />
     <ClCompile Include="initialization.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="largeVectorBasis.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="matrix3d.cpp" />
     <ClCompile Include="matrixelement.cpp" />
@@ -194,10 +195,10 @@
     <ClInclude Include="constants.h" />
     <ClInclude Include="dichotomousSolver.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="largeVectorBasis.h" />
     <ClInclude Include="matrix3d.h" />
     <ClInclude Include="matrixElement.h" />
     <ClInclude Include="memory_debug.h" />
-    <ClInclude Include="mpi_util.h" />
     <ClInclude Include="output.h" />
     <ClInclude Include="particle.h" />
     <ClInclude Include="random.h" />

@@ -14,22 +14,21 @@
 #include "vector3d.h"
 #include "random.h"
 #include "simulation.h"
-#include "mpi_util.h"
 
 void Simulation::moveParticles() {
 	double procTime = 0;
-	if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
 	//MPI_Barrier(MPI_COMM_WORLD);
-	if ((rank == 0) && (verbosity > 0)) printf("moving particles\n");
-	if ((rank == 0) && (verbosity > 0)) printLog("moving particles\n");
+	if ((verbosity > 0)) printf("moving particles\n");
+	if ((verbosity > 0)) printLog("moving particles\n");
 	int i = 0;
 
 	for (i = 0; i < particles.size(); ++i) {
 		if (i % 1000 == 0) {
 			if (verbosity > 2) {
-				printf("move particle number %d rank %d\n", i, rank);
+				printf("move particle number %d\n", i);
 			}
 		}
 		moveParticle(particles[i]);
@@ -39,45 +38,32 @@ void Simulation::moveParticles() {
 	//if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 	//removeEscapedParticles();
 	//}
-	if ((rank == 0) && (verbosity > 0)) printf("end moving particles\n");
-	if ((rank == 0) && (verbosity > 0)) printLog("end moving particles\n");
-	//MPI_Barrier(MPI_COMM_WORLD);
-	if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if ((verbosity > 0)) printf("end moving particles\n");
+	if ((verbosity > 0)) printLog("end moving particles\n");
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
-		printf("moving particles time = %g sec\n", procTime/CLOCKS_PER_SEC);
+		printf("moving particles time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }
 
 void Simulation::removeEscapedParticles() {
-	double procTime= 0;
-	if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock();
+	double procTime = 0;
+	if (timing && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
 	}
-	if (nprocs > 1) {
-		for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
-			Particle* particle = escapedParticlesLeft[i];
-			delete particle;
-		}
-	}
-	escapedParticlesLeft.clear();
 
-	if (nprocs > 1) {
-		for (int i = 0; i < escapedParticlesRight.size(); ++i) {
-			Particle* particle = escapedParticlesRight[i];
-			delete particle;
-		}
-	}
+	escapedParticlesLeft.clear();
 	escapedParticlesRight.clear();
 
-	if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
-		printf("removing escaped particles time = %g sec\n", procTime/CLOCKS_PER_SEC);
+		printf("removing escaped particles time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }
 
 void Simulation::eraseEscapedPaticles() {
 	double procTime = 0;
-	if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
 	if (particles.size() > 0) {
@@ -98,14 +84,14 @@ void Simulation::eraseEscapedPaticles() {
 			particles.erase(particles.begin());
 		}
 	}
-	if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
-		printf("erasing escaped particles time = %g sec\n", procTime/CLOCKS_PER_SEC);
+		printf("erasing escaped particles time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }
 
 void Simulation::moveParticle(Particle* particle) {
- 	updateCorrelationMaps(particle);
+	updateCorrelationMaps(particle);
 	Vector3d E = correlationTempEfield(particle);
 	//Vector3d E = correlationNewEfield(particle) * fieldScale;
 	Vector3d B = correlationBfield(particle);
@@ -125,7 +111,7 @@ void Simulation::moveParticle(Particle* particle) {
 
 	Particle tempParticle = *particle;
 
-	tempParticle.addMomentum( (E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT);
+	tempParticle.addMomentum((E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT);
 	//if (debugMode) alertNaNOrInfinity(tempParticle.momentum.x, "p.x = naN\n");
 	//if (debugMode) alertNaNOrInfinity(tempParticle.momentum.y, "p.y = naN\n");
 	//if (debugMode) alertNaNOrInfinity(tempParticle.momentum.z, "p.z = naN\n");
@@ -141,7 +127,7 @@ void Simulation::moveParticle(Particle* particle) {
 
 
 	//if (boundaryConditionType != PERIODIC) {
-	if ((tempParticle.coordinates.x < xgrid[1]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT) && (rank == 0)) {
+	if ((tempParticle.coordinates.x < xgrid[1]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT)) {
 		particle->coordinates.x = 2 * xgrid[1] - tempParticle.coordinates.x + fabs(
 			middleVelocity.x * (1 - eta) * deltaT);
 		particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
@@ -233,10 +219,10 @@ void Simulation::moveParticle(Particle* particle) {
 	Vector3d prevVelocity = velocity;
 	int i = 0;
 	Vector3d velocityHat = (tempParticle.rotationTensor * tempParticle.gammaFactor(
-			speed_of_light_normalized) * velocity);
+		speed_of_light_normalized) * velocity);
 
-	double etaDeltaT = eta*deltaT;
-	double restEtaDeltaT = (1.0 - eta)*deltaT;
+	double etaDeltaT = eta * deltaT;
+	double restEtaDeltaT = (1.0 - eta) * deltaT;
 	double velocityNorm = velocity.norm();
 
 	double error = (prevVelocity - newVelocity).norm();
@@ -250,7 +236,7 @@ void Simulation::moveParticle(Particle* particle) {
 		//tempParticle.momentum += (E + ((getVelocity + newVelocity).vectorMult(B)/(2.0*speed_of_light_normalized)))*particle->charge*deltaT;
 
 		//mistake in noguchi - he writes betashift!
-		
+
 		middleVelocity = velocityHat + rotatedE * beta;
 		/*if(middleVelocity.norm() > speed_of_light_normalized) {
 		    printf("middleVelocity = %g\n", middleVelocity.norm());
@@ -263,7 +249,7 @@ void Simulation::moveParticle(Particle* particle) {
 		tempParticle.coordinates.z += (middleVelocity.z * etaDeltaT);
 		//if (boundaryConditionType != PERIODIC) {
 		//todo more accurate speed!!
-		if ((tempParticle.coordinates.x < xgrid[1]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT) && (rank == 0)) {
+		if ((tempParticle.coordinates.x < xgrid[1]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT)) {
 			particle->coordinates.x = 2 * xgrid[1] - tempParticle.coordinates.x + fabs(
 				middleVelocity.x * restEtaDeltaT);
 			particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * restEtaDeltaT;
@@ -387,7 +373,7 @@ void Simulation::moveParticle(Particle* particle) {
 	//updateCorrelationMaps(particle);
 
 	if (particle->coordinates.x < xgrid[1]) {
-		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT && rank == 0) {
+		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 			particle->coordinates.x = 2 * xgrid[1] - particle->coordinates.x;
 			particle->reflectMomentumX();
 			return;
@@ -481,7 +467,7 @@ void Simulation::correctParticlePosition(Particle& particle) {
 
 void Simulation::evaluateParticlesRotationTensor() {
 	double procTime = 0;
-	if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
 	for (int i = 0; i < particles.size(); ++i) {
@@ -496,9 +482,9 @@ void Simulation::evaluateParticlesRotationTensor() {
 		particle->rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
 
 	}
-	if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
-		printf("evaluating ParticlesRotationTensor time = %g sec\n", procTime/CLOCKS_PER_SEC);
+		printf("evaluating ParticlesRotationTensor time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }
 
@@ -513,12 +499,12 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d& velocity
 		for (int j = 0; j < 3; j++) {
 			result.matrix[i][j] = Kronecker.matrix[i][j] + (beta * beta * BField[i] * BField[j] / speed_of_light_normalized_sqr);
 			//for (int k = 0; k < 3; ++k) {
-				for (int l = 0; l < 3; ++l) {
-					if(LeviCivita[j][i][l] != 0){
-						result.matrix[i][j] -= (beta * LeviCivita[j][i][l] * BField[l] / speed_of_light_normalized);
+			for (int l = 0; l < 3; ++l) {
+				if (LeviCivita[j][i][l] != 0) {
+					result.matrix[i][j] -= (beta * LeviCivita[j][i][l] * BField[l] / speed_of_light_normalized);
 					//result.matrix[i][j] += (beta * LeviCivita[j][k][l] * Kronecker.matrix[i][k] * BField[l] / speed_of_light_normalized);
-					}
 				}
+			}
 			//}
 
 			result.matrix[i][j] /= denominator;
@@ -530,7 +516,7 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d& velocity
 }
 
 void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContainer, double length) {
-	if ((rank == 0) && (verbosity > 0)) printf("inject new particles\n");
+	if ((verbosity > 0)) printf("inject new particles\n");
 
 	//Particle* tempParticle = particles[0];
 
@@ -548,9 +534,9 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 			                                                                                        k);
 			for (int l = 0; l < count; ++l) {
 				ParticleTypes type = typeContainer.type;
-                if(verbosity > 1){
-                    printf("inject particle number = %d\n", particlesNumber);
-                }
+				if (verbosity > 1) {
+					printf("inject particle number = %d\n", particlesNumber);
+				}
 				Particle* particle = createParticle(particlesNumber, xnumber - 1, j, k, weight, type, typeContainer,
 				                                    typeContainer.temperatureX, typeContainer.temperatureY,
 				                                    typeContainer.temperatureZ);
@@ -604,47 +590,26 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 
 void Simulation::exchangeParticles() {
 	double procTime = 0;
-	if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if (nprocs == 1) {
-		if (boundaryConditionType == PERIODIC) {
-			for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
-				Particle* particle = escapedParticlesLeft[i];
-				particle->coordinates.x += xsizeGeneral;
-				particle->escaped = false;
-				particles.push_back(particle);
-			}
-			for (int i = 0; i < escapedParticlesRight.size(); ++i) {
-				Particle* particle = escapedParticlesRight[i];
-				particle->coordinates.x -= xsizeGeneral;
-				particle->escaped = false;
-				particles.push_back(particle);
-			}
+	if (boundaryConditionType == PERIODIC) {
+		for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
+			Particle* particle = escapedParticlesLeft[i];
+			particle->coordinates.x += xsizeGeneral;
+			particle->escaped = false;
+			particles.push_back(particle);
 		}
-	} else {
-		if (rank == 0 && boundaryConditionType == PERIODIC) {
-			for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
-				Particle* particle = escapedParticlesLeft[i];
-				particle->coordinates.x += xsizeGeneral;
-			}
+		for (int i = 0; i < escapedParticlesRight.size(); ++i) {
+			Particle* particle = escapedParticlesRight[i];
+			particle->coordinates.x -= xsizeGeneral;
+			particle->escaped = false;
+			particles.push_back(particle);
 		}
-		if (rank == nprocs - 1 && boundaryConditionType == PERIODIC) {
-			for (int i = 0; i < escapedParticlesRight.size(); ++i) {
-				Particle* particle = escapedParticlesRight[i];
-				particle->coordinates.x -= xsizeGeneral;
-			}
-		}
-		if(verbosity > 2) printf("send particles left rank = %d\n", rank);
-        sendLeftReceiveRightParticles(escapedParticlesLeft, particles, types, typesNumber,
-                                      boundaryConditionType == PERIODIC, verbosity);
-        MPI_Barrier(MPI_COMM_WORLD);
-		if(verbosity > 2) printf("send particles right rank = %d\n", rank);
-        sendRightReceiveLeftParticles(escapedParticlesRight, particles, types, typesNumber,
-                                      boundaryConditionType == PERIODIC, verbosity);
 	}
-	if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
-		printf("exchange particles time = %g sec\n", procTime/CLOCKS_PER_SEC);
+		printf("exchange particles time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }

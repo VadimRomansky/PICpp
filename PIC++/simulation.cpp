@@ -15,11 +15,9 @@
 #include "particle.h"
 #include "random.h"
 #include "simulation.h"
-#include "mpi_util.h"
 
 
 void Simulation::simulate() {
-	MPI_Barrier(MPI_COMM_WORLD);
 	if (newlyStarted) {
 		//if(rank == 0) printf("create arrays\n");
 		createArrays();
@@ -44,9 +42,8 @@ void Simulation::simulate() {
 	outputGeneralInitialParameters((outputDir + "initialParameters.dat").c_str(), (outputDir + "initialParametersWithText.dat").c_str(), this);
 
 
-	MPI_Barrier(MPI_COMM_WORLD);
 
-	if ((rank == 0) && (verbosity > 1)) printf("initial exchanging fields\n");
+	if ((verbosity > 1)) printf("initial exchanging fields\n");
 	exchangeEfield();
 	exchangeGeneralBfield(Bfield, additionalBfieldLeft, additionalBfieldRight);
 	exchangeGeneralBfield(newBfield, additionalNewBfieldLeft, additionalNewBfieldRight);
@@ -54,7 +51,7 @@ void Simulation::simulate() {
 	//printf("E.x = %g E.y = %g E.z = %g\n", Efield[0][0][0].x, Efield[0][0][0].y, Efield[0][0][0].z);
 	//printf("tempE.x = %g tempE.y = %g tempE.z = %g\n", tempEfield[0][0][0].x, tempEfield[0][0][0].y, tempEfield[0][0][0].z);
 	//outputEverythingFile = fopen("./output/outputEverythingFile.dat", "w");
-	if ((rank == 0) && (verbosity > 1)) printf("initial collecting particles\n");
+	if ((verbosity > 1)) printf("initial collecting particles\n");
 	updateParticleCorrelationMaps();
 	//fclose(outputEverythingFile);
 	updateParameters();
@@ -89,7 +86,7 @@ void Simulation::simulate() {
 	}
 
 	while (time * plasma_period < maxTime && currentIteration < maxIteration) {
-		if ((rank == 0) && (verbosity > 0)) {
+		if ((verbosity > 0)) {
 			FILE* logFile = fopen((outputDir + "log.dat").c_str(), "a");
 			fprintf(logFile, "start iteration number = %d time = %15.10g\n", currentIteration, time);
 			fflush(logFile);
@@ -97,7 +94,7 @@ void Simulation::simulate() {
 		}
 		//if ((rank == 0)) printLog("start iteration\n");
 		//if ((rank == 0)) printf(" dt/plasma_period = %15.10g\n", deltaT);
-		if ((rank == 0)) printf("start iteration number = %d time = %15.10g\n", currentIteration, time);
+		printf("start iteration number = %d time = %15.10g\n", currentIteration, time);
 		updateEnergy();
 		if (currentIteration % writeParameter == 0) {
 			output();
@@ -108,7 +105,7 @@ void Simulation::simulate() {
 		}
 
 		double iterationTime = 0;
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		if (timing && (currentIteration % writeParameter == 0)) {
 			iterationTime = clock();
 		}
 
@@ -123,13 +120,13 @@ void Simulation::simulate() {
 
 		evaluateMagneticField();
 		double procTime = 0;
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		if (timing && (currentIteration % writeParameter == 0)) {
 			procTime = clock();
 		}
 		exchangeGeneralBfield(newBfield, additionalNewBfieldLeft, additionalNewBfieldRight);
 		exchangeGeneralEfield(tempEfield, additionalTempEfieldLeft, additionalTempEfieldRight);
 		exchangeGeneralEfield(newEfield, additionalNewEfieldLeft, additionalNewEfieldRight);
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		if (timing  && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
 			printf("exchanging field time = %g sec\n", procTime / CLOCKS_PER_SEC);
 		}
@@ -158,30 +155,28 @@ void Simulation::simulate() {
 
 		moveParticles();
 
-		if ((rank == 0) && (verbosity > 1)) printLog("erasing escaped particles\n");
-		if ((rank == 0) && (verbosity > 1)) printf("erasing escaped particles\n");
+		if ((verbosity > 1)) printLog("erasing escaped particles\n");
+		if ((verbosity > 1)) printf("erasing escaped particles\n");
 
 		eraseEscapedPaticles();
 
 		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((rank == 0) && (verbosity > 1)) printLog("start exchange particles\n");
-		if ((rank == 0) && (verbosity > 1)) printf("start exchange particles\n");
-		MPI_Barrier(MPI_COMM_WORLD);
+		if ((verbosity > 1)) printLog("start exchange particles\n");
+		if ((verbosity > 1)) printf("start exchange particles\n");
 
 		exchangeParticles();
 
-		if ((rank == 0) && (verbosity > 1)) printLog("start injecting new particles\n");
-		if ((rank == 0) && (verbosity > 1)) printf("start injecting new particles\n");
+		if ((verbosity > 1)) printLog("start injecting new particles\n");
+		if ((verbosity > 1)) printf("start injecting new particles\n");
 
 
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		if (timing && (currentIteration % writeParameter == 0)) {
 			procTime = clock();
 		}
 		for (int i = 0; i < typesNumber; ++i) {
 			types[i].injectionLength += fabs(V0.x * deltaT);
 		}
 		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH) {
-			if (rank == nprocs - 1) {
 				for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
 					if (types[typeCounter].particlesPerBin > 0) {
 						if (types[typeCounter].particlesPerBin * types[typeCounter].injectionLength >= deltaX) {
@@ -193,48 +188,49 @@ void Simulation::simulate() {
 						}
 					}
 				}
-			}
-			if ((rank == 0) && (verbosity > 1)) printf("exchanging particles number\n");
-			MPI_Barrier(MPI_COMM_WORLD);
-			int tempParticleNumber[1];
-			tempParticleNumber[0] = particlesNumber;
-			MPI_Bcast(tempParticleNumber, 1, MPI_INT, nprocs - 1, MPI_COMM_WORLD);
-			particlesNumber = tempParticleNumber[0];
 		}
 		if (preserveChargeGlobal && (boundaryConditionType != PERIODIC)) {
 			addToPreserveChargeGlobal();
 		}
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		if (timing && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
 			printf("injecting and preserving time = %g sec\n", procTime / CLOCKS_PER_SEC);
 		}
 
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		if (timing  && (currentIteration % writeParameter == 0)) {
 			procTime = clock();
 		}
 		updateParticleCorrelationMaps();
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		if (timing && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
 			printf("updating correlation maps = %g sec\n", procTime / CLOCKS_PER_SEC);
 		}
 
 		updateDensityParameters();
+		if (timing && (currentIteration % writeParameter == 0)) {
+			procTime = clock();
+		}
 		exchangeGeneralEfield(newEfield, additionalNewEfieldLeft, additionalNewEfieldRight);
+		if (timing && (currentIteration % writeParameter == 0)) {
+			procTime = clock() - procTime;
+			printf("exchanging fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
+		}
 		//smoothChargeDensity();
 		smoothNewEfield();
 		if (currentIteration % divergenceCleanUpParameter == 0) {
 			cleanupDivergence();
 		}
+		smoothNewEfield();
 		//smoothNewBfield();
 
 		updateFields();
 
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		if (timing  && (currentIteration % writeParameter == 0)) {
 			procTime = clock();
 		}
 		exchangeGeneralEfield(newEfield, additionalNewEfieldLeft, additionalNewEfieldRight);
 		exchangeGeneralBfield(Bfield, additionalBfieldLeft, additionalBfieldRight);
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		if (timing && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
 			printf("exchanging fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
 		}
@@ -261,7 +257,7 @@ void Simulation::simulate() {
 
 		time += deltaT;
 
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		if (timing && (currentIteration % writeParameter == 0)) {
 			iterationTime = clock() - iterationTime;
 			printf("iteration except outputing time = %g sec\n", iterationTime / CLOCKS_PER_SEC);
 		}
@@ -275,20 +271,20 @@ void Simulation::simulate() {
 
 void Simulation::outputTrajectories() {
 	double procTime = 0;
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing  && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if ((rank == 0) && (verbosity > 1)) printf("outputing trajectory 1\n");
+	if ( (verbosity > 1)) printf("outputing trajectory 1\n");
 	outputTrajectoryByNumber((outputDir + "trajectory_proton.dat").c_str(), protonNumber, this);
-	if ((rank == 0) && (verbosity > 1)) printf("outputing trajectory 2\n");
+	if ( (verbosity > 1)) printf("outputing trajectory 2\n");
 	outputTrajectoryByNumber((outputDir + "trajectory_electron.dat").c_str(), electronNumber, this);
-	if ((rank == 0) && (verbosity > 1)) printf("outputing trajectory 3\n");
+	if ( (verbosity > 1)) printf("outputing trajectory 3\n");
 	outputTrajectoryByNumber((outputDir + "trajectory_proton_1.dat").c_str(), protonNumber1, this);
-	if ((rank == 0) && (verbosity > 1)) printf("outputing trajectory 4\n");
+	if ((verbosity > 1)) printf("outputing trajectory 4\n");
 	outputTrajectoryByNumber((outputDir + "trajectory_electron_1.dat").c_str(), electronNumber1, this);
-	if ((rank == 0) && (verbosity > 1)) printf("outputing trajectory 5\n");
+	if ((verbosity > 1)) printf("outputing trajectory 5\n");
 	outputTrajectoryByNumber((outputDir + "trajectory_proton_2.dat").c_str(), protonNumber2, this);
-	if ((rank == 0) && (verbosity > 1)) printf("outputing trajectory 6\n");
+	if ((verbosity > 1)) printf("outputing trajectory 6\n");
 	outputTrajectoryByNumber((outputDir + "trajectory_electron_2.dat").c_str(), electronNumber2, this);
 
 	outputTrajectoryByNumber((outputDir + "trajectory_proton_3.dat").c_str(), protonNumber3, this);
@@ -306,7 +302,7 @@ void Simulation::outputTrajectories() {
 	outputTrajectoryByNumber((outputDir + "trajectory_electron_7.dat").c_str(), electronNumber7, this);
 	outputTrajectoryByNumber((outputDir + "trajectory_electron_8.dat").c_str(), electronNumber8, this);
 	outputTrajectoryByNumber((outputDir + "trajectory_electron_9.dat").c_str(), electronNumber9, this);
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("outputing trajectories time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
@@ -314,153 +310,101 @@ void Simulation::outputTrajectories() {
 
 void Simulation::output() {
 	double procTime = 0;
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing  && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if ((rank == 0) && (verbosity > 0)) printf("outputing iteration number %d\n", currentIteration);
-	if ((rank == 0) && (verbosity > 0)) printLog("outputing\n");
+	if ((verbosity > 0)) printf("outputing iteration number %d\n", currentIteration);
+	if ((verbosity > 0)) printLog("outputing\n");
 
-	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution protons\n");
+	if ((verbosity > 1)) printf("outputing distribution protons\n");
 	outputDistribution((outputDir + "distribution_protons.dat").c_str(), particles, PROTON, scaleFactor,
 	                   plasma_period, verbosity);
-	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution electrons\n");
+	if ((verbosity > 1)) printf("outputing distribution electrons\n");
 	outputDistribution((outputDir + "distribution_electrons.dat").c_str(), particles, ELECTRON, scaleFactor,
 	                   plasma_period, verbosity);
-	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution alphas\n");
+	if ((verbosity > 1)) printf("outputing distribution alphas\n");
 	outputDistribution((outputDir + "distribution_alphas.dat").c_str(), particles, ALPHA, scaleFactor,
 	                   plasma_period, verbosity);
 
 	Vector3d shockWaveV = V0/3;
 
-	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution protons shock wave\n");
+	if ((verbosity > 1)) printf("outputing distribution protons shock wave\n");
 	outputDistributionShiftedSystem((outputDir + "distribution_protons_sw.dat").c_str(), particles, shockWaveV, speed_of_light_normalized, PROTON, scaleFactor,
 	                   plasma_period, verbosity);
-	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution electrons shock wave\n");
+	if ((verbosity > 1)) printf("outputing distribution electrons shock wave\n");
 	outputDistributionShiftedSystem((outputDir + "distribution_electrons_sw.dat").c_str(), particles, shockWaveV, speed_of_light_normalized, ELECTRON, scaleFactor,
 	                   plasma_period, verbosity);
-	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution alphas shock wave\n");
+	if ((verbosity > 1)) printf("outputing distribution alphas shock wave\n");
 	outputDistributionShiftedSystem((outputDir + "distribution_alphas_sw.dat").c_str(), particles, shockWaveV, speed_of_light_normalized, ALPHA, scaleFactor,
 	                   plasma_period, verbosity);
 
-	//if ((rank == 0) && (verbosity > 1)) printf("outputing anisotropy electrons\n");
+	//if ( (verbosity > 1)) printf("outputing anisotropy electrons\n");
 	//outputAnisotropy((outputDir + "anisotropy_electrons.dat").c_str(), this, ELECTRON, scaleFactor, plasma_period);
 
 	//anisotropyFileProton = fopen((outputDir + "anisotropy_protons.dat").c_str(), "a");
-	//if ((rank == 0) && (verbosity > 1)) printf("outputing anisotropy protons\n");
+	//if ((verbosity > 1)) printf("outputing anisotropy protons\n");
 
-	//if ((rank == 0) && (verbosity > 1)) printf("outputing anisotropy alphas\n");
+	//if ((verbosity > 1)) printf("outputing anisotropy alphas\n");
 	//outputAnisotropy((outputDir + "anisotropy_alphas.dat").c_str(), this, ALPHA, scaleFactor, plasma_period);
 
-	//if ((rank == 0) && (verbosity > 1)) printf("outputing anisotropy positrons\n");
+	//if ((verbosity > 1)) printf("outputing anisotropy positrons\n");
 	//outputAnisotropy((outputDir + "anisotropy_positrons.dat").c_str(), this, POSITRON, scaleFactor, plasma_period);
 
-	//if ((rank == 0) && (verbosity > 1)) printf("outputing anisotropy deuterium\n");
+	//if ((verbosity > 1)) printf("outputing anisotropy deuterium\n");
 	//outputAnisotropy((outputDir + "anisotropy_deuterium.dat").c_str(), this, DEUTERIUM, scaleFactor, plasma_period);
-	//if ((rank == 0) && (verbosity > 1)) printf("outputing anisotropy helium3\n");
+	//if ((verbosity > 1)) printf("outputing anisotropy helium3\n");
 	//outputAnisotropy((outputDir + "anisotropy_helium3.dat").c_str(), this, HELIUM3, scaleFactor, plasma_period);
-	//if ((rank == 0) && (verbosity > 1)) printf("outputing anisotropy oxygen+3\n");
+	//if ((verbosity > 1)) printf("outputing anisotropy oxygen+3\n");
 	//outputAnisotropy((outputDir + "anisotropy_oxygen+3.dat").c_str(), this, OXYGEN_PLUS3, scaleFactor, plasma_period);
-	//if ((rank == 0) && (verbosity > 1)) printf("outputing anisotropy silicon\n");
+	//if ((verbosity > 1)) printf("outputing anisotropy silicon\n");
 	//outputAnisotropy((outputDir + "anisotropy_silicon.dat").c_str(), this, SILICON_PLUS1, scaleFactor, plasma_period);
 	//}
 
-	if ((rank == 0) && (verbosity > 1)) printf("outputing fields\n");
+	if ((verbosity > 1)) printf("outputing fields\n");
 	outputFields((outputDir + "Efield.dat").c_str(), (outputDir + "Bfield.dat").c_str(), Efield, Bfield, xnumber,
 	             ynumber, znumber, plasma_period, scaleFactor);
 
-	if ((rank == 0) && (verbosity > 1)) printf("outputing grid\n");
+	if ((verbosity > 1)) printf("outputing grid\n");
 	outputGrid((outputDir + "Xfile.dat").c_str(), xgrid, xnumber, scaleFactor);
 
-	if (rank == 0) outputGridSimple((outputDir + "Yfile.dat").c_str(), ygrid, ynumber, scaleFactor);
+	outputGridSimple((outputDir + "Yfile.dat").c_str(), ygrid, ynumber, scaleFactor);
 
-	if (rank == 0) outputGridSimple((outputDir + "Zfile.dat").c_str(), zgrid, znumber, scaleFactor);
+	outputGridSimple((outputDir + "Zfile.dat").c_str(), zgrid, znumber, scaleFactor);
 
-	//todo!!! for debug only!
-	switch (rank) {
-	case 0:
-		outputGridSimple((outputDir + "Xfile0.dat").c_str(), xgrid, xnumber, scaleFactor);
-		outputVectorNodeArraySimple((outputDir + "Efield0.dat").c_str(), Efield, xnumber, ynumber, znumber, 1.0 / (plasma_period * sqrt(scaleFactor)));
-		break;
-	case 1:
-		outputGridSimple((outputDir + "Xfile1.dat").c_str(), xgrid, xnumber, scaleFactor);
-		outputVectorNodeArraySimple((outputDir + "Efield1.dat").c_str(), Efield, xnumber, ynumber, znumber, 1.0 / (plasma_period * sqrt(scaleFactor)));
-		break;
-	case 2:
-		outputGridSimple((outputDir + "Xfile2.dat").c_str(), xgrid, xnumber, scaleFactor);
-		outputVectorNodeArraySimple((outputDir + "Efield2.dat").c_str(), Efield, xnumber, ynumber, znumber, 1.0 / (plasma_period * sqrt(scaleFactor)));
-		break;
-	case 3:
-		outputGridSimple((outputDir + "Xfile3.dat").c_str(), xgrid, xnumber, scaleFactor);
-		outputVectorNodeArraySimple((outputDir + "Efield3.dat").c_str(), Efield, xnumber, ynumber, znumber, 1.0 / (plasma_period * sqrt(scaleFactor)));
-		break;
-	case 4:
-		outputGridSimple((outputDir + "Xfile4.dat").c_str(), xgrid, xnumber, scaleFactor);
-		outputVectorNodeArraySimple((outputDir + "Efield4.dat").c_str(), Efield, xnumber, ynumber, znumber, 1.0 / (plasma_period * sqrt(scaleFactor)));
-		break;
-	case 5:
-		outputGridSimple((outputDir + "Xfile5.dat").c_str(), xgrid, xnumber, scaleFactor);
-		outputVectorNodeArraySimple((outputDir + "Efield5.dat").c_str(), Efield, xnumber, ynumber, znumber, 1.0 / (plasma_period * sqrt(scaleFactor)));
-		break;
-	case 6:
-		outputGridSimple((outputDir + "Xfile6.dat").c_str(), xgrid, xnumber, scaleFactor);
-		outputVectorNodeArraySimple((outputDir + "Efield6.dat").c_str(), Efield, xnumber, ynumber, znumber, 1.0 / (plasma_period * sqrt(scaleFactor)));
-		break;
-	case 7:
-		outputGridSimple((outputDir + "Xfile7.dat").c_str(), xgrid, xnumber, scaleFactor);
-		outputVectorNodeArraySimple((outputDir + "Efield7.dat").c_str(), Efield, xnumber, ynumber, znumber, 1.0 / (plasma_period * sqrt(scaleFactor)));
-		break;
-	case 8:
-		outputGridSimple((outputDir + "Xfile8.dat").c_str(), xgrid, xnumber, scaleFactor);
-		outputVectorNodeArraySimple((outputDir + "Efield8.dat").c_str(), Efield, xnumber, ynumber, znumber, 1.0 / (plasma_period * sqrt(scaleFactor)));
-		break;
-	case 9:
-		outputGridSimple((outputDir + "Xfile9.dat").c_str(), xgrid, xnumber, scaleFactor);
-		outputVectorNodeArraySimple((outputDir + "Efield9.dat").c_str(), Efield, xnumber, ynumber, znumber, 1.0 / (plasma_period * sqrt(scaleFactor)));
-		break;
-	case 10:
-		outputGridSimple((outputDir + "Xfile10.dat").c_str(), xgrid, xnumber, scaleFactor);
-		outputVectorNodeArraySimple((outputDir + "Efield10.dat").c_str(), Efield, xnumber, ynumber, znumber, 1.0 / (plasma_period * sqrt(scaleFactor)));
-		break;
-	case 11:
-		outputGridSimple((outputDir + "Xfile11.dat").c_str(), xgrid, xnumber, scaleFactor);
-		outputVectorNodeArraySimple((outputDir + "Efield11.dat").c_str(), Efield, xnumber, ynumber, znumber, 1.0 / (plasma_period * sqrt(scaleFactor)));
-		break;
-	}
-
-	if ((rank == 0) && (verbosity > 1)) printf("outputing concentrations\n");
+	if ((verbosity > 1)) printf("outputing concentrations\n");
 	outputConcentrations((outputDir + "concentrations.dat").c_str(), particleConcentrations, chargeDensity,
 	                     chargeDensityHat, xnumber, ynumber, znumber, typesNumber, plasma_period, scaleFactor);
 
 
 
-	if ((rank == 0) && (verbosity > 1)) printf("outputing velocity\n");
+	if ((verbosity > 1)) printf("outputing velocity\n");
 	outputVelocity((outputDir + "velocity.dat").c_str(),
 	               particleBulkVelocities, types, xnumber, ynumber, znumber, typesNumber, plasma_period, scaleFactor);
 
-	/*if ((rank == 0) && (verbosity > 1)) printf("outputing flux\n");
+	if ((verbosity > 1)) printf("outputing flux\n");
 	outputFlux((outputDir + "flux.dat").c_str(), electricFlux, externalElectricFlux, xnumber + 1, ynumber + 1,
-	           znumber + 1, plasma_period, scaleFactor);*/
+	           znumber + 1, plasma_period, scaleFactor);
 
 	/*if ((rank == 0) && (verbosity > 1)) printf("outputing divergence\n");
 	outputDivergenceError((outputDir + "divergence_error.dat").c_str(), this, plasma_period, scaleFactor);*/
 
 	double rotBscale = 1.0 / (plasma_period * plasma_period * sqrt(scaleFactor));
 
-	/*if ((rank == 0) && (verbosity > 1)) printf("outputing rotB\n");
-	outputVectorNodeArray((outputDir + "rotBFile.dat").c_str(), rotB, xnumber + 1, ynumber + 1, znumber + 1, rotBscale);*/
+	if ((verbosity > 1)) printf("outputing rotB\n");
+	outputVectorNodeArray((outputDir + "rotBFile.dat").c_str(), rotB, xnumber + 1, ynumber + 1, znumber + 1, rotBscale);
 
-	/*if ((rank == 0) && (verbosity > 1)) printf("outputing Ederivative\n");
+	if ((verbosity > 1)) printf("outputing Ederivative\n");
 	outputVectorNodeArray((outputDir + "EderivativeFile.dat").c_str(), Ederivative, xnumber + 1, ynumber + 1,
-	                      znumber + 1, rotBscale);*/
+	                      znumber + 1, rotBscale);
 
-	/*if ((rank == 0) && (verbosity > 1)) printf("outputing rotE\n");
-	outputVectorCellArray((outputDir + "rotEFile.dat").c_str(), rotE, xnumber, ynumber, znumber, rotBscale);*/
+	if ((verbosity > 1)) printf("outputing rotE\n");
+	outputVectorCellArray((outputDir + "rotEFile.dat").c_str(), rotE, xnumber, ynumber, znumber, rotBscale);
 
 	/*if (rank == 0) printf("outputing dielectricTensor\n");
 	outputMatrixArray((outputDir + "dielectricTensorFile.dat").c_str(), dielectricTensor, xnumber + 1, ynumber + 1,
 	                  znumber + 1);*/
 
-	if ((rank == 0) && (verbosity > 1)) printf("outputing particles\n");
+	if ((verbosity > 1)) printf("outputing particles\n");
 	for (int i = 0; i < typesNumber; ++i) {
 		outputParticles((outputDir + types[i].typeName + ".dat").c_str(), this, types[i].type);
 	}
@@ -470,19 +414,19 @@ void Simulation::output() {
 	outputMaxwellEquationMatrixFull(maxwellMatrixFile, maxwellEquationMatrix, xnumber, ynumber, znumber, maxwellEquationMatrixSize);
 	fclose(maxwellMatrixFile);*/
 
-	if (rank == 0) outputGeneral((outputDir + "general.dat").c_str(), this);
-	if (rank == 0) outputGeneralAnisotropy((outputDir + "generalAnisotropy.dat").c_str(), this);
-	if ((rank == 0) && (verbosity > 0)) printf("finish outputing\n");
-	if ((rank == 0) && (verbosity > 0)) printLog("finish outputing\n");
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	outputGeneral((outputDir + "general.dat").c_str(), this);
+	outputGeneralAnisotropy((outputDir + "generalAnisotropy.dat").c_str(), this);
+	if ((verbosity > 0)) printf("finish outputing\n");
+	if ((verbosity > 0)) printLog("finish outputing\n");
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("outputing time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }
 
 void Simulation::outputBackup() {
-	if ((rank == 0) && (verbosity > 0)) printf("writing backup\n");
-	if ((rank == 0) && (verbosity > 0)) printLog("writing backup\n");
+	if ((verbosity > 0)) printf("writing backup\n");
+	if ((verbosity > 0)) printLog("writing backup\n");
 
 	std::string backupDir = backupDirectory;
 	//FILE* backupGeneralFile = fopen((backupDir + "general.dat").c_str(), "r");
@@ -501,15 +445,15 @@ void Simulation::outputBackup() {
 
 void Simulation::updateDeltaT() {
 	double procTime = 0;
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if ((rank == 0) && (verbosity > 0)) printf("updating time step\n");
-	if ((rank == 0) && (verbosity > 0)) printLog("updating time step\n");
+	if ((verbosity > 0)) printf("updating time step\n");
+	if ((verbosity > 0)) printLog("updating time step\n");
 	//double delta = min2(deltaX, min2(deltaY, deltaZ));
 	double delta = deltaX;
 	deltaT = timeEpsilonKourant * delta / speed_of_light_normalized;
-	if ((rank == 0) && (verbosity > 1)) printLog("dx/c\n");
+	if ((verbosity > 1)) printLog("dx/c\n");
 	if (particles.size() > 0) {
 		double derEmax = 0;
 		double B = B0.norm();
@@ -547,7 +491,7 @@ void Simulation::updateDeltaT() {
 				}
 			}
 		}
-		if ((rank == 0) && (verbosity > 1)) printLog("evaluatd E and minFlux\n");
+		if ((verbosity > 1)) printLog("evaluatd E and minFlux\n");
 
 		/*if(E > 0 && minFlux > 0){
 		    double maxResistance = 0;
@@ -620,39 +564,10 @@ void Simulation::updateDeltaT() {
 		}*/
 	}
 
-	if ((rank == 0) && (verbosity > 1)) printLog("exchanging time step\n");
-	if (nprocs > 1) {
+	if ((verbosity > 1)) printLog("exchanging time step\n");
 
-		MPI_Barrier(MPI_COMM_WORLD);
-		double temp[1];
-		temp[0] = deltaT;
-		if (rank != 0) {
-			MPI_Send(temp, 1, MPI_DOUBLE, 0, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD);
-		} else {
-			for (int i = 1; i < nprocs; ++i) {
-				MPI_Status status;
-				MPI_Recv(temp, 1, MPI_DOUBLE, i, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD, &status);
-				if (temp[0] < deltaT) {
-					deltaT = temp[0];
-				}
-			}
-		}
-		MPI_Barrier(MPI_COMM_WORLD);
-
-		if (rank == 0) {
-			temp[0] = deltaT;
-			for (int i = 1; i < nprocs; ++i) {
-				MPI_Send(temp, 1, MPI_DOUBLE, i, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD);
-			}
-		} else {
-			MPI_Status status;
-			MPI_Recv(temp, 1, MPI_DOUBLE, 0, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD, &status);
-			deltaT = temp[0];
-		}
-		MPI_Barrier(MPI_COMM_WORLD);
-	}
-	if ((rank == 0) && (verbosity > 0)) printLog("end updating time step\n");
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if ((verbosity > 0)) printLog("end updating time step\n");
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating deltaT = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
@@ -678,7 +593,6 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
 		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 	if (particle.coordinates.x > xgrid[xnumber]) {
@@ -696,12 +610,11 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
 		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
 	if (particle.coordinates.y < ygrid[0]) {
-		if (rank == 0) printf("particle.y < ygrid[0]\n");
+		printf("particle.y < ygrid[0]\n");
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "particle.y = %15.10g < %15.10g\n", particle.coordinates.y, ygrid[0]);
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x,
@@ -710,7 +623,6 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
 		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 	if (particle.coordinates.y > ygrid[ynumber]) {
@@ -723,12 +635,11 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
 		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
 	if (particle.coordinates.z < zgrid[0]) {
-		if (rank == 0) printf("particle.z < zgrid[0]\n");
+		printf("particle.z < zgrid[0]\n");
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "particle.z = %15.10g < %15.10g\n", particle.coordinates.z, zgrid[0]);
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x,
@@ -737,11 +648,10 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
 		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 	if (particle.coordinates.z > zgrid[znumber]) {
-		if (rank == 0) printf("particle.z > zsize\n");
+		printf("particle.z > zsize\n");
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "particle.z = %15.10g > %15.10g\n", particle.coordinates.z, zgrid[znumber]);
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x,
@@ -750,19 +660,18 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
 		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 }
 
 void Simulation::updateElectroMagneticParameters() {
 	double procTime = 0;
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
 	//MPI_Barrier(MPI_COMM_WORLD);
-	if ((rank == 0) && (verbosity > 0)) printf("updating flux, density snd dielectric tensor\n");
-	if ((rank == 0) && (verbosity > 0)) printLog("updating flux, density and dielectric tensor\n");
+	if ((verbosity > 0)) printf("updating flux, density snd dielectric tensor\n");
+	if ((verbosity > 0)) printLog("updating flux, density and dielectric tensor\n");
 	//check particle only in one boundary box
 	if (debugMode) {
 		//checkParticlesInB
@@ -795,7 +704,9 @@ void Simulation::updateElectroMagneticParameters() {
 		}
 	}
 
-	//todo charges of different sign
+	int crossBinNumberX= splineOrder + 2;
+	int crossBinNumberY= min2(ynumber, splineOrder + 2);
+	int crossBinNumberZ= min2(znumber, splineOrder + 2);
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
 
@@ -830,14 +741,14 @@ void Simulation::updateElectroMagneticParameters() {
 
 		if (solverType == IMPLICIT) {
 			tempParticleShiftX.coordinates.x = particle->coordinates.x + shiftX;
-			updateCorrelationMaps(tempParticleShiftX);
+			updateCorrelationMapsX(tempParticleShiftX);
 			Vector3d oldE = correlationEfield(tempParticleShiftX);
 			Vector3d oldB = correlationBfield(tempParticleShiftX);
 			tempParticleShiftX.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
 			tempRotatedVelocityShiftX = tempParticleShiftX.rotationTensor * (velocity * gamma);
 			if (ynumber > 1) {
 				tempParticleShiftY.coordinates.y = particle->coordinates.y + shiftY;
-				updateCorrelationMaps(tempParticleShiftY);
+				updateCorrelationMapsY(tempParticleShiftY);
 				oldE = correlationEfield(tempParticleShiftY);
 				oldB = correlationBfield(tempParticleShiftY);
 				tempParticleShiftY.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
@@ -845,7 +756,7 @@ void Simulation::updateElectroMagneticParameters() {
 			}
 			if (znumber > 1) {
 				tempParticleShiftZ.coordinates.z = particle->coordinates.z + shiftZ;
-				updateCorrelationMaps(tempParticleShiftZ);
+				updateCorrelationMapsZ(tempParticleShiftZ);
 				oldE = correlationEfield(tempParticleShiftZ);
 				oldB = correlationBfield(tempParticleShiftZ);
 				tempParticleShiftZ.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
@@ -853,9 +764,9 @@ void Simulation::updateElectroMagneticParameters() {
 			}
 		}
 
-		for (int i = 0; i < splineOrder + 2; ++i) {
-			for (int j = 0; j < min2(ynumber, splineOrder + 2); ++j) {
-				for (int k = 0; k < min2(znumber, splineOrder + 2); ++k) {
+		for (int i = 0; i < crossBinNumberX; ++i) {
+			for (int j = 0; j < crossBinNumberY; ++j) {
+				for (int k = 0; k < crossBinNumberZ; ++k) {
 					int curI = particle->correlationMapNode.xindex[i];
 					int curJ = particle->correlationMapNode.yindex[j];
 					int curK = particle->correlationMapNode.zindex[k];
@@ -873,9 +784,9 @@ void Simulation::updateElectroMagneticParameters() {
 					}
 					double correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k] / volumeE(curI, curJ, curK);
 					double particleCharge = particle->charge * particle->weight;
-					if (curI <= 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT && rank == 0) {
+					if (curI <= 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 						Particle tempParticle = *particle;
-						updateCorrelationMaps(tempParticle);
+						//updateCorrelationMaps(tempParticle);
 						Vector3d oldE = correlationEfield(tempParticleShiftX);
 						Vector3d oldB = correlationBfield(tempParticleShiftX);
 						tempParticle.reflectMomentumX();
@@ -889,14 +800,14 @@ void Simulation::updateElectroMagneticParameters() {
 						double tempCorrelation = correlationWithEbin(tempParticleShiftX, curI, curJ, curK) / volumeE(curI, curJ, curK);
 						if (solverType == IMPLICIT) {
 							tempParticleShiftX.coordinates.x = particle->coordinates.x + shiftX;
-							updateCorrelationMaps(tempParticleShiftX);
+							updateCorrelationMapsX(tempParticleShiftX);
 							oldE = correlationEfield(tempParticleShiftX);
 							oldB = correlationBfield(tempParticleShiftX);
 							tempParticleShiftX.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
 							tempRotatedVelocityShiftX = tempParticleShiftX.rotationTensor * (velocity * gamma);
 							if (ynumber > 1) {
 								tempParticleShiftY.coordinates.y = particle->coordinates.y + shiftY;
-								updateCorrelationMaps(tempParticleShiftY);
+								updateCorrelationMapsY(tempParticleShiftY);
 								oldE = correlationEfield(tempParticleShiftY);
 								oldB = correlationBfield(tempParticleShiftY);
 								tempParticleShiftY.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
@@ -904,7 +815,7 @@ void Simulation::updateElectroMagneticParameters() {
 							}
 							if (znumber > 1) {
 								tempParticleShiftZ.coordinates.z = particle->coordinates.z + shiftZ;
-								updateCorrelationMaps(tempParticleShiftZ);
+								updateCorrelationMapsZ(tempParticleShiftZ);
 								oldE = correlationEfield(tempParticleShiftZ);
 								oldB = correlationBfield(tempParticleShiftZ);
 								tempParticleShiftZ.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
@@ -924,7 +835,7 @@ void Simulation::updateElectroMagneticParameters() {
 
 
 							if (ynumber > 1) {
-								tempCorrelation = correlationWithEbin(tempParticleShiftY, curI, j, k) / volumeE(curI, j, k);
+								tempCorrelation = correlationWithEbin(tempParticleShiftY, curI, curJ, curK) / volumeE(curI, curJ, curK);
 
 								tensorDer10Y = ((tempRotatedVelocityShiftY.y * tempRotatedVelocityShiftY.x) * tempCorrelation - tensor.matrix[1][0] * correlation) / shiftY;
 								tensorDer11Y = ((tempRotatedVelocityShiftY.y * tempRotatedVelocityShiftY.y) * tempCorrelation - tensor.matrix[1][1] * correlation) / shiftY;
@@ -932,7 +843,7 @@ void Simulation::updateElectroMagneticParameters() {
 							}
 
 							if (znumber > 1) {
-								tempCorrelation = correlationWithEbin(tempParticleShiftZ, curI, j, k) / volumeE(curI, j, k);
+								tempCorrelation = correlationWithEbin(tempParticleShiftZ, curI, curJ, curK) / volumeE(curI, curJ, curK);
 
 								tensorDer20Z = ((tempRotatedVelocityShiftZ.z * tempRotatedVelocityShiftZ.x) * tempCorrelation - tensor.matrix[0][0] * correlation) / shiftZ;
 								tensorDer21Z = ((tempRotatedVelocityShiftZ.z * tempRotatedVelocityShiftZ.y) * tempCorrelation - tensor.matrix[0][1] * correlation) / shiftZ;
@@ -945,16 +856,16 @@ void Simulation::updateElectroMagneticParameters() {
 								electricFluxMinus[2 - curI][curJ][curK] += rotatedVelocity * (particleCharge * correlation);
 								//electricFluxMinus[2 - curI][curJ][curK] += velocity * (particleCharge * correlation);						
 							}
-							dielectricTensor[2 - curI][curJ][curK] = dielectricTensor[curI][curJ][curK] - particle->rotationTensor * (particleOmega * correlation);
+							dielectricTensor[2 - curI][curJ][curK] = dielectricTensor[2 - curI][curJ][curK] - particle->rotationTensor * (particleOmega * correlation);
 
 							divPressureTensor[2 - curI][curJ][curK].x += (tensorDer00X + tensorDer10Y + tensorDer20Z) * particleCharge;
 							divPressureTensor[2 - curI][curJ][curK].y += (tensorDer01X + tensorDer11Y + tensorDer21Z) * particleCharge;
 							divPressureTensor[2 - curI][curJ][curK].z += (tensorDer02X + tensorDer12Y + tensorDer22Z) * particleCharge;
 						} else {
 							if (particleCharge > 0) {
-								electricFlux[2 - curI][j][k] += velocity * particleCharge * correlation;
+								electricFlux[2 - curI][curJ][curK] += velocity * particleCharge * correlation;
 							} else {
-								electricFluxMinus[2 - curI][j][k] += velocity * particleCharge * correlation;
+								electricFluxMinus[2 - curI][curJ][curK] += velocity * particleCharge * correlation;
 							}
 						}
 					} else {
@@ -978,7 +889,7 @@ void Simulation::updateElectroMagneticParameters() {
 
 
 						if (ynumber > 1) {
-							tempCorrelation = correlationWithEbin(tempParticleShiftY, curI, j, k) / volumeE(curI, j, k);
+							tempCorrelation = correlationWithEbin(tempParticleShiftY, curI, curJ, curK) / volumeE(curI, curJ, curK);
 
 							tensorDer10Y = ((tempRotatedVelocityShiftY.y * tempRotatedVelocityShiftY.x) * tempCorrelation - tensor.matrix[1][0] * correlation) / shiftY;
 							tensorDer11Y = ((tempRotatedVelocityShiftY.y * tempRotatedVelocityShiftY.y) * tempCorrelation - tensor.matrix[1][1] * correlation) / shiftY;
@@ -986,7 +897,7 @@ void Simulation::updateElectroMagneticParameters() {
 						}
 
 						if (znumber > 1) {
-							tempCorrelation = correlationWithEbin(tempParticleShiftZ, curI, j, k) / volumeE(curI, j, k);
+							tempCorrelation = correlationWithEbin(tempParticleShiftZ, curI, curJ, curK) / volumeE(curI, curJ, curK);
 
 							tensorDer20Z = ((tempRotatedVelocityShiftZ.z * tempRotatedVelocityShiftZ.x) * tempCorrelation - tensor.matrix[0][0] * correlation) / shiftZ;
 							tensorDer21Z = ((tempRotatedVelocityShiftZ.z * tempRotatedVelocityShiftZ.y) * tempCorrelation - tensor.matrix[0][1] * correlation) / shiftZ;
@@ -1064,7 +975,7 @@ void Simulation::updateElectroMagneticParameters() {
 		}
 	}
 
-	if (rank == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+	if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				electricFlux[1][j][k] = Vector3d(0, 0, 0);
@@ -1142,7 +1053,7 @@ void Simulation::updateElectroMagneticParameters() {
 	}
 	//MPI_Barrier(MPI_COMM_WORLD);
 	//fprintf(outputEverythingFile, "electricFlux %d after boundaries = %28.22g %28.22g %28.22g\n", debugPoint, electricFlux[debugPoint][0][0].x, electricFlux[debugPoint][0][0].y, electricFlux[debugPoint][0][0].z);
-	if ((rank == 0) && (verbosity > 1)) printf("updating electricDensityHat and pressure tensor\n");
+	if ((verbosity > 1)) printf("updating electricDensityHat and pressure tensor\n");
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -1169,9 +1080,9 @@ void Simulation::updateElectroMagneticParameters() {
 
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
-		for (int i = 0; i < splineOrder + 2; ++i) {
-			for (int j = 0; j < min2(ynumber, splineOrder + 2); ++j) {
-				for (int k = 0; k < min2(znumber, splineOrder + 2); ++k) {
+		for (int i = 0; i < crossBinNumberX; ++i) {
+			for (int j = 0; j < crossBinNumberY; ++j) {
+				for (int k = 0; k < crossBinNumberZ; ++k) {
 					int curI = particle->correlationMapCell.xindex[i];
 					int curJ = particle->correlationMapCell.yindex[j];
 					int curK = particle->correlationMapCell.zindex[k];
@@ -1191,7 +1102,7 @@ void Simulation::updateElectroMagneticParameters() {
 					double particleCharge = particle->charge * particle->weight;
 
 
-					if (curI <= 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT && rank == 0) {
+					if (curI <= 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 						//Particle tempParticle = *particle;
 						//tempParticle.reflectMomentumX();
 						//double beta = 0.5 * particle->charge * deltaT / particle->mass;
@@ -1281,7 +1192,7 @@ void Simulation::updateElectroMagneticParameters() {
 	}
 
 	//todo realy?
-	if (boundaryConditionType == SUPER_CONDUCTOR_LEFT && rank == 0) {
+	if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			for (int k = 0; k < znumber + 1; ++k) {
 				electricFlux[1][j][k] = Vector3d(0, 0, 0);
@@ -1318,6 +1229,28 @@ void Simulation::updateElectroMagneticParameters() {
 			}
 		}
 	}
+
+	//zero densities!!!
+	/*for (int i = 0; i < xnumber + 1; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				chargeDensityHat[i][j][k] = 0;
+				chargeDensity[i][j][k] = 0;
+				chargeDensityMinus[i][j][k] = 0;
+			}
+		}
+	}
+	for (int i = 0; i < additionalBinNumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				additionalChargeDensityHatLeft[i][j][k] = 0;
+				additionalChargeDensityMinusLeft[i][j][k] = 0;
+				additionalChargeDensityHatRight[i][j][k] = 0;
+				additionalChargeDensityMinusRight[i][j][k] = 0;
+			}
+		}
+	}*/
+	//////
 	//fprintf(outputEverythingFile, "density %d afterFlux = %28.22g\n", chargeDensityHat[debugPoint - 1][0][0]);
 	//fprintf(outputEverythingFile, "density %d afterFlux = %28.22g\n", chargeDensityHat[debugPoint][0][0]);
 	//fprintf(outputEverythingFile, "density %d afterFlux = %28.22g\n", chargeDensityHat[debugPoint + 1][0][0]);
@@ -1327,28 +1260,29 @@ void Simulation::updateElectroMagneticParameters() {
 	    fprintf(tempDensityFile, "%28.22g\n", chargeDensityHat[i][0][0]);
 	}
 	fclose(tempDensityFile);*/
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating electromagnetic parameters time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
 	//MPI_Barrier(MPI_COMM_WORLD);
-	if ((rank == 0) && (verbosity > 0)) printf("start exchange parameters\n");
-	if ((rank == 0) && (verbosity > 1)) printf("sum charge density hat\n");
+	if ((verbosity > 0)) printf("start exchange parameters\n");
+	if ((verbosity > 1)) printf("sum charge density hat\n");
 	//MPI_Barrier(MPI_COMM_WORLD);
 	sumChargeDensityHat();
-	if ((rank == 0) && (verbosity > 1)) printf("sumcell matrix parameters\n");
+	if ((verbosity > 1)) printf("sumcell matrix parameters\n");
 	//MPI_Barrier(MPI_COMM_WORLD);
 	sumCellMatrixParameters();
-	if ((rank == 0) && (verbosity > 1)) printf("sum node vector parameters\n");
+	if ((verbosity > 1)) printf("sum node vector parameters\n");
 	//MPI_Barrier(MPI_COMM_WORLD);
 	sumNodeVectorParameters();
-	if ((rank == 0) && (verbosity > 1)) printf("sum node matrix parameters\n");
+	if ((verbosity > 1)) printf("sum node matrix parameters\n");
 	//MPI_Barrier(MPI_COMM_WORLD);
 	sumNodeMatrixParameters();
-	if ((rank == 0) && (verbosity > 1)) printf("update external flux\n");
+	if ((verbosity > 1)) printf("update external flux\n");
 	updateExternalFlux();
 
 	for (int i = 0; i < xnumber + 2; ++i) {
@@ -1364,109 +1298,13 @@ void Simulation::updateElectroMagneticParameters() {
 			}
 		}
 	}
-
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("exchanging electromagnetic parameters time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }
 
 void Simulation::sumNodeVectorParameters() {
-	if (nprocs > 1) {
-		if ((verbosity > 2)) printf("crating buffer in sum node vector parameters\n");
-		double* inBufferRight = new double[(2 + additionalBinNumber) * (ynumber + 1) * (znumber + 1) * 3];
-		double* outBufferRight = new double[(2 + additionalBinNumber) * (ynumber + 1) * (znumber + 1) * 3];
-		double* inBufferLeft = new double[(2 + additionalBinNumber) * (ynumber + 1) * (znumber + 1) * 3];
-		double* outBufferLeft = new double[(2 + additionalBinNumber) * (ynumber + 1) * (znumber + 1) * 3];
-
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((verbosity > 2)) printf("sending left flux sum node vector parameters rank = %d\n", rank);
-		if (rank == 0) {
-			if (boundaryConditionType == PERIODIC) {
-				sendNodeVectorParametersLeft(electricFlux, additionalElectricFluxLeft, outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			sendNodeVectorParametersLeft(electricFlux, additionalElectricFluxLeft, outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		if ((verbosity > 2)) printf("receiving right flux sum node vector parameters rank = %d\n", rank);
-		if (rank == nprocs - 1) {
-			if (boundaryConditionType == PERIODIC) {
-				receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		if ((verbosity > 2)) printf("sending right flux sum node vector parameters rank = %d\n", rank);
-		if (rank == nprocs - 1) {
-			if (boundaryConditionType == PERIODIC) {
-				sendNodeVectorParametersRight(electricFlux, additionalElectricFluxRight, outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			sendNodeVectorParametersRight(electricFlux, additionalElectricFluxRight, outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((verbosity > 2)) printf("receiving left flux sum node vector parameters rank = %d\n", rank);
-		if (rank == 0) {
-			if (boundaryConditionType == PERIODIC) {
-				receiveNodeVectorParametersLeft(tempNodeVectorParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			receiveNodeVectorParametersLeft(tempNodeVectorParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		sumTempNodeVectorParameters(electricFlux);
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-		//printf("send divPressureTensor\n");
-		if ((verbosity > 2)) printf("sending left div pressure tensor sum node vector parameters rank = %d\n", rank);
-		if (rank == 0) {
-			if (boundaryConditionType == PERIODIC) {
-				sendNodeVectorParametersLeft(divPressureTensor, additionalDivPressureTensorLeft, outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			sendNodeVectorParametersLeft(divPressureTensor, additionalDivPressureTensorLeft, outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		if ((verbosity > 2)) printf("receiving right divpressure tensor sum node vector parameters\n");
-		if (rank == nprocs - 1) {
-			if (boundaryConditionType == PERIODIC) {
-				receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		if ((verbosity > 2)) printf("sending right div pressure tensor sum node vector parameters rank = %d\n", rank);
-		if (rank == nprocs - 1) {
-			if (boundaryConditionType == PERIODIC) {
-				sendNodeVectorParametersRight(divPressureTensor, additionalDivPressureTensorRight, outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			sendNodeVectorParametersRight(divPressureTensor, additionalDivPressureTensorRight, outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((verbosity > 2)) printf("receiving left divpressure tensor sum node vector parameters\n");
-		if (rank == 0) {
-			if (boundaryConditionType == PERIODIC) {
-				receiveNodeVectorParametersLeft(tempNodeVectorParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			receiveNodeVectorParametersLeft(tempNodeVectorParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		sumTempNodeVectorParameters(divPressureTensor);
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((verbosity > 2)) printf("deleting buffer in sum node vector parameters rank = %d\n", rank);
-		delete[] inBufferLeft;
-		delete[] inBufferRight;
-		delete[] outBufferLeft;
-		delete[] outBufferRight;
-	} else {
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j <= ynumber; ++j) {
 				for (int k = 0; k <= znumber; ++k) {
@@ -1496,12 +1334,11 @@ void Simulation::sumNodeVectorParameters() {
 					}
 				}
 			}
-		}
 	}
 }
 
 void Simulation::sumTempNodeVectorParameters(Vector3d*** array) {
-	if (rank > 0 || boundaryConditionType == PERIODIC) {
+	if (boundaryConditionType == PERIODIC) {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			for (int k = 0; k < znumber + 1; ++k) {
 				array[1][j][k] = array[1][j][k] + tempNodeVectorParameterLeft[0][j][k];
@@ -1513,7 +1350,7 @@ void Simulation::sumTempNodeVectorParameters(Vector3d*** array) {
 		}
 	}
 
-	if (rank < nprocs - 1 || boundaryConditionType == PERIODIC) {
+	if (boundaryConditionType == PERIODIC) {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			for (int k = 0; k < znumber + 1; ++k) {
 				array[xnumber - 1][j][k] = array[xnumber - 1][j][k] + tempNodeVectorParameterRight[0][j][k];
@@ -1528,59 +1365,6 @@ void Simulation::sumTempNodeVectorParameters(Vector3d*** array) {
 }
 
 void Simulation::sumNodeMatrixParameters() {
-	if (nprocs > 1) {
-		if ((verbosity > 2)) printf("crating buffer in sum node matrix parameters rank = %d\n", rank);
-		double* inBufferRight = new double[(2 + additionalBinNumber) * (ynumber + 1) * (znumber + 1) * 9];
-		double* outBufferRight = new double[(2 + additionalBinNumber) * (ynumber + 1) * (znumber + 1) * 9];
-		double* inBufferLeft = new double[(2 + additionalBinNumber) * (ynumber + 1) * (znumber + 1) * 9];
-		double* outBufferLeft = new double[(2 + additionalBinNumber) * (ynumber + 1) * (znumber + 1) * 9];
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((verbosity > 2)) printf("send left dielectric tensor sum node matrix parameters rank = %d\n", rank);
-		if (rank == 0) {
-			if (boundaryConditionType == PERIODIC) {
-				sendNodeMatrixParametersLeft(dielectricTensor, additionalDielectricTensorLeft, outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			sendNodeMatrixParametersLeft(dielectricTensor, additionalDielectricTensorLeft, outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		if ((verbosity > 2)) printf("receiving right dielectric tensor sum node matrix parameters rank = %d\n", rank);
-		if (rank == nprocs - 1) {
-			if (boundaryConditionType == PERIODIC) {
-				receiveNodeMatrixParametersRight(tempNodeMatrixParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			receiveNodeMatrixParametersRight(tempNodeMatrixParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		if ((verbosity > 2)) printf("send right dielectric tensor sum node matrix parameters rank = %d\n", rank);
-		if (rank == nprocs - 1) {
-			if (boundaryConditionType == PERIODIC) {
-				sendNodeMatrixParametersRight(dielectricTensor, additionalDielectricTensorRight, outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			sendNodeMatrixParametersRight(dielectricTensor, additionalDielectricTensorRight, outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((verbosity > 2)) printf("receiving left dielectric tensor sum node matrix parameters rank = %d\n", rank);
-		if (rank == 0) {
-			if (boundaryConditionType == PERIODIC) {
-				receiveNodeMatrixParametersLeft(tempNodeMatrixParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			receiveNodeMatrixParametersLeft(tempNodeMatrixParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		sumTempNodeMatrixParameters(dielectricTensor);
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((verbosity > 2)) printf("deleting buffer in sum node matrix parameters rank = %d\n", rank);
-		delete[] inBufferLeft;
-		delete[] inBufferRight;
-		delete[] outBufferLeft;
-		delete[] outBufferRight;
-	} else {
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j <= ynumber; ++j) {
 				for (int k = 0; k <= znumber; ++k) {
@@ -1603,12 +1387,11 @@ void Simulation::sumNodeMatrixParameters() {
 					}
 				}
 			}
-		}
 	}
 }
 
 void Simulation::sumTempNodeMatrixParameters(Matrix3d*** array) {
-	if (rank > 0 || boundaryConditionType == PERIODIC) {
+	if (boundaryConditionType == PERIODIC) {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			for (int k = 0; k < znumber + 1; ++k) {
 				array[1][j][k] = array[1][j][k] + tempNodeMatrixParameterLeft[0][j][k];
@@ -1620,7 +1403,7 @@ void Simulation::sumTempNodeMatrixParameters(Matrix3d*** array) {
 		}
 	}
 
-	if (rank < nprocs - 1 || boundaryConditionType == PERIODIC) {
+	if (boundaryConditionType == PERIODIC) {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			for (int k = 0; k < znumber + 1; ++k) {
 				array[xnumber - 1][j][k] = array[xnumber - 1][j][k] + tempNodeMatrixParameterRight[0][j][k];
@@ -1635,7 +1418,7 @@ void Simulation::sumTempNodeMatrixParameters(Matrix3d*** array) {
 }
 
 void Simulation::sumTempNodeParameters(double*** array) {
-	if (rank > 0 || boundaryConditionType == PERIODIC) {
+	if (boundaryConditionType == PERIODIC) {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			for (int k = 0; k < znumber + 1; ++k) {
 				array[1][j][k] = array[1][j][k] + tempNodeParameterLeft[0][j][k];
@@ -1647,7 +1430,7 @@ void Simulation::sumTempNodeParameters(double*** array) {
 		}
 	}
 
-	if (rank < nprocs - 1 || boundaryConditionType == PERIODIC) {
+	if (boundaryConditionType == PERIODIC) {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			for (int k = 0; k < znumber + 1; ++k) {
 				array[xnumber - 1][j][k] = array[xnumber - 1][j][k] + tempNodeParameterRight[0][j][k];
@@ -1687,10 +1470,10 @@ void Simulation::smoothDensity() {
 
 void Simulation::updateDensityParameters() {
 	double procTime = 0;
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if ((rank == 0) && (verbosity > 0)) {
+	if ((verbosity > 0)) {
 		printf("updating densityParameters\n");
 	}
 	//FILE* debugFile = fopen("./output/particleCorrelations.dat","w");
@@ -1748,7 +1531,7 @@ void Simulation::updateDensityParameters() {
 					double particleCharge = particle->charge * particle->weight;
 					int typeN = getTypeNumber(particle);
 
-					if (curI <= 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT && rank == 0) {
+					if (curI <= 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 						Vector3d reflectedMomentum = particle->getMomentum();
 						reflectedMomentum.x = -reflectedMomentum.x;
 						particleBulkVelocities[typeN][1 - curI][curJ][curK] += reflectedMomentum * particle->weight * correlation;
@@ -1807,7 +1590,29 @@ void Simulation::updateDensityParameters() {
 		}
 	}
 
-	if ((rank == 0) && (verbosity > 1)) {
+	//zero density!!!
+	/*for (int i = 0; i < xnumber + 1; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				chargeDensity[i][j][k] = 0;
+				chargeDensityMinus[i][j][k] = 0;
+			}
+		}
+	}
+
+	for (int i = 0; i < additionalBinNumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			for (int k = 0; k < znumber; ++k) {
+				additionalChargeDensityLeft[i][j][k] = 0;
+				additionalChargeDensityMinusLeft[i][j][k] = 0;
+				additionalChargeDensityRight[i][j][k] = 0;
+				additionalChargeDensityMinusRight[i][j][k] = 0;
+			}
+		}
+	}*/
+	//////
+
+	if ((verbosity > 1)) {
 		printf("sum densityParameters\n");
 	}
 	sumCellParameters();
@@ -1828,66 +1633,13 @@ void Simulation::updateDensityParameters() {
 			}
 		}
 	}
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating density parameters time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }
 
 void Simulation::sumChargeDensityHat() {
-	if (nprocs > 1) {
-		if ((verbosity > 2)) printf("crating buffer in sum charge density hat rank = %d\n", rank);
-		double* inBufferRight = new double[(2 + additionalBinNumber) * ynumber * znumber];
-		double* outBufferRight = new double[(2 + additionalBinNumber) * ynumber * znumber];
-		double* inBufferLeft = new double[(2 + additionalBinNumber) * ynumber * znumber];
-		double* outBufferLeft = new double[(2 + additionalBinNumber) * ynumber * znumber];
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((rank == 0) && (verbosity > 2)) printf("sending left sum charge density hat rank = %d\n", rank);
-		if (rank == 0) {
-			if (boundaryConditionType == PERIODIC) {
-				sendCellParametersLeft(chargeDensityHat, additionalChargeDensityHatLeft, outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			sendCellParametersLeft(chargeDensityHat, additionalChargeDensityHatLeft, outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		if ((verbosity > 2)) printf("receiving right in sum charge density hat rank = %d\n", rank);
-		if (rank == nprocs - 1) {
-			if (boundaryConditionType == PERIODIC) {
-				receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		if ((rank == 0) && (verbosity > 2)) printf("sending right sum charge density hat rank = %d\n", rank);
-		if (rank == nprocs - 1) {
-			if (boundaryConditionType == PERIODIC) {
-				sendCellParametersRight(chargeDensityHat, additionalChargeDensityHatRight, outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			sendCellParametersRight(chargeDensityHat, additionalChargeDensityHatRight, outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((verbosity > 2)) printf("receiving left in sum charge density hat rank = %d\n", rank);
-		if (rank == 0) {
-			if (boundaryConditionType == PERIODIC) {
-				receiveCellParametersLeft(tempCellParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			receiveCellParametersLeft(tempCellParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-		sumCellTempParameters(chargeDensityHat);
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((verbosity > 2)) printf("deleting buffer in sum charge density hat rank = %d\n", rank);
-		delete[] inBufferRight;
-		delete[] outBufferRight;
-		delete[] inBufferLeft;
-		delete[] outBufferLeft;
-	} else {
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
@@ -1904,123 +1656,9 @@ void Simulation::sumChargeDensityHat() {
 				}
 			}
 		}
-	}
 }
 
 void Simulation::sumCellParameters() {
-	if (nprocs > 1) {
-		double* inBufferRight = new double[(2 + additionalBinNumber) * ynumber * znumber];
-		double* outBufferRight = new double[(2 + additionalBinNumber) * ynumber * znumber];
-		double* inBufferLeft = new double[(2 + additionalBinNumber) * ynumber * znumber];
-		double* outBufferLeft = new double[(2 + additionalBinNumber) * ynumber * znumber];
-
-		for (int t = 0; t < typesNumber; ++t) {
-			//MPI_Barrier(MPI_COMM_WORLD);
-			if (types[t].particlesPerBin > 0) {
-				if (rank == 0) {
-					if (boundaryConditionType == PERIODIC) {
-						sendCellParametersLeft(particleConcentrations[t], additionalParticleConcentrationsLeft[t], outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-					}
-				} else {
-					sendCellParametersLeft(particleConcentrations[t], additionalParticleConcentrationsLeft[t], outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-				}
-
-				if (rank == nprocs - 1) {
-					if (boundaryConditionType == PERIODIC) {
-						receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-					}
-				} else {
-					receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-				}
-
-
-				if (rank == nprocs - 1) {
-					if (boundaryConditionType == PERIODIC) {
-						sendCellParametersRight(particleConcentrations[t], additionalParticleConcentrationsRight[t], outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-					}
-				} else {
-					sendCellParametersRight(particleConcentrations[t], additionalParticleConcentrationsRight[t], outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-				}
-
-
-				//MPI_Barrier(MPI_COMM_WORLD);
-				if (rank == 0) {
-					if (boundaryConditionType == PERIODIC) {
-						receiveCellParametersLeft(tempCellParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-					}
-				} else {
-					receiveCellParametersLeft(tempCellParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-				}
-
-				sumCellTempParameters(particleConcentrations[t]);
-			}
-			//MPI_Barrier(MPI_COMM_WORLD);
-		}
-
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-
-		if (rank == 0) {
-			if (boundaryConditionType == PERIODIC) {
-				sendCellParametersLeft(chargeDensity, additionalChargeDensityLeft, outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			sendCellParametersLeft(chargeDensity, additionalChargeDensityLeft, outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		if (rank == nprocs - 1) {
-			if (boundaryConditionType == PERIODIC) {
-				receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		if (rank == nprocs - 1) {
-			if (boundaryConditionType == PERIODIC) {
-				sendCellParametersRight(chargeDensity, additionalChargeDensityRight, outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			sendCellParametersRight(chargeDensity, additionalChargeDensityRight, outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-
-		if (rank == 0) {
-			if (boundaryConditionType == PERIODIC) {
-				receiveCellParametersLeft(tempCellParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			receiveCellParametersLeft(tempCellParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		sumCellTempParameters(chargeDensity);
-		//MPI_Barrier(MPI_COMM_WORLD);
-
-		if (rank == nprocs - 1 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				chargeDensity[xnumber - 1][j][k] = chargeDensity[xnumber - 1][j][k] + chargeDensity[xnumber][j][k];
-				chargeDensity[xnumber][j][k] = 0;
-				for (int i = 0; i < additionalBinNumber; ++i) {
-					chargeDensity[xnumber - 1][j][k] = chargeDensity[xnumber - 1][j][k] + additionalChargeDensityRight[i][j][k];
-				}
-				for(int t = 0; t < typesNumber; ++t) {
-					particleConcentrations[t][xnumber - 1][j][k] = particleConcentrations[t][xnumber - 1][j][k] + particleConcentrations[t][xnumber][j][k];
-					particleConcentrations[t][xnumber][j][k] = 0;
-					for (int i = 0; i < additionalBinNumber; ++i) {
-						particleConcentrations[t][xnumber - 1][j][k] = particleConcentrations[t][xnumber - 1][j][k] + additionalParticleConcentrationsRight[t][i][j][k];
-					}
-				}
-			}
-		}
-	}
-
-		delete[] inBufferRight;
-		delete[] outBufferRight;
-		delete[] inBufferLeft;
-		delete[] outBufferLeft;
-	} else {
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
@@ -2068,12 +1706,10 @@ void Simulation::sumCellParameters() {
 				}
 			}
 		}
-	}
-
 }
 
 void Simulation::sumCellTempParameters(double*** array) {
-	if (rank > 0 || boundaryConditionType == PERIODIC) {
+	if (boundaryConditionType == PERIODIC) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				array[0][j][k] = array[0][j][k] + tempCellParameterLeft[0][j][k];
@@ -2085,7 +1721,7 @@ void Simulation::sumCellTempParameters(double*** array) {
 		}
 	}
 
-	if (rank < nprocs - 1 || boundaryConditionType == PERIODIC) {
+	if (boundaryConditionType == PERIODIC) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				array[xnumber - 1][j][k] = array[xnumber - 1][j][k] + tempCellParameterRight[0][j][k];
@@ -2100,60 +1736,6 @@ void Simulation::sumCellTempParameters(double*** array) {
 }
 
 void Simulation::sumCellVectorParameters() {
-	if (nprocs > 1) {
-		double* inBufferRight = new double[(2 + additionalBinNumber) * 3 * ynumber * znumber];
-		double* outBufferRight = new double[(2 + additionalBinNumber) * 3 * ynumber * znumber];
-		double* inBufferLeft = new double[(2 + additionalBinNumber) * 3 * ynumber * znumber];
-		double* outBufferLeft = new double[(2 + additionalBinNumber) * 3 * ynumber * znumber];
-
-		for (int t = 0; t < typesNumber; ++t) {
-			//MPI_Barrier(MPI_COMM_WORLD);
-			if (types[t].particlesPerBin > 0) {
-				if (rank == 0) {
-					if (boundaryConditionType == PERIODIC) {
-						sendCellVectorParametersLeft(particleBulkVelocities[t], additionalParticleBulkVelocitiesLeft[t], outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-					}
-				} else {
-					sendCellVectorParametersLeft(particleBulkVelocities[t], additionalParticleBulkVelocitiesLeft[t], outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-				}
-
-
-				if (rank == nprocs - 1) {
-					if (boundaryConditionType == PERIODIC) {
-						receiveCellVectorParametersRight(tempCellVectorParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-					}
-				} else {
-					receiveCellVectorParametersRight(tempCellVectorParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-				}
-
-				if (rank == nprocs - 1) {
-					if (boundaryConditionType == PERIODIC) {
-						sendCellVectorParametersRight(particleBulkVelocities[t], additionalParticleBulkVelocitiesRight[t], outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-					}
-				} else {
-					sendCellVectorParametersRight(particleBulkVelocities[t], additionalParticleBulkVelocitiesRight[t], outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-				}
-
-				//MPI_Barrier(MPI_COMM_WORLD);
-
-				if (rank == 0) {
-					if (boundaryConditionType == PERIODIC) {
-						receiveCellVectorParametersLeft(tempCellVectorParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-					}
-				} else {
-					receiveCellVectorParametersLeft(tempCellVectorParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-				}
-
-				sumCellTempVectorParameters(particleBulkVelocities[t]);
-			}
-			//MPI_Barrier(MPI_COMM_WORLD);
-		}
-
-		delete[] inBufferRight;
-		delete[] outBufferRight;
-		delete[] inBufferLeft;
-		delete[] outBufferLeft;
-	} else {
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
@@ -2173,11 +1755,10 @@ void Simulation::sumCellVectorParameters() {
 				}
 			}
 		}
-	}
 }
 
 void Simulation::sumCellTempVectorParameters(Vector3d*** array) {
-	if (rank > 0 || boundaryConditionType == PERIODIC) {
+	if (boundaryConditionType == PERIODIC) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				array[0][j][k] = array[0][j][k] + tempCellVectorParameterLeft[0][j][k];
@@ -2189,7 +1770,7 @@ void Simulation::sumCellTempVectorParameters(Vector3d*** array) {
 		}
 	}
 
-	if (rank < nprocs - 1 || boundaryConditionType == PERIODIC) {
+	if (boundaryConditionType == PERIODIC) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				array[xnumber - 1][j][k] = array[xnumber - 1][j][k] + tempCellVectorParameterRight[0][j][k];
@@ -2204,59 +1785,6 @@ void Simulation::sumCellTempVectorParameters(Vector3d*** array) {
 }
 
 void Simulation::sumCellMatrixParameters() {
-	if (nprocs > 1) {
-		if ((verbosity > 2)) printf("crating buffer in sum cell matrix parameters rank = %d\n", rank);
-		double* inBufferRight = new double[(2 + additionalBinNumber) * 9 * ynumber * znumber];
-		double* outBufferRight = new double[(2 + additionalBinNumber) * 9 * ynumber * znumber];
-		double* inBufferLeft = new double[(2 + additionalBinNumber) * 9 * ynumber * znumber];
-		double* outBufferLeft = new double[(2 + additionalBinNumber) * 9 * ynumber * znumber];
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((verbosity > 2)) printf("sending left  pressure tensor sum cell matrix parameters rank = %d\n", rank);
-		if (rank == 0) {
-			if (boundaryConditionType == PERIODIC) {
-				sendCellMatrixParametersLeft(pressureTensor, additionalPressureTensorLeft, outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			sendCellMatrixParametersLeft(pressureTensor, additionalPressureTensorLeft, outBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		if ((verbosity > 2)) printf("receiving right pressure tensor in sum cell matrix parameters rank = %d\n", rank);
-		if (rank == nprocs - 1) {
-			if (boundaryConditionType == PERIODIC) {
-				receiveCellMatrixParametersRight(tempCellMatrixParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			receiveCellMatrixParametersRight(tempCellMatrixParameterRight, inBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		if ((verbosity > 2)) printf("sending right pressure tensor sum cell matrix parameters rank = %d\n", rank);
-		if (rank == nprocs - 1) {
-			if (boundaryConditionType == PERIODIC) {
-				sendCellMatrixParametersRight(pressureTensor, additionalPressureTensorRight, outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			sendCellMatrixParametersRight(pressureTensor, additionalPressureTensorRight, outBufferRight, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((verbosity > 2)) printf("receiving left pressure tensor in sum cell matrix parameters rank = %d\n", rank);
-		if (rank == 0) {
-			if (boundaryConditionType == PERIODIC) {
-				receiveCellMatrixParametersLeft(tempCellMatrixParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-			}
-		} else {
-			receiveCellMatrixParametersLeft(tempCellMatrixParameterLeft, inBufferLeft, xnumber, ynumber, znumber, additionalBinNumber);
-		}
-
-		sumCellTempMatrixParameters(pressureTensor);
-		//MPI_Barrier(MPI_COMM_WORLD);
-		if ((verbosity > 2)) printf("deleting buffer in sum cell matrix parameters rank = %d\n", rank);
-		delete[] inBufferRight;
-		delete[] outBufferRight;
-		delete[] inBufferLeft;
-		delete[] outBufferLeft;
-	} else {
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
@@ -2277,12 +1805,11 @@ void Simulation::sumCellMatrixParameters() {
 				}
 			}
 		}
-	}
 
 }
 
 void Simulation::sumCellTempMatrixParameters(Matrix3d*** array) {
-	if (rank > 0 || boundaryConditionType == PERIODIC) {
+	if (boundaryConditionType == PERIODIC) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				array[0][j][k] = array[0][j][k] + tempCellMatrixParameterLeft[0][j][k];
@@ -2294,7 +1821,7 @@ void Simulation::sumCellTempMatrixParameters(Matrix3d*** array) {
 		}
 	}
 
-	if (rank < nprocs - 1 || boundaryConditionType == PERIODIC) {
+	if (boundaryConditionType == PERIODIC) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
 				array[xnumber - 1][j][k] = array[xnumber - 1][j][k] + tempCellMatrixParameterRight[0][j][k];
@@ -2310,7 +1837,7 @@ void Simulation::sumCellTempMatrixParameters(Matrix3d*** array) {
 
 void Simulation::updateEnergy() {
 	double procTime = 0;
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
 	particleEnergy = 0;
@@ -2326,7 +1853,7 @@ void Simulation::updateEnergy() {
 				for (int k = 0; k < znumber; ++k) {
 					Vector3d E = Efield[i][j][k];
 					electricFieldEnergy += E.scalarMult(E) * volumeE(i, j, k) / (8 * pi);
-					if (boundaryConditionType == PERIODIC || rank > 0 || i > 1) {
+					if (boundaryConditionType == PERIODIC || i > 1) {
 						electricFieldEnergy -= E0.scalarMult(E0) * volumeB(i, j, k) / (8 * pi);
 					}
 				}
@@ -2338,7 +1865,7 @@ void Simulation::updateEnergy() {
 				for (int k = 0; k < znumber; ++k) {
 					Vector3d B = Bfield[i][j][k];
 					magneticFieldEnergy += (B.scalarMult(B)) * volumeB(i, j, k) / (8 * pi);
-					if (boundaryConditionType == PERIODIC || rank > 0 || i > 0) {
+					if (boundaryConditionType == PERIODIC || i > 0) {
 						magneticFieldEnergy -= B0.scalarMult(B0) * volumeB(i, j, k) / (8 * pi);
 					}
 				}
@@ -2418,45 +1945,11 @@ void Simulation::updateEnergy() {
 	}
 
 	if (currentIteration % writeParameter == 0) {
-		double buffer[12];
-		if (rank != 0) {
-			buffer[0] = particleEnergy;
-			buffer[1] = electricFieldEnergy;
-			buffer[2] = magneticFieldEnergy;
-			buffer[3] = energy;
-			buffer[4] = globalMomentum.x;
-			buffer[5] = globalMomentum.y;
-			buffer[6] = globalMomentum.z;
-			buffer[7] = theoreticalEnergy;
-			buffer[8] = theoreticalMomentum.x;
-			buffer[9] = theoreticalMomentum.y;
-			buffer[10] = theoreticalMomentum.z;
-			//buffer[11] = (double)particlesNumber;
-
-			MPI_Send(buffer, 11, MPI_DOUBLE, 0, MPI_SEND_GENERAL_PARAMETERS, MPI_COMM_WORLD);
-		} else {
-			generalTheoreticalEnergy = theoreticalEnergy;
-			generalTheoreticalMomentum = theoreticalMomentum;
-			for (int i = 1; i < nprocs; ++i) {
-				MPI_Status status;
-				MPI_Recv(buffer, 11, MPI_DOUBLE, i, MPI_SEND_GENERAL_PARAMETERS, MPI_COMM_WORLD, &status);
-				particleEnergy += buffer[0];
-				electricFieldEnergy += buffer[1];
-				magneticFieldEnergy += buffer[2];
-				energy += buffer[3];
-				globalMomentum.x += buffer[4];
-				globalMomentum.y += buffer[5];
-				globalMomentum.z += buffer[6];
-				generalTheoreticalEnergy += buffer[7];
-				generalTheoreticalMomentum.x += buffer[8];
-				generalTheoreticalMomentum.y += buffer[9];
-				generalTheoreticalMomentum.z += buffer[10];
-				//particlesNumber += buffer[11];
-			}
-		}
+		generalTheoreticalEnergy = theoreticalEnergy;
+		generalTheoreticalMomentum = theoreticalMomentum;
 	}
 
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating energy time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
@@ -2472,7 +1965,6 @@ Vector3d Simulation::getBfield(int i, int j, int k) {
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "i = %d, xnumber = %d\n", i, xnumber);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
@@ -2485,7 +1977,6 @@ Vector3d Simulation::getBfield(int i, int j, int k) {
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "j = %d, ynumber = %d\n", j, ynumber);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
@@ -2498,7 +1989,6 @@ Vector3d Simulation::getBfield(int i, int j, int k) {
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "k = %d, znumber = %d\n", k, znumber);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
@@ -2618,11 +2108,12 @@ double Simulation::getDensity(int i, int j, int k) {
 
 void Simulation::updateParameters() {
 	double procTime = 0;
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
 	maxBfield = Bfield[0][0][0] - B0;
 	maxEfield = Efield[0][0][0];
+	
 	for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
@@ -2636,61 +2127,25 @@ void Simulation::updateParameters() {
 		}
 	}
 
+	meanSquaredEfield[0] = 0;
+	meanSquaredEfield[1] = 0;
+	meanSquaredEfield[2] = 0;
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			for (int k = 0; k < znumber + 1; ++k) {
 				if (Efield[i][j][k].norm() > maxEfield.norm()) {
 					maxEfield = Efield[i][j][k];
 				}
+				if(i > 0 && i < xnumber) {
+					meanSquaredEfield[0] += Efield[i][j][k].x*Efield[i][j][k].x;
+					meanSquaredEfield[1] += Efield[i][j][k].y*Efield[i][j][k].y;
+					meanSquaredEfield[2] += Efield[i][j][k].z*Efield[i][j][k].z;
+				}
 			}
 		}
 	}
 
-	MPI_Barrier(MPI_COMM_WORLD);
-	double temp[7];
-	temp[0] = maxBfield.x;
-	temp[1] = maxBfield.y;
-	temp[2] = maxBfield.z;
-	temp[3] = maxEfield.x;
-	temp[4] = maxEfield.y;
-	temp[5] = maxEfield.z;
-	if (rank != 0) {
-		MPI_Send(temp, 6, MPI_DOUBLE, 0, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD);
-	} else {
-		for (int i = 1; i < nprocs; ++i) {
-			MPI_Status status;
-			MPI_Recv(temp, 6, MPI_DOUBLE, i, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD, &status);
-			Vector3d tempB = Vector3d(temp[0], temp[1], temp[2]);
-			Vector3d tempE = Vector3d(temp[3], temp[4], temp[5]);
-			if (tempB.norm() > maxBfield.norm()) {
-				maxBfield = tempB;
-			}
-			if (tempE.norm() > maxEfield.norm()) {
-				maxEfield = tempE;
-			}
-		}
-	}
-	MPI_Barrier(MPI_COMM_WORLD);
-
-	if (rank == 0) {
-		temp[0] = maxBfield.x;
-		temp[1] = maxBfield.y;
-		temp[2] = maxBfield.z;
-		temp[3] = maxEfield.x;
-		temp[4] = maxEfield.y;
-		temp[5] = maxEfield.z;
-		for (int i = 1; i < nprocs; ++i) {
-			MPI_Send(temp, 6, MPI_DOUBLE, i, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD);
-		}
-	} else {
-		MPI_Status status;
-		MPI_Recv(temp, 6, MPI_DOUBLE, 0, MPI_SEND_DOUBLE_NUMBER_ALL, MPI_COMM_WORLD, &status);
-		maxBfield = Vector3d(temp[0], temp[1], temp[2]);
-		maxEfield = Vector3d(temp[3], temp[4], temp[5]);
-	}
-	MPI_Barrier(MPI_COMM_WORLD);
-
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating parameters time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
@@ -2698,7 +2153,7 @@ void Simulation::updateParameters() {
 
 void Simulation::updateAnisotropy() {
 	double procTime = 0;
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
 	double* parallelV2 = new double[typesNumber];
@@ -2719,31 +2174,6 @@ void Simulation::updateAnisotropy() {
 			+ sqr(particle->velocityZ(speed_of_light_normalized))) * particle->weight;
 	}
 
-	MPI_Barrier(MPI_COMM_WORLD);
-
-	if (nprocs > 1) {
-		if (rank != 0) {
-			for (int i = 0; i < typesNumber; ++i) {
-				outBuffer[3 * i] = parallelV2[i];
-				outBuffer[3 * i + 1] = normalV2[i];
-				outBuffer[3 * i + 2] = types[i].generalWeight;
-			}
-			MPI_Send(outBuffer, 3 * typesNumber, MPI_DOUBLE, 0, MPI_SEND_DOUBLE_ALL_TO_FIRST, MPI_COMM_WORLD);
-		} else {
-			for (int i = 1; i < nprocs; ++i) {
-				MPI_Status status;
-				MPI_Recv(inBuffer, 3 * typesNumber, MPI_DOUBLE, i, MPI_SEND_DOUBLE_ALL_TO_FIRST, MPI_COMM_WORLD, &status);
-				for (int t = 0; t < typesNumber; ++t) {
-					parallelV2[t] += inBuffer[3 * t];
-					normalV2[t] += inBuffer[3 * t + 1];
-					types[t].generalWeight += inBuffer[3 * t + 2];
-				}
-			}
-		}
-	}
-
-	MPI_Barrier(MPI_COMM_WORLD);
-
 	for (int t = 0; t < typesNumber; ++t) {
 		if (types[t].generalWeight > 0) {
 			types[t].anisotropy = (0.5 * normalV2[t] / parallelV2[t]) - (2 * parallelV2[t] / normalV2[t]);
@@ -2760,8 +2190,7 @@ void Simulation::updateAnisotropy() {
 	delete[] normalV2;
 	delete[] inBuffer;
 	delete[] outBuffer;
-
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating anisotropy time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
@@ -2810,54 +2239,35 @@ void Simulation::resetNewTempFields() {
 }
 
 void Simulation::updateShockWaveX() {
+	double procTime = 0;
+	if (timing && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
+
 	double tempShockWavex[1];
 	tempShockWavex[0] = -1.0;
-	if (rank < nprocs - 1) {
-		MPI_Status status;
-		MPI_Recv(tempShockWavex, 1, MPI_DOUBLE, rank + 1, MPI_SEND_DOUBLE_NUMBER_LEFT, MPI_COMM_WORLD, &status);
-		if (tempShockWavex[0] < 0) {
-			for (int i = xnumber - 1; i > 0; i--) {
-				if (particleBulkVelocities[1][i][0][0].x > V0.x / 2) {
-					tempShockWavex[0] = xgrid[i + 1];
-					break;
-				}
-			}
-		}
-		if (rank > 0) {
-			MPI_Send(tempShockWavex, 1, MPI_DOUBLE, rank - 1, MPI_SEND_DOUBLE_NUMBER_LEFT, MPI_COMM_WORLD);
-		}
-	} else {
 		for (int i = xnumber - 1; i > 0; i--) {
 			if (particleBulkVelocities[1][i][0][0].x > V0.x / 2) {
 				tempShockWavex[0] = xgrid[i + 1];
 				break;
 			}
 		}
-		if (rank > 0) {
-			MPI_Send(tempShockWavex, 1, MPI_DOUBLE, rank - 1, MPI_SEND_DOUBLE_NUMBER_LEFT, MPI_COMM_WORLD);
-		}
-	}
 
 	if (tempShockWavex[0] < shockWaveX) {
 		tempShockWavex[0] = shockWaveX;
 	}
 
-	MPI_Barrier(MPI_COMM_WORLD);
-
-	MPI_Bcast(tempShockWavex, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
 	shockWaveX = tempShockWavex[0];
+
+	if (timing && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("updating shock wave = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}
 }
 
 void Simulation::splitParticles() {
 	int tempParticlesNumber[1];
-	for (int i = 0; i < nprocs; ++i) {
-		if (i == rank) {
-			if (rank > 0) {
-				MPI_Status status;
-				MPI_Recv(tempParticlesNumber, 1, MPI_INT, rank - 1, MPI_SEND_INTEGER_NUMBER_RIGHT, MPI_COMM_WORLD, &status);
-				particlesNumber = tempParticlesNumber[0];
-			}
 			int n = particles.size();
 			for (int p = 0; p < n; ++p) {
 				Particle* particle = particles[p];
@@ -2866,14 +2276,9 @@ void Simulation::splitParticles() {
 					particlesNumber++;
 				}*/
 			}
-			if (rank < nprocs - 1) {
-				tempParticlesNumber[0] = particlesNumber;
-				MPI_Send(tempParticlesNumber, 1, MPI_INT, rank + 1, MPI_SEND_INTEGER_NUMBER_RIGHT, MPI_COMM_WORLD);
-			}
-		}
-	}
+		
+	
 	tempParticlesNumber[0] = particlesNumber;
-	MPI_Bcast(tempParticlesNumber, 1, MPI_INT, nprocs - 1, MPI_COMM_WORLD);
 	particlesNumber = tempParticlesNumber[0];
 }
 
@@ -2907,7 +2312,6 @@ void Simulation::splitParticle(Particle* particle) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "somtehing wrong with normY = %g norm p = %g\n", normY, norm);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 		tempYort = tempYort / normY;
@@ -2918,7 +2322,6 @@ void Simulation::splitParticle(Particle* particle) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "somtehing wrong with normZ = %g norm p = %g\n", normZ, norm);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 		tempZort = tempZort / normZ;

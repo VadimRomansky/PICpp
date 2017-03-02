@@ -8,21 +8,22 @@
 class MatrixElement;
 class Vector3d;
 class Complex;
+class LargeVectorBasis;
 
 void generalizedMinimalResidualMethod(std::vector<MatrixElement> ****matrix, double ****rightPart, double ****outvector,
                                       int xnumber, int ynumber, int znumber, int lnumber, int xnumberGeneral,
                                       int znumberGeneral, int ynumberGeneral, double precision, int maxIteration,
-                                      bool periodic, int verbocity);
-double *****arnoldiIterations(std::vector<MatrixElement> ****matrix, double **outHessenbergMatrix, int n,
-                              double *****prevBasis, double **prevHessenbergMatrix, int xnumber, int ynumber,
-                              int znumber, int lnumber, bool periodic, int rank, int nprocs);
-double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic, int rank, int nprocs);
-double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic, int rank, int nprocs);
-void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic, int rank, int nprocs);
-void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic, int rank, int nprocs);
+                                      bool periodic, int verbocity, double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer, double* rightInGmresBuffer, LargeVectorBasis* gmresBasis);
+void arnoldiIterations(std::vector<MatrixElement> ****matrix, double **outHessenbergMatrix, int n,
+                       LargeVectorBasis* gmresBasis, double **prevHessenbergMatrix, int xnumber, int ynumber,
+                       int znumber, int lnumber, bool periodic, double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer, double* rightInGmresBuffer);
+double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic);
+double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic);
+void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic);
+void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, double**** vector, int xnumber, int ynumber, int znumber, int lnumber, bool periodic);
 double evaluateError(double**** hessenbergMatrix, double*** vector, double beta, int n);
 double scalarMultiplyLargeVectors(double ****a, double ****b, int xnumber, int ynumber, int znumber, int lnumber,
-                                  bool periodic, int rank, int nprocs);
+                                  bool periodic);
 double scalarMultiplyLargeVectors(Vector3d ***a, Vector3d ***b, int xnumber, int ynumber, int znumber, int lnumber,
                                   bool periodic, int rank, int nprocs);
 

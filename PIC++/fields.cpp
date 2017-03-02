@@ -16,12 +16,12 @@
 
 void Simulation::evaluateElectricField() {
 	double procTime = 0;
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if ((rank == 0) && (verbosity > 0)) printf("evaluating fields\n");
+	if ((verbosity > 0)) printf("evaluating fields\n");
 	fflush(stdout);
-	if ((rank == 0) && (verbosity > 0)) printLog("evaluating fields\n");
+	if ((verbosity > 0)) printLog("evaluating fields\n");
 	//fopen("./output/outputEverythingFile.dat","a");
 
 	if (solverType == IMPLICIT) {
@@ -52,7 +52,7 @@ void Simulation::evaluateElectricField() {
 		bool periodic = (boundaryConditionType == PERIODIC);
 		generalizedMinimalResidualMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumber, ynumber,
 		                                 znumber, maxwellEquationMatrixSize, xnumberGeneral, ynumberGeneral,
-		                                 znumberGeneral, maxErrorLevel, maxGMRESIterations, periodic, verbosity);
+		                                 znumberGeneral, maxErrorLevel, maxGMRESIterations, periodic, verbosity, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, gmresMaxwellBasis);
 		/*conjugateGradientMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumber, ynumber,
 		                                 znumber, maxwellEquationMatrixSize, maxErrorLevel, maxGMRESIterations);*/
 		//#pragma omp parallel for
@@ -61,28 +61,16 @@ void Simulation::evaluateElectricField() {
 		//for(int i = 0; i < xnumber; ++i){
 		//fprintf(gmresFile, "%28.22g %28.22g %28.22g\n", gmresOutput[i][0][0][0], gmresOutput[i][0][0][1], gmresOutput[i][0][0][2]);
 		//}
-		//fclose(gmresFile);
-		double* bufferRightSend = new double[ynumber * znumber * 3];
-		double* bufferRightRecv = new double[ynumber * znumber * 3];
-		double* bufferLeftSend = new double[ynumber * znumber * 3];
-		double* bufferLeftRecv = new double[ynumber * znumber * 3];
+		//fclose(gmresFile);* 3];
 
 
-		MPI_Barrier(MPI_COMM_WORLD);
-
-		if ((periodic) || (rank > 0)) sendGMRESTempVectorToLeft(gmresOutput, bufferLeftSend, xnumber, ynumber, znumber, 3);
-		if ((periodic) || (rank < nprocs - 1))sendGMRESTempVectorToRight(gmresOutput, bufferRightSend, xnumber, ynumber, znumber, 3);
+		if ((periodic)) sendGMRESTempVectorToLeft(gmresOutput, leftOutGmresBuffer, xnumber, ynumber, znumber, 3);
+		if ((periodic))sendGMRESTempVectorToRight(gmresOutput, rightOutGmresBuffer, xnumber, ynumber, znumber, 3);
 
 
-		if ((periodic) || (rank > 0))receiveGMRESTempVectorFromLeft(gmresOutput, bufferLeftRecv, xnumber, ynumber, znumber, 3);
-		if ((periodic) || (rank < nprocs - 1)) receiveGMRESTempVectorFromRight(gmresOutput, bufferRightRecv, xnumber, ynumber, znumber, 3);
+		if ((periodic))receiveGMRESTempVectorFromLeft(gmresOutput, leftInGmresBuffer, xnumber, ynumber, znumber, 3);
+		if ((periodic)) receiveGMRESTempVectorFromRight(gmresOutput, rightInGmresBuffer, xnumber, ynumber, znumber, 3);
 
-		MPI_Barrier(MPI_COMM_WORLD);
-
-		delete[] bufferRightSend;
-		delete[] bufferRightRecv;
-		delete[] bufferLeftSend;
-		delete[] bufferLeftRecv;
 
 		//delete[] bufferRightSend;
 		// delete[] bufferRightRecv;
@@ -145,6 +133,16 @@ void Simulation::evaluateElectricField() {
 			}
 		}
 
+		if (boundaryConditionType != PERIODIC) {
+			for (int j = 0; j < ynumber + 1; ++j) {
+				for (int k = 0; k < znumber + 1; ++k) {
+					tempEfield[xnumber + 1][j][k] = E0;
+				}
+			}
+		}
+
+		smoothTempEfield();
+
 		for (int i = 0; i < xnumber + 1; ++i) {
 			for (int j = 0; j < ynumber + 1; ++j) {
 				for (int k = 0; k < znumber + 1; ++k) {
@@ -154,11 +152,10 @@ void Simulation::evaluateElectricField() {
 			}
 		}
 
-		if (rank == nprocs - 1 && boundaryConditionType != PERIODIC) {
+		if (boundaryConditionType != PERIODIC) {
 			for (int j = 0; j < ynumber + 1; ++j) {
 				for (int k = 0; k < znumber + 1; ++k) {
 					newEfield[xnumber + 1][j][k] = E0;
-					tempEfield[xnumber + 1][j][k] = E0;
 				}
 			}
 		}
@@ -201,7 +198,8 @@ void Simulation::evaluateElectricField() {
 			}
 		}
 	}
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("evaluating electric field time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
@@ -240,7 +238,6 @@ void Simulation::updateEfield() {
 			}
 		}
 	}
-	if (nprocs == 1) {
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j < ynumber + 1; ++j) {
 				for (int k = 0; k < znumber + 1; ++k) {
@@ -254,7 +251,6 @@ void Simulation::updateEfield() {
 				}
 			}
 		}
-	}
 
 	for (int i = 0; i < xnumber + 2; ++i) {
 		for (int j = 0; j < ynumber + 1; ++j) {
@@ -282,12 +278,12 @@ void Simulation::updateBfield() {
 
 void Simulation::updateFields() {
 	double procTime = 0;
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
 	updateEfield();
 	updateBfield();
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
@@ -304,57 +300,6 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 		}
 	}
 
-	if (nprocs > 1) {
-		for (int i = 0; i < xnumber + 1; ++i) {
-			for (int j = 0; j < ynumber; ++j) {
-				for (int k = 0; k < znumber; ++k) {
-					if (rank == 0) {
-						if (i == 0) {
-							createLeftFakeEquation(i, j, k);
-						} else if (i == 1) {
-							if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
-								createSuperConductorLeftEquation(i, j, k);
-								//createLeftFakeEquation(i, j, k);
-							} else {
-								createInternalEquation(i, j, k);
-							}
-						} else if (i < xnumber) {
-							createInternalEquation(i, j, k);
-						} else {
-							createRightFakeEquation(i, j, k);
-						}
-					} else if (rank == nprocs - 1) {
-						if (i == 0) {
-							createLeftFakeEquation(i, j, k);
-						} else if (i < xnumber - additionalBinNumber) {
-							createInternalEquation(i, j, k);
-						} else if (i < xnumber) {
-							if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
-								createFreeRightEquation(i, j, k);
-							} else {
-								createInternalEquation(i, j, k);
-							}
-						} else {
-							if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
-								createFreeRightEquation(i, j, k);
-							} else {
-								createRightFakeEquation(i, j, k);
-							}
-						}
-					} else {
-						if ((i > 0 && i < xnumber)) {
-							createInternalEquation(i, j, k);
-						} else if (i == 0) {
-							createLeftFakeEquation(i, j, k);
-						} else {
-							createRightFakeEquation(i, j, k);
-						}
-					}
-				}
-			}
-
-		}
-	} else {
 		for (int i = 0; i < xnumber + 1; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
@@ -384,7 +329,6 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 					}
 				}
 			}
-		}
 	}
 
 	if (debugMode) {
@@ -401,59 +345,53 @@ void Simulation::checkEquationMatrix(std::vector<MatrixElement>**** matrix, int 
 					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
 						MatrixElement element = matrix[i][j][k][l][m];
 						if (element.i < 0) {
-							if (rank == 0) printf("element i < 0\n");
+							printf("element i < 0\n");
 							fflush(stdout);
 							errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 							fprintf(errorLogFile, "element i = %d < 0\n", element.i);
 							fclose(errorLogFile);
-							MPI_Finalize();
 							exit(0);
 						}
 						if (element.i > xnumber) {
-							if (rank == 0) printf("element i > xnumber");
+							printf("element i > xnumber");
 							fflush(stdout);
 							errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 							fprintf(errorLogFile, "element i = %d > xnumber = %d\n", element.i, xnumber);
 							fclose(errorLogFile);
-							MPI_Finalize();
 							exit(0);
 						}
 
 						if (element.j < 0) {
-							if (rank == 0) printf("element j < 0\n");
+							printf("element j < 0\n");
 							fflush(stdout);
 							errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 							fprintf(errorLogFile, "element j = %d < 0\n", element.j);
 							fclose(errorLogFile);
-							MPI_Finalize();
 							exit(0);
 						}
 						if (element.j >= ynumber) {
-							if (rank == 0) printf("element j >= ynumber");
+							printf("element j >= ynumber");
 							fflush(stdout);
 							errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 							fprintf(errorLogFile, "element j = %d >= ynumber = %d\n", element.j, ynumber);
 							fclose(errorLogFile);
-							MPI_Finalize();
 							exit(0);
 						}
 
 						if (element.k < 0) {
-							if (rank == 0) printf("element k < 0\n");
+							printf("element k < 0\n");
 							fflush(stdout);
 							errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 							fprintf(errorLogFile, "element k = %d < 0\n", element.k);
 							fclose(errorLogFile);
-							MPI_Finalize();
 							exit(0);
 						}
 						if (element.k >= znumber) {
-							if (rank == 0) printf("element k >= znumber");
+							printf("element k >= znumber");
 							fflush(stdout);
 							errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 							fprintf(errorLogFile, "element k = %d >= xnumber = %d\n", element.k, znumber);
 							fclose(errorLogFile);
-							MPI_Finalize();
 							exit(0);
 						}
 						for (int n = m + 1; n < matrix[i][j][k][l].size(); ++n) {
@@ -469,7 +407,6 @@ void Simulation::checkEquationMatrix(std::vector<MatrixElement>**** matrix, int 
 								fprintf(errorLogFile, "equal indexes current = %d %d %d %d temp = %d %d %d %d\n", i, j,
 								        k, l, element.i, element.j, element.k, element.l);
 								fclose(errorLogFile);
-								MPI_Finalize();
 								exit(0);
 							}
 						}
@@ -1478,7 +1415,7 @@ void Simulation::createInternalEquation(int i, int j, int k) {
 
 void Simulation::evaluateMagneticField() {
 	double procTime = 0;
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
 	for (int i = 0; i < xnumber; ++i) {
@@ -1490,28 +1427,25 @@ void Simulation::evaluateMagneticField() {
 					Bfield[i][j][k] - (rotEold * (1 - theta) + rotEnew * theta) * (speed_of_light_normalized * deltaT);*/
 				rotE[i][j][k] = evaluateRotTempE(i, j, k);
 				newBfield[i][j][k] = Bfield[i][j][k] - (rotE[i][j][k]) * (speed_of_light_normalized * deltaT);
-				if ((boundaryConditionType != PERIODIC) && (rank == nprocs - 1) && (i >= xnumber - 1)) {
+				if ((boundaryConditionType != PERIODIC) && (i >= xnumber - 1)) {
 					newBfield[i][j][k] = B0;
 				}
-				if ((boundaryConditionType != PERIODIC) && (rank == 0) && (i == 0)) {
+				if ((boundaryConditionType != PERIODIC) && (i == 0)) {
 					//newBfield[i][j][k] = Vector3d(0, 0, 0);
 					newBfield[i][j][k] = newBfield[1][j][k];
 				}
 			}
 		}
 	}
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if (timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("evaluating magnetic field time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }
 
 void Simulation::updateBoundaries() {
-	int rank;
-	int nprocs;
-	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	if (nprocs == 1) {
+
+	
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
@@ -1531,7 +1465,7 @@ void Simulation::updateBoundaries() {
 				}
 			}
 		}
-	}
+	
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -1549,11 +1483,8 @@ void Simulation::updateBoundaries() {
 }
 
 void Simulation::updateBoundariesOldField() {
-	int rank;
-	int nprocs;
-	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	if (nprocs == 1) {
+
+	
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
@@ -1567,7 +1498,7 @@ void Simulation::updateBoundariesOldField() {
 				}
 			}
 		}
-	}
+	
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -1583,12 +1514,7 @@ void Simulation::updateBoundariesOldField() {
 }
 
 void Simulation::updateBoundariesNewField() {
-	int rank;
-	int nprocs;
-	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	if (nprocs == 1) {
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
@@ -1602,7 +1528,7 @@ void Simulation::updateBoundariesNewField() {
 				}
 			}
 		}
-	}
+	
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -1618,10 +1544,6 @@ void Simulation::updateBoundariesNewField() {
 }
 
 Vector3d Simulation::evaluateRotB(int i, int j, int k) {
-	int rank;
-	int nprocs;
-	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 	Vector3d BrightX;
 	Vector3d BleftX;
@@ -1661,7 +1583,6 @@ Vector3d Simulation::evaluateRotB(int i, int j, int k) {
 	if (curI == 0) {
 		printf("curI = 0 in evaluateRotB\n");
 		fflush(stdout);
-		MPI_Finalize();
 		exit(0);
 	} else {
 		BrightX = (Bfield[curI][curJ][curK] + Bfield[curI][prevJ][curK] + Bfield[curI][curJ][prevK] + Bfield[curI][prevJ][prevK]) / 4.0;
@@ -1693,7 +1614,6 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d < 0 in evaluateRotTempE\n", i);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1703,7 +1623,6 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d >= xnumber = %d in evaluateRotTempE\n", i, xnumber);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1713,7 +1632,6 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d < 0 in evaluateRotTempE\n", j);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1723,7 +1641,6 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d >= ynumber = %d in evaluateRotTempE\n", j, ynumber);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1733,7 +1650,6 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d < 0 in evaluateRotTempE\n", k);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1743,7 +1659,6 @@ Vector3d Simulation::evaluateRotTempE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d >= znumber = %d in evaluateRotTempE\n", k, znumber);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 	}
@@ -1790,7 +1705,6 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d < 0 in evaluateRotTempE\n", i);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1800,7 +1714,6 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d >= xnumber = %d in evaluateRotTempE\n", i, xnumber);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1810,7 +1723,6 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d < 0 in evaluateRotTempE\n", j);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1820,7 +1732,6 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d >= ynumber = %d in evaluateRotTempE\n", j, ynumber);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1830,7 +1741,6 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d < 0 in evaluateRotTempE\n", k);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1840,7 +1750,6 @@ Vector3d Simulation::evaluateRotE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d >= znumber = %d in evaluateRotTempE\n", k, znumber);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 	}
@@ -1884,7 +1793,6 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d < 0 in evaluateRotTempE\n", i);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1894,7 +1802,6 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d >= xnumber = %d in evaluateRotTempE\n", i, xnumber);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1904,7 +1811,6 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d < 0 in evaluateRotTempE\n", j);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1914,7 +1820,6 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d >= ynumber = %d in evaluateRotTempE\n", j, ynumber);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1924,7 +1829,6 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d < 0 in evaluateRotTempE\n", k);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -1934,7 +1838,6 @@ Vector3d Simulation::evaluateRotNewE(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d >= znumber = %d in evaluateRotTempE\n", k, znumber);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 	}
@@ -2064,7 +1967,6 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d < 0 in evaluateDivFlux\n", i);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -2074,7 +1976,6 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "i = %d >= xnumber = %d in evaluateDivFlux\n", i, xnumber);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -2084,7 +1985,6 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d < 0 in evaluateDivFlux\n", j);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -2094,7 +1994,6 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "j = %d >= ynumber = %d in evaluateDivFlux\n", j, ynumber);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -2104,7 +2003,6 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d < 0 in evaluateDivFlux\n", k);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 
@@ -2114,7 +2012,6 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 			errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 			fprintf(errorLogFile, "k = %d >= znumber = %d in evaluateDivFlux\n", k, znumber);
 			fclose(errorLogFile);
-			MPI_Finalize();
 			exit(0);
 		}
 	}
@@ -2304,130 +2201,6 @@ void Simulation::exchangeEfield() {
 }
 
 void Simulation::exchangeGeneralEfield(Vector3d*** field, Vector3d*** additionalFieldLeft, Vector3d*** additionalFieldRight) {
-	int leftRank = rank - 1;
-	if (leftRank < 0) {
-		leftRank = nprocs - 1;
-	}
-	int rightRank = rank + 1;
-	if (rightRank >= nprocs) {
-		rightRank = 0;
-	}
-
-	if (nprocs > 1) {
-		double* inBufferLeft = new double[(1 + additionalBinNumber) * 3 * (ynumber + 1) * (znumber + 1)];
-		double* outBufferRight = new double[(1 + additionalBinNumber) * 3 * (ynumber + 1) * (znumber + 1)];
-		double* inBufferRight = new double[(1 + additionalBinNumber) * 3 * (ynumber + 1) * (znumber + 1)];
-		double* outBufferLeft = new double[(1 + additionalBinNumber) * 3 * (ynumber + 1) * (znumber + 1)];
-
-		int bcount = 0;
-
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
-				for (int l = 0; l < 3; ++l) {
-					outBufferRight[bcount] = field[xnumber - 1][j][k][l];
-					outBufferLeft[bcount] = field[2][j][k][l];
-					bcount++;
-				}
-			}
-		}
-		for (int i = 0; i < additionalBinNumber; ++i) {
-			for (int j = 0; j < ynumber + 1; ++j) {
-				for (int k = 0; k < znumber + 1; ++k) {
-					for (int l = 0; l < 3; ++l) {
-						outBufferRight[bcount] = field[xnumber - 2 - i][j][k][l];
-						outBufferLeft[bcount] = field[3 + i][j][k][l];
-						bcount++;
-					}
-				}
-			}
-		}
-		if ((rank < nprocs - 1) || (boundaryConditionType == PERIODIC)) {
-			MPI_Send(outBufferRight, (1 + additionalBinNumber) * 3 * (ynumber + 1) * (znumber + 1), MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, MPI_COMM_WORLD);
-		}
-		MPI_Barrier(MPI_COMM_WORLD);
-		bcount = 0;
-		if ((rank > 0) || (boundaryConditionType == PERIODIC)) {
-			MPI_Status status;
-			MPI_Recv(inBufferLeft, (1 + additionalBinNumber) * 3 * (ynumber + 1) * (znumber + 1), MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, MPI_COMM_WORLD, &status);
-			for (int j = 0; j < ynumber + 1; ++j) {
-				for (int k = 0; k < znumber + 1; ++k) {
-					for (int l = 0; l < 3; ++l) {
-						field[0][j][k][l] = inBufferLeft[bcount];
-						bcount++;
-					}
-				}
-			}
-			for (int i = 0; i < additionalBinNumber; ++i) {
-				for (int j = 0; j < ynumber + 1; ++j) {
-					for (int k = 0; k < znumber + 1; ++k) {
-						for (int l = 0; l < 3; ++l) {
-							additionalFieldLeft[i][j][k][l] = inBufferLeft[bcount];
-							bcount++;
-						}
-					}
-				}
-			}
-		}
-
-		MPI_Barrier(MPI_COMM_WORLD);
-
-		if ((rank > 0) || (boundaryConditionType == PERIODIC)) {
-			MPI_Send(outBufferLeft, (1 + additionalBinNumber) * 3 * (ynumber + 1) * (znumber + 1), MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, MPI_COMM_WORLD);
-		}
-		MPI_Barrier(MPI_COMM_WORLD);
-		bcount = 0;
-		if ((rank < nprocs - 1) || (boundaryConditionType == PERIODIC)) {
-			MPI_Status status;
-			MPI_Recv(inBufferRight, (1 + additionalBinNumber) * 3 * (ynumber + 1) * (znumber + 1), MPI_DOUBLE, rightRank, MPI_BFIELD_LEFT, MPI_COMM_WORLD, &status);
-			for (int j = 0; j < ynumber + 1; ++j) {
-				for (int k = 0; k < znumber + 1; ++k) {
-					for (int l = 0; l < 3; ++l) {
-						field[xnumber + 1][j][k][l] = inBufferRight[bcount];
-						bcount++;
-					}
-				}
-			}
-			for (int i = 0; i < additionalBinNumber; ++i) {
-				for (int j = 0; j < ynumber + 1; ++j) {
-					for (int k = 0; k < znumber + 1; ++k) {
-						for (int l = 0; l < 3; ++l) {
-							additionalFieldRight[i][j][k][l] = inBufferRight[bcount];
-							bcount++;
-						}
-					}
-				}
-			}
-		}
-
-		if ((rank == 0) && (boundaryConditionType != PERIODIC)) {
-			for (int j = 0; j < ynumber + 1; ++j) {
-				for (int k = 0; k < znumber + 1; ++k) {
-					//field[0][j][k] = field[2][j][k];
-					field[0][j][k] = Vector3d(0, 0, 0);
-					for (int i = 0; i < additionalBinNumber; ++i) {
-						//additionalFieldLeft[i][j][k] = field[3+i][j][k];
-						additionalFieldLeft[i][j][k] = Vector3d(0, 0, 0);
-					}
-				}
-			}
-		}
-
-		if ((rank == nprocs - 1) && (boundaryConditionType != PERIODIC)) {
-			for (int j = 0; j < ynumber + 1; ++j) {
-				for (int k = 0; k < znumber + 1; ++k) {
-					for (int i = 0; i < additionalBinNumber; ++i) {
-						additionalFieldRight[i][j][k] = field[xnumber][j][k];
-					}
-				}
-			}
-		}
-
-
-		delete[] inBufferLeft;
-		delete[] outBufferRight;
-		delete[] inBufferRight;
-		delete[] outBufferLeft;
-	} else {
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j < ynumber + 1; ++j) {
 				for (int k = 0; k < znumber + 1; ++k) {
@@ -2451,135 +2224,11 @@ void Simulation::exchangeGeneralEfield(Vector3d*** field, Vector3d*** additional
 				}
 			}
 		}
-	}
+	
 }
 
 void Simulation::exchangeGeneralBfield(Vector3d*** field, Vector3d*** additionalFieldLeft, Vector3d*** additionalFieldRight) {
 
-	int leftRank = rank - 1;
-	if (leftRank < 0) {
-		leftRank = nprocs - 1;
-	}
-	int rightRank = rank + 1;
-	if (rightRank >= nprocs) {
-		rightRank = 0;
-	}
-
-	if (nprocs > 1) {
-		double* inBufferLeft = new double[(1 + additionalBinNumber) * 3 * ynumber * znumber];
-		double* outBufferRight = new double[(1 + additionalBinNumber) * 3 * ynumber * znumber];
-		double* inBufferRight = new double[(1 + additionalBinNumber) * 3 * ynumber * znumber];
-		double* outBufferLeft = new double[(1 + additionalBinNumber) * 3 * ynumber * znumber];
-
-		int bcount = 0;
-
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				for (int l = 0; l < 3; ++l) {
-					outBufferRight[bcount] = field[xnumber - 1][j][k][l];
-					outBufferLeft[bcount] = field[1][j][k][l];
-					bcount++;
-				}
-			}
-		}
-		for (int i = 0; i < additionalBinNumber; ++i) {
-			for (int j = 0; j < ynumber; ++j) {
-				for (int k = 0; k < znumber; ++k) {
-					for (int l = 0; l < 3; ++l) {
-						outBufferRight[bcount] = field[xnumber - 2 - i][j][k][l];
-						outBufferLeft[bcount] = field[2 + i][j][k][l];
-						bcount++;
-					}
-				}
-			}
-		}
-		if ((rank < nprocs - 1) || (boundaryConditionType == PERIODIC)) {
-			MPI_Send(outBufferRight, (1 + additionalBinNumber) * 3 * ynumber * znumber, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, MPI_COMM_WORLD);
-		}
-		MPI_Barrier(MPI_COMM_WORLD);
-		bcount = 0;
-		if ((rank > 0) || (boundaryConditionType == PERIODIC)) {
-			MPI_Status status;
-			MPI_Recv(inBufferLeft, (1 + additionalBinNumber) * 3 * ynumber * znumber, MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, MPI_COMM_WORLD, &status);
-			for (int j = 0; j < ynumber; ++j) {
-				for (int k = 0; k < znumber; ++k) {
-					for (int l = 0; l < 3; ++l) {
-						field[0][j][k][l] = inBufferLeft[bcount];
-						bcount++;
-					}
-				}
-			}
-			for (int i = 0; i < additionalBinNumber; ++i) {
-				for (int j = 0; j < ynumber; ++j) {
-					for (int k = 0; k < znumber; ++k) {
-						for (int l = 0; l < 3; ++l) {
-							additionalFieldLeft[i][j][k][l] = inBufferLeft[bcount];
-							bcount++;
-						}
-					}
-				}
-			}
-		}
-
-		MPI_Barrier(MPI_COMM_WORLD);
-
-		if ((rank > 0) || (boundaryConditionType == PERIODIC)) {
-			MPI_Send(outBufferLeft, (1 + additionalBinNumber) * 3 * ynumber * znumber, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, MPI_COMM_WORLD);
-		}
-		MPI_Barrier(MPI_COMM_WORLD);
-		bcount = 0;
-		if ((rank < nprocs - 1) || (boundaryConditionType == PERIODIC)) {
-			MPI_Status status;
-			MPI_Recv(inBufferRight, (1 + additionalBinNumber) * 3 * ynumber * znumber, MPI_DOUBLE, rightRank, MPI_BFIELD_LEFT, MPI_COMM_WORLD, &status);
-			for (int j = 0; j < ynumber; ++j) {
-				for (int k = 0; k < znumber; ++k) {
-					for (int l = 0; l < 3; ++l) {
-						field[xnumber][j][k][l] = inBufferRight[bcount];
-						bcount++;
-					}
-				}
-			}
-			for (int i = 0; i < additionalBinNumber; ++i) {
-				for (int j = 0; j < ynumber; ++j) {
-					for (int k = 0; k < znumber; ++k) {
-						for (int l = 0; l < 3; ++l) {
-							additionalFieldRight[i][j][k][l] = inBufferRight[bcount];
-							bcount++;
-						}
-					}
-				}
-			}
-		}
-
-		if ((rank == 0) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT)) {
-			for (int j = 0; j < ynumber; ++j) {
-				for (int k = 0; k < znumber; ++k) {
-					//field[0][j][k] = field[1][j][k]*(-1);
-					field[0][j][k] = Vector3d(0, 0, 0);
-					for (int i = 0; i < additionalBinNumber; ++i) {
-						//additionalFieldLeft[i][j][k] = field[2+i][j][k]*(-1);
-						additionalFieldLeft[i][j][k] = Vector3d(0, 0, 0);
-					}
-				}
-			}
-		}
-
-		if ((rank == nprocs - 1) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT)) {
-			for (int j = 0; j < ynumber; ++j) {
-				for (int k = 0; k < znumber; ++k) {
-					for (int i = 0; i < additionalBinNumber; ++i) {
-						additionalFieldRight[i][j][k] = field[xnumber][j][k];
-					}
-				}
-			}
-		}
-
-
-		delete[] inBufferLeft;
-		delete[] outBufferRight;
-		delete[] inBufferRight;
-		delete[] outBufferLeft;
-	} else {
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
@@ -2605,17 +2254,17 @@ void Simulation::exchangeGeneralBfield(Vector3d*** field, Vector3d*** additional
 					}
 				}
 			}
-		}
+		
 	}
 }
 
 void Simulation::smoothChargeDensity() {
 	int minI = 1;
-	if (rank == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+	if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 		minI = 2;
 	}
 	int maxI = xnumber;
-	if (rank == nprocs - 1 && boundaryConditionType != PERIODIC) {
+	if (boundaryConditionType != PERIODIC) {
 		maxI = xnumber - additionalBinNumber;
 	}
 
@@ -2639,11 +2288,11 @@ void Simulation::smoothChargeDensity() {
 
 void Simulation::smoothChargeDensityHat() {
 	int minI = 1;
-	if (rank == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+	if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 		minI = 2;
 	}
 	int maxI = xnumber;
-	if (rank == nprocs - 1 && boundaryConditionType != PERIODIC) {
+	if (boundaryConditionType != PERIODIC) {
 		maxI = xnumber - additionalBinNumber;
 	}
 
@@ -2666,25 +2315,37 @@ void Simulation::smoothChargeDensityHat() {
 }
 
 void Simulation::smoothTempEfield() {
+	double procTime = 0;
+	if (timing && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
+	int minI = 2;
+	if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+		minI = 3;
+	}
+	int maxI = xnumber-1;
+	if (boundaryConditionType != PERIODIC) {
+		maxI = xnumber - additionalBinNumber;
+	}
 	if ((ynumber == 1) && (znumber == 1)) {
-		smoothingEfield[0][0][0] = tempEfield[0][0][0] * (1.0 - smoothingParameter) + (tempEfield[0][0][0] + tempEfield[1][0][0]) * smoothingParameter / 2.0;
-		for (int i = 1; i < xnumber + 1; ++i) {
+		//smoothingEfield[0][0][0] = newEfield[0][0][0]*(1.0 - smoothingParameter) + (newEfield[0][0][0] + newEfield[1][0][0])*smoothingParameter/2.0;
+		for (int i = minI; i < maxI; ++i) {
 			smoothingEfield[i][0][0] = tempEfield[i][0][0] * (1.0 - smoothingParameter) + (tempEfield[i - 1][0][0] + tempEfield[i][0][0] + tempEfield[i + 1][0][0]) * smoothingParameter / 3.0;
 		}
-		smoothingEfield[xnumber + 1][0][0] = tempEfield[xnumber - 1][0][0] * (1.0 - smoothingParameter) + (tempEfield[xnumber][0][0] + tempEfield[xnumber + 1][0][0]) * smoothingParameter / 2.0;
+		//smoothingEfield[xnumber+1][0][0] = newEfield[xnumber-1][0][0]*(1.0 - smoothingParameter) + (newEfield[xnumber][0][0] + newEfield[xnumber + 1][0][0])*smoothingParameter/2.0;
 	} else if (znumber == 1) {
 		for (int j = 0; j < ynumber; ++j) {
 			int prevJ = j - 1;
 			if (prevJ < 0) {
 				prevJ = ynumber;
 			}
-			smoothingEfield[0][j][0] = tempEfield[0][j][0] * (1.0 - smoothingParameter) + (tempEfield[0][j][0] + tempEfield[1][j][0] + tempEfield[0][j + 1][0] + tempEfield[1][j + 1][0] + tempEfield[0][prevJ][0] + tempEfield[1][prevJ][0]) * smoothingParameter / 6.0;
-			for (int i = 1; i < xnumber + 1; ++i) {
+			//smoothingEfield[0][j][0] = newEfield[0][j][0]*(1.0 - smoothingParameter) + (newEfield[0][j][0] + newEfield[1][j][0] + newEfield[0][j+1][0] + newEfield[1][j+1][0] + newEfield[0][prevJ][0] + newEfield[1][prevJ][0])*smoothingParameter/6.0;
+			for (int i = minI; i < maxI; ++i) {
 				smoothingEfield[i][j][0] = tempEfield[i][j][0] * (1.0 - smoothingParameter) + (tempEfield[i - 1][j][0] + tempEfield[i][j][0] + tempEfield[i + 1][j][0] +
 					tempEfield[i - 1][j + 1][0] + tempEfield[i][j + 1][0] + tempEfield[i + 1][j + 1][0] +
 					tempEfield[i - 1][prevJ][0] + tempEfield[i][prevJ][0] + tempEfield[i + 1][prevJ][0]) * smoothingParameter / 9.0;
 			}
-			smoothingEfield[xnumber + 1][j][0] = tempEfield[xnumber + 1][j][0] * (1.0 - smoothingParameter) + (tempEfield[xnumber][j][0] + tempEfield[xnumber + 1][j][0] + tempEfield[xnumber][j + 1][0] + tempEfield[xnumber + 1][j + 1][0] + tempEfield[xnumber][prevJ][0] + tempEfield[xnumber + 1][prevJ][0]) * smoothingParameter / 6.0;
+			//smoothingEfield[xnumber+1][j][0] = newEfield[xnumber+1][j][0]*(1.0 - smoothingParameter) + (newEfield[xnumber][j][0] + newEfield[xnumber + 1][j][0] + newEfield[xnumber][j+1][0] + newEfield[xnumber + 1][j+1][0] + newEfield[xnumber][prevJ][0] + newEfield[xnumber + 1][prevJ][0])*smoothingParameter/6.0;
 		}
 
 	} else if (ynumber == 1) {
@@ -2693,34 +2354,34 @@ void Simulation::smoothTempEfield() {
 			if (prevK < 0) {
 				prevK = znumber;
 			}
-			smoothingEfield[0][0][k] = tempEfield[0][0][k] * (1.0 - smoothingParameter) + (tempEfield[0][0][k] + tempEfield[1][0][k] + tempEfield[0][0][k + 1] + tempEfield[1][0][k + 1] + tempEfield[0][0][prevK] + tempEfield[1][0][prevK]) * smoothingParameter / 6.0;
-			for (int i = 1; i < xnumber + 1; ++i) {
+			// smoothingEfield[0][0][k] = newEfield[0][0][k]*(1.0 - smoothingParameter) + (newEfield[0][0][k] + newEfield[1][0][k] + newEfield[0][0][k+1] + newEfield[1][0][k+1] + newEfield[0][0][prevK] + newEfield[1][0][prevK])*smoothingParameter/6.0;
+			for (int i = minI; i < maxI; ++i) {
 				smoothingEfield[i][0][k] = tempEfield[i][0][k] * (1.0 - smoothingParameter) + (tempEfield[i - 1][0][k] + tempEfield[i][0][k] + tempEfield[i + 1][0][k] +
 					tempEfield[i - 1][0][k + 1] + tempEfield[i][0][k + 1] + tempEfield[i + 1][0][k + 1] +
 					tempEfield[i - 1][0][prevK] + tempEfield[i][0][prevK] + tempEfield[i + 1][0][prevK]) * smoothingParameter / 9.0;
 			}
-			smoothingEfield[xnumber + 1][0][k] = tempEfield[xnumber + 1][0][k] * (1.0 - smoothingParameter) + (tempEfield[xnumber][0][k] + tempEfield[xnumber + 1][0][k] + tempEfield[xnumber][0][k + 1] + tempEfield[xnumber + 1][0][k + 1] + tempEfield[xnumber][0][prevK] + tempEfield[xnumber + 1][0][prevK]) * smoothingParameter / 6.0;
+			//smoothingEfield[xnumber+1][0][k] = newEfield[xnumber+1][0][k]*(1.0 - smoothingParameter) + (newEfield[xnumber][0][k] + newEfield[xnumber + 1][0][k] + newEfield[xnumber][0][k+1] + newEfield[xnumber + 1][0][k+1] + newEfield[xnumber][0][prevK] + newEfield[xnumber + 1][0][prevK])*smoothingParameter/6.0;
 		}
 	} else {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				smoothingEfield[0][j][k] = tempEfield[0][j][k] * (1.0 - smoothingParameter);
-				for (int tempJ = j - 1; tempJ <= j + 1; tempJ++) {
-					for (int tempK = k - 1; tempK <= k + 1; tempK++) {
-						int curJ = tempJ;
-						if (curJ < 0) {
-							curJ = ynumber;
-						}
-						int curK = tempK;
-						if (curK < 0) {
-							curK = znumber;
-						}
-						smoothingEfield[0][j][k] = smoothingEfield[0][j][k] + (tempEfield[0][curJ][curK] + tempEfield[1][curJ][curK]) * smoothingParameter / 18.0;
-					}
-				}
-			}
-		}
-		for (int i = 1; i < xnumber + 1; ++i) {
+		/*for(int j = 0; j < ynumber; ++j){
+		    for(int k = 0; k < znumber; ++k){
+		        smoothingEfield[0][j][k] = newEfield[0][j][k]*(1.0 - smoothingParameter);
+		        for(int tempJ = j - 1; tempJ <= j+1; tempJ++){
+		            for(int tempK = k - 1; tempK <= k+1; tempK++){
+		                int curJ = tempJ;
+		                if(curJ < 0){
+		                    curJ = ynumber;
+		                }
+		                int curK = tempK;
+		                if(curK < 0){
+		                    curK = znumber;
+		                }
+		                smoothingEfield[0][j][k] = smoothingEfield[0][j][k] + (newEfield[0][curJ][curK] + newEfield[1][curJ][curK])*smoothingParameter/18.0;
+		            }
+		        }
+		    }
+		}*/
+		for (int i = minI; i < maxI; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
 					smoothingEfield[i][j][k] = tempEfield[i][j][k] * (1.0 - smoothingParameter);
@@ -2740,26 +2401,26 @@ void Simulation::smoothTempEfield() {
 				}
 			}
 		}
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				smoothingEfield[xnumber + 1][j][k] = tempEfield[xnumber + 1][j][k] * (1.0 - smoothingParameter);
-				for (int tempJ = j - 1; tempJ <= j + 1; tempJ++) {
-					for (int tempK = k - 1; tempK <= k + 1; tempK++) {
-						int curJ = tempJ;
-						if (curJ < 0) {
-							curJ = ynumber;
-						}
-						int curK = tempK;
-						if (curK < 0) {
-							curK = znumber;
-						}
-						smoothingEfield[xnumber + 1][j][k] = smoothingEfield[xnumber + 1][j][k] + (tempEfield[xnumber][curJ][curK] + tempEfield[xnumber + 1][curJ][curK]) * smoothingParameter / 18.0;
-					}
-				}
-			}
-		}
+		/*for(int j = 0; j < ynumber; ++j){
+		    for(int k = 0; k < znumber; ++k){
+		        smoothingEfield[xnumber + 1][j][k] = newEfield[xnumber + 1][j][k]*(1.0 - smoothingParameter);
+		        for(int tempJ = j - 1; tempJ <= j+1; tempJ++){
+		            for(int tempK = k - 1; tempK <= k+1; tempK++){
+		                int curJ = tempJ;
+		                if(curJ < 0){
+		                    curJ = ynumber;
+		                }
+		                int curK = tempK;
+		                if(curK < 0){
+		                    curK = znumber;
+		                }
+		                smoothingEfield[xnumber + 1][j][k] = smoothingEfield[xnumber + 1][j][k] + (newEfield[xnumber][curJ][curK] + newEfield[xnumber + 1][curJ][curK])*smoothingParameter/18.0;
+		            }
+		        }
+		    }
+		}*/
 	}
-	for (int i = 0; i < xnumber + 2; ++i) {
+	for (int i = minI; i < maxI; ++i) {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			smoothingEfield[i][j][znumber] = smoothingEfield[i][j][0];
 		}
@@ -2768,22 +2429,32 @@ void Simulation::smoothTempEfield() {
 			smoothingEfield[i][ynumber][k] = smoothingEfield[i][0][k];
 		}
 	}
-	for (int i = 0; i < xnumber + 2; ++i) {
+	for (int i = minI; i < maxI; ++i) {
 		for (int j = 0; j < ynumber + 1; ++j) {
 			for (int k = 0; k < znumber + 1; ++k) {
 				tempEfield[i][j][k] = smoothingEfield[i][j][k];
 			}
 		}
 	}
+	exchangeGeneralEfield(tempEfield, additionalTempEfieldLeft, additionalTempEfieldRight);
+
+	if (timing && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("smoothing temp Efield time = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}
 }
 
 void Simulation::smoothNewEfield() {
+	double procTime = 0;
+	if (timing && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
 	int minI = 2;
-	if (rank == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+	if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 		minI = 3;
 	}
 	int maxI = xnumber-1;
-	if (rank == nprocs - 1 && boundaryConditionType != PERIODIC) {
+	if (boundaryConditionType != PERIODIC) {
 		maxI = xnumber - additionalBinNumber;
 	}
 	if ((ynumber == 1) && (znumber == 1)) {
@@ -2896,6 +2567,10 @@ void Simulation::smoothNewEfield() {
 		}
 	}
 	exchangeGeneralEfield(newEfield, additionalNewEfieldLeft, additionalNewEfieldRight);
+	if (timing && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("smoothing new Efield time = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}
 }
 
 void Simulation::smoothBfield() {

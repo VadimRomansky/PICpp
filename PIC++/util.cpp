@@ -8,7 +8,7 @@
 #include "util.h"
 #include "constants.h"
 
-double power(double v, double p) {
+double power(const double & v, const double & p) {
 	return exp(p * log(v));
 }
 
@@ -16,11 +16,11 @@ double sqr(double v) {
 	return v * v;
 }
 
-double cube(double v) {
+double cube(const double & v) {
 	return v * v * v;
 }
 
-double max2(double a, double b) {
+double max2(const double & a, const double & b) {
 	if (a >= b) {
 		return a;
 	} else {
@@ -28,7 +28,7 @@ double max2(double a, double b) {
 	}
 }
 
-double max3(double a, double b, double c) {
+double max3(const double & a, const double & b, const double & c) {
 	if (a > b) {
 		return max2(a, c);
 	} else {
@@ -36,7 +36,7 @@ double max3(double a, double b, double c) {
 	}
 }
 
-double min2(double a, double b) {
+double min2(const double & a, const double & b) {
 	if (a >= b) {
 		return b;
 	} else {
@@ -44,7 +44,7 @@ double min2(double a, double b) {
 	}
 }
 
-double min3(double a, double b, double c) {
+double min3(const double & a, const double & b, const double & c) {
 	if (a > b) {
 		return min2(b, c);
 	} else {
@@ -52,7 +52,7 @@ double min3(double a, double b, double c) {
 	}
 }
 
-void alertNaNOrInfinity(double value, const char* s) {
+void alertNaNOrInfinity(const double & value, const char* s) {
 	if (value != value || 0 * value != 0 * value) {
 		std::string outputDir = outputDirectory;
 		printf("%s", s);
@@ -60,12 +60,7 @@ void alertNaNOrInfinity(double value, const char* s) {
 		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "%s", s);
-		int rank;
-		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-		fprintf(errorLogFile, "thread number = %d\n", rank);
-        printf("thread number = %d\n", rank);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 		//Sleep(1000);
 	}
@@ -80,7 +75,6 @@ void alertNotPositive(double value, const char* s) {
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "%s", s);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 }
@@ -94,7 +88,6 @@ void alertNegative(double value, const char* s) {
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "%s", s);
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 }
@@ -107,19 +100,14 @@ void printErrorAndExit(const char* s){
 	FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 	fprintf(errorLogFile, "%s", s);
 	fclose(errorLogFile);
-	MPI_Finalize();
 	exit(0);
 }
 
 void printLog(const char* s){
-	int size;
-	int rank;
-	MPI_Comm_size(MPI_COMM_WORLD, &size);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	std::string outputDir = std::string(outputDirectory);
 	//FILE* logFile = fopen("./output/log.dat", "a");
 	FILE* logFile = fopen((outputDir + "log.dat").c_str(), "a");
-	fprintf(logFile, "rank = %d, message %s", rank, s);
+	fprintf(logFile, "message %s", s);
 	fflush(logFile);
 	fclose(logFile);
 }
@@ -155,7 +143,6 @@ double McDonaldFunction(double x, double index) {
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "x in McDonald < 0\n");
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 

@@ -15,17 +15,17 @@
 
 void Simulation::cleanupDivergence() {
 	double procTime = 0;
-	if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if(timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if((rank == 0) && (verbosity > 0)) printf("cleaning up divergence\n");
+	if((verbosity > 0)) printf("cleaning up divergence\n");
 	fflush(stdout);
 
 	//substractMeanDensity();
 
 	if(ynumber == 1 && znumber == 1){
 		cleanupDivergence1d();
-		if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		if(timing  && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
 			printf("cleaning divergence time = %g sec\n", procTime/CLOCKS_PER_SEC);
 		}
@@ -44,8 +44,8 @@ void Simulation::cleanupDivergence() {
 		}
 	}
 	fullDensity /= (xsize*ysize*zsize);
-	if((rank == 0) && (verbosity > 1)) printf("full density = %22.15g\n", fullDensity);
-	if((rank == 0) && (verbosity > 1)) printf("density[0][0][0] = %22.15g\n", chargeDensity[0][0][0]);
+	if((verbosity > 1)) printf("full density = %22.15g\n", fullDensity);
+	if((verbosity > 1)) printf("density[0][0][0] = %22.15g\n", chargeDensity[0][0][0]);
 	fflush(stdout);
 
 
@@ -121,7 +121,7 @@ void Simulation::cleanupDivergence() {
 					if(i == 0){
                         createDivergenceCleanupLeftFakeEquation(0, j, k);
 					} else if(i == 1){
-						if(rank == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+						if(boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
                             //todo check
 							//createDivergenceCleanupSuperConductorEquation(i, j, k);
                             createDivergenceCleanupLeftFakeEquation(1, j, k);
@@ -131,7 +131,7 @@ void Simulation::cleanupDivergence() {
 					} else if(i < xnumber - additionalBinNumber - 1) {
 						createDivergenceCleanupInternalEquation(i, j, k);
 					} else if(i < xnumber){
-						if(rank == nprocs - 1 && boundaryConditionType != PERIODIC) {
+						if(boundaryConditionType != PERIODIC) {
 							createDivergenceCleanupRightFakeEquation(i, j, k);
 						} else {
 							createDivergenceCleanupInternalEquation(i, j, k);
@@ -317,8 +317,7 @@ void Simulation::cleanupDivergence() {
 	evaluateDivergenceCleaningField();
 	substractMeanEfield();
 	updateFieldByCleaning();
-
-	if(timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+	if(timing && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("cleaning divergence time = %g sec\n", procTime/CLOCKS_PER_SEC);
 	}
@@ -352,9 +351,9 @@ void Simulation::substractMeanDensity() {
 
 void Simulation::cleanupDivergence1d() {
 	double rightField[3];
-		rightField[0] = 0;
-		rightField[1] = 0;
-		rightField[2] = 0;
+	rightField[0] = 0;
+	rightField[1] = 0;
+	rightField[2] = 0;
 	
 
 	for(int i = 0; i < 3; ++i){
@@ -366,8 +365,9 @@ void Simulation::cleanupDivergence1d() {
 		divergenceCleaningField[i][0][0][0] = divergenceCleaningField[i + 1][0][0][0] - clean_up_right_part * deltaX;
 		divergenceCleaningField[i][0][0][1] = 0;
 		divergenceCleaningField[i][0][0][2] = 0;
-        if((rank == nprocs - 1) && (boundaryConditionType != PERIODIC)){
+        if((boundaryConditionType != PERIODIC)){
             if(i >= xnumber - additionalBinNumber){
+            //if(i >= xnumber){
                 divergenceCleaningField[i][0][0][0]= 0;
             }
         }
@@ -379,17 +379,18 @@ void Simulation::cleanupDivergence1d() {
 		leftField[i] = divergenceCleaningField[2][0][0][i];
 	}
 
-
 	//substractMeanEfield();
 
 	updateFieldByCleaning();
 
-	if(rank == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 		newEfield[1][0][0].y = 0;
 		newEfield[1][0][0].z = 0;
+		newEfield[0][0][0].y = 0;
+		newEfield[0][0][0].z = 0;
 	}
 
-	if(rank == nprocs - 1 && boundaryConditionType != PERIODIC){
+	if(boundaryConditionType != PERIODIC){
 		newEfield[xnumber][0][0] = E0;
 		newEfield[xnumber+1][0][0] = E0;
 	}
@@ -432,7 +433,7 @@ void Simulation::substractMeanEfield() {
 	for (int i = 0; i < xnumber+1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
-                if(i < xnumber - additionalBinNumber || rank < nprocs - 1 || boundaryConditionType == PERIODIC) {
+                if(i < xnumber - additionalBinNumber || boundaryConditionType == PERIODIC) {
                     newEfield[i][j][k] -= meanField;
                 }
 			}
@@ -475,8 +476,6 @@ void Simulation::updateFieldByCleaning() {
 			newEfield[i][j][znumber] = newEfield[i][j][0];
 		}
 	}
-
-
 		if (boundaryConditionType == PERIODIC) {
 			for (int j = 0; j < ynumber + 1; ++j) {
 				for (int k = 0; k < znumber + 1; ++k) {
@@ -486,6 +485,7 @@ void Simulation::updateFieldByCleaning() {
 				}
 			}
 		}
+	
 }
 
 void Simulation::evaluateDivergenceCleaningField() {

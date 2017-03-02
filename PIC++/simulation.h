@@ -6,6 +6,7 @@
 #include "stdio.h"
 #include "vector"
 #include "list"
+#include "largeVectorBasis.h"
 
 class MatrixElement;
 class Complex;
@@ -26,8 +27,6 @@ class Simulation {
 private:
 	bool arrayCreated;
 public:
-	int rank;
-	int nprocs;
 
 	std::string outputDir;
 	int xnumberGeneral;
@@ -140,6 +139,7 @@ public:
 
 	Vector3d maxEfield;
 	Vector3d maxBfield;
+	double meanSquaredEfield[3];
 
 
 	Vector3d V0;
@@ -173,6 +173,8 @@ public:
 	double* middleZgrid;
 
 	double**** gmresOutput;
+	LargeVectorBasis* gmresMaxwellBasis;
+	LargeVectorBasis* gmresCleanupBasis;
 
 
 	std::vector<MatrixElement>**** maxwellEquationMatrix;
@@ -239,10 +241,20 @@ public:
 
 	double*** divergenceCleaningPotentialFourier;
 
-	double* leftEbuffer;
-	double* rightEbuffer;
-	double* leftEoutBuffer;
-	double* rightEinBuffer;
+	double* leftOutVectorNodeBuffer;
+	double* rightOutVectorNodeBuffer;
+	double* leftInVectorNodeBuffer;
+	double* rightInVectorNodeBuffer;
+
+	double* leftOutVectorCellBuffer;
+	double* rightOutVectorCellBuffer;
+	double* leftInVectorCellBuffer;
+	double* rightInVectorCellBuffer;
+
+	double* leftOutGmresBuffer;
+	double* rightOutGmresBuffer;
+	double* leftInGmresBuffer;
+	double* rightInGmresBuffer;
 
 	std::vector<Particle*> particles;
 	std::vector<Particle*> escapedParticlesLeft;
@@ -346,12 +358,7 @@ public:
 	Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                    double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                    int maxIterations, double maxTimeV, int typesNumberV, int *particlesperBin,
-                   double *concentrations, int inputType, int nprocsV, int verbosityV);
-	Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
-                   double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
-                   int maxIterations, double maxTimeV, int typesNumberV, int *particlesperBin,
-                   double *concentrations, int inputType, int nprocsV, int verbosityV, double plasmaPeriodV,
-                   double scaleFactorV);
+                   double *concentrations, int inputType, int verbosityV);
 	~Simulation();
 
 	void initialize();
@@ -501,21 +508,23 @@ public:
 
 	void evaluateParticlesRotationTensor();
 	void injectNewParticles(int count, ParticleTypeContainer typeContainer, double length);
-	bool particleCrossBbinX(Particle& particle, int i) const;
-	bool particleCrossBbinY(Particle& particle, int j) const;
-	bool particleCrossBbinZ(Particle& particle, int k) const;
-
-	bool particleCrossEbinX(Particle& particle, int i) const;
-	bool particleCrossEbinY(Particle& particle, int j) const;
-	bool particleCrossEbinZ(Particle& particle, int k) const;
 
 	void updateParticleCorrelationMaps();
 	void updateCorrelationMaps(Particle* particle);
 	void updateCorrelationMapCell(Particle* particle);
 	void updateCorrelationMapNode(Particle* particle);
 	void updateCorrelationMaps(Particle& particle);
+	void updateCorrelationMapsX(Particle& particle);
+	void updateCorrelationMapsY(Particle& particle);
+	void updateCorrelationMapsZ(Particle& particle);
 	void updateCorrelationMapCell(Particle& particle);
+	void updateCorrelationMapCellX(Particle& particle);
+	void updateCorrelationMapCellY(Particle& particle);
+	void updateCorrelationMapCellZ(Particle& particle);
 	void updateCorrelationMapNode(Particle& particle);
+	void updateCorrelationMapNodeX(Particle& particle);
+	void updateCorrelationMapNodeY(Particle& particle);
+	void updateCorrelationMapNodeZ(Particle& particle);
 
 	Vector3d correlationTempEfield(Particle* particle);
 	Vector3d correlationNewEfield(Particle* particle);

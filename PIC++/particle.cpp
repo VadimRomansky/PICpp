@@ -55,6 +55,9 @@ Particle::Particle(const Particle& particle) {
 	rotationTensor = particle.rotationTensor;
 	initialMomentum = particle.initialMomentum;
 
+	correlationMapNode = particle.correlationMapNode;
+	correlationMapCell = particle.correlationMapCell;
+
 	dx = particle.dx;
 	dy = particle.dy;
 	dz = particle.dz;
@@ -235,7 +238,6 @@ void Particle::addVelocity(const Vector3d &v, const double& c) {
 		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "v/c > 1 in addVelocity\n");
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 
@@ -279,7 +281,6 @@ void Particle::setMomentumByV(const Vector3d& v, const double& c) {
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "v/c > 1 in setMomentumByV\n");
 		fclose(errorLogFile);
-		MPI_Finalize();
 		exit(0);
 	}
 	velocity = v;
