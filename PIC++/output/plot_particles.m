@@ -1,27 +1,31 @@
 clear;
-load protons.dat;
-load electrons.dat;
-load positrons.dat;
-load alphas.dat;
+load proton.dat;
+load electron.dat;
+load positron.dat;
+load alpha.dat;
 load deuterium.dat;
-load helium3.dat
+load helium3.dat;
+load oxygen_plus_3.dat;
+load silicon_plus_1.dat;
 
-N1=size(electrons,1);
-N2=size(protons,1);
-N3=size(positrons,1);
-N4=size(alphas,1);
+N1=size(electron,1);
+N2=size(proton,1);
+N3=size(positron,1);
+N4=size(alpha,1);
 N5=size(deuterium,1);
 N6 = size(helium3,1);
+N7 = size(oxygen_plus_3,1);
+N8 = size(silicon_plus_1,1);
 if(N1 > 0)
     figure(1);
-    plot (electrons(1:N1,1), electrons(1:N1,2),'blue');
+    plot (electron(1:N1,1), electron(1:N1,2),'blue');
     title ('electrons');
     xlabel ('x cm');
     ylabel ('P g*cm/s');
     %legend('electrons','Location','northeast');
     grid ; 
     figure(2);
-    plot (electrons(1:N1,1), electrons(1:N1,3), 'blue');
+    plot (electron(1:N1,1), electron(1:N1,3), 'blue');
     title ('electrons');
     xlabel ('x cm');
     ylabel ('Px g*cm/s');
@@ -31,14 +35,14 @@ end;
 
 if(N2 > 0)
     figure(3);
-    plot (protons(1:N2,1), protons(1:N2,2),'blue');
+    plot (proton(1:N2,1), proton(1:N2,2),'blue');
     title ('protons');
     xlabel ('x cm');
     ylabel ('P g*cm/s');
     %legend('protons','Location','northeast');
     grid ; 
     figure(4);
-    plot (protons(1:N2,1), protons(1:N2,3), 'blue');
+    plot (proton(1:N2,1), proton(1:N2,3), 'blue');
     title ('protons');
     xlabel ('x cm');
     ylabel ('Px g*cm/s');
@@ -48,14 +52,14 @@ end;
 
 if(N3 > 0)
     figure(5);
-    plot (positrons(1:N3,1), positros(1:N3,2),'blue');
+    plot (positron(1:N3,1), positro(1:N3,2),'blue');
     title ('positrons');
     xlabel ('x cm');
     ylabel ('P g*cm/s');
     %legend('positrons','Location','northeast');
     grid ; 
     figure(6);
-    plot (positrons(1:N3,1), positrons(1:N3,3), 'blue');
+    plot (positron(1:N3,1), positron(1:N3,3), 'blue');
     title ('positrons');
     xlabel ('x cm');
     ylabel ('Px g*cm/s');
@@ -65,14 +69,14 @@ end;
 
 if(N4 > 0)
     figure(7);
-    plot (alphas(1:N4,1), alphas(1:N4,2), 'blue');
+    plot (alpha(1:N4,1), alpha(1:N4,2), 'blue');
     title ('alphas');
     xlabel ('x cm');
     ylabel ('P g*cm/s');
     %legend('alphas','Location','northeast');
     grid ; 
     figure(8);
-    plot (alphas(1:N4,1), alphas(1:N4,3), 'blue');
+    plot (alpha(1:N4,1), alpha(1:N4,3), 'blue');
     title ('alphas');
     xlabel ('x cm');
     ylabel ('Px g*cm/s');
@@ -108,6 +112,38 @@ if(N6 > 0)
     figure(12);
     plot (helium3(1:N6,1), helium3(1:N6,3), 'blue');
     title ('helium3');
+    xlabel ('x cm');
+    ylabel ('Px g*cm/s');
+    %legend('helium3','Location','northeast');
+    grid ; 
+end;
+if(N7 > 0)
+    figure(13);
+    plot (oxygen_plus_3(1:N7,1), oxygen_plus_3(1:N7,2),'blue');
+    title ('oxygen+3');
+    xlabel ('x cm');
+    ylabel ('P g*cm/s');
+    %legend('helium3','Location','northeast');
+    grid ; 
+    figure(14);
+    plot (oxygen_plus_3(1:N7,1), oxygen_plus_3(1:N7,3), 'blue');
+    title ('oxygen+3');
+    xlabel ('x cm');
+    ylabel ('Px g*cm/s');
+    %legend('helium3','Location','northeast');
+    grid ; 
+end;
+if(N8 > 0)
+    figure(15);
+    plot (silicon_plus_1(1:N8,1), silicon_plus_1(1:N8,2),'blue');
+    title ('silicon+1');
+    xlabel ('x cm');
+    ylabel ('P g*cm/s');
+    %legend('helium3','Location','northeast');
+    grid ; 
+    figure(16);
+    plot (silicon_plus_1(1:N8,1), silicon_plus_1(1:N8,3), 'blue');
+    title ('silicon+1');
     xlabel ('x cm');
     ylabel ('Px g*cm/s');
     %legend('helium3','Location','northeast');

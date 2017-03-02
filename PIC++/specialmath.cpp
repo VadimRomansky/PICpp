@@ -12,6 +12,24 @@
 #include "random.h"
 #include "specialmath.h"
 
+void updatePeriodicBoundaries(double**** tempVector, int xnumber, int ynumber, int znumber,
+                              int lnumber) {
+	for (int j = 0; j < ynumber; ++j) {
+		for (int k = 0; k < znumber; ++k) {
+			for (int l = 0; l < lnumber; ++l) {
+				tempVector[xnumber][j][k][l] = tempVector[1][j][k][l];
+			}
+		}
+	}
+	for (int j = 0; j < ynumber; ++j) {
+		for (int k = 0; k < znumber; ++k) {
+			for (int l = 0; l < lnumber; ++l) {
+				tempVector[0][j][k][l] = tempVector[xnumber - 1][j][k][l];
+			}
+		}
+	}
+}
+
 double evaluateError(double** hessenbergMatrix, double* vector, double beta, int n) {
 	double* resVector = new double[n + 1];
 
@@ -152,26 +170,16 @@ void arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessen
 	}
 	delete[] prevHessenbergMatrix;
 	//printf("update hessenberg\n");
-	if(n >= gmresBasis->capacity) {
-		gmresBasis->resize(2*n);
+	if (n >= gmresBasis->capacity) {
+		gmresBasis->resize(2 * n);
 	}
 	multiplySpecialMatrixVector(gmresBasis->array[n - 1], matrix, gmresBasis->array[n - 2], xnumber, ynumber, znumber, lnumber, periodic);
-	gmresBasis->size+= 1;
+	gmresBasis->size += 1;
 	//printf("mult special matrix");
 
 	//printf("start exchange\n");
 
-
-	if ((periodic)) sendGMRESTempVectorToLeft(gmresBasis->array[n - 1], leftOutGmresBuffer, xnumber, ynumber, znumber, lnumber);
-	if ((periodic)) sendGMRESTempVectorToRight(gmresBasis->array[n - 1], rightOutGmresBuffer, xnumber, ynumber, znumber, lnumber);
-
-
-	//printf("finish sending\n");
-
-	if ((periodic)) receiveGMRESTempVectorFromRight(gmresBasis->array[n - 1], rightInGmresBuffer, xnumber, ynumber, znumber, lnumber);
-	if ((periodic)) receiveGMRESTempVectorFromLeft(gmresBasis->array[n - 1], leftInGmresBuffer, xnumber, ynumber, znumber, lnumber);
-
-
+	if(periodic) updatePeriodicBoundaries(gmresBasis->array[n-1], xnumber, ynumber, znumber, lnumber);
 
 	/*if(rank == 0){
 		printf("tempVector = %15.10g\n", tempVector[0][0][0][1]);
@@ -293,15 +301,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
                                       bool periodic, int verbocity, double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer, double* rightInGmresBuffer, LargeVectorBasis* gmresBasis) {
 
 	if ((verbocity > 0)) printf("start GMRES\n");
-
-
-	if ((periodic)) sendGMRESTempVectorToLeft(rightPart, leftOutGmresBuffer, xnumber, ynumber, znumber, lnumber);
-	if ((periodic)) sendGMRESTempVectorToRight(rightPart, rightOutGmresBuffer, xnumber, ynumber, znumber, lnumber);
-	//printf("finish sending\n");
-
-	if ((periodic)) receiveGMRESTempVectorFromLeft(rightPart, leftInGmresBuffer, xnumber, ynumber, znumber, lnumber);
-	if ((periodic)) receiveGMRESTempVectorFromRight(rightPart, rightInGmresBuffer, xnumber, ynumber, znumber, lnumber);
-
+	if(periodic) updatePeriodicBoundaries(rightPart, xnumber, ynumber, znumber, lnumber);
 
 	double norm = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart, xnumber, ynumber, znumber, lnumber, periodic));
 	//printf("norm = %g\n", norm);
@@ -371,9 +371,9 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 		}
 	}
 	double***** newBasis;*/
-	if(gmresBasis->capacity <=0) {
+	if (gmresBasis->capacity <= 0) {
 		gmresBasis->resize(10);
-	}									
+	}
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
 			for (int k = 0; k < znumber; ++k) {
@@ -640,7 +640,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 		}
 	}
 
-	gmresBasis->clear();									 
+	gmresBasis->clear();
 
 	//printf("rank = %d outvector[0][0][0][1] = %g\n", rank, outvector[0][0][0][1]);
 	//printf("rank = %d outvector[1][0][0][1] = %g\n", rank, outvector[1][0][0][1]);
@@ -649,13 +649,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 	//printf("rank = %d outvector[xnumber - 1][0][0][1] = %g\n", rank, outvector[xnumber - 1][0][0][1]);
 	//printf("rank = %d outvector[xnumber][0][0][1] = %g\n", rank, outvector[xnumber][0][0][1]);
 
-	if ((periodic)) sendGMRESTempVectorToLeft(outvector, leftOutGmresBuffer, xnumber, ynumber, znumber, lnumber);
-	if ((periodic)) sendGMRESTempVectorToRight(outvector, rightOutGmresBuffer, xnumber, ynumber, znumber, lnumber);
-
-	//printf("finish sending\n");
-
-	if ((periodic)) receiveGMRESTempVectorFromLeft(outvector, leftInGmresBuffer, xnumber, ynumber, znumber, lnumber);
-	if ((periodic)) receiveGMRESTempVectorFromRight(outvector, rightInGmresBuffer, xnumber, ynumber, znumber, lnumber);
+	if(periodic) updatePeriodicBoundaries(outvector, xnumber, ynumber, znumber, lnumber);
 
 
 	//printf("rank = %d outvector[0][0][0][1] = %g\n", rank, outvector[0][0][0][1]);

@@ -63,14 +63,7 @@ void Simulation::evaluateElectricField() {
 		//}
 		//fclose(gmresFile);* 3];
 
-
-		if ((periodic)) sendGMRESTempVectorToLeft(gmresOutput, leftOutGmresBuffer, xnumber, ynumber, znumber, 3);
-		if ((periodic))sendGMRESTempVectorToRight(gmresOutput, rightOutGmresBuffer, xnumber, ynumber, znumber, 3);
-
-
-		if ((periodic))receiveGMRESTempVectorFromLeft(gmresOutput, leftInGmresBuffer, xnumber, ynumber, znumber, 3);
-		if ((periodic)) receiveGMRESTempVectorFromRight(gmresOutput, rightInGmresBuffer, xnumber, ynumber, znumber, 3);
-
+		if(periodic) updatePeriodicBoundaries(gmresOutput, xnumber, ynumber, znumber, 3);
 
 		//delete[] bufferRightSend;
 		// delete[] bufferRightRecv;

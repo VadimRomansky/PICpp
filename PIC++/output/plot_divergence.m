@@ -23,8 +23,11 @@ divergenceError(1:Nx, 1:3) = 0;
 divergence(1:Nx, 1:3) = 0;
 density(1:Nx, 1:3) = 0;
 
+middleX(1:Nx)=0;
 
-for i=1:Nx,   
+
+for i=1:Nx,  
+   middleX(i) = (Xfile(i)+Xfile(i+1))/2;
    divergenceError(i, 1) = divergence_error((Nz*Ny*(i-1) + Nz*(ynumber-1) + znumber) + a*N, 1);
    divergenceError(i, 2) = divergence_error((Nz*Ny*(i-1) + Nz*(ynumber-1) + znumber) + b*N, 1);
    divergenceError(i, 3) = divergence_error((Nz*Ny*(i-1) + Nz*(ynumber-1) + znumber) + c*N, 1);
@@ -37,21 +40,21 @@ for i=1:Nx,
 end;
 
 figure(1);
-plot (Xfile(1:Nx,1),divergenceError(1:Nx, 1), 'red', Xfile(1:Nx,1), divergenceError(1:Nx, 2), 'green', Xfile(1:Nx,1), divergenceError(1:Nx, 3), 'blue');
+plot (middleX(1:Nx),divergenceError(1:Nx, 1), 'red', middleX(1:Nx), divergenceError(1:Nx, 2), 'green', middleX(1:Nx), divergenceError(1:Nx, 3), 'blue');
 title ('divergence error');
 xlabel ('x cm');
 ylabel ('rho sgs*cm^-3');
 grid ;
 
 figure(2);
-plot (Xfile(1:Nx,1),divergence(1:Nx, 1), 'red', Xfile(1:Nx,1), divergence(1:Nx, 2), 'green', Xfile(1:Nx,1), divergence(1:Nx, 3), 'blue');
+plot (middleX(1:Nx),divergence(1:Nx, 1), 'red', middleX(1:Nx), divergence(1:Nx, 2), 'green', middleX(1:Nx), divergence(1:Nx, 3), 'blue');
 title ('divergence');
 xlabel ('x cm');
 ylabel ('rho sgs*cm^-3');
 grid ;
 
 figure(3);
-plot (Xfile(1:Nx,1),density(1:Nx, 1), 'red', Xfile(1:Nx,1), density(1:Nx, 2), 'green', Xfile(1:Nx,1), density(1:Nx, 3), 'blue');
+plot (middleX(1:Nx),density(1:Nx, 1), 'red', middleX(1:Nx), density(1:Nx, 2), 'green', middleX(1:Nx), density(1:Nx, 3), 'blue');
 title ('4*pi*density');
 xlabel ('x cm');
 ylabel ('rho sgs*cm^-3');

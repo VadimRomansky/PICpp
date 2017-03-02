@@ -7,10 +7,13 @@
 1E-4 0 0                  magneticField
 10000000              max iterations
 1E100                   max time
-6                  particle types number
+1                  log verbocity level
+8                  particle types number
 1E-4 50                electrons concentration and particles per bin
 1E-4 50                protons concentration and particles per bin
 0 0                 positrons concentration and particles per bin
 0 0                 alpha per concentration and particles bin
 0 0                  deuterium concentration and particles per bin
 0 0                  helium3 per concentration and particles bin Note that neutrality is om your own responsibility!
+0 0               oxygen+3 concentration and particles per bin
+0 0               silicon+1 concentration and particles per bin

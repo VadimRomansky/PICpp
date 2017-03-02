@@ -1,7 +1,7 @@
 clear;
-load traectory_electron.dat;
+load trajectory_electron.dat;
 N1=1;
-N2=size(traectory_electron,1);
+N2=size(trajectory_electron,1);
 
 xteoretic(1:N2) = 0;
 Efield = 1E-6;
@@ -9,21 +9,21 @@ q = -4.803529695E-10;
 m = 0.910938291E-27;
 
 for i = 1:N2;
-    xteoretic(i) = traectory_electron(1,2) + (q*Efield*0.5/m)*(traectory_electron(i,1))^2;
+    xteoretic(i) = trajectory_electron(1,3) + (q*Efield*0.5/m)*(trajectory_electron(i,2))^2;
 end;
 
 
 figure(1);
-%plot (traectory_electron(1:N2,1),traectory_electron(1:N2,2),'red',traectory_electron(1:N2,1),traectory_electron(1:N2,3),'green',traectory_electron(1:N2,1),traectory_electron(1:N2,4),'blue', traectory_electron(1:N2,1), xteoretic(1:N2), 'yellow');
-plot (traectory_electron(1:N2,1),traectory_electron(1:N2,2),'red',traectory_electron(1:N2,1),traectory_electron(1:N2,3),'green',traectory_electron(1:N2,1),traectory_electron(1:N2,4),'blue');
+%plot (traectory_electron(1:N2,1),traectory_electron(1:N2,3),'red',traectory_electron(1:N2,1),traectory_electron(1:N2,4),'green',traectory_electron(1:N2,1),traectory_electron(1:N2,5),'blue', traectory_electron(1:N2,1), xteoretic(1:N2), 'yellow');
+plot (trajectory_electron(1:N2,1),trajectory_electron(1:N2,3),'red',trajectory_electron(1:N2,1),trajectory_electron(1:N2,4),'green',trajectory_electron(1:N2,1),trajectory_electron(1:N2,5),'blue');
 title ('r');
 xlabel ('t');
-ylabel (')');
+ylabel ('r');
 legend('x', 'y','z','Location','southwest');
 grid ;
 
 figure(2);
-plot (traectory_electron(1:N2,1),traectory_electron(1:N2,5),'red',traectory_electron(1:N2,1),traectory_electron(1:N2,6),'green',traectory_electron(1:N2,1),traectory_electron(1:N2,7),'blue', traectory_electron(1:N2,1),traectory_electron(1:N2,8),'black');
+plot (trajectory_electron(1:N2,1),trajectory_electron(1:N2,6),'red',trajectory_electron(1:N2,1),trajectory_electron(1:N2,7),'green',trajectory_electron(1:N2,1),trajectory_electron(1:N2,8),'blue', trajectory_electron(1:N2,2),trajectory_electron(1:N2,9),'black');
 title ('p');
 xlabel ('t');
 ylabel ('p');
@@ -31,8 +31,36 @@ legend('px', 'py','pz', 'p','Location','southwest');
 grid ;
 
 figure(3);
-plot (traectory_electron(1:N2,3),traectory_electron(1:N2,4));
+plot (trajectory_electron(1:N2,4),trajectory_electron(1:N2,5));
 title ('r');
 xlabel ('y');
 ylabel ('z');
 grid ;
+
+figure(4);
+plot (trajectory_electron(1:N2,3),trajectory_electron(1:N2,9));
+title ('p(x)');
+xlabel ('x');
+ylabel ('p');
+grid ;
+
+figure(5);
+plot (trajectory_electron(1:N2,3),trajectory_electron(1:N2,6));
+title ('p_x(x)');
+xlabel ('x');
+ylabel ('p_x');
+grid ;
+
+%figure(6);
+%plot (trajectory_electron(1:N2,4),trajectory_electron(1:N2,7));
+%title ('p_y(y)');
+%xlabel ('y');
+%ylabel ('p_y');
+%grid ;
+
+%figure(7);
+%plot (trajectory_electron(1:N2,5),trajectory_electron(1:N2,8));
+%title ('p_z(z)');
+%xlabel ('z');
+%ylabel ('p_z');
+%grid ;

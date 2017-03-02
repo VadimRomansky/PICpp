@@ -10,6 +10,8 @@ class Vector3d;
 class Complex;
 class LargeVectorBasis;
 
+void updatePeriodicBoundaries(double**** tempVector, int xnumber, int ynumber, int znumber,
+                              int lnumber);
 void generalizedMinimalResidualMethod(std::vector<MatrixElement> ****matrix, double ****rightPart, double ****outvector,
                                       int xnumber, int ynumber, int znumber, int lnumber, int xnumberGeneral,
                                       int znumberGeneral, int ynumberGeneral, double precision, int maxIteration,

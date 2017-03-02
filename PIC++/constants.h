@@ -4,40 +4,9 @@
 const int randomSeed = 4096;
 const int numThreads = 4;
 
-//for plytech hpc
-//const char* const outputDirectory = "/home/ipntsr/romansky/PIC3d1/output/";
-//const char* const inputDirectory = "/home/ipntsr/romansky/PIC3d1/input/";
-//const char* const backupDirectory = "/home/ipntsr/romansky/PIC3d1/backup/";
-
-//for MPI on mvs
-//const char* const outputDirectory = "/home2/ioffe2/romansky/PIC3d1/output/";
-//const char* const inputDirectory = "/home2/ioffe2/romansky/PIC3d1/input/";
-//const char* const backupDirectory = "/home2/ioffe2/romansky/PIC3d1/backup/";
-
-//for MPI on h1 or h2
-//const char* const outputDirectory = "/home/vadim/PIC3d1/output/";
-//const char* const inputDirectory = "/home/vadim/PIC3d1/input/";
-//const char* const backupDirectory = "/home/vadim/PIC3d1/backup/";
-
-//for MPI on alpha
-//const char* const outputDirectory = "/home/uikam/romansky/PIC3d3/output/";
-//const char* const inputDirectory = "/home/uikam/romansky/PIC3d3/input/";
-//const char* const backupDirectory = "/home/uikam/romansky/PIC3d3/backup/";
-
-//for MPI on Ubuntu
-//const char* const outputDirectory = "/home/vadim/PIC++/trunk/PIC++/output/";
-//const char* const inputDirectory = "/home/vadim/PIC++/trunk/PIC++/input/";
-//const char* const backupDirectory = "/home/vadim/PIC++/trunk/PIC++/backup/";
- 
-//for windows 32
-//const char* const outputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/v4/PIC++/output/";
-//const char* const inputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/v4/PIC++/input/";
-//const char* const backupDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/v4/PIC++/backup/";
-
-//for windows 64
-const char* const outputDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/v4/trunk/PIC++/output/";
-const char* const inputDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/v4/trunk/PIC++/input/";
-const char* const backupDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/v4/trunk/PIC++/backup/";
+const char* const outputDirectory = "./output/";
+const char* const inputDirectory = "./input/";
+const char* const backupDirectory = "./backup/";
 
 const double atomicUnionMass = 1.66053904E-24;
 const double massProtonReal = 1.67262177E-24;
@@ -66,7 +35,7 @@ const double particleSplitLevel = 3;
 const double particleSplitAngle = 0.02;
 const int splitParticlesParameter = 100;
 const int pnumber = 500;
-const int writeParameter = 1;
+const int writeParameter = 100;
 const int writeTrajectoryNumber = 50;
 const int writeParticleNumber = 50;
 const int divergenceCleanUpParameter = 1;
