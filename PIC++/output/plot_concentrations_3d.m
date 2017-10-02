@@ -22,7 +22,7 @@ charge_density(1:Nx, 1:Ny) = 0;
 charge_density_hat(1:Nx, 1:Ny) = 0;
 particle_concentrations(1:Nx, 1:Ny, 1:Ntypes) = 0;
 
-znumber = 1;
+znumber = 2;
 
 middleX(1:Nx) = 0;
 middleY(1:Ny) = 0;
@@ -53,6 +53,7 @@ for t = 1:Ntypes,
         figure(t);
         [X, Y] = meshgrid(middleY, middleX);
         surf(X, Y, cons);
+        shading interp;
         title ('concentration');
         xlabel ('y');
         ylabel ('x');
@@ -64,6 +65,7 @@ end;
 figure(Ntypes + 1);
 [X, Y] = meshgrid(middleY, middleX);
 surf(X, Y, charge_density);
+shading interp;
 title ('charge density');
 xlabel ('y');
 ylabel ('x');
@@ -73,6 +75,7 @@ grid ;
 figure(Ntypes + 2);
 [X, Y] = meshgrid(middleY, middleX);
 surf(X, Y, charge_density_hat);
+shading interp;
 title ('charge density hat');
 xlabel ('y');
 ylabel ('x');

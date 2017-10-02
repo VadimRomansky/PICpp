@@ -27,6 +27,7 @@ public:
 	double scalarMult(const Vector3d& vector) const;
 	Vector3d vectorMult(const Vector3d& vector) const;
 	Matrix3d tensorMult(const Vector3d& vector) const;
+	Matrix3d selfTensorMult() const;
 
 	double& operator[](int i);
 };

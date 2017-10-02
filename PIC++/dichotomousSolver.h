@@ -7,7 +7,10 @@
 
 class BaseDichotomousSolver{
 public:
-    double maxErrorX;
+	virtual ~BaseDichotomousSolver() {
+	}
+
+	double maxErrorX;
     double maxErrorY;
     BaseDichotomousSolver();
     virtual double function(double x);
@@ -20,7 +23,7 @@ public:
     double rightPart;
 
     TemperatureRelativisticMaxwellSolver(double alphaNormalValue, double rightPartValue);
-    double function(double x);
+    virtual double function(double x);
 };
 
 #endif //PIC_DICHOTOMOUSSOLVER_H

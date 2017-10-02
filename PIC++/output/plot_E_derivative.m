@@ -13,12 +13,12 @@ Nz = size(Zfile, 1);
 NE = Nx*Ny*Nz;
 Nt = (size(flux, 1)/NE)-1;
 
-ynumber = 1;
-znumber = 1;
+ynumber = 2;
+znumber = 2;
 
 a = 0;
 b = fix(Nt/2);
-c = Nt - 1;
+c = fix(Nt);
 
 Jx(1:Nx, 1:3) = 0;
 Jy(1:Nx, 1:3) = 0;

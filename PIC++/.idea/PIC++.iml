@@ -4,49 +4,55 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/input.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/vector3d.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/simulation.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/dichotomousSolver.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/particle.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/specialmath.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/matrix3d.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/initialization.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/input.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/divergencecleanup.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/particle.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/input.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/complex.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/random.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/matrixelement.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/matrix3d.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/util.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/simulation.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/initialization.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/correlation.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/specialmath.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/output.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/dichotomousSolver.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/fields.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/specialmath.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mpi_util.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/random.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/simulation.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/divergencecleanup.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/constants.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/particle.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/output.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/vector3d.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/util.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/mover.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/complex.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/main.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/matrixElement.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mpi_util.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/util.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/output.cpp" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
       <library name="Header Search Paths">
         <CLASSES>
+          <root url="file:///usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed" />
+          <root url="file:///usr/lib/gcc/x86_64-linux-gnu/4.8/include" />
           <root url="file:///usr/include" />
-          <root url="file:///usr/lib/gcc/i686-linux-gnu/4.8/include" />
-          <root url="file:///usr/lib/gcc/i686-linux-gnu/4.8/include-fixed" />
           <root url="file:///usr/local/include" />
+          <root url="file://$USER_HOME$/mpich2-install/include" />
         </CLASSES>
         <SOURCES>
+          <root url="file:///usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed" />
+          <root url="file:///usr/lib/gcc/x86_64-linux-gnu/4.8/include" />
           <root url="file:///usr/include" />
-          <root url="file:///usr/lib/gcc/i686-linux-gnu/4.8/include" />
-          <root url="file:///usr/lib/gcc/i686-linux-gnu/4.8/include-fixed" />
           <root url="file:///usr/local/include" />
+          <root url="file://$USER_HOME$/mpich2-install/include" />
         </SOURCES>
       </library>
     </orderEntry>

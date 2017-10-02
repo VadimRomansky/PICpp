@@ -13,13 +13,12 @@ Nz = size(Zfile, 1);
 NE = Nx*Ny*Nz;
 Nt = (size(flux, 1)/NE)-1;
 
-ynumber = 1;
-znumber = 1;
-xnumber = 1;
+xnumber = 2;
+znumber = 2;
 
 a = 0;
 b = fix(Nt/2);
-c = Nt - 1;
+c = fix(Nt);
 
 Jx(1:Ny, 1:3) = 0;
 Jy(1:Ny, 1:3) = 0;
@@ -70,64 +69,64 @@ end;
 
 figure(1);
 plot (Yfile(1:Ny,1),Jx(1:Ny,1), 'red',Yfile(1:Ny,1),Jx(1:Ny,2), 'green',Yfile(1:Ny,1),Jx(1:Ny,3), 'blue');
-title ('4*pi*Jx');
-xlabel ('y cm');
+title ('4*pi*x');
+xlabel ('x cm');
 ylabel ('flux');
 grid ;
 
 figure(2);
 plot (Yfile(1:Ny,1),Jy(1:Ny, 1), 'red', Yfile(1:Ny,1), Jy(1:Ny, 2), 'green',Yfile(1:Ny,1),Jy(1:Ny, 3), 'blue');
 title ('4*pi*Jy');
-xlabel ('y cm');
+xlabel ('x cm');
 ylabel ('flux');
 grid ;
 
 figure(3);
 plot (Yfile(1:Ny,1),Jz(1:Ny, 1), 'red', Yfile(1:Ny,1), Jz(1:Ny, 2), 'green', Yfile(1:Ny,1), Jz(1:Ny, 3), 'blue');
 title ('4*pi*Jz');
-xlabel ('y cm');
+xlabel ('x cm');
 ylabel ('flux');
 grid ;
 
 figure(4);
-plot (Yfile(1:Ny,1),rotBx(1:Ny,1), 'red',Yfile(1:Ny,1),rotBx(1:Ny,2), 'green',Yfile(1:Ny,1),rotBx(1:Ny,3), 'blue');
+plot (Yfile(1:Ny,1),rotBx(1:Ny,1), 'red',Yfile(1:Ny,1),rotBx(1:Ny,2), 'green', Yfile(1:Ny,1),rotBx(1:Ny,3), 'blue');
 title ('rotBx');
-xlabel ('y cm');
+xlabel ('x cm');
 ylabel ('rotB');
 grid ;
 
 figure(5);
 plot (Yfile(1:Ny,1),rotBy(1:Ny, 1), 'red', Yfile(1:Ny,1), rotBy(1:Ny, 2), 'green',Yfile(1:Ny,1),rotBy(1:Ny, 3), 'blue');
 title ('rotBy');
-xlabel ('y cm');
+xlabel ('x cm');
 ylabel ('rotB');
 grid ;
 
 figure(6);
 plot (Yfile(1:Ny,1),rotBz(1:Ny, 1), 'red', Yfile(1:Ny,1), rotBz(1:Ny, 2), 'green', Yfile(1:Ny,1), rotBz(1:Ny, 3), 'blue');
 title ('rotBz');
-xlabel ('y cm');
+xlabel ('x cm');
 ylabel ('rotB');
 grid ;
 
 figure(7);
 plot (Yfile(1:Ny,1),derEx(1:Ny,1), 'red',Yfile(1:Ny,1),derEx(1:Ny,2), 'green',Yfile(1:Ny,1),derEx(1:Ny,3), 'blue');
 title ('derEx');
-xlabel ('y cm');
+xlabel ('x cm');
 ylabel ('derE');
 grid ;
 
 figure(8);
 plot (Yfile(1:Ny,1),derEy(1:Ny, 1), 'red', Yfile(1:Ny,1), derEy(1:Ny, 2), 'green',Yfile(1:Ny,1),derEy(1:Ny, 3), 'blue');
 title ('derEy');
-xlabel ('y cm');
+xlabel ('x cm');
 ylabel ('derE');
 grid ;
 
 figure(9);
 plot (Yfile(1:Ny,1),derEz(1:Ny, 1), 'red', Yfile(1:Ny,1), derEz(1:Ny, 2), 'green', Yfile(1:Ny,1), derEz(1:Ny, 3), 'blue');
 title ('derEz');
-xlabel ('y cm');
+xlabel ('x cm');
 ylabel ('derE');
 grid ;
 

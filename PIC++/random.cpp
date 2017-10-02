@@ -3,6 +3,7 @@
 #include <math.h>
 #include <cmath>
 #include <string>
+#include <mpi.h>
 //#include <crtdbg.h>
 
 //#include "memory_debug.h"
@@ -45,6 +46,7 @@ double solveInverceJuttnerFunction(double x, double theta, double besselK) {
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "distribution function can not be more than 1\n");
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 	if (x <= 0) {
@@ -68,6 +70,7 @@ double solveInverceJuttnerFunction(double x, double theta, double besselK, doubl
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "right < left in solveInverceJuttnerFunction\n");
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 	if (right - left < 0.000001 * left) {
@@ -134,6 +137,7 @@ void anisotropicMaxwellJuttnerDistribution(double &momentumNormal, double &momen
         fprintf(errorLogFile, "functionValue > maxFunctionValue in anisotropicMaxwellJuttnerDistribution\n");
         fprintf(errorLogFile, "functionValue = %g maxValue = %g p1 = %g p2 = %g alpha1 = %g alpha2 = %g\n", functionValue, maxFunctionValue, tempP1, tempP2, alphaNormal, alphaParallel);
         fclose(errorLogFile);
+        MPI_Finalize();
         exit(0);
     }
 
@@ -152,6 +156,7 @@ void anisotropicMaxwellJuttnerDistribution(double &momentumNormal, double &momen
             fprintf(errorLogFile, "functionValue > maxFunctionValue in anisotropicMaxwellJuttnerDistribution\n");
             fprintf(errorLogFile, "functionValue = %g maxValue = %g p1 = %g p2 = %g alpha1 = %g alpha2 = %g\n", functionValue, maxFunctionValue, tempP1, tempP2, alphaNormal, alphaParallel);
             fclose(errorLogFile);
+            MPI_Finalize();
             exit(0);
         }
 

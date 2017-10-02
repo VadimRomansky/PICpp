@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "util.h"
+#include "../../../../../../../Program Files/Microsoft SDKs/MPI/Include/mpi.h"
 
 double power(double v, double p){
 	return exp(p*log(v));
@@ -51,6 +52,7 @@ void alertNaNOrInfinity(double value, const char* s){
 	if(value != value || 0*value != 0*value){
 		printf("%s", s);
 		printf("\n");
+		MPI_Finalize();
 		exit(0);
 		//Sleep(1000);
 	}
@@ -60,6 +62,7 @@ void alertNotPositive(double value, const char* s){
 	if(value <= 0){
 		printf("%s", s);
 		printf("\n");
+		MPI_Finalize();
 		exit(0);
 	}
 }
@@ -68,6 +71,7 @@ void alertNegative(double value, const char* s){
 	if(value < 0){
 		printf("%s", s);
 		printf("\n");
+		MPI_Finalize();
 		exit(0);
 	}
 }

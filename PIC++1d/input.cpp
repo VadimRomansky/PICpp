@@ -232,49 +232,49 @@ Simulation readInput(FILE* inputFile) {
 	return Simulation(xnumber, xsize, temperature, density, Vx, Vy, Vz, Ex, Ey, Ez, Bx, By, Bz, maxIterations, maxTime, particlesPerBin, positronsPerBin, alphaPerBin);
 }
 
-Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particlesFile) {
+Simulation readBackup(const char* generalFileName, const char* EfileName, const char* BfileName, const char* particlesFileName) {
 	Simulation simulation = Simulation();
 
 	int xnumber = 0;
-	fscanf(generalFile, "%d", &xnumber);
+	fscanf(generalFileName, "%d", &xnumber);
 	simulation.xnumber = xnumber;
-	fscanf(generalFile, "%d", &simulation.particlesNumber);
-	fscanf(generalFile, "%d", &simulation.electronsPerBin);
-	fscanf(generalFile, "%d", &simulation.protonsPerBin);
-	fscanf(generalFile, "%d", &simulation.positronsPerBin);
-	fscanf(generalFile, "%d", &simulation.alphaPerBin);
+	fscanf(generalFileName, "%d", &simulation.particlesNumber);
+	fscanf(generalFileName, "%d", &simulation.electronsPerBin);
+	fscanf(generalFileName, "%d", &simulation.protonsPerBin);
+	fscanf(generalFileName, "%d", &simulation.positronsPerBin);
+	fscanf(generalFileName, "%d", &simulation.alphaPerBin);
 
-	fscanf(generalFile, "%lf", &simulation.density);
-	fscanf(generalFile, "%lf", &simulation.temperature);
-	fscanf(generalFile, "%lf", &simulation.plasma_period);
-	fscanf(generalFile, "%lf", &simulation.gyroradius);
-	fscanf(generalFile, "%lf", &simulation.fieldScale);
+	fscanf(generalFileName, "%lf", &simulation.density);
+	fscanf(generalFileName, "%lf", &simulation.temperature);
+	fscanf(generalFileName, "%lf", &simulation.plasma_period);
+	fscanf(generalFileName, "%lf", &simulation.gyroradius);
+	fscanf(generalFileName, "%lf", &simulation.fieldScale);
 
-	fscanf(generalFile, "%lf", &simulation.time);
-	fscanf(generalFile, "%lf", &simulation.maxTime);
+	fscanf(generalFileName, "%lf", &simulation.time);
+	fscanf(generalFileName, "%lf", &simulation.maxTime);
 
-	fscanf(generalFile, "%d", &simulation.currentIteration);
-	fscanf(generalFile, "%d", &simulation.maxIteration);
+	fscanf(generalFileName, "%d", &simulation.currentIteration);
+	fscanf(generalFileName, "%d", &simulation.maxIteration);
 
-	fscanf(generalFile, "%lf", &simulation.xsize);
-	fscanf(generalFile, "%lf", &simulation.theta);
-	fscanf(generalFile, "%lf", &simulation.eta);
+	fscanf(generalFileName, "%lf", &simulation.xsize);
+	fscanf(generalFileName, "%lf", &simulation.theta);
+	fscanf(generalFileName, "%lf", &simulation.eta);
 
 	int debugMode = 0;
 
-	fscanf(generalFile, "%d", &debugMode);
+	fscanf(generalFileName, "%d", &debugMode);
 
 	simulation.debugMode = (debugMode == 1);
 
 	int preserveCharge = 0;
 
-	fscanf(generalFile, "%d", &preserveCharge);
+	fscanf(generalFileName, "%d", &preserveCharge);
 
 	simulation.preserveCharge = (preserveCharge == 1);
 
 	int solverType = 0;
 
-	fscanf(generalFile, "%d", &solverType);
+	fscanf(generalFileName, "%d", &solverType);
 
 	if (solverType == 1) {
 		simulation.solverType = IMPLICIT;
@@ -284,7 +284,7 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 
 	int boundaryConditionType = 0;
 
-	fscanf(generalFile, "%d", &boundaryConditionType);
+	fscanf(generalFileName, "%d", &boundaryConditionType);
 
 	if (boundaryConditionType == 1) {
 		simulation.boundaryConditionType = PERIODIC;
@@ -292,19 +292,19 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 		simulation.boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	}
 
-	fscanf(generalFile, "%d", &simulation.maxwellEquationMatrixSize);
+	fscanf(generalFileName, "%d", &simulation.maxwellEquationMatrixSize);
 
-	fscanf(generalFile, "%lf", &simulation.extJ);
+	fscanf(generalFileName, "%lf", &simulation.extJ);
 
-	fscanf(generalFile, "%lf", &simulation.V0.x);
-	fscanf(generalFile, "%lf", &simulation.V0.y);
-	fscanf(generalFile, "%lf", &simulation.V0.z);
-	fscanf(generalFile, "%lf", &simulation.E0.x);
-	fscanf(generalFile, "%lf", &simulation.E0.y);
-	fscanf(generalFile, "%lf", &simulation.E0.z);
-	fscanf(generalFile, "%lf", &simulation.B0.x);
-	fscanf(generalFile, "%lf", &simulation.B0.y);
-	fscanf(generalFile, "%lf", &simulation.B0.z);
+	fscanf(generalFileName, "%lf", &simulation.V0.x);
+	fscanf(generalFileName, "%lf", &simulation.V0.y);
+	fscanf(generalFileName, "%lf", &simulation.V0.z);
+	fscanf(generalFileName, "%lf", &simulation.E0.x);
+	fscanf(generalFileName, "%lf", &simulation.E0.y);
+	fscanf(generalFileName, "%lf", &simulation.E0.z);
+	fscanf(generalFileName, "%lf", &simulation.B0.x);
+	fscanf(generalFileName, "%lf", &simulation.B0.y);
+	fscanf(generalFileName, "%lf", &simulation.B0.z);
 
 	simulation.deltaX = simulation.xsize / (simulation.xnumber);
 
@@ -322,14 +322,14 @@ Simulation readBackup(FILE* generalFile, FILE* Efile, FILE* Bfile, FILE* particl
 		simulation.middleXgrid[i] = (simulation.xgrid[i] + simulation.xgrid[i + 1]) / 2;
 	}
 
-	readFields(Efile, Bfile, simulation);
+	readFields(EfileName, BfileName, simulation);
 	simulation.resetNewTempFields();
-	readParticles(particlesFile, simulation);
+	readParticles(particlesFileName, simulation);
 
 	return simulation;
 }
 
-void readFields(FILE* Efile, FILE* Bfile, Simulation& simulation) {
+void readFields(const char* Efile, const char* Bfile, Simulation& simulation) {
 	for (int i = 0; i < simulation.xnumber; ++i) {
 		fscanf(Bfile, "%lf %lf %lf", &(simulation.Bfield[i].x), &(simulation.Bfield[i].y), &(simulation.Bfield[i].z));
 	}
@@ -339,7 +339,7 @@ void readFields(FILE* Efile, FILE* Bfile, Simulation& simulation) {
 	}
 }
 
-void readParticles(FILE* particlesFile, Simulation& simulation) {
+void readParticles(const char* particlesFile, Simulation& simulation) {
 	for (int i = 0; i < simulation.particlesNumber; ++i) {
 		int number = 0;
 		double mass = 0;

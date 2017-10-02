@@ -1,0 +1,103 @@
+\section{Model of implicit particle-in-cell}
+We developed the implicit particle-in-cell (PIC) code, based on the scheme suggested by Lapenta et al.~\cite{Lapenta2006} and improved for the relativistic case by Noguchi et al.\cite{Noguchi2007}. This scheme is described in details in these papers and below we present only a short description. The common assumption for all particle-in-cell codes is the consideration of the plasma as a superposition of a large number of finite elements, called super-particles. Distribution function can be represented as the sum of members for all super-particles: 
+\begin{equation}
+F \left( \textbf{x},\textbf{p},t \right) =\sum _{p=1}^{N_{s}}S \left( x-x_{{p}} \right) 
+S \left( y-y_{{p}} \right) S \left( z-z_{{p}} \right) \delta \left( \textbf{p}-\textbf{p}_{{p}} \right), 
+\end{equation}
+where $\textbf{x}$ and $\textbf{p}$ are coordinates and the momentum of a particle , respectively, $S$ is a shape-function, and $\delta$ is the Dirac's delta-function. The shape-function is chosen in form of b spline. Also we introduce interpolation function $W$ which represents the part of a particle which is contained in the grid cell:
+\begin{equation}
+W \left(x_{{c}} - x_{{p}} \right)= \int\limits_{-\infty}^{+\infty}S(x-x_{{p}})\phi(x)dx,
+\end{equation} 
+where $c$ and $p$ are indexes of the cell and the particle, respectively, and $\phi$ equals 1 inside the cell and 0 outside. Using this function we can determine electric and magnetic field for each particle as
+\begin{equation}
+\begin{aligned}
+&\textbf{E}_{p} = \sum_{c}\textbf{E}_c W \left(x_{{c}} - x_{{p}} \right),
+\\
+&\textbf{B}_{p} = \sum_{c}\textbf{B}_c W \left(x_{{c}} - x_{{p}} \right).
+\end{aligned}
+\end{equation}
+
+Then we use particle fields to solve equations of motion for particles:
+\begin{equation}
+\begin{aligned}
+&{\frac {d\textbf{x}_p}{dt}}=\textbf{v}_p,
+\\
+&{\frac {d\textbf{p}_p}{dt}}=q_p \left(\textbf{E}_{p}+\frac{\textbf{v}_p\times\textbf{B}_{p}}{c}\right),
+\end{aligned}
+\end{equation}
+where $q_p$ is the particle charge and $\textbf{p}_p$ is the momentum.
+
+At the same time, using interpolation functions we can determine macroscopic plasma parameters, such as the electric flux and the electric density :
+\begin{equation}
+\begin{aligned}\label{rhoj}
+&\rho_c=\sum_p q_p W \left(x_{{c}} - x_{{p}} \right),
+\\
+&\textbf{J}_c=\sum_p q_p \textbf{v}_p W \left(x_{{c}} - x_{{p}} \right).
+\end{aligned}
+\end{equation}
+
+The difficulty comes from the fact that particles coordinates and fields are coupled and we can not separate the equations of motion and Maxwell equations. The first possible solution is the explicit method: equations of fields use particle velocities on the previous time step and vice versa. Explicit approach is rather simple, but it has strong restrictions on stability. The other possible method is the implicit approach which is more complicated, but at the same time more stable. The main idea of it is to predict particle velocity at the next time step, using the field at the next time step and then use velocity in the implicit scheme for the field.
+
+In the implicit approach we should introduce intermediate values $F^{n+\theta}=\theta F^{n+1} + \left(1-\theta\right) F^n$, where $F^n$ is the value at the n-th time step and $F^{n+\theta}$ the value at the intermediate time step. $\theta$ is the parameter of the scheme and should be greater or equal to $\frac{1}{2}$ for stability. Using this denotations we write time discretisation of the Maxwell equations as:
+\begin{equation}
+\begin{aligned}\label{maxwell}
+&\nabla\times\textbf{E}^{n+\theta}+\frac{\textbf{B}^{n+1}-\textbf{B}^n}{c\Delta t}=0,
+\\
+&\nabla\times\textbf{B}^{n+\theta}-\frac{\textbf{E}^{n+1}-\textbf{E}^n}{c\Delta t}=\frac{4\pi}{c}\textbf{J}^{n+\theta},
+\\
+&\Delta\cdot\textbf{E}^{n+\theta}=4\pi\rho^{n+\theta},
+\\
+&\Delta\cdot\textbf{B}^n=0.
+\end{aligned}
+\end{equation}
+
+Time discretization of equations of particle motion reads as
+\begin{equation}\label{particlemoving}
+\begin{aligned}
+&\textbf{x}_p^{n+1}=\overline{\textbf{v}}_p\Delta t,
+\\
+&\textbf{p}_p^{n+1}=\textbf{p}_p^{n}+q_p\Delta t
+\left(\textbf{E}_p^{n+\theta}\left(\textbf{x}_p^{n+\theta}\right)+\frac{\overline{\textbf{v}}_p\times\textbf{B}_p^n\left(\textbf{x}_p^{n+\theta}\right)}{c}\right),
+\end{aligned}
+\end{equation}
+where $\overline{\textbf{v}}_p$ is the average velocity. It should be noted that the electric field is evaluated at the moment $n+\theta$, while the magnetic field at the moment $n$. If $\theta = \frac{1}{2}$ the scheme has the second order accuracy in $\Delta t$.  Finally we can express average velocity explicitly using $\textbf{v}_p^{n}$ and $\textbf{E}_p^{n+\theta}$: 
+\begin{equation}\label{averagev}
+\overline{\textbf{v}}_p = \widehat{\textbf{v}}_p+\frac{q_p\Delta t}{2m_p\Gamma_p}\alpha_p^{n}\textbf{E}_p^{n+\theta}\left(\textbf{x}_p^{n+\theta}\right),
+\end{equation}
+where we use following notations:
+\begin{equation}
+\widehat{\textbf{v}}_p=\alpha_p^{n}\gamma_p^n\textbf{v}_p^n,
+\end{equation} 
+\begin{equation}
+\alpha_p^n=\frac{1}{\Gamma_p\left(1+\left(\frac{q_p\Delta t\textbf{B}_p^n}{2m_p\Gamma_p}\right)^2\right)}\left(I-\frac{q_p\Delta t}{2m_p\Gamma_p}I\times\textbf{B}_p^n+\left(\frac{q_p\Delta t}{2m_p\Gamma_p}\right)^2\textbf{B}_p^n\textbf{B}_p^n\right),
+\end{equation}
+\begin{equation}
+\Gamma_p=\frac{q_p\Delta t\textbf{B}_p^n}{2m_p}\textbf{E}_p^n\cdot\textbf{v}_p^n+\gamma_p^n,
+\end{equation}
+where $I$ is the identity tensor and $\gamma_p^n$ is the gamma-factor of the particle at the moment $n$. Using expression(\ref{averagev}) for the average velocity we can expand in series expressions for the electric flux and density (\ref{rhoj}) by term $\textbf{x}_p^n-\textbf{x}_p^{n+\theta}$ and substitute them into the Maxwell equations (\ref{maxwell}). After solving algebraic equations, combining all terms and excluding magnetic field we finally obtain the implicit second-order elliptic equation for $\textbf{E}^{n+\theta}$:
+\begin{eqnarray}\label{electricfield}
+\left(c\theta\Delta t\right)^2 \left(-\nabla^2\textbf{E}^{n+\theta}-\nabla\nabla\cdot\left(\mu^n\cdot\textbf{E}^{n+\theta}\right)\right)+\epsilon^n\textbf{E}^{n+\theta}=
+\nonumber\\
+\textbf{E}^{n}-c\theta\Delta t\left(\frac{4\pi\widehat{\textbf{J}}}{c}-\frac{\Delta t}{2}\nabla\cdot\widehat{\Pi}-\nabla\times\textbf{B}^n\right)
+-\left(c\theta\Delta t\right)^2 4\pi \nabla\widehat{\rho},
+\end{eqnarray}
+where we used following notations:
+\begin{equation}
+ \epsilon^n=I+\mu^n ,
+\end{equation}
+\begin{equation}
+\mu^n=-\sum_p\frac{2\pi q_p^2\theta\Delta t^2}{m_p}\alpha_p^n W\left(x-x_p^n\right),
+\end{equation}
+\begin{equation}
+\widehat{\Pi}=\sum_p q_p\widehat{\textbf{v}}_p\widehat{\textbf{v}}_p W\left(x-x_p^n\right),
+\end{equation}
+\begin{equation}
+\widehat{\textbf{J}}=\sum_p q_p \widehat{\textbf{v}}_p W\left(x-x_p^n\right),
+\end{equation}
+\begin{equation}
+\widehat{\rho}=\rho^n - \theta \Delta t \nabla\cdot\left(\widehat{\textbf{J}} -\frac{\Delta t}{2}\nabla\cdot\widehat{\Pi} \right).
+\end{equation}
+
+The spacial discretization of the equation of the electric field (\ref{electricfield}) is performed with a finite-volume scheme and  then the system of linear equations is solved using general minimal residual algorithm. After that we can explicitly evaluate magnetic field using the first Maxwell equation (\ref{maxwell}) and finally, when fields computed, we can solve equations of motion (\ref{particlemoving}) using iterative non-linear solver.
+
+Our code is fully three dimensional and parallelized with MPI technology, which is adapted for distributed computing and can be executed on a wide class of computers.

@@ -2,6 +2,8 @@ clear;
 load distribution_protons.dat;
 load distribution_electrons.dat;
 load distribution_alphas.dat;
+load distribution_positrons.dat;
+load initialParameters.dat;
 
 Np = 500;
 
@@ -16,12 +18,14 @@ c = Nt - 1;
 Fp(1:Np, 1:3) = 0;
 Fe(1:Np, 1:3) = 0;
 Fa(1:Np, 1:3) = 0;
+Fpos(1:Np, 1:3) = 0;
 
 Pp(1:Np, 1:3) = 0;
 Pe(1:Np, 1:3) = 0;
 Pa(1:Np, 1:3) = 0;
+Ppos(1:Np, 1:3) = 0;
 
-me = 9.1*10^-26;
+me = initialParameters(36);
 v=3*10^10;
 
 for i=1:Np,
@@ -48,6 +52,14 @@ for i=1:Np,
    Fa(i,1) = distribution_alphas(i + a*Np, 2)*Pa(i,1)*Pa(i,1);
    Fa(i,2) = distribution_alphas(i + b*Np, 2)*Pa(i,2)*Pa(i,2);
    Fa(i,3) = distribution_alphas(i + c*Np, 2)*Pa(i,3)*Pa(i,3);
+   
+   Ppos(i,1) = distribution_positrons(i + a*Np,1);
+   Ppos(i,2) = distribution_positrons(i + b*Np,1);
+   Ppos(i,3) = distribution_positrons(i + c*Np,1);
+   
+   Fpos(i,1) = distribution_positrons(i + a*Np, 2)*Ppos(i,1)*Ppos(i,1);
+   Fpos(i,2) = distribution_positrons(i + b*Np, 2)*Ppos(i,2)*Ppos(i,2);
+   Fpos(i,3) = distribution_positrons(i + c*Np, 2)*Ppos(i,3)*Ppos(i,3);
 end;
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
@@ -72,5 +84,13 @@ plot (Pa(1:Np,1)/(me*v),Fa(1:Np,1), 'red',Pa(1:Np,2)/(me*v),Fa(1:Np,2), 'green',
 title ('alphas distribution function');
 xlabel ('p/{m_e c}');
 ylabel ('F_\alpha(p) p^4');
+legend('t=0','t=T/2','t=T','Location','southeast');
+grid ;
+
+figure(4);
+plot (Ppos(1:Np,1)/(me*v),Fpos(1:Np,1), 'red',Ppos(1:Np,2)/(me*v),Fpos(1:Np,2), 'green',Ppos(1:Np,3)/(me*v),Fpos(1:Np,3), 'blue');
+title ('positrons distribution function');
+xlabel ('p/{m_e c}');
+ylabel ('F_{e+}(p) p^4');
 legend('t=0','t=T/2','t=T','Location','southeast');
 grid ;

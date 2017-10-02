@@ -10,6 +10,7 @@
 
 void Simulation::evaluateFields() {
 	printf("evaluating fields\n");
+	fflush(stdout);
 
 	evaluateMaxwellEquationMatrix();
 

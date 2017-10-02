@@ -12,9 +12,8 @@ Nz = size(Zfile, 1)-1;
 N = Nx*Ny*Nz;
 Nt = size(velocity, 1)/N;
 Ntypes = size(particleTypes,1);
-ynumber = 1;
-znumber = 1;
-
+ynumber = 2;
+znumber = 2;
 a = 0;
 b = fix(Nt/2);
 c = Nt - 1;

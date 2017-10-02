@@ -3,15 +3,17 @@
 
 #include <string>
 #include "stdlib.h"
+#include "constants.h"
 #include "stdio.h"
 #include "vector"
 #include "list"
 #include "largeVectorBasis.h"
+#include "massMatrix.h"
 
 class MatrixElement;
 class Complex;
 
-enum SolverType {EXPLICIT, IMPLICIT};
+enum SolverType {EXPLICIT, IMPLICIT, IMPLICIT_EC, BUNEMAN};
 
 enum InputType {CGS, Theoretical};
 
@@ -27,19 +29,44 @@ class Simulation {
 private:
 	bool arrayCreated;
 public:
+	int rank;
+	int cartCoord[MPI_dim];
+	int cartDim[MPI_dim];
+	MPI_Comm cartComm;
+	int nprocs;
+	int leftRank;
+	int rightRank;
+	int frontRank;
+	int backRank;
+	int bottomRank;
+	int topRank;
 
 	std::string outputDir;
+	std::string inputDir;
+	std::string reducedOutputDir;
 	int xnumberGeneral;
 	int ynumberGeneral;
 	int znumberGeneral;
 	int firstAbsoluteXindex;
+	int firstAbsoluteYindex;
+	int firstAbsoluteZindex;
 	double leftX;
 	double rightX;
+	double leftY;
+	double rightY;
+	double leftZ;
+	double rightZ;
 
 	int xnumber;
 	int ynumber;
 	int znumber;
+	int xnumberAdded;
+	int ynumberAdded;
+	int znumberAdded;
 	int particlesNumber;
+
+	int resistiveLayerWidth;
+	double fakeCondactivity;
 
 	double massProton;
 	double massElectron;
@@ -83,6 +110,8 @@ public:
 	double deltaY2;
 	double deltaZ2;
 
+	double cellVolume;
+
 	double theta;
 	double eta;
 
@@ -106,12 +135,20 @@ public:
 
 	double particleEnergy;
 	double electricFieldEnergy;
+	double electricFieldEnergyX;
+	double electricFieldEnergyY;
+	double electricFieldEnergyZ;
 	double magneticFieldEnergy;
+	double magneticFieldEnergyX;
+	double magneticFieldEnergyY;
+	double magneticFieldEnergyZ;
 	double energy;
 
 	double theoreticalEnergy;
 	double generalTheoreticalEnergy;
 	Vector3d theoreticalMomentum;
+	Vector3d electromagneticMomentum;
+	Vector3d particleMomentum;
 	Vector3d generalTheoreticalMomentum;
 
 	int chargeBalance;
@@ -124,18 +161,15 @@ public:
 	int typesNumber;
 
 	double**** particleConcentrations;
-	double**** additionalParticleConcentrationsLeft;
-	double**** additionalParticleConcentrationsRight;
+	double**** particleEnergies;
+
 	double*** chargeDensity;
 	double*** chargeDensityMinus;
-	double*** tempCellParameter;
-	double*** additionalChargeDensityLeft;
-	double*** additionalChargeDensityMinusLeft;
-	double*** additionalChargeDensityRight;
-	double*** additionalChargeDensityMinusRight;
+
 	Vector3d**** particleBulkVelocities;
-	Vector3d**** additionalParticleBulkVelocitiesLeft;
-	Vector3d**** additionalParticleBulkVelocitiesRight;
+
+	MassMatrix*** massMatrix;
+	MassMatrix*** tempMassMatrix;
 
 	Vector3d maxEfield;
 	Vector3d maxBfield;
@@ -146,6 +180,11 @@ public:
 
 	Vector3d B0;
 	Vector3d E0;
+
+	Vector3d rightEfield;
+	Vector3d leftEfield;
+	Vector3d rightBfield;
+	Vector3d leftBfield;
 
 	double omegaPlasmaProton;
 	double omegaPlasmaElectron;
@@ -183,48 +222,27 @@ public:
 	std::vector<MatrixElement>**** divergenceCleanUpMatrix;
 	double**** divergenceCleanUpRightPart;
 
+	//std::vector<MatrixElement>****bunemanDivergenceCleanUpMatrix;
+	//double**** bunemanDivergenceCleanUpRightPart;
+
 	Vector3d*** electricFlux;
 	Vector3d*** electricFluxMinus;
-	Vector3d*** additionalElectricFluxLeft;
-	Vector3d*** additionalElectricFluxMinusLeft;
-	Vector3d*** additionalElectricFluxRight;
-	Vector3d*** additionalElectricFluxMinusRight;
-	Vector3d*** externalElectricFlux;
-	double*** chargeDensityHat;
-	double*** additionalChargeDensityHatLeft;
-	double*** additionalChargeDensityHatRight;
-	Matrix3d*** dielectricTensor;
-	Matrix3d*** additionalDielectricTensorLeft;
-	Matrix3d*** additionalDielectricTensorRight;
-	Matrix3d*** pressureTensor;
-	Matrix3d*** additionalPressureTensorLeft;
-	Matrix3d*** additionalPressureTensorRight;
-	Vector3d*** divPressureTensor;
-	Vector3d*** additionalDivPressureTensorLeft;
-	Vector3d*** additionalDivPressureTensorRight;
 
-	int additionalBinNumber;
+	Vector3d*** externalElectricFlux;
+
+	double*** chargeDensityHat;
+	Matrix3d*** dielectricTensor;
+	Matrix3d*** pressureTensor;
+	Vector3d*** divPressureTensor;
+	Vector3d*** divPressureTensorMinus;
 
 	Vector3d*** Efield;
-	Vector3d*** additionalEfieldLeft;
-	Vector3d*** additionalEfieldRight;
 	Vector3d*** Bfield;
-	Vector3d*** additionalBfieldLeft;
-	Vector3d*** additionalBfieldRight;
 
 	Vector3d*** newEfield;
-	Vector3d*** additionalNewEfieldLeft;
-	Vector3d*** additionalNewEfieldRight;
 	Vector3d*** newBfield;
-	Vector3d*** additionalNewBfieldLeft;
-	Vector3d*** additionalNewBfieldRight;
 
 	Vector3d*** tempEfield;
-	Vector3d*** additionalTempEfieldLeft;
-	Vector3d*** additionalTempEfieldRight;
-
-	Vector3d*** smoothingEfield;
-	Vector3d*** smoothingBfield;
 
 	//Vector3d*** tempBfield;
 
@@ -235,53 +253,350 @@ public:
 	Vector3d*** rotE;
 	Vector3d*** Bderivative;
 
+	double*** bunemanJx;
+	double*** bunemanJy;
+	double*** bunemanJz;
+
+	double*** bunemanEx;
+	double*** bunemanEy;
+	double*** bunemanEz;
+
+	double*** bunemanDivCleaningEx;
+	double*** bunemanDivCleaningEy;
+	double*** bunemanDivCleaningEz;
+
+	double*** bunemanNewEx;
+	double*** bunemanNewEy;
+	double*** bunemanNewEz;
+
+	double*** tempBunemanExParameter;
+	double*** tempBunemanEyParameter;
+	double*** tempBunemanEzParameter;
+
+	double*** bunemanBx;
+	double*** bunemanBy;
+	double*** bunemanBz;
+
+	double*** bunemanNewBx;
+	double*** bunemanNewBy;
+	double*** bunemanNewBz;
+
+	double*** tempBunemanBxParameter;
+	double*** tempBunemanByParameter;
+	double*** tempBunemanBzParameter;
+
+	double*** bunemanDivCleaningBx;
+	double*** bunemanDivCleaningBy;
+	double*** bunemanDivCleaningBz;
+
 	double**** divergenceCleaningField;
 	double**** divergenceCleaningPotential;
 	double**** tempDivergenceCleaningPotential;
 
+	double*** bunemanChargeDensity;
+	double**** bunemanDivergenceCleaningPotential;
+
 	double*** divergenceCleaningPotentialFourier;
+
+	Complex*** fourierInput;
+	Complex*** fourierImage;
+	Complex*** fourierOutput;
+
+	double* leftOutNodeBuffer;
+	double* rightOutNodeBuffer;
+	double* leftInNodeBuffer;
+	double* rightInNodeBuffer;
+
+	double* frontOutNodeBuffer;
+	double* backOutNodeBuffer;
+	double* frontInNodeBuffer;
+	double* backInNodeBuffer;
+
+	double* bottomOutNodeBuffer;
+	double* topOutNodeBuffer;
+	double* bottomInNodeBuffer;
+	double* topInNodeBuffer;
 
 	double* leftOutVectorNodeBuffer;
 	double* rightOutVectorNodeBuffer;
 	double* leftInVectorNodeBuffer;
 	double* rightInVectorNodeBuffer;
 
+	double* frontOutVectorNodeBuffer;
+	double* backOutVectorNodeBuffer;
+	double* frontInVectorNodeBuffer;
+	double* backInVectorNodeBuffer;
+
+	double* bottomOutVectorNodeBuffer;
+	double* topOutVectorNodeBuffer;
+	double* bottomInVectorNodeBuffer;
+	double* topInVectorNodeBuffer;
+
+	double* leftOutCellBuffer;
+	double* rightOutCellBuffer;
+	double* leftInCellBuffer;
+	double* rightInCellBuffer;
+
+	double* frontOutCellBuffer;
+	double* backOutCellBuffer;
+	double* frontInCellBuffer;
+	double* backInCellBuffer;
+
+	double* bottomOutCellBuffer;
+	double* topOutCellBuffer;
+	double* bottomInCellBuffer;
+	double* topInCellBuffer;
+	
+
 	double* leftOutVectorCellBuffer;
 	double* rightOutVectorCellBuffer;
 	double* leftInVectorCellBuffer;
 	double* rightInVectorCellBuffer;
+
+	double* frontOutVectorCellBuffer;
+	double* backOutVectorCellBuffer;
+	double* frontInVectorCellBuffer;
+	double* backInVectorCellBuffer;
+
+	double* bottomOutVectorCellBuffer;
+	double* topOutVectorCellBuffer;
+	double* bottomInVectorCellBuffer;
+	double* topInVectorCellBuffer;
 
 	double* leftOutGmresBuffer;
 	double* rightOutGmresBuffer;
 	double* leftInGmresBuffer;
 	double* rightInGmresBuffer;
 
+	double* frontOutGmresBuffer;
+	double* backOutGmresBuffer;
+	double* frontInGmresBuffer;
+	double* backInGmresBuffer;
+
+	double* topOutGmresBuffer;
+	double* bottomOutGmresBuffer;
+	double* topInGmresBuffer;
+	double* bottomInGmresBuffer;
+
+	double* leftOutDivergenceBuffer;
+	double* rightOutDivergenceBuffer;
+	double* leftInDivergenceBuffer;
+	double* rightInDivergenceBuffer;
+
+	double* frontOutDivergenceBuffer;
+	double* backOutDivergenceBuffer;
+	double* frontInDivergenceBuffer;
+	double* backInDivergenceBuffer;
+
+	double* topOutDivergenceBuffer;
+	double* bottomOutDivergenceBuffer;
+	double* topInDivergenceBuffer;
+	double* bottomInDivergenceBuffer;
+
+
+	////buneman E
+	double* leftOutBunemanExBuffer;
+	double* rightOutBunemanExBuffer;
+	double* leftInBunemanExBuffer;
+	double* rightInBunemanExBuffer;
+
+	double* frontOutBunemanExBuffer;
+	double* backOutBunemanExBuffer;
+	double* frontInBunemanExBuffer;
+	double* backInBunemanExBuffer;
+
+	double* bottomOutBunemanExBuffer;
+	double* topOutBunemanExBuffer;
+	double* bottomInBunemanExBuffer;
+	double* topInBunemanExBuffer;
+
+	double* leftOutBunemanEyBuffer;
+	double* rightOutBunemanEyBuffer;
+	double* leftInBunemanEyBuffer;
+	double* rightInBunemanEyBuffer;
+
+	double* frontOutBunemanEyBuffer;
+	double* backOutBunemanEyBuffer;
+	double* frontInBunemanEyBuffer;
+	double* backInBunemanEyBuffer;
+
+	double* bottomOutBunemanEyBuffer;
+	double* topOutBunemanEyBuffer;
+	double* bottomInBunemanEyBuffer;
+	double* topInBunemanEyBuffer;
+
+	double* leftOutBunemanEzBuffer;
+	double* rightOutBunemanEzBuffer;
+	double* leftInBunemanEzBuffer;
+	double* rightInBunemanEzBuffer;
+
+	double* frontOutBunemanEzBuffer;
+	double* backOutBunemanEzBuffer;
+	double* frontInBunemanEzBuffer;
+	double* backInBunemanEzBuffer;
+
+	double* bottomOutBunemanEzBuffer;
+	double* topOutBunemanEzBuffer;
+	double* bottomInBunemanEzBuffer;
+	double* topInBunemanEzBuffer;
+
+	///buneman B
+	double* leftOutBunemanBxBuffer;
+	double* rightOutBunemanBxBuffer;
+	double* leftInBunemanBxBuffer;
+	double* rightInBunemanBxBuffer;
+
+	double* frontOutBunemanBxBuffer;
+	double* backOutBunemanBxBuffer;
+	double* frontInBunemanBxBuffer;
+	double* backInBunemanBxBuffer;
+
+	double* bottomOutBunemanBxBuffer;
+	double* topOutBunemanBxBuffer;
+	double* bottomInBunemanBxBuffer;
+	double* topInBunemanBxBuffer;
+
+	double* leftOutBunemanByBuffer;
+	double* rightOutBunemanByBuffer;
+	double* leftInBunemanByBuffer;
+	double* rightInBunemanByBuffer;
+
+	double* frontOutBunemanByBuffer;
+	double* backOutBunemanByBuffer;
+	double* frontInBunemanByBuffer;
+	double* backInBunemanByBuffer;
+
+	double* bottomOutBunemanByBuffer;
+	double* topOutBunemanByBuffer;
+	double* bottomInBunemanByBuffer;
+	double* topInBunemanByBuffer;
+
+	double* leftOutBunemanBzBuffer;
+	double* rightOutBunemanBzBuffer;
+	double* leftInBunemanBzBuffer;
+	double* rightInBunemanBzBuffer;
+
+	double* frontOutBunemanBzBuffer;
+	double* backOutBunemanBzBuffer;
+	double* frontInBunemanBzBuffer;
+	double* backInBunemanBzBuffer;
+
+	double* bottomOutBunemanBzBuffer;
+	double* topOutBunemanBzBuffer;
+	double* bottomInBunemanBzBuffer;
+	double* topInBunemanBzBuffer;
+
 	std::vector<Particle*> particles;
+	std::vector<Particle*> tempParticles;
+
 	std::vector<Particle*> escapedParticlesLeft;
 	std::vector<Particle*> escapedParticlesRight;
+	std::vector<Particle*> escapedParticlesFront;
+	std::vector<Particle*> escapedParticlesBack;
+	std::vector<Particle*> escapedParticlesTop;
+	std::vector<Particle*> escapedParticlesBottom;
 
+	std::list<std::pair<int, double> >* mostAcceleratedParticlesNumbers;
+
+	int trackedParticlesNumber;
+	int** trackedParticlesNumbers;
+
+	double*** tempCellParameter;
 	double*** tempCellParameterLeft;
 	double*** tempCellParameterRight;
+	double*** tempCellParameterFront;
+	double*** tempCellParameterBack;
+	double*** tempCellParameterBottom;
+	double*** tempCellParameterTop;
+
+	double*** tempNodeParameter;
 	double*** tempNodeParameterLeft;
 	double*** tempNodeParameterRight;
+	double*** tempNodeParameterFront;
+	double*** tempNodeParameterBack;
+	double*** tempNodeParameterBottom;
+	double*** tempNodeParameterTop;
 
+	double*** tempBunemanJxLeft;
+	double*** tempBunemanJxRight;
+	double*** tempBunemanJxFront;
+	double*** tempBunemanJxBack;
+	double*** tempBunemanJxBottom;
+	double*** tempBunemanJxTop;
+
+	double*** tempBunemanJyLeft;
+	double*** tempBunemanJyRight;
+	double*** tempBunemanJyFront;
+	double*** tempBunemanJyBack;
+	double*** tempBunemanJyBottom;
+	double*** tempBunemanJyTop;
+
+	double*** tempBunemanJzLeft;
+	double*** tempBunemanJzRight;
+	double*** tempBunemanJzFront;
+	double*** tempBunemanJzBack;
+	double*** tempBunemanJzBottom;
+	double*** tempBunemanJzTop;
+
+	Vector3d*** tempCellVectorParameter;
 	Vector3d*** tempCellVectorParameterLeft;
 	Vector3d*** tempCellVectorParameterRight;
+	Vector3d*** tempCellVectorParameterFront;
+	Vector3d*** tempCellVectorParameterBack;
+	Vector3d*** tempCellVectorParameterBottom;
+	Vector3d*** tempCellVectorParameterTop;
+
+	Vector3d*** tempNodeVectorParameter;
 	Vector3d*** tempNodeVectorParameterLeft;
 	Vector3d*** tempNodeVectorParameterRight;
+	Vector3d*** tempNodeVectorParameterFront;
+	Vector3d*** tempNodeVectorParameterBack;
+	Vector3d*** tempNodeVectorParameterBottom;
+	Vector3d*** tempNodeVectorParameterTop;
 
+	Matrix3d*** tempCellMatrixParameter;
 	Matrix3d*** tempCellMatrixParameterLeft;
 	Matrix3d*** tempCellMatrixParameterRight;
+	Matrix3d*** tempCellMatrixParameterFront;
+	Matrix3d*** tempCellMatrixParameterBack;
+	Matrix3d*** tempCellMatrixParameterBottom;
+	Matrix3d*** tempCellMatrixParameterTop;
+
+	Matrix3d*** tempNodeMatrixParameter;
 	Matrix3d*** tempNodeMatrixParameterLeft;
 	Matrix3d*** tempNodeMatrixParameterRight;
+	Matrix3d*** tempNodeMatrixParameterFront;
+	Matrix3d*** tempNodeMatrixParameterBack;
+	Matrix3d*** tempNodeMatrixParameterBottom;
+	Matrix3d*** tempNodeMatrixParameterTop;
+
+	MassMatrix*** tempNodeMassMatrixParameterLeft;
+	MassMatrix*** tempNodeMassMatrixParameterRight;
+	MassMatrix*** tempNodeMassMatrixParameterFront;
+	MassMatrix*** tempNodeMassMatrixParameterBack;
+	MassMatrix*** tempNodeMassMatrixParameterBottom;
+	MassMatrix*** tempNodeMassMatrixParameterTop;
+
+	double**** residualBiconjugateDivE;
+	double**** firstResidualBiconjugateDivE;
+	double**** vBiconjugateDivE;
+	double**** pBiconjugateDivE;
+	double**** sBiconjugateDivE;
+	double**** tBiconjugateDivE;
+
+	double**** residualBiconjugateMaxwell;
+	double**** firstResidualBiconjugateMaxwell;
+	double**** vBiconjugateMaxwell;
+	double**** pBiconjugateMaxwell;
+	double**** sBiconjugateMaxwell;
+	double**** tBiconjugateMaxwell;
 
 	Matrix3d Kronecker;
 	int LeviCivita[3][3][3];
 
 	FILE* particleTypesFile;
 	FILE* incrementFile;
-	FILE* protonTraectoryFile;
-	FILE* electronTraectoryFile;
+	FILE* particlesTrajectoryFile;
 	FILE* distributionFileProton;
 	FILE* distributionFileElectron;
 	FILE* distributionFileAlpha;
@@ -327,27 +642,6 @@ public:
 	FILE* backupEfieldFile;
 	FILE* backupBfieldFile;
 
-    int protonNumber;
-    int protonNumber1;
-    int protonNumber2;
-    int protonNumber3;
-    int protonNumber4;
-    int protonNumber5;
-    int protonNumber6;
-    int protonNumber7;
-    int protonNumber8;
-    int protonNumber9;
-    int electronNumber;
-    int electronNumber1;
-    int electronNumber2;
-    int electronNumber3;
-    int electronNumber4;
-    int electronNumber5;
-    int electronNumber6;
-    int electronNumber7;
-    int electronNumber8;
-    int electronNumber9;
-
 	//FILE* outputEverythingFile;
 
 	FILE* errorLogFile;
@@ -358,28 +652,41 @@ public:
 	Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                    double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                    int maxIterations, double maxTimeV, int typesNumberV, int *particlesperBin,
-                   double *concentrations, int inputType, int verbosityV);
+                   double *concentrations, int inputType, int nprocsV, int verbosityV, MPI_Comm& comm);
+	Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
+                   double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
+                   int maxIterations, double maxTimeV, int typesNumberV, int *particlesperBin,
+                   double *concentrations, int inputType, int nprocsV, int verbosityV, double plasmaPeriodV,
+                   double scaleFactorV, SolverType solverTypev,  MPI_Comm& comm);
 	~Simulation();
 
 	void initialize();
 	void initializeSimpleElectroMagneticWave();
-	void initializeRotatedSimpleElectroMagneticWave(int wavesCount);
+	void initializeSimpleElectroMagneticWaveY();
+	void initializeSimpleElectroMagneticWaveZ();
+	void initializeRotatedSimpleElectroMagneticWave(int waveCountX, int waveCountY, int waveCountZ);
 	void checkFrequency(double omega);
 	void initializeAlfvenWaveX(int wavesCount, double amplitudeRelation);
 	void initializeAlfvenWaveY(int wavesCount, double amplitudeRelation);
-	void initializeRotatedAlfvenWave(int wavesCount, double amplitudeRelation);
+	void initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation);
+	void initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int waveCountZ, double amplitudeRelation);
 	void initializeLangmuirWave();
 	void initializeTwoStream();
 	void initializeExternalFluxInstability();
 	void initializeFluxFromRight();
 	void fieldsLorentzTransitionX(const double& v);
 	void initializeShockWave();
+	void initializeBell();
+	void solveRankineHugoniot(double upstreamDensity, Vector3d upstreamVelocity, double upstreamPressure, Vector3d upstreamB, Vector3d upstreamE, double& downstreamDensity, Vector3d& downstreamVelocity, double& downstreamPressure, Vector3d& downstreamB, Vector3d& downstreamE, double adiabaticParameter, double compressionRatio);
+	double evaluateTemperatureByPressure(double& pressure);
+	double evaluatePressureByTemperature(double& temperature);
 	void initializeAnisotropic();
 	void initializeAnisotropicSilicon();
 	void initializeWeibel();
 	void initializeRingWeibel();
 	void initializeHomogenouseFlow();
 	void initializeKolmogorovSpectrum(int start, int end, double turbulenceFraction);
+	void initializeFake();
 	void synchronizeParticleNumber();
 	void createArrays();
 	void createParticleTypes(double* concentrations, int* particlesPerBin);
@@ -395,6 +702,14 @@ public:
 	void checkDebyeParameter();
 	void checkGyroRadius();
 
+	int getCartCoordWithAbsoluteIndexX(int i);
+	int getCartCoordWithAbsoluteIndexY(int j);
+	int getCartCoordWithAbsoluteIndexZ(int k);
+
+	int getLocalIndexByAbsoluteX(int i);
+	int getLocalIndexByAbsoluteY(int j);
+	int getLocalIndexByAbsoluteZ(int k);
+
 	Matrix3d evaluateAlphaRotationTensor(double beta, Vector3d& velocity, double& gamma, Vector3d& EField, Vector3d& BField);
 	void updateDeltaT();
 	void evaluateElectricField();
@@ -405,54 +720,122 @@ public:
 	void checkEquationMatrix(std::vector<MatrixElement>**** matrix, int lnumber);
 	void createSuperConductorLeftEquation(int i, int j, int k);
 	void createFreeRightEquation(int i, int j, int k);
-	void createFreeRightEquationX(int j, int k, Vector3d& rightPart);
-	void createFreeRightEquationY(int j, int k, Vector3d& rightPart);
-	void createFreeRightEquationZ(int j, int k, Vector3d& rightPart);
-	void createLeftFakeEquation(int i, int j, int k);
-	void createRightFakeEquation(int i, int j, int k);
+	void createFreeLeftEquation(int i, int j, int k);
+	void createFakeEquation(int i, int j, int k);
 	void createInternalEquationX(int i, int j, int k);
 	void createInternalEquationY(int i, int j, int k);
 	void createInternalEquationZ(int i, int j, int k);
+	void createInternalECEquationX(int i, int j, int k);
+	void createInternalECEquationY(int i, int j, int k);
+	void createInternalECEquationZ(int i, int j, int k);
 	void createInternalEquation(int i, int j, int k);
+	bool isInResistiveLayer(int i, int j, int k);
 
 	void smoothChargeDensityHat();
+	void smoothEfieldGeneral(Vector3d*** E);
+	void smoothCellParameter(double*** array);
 	void smoothChargeDensity();
 	void smoothTempEfield();
 	void smoothNewEfield();
+	void smoothBfieldGeneral(Vector3d*** B);
 	void smoothBfield();
 	void smoothNewBfield();
+
+	void smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, double*** fieldZ);
+	void smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, double*** fieldZ);
 
 
 	void evaluateMaxwellEquationMatrix();
 	void evaluateMagneticField();
-	void updateBoundaries();
-	void updateBoundariesOldField();
-	void updateBoundariesNewField();
 
-	void substractMeanDensity();
-	void cleanupDivergence();
-	void cleanupDivergence1d();
+	void cleanupDivergence(Vector3d*** field, double*** density);
+	void cleanupDivergence1d(Vector3d*** field, double*** density);
 	void substractMeanEfield();
-	void updateFieldByCleaning();
+	void updateFieldByCleaning(Vector3d*** field);
 	void evaluateDivergenceCleaningField();
-	void createDivergenceCleanupInternalEquation(int i, int j, int k);
+	void createDivergenceCleanupInternalEquation(int i, int j, int k, Vector3d*** field, double*** density);
 
-	void createDivergenceCleanupLeftFakeEquation(int i, int j, int k);
-	void createDivergenceCleanupRightFakeEquation(int i, int j, int k);
-	void createDivergenceCleanupSuperConductorEquation(int i, int j, int k);
-	double cleanUpRightPart(int i, int j, int k);
+	void createDivergenceFakeEquation(int i, int j, int k);
+	void createDivergenceZeroEquation(int i, int j, int k);
+	void createDivergenceFixEquation(int i, int j, int k, double*** density);
+	double cleanUpRightPart(int i, int j, int k, Vector3d*** field, double*** density);
+	double evaluateMeanChargeDensity();
+	void substractMeanChargeDensity();
+
+	void cleanupDivergenceMagnetic();
+	void updateFieldByCleaningMagnetic();
+	void evaluateDivergenceCleaningFieldMagnetic();
+	void createDivergenceCleanupInternalEquationMagnetic(int i, int j, int k);
+	double cleanUpRightPartMagnetic(int i, int j, int k);
+
+	void cleanupDivergenceBuneman();
+	void updateFieldByCleaningBuneman();
+	void evaluateDivergenceCleaningFieldBuneman();
+	void createDivergenceCleanupInternalEquationBuneman(int i, int j, int k);
+	double cleanUpRightPartBuneman(int i, int j, int k);
+
+	void cleanupDivergenceBunemanMagnetic();
+	void updateFieldByCleaningBunemanMagnetic();
+	void evaluateDivergenceCleaningFieldBunemanMagnetic();
+	void createDivergenceCleanupInternalEquationBunemanMagnetic(int i, int j, int k);
+	double cleanUpRightPartBunemanMagnetic(int i, int j, int k);
 
 	void exchangeEfield();
 
-	void exchangeGeneralEfield(Vector3d*** field, Vector3d*** additionalFieldLeft, Vector3d*** additionalFieldRight);
-	void exchangeGeneralBfield(Vector3d*** field, Vector3d*** additionalFieldLeft, Vector3d*** additionalFieldRight);
+	void exchangeGeneralEfield(Vector3d*** field);
+	void exchangeGeneralEfieldX(Vector3d*** field);
+	void exchangeGeneralEfieldY(Vector3d*** field);
+	void exchangeGeneralEfieldZ(Vector3d*** field);
+
+	void exchangeGeneralBfield(Vector3d*** field);
+	void exchangeGeneralBfieldX(Vector3d*** field);
+	void exchangeGeneralBfieldY(Vector3d*** field);
+	void exchangeGeneralBfieldZ(Vector3d*** field);
+
+	void exchangeGeneralScalarCellField(double**** field);
+	void exchangeGeneralScalarCellFieldX(double**** field);
+	void exchangeGeneralScalarCellFieldY(double**** field);
+	void exchangeGeneralScalarCellFieldZ(double**** field);
+
+	void exchangeGeneralScalarNodeField(double**** field);
+	void exchangeGeneralScalarNodeFieldX(double**** field);
+	void exchangeGeneralScalarNodeFieldY(double**** field);
+	void exchangeGeneralScalarNodeFieldZ(double**** field);
+
+	void exchangeBunemanEfield(double*** fieldX, double*** fieldY, double*** fieldZ);
+
+	void exchangeBunemanExAlongX(double*** fieldX);
+	void exchangeBunemanExAlongY(double*** fieldX);
+	void exchangeBunemanExAlongZ(double*** fieldX);
+
+	void exchangeBunemanEyAlongX(double*** fieldY);
+	void exchangeBunemanEyAlongY(double*** fieldY);
+	void exchangeBunemanEyAlongZ(double*** fieldY);
+
+	void exchangeBunemanEzAlongX(double*** fieldZ);
+	void exchangeBunemanEzAlongY(double*** fieldZ);
+	void exchangeBunemanEzAlongZ(double*** fieldZ);
+
+	void exchangeBunemanBfield(double*** fieldX, double*** fieldY, double*** fieldZ);
+
+	void exchangeBunemanBxAlongX(double*** fieldX);
+	void exchangeBunemanBxAlongY(double*** fieldX);
+	void exchangeBunemanBxAlongZ(double*** fieldX);
+
+	void exchangeBunemanByAlongX(double*** fieldY);
+	void exchangeBunemanByAlongY(double*** fieldY);
+	void exchangeBunemanByAlongZ(double*** fieldY);
+
+	void exchangeBunemanBzAlongX(double*** fieldZ);
+	void exchangeBunemanBzAlongY(double*** fieldZ);
+	void exchangeBunemanBzAlongZ(double*** fieldZ);
 
 	Complex*** evaluateFourierTranslation(double*** a);
 
 	double*** evaluateReverceFourierTranslation(Complex*** a);
 	void resetNewTempFields();
-	double volumeE(int i, int j, int k);
-	double volumeB(int i, int j, int k);
+	double volumeE();
+	double volumeB();
 	void checkParticleInBox(Particle& particle);
 
 	void updateElectroMagneticParameters();
@@ -465,26 +848,62 @@ public:
 	void updateAnisotropy();
 	void updateExternalFlux();
 	Vector3d evaluateRotB(int i, int j, int k);
+	Vector3d evaluateRotEgeneral(Vector3d*** E, int i, int j, int k);
 	Vector3d evaluateRotTempE(int i, int j, int k);
 	Vector3d evaluateRotE(int i, int j, int k);
 	Vector3d evaluateRotNewE(int i, int j, int k);
+	double evaluateDivEgeneral(Vector3d*** E, int i, int j, int k);
 	double evaluateDivE(int i, int j, int k);
 	double evaluateDivCleaningE(int i, int j, int k);
 	double evaluateDivTempE(int i, int j, int k);
 	double evaluateDivNewE(int i, int j, int k);
 	double evaluateDivFlux(int i, int j, int k);
+	double evaluateDivB(int i, int j, int k);
+	double evaluateDivNewB(int i, int j, int k);
+	double evaluateDivBgeneral(Vector3d*** B, int i, int j, int k);
+
+	double evaluateDivBunemanEgeneral(double*** fieldX, double*** fieldY, double*** fieldZ, int i, int j, int k);
+	double evaluateDivBunemanNewE(int i, int j, int k);
+	double evaluateDivBunemanE(int i, int j, int k);
+
+	double evaluateDivBunemanBgeneral(double*** fieldX, double*** fieldY, double*** fieldZ, int i, int j, int k);
+	double evaluateDivBunemanNewB(int i, int j, int k);
+	double evaluateDivBunemanB(int i, int j, int k);
+
+	double evaluateBunemanRotEx(int i, int j, int k);
+	double evaluateBunemanRotEy(int i, int j, int k);
+	double evaluateBunemanRotEz(int i, int j, int k);
+
+	double evaluateBunemanRotBx(int i, int j, int k);
+	double evaluateBunemanRotBy(int i, int j, int k);
+	double evaluateBunemanRotBz(int i, int j, int k);
+
+	Vector3d getBunemanElectricField(int i, int j, int k);
+	Vector3d getBunemanMagneticField(int i, int j, int k);
+
+	Vector3d getBunemanFlux(int i, int j, int k);
+
+	void evaluateBunemanElectricField();
+	void evaluateBunemanElectricFieldX();
+	void evaluateBunemanElectricFieldY();
+	void evaluateBunemanElectricFieldZ();
+	void evaluateBunemanMagneticField();
+	void evaluateBunemanMagneticFieldX();
+	void evaluateBunemanMagneticFieldY();
+	void evaluateBunemanMagneticFieldZ();
+
+	void updateBunemanFields();
+	void updateBunemanElectricField();
+	void updateBunemanMagneticField();
+
+	void updateBunemanFlux();
+	void updateBunemanChargeDensity();
+
 
 	Vector3d getElectricFlux(int i, int j, int k);
 
 	//Vector3d evaluateDivPressureTensor(int i, int j, int k);
 	Vector3d evaluateGradDensity(int i, int j, int k);
-	Vector3d getBfield(int i, int j, int k);
-	Vector3d getTempEfield(int i, int j, int k);
-	Vector3d getNewEfield(int i, int j, int k);
-	Vector3d getEfield(int i, int j, int k);
-
-	Matrix3d getPressureTensor(int i, int j, int k);
-	double getDensity(int i, int j, int k);
 	void createParticles();
 	void moveToPreserveChargeLocal();
 	void addToPreserveChargeGlobal();
@@ -499,11 +918,12 @@ public:
 	Particle* getElectron(int n);
 	Particle* createParticle(int n, int i, int j, int k, const double& weight, const ParticleTypes& type, const ParticleTypeContainer& typeContainer, const double& temperatureX, const double& temperatureY, const double& temperatureZ);
 	void moveParticles();
+	void sortParticleToEscaped(Particle* particle);
 	void removeEscapedParticles();
 	void moveParticle(Particle* particle);
-	void correctParticlePosition(Particle* particle);
-	void correctParticlePosition(Particle& particle);
+	void moveParticleBoris(Particle* particle);
 	void exchangeParticles();
+	void collectMostAcceleratedParticles();
 
 
 	void evaluateParticlesRotationTensor();
@@ -529,13 +949,29 @@ public:
 	Vector3d correlationTempEfield(Particle* particle);
 	Vector3d correlationNewEfield(Particle* particle);
 	Vector3d correlationBfield(Particle* particle) const;
+	Vector3d correlationNewBfield(Particle* particle) const;
 	Vector3d correlationEfield(Particle* particle);
 	Vector3d correlationTempEfield(Particle& particle);
 	Vector3d correlationEfield(Particle& particle);
-	Vector3d correlationGeneralEfield(Particle& particle, Vector3d*** field, Vector3d*** additionalFieldLeft, Vector3d*** additionalFieldRight);
+	Vector3d correlationGeneralEfield(Particle& particle, Vector3d*** field);
 	Vector3d correlationNewEfield(Particle& particle);
 
 	Vector3d correlationBfield(Particle& particle) const;
+	Vector3d correlationNewBfield(Particle& particle) const;
+
+	Vector3d correlationBunemanBfield(Particle* particle);
+	Vector3d correlationBunemanBfield(Particle& particle);
+	Vector3d correlationBunemanNewBfield(Particle* particle);
+	Vector3d correlationBunemanNewBfield(Particle& particle);
+	Vector3d correlationBunemanGeneralBfield(Particle* particle, double*** fieldX, double*** fieldY, double*** fieldZ);
+	Vector3d correlationBunemanGeneralBfield(Particle& particle, double*** fieldX, double*** fieldY, double*** fieldZ);
+
+	Vector3d correlationBunemanEfield(Particle* particle);
+	Vector3d correlationBunemanEfield(Particle& particle);
+	Vector3d correlationBunemanNewEfield(Particle* particle);
+	Vector3d correlationBunemanNewEfield(Particle& particle);
+	Vector3d correlationBunemanGeneralEfield(Particle* particle, double*** fieldX, double*** fieldY, double*** fieldZ);
+	Vector3d correlationBunemanGeneralEfield(Particle& particle, double*** fieldX, double*** fieldY, double*** fieldZ);
 
 	double correlationWithBbin(Particle& particle, int i, int j, int k);
 
@@ -548,22 +984,82 @@ public:
 	void splitParticles();
 	void splitParticle(Particle* particle);
 
+	void exchangeBunemanFlux();
 
-	void sumCellParameters();
-	void sumCellMatrixParameters();
-	void sumNodeVectorParameters();
-	void sumNodeMatrixParameters();
-    void sumChargeDensityHat();
+	void sumBunemanJxAlongX();
+	void sumBunemanJxAlongY();
+	void sumBunemanJxAlongZ();
 
-    void sumCellVectorParameters();
+	void sumBunemanJyAlongX();
+	void sumBunemanJyAlongY();
+	void sumBunemanJyAlongZ();
 
-	void sumCellTempVectorParameters(Vector3d*** array);
-	void sumCellTempParameters(double*** array);
-	void sumCellTempMatrixParameters(Matrix3d*** array);
+	void sumBunemanJzAlongX();
+	void sumBunemanJzAlongY();
+	void sumBunemanJzAlongZ();
 
-	void sumTempNodeParameters(double*** array);
-	void sumTempNodeVectorParameters(Vector3d*** array);
-	void sumTempNodeMatrixParameters(Matrix3d*** array);
+	void sumTempBunemanJxAlongX();
+	void sumTempBunemanJxAlongY();
+	void sumTempBunemanJxAlongZ();
+
+	void sumTempBunemanJyAlongX();
+	void sumTempBunemanJyAlongY();
+	void sumTempBunemanJyAlongZ();
+
+	void sumTempBunemanJzAlongX();
+	void sumTempBunemanJzAlongY();
+	void sumTempBunemanJzAlongZ();
+
+
+	void sumCellParametersX();
+	void sumCellParametersY();
+	void sumCellParametersZ();
+	void sumCellMatrixParametersX();
+	void sumCellMatrixParametersY();
+	void sumCellMatrixParametersZ();
+	void sumNodeParametersX();
+	void sumNodeParametersY();
+	void sumNodeParametersZ();
+	void sumNodeVectorParametersX();
+	void sumNodeVectorParametersY();
+	void sumNodeVectorParametersZ();
+	void sumNodeMatrixParametersX();
+	void sumNodeMatrixParametersY();
+	void sumNodeMatrixParametersZ();
+	void sumNodeMassMatrixParametersX();
+	void sumNodeMassMatrixParametersY();
+	void sumNodeMassMatrixParametersZ();
+    void sumChargeDensityHatX();
+    void sumChargeDensityHatY();
+    void sumChargeDensityHatZ();
+
+    void sumCellVectorParametersX();
+    void sumCellVectorParametersY();
+    void sumCellVectorParametersZ();
+
+	void sumCellVectorTempParametersX(Vector3d*** array);
+	void sumCellVectorTempParametersY(Vector3d*** array);
+	void sumCellVectorTempParametersZ(Vector3d*** array);
+	void sumCellTempParametersX(double*** array);
+	void sumCellTempParametersY(double*** array);
+	void sumCellTempParametersZ(double*** array);
+	void sumCellTempMatrixParametersX(Matrix3d*** array);
+	void sumCellTempMatrixParametersY(Matrix3d*** array);
+	void sumCellTempMatrixParametersZ(Matrix3d*** array);
+
+	void sumTempNodeParametersX(double*** array);
+	void sumTempNodeParametersY(double*** array);
+	void sumTempNodeParametersZ(double*** array);
+	void sumTempNodeVectorParametersX(Vector3d*** array);
+	void sumTempNodeVectorParametersY(Vector3d*** array);
+	void sumTempNodeVectorParametersZ(Vector3d*** array);
+	void sumTempNodeMatrixParametersX(Matrix3d*** array);
+	void sumTempNodeMatrixParametersY(Matrix3d*** array);
+	void sumTempNodeMatrixParametersZ(Matrix3d*** array);
+
+	void sumTempNodeMassMatrixParametersX(MassMatrix*** array);
+	void sumTempNodeMassMatrixParametersY(MassMatrix*** array);
+	void sumTempNodeMassMatrixParametersZ(MassMatrix*** array);
 };
 
 #endif

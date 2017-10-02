@@ -1,0 +1,53 @@
+\documentclass[a4paper]{jpconf}
+\bibliographystyle{iopart-num}
+\usepackage{amsmath}
+\usepackage{citesort}
+\usepackage{subfigure}
+\usepackage{graphicx}
+\graphicspath{{fig/}}
+\usepackage{ifpdf}
+\ifpdf\usepackage{epstopdf}\fi
+\usepackage[export]{adjustbox}
+
+%----------------------------------------------------- 
+%\usepackage{soul,ulem,color,xspace,bm}
+% Andrei's commands
+% Suggest to remove
+%\newcommand{\asrm}[1]{{\color{magenta}\sout{#1}}}
+% Suggest to insert
+%\newcommand{\as}[1]{\color{cyan}#1\xspace\color{black}}
+% Suggest to replace
+%\newcommand{\asrp}[2]{\asrm{#1} \as{#2}}
+% Comment
+%\newcommand{\ascm}[1]{{\color{green}\;AS: #1}}
+%------------------------------------------------------
+
+\begin{document}
+\title{Particle-in-cell simulation of shock waves with different kinds of ions.}
+
+\author{V I Romanky$^{1,2}$, A M Bykov$^1$, S M Osipov$^1$ and P E Gladilin$^1$}
+
+\address{$^1$ Ioffe Institute, 26 Politekhnicheskaya st., St. Petersburg 194021, Russia}
+\address{$^2$ 
+Sternberg Astronomical Institute, Moscow State University
+ Universitetsky pr., 13, Moscow 119234, Russia}
+
+\ead{romanskyvadim@gmail.com}
+
+\begin{abstract}
+The problem of Cosmic Ray (CR) origin and acceleration is a widely discussed problem of
+modern astrophysics. It is considered that most likely CR sources are supernova remnant
+shock waves. One of the methods to study particle injection and acceleration by shock
+waves is a particle-in-cell computer simulation. In this paper we present results of shock
+wave simulations based on our self-developed implicit particle-in-cell code. First, we test the code
+with the well-known two stream and Weibel instabilities and second, simulate shock waves in
+plasma with different particle composition. Using the obtained results we study the
+process of charged particle acceleration at the shock front.
+\end{abstract}
+\input{intro.tex}
+\input{model.tex}
+\input{test.tex}
+\input{shock.tex}
+\input{conclusions.tex}
+\input{biblio.tex}
+\end{document}

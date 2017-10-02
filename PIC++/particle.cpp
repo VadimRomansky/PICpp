@@ -1,4 +1,5 @@
 #include <string>
+#include <mpi.h>
 #include "stdlib.h"
 #include "stdio.h"
 #include "math.h"
@@ -28,7 +29,7 @@ Particle::Particle(int n, double m, int qcount, double q, double w, ParticleType
 	momentum.y = py0;
 	momentum.z = pz0;
 	initialMomentum = momentum;
-	//prevMomentum = momentum;
+	prevMomentum = momentum;
 
 	dx = dx0;
 	dy = dy0;
@@ -41,6 +42,15 @@ Particle::Particle(int n, double m, int qcount, double q, double w, ParticleType
 }
 
 Particle::Particle(const Particle& particle) {
+	//private fields
+	momentum = particle.momentum;
+	velocity = particle.velocity;
+	velocityCashed = particle.velocityCashed;
+	gammaCashed = particle.gammaCashed;
+	gamma = particle.gamma;
+	//
+
+
 	number = particle.number; //todo
 
 	mass = particle.mass;
@@ -49,9 +59,13 @@ Particle::Particle(const Particle& particle) {
 	weight = particle.weight;
 	type = particle.type;
 
+	escaped = particle.escaped;
+	crossBoundaryCount = particle.crossBoundaryCount;
+
 	coordinates = particle.coordinates;
-	momentum = particle.momentum;
-	//prevMomentum = particle.prevMomentum;
+	initialCoordinates = particle.initialCoordinates;
+
+	prevMomentum = particle.prevMomentum;
 	rotationTensor = particle.rotationTensor;
 	initialMomentum = particle.initialMomentum;
 
@@ -61,11 +75,41 @@ Particle::Particle(const Particle& particle) {
 	dx = particle.dx;
 	dy = particle.dy;
 	dz = particle.dz;
+}
 
-	escaped = particle.escaped;
-	velocityCashed = false;
-	gammaCashed = false;
-    crossBoundaryCount = particle.crossBoundaryCount;
+Particle::Particle(const Particle* const particle) {
+	//private fields
+	momentum = particle->momentum;
+	velocity = particle->velocity;
+	velocityCashed = particle->velocityCashed;
+	gammaCashed = particle->gammaCashed;
+	gamma = particle->gamma;
+	//
+
+
+	number = particle->number; //todo
+
+	mass = particle->mass;
+	charge = particle->charge;
+	chargeCount = particle->chargeCount;
+	weight = particle->weight;
+	type = particle->type;
+
+	escaped = particle->escaped;
+	crossBoundaryCount = particle->crossBoundaryCount;
+
+	coordinates = particle->coordinates;
+	initialCoordinates = particle->initialCoordinates;
+
+	rotationTensor = particle->rotationTensor;
+	initialMomentum = particle->initialMomentum;
+
+	correlationMapNode = particle->correlationMapNode;
+	correlationMapCell = particle->correlationMapCell;
+
+	dx = particle->dx;
+	dy = particle->dy;
+	dz = particle->dz;
 }
 
 double Particle::shapeFunctionX(const double& xvalue) {
@@ -90,7 +134,7 @@ void Particle::setMomentum(Vector3d& p) {
 	momentum = p;
 }
 
-void Particle::setMomentum(double& px, double& py, double& pz) {
+void Particle::setMomentum(const double& px, const double& py, const double& pz) {
 	velocityCashed = false;
 	gammaCashed = false;
 	momentum.x = px;
@@ -98,19 +142,19 @@ void Particle::setMomentum(double& px, double& py, double& pz) {
 	momentum.z = pz;
 }
 
-void Particle::setMomentumX(double& px) {
+void Particle::setMomentumX(const double& px) {
 	velocityCashed = false;
 	gammaCashed = false;
 	momentum.x = px;
 }
 
-void Particle::setMomentumY(double& py) {
+void Particle::setMomentumY(const double& py) {
 	velocityCashed = false;
 	gammaCashed = false;
 	momentum.y = py;
 }
 
-void Particle::setMomentumZ(double& pz) {
+void Particle::setMomentumZ(const double& pz) {
 	velocityCashed = false;
 	gammaCashed = false;
 	momentum.z = pz;
@@ -163,7 +207,7 @@ Vector3d Particle::getVelocity(const double& c) {
 		alertNaNOrInfinity(p2, "p2 = NaN in particle::getVelocity\n");
 		double c2 = c*c;
 		double mc2 = mass * c2;
-		if (p2 < relativisticPrecision*relativisticPrecision * mass * mass * c2) {
+		if (p2 < relativisticPrecision * mass * mass * c2) {
 			velocity = momentum / mass;
 		} else {
 			if(!gammaCashed){
@@ -238,6 +282,7 @@ void Particle::addVelocity(const Vector3d &v, const double& c) {
 		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		fprintf(errorLogFile, "v/c > 1 in addVelocity\n");
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
@@ -281,13 +326,14 @@ void Particle::setMomentumByV(const Vector3d& v, const double& c) {
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "v/c > 1 in setMomentumByV\n");
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 	velocity = v;
 	velocityCashed = true;
 	double v2 = v.scalarMult(v);
 	double c2 = c*c;
-	if(v2 < relativisticPrecision*relativisticPrecision*c2){
+	if(v2 < relativisticPrecision*c2){
 		momentum = v * mass;
 		return;
 	}
@@ -312,3 +358,9 @@ double Particle::energy(const double& c) {
 	//return gamma_factor*mass*c*c;
 	return (gamma_factor - 1) * mass * c * c;
 }
+
+double Particle::fullEnergy(const double& c) {
+	double gamma_factor = gammaFactor(c);
+	return gamma_factor*mass*c*c;
+}
+ 

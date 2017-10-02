@@ -5,11 +5,12 @@ begin graph
   size 16 16
   fullsize
   data   "general.dat"
-  d2 lstyle 1 lwidth 0.05 color black
-  d3 lstyle 1 lwidth 0.05 color green
-  d4 lstyle 1 lwidth 0.05 color blue
-  d5 lstyle 1 lwidth 0.05 color red
-  d9 lstyle 1 lwidth 0.05 color yellow
+  d3 lstyle 1 lwidth 0.05 color black
+  d4 lstyle 1 lwidth 0.05 color green
+  d5 lstyle 1 lwidth 0.05 color blue
+  d6 lstyle 1 lwidth 0.05 color red
+  d10 lstyle 1 lwidth 0.05 color yellow
+  d18 lstyle 1 lwidth 0.05 color cyan
 end graph
 amove 24 2
 begin graph

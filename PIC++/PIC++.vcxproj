@@ -73,7 +73,7 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files (x86)\Microsoft SDKs\MPI\Include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files (x86)\Microsoft SDKs\MPI\Include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files (x86)\Microsoft SDKs\MPI\Include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files (x86)\Microsoft SDKs\MPI\Lib\x86;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files (x86)\Microsoft SDKs\MPI\Lib\x86;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files (x86)\Microsoft SDKs\MPI\Include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
@@ -124,8 +124,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <OpenMPSupport>false</OpenMPSupport>
@@ -169,39 +168,55 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="boundaryFieldEvaluator.cpp" />
     <ClCompile Include="complex.cpp" />
     <ClCompile Include="correlation.cpp" />
     <ClCompile Include="correlationMap.cpp" />
     <ClCompile Include="dichotomousSolver.cpp" />
     <ClCompile Include="divergencecleanup.cpp" />
+    <ClCompile Include="divergencecleanup_buneman.cpp" />
     <ClCompile Include="fields.cpp" />
+    <ClCompile Include="fields_exchange.cpp" />
+    <ClCompile Include="fourier.cpp" />
     <ClCompile Include="initialization.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="largeVectorBasis.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="matrix3d.cpp" />
     <ClCompile Include="matrixelement.cpp" />
+    <ClCompile Include="memory_util.cpp" />
+    <ClCompile Include="momentum_collecting.cpp" />
+    <ClCompile Include="momentum_exchange.cpp" />
     <ClCompile Include="mover.cpp" />
+    <ClCompile Include="mpi_util.cpp" />
     <ClCompile Include="output.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="random.cpp" />
+    <ClCompile Include="rightPartEvaluator.cpp" />
     <ClCompile Include="simulation.cpp" />
+    <ClCompile Include="smoothing.cpp" />
     <ClCompile Include="specialmath.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="vector3d.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="boundaryFieldEvaluator.h" />
     <ClInclude Include="complex.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="dichotomousSolver.h" />
+    <ClInclude Include="fourier.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="largeVectorBasis.h" />
+    <ClInclude Include="massMatrix.h" />
     <ClInclude Include="matrix3d.h" />
     <ClInclude Include="matrixElement.h" />
     <ClInclude Include="memory_debug.h" />
+    <ClInclude Include="memory_util.h" />
+    <ClInclude Include="mpi_util.h" />
     <ClInclude Include="output.h" />
     <ClInclude Include="particle.h" />
     <ClInclude Include="random.h" />
+    <ClInclude Include="rightPartEvaluator.h" />
     <ClInclude Include="simulation.h" />
     <ClInclude Include="specialmath.h" />
     <ClInclude Include="util.h" />

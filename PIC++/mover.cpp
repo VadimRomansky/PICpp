@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include "cmath"
 #include <omp.h>
+#include <mpi.h>
 #include <time.h>
 //#include <crtdbg.h>
 
@@ -14,21 +15,22 @@
 #include "vector3d.h"
 #include "random.h"
 #include "simulation.h"
+#include "mpi_util.h"
 
 void Simulation::moveParticles() {
 	double procTime = 0;
-	if (timing && (currentIteration % writeParameter == 0)) {
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	//MPI_Barrier(MPI_COMM_WORLD);
-	if ((verbosity > 0)) printf("moving particles\n");
-	if ((verbosity > 0)) printLog("moving particles\n");
+	//MPI_Barrier(cartComm);
+	if ((rank == 0) && (verbosity > 0)) printf("moving particles\n");
+	if ((rank == 0) && (verbosity > 0)) printLog("moving particles\n");
 	int i = 0;
 
 	for (i = 0; i < particles.size(); ++i) {
 		if (i % 1000 == 0) {
 			if (verbosity > 2) {
-				printf("move particle number %d\n", i);
+				printf("move particle number %d rank %d\n", i, rank);
 			}
 		}
 		moveParticle(particles[i]);
@@ -38,24 +40,110 @@ void Simulation::moveParticles() {
 	//if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
 	//removeEscapedParticles();
 	//}
-	if ((verbosity > 0)) printf("end moving particles\n");
-	if ((verbosity > 0)) printLog("end moving particles\n");
-	if (timing && (currentIteration % writeParameter == 0)) {
+	if ((rank == 0) && (verbosity > 0)) printf("end moving particles\n");
+	if ((rank == 0) && (verbosity > 0)) printLog("end moving particles\n");
+	MPI_Barrier(cartComm);
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("moving particles time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }
 
-void Simulation::removeEscapedParticles() {
-	double procTime = 0;
-	if (timing && (currentIteration % writeParameter == 0)) {
-		procTime = clock();
+void Simulation::sortParticleToEscaped(Particle* particle) {
+	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
+		escapedParticlesLeft.push_back(particle);
+		particle->escaped = true;
+		particle->crossBoundaryCount++;
+		return;
+	}
+	if (particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
+		escapedParticlesRight.push_back(particle);
+		particle->escaped = true;
+		particle->crossBoundaryCount++;
+		return;
 	}
 
+	if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
+		escapedParticlesFront.push_back(particle);
+		particle->escaped = true;
+		particle->crossBoundaryCount++;
+		return;
+	}
+	if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
+		escapedParticlesBack.push_back(particle);
+		particle->escaped = true;
+		particle->crossBoundaryCount++;
+		return;
+	}
+
+	if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+		escapedParticlesBottom.push_back(particle);
+		particle->escaped = true;
+		particle->crossBoundaryCount++;
+		return;
+	}
+	if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+		escapedParticlesTop.push_back(particle);
+		particle->escaped = true;
+		particle->crossBoundaryCount++;
+	}
+}
+
+void Simulation::removeEscapedParticles() {
+	double procTime = 0;
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
+	if ((cartDim[0] > 1) || (boundaryConditionType == FREE_BOTH)) {
+		for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
+			Particle* particle = escapedParticlesLeft[i];
+			delete particle;
+		}
+	}
 	escapedParticlesLeft.clear();
+
+	if ((cartDim[0] > 1) || (boundaryConditionType != PERIODIC)) {
+		for (int i = 0; i < escapedParticlesRight.size(); ++i) {
+			Particle* particle = escapedParticlesRight[i];
+			delete particle;
+		}
+	}
 	escapedParticlesRight.clear();
 
-	if (timing && (currentIteration % writeParameter == 0)) {
+	if (cartDim[1] > 1) {
+		for (int i = 0; i < escapedParticlesFront.size(); ++i) {
+			Particle* particle = escapedParticlesFront[i];
+			delete particle;
+		}
+	}
+	escapedParticlesFront.clear();
+
+	if (cartDim[1] > 1) {
+		for (int i = 0; i < escapedParticlesBack.size(); ++i) {
+			Particle* particle = escapedParticlesBack[i];
+			delete particle;
+		}
+	}
+	escapedParticlesBack.clear();
+
+	if (cartDim[2] > 1) {
+		for (int i = 0; i < escapedParticlesBottom.size(); ++i) {
+			Particle* particle = escapedParticlesBottom[i];
+			delete particle;
+		}
+	}
+	escapedParticlesBottom.clear();
+
+	if (cartDim[2] > 1) {
+		for (int i = 0; i < escapedParticlesTop.size(); ++i) {
+			Particle* particle = escapedParticlesTop[i];
+			delete particle;
+		}
+	}
+	escapedParticlesTop.clear();
+
+	MPI_Barrier(cartComm);
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("removing escaped particles time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
@@ -63,28 +151,26 @@ void Simulation::removeEscapedParticles() {
 
 void Simulation::eraseEscapedPaticles() {
 	double procTime = 0;
-	if (timing && (currentIteration % writeParameter == 0)) {
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
+	std::vector<Particle*> tempParticles;
 	if (particles.size() > 0) {
-		std::vector<Particle*>::iterator it = particles.end();
-		it = it - 1;
-		while (it != particles.begin()) {
-			Particle* particle = *it;
-			std::vector<Particle*>::iterator prev = it - 1;
+		tempParticles.reserve(particles.size());
+		for (int i = 0; i < particles.size(); ++i) {
+			Particle* particle = particles[i];
 			if (particle->escaped) {
 				chargeBalance -= particle->chargeCount;
-				particles.erase(it);
+			} else {
+				tempParticles.push_back(particle);
 			}
-			it = prev;
-		}
-		Particle* particle = particles[0];
-		if (particle->escaped) {
-			chargeBalance -= particle->chargeCount;
-			particles.erase(particles.begin());
 		}
 	}
-	if (timing && (currentIteration % writeParameter == 0)) {
+	particles.clear();
+	particles = tempParticles;
+	tempParticles.clear();
+	MPI_Barrier(cartComm);
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("erasing escaped particles time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
@@ -92,9 +178,20 @@ void Simulation::eraseEscapedPaticles() {
 
 void Simulation::moveParticle(Particle* particle) {
 	updateCorrelationMaps(particle);
-	Vector3d E = correlationTempEfield(particle);
-	//Vector3d E = correlationNewEfield(particle) * fieldScale;
-	Vector3d B = correlationBfield(particle);
+	particle->prevMomentum = particle->getMomentum();
+	Vector3d E;
+	Vector3d B;
+
+	if(solverType == BUNEMAN){
+		E = (correlationBunemanEfield(particle) + correlationBunemanNewEfield(particle))/2.0;
+		B = (correlationBunemanBfield(particle) + correlationBunemanNewBfield(particle))/2.0;
+	} else {
+		E = correlationTempEfield(particle);
+		//E = correlationNewEfield(particle);
+		//B = correlationBfield(particle)*(1-theta) + correlationNewBfield(particle)*theta;
+		B = correlationBfield(particle);
+	}
+	//B = B0;
 	//printf("E = %g %g %g\n", E.x, E.y, E.z);
 	//printf("B = %g %g %g\n", B.x, B.y, B.z);
 
@@ -104,18 +201,25 @@ void Simulation::moveParticle(Particle* particle) {
 
 
 	//see Noguchi
+	double gamma = particle->gammaFactor(speed_of_light_normalized);
 	double beta = 0.5 * particle->charge * deltaT / particle->mass;
 
-	int particleIterations = 20;
+	int particleIterations = 50;
 
 
 	Particle tempParticle = *particle;
 
-	tempParticle.addMomentum((E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT);
-	//if (debugMode) alertNaNOrInfinity(tempParticle.momentum.x, "p.x = naN\n");
-	//if (debugMode) alertNaNOrInfinity(tempParticle.momentum.y, "p.y = naN\n");
-	//if (debugMode) alertNaNOrInfinity(tempParticle.momentum.z, "p.z = naN\n");
+	//tempParticle.addMomentum((E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT);
 
+	//boris
+	bool boris = false;
+	if (boris) {
+		moveParticleBoris(particle);
+		return;
+	}
+	//
+	tempParticle.addMomentum((E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT);
+	alertNaNOrInfinity(E.x, "E.x = Nan in move particle\n");
 
 	newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
 
@@ -125,349 +229,252 @@ void Simulation::moveParticle(Particle* particle) {
 	tempParticle.coordinates.y += middleVelocity.y * eta * deltaT;
 	tempParticle.coordinates.z += middleVelocity.z * eta * deltaT;
 
-
-	//if (boundaryConditionType != PERIODIC) {
-	if ((tempParticle.coordinates.x < xgrid[1]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT)) {
-		particle->coordinates.x = 2 * xgrid[1] - tempParticle.coordinates.x + fabs(
+	if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
+		particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 			middleVelocity.x * (1 - eta) * deltaT);
 		particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
 		particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * (1 - eta) * deltaT;
-
-		if (particle->coordinates.y > ygrid[ynumber]) {
-			particle->coordinates.y -= ysize;
-		}
-		if (particle->coordinates.y < ygrid[0]) {
-			particle->coordinates.y += ysize;
-		}
-
-		if (particle->coordinates.z > zgrid[znumber]) {
-			particle->coordinates.z -= zsize;
-		}
-		if (particle->coordinates.z < zgrid[0]) {
-			particle->coordinates.z += zsize;
-		}
-		newVelocity.x = -newVelocity.x;
+		newVelocity.x = fabs(newVelocity.x);
 		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
-
-		//if (debugMode) alertNaNOrInfinity(particle->momentum.x, "p.x = NaN in simulation::moveParticle\n");
-		//if (debugMode) alertNaNOrInfinity(particle->momentum.y, "p.y = NaN in simulation::moveParticle\n");
-		//if (debugMode) alertNaNOrInfinity(particle->momentum.z, "p.z = NaN in simulation::moveParticle\n");
+		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+		sortParticleToEscaped(particle);
 		return;
 	}
-
-	//if (tempParticle.coordinates.x < xgrid[0]) {
-	if (tempParticle.coordinates.x < xgrid[1]) {
-
-		escapedParticlesLeft.push_back(particle);
-		particle->coordinates.x = tempParticle.coordinates.x + middleVelocity.x * (1 - eta) * deltaT;
-
-		particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
-		if (particle->coordinates.y > ygrid[ynumber]) {
-			particle->coordinates.y -= ysize;
-		}
-		if (particle->coordinates.y < ygrid[0]) {
-			particle->coordinates.y += ysize;
-		}
-
-		particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * (1 - eta) * deltaT;
-		if (particle->coordinates.z > zgrid[znumber]) {
-			particle->coordinates.z -= zsize;
-		}
-		if (particle->coordinates.z < zgrid[0]) {
-			particle->coordinates.z += zsize;
-		}
-		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
-		particle->escaped = true;
-		particle->crossBoundaryCount++;
-		//if (debugMode) alertNaNOrInfinity(particle->momentum.x, "p.x = NaN in simulation::moveParticle\n");
-		//if (debugMode) alertNaNOrInfinity(particle->momentum.y, "p.y = NaN in simulation::moveParticle\n");
-		//if (debugMode) alertNaNOrInfinity(particle->momentum.z, "p.z = NaN in simulation::moveParticle\n");
-		return;
-
-	}
-	//if (tempParticle.coordinates.x > xgrid[xnumber+1]) {
-	if (tempParticle.coordinates.x > xgrid[xnumber]) {
-		escapedParticlesRight.push_back(particle);
-		particle->coordinates.x = tempParticle.coordinates.x + middleVelocity.x * (1 - eta) * deltaT;
-
-		particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
-		if (particle->coordinates.y > ygrid[ynumber]) {
-			particle->coordinates.y -= ysize;
-		}
-		if (particle->coordinates.y < ygrid[0]) {
-			particle->coordinates.y += ysize;
-		}
-
-		particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * (1 - eta) * deltaT;
-		if (particle->coordinates.z > zgrid[znumber]) {
-			particle->coordinates.z -= zsize;
-		}
-		if (particle->coordinates.z < zgrid[0]) {
-			particle->coordinates.z += zsize;
-		}
-		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
-		particle->escaped = true;
-		particle->crossBoundaryCount++;
-		//if (debugMode) alertNaNOrInfinity(particle->momentum.x, "p.x = NaN in simulation::moveParticle\n");
-		//if (debugMode) alertNaNOrInfinity(particle->momentum.y, "p.y = NaN in simulation::moveParticle\n");
-		//if (debugMode) alertNaNOrInfinity(particle->momentum.z, "p.z = NaN in simulation::moveParticle\n");
-		return;
-	}
-	//}
 
 
 	Vector3d prevVelocity = velocity;
 	int i = 0;
-	Vector3d velocityHat = (tempParticle.rotationTensor * tempParticle.gammaFactor(
+	Vector3d velocityHat = (particle->rotationTensor * particle->gammaFactor(
 		speed_of_light_normalized) * velocity);
+	Vector3d Eperp = E - velocity*(velocity.scalarMult(E)/(velocity.scalarMult(velocity)));
+	Vector3d electricVelocityShift = (Eperp * (2 * eta * beta / gamma));
+	//velocityHat += electricVelocityShift;
 
+	if (velocityHat.norm() > speed_of_light_normalized) {
+		//printf("velocity Hat norm > c\n");
+		//MPI_Finalize();
+		//exit(0);
+	}
+	double a = tempParticle.gammaFactor(speed_of_light_normalized);
 	double etaDeltaT = eta * deltaT;
 	double restEtaDeltaT = (1.0 - eta) * deltaT;
 	double velocityNorm = velocity.norm();
 
-	double error = (prevVelocity - newVelocity).norm();
-	while (error > particleVelocityErrorLevel * velocityNorm && i < particleIterations) {
+	Vector3d prevMomentum = particle->getMomentum();
+	Vector3d momentum = tempParticle.getMomentum();
+	Vector3d newMomentum = tempParticle.getMomentum();
+	double momentumNorm = momentum.norm();
+
+	//double error = (prevVelocity - newVelocity).norm();
+	double error = (prevMomentum - newMomentum).norm();
+	//error = 0;
+	while (error > particleVelocityErrorLevel * momentumNorm && i < particleIterations) {
 		++i;
 		prevVelocity = newVelocity;
+		prevMomentum = newMomentum;
 
 		tempParticle = *particle;
-		Vector3d rotatedE = tempParticle.rotationTensor * E;
-
-		//tempParticle.momentum += (E + ((getVelocity + newVelocity).vectorMult(B)/(2.0*speed_of_light_normalized)))*particle->charge*deltaT;
-
-		//mistake in noguchi - he writes betashift!
+		Vector3d rotatedE = particle->rotationTensor * E;
 
 		middleVelocity = velocityHat + rotatedE * beta;
-		/*if(middleVelocity.norm() > speed_of_light_normalized) {
-		    printf("middleVelocity = %g\n", middleVelocity.norm());
-		    printf("speed of light = %g\n", speed_of_light_normalized);
-		    printf("particle number %d\n", particle->number);
-		}*/
 
 		tempParticle.coordinates.x += (middleVelocity.x * etaDeltaT);
 		tempParticle.coordinates.y += (middleVelocity.y * etaDeltaT);
 		tempParticle.coordinates.z += (middleVelocity.z * etaDeltaT);
-		//if (boundaryConditionType != PERIODIC) {
-		//todo more accurate speed!!
-		if ((tempParticle.coordinates.x < xgrid[1]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT)) {
-			particle->coordinates.x = 2 * xgrid[1] - tempParticle.coordinates.x + fabs(
+
+		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
+			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 				middleVelocity.x * restEtaDeltaT);
 			particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * restEtaDeltaT;
 			particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * restEtaDeltaT;
-			if (particle->coordinates.y > ygrid[ynumber]) {
-				particle->coordinates.y -= ysize;
-			}
-			if (particle->coordinates.y < ygrid[0]) {
-				particle->coordinates.y += ysize;
-			}
-			if (particle->coordinates.z > zgrid[znumber]) {
-				particle->coordinates.z -= zsize;
-			}
-			if (particle->coordinates.z < zgrid[0]) {
-				particle->coordinates.z += zsize;
-			}
-			newVelocity.x = -newVelocity.x;
+
+			newVelocity.x = fabs(newVelocity.x);
 			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
-			//if (debugMode) alertNaNOrInfinity(particle->momentum.x, "p.x = NaN in simulation::moveParticle\n");
-			//if (debugMode) alertNaNOrInfinity(particle->momentum.y, "p.y = NaN in simulation::moveParticle\n");
-			//if (debugMode) alertNaNOrInfinity(particle->momentum.z, "p.z = NaN in simulation::moveParticle\n");
-			//particle->momentum.x = -particle->momentum.x;
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+			sortParticleToEscaped(particle);
 			return;
 
 		}
-		//if (tempParticle.coordinates.x < xgrid[0]) {
-		if (tempParticle.coordinates.x < xgrid[1]) {
-			//printf("particle number %d escaped to left\n", particle->number);
-			escapedParticlesLeft.push_back(particle);
-			particle->coordinates.x = tempParticle.coordinates.x + middleVelocity.x * restEtaDeltaT;
 
-			particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * restEtaDeltaT;
-			if (particle->coordinates.y > ygrid[ynumber]) {
-				particle->coordinates.y -= ysize;
-			}
-			if (particle->coordinates.y < ygrid[0]) {
-				particle->coordinates.y += ysize;
-			}
 
-			particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * restEtaDeltaT;
-			if (particle->coordinates.z > zgrid[znumber]) {
-				particle->coordinates.z -= zsize;
-			}
-			if (particle->coordinates.z < zgrid[0]) {
-				particle->coordinates.z += zsize;
-			}
-			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
-			particle->escaped = true;
-			particle->crossBoundaryCount++;
-			//if (debugMode) alertNaNOrInfinity(particle->momentum.x, "p.x = NaN in simulation::moveParticle\n");
-			//if (debugMode) alertNaNOrInfinity(particle->momentum.y, "p.y = NaN in simulation::moveParticle\n");
-			//if (debugMode) alertNaNOrInfinity(particle->momentum.z, "p.z = NaN in simulation::moveParticle\n");
-			return;
-		}
-
-		//if (tempParticle.coordinates.x > xgrid[xnumber+1]) {
-		if (tempParticle.coordinates.x > xgrid[xnumber]) {
-			escapedParticlesRight.push_back(particle);
-			particle->coordinates.x = tempParticle.coordinates.x + middleVelocity.x * restEtaDeltaT;
-
-			particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * restEtaDeltaT;
-			if (particle->coordinates.y > ygrid[ynumber]) {
-				particle->coordinates.y -= ysize;
-			}
-			if (particle->coordinates.y < ygrid[0]) {
-				particle->coordinates.y += ysize;
-			}
-			particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * restEtaDeltaT;
-			if (particle->coordinates.z > zgrid[znumber]) {
-				particle->coordinates.z -= zsize;
-			}
-			if (particle->coordinates.z < zgrid[0]) {
-				particle->coordinates.z += zsize;
-			}
-			//if (debugMode) alertNaNOrInfinity(particle->momentum.x, "p.x = NaN in simulation::moveParticle\n");
-			//if (debugMode) alertNaNOrInfinity(particle->momentum.y, "p.y = NaN in simulation::moveParticle\n");
-			//if (debugMode) alertNaNOrInfinity(particle->momentum.z, "p.z = NaN in simulation::moveParticle\n");
-			//particle->setMomentumByV(newVelocity, speed_of_light_normalized);
-			particle->escaped = true;
-			particle->crossBoundaryCount++;
-			return;
-		}
-		//}
-		correctParticlePosition(tempParticle);
+		//correctParticlePosition(tempParticle);
 		updateCorrelationMaps(tempParticle);
-		//checkParticleInBox(tempParticle);
 
-		E = correlationTempEfield(tempParticle);
-		//E = correlationNewEfield(tempParticle) * fieldScale;
-		B = correlationBfield(tempParticle);
-		//printf("E = %g %g %g\n", E.x, E.y, E.z);
-		//printf("B = %g %g %g\n", B.x, B.y, B.z);
+		if(solverType == BUNEMAN){
+			E = (correlationBunemanEfield(tempParticle) + correlationBunemanNewEfield(tempParticle))/2.0;
+			B = (correlationBunemanBfield(tempParticle) + correlationBunemanNewBfield(tempParticle))/2.0;
+		} else {
+			E = correlationTempEfield(tempParticle);
+			//E = correlationNewEfield(tempParticle);
+			//B = correlationBfield(tempParticle)*(1-theta) + correlationNewBfield(tempParticle)*theta;
+			B = correlationBfield(tempParticle);
+		}
+		//E = E0;
+		//B = B0;
 
-		tempParticle.addMomentum((E + (middleVelocity.vectorMult(
-			B) / speed_of_light_normalized)) * (particle->charge * deltaT));
-		//if (debugMode) alertNaNOrInfinity(tempParticle.momentum.x, "p.x = NaN in simulation::moveParticle\n");
-		//if (debugMode) alertNaNOrInfinity(tempParticle.momentum.y, "p.y = NaN in simulation::moveParticle\n");
-		//if (debugMode) alertNaNOrInfinity(tempParticle.momentum.z, "p.z = NaN in simulation::moveParticle\n");
+		tempParticle.addMomentum((E + (middleVelocity.vectorMult(B) / speed_of_light_normalized)) * (particle->charge * deltaT));
 		newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
-		error = (prevVelocity - newVelocity).norm();
+		newMomentum = tempParticle.getMomentum();
+		//error = (prevVelocity - newVelocity).norm();
+		error = (prevMomentum - newMomentum).norm();
 	}
 
-	//Vector3d prevCoordinates = particle->coordinates;
-
 	particle->copyMomentum(tempParticle);
-	//if (debugMode) alertNaNOrInfinity(particle->momentum.x, "p.x = NaN in simulation::moveParticle\n");
-	//if (debugMode) alertNaNOrInfinity(particle->momentum.y, "p.y = NaN in simulation::moveParticle\n");
-	//if (debugMode) alertNaNOrInfinity(particle->momentum.z, "p.z = NaN in simulation::moveParticle\n");
-
-	/*if (particle->momentum.x > 1E100) {
-		printf("particle->momentum.x > 1E100\n");
-	}*/
-	//particle->momentum.x = 0;
 
 	particle->coordinates.x += middleVelocity.x * deltaT;
 
 	particle->coordinates.y += middleVelocity.y * deltaT;
 	particle->coordinates.z += middleVelocity.z * deltaT;
 
-	correctParticlePosition(particle);
-	//updateCorrelationMaps(particle);
+	//correctParticlePosition(particle);
+	/*if(particle->coordinates.x > xgrid[xnumberAdded - additionalBinNumber]){
+		printf("aaa\n");
+	}*/
 
-	if (particle->coordinates.x < xgrid[1]) {
-		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
-			particle->coordinates.x = 2 * xgrid[1] - particle->coordinates.x;
+	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
+		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
 			particle->reflectMomentumX();
-			return;
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+			//return;
 		} else {
-			//printf("particle number %d escaped to left\n", particle->number);
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 			escapedParticlesLeft.push_back(particle);
-			//particle->coordinates.x = xsize;
 			return;
 		}
 	}
-	if (particle->coordinates.x > xgrid[xnumber]) {
-		//printf("particle number %d escaped to right\n", particle->number);
-		//printLog("particle escaped to right\n");
+	if (particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
 		escapedParticlesRight.push_back(particle);
 		particle->crossBoundaryCount++;
-		//particle->coordinates.x = xsize;
 		particle->escaped = true;
 		return;
 	}
+
+	if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
+		escapedParticlesFront.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+		return;
+	}
+
+	if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
+		escapedParticlesBack.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+		return;
+	}
+
+	if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+		escapedParticlesBottom.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+		return;
+	}
+
+	if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+		escapedParticlesTop.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+	}
 }
 
-void Simulation::correctParticlePosition(Particle* particle) {
-	if (particle->coordinates.y < ygrid[0]) {
-		particle->coordinates.y = particle->coordinates.y + ysize;
+void Simulation::moveParticleBoris(Particle* particle) {
+	updateCorrelationMaps(particle);
+
+	Vector3d E1;
+	Vector3d E2;
+	Vector3d B;
+
+	if(solverType == BUNEMAN){
+		E1 = correlationBunemanEfield(particle);// + correlationBunemanNewEfield(particle);
+		E2 = correlationBunemanNewEfield(particle);
+		B = correlationBunemanBfield(particle);// + correlationBunemanNewBfield(particle);
+	} else {
+		E1 = correlationEfield(particle);
+		E2 = correlationNewEfield(particle);
+		//E = correlationNewEfield(particle) * fieldScale;
+		B = correlationBfield(particle)*(1-theta) + correlationNewBfield(particle)*theta;
+		//B = correlationBfield(particle);
 	}
-	if (particle->coordinates.y > ygrid[ynumber]) {
-		particle->coordinates.y = particle->coordinates.y - ysize;
+	//B = B0;
+	//printf("E = %g %g %g\n", E.x, E.y, E.z);
+	//printf("B = %g %g %g\n", B.x, B.y, B.z);
+
+
+	double Bnorm = B.norm();
+	double Bnorm2 = B.scalarMult(B);
+	double beta = particle->charge *deltaT/2.0;
+
+	Vector3d p1 = particle->getMomentum() + E1*beta;
+	double tempGamma = sqrt(1.0 + (p1.scalarMult(p1)/(particle->mass*particle->mass*speed_of_light_normalized_sqr)));
+	double omega = particle->charge*Bnorm/(particle->mass*speed_of_light*tempGamma);
+	double a1 = tan(omega*deltaT/2.0)/Bnorm;
+	if(Bnorm <= 0){
+		a1 = particle->charge/(2.0*particle->mass*speed_of_light*tempGamma);
+	}
+	//double a1 = particle->charge/(2.0*particle->mass*speed_of_light*tempGamma);
+	double a2 = 2*a1/(1 + a1*a1*Bnorm2);
+	Vector3d p3 = p1 + (p1.vectorMult(B))*a1;
+	Vector3d p2 = p1 + (p3.vectorMult(B))*a2;
+
+	Vector3d newMomentum = p2 + E2*beta;
+
+	particle->setMomentum(newMomentum);
+	Vector3d newVelocity = particle->getVelocity(speed_of_light_normalized);
+	particle->coordinates += newVelocity*deltaT;
+
+	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
+		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
+			particle->reflectMomentumX();
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+			//return;
+		} else {
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+			escapedParticlesLeft.push_back(particle);
+			return;
+		}
+	}
+	if (particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
+		escapedParticlesRight.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+		return;
 	}
 
-	if (particle->coordinates.z < zgrid[0]) {
-		particle->coordinates.z = particle->coordinates.z + zsize;
-	}
-	if (particle->coordinates.z > zgrid[znumber]) {
-		particle->coordinates.z = particle->coordinates.z - zsize;
-	}
-
-
-	/*if (particle->coordinates.x < xgrid[1]) {
-	    if (boundaryConditionType == SUPER_CONDUCTOR_LEFT && rank == 0) {
-	        particle->coordinates.x = 2 * xgrid[1] - particle->coordinates.x;
-	        particle->momentum.x = -particle->momentum.x;
-	        return;
-	    } else {
-	        escapedParticlesLeft.push_back(particle);
-	        particle->coordinates.x = xsize;
-	        particle->escaped = true;
-	        return;
-	    }
-	}
-	if (particle->coordinates.x > xgrid[xnumber]) {
-	    escapedParticlesRight.push_back(particle);
-	    particle->coordinates.x = xsize;
-	    particle->escaped = true;
-	    return;
-	}*/
-	/*if (boundaryConditionType == PERIODIC) {
-	    if (particle.coordinates.x < xgrid[0]) {
-	        particle.coordinates.x = particle.coordinates.x + xsize;
-	    }
-	    if (particle.coordinates.x > xgrid[xnumber]) {
-	        particle.coordinates.x = particle.coordinates.x - xsize;
-	    }
-	}*/
-}
-
-void Simulation::correctParticlePosition(Particle& particle) {
-	if (particle.coordinates.y < ygrid[0]) {
-		particle.coordinates.y = particle.coordinates.y + ysize;
-	}
-	if (particle.coordinates.y > ygrid[ynumber]) {
-		particle.coordinates.y = particle.coordinates.y - ysize;
+	if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
+		escapedParticlesFront.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+		return;
 	}
 
-	if (particle.coordinates.z < zgrid[0]) {
-		particle.coordinates.z = particle.coordinates.z + zsize;
+	if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
+		escapedParticlesBack.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+		return;
 	}
-	if (particle.coordinates.z > zgrid[znumber]) {
-		particle.coordinates.z = particle.coordinates.z - zsize;
+
+	if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+		escapedParticlesBottom.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+		return;
 	}
-	/*if (boundaryConditionType == PERIODIC) {
-	    if (particle.coordinates.x < xgrid[0]) {
-	        particle.coordinates.x = particle.coordinates.x + xsize;
-	    }
-	    if (particle.coordinates.x > xgrid[xnumber]) {
-	        particle.coordinates.x = particle.coordinates.x - xsize;
-	    }
-	}*/
+
+	if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+		escapedParticlesTop.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+	}
 }
 
 void Simulation::evaluateParticlesRotationTensor() {
 	double procTime = 0;
-	if (timing && (currentIteration % writeParameter == 0)) {
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
 	for (int i = 0; i < particles.size(); ++i) {
@@ -476,24 +483,35 @@ void Simulation::evaluateParticlesRotationTensor() {
 		double gamma = particle->gammaFactor(speed_of_light_normalized);
 		Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
 
-		Vector3d oldE = correlationEfield(particle);
-		Vector3d oldB = correlationBfield(particle);
+		Vector3d oldE;
+		Vector3d oldB;
 
+		if(solverType == BUNEMAN){
+			oldE = correlationBunemanEfield(particle);
+			oldB = correlationBunemanBfield(particle);
+		} else {
+			oldE = correlationEfield(particle);
+			//E = correlationNewEfield(particle) * fieldScale;
+			//B = correlationBfield(particle)*(1-theta) + correlationNewBfield(particle)*theta;
+			oldB = correlationBfield(particle);
+		}
 		particle->rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
 
 	}
-	if (timing && (currentIteration % writeParameter == 0)) {
+	MPI_Barrier(cartComm);
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("evaluating ParticlesRotationTensor time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }
 
 Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d& velocity, double& gamma, Vector3d& EField, Vector3d& BField) {
-	Matrix3d result;
+	Matrix3d result = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	double G = ((beta * (EField.scalarMult(velocity)) / speed_of_light_normalized_sqr) + gamma);
 	beta = beta / G;
-	double denominator = G * (1 + beta * beta * BField.scalarMult(BField) / speed_of_light_normalized_sqr);
+	double beta2c = beta * beta / speed_of_light_normalized_sqr;
+	double denominator = G * (1 + beta2c * BField.scalarMult(BField));
 
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -512,15 +530,39 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d& velocity
 		}
 	}
 
+	/*result.matrix[0][0] = 1.0 + beta2c*BField[0]*BField[0];
+	result.matrix[0][1] = beta2c*BField[0]*BField[1];
+	result.matrix[0][2] = beta2c*BField[0]*BField[2];
+	result.matrix[1][1] = 1.0 + beta2c*BField[1]*BField[1];
+	result.matrix[1][2] = beta2c*BField[1]*BField[2];
+	result.matrix[2][2] = 1.0 + beta2c*BField[2]*BField[2];
+	result.matrix[1][0] = result.matrix[0][1];
+	result.matrix[2][0] = result.matrix[0][2];
+	result.matrix[2][1] = result.matrix[1][2];
+
+	result.matrix[0][1] += beta * BField[2] / speed_of_light_normalized;
+	result.matrix[0][2] -= beta * BField[1] / speed_of_light_normalized;
+	result.matrix[1][0] -= beta * BField[2] / speed_of_light_normalized;
+	result.matrix[1][2] += beta * BField[0] / speed_of_light_normalized;
+	result.matrix[2][0] += beta * BField[1] / speed_of_light_normalized;
+	result.matrix[2][1] -= beta * BField[0] / speed_of_light_normalized;
+
+	for(int i = 0; i < 3; ++i) {
+		for(int j = 0; j < 3; ++j) {
+			result.matrix[i][j] /= denominator;
+			if (debugMode) alertNaNOrInfinity(result.matrix[i][j], "rotation tensor = NaN");
+		}
+	}*/
+
 	return result;
 }
 
 void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContainer, double length) {
-	if ((verbosity > 0)) printf("inject new particles\n");
+	if ((rank == 0) && (verbosity > 0)) printf("inject new particles\n");
 
 	//Particle* tempParticle = particles[0];
 
-	double x = xgrid[xnumber] - length;
+	double x = xgrid[xnumberAdded - 1 - additionalBinNumber] - length;
 	double tempDeltaY = deltaY * uniformDistribution();
 	double tempDeltaZ = deltaZ * uniformDistribution();
 
@@ -528,24 +570,23 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 	    return;
 	}*/
 
-	for (int j = 0; j < ynumber; ++j) {
-		for (int k = 0; k < znumber; ++k) {
-			double weight = (typeContainer.concentration / typeContainer.particlesPerBin) * volumeB(xnumber - 1, j,
-			                                                                                        k);
+	for (int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j) {
+		for (int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k) {
+			double weight = (typeContainer.concentration / typeContainer.particlesPerBin) * volumeB();
 			for (int l = 0; l < count; ++l) {
 				ParticleTypes type = typeContainer.type;
 				if (verbosity > 1) {
 					printf("inject particle number = %d\n", particlesNumber);
 				}
-				Particle* particle = createParticle(particlesNumber, xnumber - 1, j, k, weight, type, typeContainer,
+				Particle* particle = createParticle(particlesNumber, xnumberAdded - 1 - additionalBinNumber, j, k, weight, type, typeContainer,
 				                                    typeContainer.temperatureX, typeContainer.temperatureY,
 				                                    typeContainer.temperatureZ);
 				particlesNumber++;
 				particle->coordinates.x = x;
-				//particle->coordinates.y = ygrid[j] + tempDeltaY;
-				//particle->coordinates.z = zgrid[k] + tempDeltaZ;
-				particle->coordinates.y = middleYgrid[j];
-				particle->coordinates.z = middleZgrid[k];
+				particle->coordinates.y = ygrid[j] + tempDeltaY;
+				particle->coordinates.z = zgrid[k] + tempDeltaZ;
+				//particle->coordinates.y = middleYgrid[j];
+				//particle->coordinates.z = middleZgrid[k];
 				double y = particle->coordinates.y;
 				double z = particle->coordinates.z;
 
@@ -559,30 +600,6 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 				theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(
 					scaleFactor / plasma_period);
 				theoreticalMomentum += particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
-				/*if (preserveChargeLocal) {
-				    int necessaryElectrons = 1;
-				    if (type == ALPHA) {
-				        necessaryElectrons = 2;
-				    }
-				    while (necessaryElectrons > 0) {
-				        particle = createParticle(n, xnumber - 1, j, k, weight, ELECTRON, types[0],
-				                                  types[0].temperatureX, types[0].temperatureY,
-				                                  types[0].temperatureZ);
-				        n++;
-				        particle->coordinates.x = x;
-				        particle->coordinates.y = y;
-				        particle->coordinates.z = z;
-				        particle->addVelocity(V0, speed_of_light_normalized);
-				        particle->initialMomentum = particle->momentum;
-				        particles.push_back(particle);
-				        en = particle->energy(speed_of_light_normalized) * particle->weight * sqr(
-				            scaleFactor / plasma_period);
-				        theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(
-				            scaleFactor / plasma_period);
-				        theoreticalMomentum += particle->momentum * particle->weight * scaleFactor / plasma_period;
-				        necessaryElectrons--;
-				    }
-				}*/
 			}
 		}
 	}
@@ -590,25 +607,166 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContain
 
 void Simulation::exchangeParticles() {
 	double procTime = 0;
-	if (timing && (currentIteration % writeParameter == 0)) {
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if (boundaryConditionType == PERIODIC) {
-		for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
-			Particle* particle = escapedParticlesLeft[i];
-			particle->coordinates.x += xsizeGeneral;
-			particle->escaped = false;
-			particles.push_back(particle);
+	if (cartDim[0] == 1) {
+		if (boundaryConditionType == PERIODIC) {
+			for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
+				Particle* particle = escapedParticlesLeft[i];
+				particle->coordinates.x += xsizeGeneral;
+				particle->escaped = false;
+				tempParticles.push_back(particle);
+			}
+			for (int i = 0; i < escapedParticlesRight.size(); ++i) {
+				Particle* particle = escapedParticlesRight[i];
+				particle->coordinates.x -= xsizeGeneral;
+				particle->escaped = false;
+				tempParticles.push_back(particle);
+			}
 		}
-		for (int i = 0; i < escapedParticlesRight.size(); ++i) {
-			Particle* particle = escapedParticlesRight[i];
-			particle->coordinates.x -= xsizeGeneral;
-			particle->escaped = false;
+	} else {
+		if (cartCoord[0] == 0 && boundaryConditionType == PERIODIC) {
+			for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
+				Particle* particle = escapedParticlesLeft[i];
+				particle->coordinates.x += xsizeGeneral;
+			}
+		}
+		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType == PERIODIC) {
+			for (int i = 0; i < escapedParticlesRight.size(); ++i) {
+				Particle* particle = escapedParticlesRight[i];
+				particle->coordinates.x -= xsizeGeneral;
+			}
+		}
+		if (verbosity > 2) printf("send particles left rank = %d\n", rank);
+		sendLeftReceiveRightParticles(escapedParticlesLeft, tempParticles, types, typesNumber,
+		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank);
+		MPI_Barrier(cartComm);
+		if (verbosity > 2) printf("send particles right rank = %d\n", rank);
+		sendRightReceiveLeftParticles(escapedParticlesRight, tempParticles, types, typesNumber,
+		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank);
+	}
+
+	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
+		Particle* particle = tempParticles[pcount];
+		if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
+			escapedParticlesFront.push_back(particle);
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+		} else if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
+			escapedParticlesBack.push_back(particle);
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+		} else if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+			escapedParticlesBottom.push_back(particle);
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+		} else if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+			escapedParticlesTop.push_back(particle);
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+		} else {
 			particles.push_back(particle);
 		}
 	}
+	tempParticles.clear();
 
-	if (timing && (currentIteration % writeParameter == 0)) {
+	MPI_Barrier(cartComm);
+
+	if (cartDim[1] == 1) {
+		for (int i = 0; i < escapedParticlesFront.size(); ++i) {
+			Particle* particle = escapedParticlesFront[i];
+			particle->coordinates.y += ysizeGeneral;
+			particle->escaped = false;
+			tempParticles.push_back(particle);
+		}
+		for (int i = 0; i < escapedParticlesBack.size(); ++i) {
+			Particle* particle = escapedParticlesBack[i];
+			particle->coordinates.y -= ysizeGeneral;
+			particle->escaped = false;
+			tempParticles.push_back(particle);
+		}
+
+	} else {
+		if (cartCoord[1] == 0) {
+			for (int i = 0; i < escapedParticlesFront.size(); ++i) {
+				Particle* particle = escapedParticlesFront[i];
+				particle->coordinates.y += ysizeGeneral;
+			}
+		}
+		if (cartCoord[1] == cartDim[1] - 1) {
+			for (int i = 0; i < escapedParticlesBack.size(); ++i) {
+				Particle* particle = escapedParticlesBack[i];
+				particle->coordinates.y -= ysizeGeneral;
+			}
+		}
+		if (verbosity > 2) printf("send particles front rank = %d\n", rank);
+		sendFrontReceiveBackParticles(escapedParticlesFront, tempParticles, types, typesNumber,
+		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
+		MPI_Barrier(cartComm);
+		if (verbosity > 2) printf("send particles back rank = %d\n", rank);
+		sendBackReceiveFrontParticles(escapedParticlesBack, tempParticles, types, typesNumber,
+		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
+	}
+
+	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
+		Particle* particle = tempParticles[pcount];
+		if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+			escapedParticlesBottom.push_back(particle);
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+		} else if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+			escapedParticlesTop.push_back(particle);
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+		} else {
+			particles.push_back(particle);
+		}
+	}
+	tempParticles.clear();
+
+
+	MPI_Barrier(cartComm);
+
+	if (cartDim[2] == 1) {
+		for (int i = 0; i < escapedParticlesBottom.size(); ++i) {
+			Particle* particle = escapedParticlesBottom[i];
+			particle->coordinates.z += zsizeGeneral;
+			particle->escaped = false;
+			particles.push_back(particle);
+		}
+		for (int i = 0; i < escapedParticlesTop.size(); ++i) {
+			Particle* particle = escapedParticlesTop[i];
+			particle->coordinates.z -= zsizeGeneral;
+			particle->escaped = false;
+			particles.push_back(particle);
+		}
+
+	} else {
+		if (cartCoord[2] == 0) {
+			for (int i = 0; i < escapedParticlesBottom.size(); ++i) {
+				Particle* particle = escapedParticlesBottom[i];
+				particle->coordinates.z += zsizeGeneral;
+			}
+		}
+		if (cartCoord[2] == cartDim[2] - 1) {
+			for (int i = 0; i < escapedParticlesTop.size(); ++i) {
+				Particle* particle = escapedParticlesTop[i];
+				particle->coordinates.z -= zsizeGeneral;
+			}
+		}
+		if (verbosity > 2) printf("send particles bottom rank = %d\n", rank);
+		sendBottomReceiveTopParticles(escapedParticlesBottom, particles, types, typesNumber,
+		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
+		MPI_Barrier(cartComm);
+		if (verbosity > 2) printf("send particles top rank = %d\n", rank);
+		sendTopReceiveBottomParticles(escapedParticlesTop, particles, types, typesNumber,
+		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
+	}
+
+	MPI_Barrier(cartComm);
+	tempParticles.clear();
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("exchange particles time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}

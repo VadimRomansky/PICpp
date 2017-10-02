@@ -1,3 +1,4 @@
+#include <mpi.h>
 #include "math.h"
 #include "stdlib.h"
 #include "stdio.h"
@@ -97,6 +98,21 @@ Matrix3d Vector3d::tensorMult(const Vector3d& vector) const {
 	return result;
 }
 
+Matrix3d Vector3d::selfTensorMult() const {
+	Matrix3d result;
+	result.matrix[0][0] = x * x;
+	result.matrix[0][1] = x * y;
+	result.matrix[0][2] = x * z;
+	result.matrix[1][0] = result.matrix[0][1];
+	result.matrix[1][1] = y * y;
+	result.matrix[1][2] = y * z;
+	result.matrix[2][0] = result.matrix[0][2];
+	result.matrix[2][1] = result.matrix[1][2];
+	result.matrix[2][2] = z * z;
+
+	return result;
+}
+
 double& Vector3d::operator[](int i){
 	switch (i) {
 	case 0:
@@ -107,6 +123,7 @@ double& Vector3d::operator[](int i){
 		return z;
 	default:
 		printf("i must be 0 < i < 3\n");
+			MPI_Finalize();
 		exit(0);
 	}
 }

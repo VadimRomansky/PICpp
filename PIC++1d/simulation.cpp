@@ -16,10 +16,10 @@ void Simulation::simulate() {
 		createArrays();
 		createFiles();
 		initialize();
-		//initializeTwoStream();
+		initializeTwoStream();
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWave(1, 0.01);
-		initializeFluxFromRight();
+		//initializeFluxFromRight();
 		//initializeShockWave();
 		//initializeSimpleElectroMagneticWave();
 		//initializeLangmuirWave();

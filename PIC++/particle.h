@@ -73,7 +73,7 @@ public:
 	Vector3d initialCoordinates;
 
 	Vector3d initialMomentum;
-	//Vector3d prevMomentum;
+	Vector3d prevMomentum;
 
 	Matrix3d rotationTensor;
 
@@ -88,6 +88,7 @@ public:
 	Particle(int n, double m, int qcount, double q, double w, ParticleTypes type, double x0, double y0,
                  double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0);
 	Particle(const Particle& particle);
+	Particle(const Particle* const particle);
 
 	double shapeFunctionX(const double& xvalue);
 	double shapeFunctionY(const double& yvalue);
@@ -96,10 +97,10 @@ public:
 	double shapeFunction(const double& xvalue, const double& yvalue, const double& zvalue);
 
 	void setMomentum(Vector3d& p);
-	void setMomentum(double& px, double& py, double& pz);
-	void setMomentumX(double& px);
-	void setMomentumY(double& py);
-	void setMomentumZ(double& pz);
+	void setMomentum(const double& px, const double& py, const double& pz);
+	void setMomentumX(const double& px);
+	void setMomentumY(const double& py);
+	void setMomentumZ(const double& pz);
 	void addMomentum(Vector3d dp);
 	void reflectMomentumX();
 	void reflectMomentumY();
@@ -115,6 +116,7 @@ public:
 	void addVelocity(const Vector3d &v, const double& c);
 	double gammaFactor(const double& c);
 	double energy(const double& c);
+	double fullEnergy(const double& c);
 
 	void setMomentumByV(const Vector3d& v, const  double& c);
 };

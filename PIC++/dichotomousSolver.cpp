@@ -5,6 +5,7 @@
 #include "stdio.h"
 #include <cmath>
 #include <omp.h>
+#include <mpi.h>
 #include <string>
 //#include <crtdbg.h>
 
@@ -35,6 +36,7 @@ double BaseDichotomousSolver::solve(double minX, double maxX) {
         printf("function must have different signes for dichotomous solver\n");
         fflush(stdout);
         fclose(errorLogFile);
+        MPI_Finalize();
         exit(0);
     }
 
@@ -65,6 +67,7 @@ double BaseDichotomousSolver::function(double x) {
     printf("Using base class for dichotomous solver is restricted\n");
     fflush(stdout);
     fclose(errorLogFile);
+    MPI_Finalize();
     exit(0);
 }
 

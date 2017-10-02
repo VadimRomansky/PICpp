@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include <cmath>
 #include <omp.h>
+#include <mpi.h>
 //#include <crtdbg.h>
 
 //#include "memory_debug.h"
@@ -17,12 +18,19 @@
 #include "particle.h"
 #include "random.h"
 #include "simulation.h"
+#include "mpi_util.h"
+#include "input.h"
+#include "complex.h"
 
 Simulation::Simulation() {
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 	newlyStarted = false;
 	preserveChargeGlobal = true;
 	arrayCreated = false;
 	outputDir = std::string(outputDirectory);
+	inputDir = std::string(inputDirectory);
+	reducedOutputDir = std::string(reducedOutputDirectory);
 
 	maxEfield = Vector3d(0, 0, 0);
 	maxBfield = Vector3d(0, 0, 0);
@@ -46,90 +54,178 @@ Simulation::Simulation() {
 	LeviCivita[2][0][1] = 1.0;
 	LeviCivita[2][1][0] = -1.0;
 	typesNumber = 8;
-	additionalBinNumber = (splineOrder + 1) / 2;
 	verbosity = 0;
 	//types = new ParticleTypeContainer[typesNumber];
 	//concentrations = new double[typesNumber];
 	//particlesPerBin = new int[typesNumber];
 	shockWaveX = -1.0;
-	protonNumber = 0;
-	protonNumber1 = 0;
-	protonNumber2 = 0;
-	protonNumber3 = 0;
-	protonNumber4 = 0;
-	protonNumber5 = 0;
-	protonNumber6 = 0;
-	protonNumber7 = 0;
-	protonNumber8 = 0;
-	protonNumber9 = 0;
-	electronNumber = 0;
-	electronNumber1 = 0;
-	electronNumber2 = 0;
-	electronNumber3 = 0;
-	electronNumber4 = 0;
-	electronNumber5 = 0;
-	electronNumber6 = 0;
-	electronNumber7 = 0;
-	electronNumber8 = 0;
-	electronNumber9 = 0;
 }
 
 void Simulation::setSpaceForProc() {
-	int tempXnumber = xnumberGeneral  + 1;
+	int tempXnumber = ((xnumberGeneral) / cartDim[0]);
+	int modXnumber = (xnumberGeneral) % cartDim[0];
 
-	xnumber = tempXnumber;
-	firstAbsoluteXindex = 0;
+	if (cartCoord[0] >= cartDim[0] - modXnumber) {
+		xnumber = tempXnumber + 1;
+		firstAbsoluteXindex = xnumberGeneral - (xnumber) * (cartDim[0] - cartCoord[0]) - additionalBinNumber;
+	} else {
+		xnumber = tempXnumber;
+		firstAbsoluteXindex = (xnumber) * cartCoord[0] - additionalBinNumber;
+	}
 
+	int tempYnumber = ((ynumberGeneral) / cartDim[1]);
+	int modYnumber = (ynumberGeneral) % cartDim[1];
 
+	if (cartCoord[1] >= cartDim[1] - modYnumber) {
+		ynumber = tempYnumber + 1;
+		firstAbsoluteYindex = ynumberGeneral - (ynumber) * (cartDim[1] - cartCoord[1]) - additionalBinNumber;
+	} else {
+		ynumber = tempYnumber;
+		firstAbsoluteYindex = (ynumber) * cartCoord[1] - additionalBinNumber;
+	}
 
+	int tempZnumber = ((znumberGeneral) / cartDim[2]);
+	int modZnumber = (znumberGeneral) % cartDim[2];
 
-	xsize = xnumber * xsizeGeneral / xnumberGeneral;
-	ysize = ysizeGeneral;
-	zsize = zsizeGeneral;
+	if (cartCoord[2] >= cartDim[2] - modZnumber) {
+		znumber = tempZnumber + 1;
+		firstAbsoluteZindex = znumberGeneral - (znumber) * (cartDim[2] - cartCoord[2]) - additionalBinNumber;
+	} else {
+		znumber = tempZnumber;
+		firstAbsoluteZindex = (znumber) * cartCoord[2] - additionalBinNumber;
+	}
 
-	deltaX = xsize / (xnumber);
-	deltaY = ysize / (ynumber);
-	deltaZ = zsize / (znumber);
+	//todo boundary conditiontype
+	/*if (cartDim[0] > 5) {
+		int firstSmallRegions = 2 * cartDim[0] / 3;
+		int firstSmallXnumber = xnumberGeneral / 3;
+		int lastLargeRegions = cartDim[0] - firstSmallRegions;
+		int lastLargeXnumber = xnumberGeneral - firstSmallXnumber;
+		if (cartCoord[0] < firstSmallRegions) {
+			tempXnumber = firstSmallXnumber / firstSmallRegions;
+			modXnumber = firstSmallXnumber % firstSmallRegions;
+			if (cartCoord[0] >= firstSmallRegions - modXnumber) {
+				xnumber = tempXnumber + 1;
+				firstAbsoluteXindex = firstSmallXnumber - (xnumber) * (firstSmallRegions - cartCoord[0]) - additionalBinNumber;
+			} else {
+				xnumber = tempXnumber;
+				firstAbsoluteXindex = (xnumber) * cartCoord[0] - additionalBinNumber;
+			}
+		} else {
+			tempXnumber = lastLargeXnumber / lastLargeRegions;
+			modXnumber = lastLargeXnumber % lastLargeRegions;
+			if (cartCoord[0] >= cartDim[0] - modXnumber) {
+				xnumber = tempXnumber + 1;
+				firstAbsoluteXindex = xnumberGeneral - (xnumber) * (cartDim[0] - cartCoord[0]) - additionalBinNumber;
+			} else {
+				xnumber = tempXnumber;
+				firstAbsoluteXindex = firstSmallXnumber + (xnumber) * (cartCoord[0] - firstSmallRegions) - additionalBinNumber;
+			}
+		}
+
+	}*/
+	//printf("xnumber = %d\n", xnumber);
+	xnumberAdded = xnumber + 2 + 2 * additionalBinNumber;
+	ynumberAdded = ynumber + 2 + 2 * additionalBinNumber;
+	znumberAdded = znumber + 2 + 2 * additionalBinNumber;
+
+	xsize = xnumberAdded * xsizeGeneral / xnumberGeneral;
+	ysize = ynumberAdded * ysizeGeneral / ynumberGeneral;
+	zsize = znumberAdded * zsizeGeneral / znumberGeneral;
+
+	//deltaX = xsize / (xnumber);
+	//deltaY = ysize / (ynumber);
+	//deltaZ = zsize / (znumber);
+
+	deltaX = xsizeGeneral / (xnumberGeneral);
+	deltaY = ysizeGeneral / (ynumberGeneral);
+	deltaZ = zsizeGeneral / (znumberGeneral);
 
 	deltaX2 = deltaX * deltaX;
 	deltaY2 = deltaY * deltaY;
 	deltaZ2 = deltaZ * deltaZ;
 
-	/*if (rank >= nprocs - modXnumber) {
-		leftX = 2 * xsizeGeneral - (xsize - deltaX) * (nprocs - rank) - deltaX;
-	} else {
-		leftX = xsizeGeneral + (xsize - deltaX) * rank - deltaX;
-	}*/
-	leftX = xsizeGeneral + (firstAbsoluteXindex - 1) * deltaX;
+	cellVolume = deltaX * deltaY * deltaZ;
+
+	leftX = xsizeGeneral + (firstAbsoluteXindex) * deltaX;
 	rightX = leftX + xsize;
+	leftY = ysizeGeneral + (firstAbsoluteYindex) * deltaY;
+	rightY = leftY + ysize;
+	leftZ = zsizeGeneral + (firstAbsoluteZindex) * deltaZ;
+	rightZ = leftZ + zsize;
 }
 
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                        double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                        int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
-                       double* concentrationsV, int inType, int verbosityV) {
+                       double* concentrationsV, int inType, int nprocsV, int verbosityV, MPI_Comm& comm) {
+	nprocs = nprocsV;
+	cartComm = comm;
+	int periods[MPI_dim];
+	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
+	MPI_Comm_rank(cartComm, &rank);
+	int tempCoord[3];
+	for (int i = 0; i < 3; ++i) {
+		tempCoord[i] = cartCoord[i];
+	}
+	tempCoord[0] -= 1;
+	if (tempCoord[0] < 0) {
+		tempCoord[0] = cartDim[0] - 1;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &leftRank);
+	tempCoord[0] = cartCoord[0] + 1;
+	if (tempCoord[0] >= cartDim[0]) {
+		tempCoord[0] = 0;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &rightRank);
+	tempCoord[0] = cartCoord[0];
+	tempCoord[1] -= 1;
+	if (tempCoord[1] < 0) {
+		tempCoord[1] = cartDim[1] - 1;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &frontRank);
+	tempCoord[1] = cartCoord[1] + 1;
+	if (tempCoord[1] >= cartDim[1]) {
+		tempCoord[1] = 0;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &backRank);
+	tempCoord[1] = cartCoord[1];
+	tempCoord[2] -= 1;
+	if (tempCoord[2] < 0) {
+		tempCoord[2] = cartDim[2] - 1;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &bottomRank);
+	tempCoord[2] = cartCoord[2] + 1;
+	if (tempCoord[2] >= cartDim[2]) {
+		tempCoord[2] = 0;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &topRank);
+
 	arrayCreated = false;
 	timing = true;
 	outputDir = std::string(outputDirectory);
+	inputDir = std::string(inputDirectory);
+	reducedOutputDir = std::string(reducedOutputDirectory);
 	if (inType == 0) {
 		inputType = CGS;
-	}
-	else if (inType == 1) {
+	} else if (inType == 1) {
 		inputType = Theoretical;
-	}
-	else {
+	} else {
 		printf("input type must be 1 or 0\n");
 		fflush(stdout);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "input type must be 1 or 0\n");
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 	debugMode = false;
 	newlyStarted = true;
 	preserveChargeGlobal = true;
 	solverType = IMPLICIT; //не явный
+	//solverType = IMPLICIT_EC; //не явный с сохранением энергии
 	//solverType = EXPLICIT; //явный
+	//solverType = BUNEMAN;
 	boundaryConditionType = PERIODIC;
 	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
@@ -144,6 +240,258 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		fprintf(errorLogFile,
 		        "PIC++ support only 8 types of ions, typesNumber must be = 8. if you need less, ypu can initialize them with 0 concentration\n");
 		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+	concentrations = concentrationsV;
+	particlesPerBin = particlesPerBinV;
+
+	currentIteration = 0;
+	time = 0;
+	particlesNumber = 0;
+
+	particleEnergy = 0;
+	electricFieldEnergy = 0;
+	magneticFieldEnergy = 0;
+	chargeBalance = 0;
+
+	globalMomentum = Vector3d(0, 0, 0);
+
+
+	theta = initialTheta;
+	//eta = theta;
+	eta = 0.5;
+	//eta = 1.0;
+
+	xnumberGeneral = xn;
+	ynumberGeneral = yn;
+	znumberGeneral = zn;
+
+	ynumber = yn;
+	znumber = zn;
+
+	xsizeGeneral = xsizev;
+	ysizeGeneral = ysizev;
+	zsizeGeneral = zsizev;
+
+	setSpaceForProc();
+
+	temperature = temp;
+
+	maxIteration = maxIterations;
+	maxTime = maxTimeV;
+
+	extJ = 0;
+
+	V0 = Vector3d(Vx, Vy, Vz);
+
+	B0 = Vector3d(Bx, By, Bz);
+	E0 = Vector3d(Ex, Ey, Ez);
+
+
+	if (inputType == CGS) {
+		massProton = massProtonReal;
+		massElectron = massElectronFactor * massElectronReal;
+		massAlpha = massAlphaReal;
+		massDeuterium = massDeuteriumReal;
+		massHelium3 = massHelium3Real;
+
+		double omega2 = 0;
+
+		omega2 += 4 * pi * concentrationsV[0] * electron_charge * electron_charge / massElectron;
+		omega2 += 4 * pi * concentrationsV[1] * electron_charge * electron_charge / massProton;
+		omega2 += 4 * pi * concentrationsV[2] * electron_charge * electron_charge / massElectron;
+		omega2 += 4 * pi * concentrationsV[3] * 4 * electron_charge * electron_charge / massAlpha;
+		omega2 += 4 * pi * concentrationsV[4] * electron_charge * electron_charge / massDeuterium;
+		omega2 += 4 * pi * concentrationsV[5] * 4 * electron_charge * electron_charge / massHelium3;
+
+		double gamma = 1.0/sqrt(1.0 - V0.scalarMult(V0) / (speed_of_light * speed_of_light));
+
+		//plasma_period = sqrt(1 / omega2) * (2 * pi) * gamma * sqrt(gamma);
+		plasma_period = sqrt(1 / omega2) * sqrt(gamma);
+		//plasma_period = sqrt(1 / omega2) * (2 * pi) * gamma * sqrt(gamma)/(2*pi);
+		double thermal_momentum;
+		if (kBoltzman * temperature > massElectron * speed_of_light * speed_of_light) {
+			thermal_momentum = kBoltzman * temperature / speed_of_light;
+		} else {
+			thermal_momentum = sqrt(2 * massElectron * kBoltzman * temperature);
+		}
+		thermal_momentum += V0.norm() * massElectron;
+		double gyro_radius = thermal_momentum * speed_of_light / (electron_charge * B0.norm());
+		//if (B0.norm() <= 0) {
+		//scaleFactor = 1.0;
+		//}
+		scaleFactor = speed_of_light * plasma_period;
+
+		plasma_period = 1.0;
+		scaleFactor = 1.0;
+
+		//scaleFactor = xsize;
+		//scaleFactor = xsizeGeneral;
+		//plasma_period = xsizeGeneral/(xnumberGeneral*speed_of_light);
+
+		E0 = E0 * (plasma_period * sqrt(scaleFactor));
+		B0 = B0 * (plasma_period * sqrt(scaleFactor));
+		V0 = V0 * plasma_period / scaleFactor;
+
+		rescaleConstants();
+
+		density = density * cube(scaleFactor);
+		for (int i = 0; i < typesNumber; ++i) {
+			concentrations[i] = concentrations[i] * cube(scaleFactor);
+		}
+
+		printf("scaleFactor = %lf\n", scaleFactor);
+
+		deltaX /= scaleFactor;
+		deltaY /= scaleFactor;
+		deltaZ /= scaleFactor;
+		deltaX2 /= scaleFactor * scaleFactor;
+		deltaY2 /= scaleFactor * scaleFactor;
+		deltaZ2 /= scaleFactor * scaleFactor;
+
+		leftX /= scaleFactor;
+		rightX /= scaleFactor;
+		xsize /= scaleFactor;
+		xsizeGeneral /= scaleFactor;
+		leftY /= scaleFactor;
+		rightY /= scaleFactor;
+		ysize /= scaleFactor;
+		ysizeGeneral /= scaleFactor;
+		leftZ /= scaleFactor;
+		rightZ /= scaleFactor;
+		zsize /= scaleFactor;
+		zsizeGeneral /= scaleFactor;
+		if (rank == 0) printf("xsize/scaleFactor = %lf\n", xsize);
+		//fflush(stdout);
+	} else {
+		massProton = 1.0;
+		massElectron = massProton / 256;
+		massAlpha = massProton * massAlphaReal / massProtonReal;
+		massDeuterium = massProton * massDeuteriumReal / massProtonReal;
+		massHelium3 = massProton * massHelium3Real / massProtonReal;
+		double protonScale = massProton / massProtonReal;
+		plasma_period = cube(speed_of_light) / (protonScale * electron_charge);
+		scaleFactor = speed_of_light * plasma_period;
+		rescaleConstantsToTheoretical();
+		double densityForUnits = massElectron * (massProton + massElectron) / (4 * pi * electron_charge_normalized * electron_charge_normalized);
+		if (fabs(density - densityForUnits) / (densityForUnits + densityForUnits) > 1E-3) {
+			if (rank == 0) printf("density must be changed\n");
+			if (rank == 0) printf("density = %g, must be = %g\n", density, densityForUnits);
+			fflush(stdout);
+		}
+	}
+
+	resistiveLayerWidth = defaulResistiveLayerWidth;
+	fakeCondactivity = 2*speed_of_light_normalized/(deltaX*(resistiveLayerWidth+1));
+
+	maxEfield = Vector3d(0, 0, 0);
+	maxBfield = Vector3d(0, 0, 0);
+	shockWavePoint = 0;
+
+	Kronecker = Matrix3d(1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0);
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			for (int k = 0; k < 3; ++k) {
+				LeviCivita[i][j][k] = 0;
+			}
+		}
+	}
+	LeviCivita[0][1][2] = 1.0;
+	LeviCivita[0][2][1] = -1.0;
+	LeviCivita[1][0][2] = -1.0;
+	LeviCivita[1][2][0] = 1.0;
+	LeviCivita[2][0][1] = 1.0;
+	LeviCivita[2][1][0] = -1.0;
+	shockWaveX = -1.0;
+	//if(rank == 0) printf("end constructor\n");
+	//fflush(stdout);
+}
+
+Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
+                       double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
+                       int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
+                       double* concentrationsV, int inType, int nprocsV, int verbosityV, double plasmaPeriodV,
+                       double scaleFactorV, SolverType solverTypev, MPI_Comm& comm) {
+	nprocs = nprocsV;
+	cartComm = comm;
+	int periods[MPI_dim];
+	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
+	MPI_Comm_rank(cartComm, &rank);
+	int tempCoord[3];
+	for (int i = 0; i < 3; ++i) {
+		tempCoord[i] = cartCoord[i];
+	}
+	tempCoord[0] -= 1;
+	if (tempCoord[0] < 0) {
+		tempCoord[0] = cartDim[0] - 1;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &leftRank);
+	tempCoord[0] = cartCoord[0] + 1;
+	if (tempCoord[0] >= cartDim[0]) {
+		tempCoord[0] = 0;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &rightRank);
+	tempCoord[0] = cartCoord[0];
+	tempCoord[1] -= 1;
+	if (tempCoord[1] < 0) {
+		tempCoord[1] = cartDim[1] - 1;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &frontRank);
+	tempCoord[1] = cartCoord[1] + 1;
+	if (tempCoord[1] >= cartDim[1]) {
+		tempCoord[1] = 0;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &backRank);
+	tempCoord[1] = cartCoord[1];
+	tempCoord[2] -= 1;
+	if (tempCoord[2] < 0) {
+		tempCoord[2] = cartDim[2] - 1;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &bottomRank);
+	tempCoord[2] = cartCoord[2] + 1;
+	if (tempCoord[2] >= cartDim[2]) {
+		tempCoord[2] = 0;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &topRank);
+	arrayCreated = false;
+	timing = true;
+	outputDir = std::string(outputDirectory);
+	inputDir = std::string(inputDirectory);
+	reducedOutputDir = std::string(reducedOutputDirectory);
+	if (inType == 0) {
+		inputType = CGS;
+	} else if (inType == 1) {
+		inputType = Theoretical;
+	} else {
+		printf("input type must be 1 or 0\n");
+		fflush(stdout);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "input type must be 1 or 0\n");
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+	debugMode = false;
+	newlyStarted = true;
+	preserveChargeGlobal = true;
+	solverType = solverTypev;
+	boundaryConditionType = PERIODIC;
+	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	maxwellEquationMatrixSize = 3;
+	verbosity = verbosityV;
+
+	typesNumber = typesNumberV;
+	if (typesNumber != 8) {
+		printf(
+			"PIC++ support only 8 types of ions, typesNumber must be = 8. if you need less, ypu can initialize them with 0 concentration\n");
+		fflush(stdout);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile,
+		        "PIC++ support only 8 types of ions, typesNumber must be = 8. if you need less, ypu can initialize them with 0 concentration\n");
+		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 	concentrations = concentrationsV;
@@ -190,8 +538,6 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	B0 = Vector3d(Bx, By, Bz);
 	E0 = Vector3d(Ex, Ey, Ez);
 
-	additionalBinNumber = (splineOrder + 1) / 2;
-
 	if (inputType == CGS) {
 		massProton = massProtonReal;
 		massElectron = massElectronFactor * massElectronReal;
@@ -199,87 +545,39 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		massDeuterium = massDeuteriumReal;
 		massHelium3 = massHelium3Real;
 
-		double omega2 = 0;
 
-		omega2 += 4 * pi * concentrationsV[0] * electron_charge * electron_charge / massElectron;
-		omega2 += 4 * pi * concentrationsV[1] * electron_charge * electron_charge / massProton;
-		omega2 += 4 * pi * concentrationsV[2] * electron_charge * electron_charge / massElectron;
-		omega2 += 4 * pi * concentrationsV[3] * 4 * electron_charge * electron_charge / massAlpha;
-		omega2 += 4 * pi * concentrationsV[4] * electron_charge * electron_charge / massDeuterium;
-		omega2 += 4 * pi * concentrationsV[5] * 4 * electron_charge * electron_charge / massHelium3;
+		plasma_period = plasmaPeriodV;
 
-		double gamma = sqrt(1.0 - V0.scalarMult(V0) / (speed_of_light * speed_of_light));
+		scaleFactor = scaleFactorV;
 
-		plasma_period = sqrt(1 / omega2) * (2 * pi) * gamma * sqrt(gamma);
-		//plasma_period = sqrt(1 / omega2) * (2 * pi) * gamma * sqrt(gamma)/(2*pi);
-		double thermal_momentum;
-		if (kBoltzman * temperature > massElectron * speed_of_light * speed_of_light) {
-			thermal_momentum = kBoltzman * temperature / speed_of_light;
-		}
-		else {
-			thermal_momentum = sqrt(2 * massElectron * kBoltzman * temperature);
-		}
-		thermal_momentum += V0.norm() * massElectron;
-		double gyro_radius = thermal_momentum * speed_of_light / (electron_charge * B0.norm());
-		//if (B0.norm() <= 0) {
-		//scaleFactor = 1.0;
-		//}
-		scaleFactor = speed_of_light * plasma_period;
-
-		plasma_period = 1.0;
-		scaleFactor = 1.0;
-
-		//scaleFactor = xsize;
-
-
-		E0 = E0 * (plasma_period * sqrt(scaleFactor));
-		B0 = B0 * (plasma_period * sqrt(scaleFactor));
-		V0 = V0 * plasma_period / scaleFactor;
 
 		rescaleConstants();
 
-		density = density * cube(scaleFactor);
-		for (int i = 0; i < typesNumber; ++i) {
-			concentrations[i] = concentrations[i] * cube(scaleFactor);
-		}
 
 		printf("scaleFactor = %lf\n", scaleFactor);
 
-		deltaX /= scaleFactor;
-		deltaY /= scaleFactor;
-		deltaZ /= scaleFactor;
-		deltaX2 /= scaleFactor * scaleFactor;
-		deltaY2 /= scaleFactor * scaleFactor;
-		deltaZ2 /= scaleFactor * scaleFactor;
-
-		leftX /= scaleFactor;
-		rightX /= scaleFactor;
-		xsize /= scaleFactor;
-		xsizeGeneral /= scaleFactor;
-		ysize /= scaleFactor;
-		ysizeGeneral /= scaleFactor;
-		zsize /= scaleFactor;
-		zsizeGeneral /= scaleFactor;
-		printf("xsize/scaleFactor = %lf\n", xsize);
+		if (rank == 0) printf("xsize/scaleFactor = %lf\n", xsize);
 		//fflush(stdout);
-	}
-	else {
+	} else {
 		massProton = 1.0;
 		massElectron = massProton / 256;
 		massAlpha = massProton * massAlphaReal / massProtonReal;
 		massDeuterium = massProton * massDeuteriumReal / massProtonReal;
 		massHelium3 = massProton * massHelium3Real / massProtonReal;
 		double protonScale = massProton / massProtonReal;
-		plasma_period = cube(speed_of_light) / (protonScale * electron_charge);
-		scaleFactor = speed_of_light * plasma_period;
+		plasma_period = plasmaPeriodV;
+		scaleFactor = scaleFactorV;
 		rescaleConstantsToTheoretical();
 		double densityForUnits = massElectron * (massProton + massElectron) / (4 * pi * electron_charge_normalized * electron_charge_normalized);
 		if (fabs(density - densityForUnits) / (densityForUnits + densityForUnits) > 1E-3) {
-			printf("density must be changed\n");
-			printf("density = %g, must be = %g\n", density, densityForUnits);
+			if (rank == 0) printf("density must be changed\n");
+			if (rank == 0) printf("density = %g, must be = %g\n", density, densityForUnits);
 			fflush(stdout);
 		}
 	}
+
+	resistiveLayerWidth = defaulResistiveLayerWidth;
+	fakeCondactivity = 2*speed_of_light_normalized/(deltaX*(resistiveLayerWidth+1));
 
 	maxEfield = Vector3d(0, 0, 0);
 	maxBfield = Vector3d(0, 0, 0);
@@ -301,41 +599,27 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	LeviCivita[2][0][1] = 1.0;
 	LeviCivita[2][1][0] = -1.0;
 	shockWaveX = -1.0;
-	//if(rank == 0) printf("end constructor\n");
-	//fflush(stdout);
-	protonNumber = 0;
-	protonNumber1 = 0;
-	protonNumber2 = 0;
-	protonNumber3 = 0;
-	protonNumber4 = 0;
-	protonNumber5 = 0;
-	protonNumber6 = 0;
-	protonNumber7 = 0;
-	protonNumber8 = 0;
-	protonNumber9 = 0;
-	electronNumber = 0;
-	electronNumber1 = 0;
-	electronNumber2 = 0;
-	electronNumber3 = 0;
-	electronNumber4 = 0;
-	electronNumber5 = 0;
-	electronNumber6 = 0;
-	electronNumber7 = 0;
-	electronNumber8 = 0;
-	electronNumber9 = 0;
+	if (rank == 0) printf("end constructor\n");
+	fflush(stdout);
 }
 
 Simulation::~Simulation() {
 	if (arrayCreated) {
+		//if(false){
+		delete[] mostAcceleratedParticlesNumbers;
+		for (int i = 0; i < trackedParticlesNumber; ++i) {
+			delete[] trackedParticlesNumbers[i];
+		}
+		delete[] trackedParticlesNumbers;
 		delete gmresMaxwellBasis;
 		delete gmresCleanupBasis;
 		delete[] types;
 		delete[] concentrations;
 		delete[] particlesPerBin;
 
-		for (int i = 0; i < xnumber + 1; ++i) {
-			for (int j = 0; j < ynumber; ++j) {
-				for (int k = 0; k < znumber; ++k) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					delete[] gmresOutput[i][j][k];
 				}
 				delete[] gmresOutput[i][j];
@@ -344,9 +628,9 @@ Simulation::~Simulation() {
 		}
 		delete[] gmresOutput;
 
-		for (int i = 0; i < xnumber + 1; ++i) {
-			for (int j = 0; j < ynumber; ++j) {
-				for (int k = 0; k < znumber; ++k) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					delete[] maxwellEquationMatrix[i][j][k];
 					delete[] maxwellEquationRightPart[i][j][k];
 				}
@@ -359,9 +643,9 @@ Simulation::~Simulation() {
 		delete[] maxwellEquationMatrix;
 		delete[] maxwellEquationRightPart;
 
-		for (int i = 0; i < xnumber + 2; ++i) {
-			for (int j = 0; j < ynumber; ++j) {
-				for (int k = 0; k < znumber; ++k) {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
 					delete[] divergenceCleaningField[i][j][k];
 					delete[] divergenceCleanUpMatrix[i][j][k];
 					delete[] divergenceCleanUpRightPart[i][j][k];
@@ -378,48 +662,78 @@ Simulation::~Simulation() {
 		delete[] divergenceCleanUpMatrix;
 		delete[] divergenceCleanUpRightPart;
 
-		for (int i = 0; i < xnumber + 1; ++i) {
-			for (int j = 0; j < ynumber; ++j) {
-				for (int k = 0; k < znumber; ++k) {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
 					delete[] divergenceCleaningPotential[i][j][k];
 					delete[] tempDivergenceCleaningPotential[i][j][k];
 				}
 				delete[] divergenceCleaningPotential[i][j];
 				delete[] tempDivergenceCleaningPotential[i][j];
-				delete[] divergenceCleaningPotentialFourier[i][j];
 			}
 			delete[] divergenceCleaningPotential[i];
 			delete[] tempDivergenceCleaningPotential[i];
-			delete[] divergenceCleaningPotentialFourier[i];
 		}
 		delete[] divergenceCleaningPotential;
 		delete[] tempDivergenceCleaningPotential;
+
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				delete[] divergenceCleaningPotentialFourier[i][j];
+			}
+			delete[] divergenceCleaningPotentialFourier[i];
+		}
 		delete[] divergenceCleaningPotentialFourier;
 
-		for (int i = 0; i < xnumber + 2; ++i) {
-			for (int j = 0; j < ynumber + 1; ++j) {
+		for (int i = 0; i < xnumber; ++i) {
+			for (int j = 0; j < ynumber; ++j) {
+				delete[] fourierInput[i][j];
+				delete[] fourierImage[i][j];
+				delete[] fourierOutput[i][j];
+			}
+			delete[] fourierInput[i];
+			delete[] fourierImage[i];
+			delete[] fourierOutput[i];
+		}
+		delete[] fourierInput;
+		delete[] fourierImage;
+		delete[] fourierOutput;
+
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				delete[] massMatrix[i][j];
+				delete[] tempMassMatrix[i][j];
+
 				delete[] Efield[i][j];
 				delete[] newEfield[i][j];
 				delete[] tempEfield[i][j];
-				delete[] smoothingEfield[i][j];
 				delete[] explicitEfield[i][j];
 				delete[] rotB[i][j];
 				delete[] Ederivative[i][j];
+				delete[] tempNodeParameter[i][j];
+				delete[] tempNodeVectorParameter[i][j];
+				delete[] tempNodeMatrixParameter[i][j];
 			}
+			delete[] massMatrix[i];
+			delete[] tempMassMatrix[i];
+
 			delete[] Efield[i];
 			delete[] newEfield[i];
 			delete[] tempEfield[i];
-			delete[] smoothingEfield[i];
 			delete[] explicitEfield[i];
 			delete[] rotB[i];
 			delete[] Ederivative[i];
+			delete[] tempNodeParameter[i];
+			delete[] tempNodeVectorParameter[i];
+			delete[] tempNodeMatrixParameter[i];
 		}
-		for (int i = 0; i < xnumber + 2; ++i) {
-			for (int j = 0; j < ynumber + 1; ++j) {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				delete[] electricFlux[i][j];
 				delete[] electricFluxMinus[i][j];
 				delete[] externalElectricFlux[i][j];
 				delete[] divPressureTensor[i][j];
+				delete[] divPressureTensorMinus[i][j];
 				delete[] dielectricTensor[i][j];
 			}
 
@@ -427,68 +741,89 @@ Simulation::~Simulation() {
 			delete[] electricFluxMinus[i];
 			delete[] externalElectricFlux[i];
 			delete[] divPressureTensor[i];
+			delete[] divPressureTensorMinus[i];
 			delete[] dielectricTensor[i];
 		}
+
+		delete[] massMatrix;
+		delete[] tempMassMatrix;
 
 		delete[] Efield;
 		delete[] newEfield;
 		delete[] tempEfield;
-		delete[] smoothingEfield;
 		delete[] explicitEfield;
 		delete[] rotB;
 		delete[] Ederivative;
+
+		delete[] tempNodeParameter;
+		delete[] tempNodeVectorParameter;
+		delete[] tempNodeMatrixParameter;
 
 		delete[] electricFlux;
 		delete[] electricFluxMinus;
 		delete[] externalElectricFlux;
 		delete[] divPressureTensor;
+		delete[] divPressureTensorMinus;
 		delete[] dielectricTensor;
 
 		for (int t = 0; t < typesNumber; ++t) {
-			for (int i = 0; i < xnumber + 1; ++i) {
-				for (int j = 0; j < ynumber; ++j) {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
 					delete[] particleConcentrations[t][i][j];
+					delete[] particleEnergies[t][i][j];
 					delete[] particleBulkVelocities[t][i][j];
 				}
 				delete[] particleConcentrations[t][i];
+				delete[] particleEnergies[t][i];
 				delete[] particleBulkVelocities[t][i];
 			}
 			delete[] particleConcentrations[t];
+			delete[] particleEnergies[t];
 			delete[] particleBulkVelocities[t];
 		}
 		delete[] particleConcentrations;
+		delete[] particleEnergies;
 		delete[] particleBulkVelocities;
 
-		for (int i = 0; i < xnumber + 1; ++i) {
-			for (int j = 0; j < ynumber; ++j) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
 				delete[] Bfield[i][j];
 				delete[] newBfield[i][j];
-				delete[] smoothingBfield[i][j];
 				delete[] chargeDensity[i][j];
 				delete[] chargeDensityMinus[i][j];
 				delete[] pressureTensor[i][j];
 				delete[] chargeDensityHat[i][j];
 				delete[] tempCellParameter[i][j];
+				delete[] tempCellVectorParameter[i][j];
+				delete[] tempCellMatrixParameter[i][j];
+				delete[] rotE[i][j];
+				delete[] Bderivative[i][j];
 			}
 			delete[] Bfield[i];
 			delete[] newBfield[i];
-			delete[] smoothingBfield[i];
 			delete[] chargeDensity[i];
 			delete[] chargeDensityMinus[i];
 			delete[] pressureTensor[i];
 			delete[] chargeDensityHat[i];
 			delete[] tempCellParameter[i];
+			delete[] tempCellVectorParameter[i];
+			delete[] tempCellMatrixParameter[i];
+			delete[] rotE[i];
+			delete[] Bderivative[i];
 		}
 
 		delete[] Bfield;
 		delete[] newBfield;
-		delete[] smoothingBfield;
 
 		delete[] chargeDensity;
 		delete[] chargeDensityMinus;
 		delete[] pressureTensor;
 		delete[] chargeDensityHat;
 		delete[] tempCellParameter;
+		delete[] tempCellVectorParameter;
+		delete[] tempCellMatrixParameter;
+		delete[] rotE;
+		delete[] Bderivative;
 
 		delete[] xgrid;
 		delete[] middleXgrid;
@@ -496,6 +831,11 @@ Simulation::~Simulation() {
 		delete[] middleYgrid;
 		delete[] zgrid;
 		delete[] middleZgrid;
+
+		delete[] rightOutNodeBuffer;
+		delete[] rightInNodeBuffer;
+		delete[] leftOutNodeBuffer;
+		delete[] leftInNodeBuffer;
 
 		delete[] rightOutVectorNodeBuffer;
 		delete[] rightInVectorNodeBuffer;
@@ -507,131 +847,182 @@ Simulation::~Simulation() {
 		delete[] leftOutVectorCellBuffer;
 		delete[] leftInVectorCellBuffer;
 
+		delete[] rightOutCellBuffer;
+		delete[] rightInCellBuffer;
+		delete[] leftOutCellBuffer;
+		delete[] leftInCellBuffer;
+
+		delete[] backOutNodeBuffer;
+		delete[] backInNodeBuffer;
+		delete[] frontOutNodeBuffer;
+		delete[] frontInNodeBuffer;
+
+		delete[] backOutVectorNodeBuffer;
+		delete[] backInVectorNodeBuffer;
+		delete[] frontOutVectorNodeBuffer;
+		delete[] frontInVectorNodeBuffer;
+
+		delete[] backOutVectorCellBuffer;
+		delete[] backInVectorCellBuffer;
+		delete[] frontOutVectorCellBuffer;
+		delete[] frontInVectorCellBuffer;
+
+		delete[] backOutCellBuffer;
+		delete[] backInCellBuffer;
+		delete[] frontOutCellBuffer;
+		delete[] frontInCellBuffer;
+
+		delete[] topOutNodeBuffer;
+		delete[] topInNodeBuffer;
+		delete[] bottomOutNodeBuffer;
+		delete[] bottomInNodeBuffer;
+
+		delete[] topOutVectorNodeBuffer;
+		delete[] topInVectorNodeBuffer;
+		delete[] bottomOutVectorNodeBuffer;
+		delete[] bottomInVectorNodeBuffer;
+
+		delete[] topOutVectorCellBuffer;
+		delete[] topInVectorCellBuffer;
+		delete[] bottomOutVectorCellBuffer;
+		delete[] bottomInVectorCellBuffer;
+
+		delete[] topOutCellBuffer;
+		delete[] topInCellBuffer;
+		delete[] bottomOutCellBuffer;
+		delete[] bottomInCellBuffer;
+
+		////buneman E
+	delete[] leftOutBunemanExBuffer;
+	delete[] rightOutBunemanExBuffer;
+	delete[] leftInBunemanExBuffer;
+	delete[] rightInBunemanExBuffer;
+
+	delete[] frontOutBunemanExBuffer;
+	delete[] backOutBunemanExBuffer;
+	delete[] frontInBunemanExBuffer;
+	delete[] backInBunemanExBuffer;
+
+	delete[] bottomOutBunemanExBuffer;
+	delete[] topOutBunemanExBuffer;
+	delete[] bottomInBunemanExBuffer;
+	delete[] topInBunemanExBuffer;
+
+	delete[] leftOutBunemanEyBuffer;
+	delete[] rightOutBunemanEyBuffer;
+	delete[] leftInBunemanEyBuffer;
+	delete[] rightInBunemanEyBuffer;
+
+	delete[] frontOutBunemanEyBuffer;
+	delete[] backOutBunemanEyBuffer;
+	delete[] frontInBunemanEyBuffer;
+	delete[] backInBunemanEyBuffer;
+
+	delete[] bottomOutBunemanEyBuffer;
+	delete[] topOutBunemanEyBuffer;
+	delete[] bottomInBunemanEyBuffer;
+	delete[] topInBunemanEyBuffer;
+
+	delete[] leftOutBunemanEzBuffer;
+	delete[] rightOutBunemanEzBuffer;
+	delete[] leftInBunemanEzBuffer;
+	delete[] rightInBunemanEzBuffer;
+
+	delete[] frontOutBunemanEzBuffer;
+	delete[] backOutBunemanEzBuffer;
+	delete[] frontInBunemanEzBuffer;
+	delete[] backInBunemanEzBuffer;
+
+	delete[] bottomOutBunemanEzBuffer;
+	delete[] topOutBunemanEzBuffer;
+	delete[] bottomInBunemanEzBuffer;
+	delete[] topInBunemanEzBuffer;
+
+	///buneman B
+	delete[] leftOutBunemanBxBuffer;
+	delete[] rightOutBunemanBxBuffer;
+	delete[] leftInBunemanBxBuffer;
+	delete[] rightInBunemanBxBuffer;
+
+	delete[] frontOutBunemanBxBuffer;
+	delete[] backOutBunemanBxBuffer;
+	delete[] frontInBunemanBxBuffer;
+	delete[] backInBunemanBxBuffer;
+
+	delete[] bottomOutBunemanBxBuffer;
+	delete[] topOutBunemanBxBuffer;
+	delete[] bottomInBunemanBxBuffer;
+	delete[] topInBunemanBxBuffer;
+
+	delete[] leftOutBunemanByBuffer;
+	delete[] rightOutBunemanByBuffer;
+	delete[] leftInBunemanByBuffer;
+	delete[] rightInBunemanByBuffer;
+
+	delete[] frontOutBunemanByBuffer;
+	delete[] backOutBunemanByBuffer;
+	delete[] frontInBunemanByBuffer;
+	delete[] backInBunemanByBuffer;
+
+	delete[] bottomOutBunemanByBuffer;
+	delete[] topOutBunemanByBuffer;
+	delete[] bottomInBunemanByBuffer;
+	delete[] topInBunemanByBuffer;
+
+	delete[] leftOutBunemanBzBuffer;
+	delete[] rightOutBunemanBzBuffer;
+	delete[] leftInBunemanBzBuffer;
+	delete[] rightInBunemanBzBuffer;
+
+	delete[] frontOutBunemanBzBuffer;
+	delete[] backOutBunemanBzBuffer;
+	delete[] frontInBunemanBzBuffer;
+	delete[] backInBunemanBzBuffer;
+
+	delete[] bottomOutBunemanBzBuffer;
+	delete[] topOutBunemanBzBuffer;
+	delete[] bottomInBunemanBzBuffer;
+	delete[] topInBunemanBzBuffer;
+
 		delete[] rightOutGmresBuffer;
 		delete[] rightInGmresBuffer;
 		delete[] leftOutGmresBuffer;
 		delete[] leftInGmresBuffer;
 
-		if (additionalBinNumber > 0) {
-			for (int i = 0; i < additionalBinNumber; ++i) {
-				for (int j = 0; j < ynumber + 1; ++j) {
-					delete[] additionalEfieldLeft[i][j];
-					delete[] additionalEfieldRight[i][j];
-					delete[] additionalTempEfieldLeft[i][j];
-					delete[] additionalTempEfieldRight[i][j];
-					delete[] additionalNewEfieldLeft[i][j];
-					delete[] additionalNewEfieldRight[i][j];
-					delete[] additionalElectricFluxLeft[i][j];
-					delete[] additionalElectricFluxMinusLeft[i][j];
-					delete[] additionalElectricFluxRight[i][j];
-					delete[] additionalElectricFluxMinusRight[i][j];
-					delete[] additionalDielectricTensorLeft[i][j];
-					delete[] additionalDielectricTensorRight[i][j];
-					delete[] additionalDivPressureTensorLeft[i][j];
-					delete[] additionalDivPressureTensorRight[i][j];
-				}
-				delete[] additionalEfieldLeft[i];
-				delete[] additionalEfieldRight[i];
-				delete[] additionalTempEfieldLeft[i];
-				delete[] additionalTempEfieldRight[i];
-				delete[] additionalNewEfieldLeft[i];
-				delete[] additionalNewEfieldRight[i];
-				delete[] additionalElectricFluxLeft[i];
-				delete[] additionalElectricFluxMinusLeft[i];
-				delete[] additionalElectricFluxRight[i];
-				delete[] additionalElectricFluxMinusRight[i];
-				delete[] additionalDielectricTensorLeft[i];
-				delete[] additionalDielectricTensorRight[i];
-				delete[] additionalDivPressureTensorLeft[i];
-				delete[] additionalDivPressureTensorRight[i];
+		delete[] backOutGmresBuffer;
+		delete[] backInGmresBuffer;
+		delete[] frontOutGmresBuffer;
+		delete[] frontInGmresBuffer;
 
-				for (int j = 0; j < ynumber; ++j) {
-					delete[] additionalBfieldLeft[i][j];
-					delete[] additionalBfieldRight[i][j];
-					delete[] additionalNewBfieldLeft[i][j];
-					delete[] additionalNewBfieldRight[i][j];
-					delete[] additionalChargeDensityHatLeft[i][j];
-					delete[] additionalChargeDensityHatRight[i][j];
-					delete[] additionalChargeDensityLeft[i][j];
-					delete[] additionalChargeDensityMinusLeft[i][j];
-					delete[] additionalChargeDensityRight[i][j];
-					delete[] additionalChargeDensityMinusRight[i][j];
-					delete[] additionalPressureTensorLeft[i][j];
-					delete[] additionalPressureTensorRight[i][j];
-				}
-				delete[] additionalBfieldLeft[i];
-				delete[] additionalBfieldRight[i];
-				delete[] additionalNewBfieldLeft[i];
-				delete[] additionalNewBfieldRight[i];
-				delete[] additionalChargeDensityHatLeft[i];
-				delete[] additionalChargeDensityHatRight[i];
-				delete[] additionalChargeDensityLeft[i];
-				delete[] additionalChargeDensityMinusLeft[i];
-				delete[] additionalChargeDensityRight[i];
-				delete[] additionalChargeDensityMinusRight[i];
-				delete[] additionalPressureTensorLeft[i];
-				delete[] additionalPressureTensorRight[i];
-			}
-			delete[] additionalEfieldLeft;
-			delete[] additionalEfieldRight;
-			delete[] additionalTempEfieldLeft;
-			delete[] additionalTempEfieldRight;
-			delete[] additionalNewEfieldLeft;
-			delete[] additionalNewEfieldRight;
-			delete[] additionalElectricFluxLeft;
-			delete[] additionalElectricFluxMinusLeft;
-			delete[] additionalElectricFluxRight;
-			delete[] additionalElectricFluxMinusRight;
-			delete[] additionalDielectricTensorLeft;
-			delete[] additionalDielectricTensorRight;
-			delete[] additionalDivPressureTensorLeft;
-			delete[] additionalDivPressureTensorRight;
+		delete[] topOutGmresBuffer;
+		delete[] topInGmresBuffer;
+		delete[] bottomOutGmresBuffer;
+		delete[] bottomInGmresBuffer;
 
-			delete[] additionalBfieldLeft;
-			delete[] additionalBfieldRight;
-			delete[] additionalNewBfieldLeft;
-			delete[] additionalNewBfieldRight;
-			delete[] additionalChargeDensityHatLeft;
-			delete[] additionalChargeDensityHatRight;
-			delete[] additionalChargeDensityLeft;
-			delete[] additionalChargeDensityMinusLeft;
-			delete[] additionalChargeDensityRight;
-			delete[] additionalChargeDensityMinusRight;
-			delete[] additionalPressureTensorLeft;
-			delete[] additionalPressureTensorRight;
+		delete[] rightOutDivergenceBuffer;
+		delete[] leftOutDivergenceBuffer;
+		delete[] leftInDivergenceBuffer;
+		delete[] rightInDivergenceBuffer;
 
-			for (int t = 0; t < typesNumber; ++t) {
-				for (int i = 0; i < additionalBinNumber; ++i) {
-					for (int j = 0; j < ynumber; ++j) {
-						delete[] additionalParticleConcentrationsLeft[t][i][j];
-						delete[] additionalParticleConcentrationsRight[t][i][j];
-						delete[] additionalParticleBulkVelocitiesLeft[t][i][j];
-						delete[] additionalParticleBulkVelocitiesRight[t][i][j];
-					}
-					delete[] additionalParticleConcentrationsLeft[t][i];
-					delete[] additionalParticleConcentrationsRight[t][i];
-					delete[] additionalParticleBulkVelocitiesLeft[t][i];
-					delete[] additionalParticleBulkVelocitiesRight[t][i];
-				}
-				delete[] additionalParticleConcentrationsLeft[t];
-				delete[] additionalParticleConcentrationsRight[t];
-				delete[] additionalParticleBulkVelocitiesLeft[t];
-				delete[] additionalParticleBulkVelocitiesRight[t];
-			}
-		}
-		delete[] additionalParticleConcentrationsLeft;
-		delete[] additionalParticleConcentrationsRight;
-		delete[] additionalParticleBulkVelocitiesLeft;
-		delete[] additionalParticleBulkVelocitiesRight;
+		delete[] frontOutDivergenceBuffer;
+		delete[] backOutDivergenceBuffer;
+		delete[] frontInDivergenceBuffer;
+		delete[] backInDivergenceBuffer;
+
+		delete[] topOutDivergenceBuffer;
+		delete[] topInDivergenceBuffer;
+		delete[] bottomOutDivergenceBuffer;
+		delete[] bottomInDivergenceBuffer;
 
 		for (int i = 0; i < particles.size(); ++i) {
 			Particle* particle = particles[i];
 			delete particle;
 		}
 		particles.clear();
+		tempParticles.clear();
 
-		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
-			for (int j = 0; j < ynumber; ++j) {
+		for (int i = 0; i < 2 + 2 * additionalBinNumber; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
 				delete[] tempCellParameterLeft[i][j];
 				delete[] tempCellParameterRight[i][j];
 				delete[] tempCellVectorParameterLeft[i][j];
@@ -653,8 +1044,8 @@ Simulation::~Simulation() {
 		delete[] tempCellMatrixParameterLeft;
 		delete[] tempCellMatrixParameterRight;
 
-		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
-			for (int j = 0; j < ynumber + 1; ++j) {
+		for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				delete[] tempNodeParameterLeft[i][j];
 				delete[] tempNodeParameterRight[i][j];
 				delete[] tempNodeVectorParameterLeft[i][j];
@@ -675,6 +1066,379 @@ Simulation::~Simulation() {
 		delete[] tempNodeVectorParameterRight;
 		delete[] tempNodeMatrixParameterLeft;
 		delete[] tempNodeMatrixParameterRight;
+
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < 2 + 2 * additionalBinNumber; ++j) {
+				delete[] tempCellParameterFront[i][j];
+				delete[] tempCellParameterBack[i][j];
+				delete[] tempCellVectorParameterFront[i][j];
+				delete[] tempCellVectorParameterBack[i][j];
+				delete[] tempCellMatrixParameterFront[i][j];
+				delete[] tempCellMatrixParameterBack[i][j];
+			}
+			delete[] tempCellParameterFront[i];
+			delete[] tempCellParameterBack[i];
+			delete[] tempCellVectorParameterFront[i];
+			delete[] tempCellVectorParameterBack[i];
+			delete[] tempCellMatrixParameterFront[i];
+			delete[] tempCellMatrixParameterBack[i];
+		}
+		delete[] tempCellParameterFront;
+		delete[] tempCellParameterBack;
+		delete[] tempCellVectorParameterFront;
+		delete[] tempCellVectorParameterBack;
+		delete[] tempCellMatrixParameterFront;
+		delete[] tempCellMatrixParameterBack;
+
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
+				delete[] tempNodeParameterFront[i][j];
+				delete[] tempNodeParameterBack[i][j];
+				delete[] tempNodeVectorParameterFront[i][j];
+				delete[] tempNodeVectorParameterBack[i][j];
+				delete[] tempNodeMatrixParameterFront[i][j];
+				delete[] tempNodeMatrixParameterBack[i][j];
+			}
+			delete[] tempNodeParameterFront[i];
+			delete[] tempNodeParameterBack[i];
+			delete[] tempNodeVectorParameterFront[i];
+			delete[] tempNodeVectorParameterBack[i];
+			delete[] tempNodeMatrixParameterFront[i];
+			delete[] tempNodeMatrixParameterBack[i];
+		}
+		delete[] tempNodeParameterFront;
+		delete[] tempNodeParameterBack;
+		delete[] tempNodeVectorParameterFront;
+		delete[] tempNodeVectorParameterBack;
+		delete[] tempNodeMatrixParameterFront;
+		delete[] tempNodeMatrixParameterBack;
+
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				delete[] tempCellParameterBottom[i][j];
+				delete[] tempCellParameterTop[i][j];
+				delete[] tempCellVectorParameterBottom[i][j];
+				delete[] tempCellVectorParameterTop[i][j];
+				delete[] tempCellMatrixParameterBottom[i][j];
+				delete[] tempCellMatrixParameterTop[i][j];
+			}
+			delete[] tempCellParameterBottom[i];
+			delete[] tempCellParameterTop[i];
+			delete[] tempCellVectorParameterBottom[i];
+			delete[] tempCellVectorParameterTop[i];
+			delete[] tempCellMatrixParameterBottom[i];
+			delete[] tempCellMatrixParameterTop[i];
+		}
+		delete[] tempCellParameterBottom;
+		delete[] tempCellParameterTop;
+		delete[] tempCellVectorParameterBottom;
+		delete[] tempCellVectorParameterTop;
+		delete[] tempCellMatrixParameterBottom;
+		delete[] tempCellMatrixParameterTop;
+
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				delete[] tempNodeParameterBottom[i][j];
+				delete[] tempNodeParameterTop[i][j];
+				delete[] tempNodeVectorParameterBottom[i][j];
+				delete[] tempNodeVectorParameterTop[i][j];
+				delete[] tempNodeMatrixParameterBottom[i][j];
+				delete[] tempNodeMatrixParameterTop[i][j];
+			}
+			delete[] tempNodeParameterBottom[i];
+			delete[] tempNodeParameterTop[i];
+			delete[] tempNodeVectorParameterBottom[i];
+			delete[] tempNodeVectorParameterTop[i];
+			delete[] tempNodeMatrixParameterBottom[i];
+			delete[] tempNodeMatrixParameterTop[i];
+		}
+		delete[] tempNodeParameterBottom;
+		delete[] tempNodeParameterTop;
+		delete[] tempNodeVectorParameterBottom;
+		delete[] tempNodeVectorParameterTop;
+		delete[] tempNodeMatrixParameterBottom;
+		delete[] tempNodeMatrixParameterTop;
+
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					delete[] residualBiconjugateDivE[i][j][k];
+					delete[] firstResidualBiconjugateDivE[i][j][k];
+					delete[] vBiconjugateDivE[i][j][k];
+					delete[] pBiconjugateDivE[i][j][k];
+					delete[] sBiconjugateDivE[i][j][k];
+					delete[] tBiconjugateDivE[i][j][k];
+				}
+				delete[] residualBiconjugateDivE[i][j];
+				delete[] firstResidualBiconjugateDivE[i][j];
+				delete[] vBiconjugateDivE[i][j];
+				delete[] pBiconjugateDivE[i][j];
+				delete[] sBiconjugateDivE[i][j];
+				delete[] tBiconjugateDivE[i][j];
+			}
+			delete[] residualBiconjugateDivE[i];
+			delete[] firstResidualBiconjugateDivE[i];
+			delete[] vBiconjugateDivE[i];
+			delete[] pBiconjugateDivE[i];
+			delete[] sBiconjugateDivE[i];
+			delete[] tBiconjugateDivE[i];
+		}
+		delete[] residualBiconjugateDivE;
+		delete[] firstResidualBiconjugateDivE;
+		delete[] vBiconjugateDivE;
+		delete[] pBiconjugateDivE;
+		delete[] sBiconjugateDivE;
+		delete[] tBiconjugateDivE;
+
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					delete[] residualBiconjugateMaxwell[i][j][k];
+					delete[] firstResidualBiconjugateMaxwell[i][j][k];
+					delete[] vBiconjugateMaxwell[i][j][k];
+					delete[] pBiconjugateMaxwell[i][j][k];
+					delete[] sBiconjugateMaxwell[i][j][k];
+					delete[] tBiconjugateMaxwell[i][j][k];
+				}
+				delete[] residualBiconjugateMaxwell[i][j];
+				delete[] firstResidualBiconjugateMaxwell[i][j];
+				delete[] vBiconjugateMaxwell[i][j];
+				delete[] pBiconjugateMaxwell[i][j];
+				delete[] sBiconjugateMaxwell[i][j];
+				delete[] tBiconjugateMaxwell[i][j];
+			}
+			delete[] residualBiconjugateMaxwell[i];
+			delete[] firstResidualBiconjugateMaxwell[i];
+			delete[] vBiconjugateMaxwell[i];
+			delete[] pBiconjugateMaxwell[i];
+			delete[] sBiconjugateMaxwell[i];
+			delete[] tBiconjugateMaxwell[i];
+		}
+		delete[] residualBiconjugateMaxwell;
+		delete[] firstResidualBiconjugateMaxwell;
+		delete[] vBiconjugateMaxwell;
+		delete[] pBiconjugateMaxwell;
+		delete[] sBiconjugateMaxwell;
+		delete[] tBiconjugateMaxwell;
+
+		if(solverType == BUNEMAN){
+
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				delete[] bunemanJx[i][j];
+				delete[] bunemanEx[i][j];
+				delete[] bunemanNewEx[i][j];
+				delete[] tempBunemanExParameter[i][j];
+				delete[] bunemanDivCleaningEx[i][j];
+			}
+			delete[] bunemanJx[i];
+			delete[] bunemanEx[i];
+			delete[] bunemanNewEx[i];
+			delete[] tempBunemanExParameter[i];
+			delete[] bunemanDivCleaningEx[i];
+		}
+		delete[] bunemanJx;
+		delete[] bunemanEx;
+		delete[] bunemanNewEx;
+		delete[] tempBunemanExParameter;
+		delete[] bunemanDivCleaningEx;
+
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				delete[] bunemanJy[i][j];
+				delete[] bunemanEy[i][j];
+				delete[] bunemanNewEy[i][j];
+				delete[] tempBunemanEyParameter[i][j];
+				delete[] bunemanDivCleaningEy[i][j];
+			}
+			delete[] bunemanJy[i];
+			delete[] bunemanEy[i];
+			delete[] bunemanNewEy[i];
+			delete[] tempBunemanEyParameter[i];
+			delete[] bunemanDivCleaningEy[i];
+		}
+		delete[] bunemanJy;
+		delete[] bunemanEy;
+		delete[] bunemanNewEy;
+		delete[] tempBunemanEyParameter;
+		delete[] bunemanDivCleaningEy;
+
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				delete[] bunemanJz[i][j];
+				delete[] bunemanEz[i][j];
+				delete[] bunemanNewEz[i][j];
+				delete[] tempBunemanEzParameter[i][j];
+				delete[] bunemanDivCleaningEz[i][j];
+			}
+			delete[] bunemanJz[i];
+			delete[] bunemanEz[i];
+			delete[] bunemanNewEz[i];
+			delete[] tempBunemanEzParameter[i];
+			delete[] bunemanDivCleaningEz[i];
+		}
+		delete[] bunemanJz;
+		delete[] bunemanEz;
+		delete[] bunemanNewEz;
+		delete[] tempBunemanEzParameter;
+		delete[] bunemanDivCleaningEz;
+
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				delete[] bunemanBx[i][j];
+				delete[] bunemanNewBx[i][j];
+				delete[] tempBunemanBxParameter[i][j];
+				delete[] bunemanDivCleaningBx[i][j];
+			}
+			delete[] bunemanBx[i];
+			delete[] bunemanNewBx[i];
+			delete[] tempBunemanBxParameter[i];
+			delete[] bunemanDivCleaningBx[i];
+		}
+		delete[] bunemanBx;
+		delete[] bunemanNewBx;
+		delete[] tempBunemanBxParameter;
+		delete[] bunemanDivCleaningBx;
+
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				delete[] bunemanBy[i][j];
+				delete[] bunemanNewBy[i][j];
+				delete[] tempBunemanByParameter[i][j];
+				delete[] bunemanDivCleaningBy[i][j];
+			}
+			delete[] bunemanBy[i];
+			delete[] bunemanNewBy[i];
+			delete[] tempBunemanByParameter[i];
+			delete[] bunemanDivCleaningBy[i];
+		}
+		delete[] bunemanBy;
+		delete[] bunemanNewBy;
+		delete[] tempBunemanByParameter;
+		delete[] bunemanDivCleaningBy;
+
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				delete[] bunemanBz[i][j];
+				delete[] bunemanNewBz[i][j];
+				delete[] tempBunemanBzParameter[i][j];
+				delete[] bunemanDivCleaningBz[i][j];
+			}
+			delete[] bunemanBz[i];
+			delete[] bunemanNewBz[i];
+			delete[] tempBunemanBzParameter[i];
+			delete[] bunemanDivCleaningBz[i];
+		}
+		delete[] bunemanBz;
+		delete[] bunemanNewBz;
+		delete[] tempBunemanBzParameter;
+		delete[] bunemanDivCleaningBz;
+
+		//// temp buneman j
+		// left right
+		for(int i = 0; i < 2 + 2*additionalBinNumber; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				delete[] tempBunemanJxLeft[i][j];
+				delete[] tempBunemanJxRight[i][j];
+			}
+			delete[] tempBunemanJxLeft[i];
+			delete[] tempBunemanJxRight[i];
+		}
+		delete[] tempBunemanJxLeft;
+		delete[] tempBunemanJxRight;
+
+
+		for(int i = 0; i < 3 + 2*additionalBinNumber; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				delete[] tempBunemanJyLeft[i][j];
+				delete[] tempBunemanJyRight[i][j];
+			}
+			delete[] tempBunemanJyLeft[i];
+			delete[] tempBunemanJyRight[i];
+		}
+		delete[] tempBunemanJyLeft;
+		delete[] tempBunemanJyRight;
+
+		for(int i = 0; i < 3 + 2*additionalBinNumber; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				delete[] tempBunemanJzLeft[i][j];
+				delete[] tempBunemanJzRight[i][j];
+			}
+			delete[] tempBunemanJzLeft[i];
+			delete[] tempBunemanJzRight[i];
+		}
+		delete[] tempBunemanJzLeft;
+		delete[] tempBunemanJzRight;
+	
+		///front back
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < 3 + 2*additionalBinNumber; ++j){
+				delete[] tempBunemanJxFront[i][j];
+				delete[] tempBunemanJxBack[i][j];
+			}
+			delete[] tempBunemanJxFront[i];
+			delete[] tempBunemanJxBack[i];
+		}
+		delete[] tempBunemanJxFront;
+		delete[] tempBunemanJxBack;
+
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < 2 + 2*additionalBinNumber; ++j){
+				delete[] tempBunemanJyFront[i][j];
+				delete[] tempBunemanJyBack[i][j];
+			}
+			delete[] tempBunemanJyFront[i];
+			delete[] tempBunemanJyBack[i];
+		}
+		delete[] tempBunemanJyFront;
+		delete[] tempBunemanJyBack;
+
+		for(int i = 0; i < xnumberAdded+1; ++i){
+			for(int j = 0; j < 3 + 2*additionalBinNumber; ++j){
+				delete[] tempBunemanJzFront[i][j];
+				delete[] tempBunemanJzBack[i][j];
+			}
+			delete[] tempBunemanJzFront[i];
+			delete[] tempBunemanJzBack[i];
+		}
+		delete[] tempBunemanJzFront;
+		delete[] tempBunemanJzBack;
+		// bottom top
+
+
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				delete[] tempBunemanJxBottom[i][j];
+				delete[] tempBunemanJxTop[i][j];
+			}
+			delete[] tempBunemanJxBottom[i];
+			delete[] tempBunemanJxTop[i];
+		}
+		delete[] tempBunemanJxBottom;
+		delete[] tempBunemanJxTop;
+
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				delete[] tempBunemanJyBottom[i][j];
+				delete[] tempBunemanJyTop[i][j];
+			}
+			delete[] tempBunemanJyBottom[i];
+			delete[] tempBunemanJyTop[i];
+		}
+		delete[] tempBunemanJyBottom;
+		delete[] tempBunemanJyTop;
+
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				delete[] tempBunemanJzBottom[i][j];
+				delete[] tempBunemanJzTop[i][j];
+			}
+			delete[] tempBunemanJzBottom[i];
+			delete[] tempBunemanJzTop[i];
+		}
+		delete[] tempBunemanJzBottom;
+		delete[] tempBunemanJzTop;
+	}
 	}
 }
 
@@ -694,50 +1458,109 @@ void Simulation::rescaleConstantsToTheoretical() {
 }
 
 void Simulation::initialize() {
-	printf("initialization\n");
+	if (rank == 0) printf("initialization\n");
 	fflush(stdout);
-	printLog("initialization\n");
+	if (rank == 0) printLog("initialization\n");
+
+	bool readTrackedParticles = false;
+
+	if (readTrackedParticles) {
+		if (rank == 0) {
+			trackedParticlesNumbers = readTrackedParticlesNumbers((inputDir + "acceleratedParticlesNumbers.dat").c_str(), trackedParticlesNumber);
+		}
+
+		if (rank == 0) {
+			for (int i = 1; i < nprocs; ++i) {
+				int trackedN[1];
+				trackedN[0] = trackedParticlesNumber;
+				MPI_Send(trackedN, 1, MPI_INT, i, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm);
+			}
+		} else {
+			int trackedN[1];
+			MPI_Status status;
+			MPI_Recv(trackedN, 1, MPI_INT, 0, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm, &status);
+			trackedParticlesNumber = trackedN[0];
+		}
+
+		if (rank == 0) {
+			int* tempNumbers = new int[trackedParticlesNumber];
+			int* tempTypes = new int[trackedParticlesNumber];
+			for (int i = 0; i < trackedParticlesNumber; ++i) {
+				tempNumbers[i] = trackedParticlesNumbers[i][0];
+				tempTypes[i] = trackedParticlesNumbers[i][1];
+			}
+			for (int i = 1; i < nprocs; ++i) {
+				MPI_Send(tempNumbers, trackedParticlesNumber, MPI_INT, i, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm);
+				MPI_Send(tempTypes, trackedParticlesNumber, MPI_INT, i, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm);
+			}
+
+			delete[] tempNumbers;
+			delete[] tempTypes;
+		} else {
+			MPI_Status status;
+			int* tempNumbers = new int[trackedParticlesNumber];
+			int* tempTypes = new int[trackedParticlesNumber];
+			trackedParticlesNumbers = new int*[trackedParticlesNumber];
+			MPI_Recv(tempNumbers, trackedParticlesNumber, MPI_INT, 0, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm, &status);
+			MPI_Recv(tempTypes, trackedParticlesNumber, MPI_INT, 0, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm, &status);
+			for (int i = 0; i < trackedParticlesNumber; ++i) {
+				trackedParticlesNumbers[i] = new int[2];
+				trackedParticlesNumbers[i][0] = tempNumbers[i];
+				trackedParticlesNumbers[i][1] = tempTypes[i];
+			}
+			delete[] tempNumbers;
+			delete[] tempTypes;
+		}
+	} else {
+		trackedParticlesNumber = 20;
+		trackedParticlesNumbers = new int*[trackedParticlesNumber];
+		for (int i = 0; i < trackedParticlesNumber; ++i) {
+			trackedParticlesNumbers[i] = new int[2];
+			trackedParticlesNumbers[i][0] = 2*i;
+			trackedParticlesNumbers[i][1] = 0;
+		}
+	}
 
 	xgrid[0] = leftX;
 
-	for (int i = 1; i <= xnumber + 1; ++i) {
+	for (int i = 1; i <= xnumberAdded; ++i) {
 		xgrid[i] = xgrid[0] + i * deltaX;
 	}
 
-	xgrid[xnumber] = rightX;
+	//xgrid[xnumberAdded-1] = rightX;
 	//xgrid[xnumber + 1] = rightX + deltaX;
-	xgrid[xnumber + 1] = xgrid[0]+(xnumber+1)*deltaX;
+	//xgrid[xnumberAdded] = xgrid[0] + (xnumberAdded) * deltaX;
 
 	//printf("xgrid[0] = %lf xgrid[xnumber] = %lf\n", xgrid[0], xgrid[xnumber]);
 
-	ygrid[0] = ysize;
-	for (int j = 0; j <= ynumber; ++j) {
+	ygrid[0] = leftY;
+	for (int j = 0; j <= ynumberAdded; ++j) {
 		ygrid[j] = ygrid[0] + j * deltaY;
 	}
-	ygrid[ynumber] = 2 * ysize;
+	//ygrid[ynumber] = 2 * ysize;
 
-	zgrid[0] = zsize;
-	for (int k = 0; k <= znumber; ++k) {
+	zgrid[0] = leftZ;
+	for (int k = 0; k <= znumberAdded; ++k) {
 		zgrid[k] = zgrid[0] + k * deltaZ;
 	}
-	zgrid[znumber] = 2 * zsize;
+	//zgrid[znumber] = 2 * zsize;
 
-	for (int i = 0; i < xnumber + 1; ++i) {
+	for (int i = 0; i < xnumberAdded; ++i) {
 		middleXgrid[i] = (xgrid[i] + xgrid[i + 1]) / 2;
 	}
 
-	for (int j = 0; j < ynumber; ++j) {
+	for (int j = 0; j < ynumberAdded; ++j) {
 		middleYgrid[j] = (ygrid[j] + ygrid[j + 1]) / 2;
 	}
 
-	for (int k = 0; k < znumber; ++k) {
+	for (int k = 0; k < znumberAdded; ++k) {
 		middleZgrid[k] = (zgrid[k] + zgrid[k + 1]) / 2;
 	}
 
 
-	for (int i = 0; i < xnumber + 2; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				Efield[i][j][k] = E0;
 				newEfield[i][j][k] = Efield[i][j][k];
 				tempEfield[i][j][k] = Efield[i][j][k];
@@ -749,9 +1572,9 @@ void Simulation::initialize() {
 		}
 	}
 
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				Bfield[i][j][k] = B0;
 				//Bfield[i][j][k].x = B0.x;
 				newBfield[i][j][k] = Bfield[i][j][k];
@@ -775,28 +1598,32 @@ void Simulation::initialize() {
 	omegaPlasmaElectron = sqrt(
 		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
 
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	if (omegaPlasmaElectron * xsize / speed_of_light_normalized < 5) {
-		printf("omegaPlasmaElectron*xsize/speed_of_light_normalized < 5\n");
-		fprintf(informationFile, "omegaPlasmaElectron*xsize/speed_of_light_normalized < 5\n");
+		if (rank == 0) printf("omegaPlasmaElectron*xsize/speed_of_light_normalized < 5\n");
+		if (rank == 0) fprintf(informationFile, "omegaPlasmaElectron*xsize/speed_of_light_normalized < 5\n");
 	}
+	if (rank == 0)
 		printf("omegaPlasmaElectron*xsize/speed_of_light_normalized = %g\n",
 		       omegaPlasmaElectron * xsize / speed_of_light_normalized);
 	fflush(stdout);
+	if (rank == 0)
 		fprintf(informationFile, "omegaPlasmaElectron*xsize/speed_of_light_normalized = %g\n",
 		        omegaPlasmaElectron * xsize / speed_of_light_normalized);
 
 	if (omegaPlasmaElectron * deltaX / speed_of_light_normalized > 1) {
-		printf("omegaPlasmaElectron*deltaX/speed_of_light_normalized > 1\n");
+		if (rank == 0) printf("omegaPlasmaElectron*deltaX/speed_of_light_normalized > 1\n");
 		fflush(stdout);
-		fprintf(informationFile, "omegaPlasmaElectron*deltaX/speed_of_light_normalized > 1\n");
+		if (rank == 0) fprintf(informationFile, "omegaPlasmaElectron*deltaX/speed_of_light_normalized > 1\n");
 	}
+	if (rank == 0)
 		printf("omegaPlasmaElectron*deltaX/speed_of_light_normalized = %g\n",
 		       omegaPlasmaElectron * deltaX / speed_of_light_normalized);
 	fflush(stdout);
+	if (rank == 0)
 		fprintf(informationFile, "omegaPlasmaElectron*deltaX/speed_of_light_normalized = %g\n",
 		        omegaPlasmaElectron * deltaX / speed_of_light_normalized);
-	fclose(informationFile);
+	if (rank == 0) fclose(informationFile);
 
 	//checkDebyeParameter();
 	checkGyroRadius();
@@ -808,11 +1635,11 @@ void Simulation::initialize() {
 
 void Simulation::initializeSimpleElectroMagneticWave() {
 	boundaryConditionType = PERIODIC;
-	E0 = Vector3d(0, 0, 0);
-	B0 = Vector3d(0, 0, 0);
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
+	//E0 = Vector3d(0, 0, 0);
+	//B0 = Vector3d(0, 0, 0);
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				Bfield[i][j][k] = Vector3d(0, 0, 0);
 				newBfield[i][j][k] = Bfield[i][j][k];
 			}
@@ -821,13 +1648,148 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 	double kw = (2 * pi / xsizeGeneral);
 	printf("kw = %15.10g\n", kw);
 	fflush(stdout);
-	double E = 1E-5;
+	//double E = 1E-5;
+	double E = B0.norm();
+	if(solverType == BUNEMAN){
+		double omega = speed_of_light_normalized*kw;
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				for(int k = 0; k < znumberAdded + 1; ++k){
+					bunemanEx[i][j][k] = 0;
+					bunemanNewEx[i][j][k] = 0;
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				for(int k = 0; k < znumberAdded + 1; ++k){
+					bunemanEy[i][j][k] = E * sin(kw * xgrid[i]);
+					bunemanNewEy[i][j][k] = bunemanEy[i][j][k];
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				for(int k = 0; k < znumberAdded; ++k){
+					bunemanEz[i][j][k] = 0;
+					bunemanNewEz[i][j][k] = bunemanEz[i][j][k];
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				for(int k = 0; k < znumberAdded; ++k){
+					bunemanBx[i][j][k] = 0;
+					bunemanNewBx[i][j][k] = 0;
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				for(int k = 0; k < znumberAdded; ++k){
+					bunemanBy[i][j][k] = 0;
+					bunemanNewBy[i][j][k] = 0;
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				for(int k = 0; k < znumberAdded + 1; ++k){
+					bunemanBz[i][j][k] = E * sin(kw * middleXgrid[i] - omega*deltaT/2);
+					//bunemanBz[i][j][k] = E * sin(kw * middleXgrid[i]);
+					bunemanNewBz[i][j][k] = bunemanBz[i][j][k];
+				}
+			}
+		}
+	} else {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					Efield[i][j][k].x = 0;
+					Efield[i][j][k].y = E * sin(kw * xgrid[i]);
+					Efield[i][j][k].z = 0;
+					tempEfield[i][j][k] = Efield[i][j][k];
+					newEfield[i][j][k] = tempEfield[i][j][k];
+					explicitEfield[i][j][k] = Efield[i][j][k];
+				}
+			}
+		}
 
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					Bfield[i][j][k].z = E * sin(kw * middleXgrid[i]);
+					newBfield[i][j][k] = Bfield[i][j][k];
+				}
+			}
+		}
+	}
+}
+
+void Simulation::initializeSimpleElectroMagneticWaveY() {
+	boundaryConditionType = PERIODIC;
+	//E0 = Vector3d(0, 0, 0);
+	//B0 = Vector3d(0, 0, 0);
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				Bfield[i][j][k] = Vector3d(0, 0, 0);
+				newBfield[i][j][k] = Bfield[i][j][k];
+			}
+		}
+	}
+	double kw = (2 * pi / ysizeGeneral);
+	printf("kw = %15.10g\n", kw);
+	fflush(stdout);
+	//double E = 1E-5;
+	double E = B0.norm();
+
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				Efield[i][j][k].x = 0;
-				Efield[i][j][k].y = E * sin(kw * xgrid[i]);
+				Efield[i][j][k].z = E * sin(kw * ygrid[j]);
+				Efield[i][j][k].y = 0;
+				tempEfield[i][j][k] = Efield[i][j][k];
+				newEfield[i][j][k] = tempEfield[i][j][k];
+				explicitEfield[i][j][k] = Efield[i][j][k];
+			}
+		}
+	}
+
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				Bfield[i][j][k].x = E * sin(kw * middleYgrid[j]);
+				newBfield[i][j][k] = Bfield[i][j][k];
+			}
+		}
+	}
+}
+
+void Simulation::initializeSimpleElectroMagneticWaveZ() {
+	boundaryConditionType = PERIODIC;
+	//E0 = Vector3d(0, 0, 0);
+	//B0 = Vector3d(0, 0, 0);
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				Bfield[i][j][k] = Vector3d(0, 0, 0);
+				newBfield[i][j][k] = Bfield[i][j][k];
+			}
+		}
+	}
+	double kw = (2 * pi / zsizeGeneral);
+	printf("kw = %15.10g\n", kw);
+	fflush(stdout);
+	//double E = 1E-5;
+	double E = B0.norm();
+
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				Efield[i][j][k].y = 0;
+				Efield[i][j][k].x = E * sin(kw * zgrid[k]);
 				Efield[i][j][k].z = 0;
 				tempEfield[i][j][k] = Efield[i][j][k];
 				newEfield[i][j][k] = tempEfield[i][j][k];
@@ -836,49 +1798,17 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 		}
 	}
 
-		for (int k = 0; k < znumber; ++k) {
-			for (int j = 0; j < ynumber; ++j) {
-				Efield[xnumber][j][k] = Efield[1][j][k];
-				tempEfield[xnumber][j][k] = Efield[1][j][k];
-				newEfield[xnumber][j][k] = Efield[1][j][k];
-				explicitEfield[xnumber][j][k] = explicitEfield[1][j][k];
-			}
-		}
-	
-
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			Efield[i][j][znumber] = Efield[i][j][0];
-			tempEfield[i][j][znumber] = Efield[i][j][0];
-			newEfield[i][j][znumber] = Efield[i][j][0];
-			explicitEfield[i][j][znumber] = explicitEfield[i][j][0];
-		}
-	}
-
-
-	for (int k = 0; k < znumber + 1; ++k) {
-		for (int i = 0; i < xnumber + 1; ++i) {
-			Efield[i][ynumber][k] = Efield[i][0][k];
-			tempEfield[i][ynumber][k] = Efield[i][0][k];
-			newEfield[i][ynumber][k] = Efield[i][0][k];
-			explicitEfield[i][ynumber][k] = explicitEfield[i][0][k];
-		}
-	}
-
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				Bfield[i][j][k].z = E * sin(kw * middleXgrid[i]);
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				Bfield[i][j][k].y = E * sin(kw * middleZgrid[k]);
 				newBfield[i][j][k] = Bfield[i][j][k];
 			}
 		}
 	}
-
-
-	double t = 2 * pi / (kw * speed_of_light_normalized);
 }
 
-void Simulation::initializeRotatedSimpleElectroMagneticWave(int wavesCount) {
+void Simulation::initializeRotatedSimpleElectroMagneticWave(int waveCountX, int waveCountY, int waveCountZ) {
 	boundaryConditionType = PERIODIC;
 
 	Eyamplitude = 1;
@@ -886,10 +1816,10 @@ void Simulation::initializeRotatedSimpleElectroMagneticWave(int wavesCount) {
 	Bzamplitude = Eyamplitude;
 	Byamplitude = Ezamplitude;
 
-	double kx = wavesCount * 2 * pi / xsizeGeneral;
-	double ky = wavesCount * 2 * pi / ysizeGeneral;
-	double kz = wavesCount * 2 * pi / zsizeGeneral;
-	kz = 0;
+	double kx = waveCountX * 2 * pi / xsizeGeneral;
+	double ky = waveCountY * 2 * pi / ysizeGeneral;
+	double kz = waveCountZ * 2 * pi / zsizeGeneral;
+	//kz = 0;
 
 	double kw = sqrt(kx * kx + ky * ky + kz * kz);
 
@@ -909,9 +1839,9 @@ void Simulation::initializeRotatedSimpleElectroMagneticWave(int wavesCount) {
 	}
 
 
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				Efield[i][j][k].x = 0;
 				Efield[i][j][k].y = Eyamplitude * cos(kx * xgrid[i] + ky * ygrid[j] + kz * zgrid[k]);
 				Efield[i][j][k].z = Ezamplitude * sin(kx * xgrid[i] + ky * ygrid[j] + kz * zgrid[k]);
@@ -923,36 +1853,9 @@ void Simulation::initializeRotatedSimpleElectroMagneticWave(int wavesCount) {
 		}
 	}
 
-	for (int k = 0; k < znumber; ++k) {
-		for (int j = 0; j < ynumber; ++j) {
-			Efield[xnumber][j][k] = Efield[0][j][k];
-			tempEfield[xnumber][j][k] = Efield[0][j][k];
-			newEfield[xnumber][j][k] = Efield[0][j][k];
-			explicitEfield[xnumber][j][k] = explicitEfield[0][j][k];
-		}
-	}
-
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			Efield[i][j][znumber] = Efield[i][j][0];
-			tempEfield[i][j][znumber] = Efield[i][j][0];
-			newEfield[i][j][znumber] = Efield[i][j][0];
-			explicitEfield[i][j][znumber] = explicitEfield[i][j][0];
-		}
-	}
-
-	for (int k = 0; k < znumber + 1; ++k) {
-		for (int i = 0; i < xnumber + 1; ++i) {
-			Efield[i][ynumber][k] = Efield[i][0][k];
-			tempEfield[i][ynumber][k] = Efield[i][0][k];
-			newEfield[i][ynumber][k] = Efield[i][0][k];
-			explicitEfield[i][ynumber][k] = explicitEfield[i][0][k];
-		}
-	}
-
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				Bfield[i][j][k].x = 0;
 				Bfield[i][j][k].y = Byamplitude * sin(kx * middleXgrid[i] + ky * middleYgrid[j] + kz * middleZgrid[k]);
 				Bfield[i][j][k].z = Bzamplitude * cos(kx * middleXgrid[i] + ky * middleYgrid[j] + kz * middleZgrid[k]);
@@ -963,9 +1866,9 @@ void Simulation::initializeRotatedSimpleElectroMagneticWave(int wavesCount) {
 	}
 }
 
-void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation) {
+void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation) {
 	boundaryConditionType = PERIODIC;
-	printf("initialization alfven wave\n");
+	if (rank == 0) printf("initialization alfven wave\n");
 	fflush(stdout);
 
 
@@ -982,22 +1885,23 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	createParticles();
 	E0 = Vector3d(0, 0, 0);
 
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	double alfvenV = B0.norm() / sqrt(4 * pi * density);
 	if (alfvenV > speed_of_light_normalized) {
 		printf("alfven velocity > c\n");
-		fprintf(informationFile, "alfven velocity > c\n");
-		fclose(informationFile);
+		if (rank == 0) fprintf(informationFile, "alfven velocity > c\n");
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "alfvenV/c = %15.10g > 1\n", alfvenV / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
-	fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
-	fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
-	printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
-	printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	if (rank == 0) fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	if (rank == 0) fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	if (rank == 0) printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	if (rank == 0) printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
 	fflush(stdout);
 
 	double kw = (wavesCount * 2 * pi / xsizeGeneral);
@@ -1010,26 +1914,28 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
 	if (omegaGyroProton < 5 * speed_of_light_normalized * kw) {
-		printf("omegaGyroProton < 5*k*c\n");
+		if (rank == 0) printf("omegaGyroProton < 5*k*c\n");
 		fflush(stdout);
-		fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
+		if (rank == 0) fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
 		//fclose(informationFile);
 		//exit(0);
 	}
-	printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
+	if (rank == 0) printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
 	fflush(stdout);
+	if (rank == 0)
 		fprintf(informationFile, "omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
 
 	if (omegaPlasmaProton < 5 * omegaGyroProton) {
-		printf("omegaPlasmaProton < 5*omegaGyroProton\n");
+		if (rank == 0) printf("omegaPlasmaProton < 5*omegaGyroProton\n");
 		fflush(stdout);
-		fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
+		if (rank == 0) fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
 		//fclose(informationFile);
 		//exit(0);
 	}
-	printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	if (rank == 0) printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
 	fflush(stdout);
-	fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	if (rank == 0)
+		fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
 
 	//w = q*kw*B/mP * 0.5*(sqrt(d)+-b)/a
 	double b = speed_of_light_normalized * kw * (massProton - massElectron) / massProton;
@@ -1042,11 +1948,12 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	if (discriminant < 0) {
 		printf("discriminant < 0\n");
 		fflush(stdout);
-		fprintf(informationFile, "discriminant < 0\n");
-		fclose(informationFile);
+		if (rank == 0) fprintf(informationFile, "discriminant < 0\n");
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "discriminant = %15.10g\n", discriminant);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
@@ -1090,38 +1997,39 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	a1 = a1 / a0;
 	a0 = 1.0;
 
-	printf("a4 = %g\n", a4);
-	fprintf(informationFile, "a4 = %g\n", a4);
-	printf("a3 = %g\n", a3);
-	fprintf(informationFile, "a3 = %g\n", a3);
-	printf("a2 = %g\n", a2);
-	fprintf(informationFile, "a2 = %g\n", a2);
-	printf("a1 = %g\n", a1);
-	fprintf(informationFile, "a1 = %g\n", a1);
-	printf("a0 = %g\n", a0);
-	fprintf(informationFile, "a0 = %g\n", a0);
+	if (rank == 0) printf("a4 = %g\n", a4);
+	if (rank == 0) fprintf(informationFile, "a4 = %g\n", a4);
+	if (rank == 0) printf("a3 = %g\n", a3);
+	if (rank == 0) fprintf(informationFile, "a3 = %g\n", a3);
+	if (rank == 0) printf("a2 = %g\n", a2);
+	if (rank == 0) fprintf(informationFile, "a2 = %g\n", a2);
+	if (rank == 0) printf("a1 = %g\n", a1);
+	if (rank == 0) fprintf(informationFile, "a1 = %g\n", a1);
+	if (rank == 0) printf("a0 = %g\n", a0);
+	if (rank == 0) fprintf(informationFile, "a0 = %g\n", a0);
 	fflush(stdout);
 
 	double fakeOmega1 = kw * alfvenV;
-	printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	if (rank == 0) printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	fflush(stdout);
-	fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	if (rank == 0) fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	double realOmega2 = solve4orderEquation(a4, a3, a2, a1, a0, 1.0);
 	if (realOmega2 < 0) {
 		printf("omega^2 < 0\n");
 		fflush(stdout);
-		fprintf(informationFile, "omega^2 < 0\n");
-		fclose(informationFile);
+		if (rank == 0) fprintf(informationFile, "omega^2 < 0\n");
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
 	double error = (((a4 * realOmega2 + a3) * realOmega2 + a2) * realOmega2 + a1) * realOmega2 + a0;
-	printf("error = %15.10g\n", error);
+	if (rank == 0) printf("error = %15.10g\n", error);
 	fflush(stdout);
-	fprintf(informationFile, "error = %15.10g\n", error);
+	if (rank == 0) fprintf(informationFile, "error = %15.10g\n", error);
 	//double
 	omega = sqrt(realOmega2) * fakeOmega;
 	if (omega < 0) {
@@ -1129,39 +2037,39 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	}
 
 	if (omega > speed_of_light_normalized * kw / 5.0) {
-		printf("omega > k*c/5\n");
+		if (rank == 0) printf("omega > k*c/5\n");
 		fflush(stdout);
-		fprintf(informationFile, "omega > k*c/5\n");
-		printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(informationFile, "omega > k*c/5\n");
+		if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 		fflush(stdout);
-		fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 		//fclose(informationFile);
-		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
-		fclose(errorLogFile);
+		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		if (rank == 0) fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fclose(errorLogFile);
 		//exit(0);
 	}
-	printf("omega = %g\n", omega / plasma_period);
+	if (rank == 0) printf("omega = %g\n", omega / plasma_period);
 	fflush(stdout);
-	fprintf(informationFile, "omega = %g\n", omega / plasma_period);
+	if (rank == 0) fprintf(informationFile, "omega = %g\n", omega / plasma_period);
 
-	printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 	fflush(stdout);
-	fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 
 	if (fabs(omega) > omegaGyroProton / 2) {
-		printf("omega > omegaGyroProton/2\n");
+		if (rank == 0) printf("omega > omegaGyroProton/2\n");
 		fflush(stdout);
-		fprintf(informationFile, "omega > omegaGyroProton/2\n");
+		if (rank == 0) fprintf(informationFile, "omega > omegaGyroProton/2\n");
 	}
-	printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
 	fflush(stdout);
-	fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
-	fclose(informationFile);
+	if (rank == 0) fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) fclose(informationFile);
 
 	checkFrequency(omega);
 
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	//checkCollisionTime(omega);
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
@@ -1214,9 +2122,9 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	//VzamplitudeProton = 0.0;
 	//Byamplitude = 0.0;
 
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				Efield[i][j][k].x = 0;
 				Efield[i][j][k].y = Eyamplitude * cos(kw * xgrid[i] - phase);
 				Efield[i][j][k].z = Ezamplitude * sin(kw * xgrid[i] - phase);
@@ -1227,6 +2135,7 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 		}
 	}
 
+	/*if (nprocs == 1) {
 		for (int k = 0; k < znumber; ++k) {
 			for (int j = 0; j < ynumber; ++j) {
 				Efield[xnumber][j][k] = Efield[1][j][k];
@@ -1240,7 +2149,7 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 				explicitEfield[xnumber - 1][j][k] = explicitEfield[0][j][k];
 			}
 		}
-	
+	}
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -1258,11 +2167,11 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 			newEfield[i][ynumber][k] = Efield[i][0][k];
 			explicitEfield[i][ynumber][k] = explicitEfield[i][0][k];
 		}
-	}
-
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
+	}*/
+	B0 = Vector3d(B0.norm(), 0, 0);
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				Bfield[i][j][k].x = B0.norm();
 				Bfield[i][j][k].y = Byamplitude * sin(kw * middleXgrid[i] - phase);
 				Bfield[i][j][k].z = Bzamplitude * cos(kw * middleXgrid[i] - phase);
@@ -1274,62 +2183,72 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 	if (fabs(VzamplitudeProton) > speed_of_light_normalized) {
 		printf("VzamplitudeProton > speed_of_light_normalized\n");
 		fflush(stdout);
-		fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
+		if (rank == 0) fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
 		printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 		fflush(stdout);
-		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
-		fclose(informationFile);
+		if (rank == 0)
+			fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeProton/c = %15.10g > 1\n", VzamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
-	printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	if (rank == 0) printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 	fflush(stdout);
-	fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	if (rank == 0)
+		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 
 	if (fabs(VzamplitudeElectron) > speed_of_light_normalized) {
 		printf("VzamplitudeElectron > speed_of_light_normalized\n");
 		fflush(stdout);
-		fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
+		if (rank == 0) fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
 		printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 		fflush(stdout);
-		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
-		fclose(informationFile);
+		if (rank == 0)
+			fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeElectron/c = %15.10g > 1\n", VzamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
-	printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	if (rank == 0) printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 	fflush(stdout);
-	fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	if (rank == 0)
+		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 
 	if (fabs(VyamplitudeProton) > speed_of_light_normalized) {
 		printf("VyamplitudeProton > speed_of_light_normalized\n");
 		fflush(stdout);
-		fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
+		if (rank == 0) fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
 		printf("VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
 		fflush(stdout);
-		fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
-		fclose(informationFile);
+		if (rank == 0)
+			fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeProton/c = %15.10g > 1\n", VyamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
 	if (fabs(VyamplitudeElectron) > speed_of_light_normalized) {
 		printf("VyamplitudeElectron > speed_of_light_normalized\n");
 		fflush(stdout);
-		fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
+		if (rank == 0) fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
 		printf("VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
 		fflush(stdout);
-		fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
-		fclose(informationFile);
+		if (rank == 0)
+			fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeElectron/c = %15.10g > 1\n", VyamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
@@ -1362,28 +2281,28 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 
 	updateDeltaT();
 
-	printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
-	printf("dt = %g\n", deltaT * plasma_period);
+	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) printf("dt = %g\n", deltaT * plasma_period);
 	fflush(stdout);
-	fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
-	fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
+	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
 
 	double Vthermal = sqrt(2 * kBoltzman_normalized * temperature / massElectron);
 	double thermalFlux = Vthermal * concentration * electron_charge_normalized / sqrt(1.0 * types[0].particlesPerBin);
 	double alfvenFlux = (VyamplitudeProton - VyamplitudeElectron) * concentration * electron_charge_normalized;
 	if (thermalFlux > alfvenFlux / 2) {
-		printf("thermalFlux > alfvenFlux/2\n");
+		if (rank == 0) printf("thermalFlux > alfvenFlux/2\n");
 		fflush(stdout);
-		fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
+		if (rank == 0) fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
 	}
-	printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	if (rank == 0) printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
 	fflush(stdout);
-	fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	if (rank == 0) fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
 	double minDeltaT = deltaX / Vthermal;
 	if (minDeltaT > deltaT) {
-		printf("deltaT < dx/Vthermal\n");
+		if (rank == 0) printf("deltaT < dx/Vthermal\n");
 		fflush(stdout);
-		fprintf(informationFile, "deltaT < dx/Vthermal\n");
+		if (rank == 0) fprintf(informationFile, "deltaT < dx/Vthermal\n");
 
 		//printf("deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
 		//fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
@@ -1391,7 +2310,7 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 		//fclose(informationFile);
 		//exit(0);
 	}
-	
+	if (rank == 0) {
 		printf("deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
 		fflush(stdout);
 		fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
@@ -1495,18 +2414,21 @@ void Simulation:: initializeAlfvenWaveX(int wavesCount, double amplitudeRelation
 		fprintf(informationFile, "dVze/dt amplitude = %g\n",
 		        derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
-	
+	}
 
-	fclose(informationFile);
+	if (rank == 0) fclose(informationFile);
 }
 
 
 void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation) {
 	boundaryConditionType = PERIODIC;
-	printf("initialization alfven wave\n");
+	if (rank == 0)printf("initialization alfven wave\n");
+	fflush(stdout);
 
 	double concentration = density / (massProton + massElectron);
 	types[1].particesDeltaX = types[0].particesDeltaX;
+	types[1].particesDeltaY = types[0].particesDeltaY;
+	types[1].particesDeltaZ = types[0].particesDeltaZ;
 	types[1].particlesPerBin = types[0].particlesPerBin;
 	types[0].concentration = concentration;
 	types[1].concentration = concentration;
@@ -1518,23 +2440,24 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	createParticles();
 	E0 = Vector3d(0, 0, 0);
 
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	double alfvenV = B0.norm() / sqrt(4 * pi * density);
 	if (alfvenV > speed_of_light_normalized) {
 		printf("alfven velocity > c\n");
 		fflush(stdout);
-		fprintf(informationFile, "alfven velocity > c\n");
-		fclose(informationFile);
+		if (rank == 0) fprintf(informationFile, "alfven velocity > c\n");
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "alfvenV/c = %15.10g > 1\n", alfvenV / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
-	fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
-	fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
-	printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
-	printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	if (rank == 0) fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	if (rank == 0) fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	if (rank == 0) printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	if (rank == 0) printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
 	fflush(stdout);
 
 	//double kw = wavesCount * 2 * pi / xsize;
@@ -1548,26 +2471,28 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
 	if (omegaGyroProton < 5 * speed_of_light_normalized * kw) {
-		printf("omegaGyroProton < 5*k*c\n");
+		if (rank == 0) printf("omegaGyroProton < 5*k*c\n");
 		fflush(stdout);
-		fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
+		if (rank == 0) fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
 		//fclose(informationFile);
 		//exit(0);
 	}
-	printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
+	if (rank == 0) printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
 	fflush(stdout);
-	fprintf(informationFile, "omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
+	if (rank == 0)
+		fprintf(informationFile, "omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
 
 	if (omegaPlasmaProton < 5 * omegaGyroProton) {
-		printf("omegaPlasmaProton < 5*omegaGyroProton\n");
+		if (rank == 0) printf("omegaPlasmaProton < 5*omegaGyroProton\n");
 		fflush(stdout);
-		fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
+		if (rank == 0) fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
 		//fclose(informationFile);
 		//exit(0);
 	}
-	printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	if (rank == 0) printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
 	fflush(stdout);
-	fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	if (rank == 0)
+		fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
 
 	//w = q*kw*B/mP * 0.5*(sqrt(d)+-b)/a
 	double b = speed_of_light_normalized * kw * (massProton - massElectron) / massProton;
@@ -1580,11 +2505,12 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	if (discriminant < 0) {
 		printf("discriminant < 0\n");
 		fflush(stdout);
-		fprintf(informationFile, "discriminant < 0\n");
-		fclose(informationFile);
+		if (rank == 0) fprintf(informationFile, "discriminant < 0\n");
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "discriminant = %15.10g\n", discriminant);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
@@ -1628,38 +2554,39 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	a1 = a1 / a0;
 	a0 = 1.0;
 
-	printf("a4 = %g\n", a4);
-	fprintf(informationFile, "a4 = %g\n", a4);
-	printf("a3 = %g\n", a3);
-	fprintf(informationFile, "a3 = %g\n", a3);
-	printf("a2 = %g\n", a2);
-	fprintf(informationFile, "a2 = %g\n", a2);
-	printf("a1 = %g\n", a1);
-	fprintf(informationFile, "a1 = %g\n", a1);
-	printf("a0 = %g\n", a0);
-	fprintf(informationFile, "a0 = %g\n", a0);
+	if (rank == 0) printf("a4 = %g\n", a4);
+	if (rank == 0) fprintf(informationFile, "a4 = %g\n", a4);
+	if (rank == 0) printf("a3 = %g\n", a3);
+	if (rank == 0) fprintf(informationFile, "a3 = %g\n", a3);
+	if (rank == 0) printf("a2 = %g\n", a2);
+	if (rank == 0) fprintf(informationFile, "a2 = %g\n", a2);
+	if (rank == 0) printf("a1 = %g\n", a1);
+	if (rank == 0) fprintf(informationFile, "a1 = %g\n", a1);
+	if (rank == 0) printf("a0 = %g\n", a0);
+	if (rank == 0) fprintf(informationFile, "a0 = %g\n", a0);
 	fflush(stdout);
 
 	double fakeOmega1 = kw * alfvenV;
-	printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	if (rank == 0) printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	fflush(stdout);
-	fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	if (rank == 0) fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	double realOmega2 = solve4orderEquation(a4, a3, a2, a1, a0, 1.0);
 	if (realOmega2 < 0) {
 		printf("omega^2 < 0\n");
 		fflush(stdout);
-		fprintf(informationFile, "omega^2 < 0\n");
-		fclose(informationFile);
+		if (rank == 0) fprintf(informationFile, "omega^2 < 0\n");
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
 	double error = (((a4 * realOmega2 + a3) * realOmega2 + a2) * realOmega2 + a1) * realOmega2 + a0;
-	printf("error = %15.10g\n", error);
+	if (rank == 0) printf("error = %15.10g\n", error);
 	fflush(stdout);
-	fprintf(informationFile, "error = %15.10g\n", error);
+	if (rank == 0) fprintf(informationFile, "error = %15.10g\n", error);
 	//double
 	omega = sqrt(realOmega2) * fakeOmega;
 	if (omega < 0) {
@@ -1668,32 +2595,38 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 
 	if (omega > speed_of_light_normalized * kw / 5.0) {
 		printf("omega > k*c/5\n");
-		fprintf(informationFile, "omega > k*c/5\n");
-		printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
-		fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega > k*c/5\n");
+		if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 		//fclose(informationFile);
-		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
-		fclose(errorLogFile);
+		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		if (rank == 0) fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fclose(errorLogFile);
 		//exit(0);
 	}
-	printf("omega = %g\n", omega / plasma_period);
-	fprintf(informationFile, "omega = %g\n", omega / plasma_period);
+	if (rank == 0) printf("omega = %g\n", omega / plasma_period);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "omega = %g\n", omega / plasma_period);
 
-	printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
-	fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 
 	if (fabs(omega) > omegaGyroProton / 2) {
-		printf("omega > omegaGyroProton/2\n");
-		fprintf(informationFile, "omega > omegaGyroProton/2\n");
+		if (rank == 0) printf("omega > omegaGyroProton/2\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega > omegaGyroProton/2\n");
 	}
-	printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
-	fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
-	fclose(informationFile);
+	if (rank == 0) printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) fclose(informationFile);
 
 	checkFrequency(omega);
 
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	//checkCollisionTime(omega);
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
@@ -1745,15 +2678,15 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	//VzamplitudeProton = 0.0;
 	//Byamplitude = 0.0;
 
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				/*Efield[i][j][k].x = 0;
 				Efield[i][j][k].y = Eyamplitude * cos(kw * xgrid[i] - kw * xshift);
 				Efield[i][j][k].z = Ezamplitude * sin(kw * xgrid[i] - kw * xshift);*/
-				Efield[i][j][k].x = -Eyamplitude * cos(kw * ygrid[j] - kw * xshift);
+				Efield[i][j][k].x = Ezamplitude * sin(kw * ygrid[j] - kw * xshift);
 				Efield[i][j][k].y = 0;
-				Efield[i][j][k].z = Ezamplitude * sin(kw * ygrid[j] - kw * xshift);
+				Efield[i][j][k].z = Eyamplitude * cos(kw * ygrid[j] - kw * xshift);
 				explicitEfield[i][j][k] = Efield[i][j][k];
 				tempEfield[i][j][k] = Efield[i][j][k];
 				newEfield[i][j][k] = Efield[i][j][k];
@@ -1761,6 +2694,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		}
 	}
 
+	/*if (nprocs == 1) {
 		for (int k = 0; k < znumber; ++k) {
 			for (int j = 0; j < ynumber; ++j) {
 				Efield[xnumber][j][k] = Efield[0][j][k];
@@ -1769,7 +2703,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 				explicitEfield[xnumber][j][k] = explicitEfield[0][j][k];
 			}
 		}
-	
+	}
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -1787,17 +2721,17 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 			newEfield[i][ynumber][k] = Efield[i][0][k];
 			explicitEfield[i][ynumber][k] = explicitEfield[i][0][k];
 		}
-	}
+	}*/
 
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				/*Bfield[i][j][k].x = B0.norm();
 				Bfield[i][j][k].y = Byamplitude * sin(kw * middleXgrid[i] - kw * xshift);
 				Bfield[i][j][k].z = Bzamplitude * cos(kw * middleXgrid[i] - kw * xshift);*/
-				Bfield[i][j][k].x = -Byamplitude * sin(kw * middleYgrid[j] - kw * xshift);
+				Bfield[i][j][k].x = Bzamplitude * cos(kw * middleYgrid[j] - kw * xshift);
 				Bfield[i][j][k].y = B0.norm();
-				Bfield[i][j][k].z = Bzamplitude * cos(kw * middleYgrid[j] - kw * xshift);
+				Bfield[i][j][k].z = Byamplitude * sin(kw * middleYgrid[j] - kw * xshift);
 				newBfield[i][j][k] = Bfield[i][j][k];
 			}
 		}
@@ -1806,61 +2740,72 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	if (fabs(VzamplitudeProton) > speed_of_light_normalized) {
 		printf("VzamplitudeProton > speed_of_light_normalized\n");
 		fflush(stdout);
-		fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
+		if (rank == 0) fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
 		printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 		fflush(stdout);
-		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
-		fclose(informationFile);
+		if (rank == 0)
+			fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeProton/c = %15.10g > 1\n", VzamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
-	printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	if (rank == 0) printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 	fflush(stdout);
-	fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	if (rank == 0)
+		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 
 	if (fabs(VzamplitudeElectron) > speed_of_light_normalized) {
 		printf("VzamplitudeElectron > speed_of_light_normalized\n");
 		fflush(stdout);
-		fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
+		if (rank == 0) fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
 		printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 		fflush(stdout);
-		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
-		fclose(informationFile);
+		if (rank == 0)
+			fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeElectron/c = %15.10g > 1\n", VzamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
-	printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
-	fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	if (rank == 0) printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	fflush(stdout);
+	if (rank == 0)
+		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 
 	if (fabs(VyamplitudeProton) > speed_of_light_normalized) {
 		printf("VyamplitudeProton > speed_of_light_normalized\n");
 		fflush(stdout);
-		fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
+		if (rank == 0) fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
 		printf("VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
 		fflush(stdout);
-		fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
-		fclose(informationFile);
+		if (rank == 0)
+			fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeProton/c = %15.10g > 1\n", VyamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
 	if (fabs(VyamplitudeElectron) > speed_of_light_normalized) {
 		printf("VyamplitudeElectron > speed_of_light_normalized\n");
 		fflush(stdout);
-		fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
+		if (rank == 0) fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
 		printf("VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
 		fflush(stdout);
-		fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
-		fclose(informationFile);
+		if (rank == 0)
+			fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeElectron/c = %15.10g > 1\n", VyamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
@@ -1874,16 +2819,16 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		double leftWeight = (ygrid[yn + 1] - particle->coordinates.y) / deltaY;
 		if (particle->type == PROTON) {
 			//velocity = Vector3d(0, 0, 1) * (VzamplitudeProton) * (leftWeight*cos(kw * (ygrid[yn] - xshift)) + rightWeight*cos(kw*(ygrid[yn+1] - xshift))) + Vector3d(0, 1, 0) * VyamplitudeProton * (leftWeight*sin(kw * (ygrid[yn] - xshift)) + rightWeight*sin(kw*(ygrid[yn+1] - xshift)));
-			velocity = (Vector3d(0, 0, 1) * (VzamplitudeProton) * cos(
-				kw * particle->coordinates.y - kw * xshift) - Vector3d(1, 0, 0) * VyamplitudeProton * sin(
+			velocity = (Vector3d(1, 0, 0) * (VzamplitudeProton) * cos(
+				kw * particle->coordinates.y - kw * xshift) + Vector3d(0, 0, 1) * VyamplitudeProton * sin(
 				kw * particle->coordinates.y - kw * xshift));
 
 		}
 		if (particle->type == ELECTRON) {
 
 			//velocity = Vector3d(0, 0, 1) * (VzamplitudeElectron) * (leftWeight*cos(kw * (ygrid[yn] - xshift)) + rightWeight*cos(kw*(ygrid[yn+1] - xshift))) + Vector3d(0, 1, 0) * VyamplitudeElectron * (leftWeight*sin(kw * (ygrid[yn] - xshift)) + rightWeight*sin(kw*(ygrid[yn+1] - xshift)));
-			velocity = (Vector3d(0, 0, 1) * (VzamplitudeElectron) * cos(
-				kw * particle->coordinates.y - kw * xshift) - Vector3d(1, 0, 0) * VyamplitudeElectron * sin(
+			velocity = (Vector3d(1, 0, 0) * (VzamplitudeElectron) * cos(
+				kw * particle->coordinates.y - kw * xshift) + Vector3d(0, 0, 1) * VyamplitudeElectron * sin(
 				kw * particle->coordinates.y - kw * xshift));
 		}
 		double beta = velocity.norm() / speed_of_light_normalized;
@@ -1895,26 +2840,28 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 
 	updateDeltaT();
 
-	printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
-	printf("dt = %g\n", deltaT * plasma_period);
+	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) printf("dt = %g\n", deltaT * plasma_period);
 	fflush(stdout);
-	fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
-	fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
+	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
 
 	double Vthermal = sqrt(2 * kBoltzman_normalized * temperature / massElectron);
 	double thermalFlux = Vthermal * concentration * electron_charge_normalized / sqrt(1.0 * types[0].particlesPerBin);
 	double alfvenFlux = (VyamplitudeProton - VyamplitudeElectron) * concentration * electron_charge_normalized;
 	if (thermalFlux > alfvenFlux / 2) {
-		printf("thermalFlux > alfvenFlux/2\n");
-		fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
+		if (rank == 0) printf("thermalFlux > alfvenFlux/2\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
 	}
-	printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	if (rank == 0) printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
 	fflush(stdout);
-	fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	if (rank == 0) fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
 	double minDeltaT = deltaX / Vthermal;
 	if (minDeltaT > deltaT) {
-		printf("deltaT < dx/Vthermal\n");
-		fprintf(informationFile, "deltaT < dx/Vthermal\n");
+		if (rank == 0) printf("deltaT < dx/Vthermal\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "deltaT < dx/Vthermal\n");
 
 		//printf("deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
 		//fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
@@ -1922,6 +2869,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		//fclose(informationFile);
 		//exit(0);
 	}
+	if (rank == 0) {
 		printf("deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
 		fflush(stdout);
 		fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
@@ -2025,17 +2973,20 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "dVze/dt amplitude = %g\n",
 		        derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
-	
+	}
 
-	fclose(informationFile);
+	if (rank == 0) fclose(informationFile);
 }
 
-void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRelation) {
+void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation) {
 	boundaryConditionType = PERIODIC;
-	printf("initialization alfven wave\n");
+	if (rank == 0)printf("initialization alfven wave\n");
+	fflush(stdout);
 
 	double concentration = density / (massProton + massElectron);
 	types[1].particesDeltaX = types[0].particesDeltaX;
+	types[1].particesDeltaY = types[0].particesDeltaY;
+	types[1].particesDeltaZ = types[0].particesDeltaZ;
 	types[1].particlesPerBin = types[0].particlesPerBin;
 	types[0].concentration = concentration;
 	types[1].concentration = concentration;
@@ -2047,31 +2998,28 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 	createParticles();
 	E0 = Vector3d(0, 0, 0);
 
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	double alfvenV = B0.norm() / sqrt(4 * pi * density);
 	if (alfvenV > speed_of_light_normalized) {
 		printf("alfven velocity > c\n");
-		fprintf(informationFile, "alfven velocity > c\n");
-		fclose(informationFile);
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "alfven velocity > c\n");
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "alfvenV/c = %15.10g > 1\n", alfvenV / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
-	fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
-	fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
-	printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
-	printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	if (rank == 0) fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	if (rank == 0) fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	if (rank == 0) printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	if (rank == 0) printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	fflush(stdout);
 
-	double kx = wavesCount * 2 * pi / xsize;
-	double ky = wavesCount * 2 * pi / ysize;
-	double kz = wavesCount * 2 * pi / zsize;
-	kz = 0;
-
-	double kw = sqrt(kx * kx + ky * ky + kz * kz);
-
-	double weight = concentration * volumeB(0, 0, 0) / types[0].particlesPerBin;
+	//double kw = wavesCount * 2 * pi / xsize;
+	double kw = wavesCount * 2 * pi / zsizeGeneral;
 
 	omegaPlasmaProton = sqrt(
 		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massProton);
@@ -2081,22 +3029,28 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
 	if (omegaGyroProton < 5 * speed_of_light_normalized * kw) {
-		printf("omegaGyroProton < 5*k*c\n");
-		fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
+		if (rank == 0) printf("omegaGyroProton < 5*k*c\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
 		//fclose(informationFile);
 		//exit(0);
 	}
-	printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
-	fprintf(informationFile, "omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
+	if (rank == 0) printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
+	fflush(stdout);
+	if (rank == 0)
+		fprintf(informationFile, "omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
 
 	if (omegaPlasmaProton < 5 * omegaGyroProton) {
-		printf("omegaPlasmaProton < 5*omegaGyroProton\n");
-		fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
+		if (rank == 0) printf("omegaPlasmaProton < 5*omegaGyroProton\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
 		//fclose(informationFile);
 		//exit(0);
 	}
-	printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
-	fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	if (rank == 0) printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	fflush(stdout);
+	if (rank == 0)
+		fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
 
 	//w = q*kw*B/mP * 0.5*(sqrt(d)+-b)/a
 	double b = speed_of_light_normalized * kw * (massProton - massElectron) / massProton;
@@ -2108,11 +3062,13 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 
 	if (discriminant < 0) {
 		printf("discriminant < 0\n");
-		fprintf(informationFile, "discriminant < 0\n");
-		fclose(informationFile);
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "discriminant < 0\n");
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "discriminant = %15.10g\n", discriminant);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
@@ -2156,34 +3112,39 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 	a1 = a1 / a0;
 	a0 = 1.0;
 
-	printf("a4 = %g\n", a4);
-	fprintf(informationFile, "a4 = %g\n", a4);
-	printf("a3 = %g\n", a3);
-	fprintf(informationFile, "a3 = %g\n", a3);
-	printf("a2 = %g\n", a2);
-	fprintf(informationFile, "a2 = %g\n", a2);
-	printf("a1 = %g\n", a1);
-	fprintf(informationFile, "a1 = %g\n", a1);
-	printf("a0 = %g\n", a0);
-	fprintf(informationFile, "a0 = %g\n", a0);
+	if (rank == 0) printf("a4 = %g\n", a4);
+	if (rank == 0) fprintf(informationFile, "a4 = %g\n", a4);
+	if (rank == 0) printf("a3 = %g\n", a3);
+	if (rank == 0) fprintf(informationFile, "a3 = %g\n", a3);
+	if (rank == 0) printf("a2 = %g\n", a2);
+	if (rank == 0) fprintf(informationFile, "a2 = %g\n", a2);
+	if (rank == 0) printf("a1 = %g\n", a1);
+	if (rank == 0) fprintf(informationFile, "a1 = %g\n", a1);
+	if (rank == 0) printf("a0 = %g\n", a0);
+	if (rank == 0) fprintf(informationFile, "a0 = %g\n", a0);
+	fflush(stdout);
 
 	double fakeOmega1 = kw * alfvenV;
-	printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
-	fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	if (rank == 0) printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	double realOmega2 = solve4orderEquation(a4, a3, a2, a1, a0, 1.0);
 	if (realOmega2 < 0) {
 		printf("omega^2 < 0\n");
-		fprintf(informationFile, "omega^2 < 0\n");
-		fclose(informationFile);
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega^2 < 0\n");
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
 	double error = (((a4 * realOmega2 + a3) * realOmega2 + a2) * realOmega2 + a1) * realOmega2 + a0;
-	printf("error = %15.10g\n", error);
-	fprintf(informationFile, "error = %15.10g\n", error);
+	if (rank == 0) printf("error = %15.10g\n", error);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "error = %15.10g\n", error);
 	//double
 	omega = sqrt(realOmega2) * fakeOmega;
 	if (omega < 0) {
@@ -2192,32 +3153,38 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 
 	if (omega > speed_of_light_normalized * kw / 5.0) {
 		printf("omega > k*c/5\n");
-		fprintf(informationFile, "omega > k*c/5\n");
-		printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
-		fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega > k*c/5\n");
+		if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 		//fclose(informationFile);
-		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
-		fclose(errorLogFile);
+		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		if (rank == 0) fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fclose(errorLogFile);
 		//exit(0);
 	}
-	printf("omega = %g\n", omega / plasma_period);
-	fprintf(informationFile, "omega = %g\n", omega / plasma_period);
+	if (rank == 0) printf("omega = %g\n", omega / plasma_period);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "omega = %g\n", omega / plasma_period);
 
-	printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
-	fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
 
 	if (fabs(omega) > omegaGyroProton / 2) {
-		printf("omega > omegaGyroProton/2\n");
-		fprintf(informationFile, "omega > omegaGyroProton/2\n");
+		if (rank == 0) printf("omega > omegaGyroProton/2\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega > omegaGyroProton/2\n");
 	}
-	printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
-	fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
-	fclose(informationFile);
+	if (rank == 0) printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) fclose(informationFile);
 
 	checkFrequency(omega);
 
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	//checkCollisionTime(omega);
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
@@ -2226,11 +3193,579 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 
 	double alfvenVReal = omega / kw;
 
-	fprintf(informationFile, "alfven V real = %15.10g\n", alfvenVReal * scaleFactor / plasma_period);
-	fprintf(informationFile, "alfven V real x = %15.10g\n", alfvenVReal * (kx / kw) * scaleFactor / plasma_period);
-
 	//double
 	Bzamplitude = B0.norm() * epsilonAmplitude;
+
+	double Omegae = omegaGyroElectron;
+	double Omegae2 = Omegae * Omegae;
+	double Omegap = omegaGyroProton;
+	double Omegap2 = Omegap * Omegap;
+	double omegae = omegaPlasmaElectron;
+	double omegae2 = omegae * omegae;
+	double omegap = omegaPlasmaProton;
+	double omegap2 = omegap * omegap;
+
+	double kc = kw * speed_of_light_normalized;
+	double kc2 = kc * kc;
+
+	double denominator = omega * omega - Omegae2 - (omegae2 * omega * omega / (omega * omega - kc2));
+
+	//double
+	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega * omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) * denominator)) + (Omegap / omega))) * Bzamplitude;
+	//double
+	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 * omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
+
+	//double
+	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (VzamplitudeElectron - VzamplitudeProton);
+
+	//double
+	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) * Bzamplitude;
+	//double
+	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) * Bzamplitude;
+
+	//double
+	Eyamplitude = (omega / kc) * Bzamplitude;
+	//double
+	Ezamplitude = -(omega / kc) * Byamplitude;
+
+	double xshift = 0;
+	//double xshift = xsize/4;
+
+	//Eyamplitude = 0.0;
+	//VzamplitudeElectron = 0.0;
+	//VzamplitudeProton = 0.0;
+	//Byamplitude = 0.0;
+
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				/*Efield[i][j][k].x = 0;
+				Efield[i][j][k].y = Eyamplitude * cos(kw * xgrid[i] - kw * xshift);
+				Efield[i][j][k].z = Ezamplitude * sin(kw * xgrid[i] - kw * xshift);*/
+				Efield[i][j][k].x = Eyamplitude * cos(kw * zgrid[k] - kw * xshift);
+				Efield[i][j][k].z = 0;
+				Efield[i][j][k].y = Ezamplitude * sin(kw * zgrid[k] - kw * xshift);
+				explicitEfield[i][j][k] = Efield[i][j][k];
+				tempEfield[i][j][k] = Efield[i][j][k];
+				newEfield[i][j][k] = Efield[i][j][k];
+			}
+		}
+	}
+	B0 = Vector3d(0, 0, B0.norm());
+	/*if (nprocs == 1) {
+		for (int k = 0; k < znumber; ++k) {
+			for (int j = 0; j < ynumber; ++j) {
+				Efield[xnumber][j][k] = Efield[0][j][k];
+				tempEfield[xnumber][j][k] = Efield[0][j][k];
+				newEfield[xnumber][j][k] = Efield[0][j][k];
+				explicitEfield[xnumber][j][k] = explicitEfield[0][j][k];
+			}
+		}
+	}
+
+	for (int i = 0; i < xnumber + 1; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+			Efield[i][j][znumber] = Efield[i][j][0];
+			tempEfield[i][j][znumber] = Efield[i][j][0];
+			newEfield[i][j][znumber] = Efield[i][j][0];
+			explicitEfield[i][j][znumber] = explicitEfield[i][j][0];
+		}
+	}
+
+	for (int k = 0; k < znumber + 1; ++k) {
+		for (int i = 0; i < xnumber + 1; ++i) {
+			Efield[i][ynumber][k] = Efield[i][0][k];
+			tempEfield[i][ynumber][k] = Efield[i][0][k];
+			newEfield[i][ynumber][k] = Efield[i][0][k];
+			explicitEfield[i][ynumber][k] = explicitEfield[i][0][k];
+		}
+	}*/
+
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				/*Bfield[i][j][k].x = B0.norm();
+				Bfield[i][j][k].y = Byamplitude * sin(kw * middleXgrid[i] - kw * xshift);
+				Bfield[i][j][k].z = Bzamplitude * cos(kw * middleXgrid[i] - kw * xshift);*/
+				Bfield[i][j][k].x = Byamplitude * sin(kw * middleZgrid[k] - kw * xshift);
+				Bfield[i][j][k].z = B0.norm();
+				Bfield[i][j][k].y = Bzamplitude * cos(kw * middleZgrid[k] - kw * xshift);
+				newBfield[i][j][k] = Bfield[i][j][k];
+			}
+		}
+	}
+
+	if (fabs(VzamplitudeProton) > speed_of_light_normalized) {
+		printf("VzamplitudeProton > speed_of_light_normalized\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
+		printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+		fflush(stdout);
+		if (rank == 0)
+			fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "VzamplitudeProton/c = %15.10g > 1\n", VzamplitudeProton / speed_of_light_normalized);
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+	if (rank == 0) printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	fflush(stdout);
+	if (rank == 0)
+		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+
+	if (fabs(VzamplitudeElectron) > speed_of_light_normalized) {
+		printf("VzamplitudeElectron > speed_of_light_normalized\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
+		printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+		fflush(stdout);
+		if (rank == 0)
+			fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "VzamplitudeElectron/c = %15.10g > 1\n", VzamplitudeElectron / speed_of_light_normalized);
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+	if (rank == 0) printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	fflush(stdout);
+	if (rank == 0)
+		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+
+	if (fabs(VyamplitudeProton) > speed_of_light_normalized) {
+		printf("VyamplitudeProton > speed_of_light_normalized\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
+		printf("VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
+		fflush(stdout);
+		if (rank == 0)
+			fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "VyamplitudeProton/c = %15.10g > 1\n", VyamplitudeProton / speed_of_light_normalized);
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+
+	if (fabs(VyamplitudeElectron) > speed_of_light_normalized) {
+		printf("VyamplitudeElectron > speed_of_light_normalized\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
+		printf("VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
+		fflush(stdout);
+		if (rank == 0)
+			fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "VyamplitudeElectron/c = %15.10g > 1\n", VyamplitudeElectron / speed_of_light_normalized);
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+
+	//k > 0, w > 0, kx-wt, Bz > 0, Vz < 0, Vyp > 0, Vye < 0
+
+	for (int pcount = 0; pcount < particles.size(); ++pcount) {
+		Particle* particle = particles[pcount];
+		Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+		int yn = (particle->coordinates.y - ygrid[0]) / deltaY;
+		double rightWeight = (particle->coordinates.y - ygrid[yn]) / deltaY;
+		double leftWeight = (ygrid[yn + 1] - particle->coordinates.y) / deltaY;
+		if (particle->type == PROTON) {
+			//velocity = Vector3d(0, 0, 1) * (VzamplitudeProton) * (leftWeight*cos(kw * (ygrid[yn] - xshift)) + rightWeight*cos(kw*(ygrid[yn+1] - xshift))) + Vector3d(0, 1, 0) * VyamplitudeProton * (leftWeight*sin(kw * (ygrid[yn] - xshift)) + rightWeight*sin(kw*(ygrid[yn+1] - xshift)));
+			velocity = (Vector3d(0, 1, 0) * (VzamplitudeProton) * cos(
+				kw * particle->coordinates.z - kw * xshift) + Vector3d(1, 0, 0) * VyamplitudeProton * sin(
+				kw * particle->coordinates.z - kw * xshift));
+
+		}
+		if (particle->type == ELECTRON) {
+
+			//velocity = Vector3d(0, 0, 1) * (VzamplitudeElectron) * (leftWeight*cos(kw * (ygrid[yn] - xshift)) + rightWeight*cos(kw*(ygrid[yn+1] - xshift))) + Vector3d(0, 1, 0) * VyamplitudeElectron * (leftWeight*sin(kw * (ygrid[yn] - xshift)) + rightWeight*sin(kw*(ygrid[yn+1] - xshift)));
+			velocity = (Vector3d(0, 1, 0) * (VzamplitudeElectron) * cos(
+				kw * particle->coordinates.z - kw * xshift) + Vector3d(1, 0, 0) * VyamplitudeElectron * sin(
+				kw * particle->coordinates.z - kw * xshift));
+		}
+		double beta = velocity.norm() / speed_of_light_normalized;
+		particle->addVelocity(velocity, speed_of_light_normalized);
+		Vector3d momentum = particle->getMomentum();
+		particle->initialMomentum = momentum;
+		//particle->prevMomentum = momentum;
+	}
+
+	updateDeltaT();
+
+	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) printf("dt = %g\n", deltaT * plasma_period);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
+
+	double Vthermal = sqrt(2 * kBoltzman_normalized * temperature / massElectron);
+	double thermalFlux = Vthermal * concentration * electron_charge_normalized / sqrt(1.0 * types[0].particlesPerBin);
+	double alfvenFlux = (VyamplitudeProton - VyamplitudeElectron) * concentration * electron_charge_normalized;
+	if (thermalFlux > alfvenFlux / 2) {
+		if (rank == 0) printf("thermalFlux > alfvenFlux/2\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
+	}
+	if (rank == 0) printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	double minDeltaT = deltaX / Vthermal;
+	if (minDeltaT > deltaT) {
+		if (rank == 0) printf("deltaT < dx/Vthermal\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "deltaT < dx/Vthermal\n");
+
+		//printf("deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
+		//fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
+
+		//fclose(informationFile);
+		//exit(0);
+	}
+	if (rank == 0) {
+		printf("deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
+		fflush(stdout);
+		fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
+		fprintf(informationFile, "\n");
+
+		fprintf(informationFile, "Bz amplitude = %g\n", Bzamplitude / (plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "By amplitude = %g\n", Byamplitude / (plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "Vz amplitude p = %g\n", VzamplitudeProton * scaleFactor / plasma_period);
+		fprintf(informationFile, "Vz amplitude e = %g\n", VzamplitudeElectron * scaleFactor / plasma_period);
+		fprintf(informationFile, "Vy amplitude p = %g\n", VyamplitudeProton * scaleFactor / plasma_period);
+		fprintf(informationFile, "Vy amplitude e = %g\n", VyamplitudeElectron * scaleFactor / plasma_period);
+		fprintf(informationFile, "Ey amplitude = %g\n", Eyamplitude / (plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "Ez amplitude = %g\n", Ezamplitude / (plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "By/Ez = %g\n", Byamplitude / Ezamplitude);
+		fprintf(informationFile, "Bz/Ey = %g\n", Bzamplitude / Eyamplitude);
+		fprintf(informationFile, "4*pi*Jy amplitude = %g\n",
+		        4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (plasma_period * plasma_period * sqrt(
+			        scaleFactor)));
+		fprintf(informationFile, "c*rotBy amplitude = %g\n",
+		        speed_of_light_normalized * kw * Bzamplitude / (plasma_period * plasma_period * sqrt(
+			        scaleFactor)));
+		fprintf(informationFile, "4*pi*Jz amplitude = %g\n",
+		        4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (plasma_period * plasma_period * sqrt(
+			        scaleFactor)));
+		fprintf(informationFile, "c*rotBz amplitude = %g\n",
+		        speed_of_light_normalized * kw * Byamplitude / (plasma_period * plasma_period * sqrt(
+			        scaleFactor)));
+		fprintf(informationFile, "\n");
+		fprintf(informationFile, "derivative By amplitude = %g\n",
+		        -omega * Byamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "-c*rotEy = %g\n",
+		        speed_of_light_normalized * kw * Ezamplitude / (plasma_period * plasma_period * sqrt(
+			        scaleFactor)));
+		fprintf(informationFile, "\n");
+		fprintf(informationFile, "derivative Bz amplitude = %g\n",
+		        omega * Bzamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "-c*rotEz = %g\n",
+		        speed_of_light_normalized * kw * Eyamplitude / (plasma_period * plasma_period * sqrt(
+			        scaleFactor)));
+		fprintf(informationFile, "\n");
+		fprintf(informationFile, "derivative Ey amplitude = %g\n",
+		        omega * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
+		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
+			        scaleFactor)));
+		fprintf(informationFile, "\n");
+		fprintf(informationFile, "derivative Ez amplitude = %g\n",
+		        -omega * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
+		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
+			        scaleFactor)));
+		fprintf(informationFile, "\n");
+
+		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) * omega;
+		fprintf(informationFile, "w*Jy amplitude = %g\n",
+		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
+
+		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) / speed_of_light_normalized);
+		fprintf(informationFile, "dJy/dt amplitude = %g\n",
+		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period * plasma_period * sqrt(
+			        scaleFactor)));
+		fprintf(informationFile, "\n");
+		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omega;
+		fprintf(informationFile, "w*Jz amplitude = %g\n",
+		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
+
+		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) / speed_of_light_normalized);
+		fprintf(informationFile, "dJz/dt amplitude = %g\n",
+		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period * plasma_period * sqrt(
+			        scaleFactor)));
+		fprintf(informationFile, "\n");
+
+		double derivativVyp = -omega * VyamplitudeProton;
+		fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * scaleFactor / sqr(plasma_period));
+
+		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeProton / speed_of_light_normalized) / massProton;
+		fprintf(informationFile, "dVyp/dt amplitude = %g\n",
+		        derivativeVelocityProtonY * scaleFactor / sqr(plasma_period));
+		fprintf(informationFile, "\n");
+
+		double derivativVzp = omega * VzamplitudeProton;
+		fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * scaleFactor / sqr(plasma_period));
+
+		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeProton / speed_of_light_normalized) / massProton;
+		fprintf(informationFile, "dVzp/dt amplitude = %g\n",
+		        derivativeVelocityProtonZ * scaleFactor / sqr(plasma_period));
+		fprintf(informationFile, "\n");
+
+		double derivativVye = -omega * VyamplitudeElectron;
+		fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * scaleFactor / sqr(plasma_period));
+
+		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeElectron / speed_of_light_normalized) / massElectron;
+		fprintf(informationFile, "dVye/dt amplitude = %g\n",
+		        derivativeVelocityElectronY * scaleFactor / sqr(plasma_period));
+		fprintf(informationFile, "\n");
+
+		double derivativVze = omega * VzamplitudeElectron;
+		fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * scaleFactor / sqr(plasma_period));
+
+		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeElectron / speed_of_light_normalized) / massElectron;
+		fprintf(informationFile, "dVze/dt amplitude = %g\n",
+		        derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
+		fprintf(informationFile, "\n");
+	}
+
+	if (rank == 0) fclose(informationFile);
+}
+
+void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int waveCountZ, double amplitudeRelation) {
+	boundaryConditionType = PERIODIC;
+	if (rank == 0) printf("initialization alfven wave\n");
+	fflush(stdout);
+
+	double concentration = density / (massProton + massElectron);
+	types[1].particesDeltaX = types[0].particesDeltaX;
+	types[1].particesDeltaY = types[0].particesDeltaY;
+	types[1].particesDeltaZ = types[0].particesDeltaZ;
+	types[1].particlesPerBin = types[0].particlesPerBin;
+	types[0].concentration = concentration;
+	types[1].concentration = concentration;
+	for (int i = 2; i < typesNumber; ++i) {
+		types[i].particlesPerBin = 0;
+		types[i].concentration = 0;
+		types[i].particesDeltaX = xsize;
+		types[i].particesDeltaY = ysize;
+		types[i].particesDeltaZ = zsize;
+	}
+	createParticles();
+	E0 = Vector3d(0, 0, 0);
+
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+
+	double B0norm = B0.norm();
+	double alfvenV = B0norm / sqrt(4 * pi * density);
+	if (alfvenV > speed_of_light_normalized) {
+		printf("alfven velocity > c\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "alfven velocity > c\n");
+		if (rank == 0) fclose(informationFile);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "alfvenV/c = %15.10g > 1\n", alfvenV / speed_of_light_normalized);
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+	if (rank == 0) fprintf(informationFile, "alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	if (rank == 0) fprintf(informationFile, "alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	if (rank == 0) printf("alfven V = %lf\n", alfvenV * scaleFactor / plasma_period);
+	if (rank == 0) printf("alfven V/c = %lf\n", alfvenV / speed_of_light_normalized);
+	fflush(stdout);
+
+	double kx = waveCountX * 2 * pi / xsizeGeneral;
+	double ky = waveCountY * 2 * pi / ysizeGeneral;
+	double kz = waveCountZ * 2 * pi / zsizeGeneral;
+	//kz = 0;
+
+	double kw = sqrt(kx * kx + ky * ky + kz * kz);
+
+	double weight = concentration * volumeB() / types[0].particlesPerBin;
+
+	omegaPlasmaProton = sqrt(
+		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massProton);
+	omegaPlasmaElectron = sqrt(
+		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
+	omegaGyroProton = B0norm * electron_charge_normalized / (massProton * speed_of_light_normalized);
+	omegaGyroElectron = B0norm * electron_charge_normalized / (massElectron * speed_of_light_normalized);
+
+	if (omegaGyroProton < 5 * speed_of_light_normalized * kw) {
+		if (rank == 0) printf("omegaGyroProton < 5*k*c\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omegaGyroProton < 5*k*c\n");
+		//fclose(informationFile);
+		//exit(0);
+	}
+	if (rank == 0) printf("omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
+	fflush(stdout);
+	if (rank == 0)
+		fprintf(informationFile, "omegaGyroProton/kc = %g\n", omegaGyroProton / (kw * speed_of_light_normalized));
+
+	if (omegaPlasmaProton < 5 * omegaGyroProton) {
+		if (rank == 0) printf("omegaPlasmaProton < 5*omegaGyroProton\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omegaPlasmaProton < 5*omegaGyroProton\n");
+		//fclose(informationFile);
+		//exit(0);
+	}
+	if (rank == 0) printf("omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+	fflush(stdout);
+	if (rank == 0)
+		fprintf(informationFile, "omegaPlasmaProton/omegaGyroProton = %g\n", omegaPlasmaProton / omegaGyroProton);
+
+	//w = q*kw*B/mP * 0.5*(sqrt(d)+-b)/a
+	double b = speed_of_light_normalized * kw * (massProton - massElectron) / massProton;
+	double discriminant = speed_of_light_normalized_sqr * kw * kw * sqr(
+		massProton + massElectron) + 16 * pi * concentration * sqr(
+		electron_charge_normalized) * (massProton + massElectron) / sqr(massProton);
+	double a = (kw * kw * speed_of_light_normalized_sqr * massProton * massElectron + 4 * pi * concentration * sqr(
+		electron_charge_normalized) * (massProton + massElectron)) / sqr(massProton);
+
+	if (discriminant < 0) {
+		printf("discriminant < 0\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "discriminant < 0\n");
+		if (rank == 0) fclose(informationFile);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "discriminant = %15.10g\n", discriminant);
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+
+	double fakeOmega = (kw * electron_charge_normalized * B0norm / massProton) * (sqrt(
+		discriminant) - b) / (2.0 * a);
+
+	//a4*x^4 + a3*x^3 + a2*x^2 + a1*x + a0 = 0
+
+	double a4 = sqr(speed_of_light_normalized_sqr * massProton * massElectron);
+	a4 = a4 * sqr(sqr(sqr(fakeOmega)));
+	double a3 = -2 * cube(speed_of_light_normalized_sqr) * sqr(kw * massElectron * massProton)
+		- 8 * pi * concentration * sqr(
+			speed_of_light_normalized_sqr * electron_charge_normalized) * massElectron * massProton * (massElectron + massProton)
+		- sqr(B0norm * speed_of_light_normalized * electron_charge_normalized) * (sqr(
+			massProton) + sqr(massElectron));
+	a3 = a3 * cube(sqr(fakeOmega));
+	double a2 = sqr(sqr(speed_of_light_normalized_sqr * kw) * massProton * massElectron)
+		+ 8 * pi * cube(speed_of_light_normalized_sqr) * concentration * sqr(
+			kw * electron_charge_normalized) * massProton * massElectron * (massProton + massElectron)
+		+ 16 * sqr(pi * speed_of_light_normalized_sqr * concentration * sqr(
+			electron_charge_normalized) * (massProton + massElectron))
+		+ 2 * sqr(
+			B0norm * speed_of_light_normalized_sqr * kw * electron_charge_normalized) * (sqr(
+			massProton) + sqr(massElectron))
+		+ 8 * pi * concentration * sqr(B0norm * speed_of_light_normalized * sqr(
+			electron_charge_normalized)) * (massProton + massElectron)
+		+ sqr(sqr(B0norm * electron_charge_normalized));
+	a2 = a2 * sqr(sqr(fakeOmega));
+	double a1 = -sqr(
+			B0norm * cube(speed_of_light_normalized) * kw * kw * electron_charge_normalized) * (sqr(
+			massProton) + sqr(massElectron))
+		- 8 * pi * concentration * sqr(B0norm * speed_of_light_normalized_sqr * kw * sqr(
+			electron_charge_normalized)) * (massProton + massElectron)
+		- 2 * sqr(speed_of_light_normalized * kw * sqr(B0norm * electron_charge_normalized));
+	a1 = a1 * sqr(fakeOmega);
+	double a0 = sqr(sqr(B0norm * speed_of_light_normalized * kw * electron_charge_normalized));
+
+	a4 = a4 / a0;
+	a3 = a3 / a0;
+	a2 = a2 / a0;
+	a1 = a1 / a0;
+	a0 = 1.0;
+
+	if (rank == 0) printf("a4 = %g\n", a4);
+	if (rank == 0) fprintf(informationFile, "a4 = %g\n", a4);
+	if (rank == 0) printf("a3 = %g\n", a3);
+	if (rank == 0) fprintf(informationFile, "a3 = %g\n", a3);
+	if (rank == 0) printf("a2 = %g\n", a2);
+	if (rank == 0) fprintf(informationFile, "a2 = %g\n", a2);
+	if (rank == 0) printf("a1 = %g\n", a1);
+	if (rank == 0) fprintf(informationFile, "a1 = %g\n", a1);
+	if (rank == 0) printf("a0 = %g\n", a0);
+	if (rank == 0) fprintf(informationFile, "a0 = %g\n", a0);
+	fflush(stdout);
+
+	double fakeOmega1 = kw * alfvenV;
+	if (rank == 0) printf("fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
+	double realOmega2 = solve4orderEquation(a4, a3, a2, a1, a0, 1.0);
+	if (realOmega2 < 0) {
+		printf("omega^2 < 0\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega^2 < 0\n");
+		if (rank == 0) fclose(informationFile);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+
+	double error = (((a4 * realOmega2 + a3) * realOmega2 + a2) * realOmega2 + a1) * realOmega2 + a0;
+	if (rank == 0) printf("error = %15.10g\n", error);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "error = %15.10g\n", error);
+	//double
+	omega = sqrt(realOmega2) * fakeOmega;
+	if (omega < 0) {
+		omega = -omega;
+	}
+
+	if (omega > speed_of_light_normalized * kw / 5.0) {
+		if (rank == 0) printf("omega > k*c/5\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega > k*c/5\n");
+		if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		//fclose(informationFile);
+		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		if (rank == 0) fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fclose(errorLogFile);
+		//exit(0);
+	}
+	if (rank == 0) printf("omega = %g\n", omega / plasma_period);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "omega = %g\n", omega / plasma_period);
+
+	if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+
+	if (fabs(omega) > omegaGyroProton / 2) {
+		if (rank == 0) printf("omega > omegaGyroProton/2\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega > omegaGyroProton/2\n");
+	}
+	if (rank == 0) printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) fclose(informationFile);
+
+	checkFrequency(omega);
+
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	//checkCollisionTime(omega);
+	//checkMagneticReynolds(alfvenV);
+	//checkDissipation(kw, alfvenV);
+
+	double epsilonAmplitude = amplitudeRelation;
+
+	double alfvenVReal = omega / kw;
+
+	if (rank == 0) fprintf(informationFile, "alfven V real = %15.10g\n", alfvenVReal * scaleFactor / plasma_period);
+	if (rank == 0)
+		fprintf(informationFile, "alfven V real x = %15.10g\n", alfvenVReal * (kx / kw) * scaleFactor / plasma_period);
+
+	//double
+	Bzamplitude = B0norm * epsilonAmplitude;
 
 	double Omegae = omegaGyroElectron;
 	double Omegae2 = Omegae * Omegae;
@@ -2287,9 +3822,9 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 	}
 	//Matrix3d inverse = *(rotationMatrix.Inverse());
 
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				Efield[i][j][k].x = 0;
 				Efield[i][j][k].y = Eyamplitude * cos(kx * xgrid[i] + ky * ygrid[j] + kz * zgrid[k]);
 				Efield[i][j][k].z = Ezamplitude * sin(kx * xgrid[i] + ky * ygrid[j] + kz * zgrid[k]);
@@ -2303,6 +3838,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 	}
 
 
+	/*if (nprocs == 1) {
 		for (int k = 0; k < znumber; ++k) {
 			for (int j = 0; j < ynumber; ++j) {
 				Efield[xnumber][j][k] = Efield[1][j][k];
@@ -2311,7 +3847,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 				explicitEfield[xnumber][j][k] = explicitEfield[1][j][k];
 			}
 		}
-	
+	}
 
 	for (int i = 0; i < xnumber + 1; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -2329,12 +3865,14 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 			newEfield[i][ynumber][k] = Efield[i][0][k];
 			explicitEfield[i][ynumber][k] = explicitEfield[i][0][k];
 		}
-	}
+	}*/
 
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				Bfield[i][j][k].x = B0.norm();
+	B0 = Vector3d(B0norm, 0, 0);
+	B0 = rotationMatrix * B0;
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				Bfield[i][j][k].x = B0norm;
 				Bfield[i][j][k].y = Byamplitude * sin(kx * middleXgrid[i] + ky * middleYgrid[j] + kz * middleZgrid[k]);
 				Bfield[i][j][k].z = Bzamplitude * cos(kx * middleXgrid[i] + ky * middleYgrid[j] + kz * middleZgrid[k]);
 				Bfield[i][j][k] = rotationMatrix * Bfield[i][j][k];
@@ -2346,53 +3884,73 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 
 	if (fabs(VzamplitudeProton) > speed_of_light_normalized) {
 		printf("VzamplitudeProton > speed_of_light_normalized\n");
-		fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "VzamplitudeProton > speed_of_light_normalized\n");
 		printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
-		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
-		fclose(informationFile);
+		fflush(stdout);
+		if (rank == 0)
+			fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeProton/c = %15.10g > 1\n", VzamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
-	printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
-	fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	if (rank == 0) printf("VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
+	fflush(stdout);
+	if (rank == 0)
+		fprintf(informationFile, "VzamplitudeProton/c = %g\n", VzamplitudeProton / speed_of_light_normalized);
 
 	if (fabs(VzamplitudeElectron) > speed_of_light_normalized) {
 		printf("VzamplitudeElectron > speed_of_light_normalized\n");
-		fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "VzamplitudeElectron > speed_of_light_normalized\n");
 		printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
-		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
-		fclose(informationFile);
+		fflush(stdout);
+		if (rank == 0)
+			fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VzamplitudeElectron/c = %15.10g > 1\n", VzamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
-	printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
-	fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	if (rank == 0) printf("VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
+	fflush(stdout);
+	if (rank == 0)
+		fprintf(informationFile, "VzamplitudeElectron/c = %g\n", VzamplitudeElectron / speed_of_light_normalized);
 
 	if (fabs(VyamplitudeProton) > speed_of_light_normalized) {
 		printf("VyamplitudeProton > speed_of_light_normalized\n");
-		fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "VyamplitudeProton > speed_of_light_normalized\n");
 		printf("VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
-		fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
-		fclose(informationFile);
+		fflush(stdout);
+		if (rank == 0)
+			fprintf(informationFile, "VyamplitudeProton/c = %g\n", VyamplitudeProton / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeProton/c = %15.10g > 1\n", VyamplitudeProton / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
 	if (fabs(VyamplitudeElectron) > speed_of_light_normalized) {
 		printf("VyamplitudeElectron > speed_of_light_normalized\n");
-		fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "VyamplitudeElectron > speed_of_light_normalized\n");
 		printf("VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
-		fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
-		fclose(informationFile);
+		fflush(stdout);
+		if (rank == 0)
+			fprintf(informationFile, "VyamplitudeElectron/c = %g\n", VyamplitudeElectron / speed_of_light_normalized);
+		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "VyamplitudeElectron/c = %15.10g > 1\n", VyamplitudeElectron / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
@@ -2447,25 +4005,28 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 
 	updateDeltaT();
 
-	printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
-	printf("dt = %g\n", deltaT * plasma_period);
+	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) printf("dt = %g\n", deltaT * plasma_period);
 	fflush(stdout);
-	fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
-	fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
+	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
 
 	double Vthermal = sqrt(2 * kBoltzman_normalized * temperature / massElectron);
 	double thermalFlux = Vthermal * concentration * electron_charge_normalized / sqrt(1.0 * types[0].particlesPerBin);
 	double alfvenFlux = (VyamplitudeProton - VyamplitudeElectron) * concentration * electron_charge_normalized;
 	if (thermalFlux > alfvenFlux / 2) {
-		printf("thermalFlux > alfvenFlux/2\n");
-		fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
+		if (rank == 0) printf("thermalFlux > alfvenFlux/2\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "thermalFlux > alfvenFlux/2\n");
 	}
-	printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
-	fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	if (rank == 0) printf("alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "alfvenFlux/thermalFlux = %g\n", alfvenFlux / thermalFlux);
 	double minDeltaT = deltaX / Vthermal;
 	if (minDeltaT > deltaT) {
-		printf("deltaT < dx/Vthermal\n");
-		fprintf(informationFile, "deltaT < dx/Vthermal\n");
+		if (rank == 0) printf("deltaT < dx/Vthermal\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "deltaT < dx/Vthermal\n");
 
 		//printf("deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
 		//fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT/minDeltaT);
@@ -2473,6 +4034,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		//fclose(informationFile);
 		//exit(0);
 	}
+	if (rank == 0) {
 		printf("deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
 		fflush(stdout);
 		fprintf(informationFile, "deltaT/minDeltaT =  %g\n", deltaT / minDeltaT);
@@ -2530,7 +4092,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		fprintf(informationFile, "w*Jy amplitude = %g\n",
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
-		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) / speed_of_light_normalized);
+		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0norm * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) / speed_of_light_normalized);
 		fprintf(informationFile, "dJy/dt amplitude = %g\n",
 		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
@@ -2539,7 +4101,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		fprintf(informationFile, "w*Jz amplitude = %g\n",
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
-		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) / speed_of_light_normalized);
+		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0norm * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) / speed_of_light_normalized);
 		fprintf(informationFile, "dJz/dt amplitude = %g\n",
 		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
@@ -2548,7 +4110,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		double derivativVyp = -omega * VyamplitudeProton;
 		fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeProton / speed_of_light_normalized) / massProton;
+		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0norm * VzamplitudeProton / speed_of_light_normalized) / massProton;
 		fprintf(informationFile, "dVyp/dt amplitude = %g\n",
 		        derivativeVelocityProtonY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -2556,7 +4118,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		double derivativVzp = omega * VzamplitudeProton;
 		fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeProton / speed_of_light_normalized) / massProton;
+		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0norm * VyamplitudeProton / speed_of_light_normalized) / massProton;
 		fprintf(informationFile, "dVzp/dt amplitude = %g\n",
 		        derivativeVelocityProtonZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -2564,7 +4126,7 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		double derivativVye = -omega * VyamplitudeElectron;
 		fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeElectron / speed_of_light_normalized) / massElectron;
+		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0norm * VzamplitudeElectron / speed_of_light_normalized) / massElectron;
 		fprintf(informationFile, "dVye/dt amplitude = %g\n",
 		        derivativeVelocityElectronY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -2572,13 +4134,13 @@ void Simulation::initializeRotatedAlfvenWave(int wavesCount, double amplitudeRel
 		double derivativVze = omega * VzamplitudeElectron;
 		fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeElectron / speed_of_light_normalized) / massElectron;
+		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0norm * VyamplitudeElectron / speed_of_light_normalized) / massElectron;
 		fprintf(informationFile, "dVze/dt amplitude = %g\n",
 		        derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
-	
+	}
 
-	fclose(informationFile);
+	if (rank == 0) fclose(informationFile);
 }
 
 void Simulation::initializeLangmuirWave() {
@@ -2599,30 +4161,98 @@ void Simulation::initializeLangmuirWave() {
 	double langmuirV = omega / kw;
 
 	checkDebyeParameter();
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
-	fprintf(informationFile, "lengmuir V = %lf\n", langmuirV * scaleFactor / plasma_period);
-	fclose(informationFile);
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) fprintf(informationFile, "lengmuir V = %lf\n", langmuirV * scaleFactor / plasma_period);
+	if (rank == 0) fclose(informationFile);
 	if (langmuirV > speed_of_light_normalized) {
 		printf("langmuirV > c\n");
+		fflush(stdout);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "langmuireV/c = %15.10g > 1\n", langmuirV / speed_of_light_normalized);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
-	printf("creating particles\n");
+	if (rank == 0) printf("creating particles\n");
+	fflush(stdout);
 	int nproton = 0;
 	int nelectron = 0;
-	double weight = (concentration / types[0].particlesPerBin) * volumeB(0, 0, 0);
-	
+	double weight = (concentration / types[0].particlesPerBin) * volumeB();
+	/*for (int i = 0; i < xnumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+		    for (int k = 0; k < znumber; ++k) {
+		        double x;
+		        for (int l = 0; l < particlesPerBin; ++l) {
+		            ParticleTypes type;
+		            type = PROTON;
+		            Particle* particle = createParticle(particlesNumber, i, j, k, weight, type, temperature);
+		            nproton++;
+		            particles.push_back(particle);
+		            particlesNumber++;
+		            if (particlesNumber % 1000 == 0) {
+		                printf("create particle number %d\n", particlesNumber);
+		            }
+		        }
+		        for (int l = 0; l < particlesPerBin * (1 + epsilon * cos(kw * middleXgrid[i])); ++l) {
+		            ParticleTypes type;
+		            type = ELECTRON;
+		            Particle* particle = createParticle(particlesNumber, i, j, k, weight, type, temperature);
+		            nelectron++;
+		            particles.push_back(particle);
+		            particlesNumber++;
+		            if (particlesNumber % 1000 == 0) {
+		                printf("create particle number %d\n", particlesNumber);
+		            }
+		        }
+		    }
+		}
+	}
+	if (nproton != nelectron) {
+		printf("nproton != nelectron\n");
+		int n;
+		ParticleTypes type;
+		if (nproton > nelectron) {
+		    n = nproton - nelectron;
+		    type = ELECTRON;
+		}
+		else {
+		    n = nelectron - nproton;
+		    type = PROTON;
+		}
+		int i = 0;
+		while (n > 0) {
+		    Particle* particle = createParticle(particlesNumber, i, 0, 0, weight, type, temperature);
+		    particles.push_back(particle);
+		    particlesNumber++;
+		    ++i;
+		    n--;
+		    if (i >= xnumber) {
+		        i = 0;
+		    }
+		    if (type == PROTON) {
+		        nproton++;
+		    }
+		    else {
+		        nelectron++;
+		    }
+		}
+	}
+	if (nproton != nelectron) {
+		printf("nproton != nelectron\n");
+		errorLogFile = fopen("./output/errorLog.dat", "w");
+		fprintf(errorLogFile, "nproton = %d nelectron = %d\n", nproton, nelectron);
+		fclose(errorLogFile);
+		exit(0);
+	}*/
 	createParticles();
 
 	double chargeDensityAmplitude = epsilon * concentration * electron_charge_normalized;
 	double Eamplitude = -4 * pi * chargeDensityAmplitude / (kw);
 
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				Efield[i][j][k].x = Eamplitude * sin(kw * xgrid[i]);
 				Efield[i][j][k].y = 0;
 				Efield[i][j][k].z = 0;
@@ -2630,14 +4260,6 @@ void Simulation::initializeLangmuirWave() {
 				tempEfield[i] = Efield[i];
 				explicitEfield[i] = Efield[i];
 			}
-		}
-	}
-
-	for (int j = 0; j < ynumber + 1; ++j) {
-		for (int k = 0; k < znumber + 1; ++k) {
-			Efield[xnumber][j][k] = Efield[0][j][k];
-			tempEfield[xnumber][j][k] = tempEfield[0][j][k];
-			explicitEfield[xnumber][j][k] = explicitEfield[0][j][k];
 		}
 	}
 
@@ -2651,46 +4273,94 @@ void Simulation::initializeLangmuirWave() {
 		}
 	}
 
-	incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
-	fprintf(incrementFile, "%g %g %g %g\n", 0.0, 0.0, 1.0, 1.0);
-	fclose(incrementFile);
-	
+	if (rank == 0) {
+		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
+		fprintf(incrementFile, "%g %g %g %g\n", 0.0, 0.0, 1.0, 1.0);
+		fclose(incrementFile);
+	}
+	MPI_Barrier(cartComm);
 }
 
 void Simulation::initializeFluxFromRight() {
-	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	//boundaryConditionType = PERIODIC;
+	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionType = PERIODIC;
 	createParticles();
 	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized);
 	//initializeAlfvenWaveY(10, 1.0E-4);
-	for (int i = 0; i < xnumber + 2; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
-				Efield[i][j][k] = E0;
-					if (i == 0 || i == 1) {
+	if(solverType == BUNEMAN){
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				for(int k = 0; k < znumberAdded + 1; ++k){
+					bunemanEx[i][j][k] = E0.x;
+					bunemanNewEx[i][j][k] = bunemanEx[i][j][k];
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				for(int k = 0; k < znumberAdded + 1; ++k){
+					bunemanEy[i][j][k] = E0.y;
+					if(boundaryConditionType != PERIODIC){
+					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
+						bunemanEy[i][j][k] = 0;
+					}
+					}
+					bunemanNewEy[i][j][k] = bunemanEy[i][j][k];
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				for(int k = 0; k < znumberAdded; ++k){
+					bunemanEz[i][j][k] = E0.z;
+					if(boundaryConditionType != PERIODIC){
+					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
+						bunemanEz[i][j][k] = 0;
+					}
+					}
+					bunemanNewEz[i][j][k] = bunemanEz[i][j][k];
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				for(int k = 0; k < znumberAdded; ++k){
+					bunemanBx[i][j][k] = B0.x;
+					bunemanNewBx[i][j][k] = bunemanBx[i][j][k];
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				for(int k = 0; k < znumberAdded; ++k){
+					bunemanBy[i][j][k] = B0.y;
+					bunemanNewBy[i][j][k] = bunemanBy[i][j][k];
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				for(int k = 0; k < znumberAdded + 1; ++k){
+					bunemanBz[i][j][k] = B0.z;
+					bunemanNewBz[i][j][k] = bunemanBz[i][j][k];
+				}
+			}
+		}
+	} else {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					Efield[i][j][k] = E0;
+					if(boundaryConditionType != PERIODIC){
+					if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
 						Efield[i][j][k].y = 0;
 						Efield[i][j][k].z = 0;
 					}
-				tempEfield[i][j][k] = Efield[i][j][k];
-				newEfield[i][j][k] = Efield[i][j][k];
-				explicitEfield[i][j][k] = Efield[i][j][k];
-			}
-		}
-	}
-
-	for (int i = 0; i < additionalBinNumber; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
-				additionalEfieldLeft[i][j][k] = Vector3d(0, 0, 0);
-			}
-		}
-	}
-
-	for (int i = 0; i < additionalBinNumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				additionalBfieldLeft[i][j][k] = B0;
-				additionalBfieldRight[i][j][k] = B0;
+					}
+					tempEfield[i][j][k] = Efield[i][j][k];
+					newEfield[i][j][k] = Efield[i][j][k];
+					explicitEfield[i][j][k] = Efield[i][j][k];
+				}
 			}
 		}
 	}
@@ -2698,26 +4368,31 @@ void Simulation::initializeFluxFromRight() {
 	double magneticEnergy = B0.scalarMult(B0) / (8 * pi);
 	double kineticEnergy = density * V0.scalarMult(V0) / 2;
 
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
-	fprintf(informationFile, "magneticEnergy/kineticEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
-	printf("magneticEnergy/kinetikEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
-	fclose(informationFile);
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) fprintf(informationFile, "magneticEnergy/kineticEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
+	if (rank == 0) printf("magneticEnergy/kinetikEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
+	fflush(stdout);
+	if (rank == 0) fclose(informationFile);
 
 	checkDebyeParameter();
-	incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
-	fprintf(incrementFile, "%g %g %g %g\n", 0.0, 0.0, 1.0, 1.0);
-	fclose(incrementFile);
+
+	MPI_Barrier(cartComm);
+	if (rank == 0) {
+		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
+		fprintf(incrementFile, "%g %g %g %g\n", 0.0, 0.0, 1.0, 1.0);
+		fclose(incrementFile);
+	}
+	MPI_Barrier(cartComm);
 }
 
 void Simulation::fieldsLorentzTransitionX(const double& v) {
 	double gamma = 1.0 / sqrt(1 - v * v / speed_of_light_normalized_sqr);
-	for (int i = 0; i < xnumber; ++i) {
+	for (int i = 0; i < xnumberAdded; ++i) {
 		int prevI = i - 1;
 		if (prevI < 0) {
 			if (boundaryConditionType == PERIODIC) {
-				prevI = xnumber - 1;
-			}
-			else {
+				prevI = xnumberAdded - 1;
+			} else {
 				prevI = 0;
 			}
 		}
@@ -2738,9 +4413,9 @@ void Simulation::fieldsLorentzTransitionX(const double& v) {
 			}
 		}
 	}
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				Vector3d middleE = (Efield[i][j][k] + Efield[i][j + 1][k] + Efield[i][j][k + 1] + Efield[i][j + 1][k + 1]
 					+ Efield[i + 1][j][k] + Efield[i + 1][j + 1][k] + Efield[i + 1][j][k + 1] + Efield[i + 1][j + 1][k + 1]) * 0.125;
 				newBfield[i][j][k].y = gamma * (Bfield[i][j][k].y + v * middleE.z / speed_of_light_normalized);
@@ -2749,29 +4424,9 @@ void Simulation::fieldsLorentzTransitionX(const double& v) {
 		}
 	}
 
-	for (int i = 0; i < xnumber; ++i) {
-		for (int k = 0; k < znumber; ++k) {
-			newEfield[i][ynumber][k] = newEfield[i][0][k];
-		}
-	}
-
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			newEfield[i][j][znumber] = newEfield[i][j][0];
-		}
-	}
-
-	if (boundaryConditionType == PERIODIC) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				newEfield[xnumber][j][k] = newEfield[0][j][k];
-			}
-		}
-	}
-
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				Efield[i][j][k] = newEfield[i][j][k];
 				tempEfield[i][j][k] = newEfield[i][j][k];
 				explicitEfield[i][j][k] = newEfield[i][j][k];
@@ -2779,9 +4434,9 @@ void Simulation::fieldsLorentzTransitionX(const double& v) {
 		}
 	}
 
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				Bfield[i][j][k] = newBfield[i][j][k];
 			}
 		}
@@ -2791,169 +4446,260 @@ void Simulation::fieldsLorentzTransitionX(const double& v) {
 void Simulation::initializeShockWave() {
 	boundaryConditionType = FREE_BOTH;
 
-	E0 = Vector3d(0, 0, 0);
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
-				Efield[i][j][k] = Vector3d(0, 0, 0);
+	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized);
+	double frontWidth = 500 * deltaX;
+	Vector3d downstreamB = Vector3d(0, 0, 0);
+	Vector3d downstreamE = Vector3d(0, 0, 0);
+	double downstreamDensity;
+	Vector3d downstreamVelocity = Vector3d(0, 0, 0);
+	double compressionRatio = 3.9;
+	double downstreamPressure;
+	double upstreamPressure = evaluatePressureByTemperature(temperature);
+	solveRankineHugoniot(density, V0, upstreamPressure, B0, E0, downstreamDensity, downstreamVelocity, downstreamPressure, downstreamB, downstreamE, 5.0 / 3.0, compressionRatio);
+	double downstreamTemperature = evaluateTemperatureByPressure(downstreamPressure) / compressionRatio;
+	double velocityForRotB = -(downstreamB.z - B0.z) * speed_of_light_normalized / (8 * pi * frontWidth * electron_charge_normalized * types[0].concentration);
+	int localI = -1;
+	int shockWaveRank[1];
+	int tempShockWaveRank[1];
+	double shockWaveX[1];
+	shockWaveX[0] = 0;
+	shockWaveRank[0] = -1;
+	shockWavePoint = xnumberGeneral / 3;
+	for (int i = 0; i < xnumberAdded - 1; ++i) {
+		if (firstAbsoluteXindex + i == shockWavePoint) {
+			if (i < 3) {
+				shockWavePoint += 3;
+				localI = i + 3;
+			} else {
+				localI = i;
+			}
+			if (localI < 10) {
+				localI += 10;
+				shockWavePoint += 10;
+			}
+			if (localI > xnumberAdded - 10) {
+				localI -= 10;
+				shockWavePoint -= 10;
+			}
+			shockWaveRank[0] = rank;
+			break;
+		}
+	}
+	if (rank > 0) {
+		MPI_Send(shockWaveRank, 1, MPI_INT, 0, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
+	} else {
+		tempShockWaveRank[0] = shockWaveRank[0];
+		for (int i = 1; i < nprocs; ++i) {
+			MPI_Status status;
+			MPI_Recv(tempShockWaveRank, 1, MPI_INT, i, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm, &status);
+			if (tempShockWaveRank[0] > -1) {
+				shockWaveRank[0] = tempShockWaveRank[0];
+			}
+		}
+	}
+
+	MPI_Bcast(shockWaveRank, 1, MPI_INT, 0, cartComm);
+	if (rank == shockWaveRank[0]) {
+		shockWaveX[0] = xgrid[localI];
+	}
+	MPI_Bcast(shockWaveX, 1, MPI_DOUBLE, shockWaveRank[0], cartComm);
+
+	int lnumber = 3 * typesNumber + 3;
+
+	double**** outVector = new double***[xnumberAdded];
+	for (int i = 0; i < xnumberAdded; ++i) {
+		outVector[i] = new double**[ynumberAdded];
+		for (int j = 0; j < ynumberAdded; ++j) {
+			outVector[i][j] = new double* [znumberAdded];
+			for (int k = 0; k < znumberAdded; ++k) {
+				outVector[i][j][k] = new double[lnumber];
+				for (int l = 0; l < lnumber; ++l) {
+					outVector[i][j][k][l] = 0;
+				}
+			}
+		}
+	}
+
+	double density = 0;
+	for (int i = 0; i < typesNumber; ++i) {
+		density += types[i].concentration * types[i].mass;
+	}
+	double bnorm = B0.norm();
+	double alfvenV = B0.norm() / sqrt(4 * pi * density);
+
+	InitializeShockRightPartEvaluator evaluator = InitializeShockRightPartEvaluator(downstreamVelocity, V0, downstreamB, B0, E0, deltaX, speed_of_light_normalized, bnorm, alfvenV, types, typesNumber, xnumberAdded, 1, 1, lnumber);
+
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				for (int t = 0; t < typesNumber; ++t) {
+					outVector[i][0][0][3 * t] = (0.5 * (downstreamVelocity.x + V0.x) - 0.5 * (downstreamVelocity.x - V0.x) * tanh((xgrid[i] - shockWaveX[0]) / frontWidth)) / alfvenV;
+					outVector[i][0][0][3 * t + 1] = (0.5 * (downstreamVelocity.y + V0.y) - 0.5 * (downstreamVelocity.y - V0.y) * tanh((xgrid[i] - shockWaveX[0]) / frontWidth)) / alfvenV;
+					outVector[i][0][0][3 * t + 2] = (0.5 * (downstreamVelocity.z + V0.z) - 0.5 * (downstreamVelocity.z - V0.z) * tanh((xgrid[i] - shockWaveX[0]) / frontWidth)) / alfvenV;
+				}
+				outVector[i][0][0][lnumber - 3] = E0.x / bnorm;
+				outVector[i][0][0][lnumber - 2] = (0.5 * (downstreamB.y + B0.y) - 0.5 * (downstreamB.y - B0.y) * tanh((xgrid[i] - shockWaveX[0]) / frontWidth)) / bnorm;
+				outVector[i][0][0][lnumber - 1] = (0.5 * (downstreamB.z + B0.z) - 0.5 * (downstreamB.z - B0.z) * tanh((xgrid[i] - shockWaveX[0]) / frontWidth)) / bnorm;
+			}
+		}
+	}
+
+	simpleIterationSolver(outVector, xnumberAdded, 1, 1, additionalBinNumber, lnumber, rank, nprocs, xnumberGeneral, ynumberGeneral, znumberGeneral, maxErrorLevel, maxSimpleIterationSolverIterations, false, verbosity, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer, evaluator, cartComm, cartCoord, cartDim);
+
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				Efield[i][j][k] = E0;
+				Efield[i][j][k].x = outVector[i][0][0][lnumber - 3] * bnorm;
 				tempEfield[i][j][k] = Efield[i][j][k];
 				newEfield[i][j][k] = Efield[i][j][k];
 				explicitEfield[i][j][k] = Efield[i][j][k];
 			}
 		}
 	}
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				Bfield[i][j][k] = Vector3d(B0.x, 0, 0);
+	exchangeGeneralEfield(Efield);
+	exchangeGeneralEfield(tempEfield);
+	exchangeGeneralEfield(newEfield);
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				Bfield[i][j][k] = B0;
+				Bfield[i][j][k].y = 0.5 * (outVector[i][0][0][lnumber - 2] + outVector[i + 1][0][0][lnumber - 2]) * bnorm;
+				Bfield[i][j][k].z = 0.5 * (outVector[i][0][0][lnumber - 1] + outVector[i + 1][0][0][lnumber - 1]) * bnorm;
 				newBfield[i][j][k] = Bfield[i][j][k];
 			}
 		}
 	}
+	exchangeGeneralBfield(Bfield);
+	exchangeGeneralBfield(newBfield);
 
-	printf("creating particles\n");
-	double concentration = density / (massProton + massElectron);
-	double downstreamTemperature = 1000 * temperature;
-	double upstreamTemperature = temperature;
-	Vector3d upstreamVelocity = V0;
-	Vector3d downstreamVelocity = Vector3d(V0.x / 4, 0, 0);
-	double alfvenV = B0.norm() / sqrt(4 * pi * density);
-	double soundVelectron = sqrt(5 * kBoltzman_normalized * downstreamTemperature / (3 * massElectron));
+	if (rank == 0) printf("creating particles\n");
 
-	if (alfvenV > V0.norm()) {
-		printf("alfvenV > V0\n");
-	}
-
-	printf("alfvenV/V0 = %15.10g\n", alfvenV / V0.norm());
-
-	if (soundVelectron > V0.norm()) {
-		printf("soundV > V0\n");
-
-	}
-	printf("soundV/V0 = %15.10g\n", soundVelectron / V0.norm());
-	//Vector3d downstreamVelocity = Vector3d(0, 0, 0);
-	shockWavePoint = xnumber / 2;
 	int n = 0;
-	//for (int i = 0; i < xnumber; ++i) {
-	for (int i = 1; i < xnumber; ++i) {
-		for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
-			double x = xgrid[i] + 0.0001 * deltaX;
-			int localParticlesPerBin = types[typeCounter].particlesPerBin;
-			double localTemperature = upstreamTemperature;
-			if (i < shockWavePoint) {
-				localParticlesPerBin = localParticlesPerBin * 4;
-				localTemperature = upstreamTemperature;
-			}
-			double deltaXParticles = deltaX / localParticlesPerBin;
-			for (int j = 0; j < ynumber; ++j) {
-				for (int k = 0; k < znumber; ++k) {
-					double weight = (types[typeCounter].concentration / types[typeCounter].particlesPerBin) * volumeB(i,
-					                                                                                                  j,
-					                                                                                                  k);
+	for (int i = 1; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				//int maxParticlesPerBin = types[0].particlesPerBin;
+				double x = xgrid[i] + 0.0001 * deltaX;
+				double y = ygrid[j] + 0.0001 * deltaY;
+				double z = zgrid[k] + 0.0001 * deltaZ;
+				//for (int l = 0; l < maxParticlesPerBin; ++l) {
+				for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
+					double localConcentration;
+					double localWeight;
+					double localTemperature;
+					int localParticlesPerBin;
+					double localParticleDeltaX;
+					double localParticleDeltaY;
+					double localParticleDeltaZ;
+					Vector3d localVelocity;
+					if (types[typeCounter].concentration > 0) {
+						localConcentration = types[typeCounter].concentration * V0.x / (0.5 * alfvenV * (outVector[i][0][0][3 * typeCounter] + outVector[i + 1][0][0][3 * typeCounter]));
+						localParticlesPerBin = types[typeCounter].particlesPerBin * V0.x / (0.5 * alfvenV * (outVector[i][0][0][3 * typeCounter] + outVector[i + 1][0][0][3 * typeCounter]));
+					} else {
+						localConcentration = 0;
+						localParticlesPerBin = 0;
+					}
+					localWeight = (localConcentration / localParticlesPerBin) * volumeB();
+					if (types[typeCounter].particlesPerBin > 0) {
+						localParticleDeltaX = deltaX / localParticlesPerBin;
+						localParticleDeltaY = deltaY / localParticlesPerBin;
+						localParticleDeltaZ = deltaZ / localParticlesPerBin;
+					} else {
+						localParticleDeltaX = xsize;
+						localParticleDeltaY = ysize;
+						localParticleDeltaZ = zsize;
+					}
+					localTemperature = (downstreamTemperature + types[typeCounter].temperatureX) * 0.5 - (downstreamTemperature - types[typeCounter].temperatureX) * 0.5 * tanh((middleXgrid[i] - shockWaveX[0]) / frontWidth);
+					localVelocity.x = 0.5 * (outVector[i][0][0][3 * typeCounter] + outVector[i + 1][0][0][3 * typeCounter]) * alfvenV;
+					localVelocity.y = 0.5 * (outVector[i][0][0][3 * typeCounter + 1] + outVector[i + 1][0][0][3 * typeCounter + 1]) * alfvenV;
+					localVelocity.z = 0.5 * (outVector[i][0][0][3 * typeCounter + 2] + outVector[i + 1][0][0][3 * typeCounter + 2]) * alfvenV;
+					//if (l < types[typeCounter].particlesPerBin) {
 					for (int l = 0; l < localParticlesPerBin; ++l) {
 						ParticleTypes type = types[typeCounter].type;
-						Particle* particle = createParticle(n, i, j, k, weight, type, types[typeCounter],
-						                                    localTemperature, localTemperature, localTemperature);
-						//particle->x = middleXgrid[i];
+						Particle* particle = createParticle(n, i, j, k, localWeight, type, types[typeCounter],
+						                                    localTemperature,
+						                                    localTemperature,
+						                                    localTemperature);
 						n++;
-						/*if (l % 2 == 0) {
-							x = particle->x;
-						} else {
-							particle->x= x;
-						}*/
-						if (i >= shockWavePoint) {
-							particle->addVelocity(upstreamVelocity, speed_of_light_normalized);
+						particle->coordinates.x = x + localParticleDeltaX * l;
+						particle->coordinates.y = y + localParticleDeltaY * l;
+						particle->coordinates.z = z + localParticleDeltaZ * l;
+						particle->initialCoordinates = particle->coordinates;
+						Vector3d particleVelocity = localVelocity;
+						if (typeCounter == 0) {
+							double denominator = (sqr(cosh((particle->coordinates.x - shockWaveX[0]) / frontWidth)) * ((compressionRatio + 1) * 0.5 - (compressionRatio - 1) * 0.5 * tanh(particle->coordinates.x - shockWaveX[0]) / frontWidth));
+							if (fabs(denominator) < 1.0) {
+								printf("aaa\n");
+							}
+							particleVelocity.y += velocityForRotB / denominator;
+							if (particleVelocity.norm() > speed_of_light_normalized) {
+								printf("aaa\n");
+							}
 						}
-						else {
-							particle->addVelocity(downstreamVelocity, speed_of_light_normalized);
+						if (localVelocity.norm() > 0) {
+							particle->addVelocity(particleVelocity, speed_of_light_normalized);
 						}
-						particle->coordinates.x = x + deltaXParticles * l;
 						Vector3d momentum = particle->getMomentum();
 						particle->initialMomentum = momentum;
 						//particle->prevMomentum = momentum;
+
 						particles.push_back(particle);
 						particlesNumber++;
 						if (particlesNumber % 1000 == 0) {
-							printf("create particle number %d\n", particlesNumber);
+							if ((rank == 0) && (verbosity > 0))printf("create particle number %d\n", particlesNumber);
 						}
+						alertNaNOrInfinity(particle->coordinates.x, "particle.x = NaN in createParticles\n");
+						alertNaNOrInfinity(particle->coordinates.y, "particle.y = NaN in createParticles\n");
+						alertNaNOrInfinity(particle->coordinates.z, "particle.z = NaN in createParticles\n");
 					}
 				}
 			}
 		}
 	}
+
+
 	synchronizeParticleNumber();
 
-	/*for(int i = 0; i < shockWavePoint; ++i){
-		//Bfield[i].y = B0.x*sin(2*20*pi*middleXgrid[i]/xsize);
-		double amplitude = 0.1*B0.x;
-		Bfield[i].y = amplitude*(uniformDistribution() - 0.5);
-		Bfield[i].z = amplitude*(uniformDistribution() - 0.5);
-		newBfield[i] = Bfield[i];
-	}*/
+}
 
-	initializeKolmogorovSpectrum(1, 100, 0.1);
+void Simulation::solveRankineHugoniot(double upstreamDensity, Vector3d upstreamVelocity, double upstreamPressure, Vector3d upstreamB, Vector3d upstreamE, double& downstreamDensity, Vector3d& downstreamVelocity, double& downstreamPressure, Vector3d& downstreamB, Vector3d& downstreamE, double adiabaticParameter, double compressionRatio) {
+	double j = upstreamDensity * upstreamVelocity.x;
+	double magneticE = upstreamB.x * upstreamB.x / (4 * pi);
+	downstreamDensity = compressionRatio * upstreamDensity;
+	downstreamVelocity.x = upstreamVelocity.x / compressionRatio;
+	downstreamB.x = upstreamB.x;
+	double Brelation = ((j * j / upstreamDensity) - magneticE) / ((j * j / downstreamDensity) - magneticE);
+	downstreamB.y = upstreamB.y * Brelation;
+	downstreamB.z = upstreamB.z * Brelation;
 
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				double v = upstreamVelocity.x;
-				if (i < shockWavePoint) {
-					//v = V0.x/4;
-					v = downstreamVelocity.x;
-				}
-				double gamma = 1.0 / sqrt(1 - v * v / speed_of_light_normalized_sqr);
-				Vector3d middleE = (Efield[i][j][k] + Efield[i + 1][j][k]) * 0.5;
-				newBfield[i][j][k].y = gamma * (Bfield[i][j][k].y + v * middleE.z / speed_of_light_normalized);
-				newBfield[i][j][k].z = gamma * (Bfield[i][j][k].z - v * middleE.y / speed_of_light_normalized);
-			}
-		}
+	downstreamVelocity.y = upstreamVelocity.y + upstreamB.x * (downstreamB.y - upstreamB.y) / (4 * pi * j);
+	downstreamVelocity.z = upstreamVelocity.z + upstreamB.x * (downstreamB.z - upstreamB.z) / (4 * pi * j);
+
+	downstreamE = upstreamE;
+
+	double a = (1.0 / ((adiabaticParameter - 1) * downstreamDensity)) + (0.5 / downstreamDensity) - (0.5 / upstreamDensity);
+	double b = (1.0 / ((adiabaticParameter - 1) * upstreamDensity)) + (0.5 / upstreamDensity) - (0.5 / downstreamDensity);
+	double c = ((1 / downstreamDensity) - (1 / upstreamDensity)) * (sqr(downstreamB.y) + sqr(downstreamB.z) - sqr(upstreamB.y) - sqr(upstreamB.z)) / (16 * pi);
+
+	downstreamPressure = (b * upstreamPressure - c) / a;
+}
+
+double Simulation::evaluateTemperatureByPressure(double& pressure) {
+	double totalConcentration = 0;
+	for (int t = 0; t < typesNumber; ++t) {
+		totalConcentration += types[t].concentration;
 	}
+	double result = pressure / (kBoltzman_normalized * totalConcentration);
+	return result;
+}
 
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				double v = upstreamVelocity.x;
-				if (i < shockWavePoint) {
-					//v = V0.x/4;
-					v = downstreamVelocity.x;
-				}
-				Vector3d middleE = (Efield[i][j][k] + Efield[i + 1][j][k]) * 0.5;
-				double gamma = 1.0 / sqrt(1 - v * v / speed_of_light_normalized_sqr);
-				newBfield[i][j][k].y = gamma * (Bfield[i][j][k].y + v * middleE.z / speed_of_light_normalized);
-				newBfield[i][j][k].z = gamma * (Bfield[i][j][k].z - v * middleE.y / speed_of_light_normalized);
-			}
-		}
+double Simulation::evaluatePressureByTemperature(double& temperature) {
+	double pressure = 0;
+	for (int t = 0; t < typesNumber; ++t) {
+		pressure += types[t].concentration * kBoltzman_normalized * temperature;
 	}
-
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			newEfield[i][j][znumber] = newEfield[i][j][0];
-		}
-	}
-
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int k = 0; k < znumber + 1; ++k) {
-			newEfield[i][ynumber][k] = newEfield[i][0][k];
-		}
-	}
-
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
-				Efield[i][j][k] = newEfield[i][j][k];
-				tempEfield[i][j][k] = newEfield[i][j][k];
-				explicitEfield[i][j][k] = newEfield[i][j][k];
-			}
-		}
-	}
-
-	for (int i = 0; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				Bfield[i] = newBfield[i];
-			}
-		}
-	}
+	return pressure;
 }
 
 void Simulation::initializeKolmogorovSpectrum(int first, int last, double turbulenceFraction) {
@@ -2973,10 +4719,16 @@ void Simulation::initializeKolmogorovSpectrum(int first, int last, double turbul
 
 	double* phases = new double[2 * (last - first + 1)];
 
-	for (int i = 0; i < 2 * (last - first + 1); ++i) {
-		phases[i] = 2 * pi * uniformDistribution();
+	if (rank == 0) {
+		for (int i = 0; i < 2 * (last - first + 1); ++i) {
+			phases[i] = 2 * pi * uniformDistribution();
+		}
 	}
-	
+
+
+	MPI_Barrier(cartComm);
+	MPI_Bcast(phases, 2 * (last - first + 1), MPI_DOUBLE, 0, cartComm);
+	MPI_Barrier(cartComm);
 
 	for (int harmCounter = first; harmCounter <= last; ++harmCounter) {
 		double kw = 2 * pi * harmCounter / length;
@@ -2984,9 +4736,9 @@ void Simulation::initializeKolmogorovSpectrum(int first, int last, double turbul
 		///double phiY = 2 * pi * uniformDistribution();
 		//double phiZ = 2 * pi * uniformDistribution();
 
-		for (int i = 0; i < xnumber + 1; ++i) {
-			for (int j = 0; j < ynumber; ++j) {
-				for (int k = 0; k < znumber; ++k) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					Bfield[i][j][k].y += Bamplitude * sin(kw * middleXgrid[i] + phases[2 * harmCounter]);
 					Bfield[i][j][k].z += Bamplitude * cos(kw * middleXgrid[i] + phases[2 * harmCounter + 1]);
 					newBfield[i][j][k] = Bfield[i][j][k];
@@ -3018,51 +4770,82 @@ void Simulation::initializeTwoStream() {
 
 	double kw = 2 * pi / xsize;
 
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	if (xsize * omegaPlasmaElectron / speed_of_light_normalized < 5) {
-		printf("xsize*omegaPlasmaElectron/speed_of_light_normalized < 5\n");
-		fprintf(informationFile, "xsize*omegaPlasmaElectron/speed_of_light_normalized < 5\n");
+		if (rank == 0) printf("xsize*omegaPlasmaElectron/speed_of_light_normalized < 5\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "xsize*omegaPlasmaElectron/speed_of_light_normalized < 5\n");
 	}
+	if (rank == 0)
 		printf("xsize*omegaPlasmaElectron/speed_of_light_normalized = %g\n",
 		       xsize * omegaPlasmaElectron / speed_of_light_normalized);
+	fflush(stdout);
+	if (rank == 0)
 		fprintf(informationFile, "xsize*omegaPlasmaElectron/speed_of_light_normalized = %g\n",
 		        xsize * omegaPlasmaElectron / speed_of_light_normalized);
 
 	if (deltaX * omegaPlasmaElectron / speed_of_light_normalized > 0.2) {
-		printf("deltaX*omegaPlasmaElectron/speed_of_light_normalized > 0.2\n");
-		fprintf(informationFile, "deltaX*omegaPlasmaElectron/speed_of_light_normalized > 0.2\n");
+		if (rank == 0) printf("deltaX*omegaPlasmaElectron/speed_of_light_normalized > 0.2\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "deltaX*omegaPlasmaElectron/speed_of_light_normalized > 0.2\n");
 	}
+	if (rank == 0)
 		printf("deltaX*omegaPlasmaElectron/speed_of_light_normalized = %g\n",
 		       xsize * omegaPlasmaElectron / speed_of_light_normalized);
+	fflush(stdout);
+	if (rank == 0)
 		fprintf(informationFile, "deltaX*omegaPlasmaElectron/speed_of_light_normalized = %g\n",
 		        xsize * omegaPlasmaElectron / speed_of_light_normalized);
 
 	if (kw > omegaPlasmaElectron / u) {
-		printf("k > omegaPlasmaElectron/u\n");
-		fprintf(informationFile, "k > omegaPlasmaElectron/u\n");
+		if (rank == 0) printf("k > omegaPlasmaElectron/u\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "k > omegaPlasmaElectron/u\n");
 	}
 
-	printf("k u/omegaPlasmaElectron = %g\n", kw * u / omegaPlasmaElectron);
-	fprintf(informationFile, "k u/omegaPlasmaElectron = %g\n", kw * u / omegaPlasmaElectron);
-	fclose(informationFile);
+	if (rank == 0) printf("k u/omegaPlasmaElectron = %g\n", kw * u / omegaPlasmaElectron);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "k u/omegaPlasmaElectron = %g\n", kw * u / omegaPlasmaElectron);
+	if (rank == 0) fclose(informationFile);
 
 	double omegaGyroHelium = B0.norm() * electron_charge_normalized / (massHelium3 * speed_of_light_normalized);
 
-	double increment = (u * omegaPlasmaElectron / (speed_of_light_normalized)) / sqrt(gamma);
+	if (rank == 0) {
+		double increment = (u * omegaPlasmaElectron / (speed_of_light_normalized)) / sqrt(gamma);
 
-	incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
-	fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, 1.0, 1.0);
-	fclose(incrementFile);
-	
+		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
+		fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, 1.0, 1.0);
+		fclose(incrementFile);
+	}
+	MPI_Barrier(cartComm);
+
+	/*for (int i = 0; i < xnumber; ++i) {
+		for (int j = 0; j < ynumber; ++j) {
+		    for (int k = 0; k < znumber; ++k) {
+		        Bfield[i][j][k] += Vector3d(0, 1, 0) * Bamplitude * cos(kw * middleXgrid[i]);
+		        newBfield[i][j][k] = Bfield[i][j][k];
+		    }
+		}
+	}*/
+
+	/*for (int i = 0; i < xnumber + 1; ++i) {
+		for (int j = 0; j < ynumber + 1; ++j) {
+		    for (int k = 0; k < znumber + 1; ++k) {
+		        Efield[i][j][k] = Vector3d(0, 0, 1) * Eamplitude * cos(kw * xgrid[i]);
+		        tempEfield[i][j][k] = Efield[i][j][k];
+		        newEfield[i][j][k] = Efield[i][j][k];
+		        explicitEfield[i][j][k] = Efield[i][j][k];
+		    }
+		}
+	}*/
 	int electronCount = 0;
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
 		if (particle->type == ELECTRON) {
 			if (electronCount % 2 == 0) {
 				particle->addVelocity(electronsVelocityPlus, speed_of_light_normalized);
-			}
-			else {
+			} else {
 				particle->addVelocity(electronsVelocityMinus, speed_of_light_normalized);
 			}
 			electronCount++;
@@ -3091,6 +4874,7 @@ void Simulation::initializeExternalFluxInstability() {
 
 
 	checkGyroRadius();
+	if (rank == 0) {
 		informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 		fprintf(informationFile, "alfven V = %g\n", alfvenV * scaleFactor / plasma_period);
 		fprintf(informationFile, "phase V = %g\n", phaseV * scaleFactor / plasma_period);
@@ -3104,8 +4888,7 @@ void Simulation::initializeExternalFluxInstability() {
 			printf("omega > cyclothron Omega Proton\n");
 			fflush(stdout);
 			fprintf(informationFile, "omega > cyclothron Omega Proton\n");
-		}
-		else if (omega > cyclothronOmegaProton / 100.0) {
+		} else if (omega > cyclothronOmegaProton / 100.0) {
 			printf("omega > cyclothrone Omega Proton/100\n");
 			fflush(stdout);
 			fprintf(informationFile, "omega > cyclothron Omega Proton/100\n");
@@ -3114,6 +4897,7 @@ void Simulation::initializeExternalFluxInstability() {
 		fprintf(informationFile, "omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
 
 		fclose(informationFile);
+	}
 }
 
 void Simulation::initializeAnisotropic() {
@@ -3163,24 +4947,27 @@ void Simulation::initializeAnisotropic() {
 
 	double vthermalProton = sqrt(kBoltzman_normalized * types[1].temperatureX / massProton);
 
-	printf("delta Omega/kmax vth = %g\n", (omegaGyroAlpha - omegaGyroProton) / (kmax * vthermalProton));
-	printf("delta Omega/kmin vth = %g\n", (omegaGyroAlpha - omegaGyroProton) / (kmin * vthermalProton));
+	if (rank == 0) printf("delta Omega/kmax vth = %g\n", (omegaGyroAlpha - omegaGyroProton) / (kmax * vthermalProton));
+	if (rank == 0) printf("delta Omega/kmin vth = %g\n", (omegaGyroAlpha - omegaGyroProton) / (kmin * vthermalProton));
 
-	printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
-	printf("omega plasma/gyro omega alphas = %g\n", omegaPlasmaAlpha / omegaGyroAlpha);
-	printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
+	if (rank == 0) printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
+	if (rank == 0) printf("omega plasma/gyro omega alphas = %g\n", omegaPlasmaAlpha / omegaGyroAlpha);
+	if (rank == 0) printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
+	fflush(stdout);
 
 	initializeKolmogorovSpectrum(1, 100, 0.0000001);
 
 	double omegaGyroHelium = B0.norm() * electron_charge_normalized / (massHelium3 * speed_of_light_normalized);
 
-	double increment = 0.01 * omegaGyroHelium;
+	if (rank == 0) {
+		double increment = 0.01 * omegaGyroHelium;
 
-	incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
-	//todo length
-	fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, 0.0, 0.0);
-	fclose(incrementFile);
-	
+		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
+		//todo length
+		fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, 0.0, 0.0);
+		fclose(incrementFile);
+	}
+	MPI_Barrier(cartComm);
 }
 
 void Simulation::initializeAnisotropicSilicon() {
@@ -3233,6 +5020,7 @@ void Simulation::initializeAnisotropicSilicon() {
 
 	initializeKolmogorovSpectrum(1, 100, 0.0000001);
 
+	if (rank == 0) {
 		double increment = 0.011 * omegaGyroSilicon;
 		double length = 180 * speed_of_light_normalized / omegaPlasmaOxygen;
 
@@ -3240,6 +5028,8 @@ void Simulation::initializeAnisotropicSilicon() {
 		//todo length
 		fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, length, length * scaleFactor);
 		fclose(incrementFile);
+	}
+	MPI_Barrier(cartComm);
 }
 
 
@@ -3278,12 +5068,13 @@ void Simulation::initializeWeibel() {
 	omegaGyroProton = B0.norm() * electron_charge_normalized / (massProton * speed_of_light_normalized);
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
-	printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
-	printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
+	if (rank == 0) printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
+	if (rank == 0) printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 
 	initializeKolmogorovSpectrum(1, 100, 0.0000001);
 
-	printf("evaluating increment\n");
+	if (rank == 0) printf("evaluating increment\n");
+	if (rank == 0) {
 		double alphaNormal = types[0].alphaNormal;
 		double alphaParallel = types[0].alphaParallel;
 
@@ -3321,8 +5112,9 @@ void Simulation::initializeWeibel() {
 		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
 		fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, length, length / scaleFactor);
 		fclose(incrementFile);
-
-	printf("finish initialize weibel\n");
+	}
+	MPI_Barrier(cartComm);
+	if (rank == 0) printf("finish initialize weibel\n");
 }
 
 
@@ -3350,8 +5142,9 @@ void Simulation::initializeRingWeibel() {
 	omegaGyroProton = B0.norm() * electron_charge_normalized / (massProton * speed_of_light_normalized);
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
-	printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
-	printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
+	if (rank == 0) printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
+	if (rank == 0) printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
+	fflush(stdout);
 
 	initializeKolmogorovSpectrum(1, 100, 0.0000001);
 
@@ -3380,6 +5173,8 @@ void Simulation::initializeRingWeibel() {
 	double G = 0.5 * (log((1 + betaParallel) / (1 - betaParallel))) / betaParallel;
 
 
+	if (rank == 0) {
+
 		double increment;
 		double length;
 
@@ -3388,8 +5183,7 @@ void Simulation::initializeRingWeibel() {
 		if (k02 < 0) {
 			increment = 0;
 			length = 0;
-		}
-		else {
+		} else {
 
 			double a = omegaPlasmaElectron * omegaPlasmaElectron * betaNormal * betaNormal / (2 * gamma * betaParallel * betaParallel);
 
@@ -3403,8 +5197,7 @@ void Simulation::initializeRingWeibel() {
 			if (kmaxIncrement2 < 0) {
 				increment = 0;
 				length = 0;
-			}
-			else {
+			} else {
 
 				double kmaxIncrement = sqrt(kmaxIncrement2);
 				length = 2 * pi / kmaxIncrement;
@@ -3421,15 +5214,20 @@ void Simulation::initializeRingWeibel() {
 		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
 		fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, length, length / scaleFactor);
 		fclose(incrementFile);
+	}
+	MPI_Barrier(cartComm);
 }
 
 void Simulation::initializeHomogenouseFlow() {
+	boundaryConditionType = FREE_BOTH;
+	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	//boundaryConditionType = PERIODIC;
 	createParticles();
 	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized);
 	//initializeAlfvenWaveY(10, 1.0E-4);
-	for (int i = 0; i < xnumber + 2; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				Efield[i][j][k] = E0;
 				tempEfield[i][j][k] = Efield[i][j][k];
 				newEfield[i][j][k] = Efield[i][j][k];
@@ -3438,146 +5236,204 @@ void Simulation::initializeHomogenouseFlow() {
 		}
 	}
 
-	for (int i = 0; i < additionalBinNumber; ++i) {
-		for (int j = 0; j < ynumber + 1; ++j) {
-			for (int k = 0; k < znumber + 1; ++k) {
-				additionalEfieldLeft[i][j][k] = E0;
-				additionalEfieldRight[i][j][k] = E0;
-			}
-		}
-	}
-
-	for (int i = 0; i < additionalBinNumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
-				additionalBfieldLeft[i][j][k] = B0;
-				additionalBfieldRight[i][j][k] = B0;
-			}
-		}
-	}
-	for (int p = 0; p < particles.size(); ++p) {
+	/*for (int p = 0; p < particles.size(); ++p) {
 		Particle* particle = particles[p];
 		Vector3d momentum = V0 * particle->mass / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
 		particle->setMomentum(momentum);
+	}*/
+}
+
+void Simulation::initializeFake(){
+	boundaryConditionType = PERIODIC;
+	createParticles();
+	//E0.y = -B0.z;
+	E0.y = B0.x;
+	E0.x = 0;
+	E0.z = 0;
+	double kw = 2*pi/ysizeGeneral;
+	for(int i = 0; i < xnumberAdded + 1; ++i){
+		for(int j = 0; j < ynumberAdded + 1; ++j){
+			for(int k = 0; k < znumberAdded + 1; ++k){
+				Efield[i][j][k] = E0*cos(kw*ygrid[j]);
+				tempEfield[i][j][k] = Efield[i][j][k];
+				newEfield[i][j][k] = Efield[i][j][k];
+				explicitEfield[i][j][k] = Efield[i][j][k];
+			}
+		}
+	}
+	for(int i = 0; i < xnumberAdded; ++i){
+		for(int j = 0; j < ynumberAdded; ++j){
+			for(int k = 0; k < znumberAdded; ++k){
+				Bfield[i][j][k] = B0;
+				//Bfield[i][j][k] = B0*(middleYgrid[j] - ysizeGeneral)/ysizeGeneral;
+				newBfield[i][j][k] = Bfield[i][j][k];
+			}
+		}
 	}
 }
 
 void Simulation::createArrays() {
-	printf("creating arrays\n");
-	fflush(stdout);
+	if (rank == 0) printf("creating arrays\n");
+	if (rank == 0) fflush(stdout);
 	//if(rank == 0) printLog("creating arrays\n");
 
-	printf("creating grid arrays\n");
-	fflush(stdout);
+	if (rank == 0) printf("creating grid arrays\n");
+	if (rank == 0) fflush(stdout);
 	// if(rank == 0) printLog("creating grid arrays\n");
-	xgrid = new double[xnumber + 2];
-	ygrid = new double[ynumber + 1];
-	zgrid = new double[znumber + 1];
+	xgrid = new double[xnumberAdded + 1];
+	ygrid = new double[ynumberAdded + 1];
+	zgrid = new double[znumberAdded + 1];
 
-	middleXgrid = new double[xnumber + 1];
-	middleYgrid = new double[ynumber];
-	middleZgrid = new double[znumber];
+	middleXgrid = new double[xnumberAdded];
+	middleYgrid = new double[ynumberAdded];
+	middleZgrid = new double[znumberAdded];
 
-	printf("creating gmresOutput arrays\n");
-	fflush(stdout);
+	if (rank == 0) printf("creating gmresOutput arrays\n");
+	if (rank == 0) fflush(stdout);
 
-	gmresOutput = new double ***[xnumber + 1];
-	for (int i = 0; i < xnumber + 1; ++i) {
-		gmresOutput[i] = new double **[ynumber];
-		for (int j = 0; j < ynumber; ++j) {
-			gmresOutput[i][j] = new double *[znumber];
-			for (int k = 0; k < znumber; ++k) {
+	gmresOutput = new double ***[xnumberAdded];
+	for (int i = 0; i < xnumberAdded; ++i) {
+		gmresOutput[i] = new double **[ynumberAdded];
+		for (int j = 0; j < ynumberAdded; ++j) {
+			gmresOutput[i][j] = new double *[znumberAdded];
+			for (int k = 0; k < znumberAdded; ++k) {
 				gmresOutput[i][j][k] = new double[maxwellEquationMatrixSize];
 			}
 		}
 	}
 
-	gmresMaxwellBasis = new LargeVectorBasis(20, xnumber+1, ynumber, znumber, 3);
-	gmresCleanupBasis = new LargeVectorBasis(20, xnumber, ynumber, znumber, 1);
+	gmresMaxwellBasis = new LargeVectorBasis(20, xnumberAdded, ynumberAdded, znumberAdded, 3);
+	gmresCleanupBasis = new LargeVectorBasis(20, xnumberAdded, ynumberAdded, znumberAdded, 1);
 
-	printf("creating fields arrays\n");
-	fflush(stdout);
+	if (rank == 0) printf("creating fields arrays\n");
+	if (rank == 0) fflush(stdout);
 	// if(rank == 0) printLog("creating fields arrays\n");
 
-	Efield = new Vector3d **[xnumber + 2];
-	newEfield = new Vector3d **[xnumber + 2];
-	tempEfield = new Vector3d **[xnumber + 2];
-	smoothingEfield = new Vector3d **[xnumber + 2];
-	explicitEfield = new Vector3d **[xnumber + 2];
-	rotB = new Vector3d **[xnumber + 2];
-	Ederivative = new Vector3d **[xnumber + 2];
-	Bfield = new Vector3d **[xnumber + 1];
-	newBfield = new Vector3d **[xnumber + 1];
-	smoothingBfield = new Vector3d **[xnumber + 1];
-	rotE = new Vector3d **[xnumber + 1];
-	Bderivative = new Vector3d **[xnumber + 1];
+	Efield = new Vector3d **[xnumberAdded + 1];
+	newEfield = new Vector3d **[xnumberAdded + 1];
+	tempEfield = new Vector3d **[xnumberAdded + 1];
+	explicitEfield = new Vector3d **[xnumberAdded + 1];
+	tempNodeParameter = new double**[xnumberAdded + 1];
+	tempNodeVectorParameter = new Vector3d**[xnumberAdded + 1];
+	tempNodeMatrixParameter = new Matrix3d**[xnumberAdded + 1];
+	rotB = new Vector3d **[xnumberAdded + 1];
+	Ederivative = new Vector3d **[xnumberAdded + 1];
+	Bfield = new Vector3d **[xnumberAdded];
+	newBfield = new Vector3d **[xnumberAdded];
+	rotE = new Vector3d **[xnumberAdded];
+	Bderivative = new Vector3d **[xnumberAdded];
+	tempCellParameter = new double**[xnumberAdded];
+	tempCellVectorParameter = new Vector3d**[xnumberAdded];
+	tempCellMatrixParameter = new Matrix3d**[xnumberAdded];
 
-	for (int i = 0; i < xnumber + 1; ++i) {
-		Bfield[i] = new Vector3d *[ynumber];
-		newBfield[i] = new Vector3d *[ynumber];
-		smoothingBfield[i] = new Vector3d *[ynumber];
-		rotE[i] = new Vector3d *[ynumber];
-		Bderivative[i] = new Vector3d *[ynumber];
-		for (int j = 0; j < ynumber; ++j) {
+	massMatrix = new MassMatrix**[xnumberAdded + 1];
+	tempMassMatrix = new MassMatrix**[xnumberAdded + 1];
+
+	for (int i = 0; i < xnumberAdded; ++i) {
+		Bfield[i] = new Vector3d *[ynumberAdded];
+		newBfield[i] = new Vector3d *[ynumberAdded];
+		rotE[i] = new Vector3d *[ynumberAdded];
+		Bderivative[i] = new Vector3d *[ynumberAdded];
+		tempCellParameter[i] = new double*[ynumberAdded];
+		tempCellVectorParameter[i] = new Vector3d*[ynumberAdded];
+		tempCellMatrixParameter[i] = new Matrix3d*[ynumberAdded];
+		for (int j = 0; j < ynumberAdded; ++j) {
 			//if(rank == 0) printf("%d %d\n", i, j);
 			//if(rank == 0) fflush((stdout));
-			Bfield[i][j] = new Vector3d[znumber];
-			newBfield[i][j] = new Vector3d[znumber];
-			smoothingBfield[i][j] = new Vector3d[znumber];
-			rotE[i][j] = new Vector3d[znumber];
-			Bderivative[i][j] = new Vector3d[znumber];
-			for (int k = 0; k < znumber; ++k) {
+			Bfield[i][j] = new Vector3d[znumberAdded];
+			newBfield[i][j] = new Vector3d[znumberAdded];
+			tempCellParameter[i][j] = new double[znumberAdded];
+			tempCellVectorParameter[i][j] = new Vector3d[znumberAdded];
+			tempCellMatrixParameter[i][j] = new Matrix3d[znumberAdded];
+			rotE[i][j] = new Vector3d[znumberAdded];
+			Bderivative[i][j] = new Vector3d[znumberAdded];
+			for (int k = 0; k < znumberAdded; ++k) {
 				Bfield[i][j][k] = Vector3d(0, 0, 0);
 				newBfield[i][j][k] = Vector3d(0, 0, 0);
-				smoothingBfield[i][j][k] = Vector3d(0, 0, 0);
+				tempCellParameter[i][j][k] = 0;
+				tempCellVectorParameter[i][j][k] = Vector3d(0, 0, 0);
+				tempCellMatrixParameter[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 				rotE[i][j][k] = Vector3d(0, 0, 0);
 				Bderivative[i][j][k] = Vector3d(0, 0, 0);
 			}
 		}
 	}
 
-	for (int i = 0; i < xnumber + 2; ++i) {
-		Efield[i] = new Vector3d *[ynumber + 1];
-		newEfield[i] = new Vector3d *[ynumber + 1];
-		tempEfield[i] = new Vector3d *[ynumber + 1];
-		smoothingEfield[i] = new Vector3d *[ynumber + 1];
-		explicitEfield[i] = new Vector3d *[ynumber + 1];
-		rotB[i] = new Vector3d *[ynumber + 1];
-		Ederivative[i] = new Vector3d *[ynumber + 1];
-		for (int j = 0; j < ynumber + 1; ++j) {
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		Efield[i] = new Vector3d *[ynumberAdded + 1];
+		newEfield[i] = new Vector3d *[ynumberAdded + 1];
+		tempEfield[i] = new Vector3d *[ynumberAdded + 1];
+		tempNodeParameter[i] = new double*[ynumberAdded + 1];
+		tempNodeVectorParameter[i] = new Vector3d*[ynumberAdded + 1];
+		tempNodeMatrixParameter[i] = new Matrix3d*[ynumberAdded + 1];
+		explicitEfield[i] = new Vector3d *[ynumberAdded + 1];
+		rotB[i] = new Vector3d *[ynumberAdded + 1];
+		Ederivative[i] = new Vector3d *[ynumberAdded + 1];
+		massMatrix[i] = new MassMatrix*[ynumberAdded + 1];
+		tempMassMatrix[i] = new MassMatrix*[ynumberAdded + 1];
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			//if(rank == 0) printf("%d %d\n", i, j);
 			//if(rank == 0) fflush((stdout));
-			Efield[i][j] = new Vector3d[znumber + 1];
-			newEfield[i][j] = new Vector3d[znumber + 1];
-			tempEfield[i][j] = new Vector3d[znumber + 1];
-			smoothingEfield[i][j] = new Vector3d[znumber + 1];
-			explicitEfield[i][j] = new Vector3d[znumber + 1];
-			rotB[i][j] = new Vector3d[znumber + 1];
-			Ederivative[i][j] = new Vector3d[znumber + 1];
-			for (int k = 0; k < znumber + 1; ++k) {
+			Efield[i][j] = new Vector3d[znumberAdded + 1];
+			newEfield[i][j] = new Vector3d[znumberAdded + 1];
+			tempEfield[i][j] = new Vector3d[znumberAdded + 1];
+			tempNodeParameter[i][j] = new double[znumberAdded + 1];
+			tempNodeVectorParameter[i][j] = new Vector3d[znumberAdded + 1];
+			tempNodeMatrixParameter[i][j] = new Matrix3d[znumberAdded + 1];
+			explicitEfield[i][j] = new Vector3d[znumberAdded + 1];
+			rotB[i][j] = new Vector3d[znumberAdded + 1];
+			Ederivative[i][j] = new Vector3d[znumberAdded + 1];
+
+			massMatrix[i][j] = new MassMatrix[znumberAdded + 1];
+			tempMassMatrix[i][j] = new MassMatrix[znumberAdded + 1];
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				Efield[i][j][k] = Vector3d(0, 0, 0);
 				newEfield[i][j][k] = Vector3d(0, 0, 0);
 				tempEfield[i][j][k] = Vector3d(0, 0, 0);
-				smoothingEfield[i][j][k] = Vector3d(0, 0, 0);
+				tempNodeParameter[i][j][k] = 0;
+				tempNodeVectorParameter[i][j][k] = Vector3d(0, 0, 0);
+				tempNodeMatrixParameter[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 				explicitEfield[i][j][k] = Vector3d(0, 0, 0);
 				rotB[i][j][k] = Vector3d(0, 0, 0);
 				Ederivative[i][j][k] = Vector3d(0, 0, 0);
+
+				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
+					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
+						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+							for(int curI = 0; curI < 3; ++curI){
+								for(int curJ = 0; curJ < 3; ++curJ){
+									massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[curI][curJ] = 0;
+									tempMassMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[curI][curJ] = 0;
+								}
+							}
+
+							massMatrix[i][j][k].xindex[tempI] = i + tempI - splineOrder - 1;
+							massMatrix[i][j][k].yindex[tempJ] = j + tempJ - splineOrder - 1;
+							massMatrix[i][j][k].zindex[tempK] = k + tempK - splineOrder - 1;
+
+							tempMassMatrix[i][j][k].xindex[tempI] = i + tempI - splineOrder - 1;
+							tempMassMatrix[i][j][k].yindex[tempJ] = j + tempJ - splineOrder - 1;
+							tempMassMatrix[i][j][k].zindex[tempK] = k + tempK - splineOrder - 1;
+						}
+					}
+				}
 			}
 		}
 	}
 
-	printf("creating maxwellequation matrix arrays\n");
+	if (rank == 0) printf("creating maxwellequation matrix arrays\n");
+	fflush(stdout);
 	//if(rank == 0) printLog("creating maxwell equation matrix arrays\n");
 
-	maxwellEquationMatrix = new std::vector<MatrixElement> ***[xnumber + 1];
-	maxwellEquationRightPart = new double ***[xnumber + 1];
-	for (int i = 0; i < xnumber + 1; ++i) {
-		maxwellEquationMatrix[i] = new std::vector<MatrixElement> **[ynumber];
-		maxwellEquationRightPart[i] = new double **[ynumber];
-		for (int j = 0; j < ynumber; ++j) {
-			maxwellEquationMatrix[i][j] = new std::vector<MatrixElement> *[znumber];
-			maxwellEquationRightPart[i][j] = new double *[znumber];
-			for (int k = 0; k < znumber; ++k) {
+	maxwellEquationMatrix = new std::vector<MatrixElement> ***[xnumberAdded];
+	maxwellEquationRightPart = new double ***[xnumberAdded];
+	for (int i = 0; i < xnumberAdded; ++i) {
+		maxwellEquationMatrix[i] = new std::vector<MatrixElement> **[ynumberAdded];
+		maxwellEquationRightPart[i] = new double **[ynumberAdded];
+		for (int j = 0; j < ynumberAdded; ++j) {
+			maxwellEquationMatrix[i][j] = new std::vector<MatrixElement> *[znumberAdded];
+			maxwellEquationRightPart[i][j] = new double *[znumberAdded];
+			for (int k = 0; k < znumberAdded; ++k) {
 				//if(rank == 0) printf("%d %d %d\n", i, j, k);
 				//if(rank == 0) fflush((stdout));
 				maxwellEquationMatrix[i][j][k] = new std::vector<MatrixElement>[maxwellEquationMatrixSize];
@@ -3586,30 +5442,31 @@ void Simulation::createArrays() {
 		}
 	}
 
-	printf("creating arrays for divergence\n");
+	if (rank == 0) printf("creating arrays for divergence\n");
+	if (rank == 0) fflush(stdout);
 	//if(rank == 0) printLog("creating arrays for divergence\n");
 
-	divergenceCleanUpMatrix = new std::vector<MatrixElement> ***[xnumber + 2];
-	divergenceCleanUpRightPart = new double ***[xnumber + 2];
+	divergenceCleanUpMatrix = new std::vector<MatrixElement> ***[xnumberAdded + 1];
+	divergenceCleanUpRightPart = new double ***[xnumberAdded + 1];
 
-	divergenceCleaningField = new double ***[xnumber + 2];
-	divergenceCleaningPotential = new double ***[xnumber + 2];
-	tempDivergenceCleaningPotential = new double ***[xnumber + 2];
-	divergenceCleaningPotentialFourier = new double **[xnumber + 1];
+	divergenceCleaningField = new double ***[xnumberAdded + 1];
+	divergenceCleaningPotential = new double ***[xnumberAdded + 1];
+	tempDivergenceCleaningPotential = new double ***[xnumberAdded + 1];
+	divergenceCleaningPotentialFourier = new double **[xnumberAdded];
 
-	for (int i = 0; i < xnumber + 2; ++i) {
-		divergenceCleanUpMatrix[i] = new std::vector<MatrixElement> **[ynumber];
-		divergenceCleanUpRightPart[i] = new double **[ynumber];
-		divergenceCleaningField[i] = new double **[ynumber];
-		divergenceCleaningPotential[i] = new double **[ynumber];
-		tempDivergenceCleaningPotential[i] = new double **[ynumber];
-		for (int j = 0; j < ynumber; ++j) {
-			divergenceCleanUpMatrix[i][j] = new std::vector<MatrixElement> *[znumber];
-			divergenceCleanUpRightPart[i][j] = new double *[znumber];
-			divergenceCleaningField[i][j] = new double *[znumber];
-			divergenceCleaningPotential[i][j] = new double *[znumber];
-			tempDivergenceCleaningPotential[i][j] = new double *[znumber];
-			for (int k = 0; k < znumber; ++k) {
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		divergenceCleanUpMatrix[i] = new std::vector<MatrixElement> **[ynumberAdded + 1];
+		divergenceCleanUpRightPart[i] = new double **[ynumberAdded + 1];
+		divergenceCleaningField[i] = new double **[ynumberAdded + 1];
+		divergenceCleaningPotential[i] = new double **[ynumberAdded + 1];
+		tempDivergenceCleaningPotential[i] = new double **[ynumberAdded + 1];
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			divergenceCleanUpMatrix[i][j] = new std::vector<MatrixElement> *[znumberAdded + 1];
+			divergenceCleanUpRightPart[i][j] = new double *[znumberAdded + 1];
+			divergenceCleaningField[i][j] = new double *[znumberAdded + 1];
+			divergenceCleaningPotential[i][j] = new double *[znumberAdded + 1];
+			tempDivergenceCleaningPotential[i][j] = new double *[znumberAdded + 1];
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				//if(rank == 0) printf("%d %d %d\n", i, j, k);
 				//if(rank == 0) fflush((stdout));
 				divergenceCleaningField[i][j][k] = new double[3];
@@ -3627,343 +5484,950 @@ void Simulation::createArrays() {
 		}
 	}
 
-	for (int i = 0; i < xnumber + 1; ++i) {
-		divergenceCleaningPotentialFourier[i] = new double *[ynumber];
-		for (int j = 0; j < ynumber; ++j) {
-			divergenceCleaningPotentialFourier[i][j] = new double[znumber];
-			for (int k = 0; k < znumber; ++k) {
+	for (int i = 0; i < xnumberAdded; ++i) {
+		divergenceCleaningPotentialFourier[i] = new double *[ynumberAdded];
+		for (int j = 0; j < ynumberAdded; ++j) {
+			divergenceCleaningPotentialFourier[i][j] = new double[znumberAdded];
+			for (int k = 0; k < znumberAdded; ++k) {
 				divergenceCleaningPotentialFourier[i][j][k] = 0;
 			}
 		}
 	}
 
-	printf("creating arrays for particlesInBins\n");
+	fourierInput = new Complex**[xnumber];
+	fourierImage = new Complex**[xnumber];
+	fourierOutput = new Complex**[xnumber];
+	for (int i = 0; i < xnumber; ++i) {
+		fourierInput[i] = new Complex*[ynumber];
+		fourierImage[i] = new Complex*[ynumber];
+		fourierOutput[i] = new Complex*[ynumber];
+		for (int j = 0; j < ynumber; ++j) {
+			fourierInput[i][j] = new Complex[znumber];
+			fourierImage[i][j] = new Complex[znumber];
+			fourierOutput[i][j] = new Complex[znumber];
+			for (int k = 0; k < znumber; ++k) {
+				fourierInput[i][j][k] = Complex(0, 0);
+				fourierImage[i][j][k] = Complex(0, 0);
+				fourierOutput[i][j][k] = Complex(0, 0);
+			}
+		}
+	}
 
-	printf("creating arrays for parameters\n");
+	if (rank == 0) printf("creating arrays for particlesInBins\n");
+	if (rank == 0) fflush(stdout);
+
+	if (rank == 0) printf("creating arrays for parameters\n");
+	fflush(stdout);
 	//if(rank == 0) printLog("creating arrays for parameters\n");
 
+	mostAcceleratedParticlesNumbers = new std::list<std::pair<int, double> >[typesNumber];
+
 	particleConcentrations = new double ***[typesNumber];
+	particleEnergies = new double ***[typesNumber];
 	particleBulkVelocities = new Vector3d ***[typesNumber];
 	for (int t = 0; t < typesNumber; ++t) {
-		particleConcentrations[t] = new double **[xnumber + 1];
-		particleBulkVelocities[t] = new Vector3d **[xnumber + 1];
-		for (int i = 0; i < xnumber + 1; ++i) {
-			particleConcentrations[t][i] = new double *[ynumber];
-			particleBulkVelocities[t][i] = new Vector3d *[ynumber];
-			for (int j = 0; j < ynumber; ++j) {
-				particleConcentrations[t][i][j] = new double[znumber];
-				particleBulkVelocities[t][i][j] = new Vector3d[znumber];
-				for (int k = 0; k < znumber; ++k) {
+		particleConcentrations[t] = new double **[xnumberAdded];
+		particleEnergies[t] = new double **[xnumberAdded];
+		particleBulkVelocities[t] = new Vector3d **[xnumberAdded];
+		for (int i = 0; i < xnumberAdded; ++i) {
+			particleConcentrations[t][i] = new double *[ynumberAdded];
+			particleEnergies[t][i] = new double *[ynumberAdded];
+			particleBulkVelocities[t][i] = new Vector3d *[ynumberAdded];
+			for (int j = 0; j < ynumberAdded; ++j) {
+				particleConcentrations[t][i][j] = new double[znumberAdded];
+				particleEnergies[t][i][j] = new double[znumberAdded];
+				particleBulkVelocities[t][i][j] = new Vector3d[znumberAdded];
+				for (int k = 0; k < znumberAdded; ++k) {
 					particleConcentrations[t][i][j][k] = 0;
+					particleEnergies[t][i][j][k] = 0;
 					particleBulkVelocities[t][i][j][k] = Vector3d(0, 0, 0);
 				}
 			}
 		}
 	}
 
-	additionalParticleConcentrationsLeft = new double ***[typesNumber];
-	additionalParticleConcentrationsRight = new double ***[typesNumber];
-	additionalParticleBulkVelocitiesLeft = new Vector3d ***[typesNumber];
-	additionalParticleBulkVelocitiesRight = new Vector3d ***[typesNumber];
-	if (additionalBinNumber > 0) {
-		for (int t = 0; t < typesNumber; ++t) {
-			additionalParticleConcentrationsLeft[t] = new double **[additionalBinNumber];
-			additionalParticleConcentrationsRight[t] = new double **[additionalBinNumber];
-			additionalParticleBulkVelocitiesLeft[t] = new Vector3d **[additionalBinNumber];
-			additionalParticleBulkVelocitiesRight[t] = new Vector3d **[additionalBinNumber];
-			for (int i = 0; i < additionalBinNumber; ++i) {
-				additionalParticleConcentrationsLeft[t][i] = new double *[ynumber];
-				additionalParticleConcentrationsRight[t][i] = new double *[ynumber];
-				additionalParticleBulkVelocitiesLeft[t][i] = new Vector3d *[ynumber];
-				additionalParticleBulkVelocitiesRight[t][i] = new Vector3d *[ynumber];
-				for (int j = 0; j < ynumber; ++j) {
-					additionalParticleConcentrationsLeft[t][i][j] = new double[znumber];
-					additionalParticleConcentrationsRight[t][i][j] = new double[znumber];
-					additionalParticleBulkVelocitiesLeft[t][i][j] = new Vector3d[znumber];
-					additionalParticleBulkVelocitiesRight[t][i][j] = new Vector3d[znumber];
-					for (int k = 0; k < znumber; ++k) {
-						additionalParticleConcentrationsLeft[t][i][j][k] = 0;
-						additionalParticleConcentrationsRight[t][i][j][k] = 0;
-						additionalParticleBulkVelocitiesLeft[t][i][j][k] = Vector3d(0, 0, 0);
-						additionalParticleBulkVelocitiesRight[t][i][j][k] = Vector3d(0, 0, 0);
-					}
-				}
-			}
-		}
-	}
+	chargeDensity = new double **[xnumberAdded];
+	chargeDensityMinus = new double **[xnumberAdded];
+	chargeDensityHat = new double **[xnumberAdded];
+	pressureTensor = new Matrix3d **[xnumberAdded];
 
-	chargeDensity = new double **[xnumber + 1];
-	chargeDensityMinus = new double **[xnumber + 1];
-	chargeDensityHat = new double **[xnumber + 1];
-	pressureTensor = new Matrix3d **[xnumber + 1];
-	tempCellParameter = new double **[xnumber + 1];
-
-	for (int i = 0; i < xnumber + 1; ++i) {
-		chargeDensity[i] = new double *[ynumber];
-		chargeDensityMinus[i] = new double *[ynumber];
-		chargeDensityHat[i] = new double *[ynumber];
-		pressureTensor[i] = new Matrix3d *[ynumber];
-		tempCellParameter[i] = new double *[ynumber];
-		for (int j = 0; j < ynumber; ++j) {
-			chargeDensity[i][j] = new double[znumber];
-			chargeDensityMinus[i][j] = new double[znumber];
-			chargeDensityHat[i][j] = new double[znumber];
-			pressureTensor[i][j] = new Matrix3d[znumber];
-			tempCellParameter[i][j] = new double[znumber];
-			for (int k = 0; k < znumber; ++k) {
+	for (int i = 0; i < xnumberAdded; ++i) {
+		chargeDensity[i] = new double *[ynumberAdded];
+		chargeDensityMinus[i] = new double *[ynumberAdded];
+		chargeDensityHat[i] = new double *[ynumberAdded];
+		pressureTensor[i] = new Matrix3d *[ynumberAdded];
+		for (int j = 0; j < ynumberAdded; ++j) {
+			chargeDensity[i][j] = new double[znumberAdded];
+			chargeDensityMinus[i][j] = new double[znumberAdded];
+			chargeDensityHat[i][j] = new double[znumberAdded];
+			pressureTensor[i][j] = new Matrix3d[znumberAdded];
+			for (int k = 0; k < znumberAdded; ++k) {
 				//if(rank == 0) printf("%d %d %d\n", i, j, k);
 				//if(rank == 0) fflush((stdout));
 				chargeDensity[i][j][k] = 0;
 				chargeDensityMinus[i][j][k] = 0;
 				chargeDensityHat[i][j][k] = 0;
 				pressureTensor[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				tempCellParameter[i][j][k] = 0;
 			}
 		}
 	}
 
-	if (additionalBinNumber > 0) {
-		additionalBfieldLeft = new Vector3d **[additionalBinNumber];
-		additionalBfieldRight = new Vector3d **[additionalBinNumber];
-		additionalNewBfieldLeft = new Vector3d **[additionalBinNumber];
-		additionalNewBfieldRight = new Vector3d **[additionalBinNumber];
-		additionalChargeDensityHatLeft = new double **[additionalBinNumber];
-		additionalChargeDensityHatRight = new double **[additionalBinNumber];
-		additionalChargeDensityLeft = new double **[additionalBinNumber];
-		additionalChargeDensityMinusLeft = new double **[additionalBinNumber];
-		additionalChargeDensityRight = new double **[additionalBinNumber];
-		additionalChargeDensityMinusRight = new double **[additionalBinNumber];
-		additionalChargeDensityLeft = new double **[additionalBinNumber];
-		additionalChargeDensityRight = new double **[additionalBinNumber];
-		additionalPressureTensorLeft = new Matrix3d **[additionalBinNumber];
-		additionalPressureTensorRight = new Matrix3d **[additionalBinNumber];
-		for (int i = 0; i < additionalBinNumber; ++i) {
-			additionalBfieldLeft[i] = new Vector3d *[ynumber];
-			additionalBfieldRight[i] = new Vector3d *[ynumber];
-			additionalNewBfieldLeft[i] = new Vector3d *[ynumber];
-			additionalNewBfieldRight[i] = new Vector3d *[ynumber];
-			additionalChargeDensityHatLeft[i] = new double *[ynumber];
-			additionalChargeDensityHatRight[i] = new double *[ynumber];
-			additionalChargeDensityLeft[i] = new double *[ynumber];
-			additionalChargeDensityMinusLeft[i] = new double *[ynumber];
-			additionalChargeDensityRight[i] = new double *[ynumber];
-			additionalChargeDensityMinusRight[i] = new double *[ynumber];
-			additionalChargeDensityLeft[i] = new double *[ynumber];
-			additionalChargeDensityRight[i] = new double *[ynumber];
-			additionalPressureTensorLeft[i] = new Matrix3d *[ynumber];
-			additionalPressureTensorRight[i] = new Matrix3d *[ynumber];
-			for (int j = 0; j < ynumber; ++j) {
-				additionalBfieldLeft[i][j] = new Vector3d[znumber];
-				additionalBfieldRight[i][j] = new Vector3d[znumber];
-				additionalNewBfieldLeft[i][j] = new Vector3d[znumber];
-				additionalNewBfieldRight[i][j] = new Vector3d[znumber];
-				additionalChargeDensityHatLeft[i][j] = new double[znumber];
-				additionalChargeDensityHatRight[i][j] = new double[znumber];
-				additionalChargeDensityLeft[i][j] = new double[znumber];
-				additionalChargeDensityMinusLeft[i][j] = new double[znumber];
-				additionalChargeDensityRight[i][j] = new double[znumber];
-				additionalChargeDensityMinusRight[i][j] = new double[znumber];
-				additionalChargeDensityLeft[i][j] = new double[znumber];
-				additionalChargeDensityRight[i][j] = new double[znumber];
-				additionalPressureTensorLeft[i][j] = new Matrix3d[znumber];
-				additionalPressureTensorRight[i][j] = new Matrix3d[znumber];
-				for (int k = 0; k < znumber; ++k) {
-					additionalBfieldLeft[i][j][k] = Vector3d(0, 0, 0);
-					additionalBfieldRight[i][j][k] = Vector3d(0, 0, 0);
-					additionalNewBfieldLeft[i][j][k] = Vector3d(0, 0, 0);
-					additionalNewBfieldRight[i][j][k] = Vector3d(0, 0, 0);
-					additionalChargeDensityHatLeft[i][j][k] = 0;
-					additionalChargeDensityHatRight[i][j][k] = 0;
-					additionalChargeDensityLeft[i][j][k] = 0;
-					additionalChargeDensityMinusLeft[i][j][k] = 0;
-					additionalChargeDensityRight[i][j][k] = 0;
-					additionalChargeDensityMinusRight[i][j][k] = 0;
-					additionalChargeDensityLeft[i][j][k] = 0;
-					additionalChargeDensityRight[i][j][k] = 0;
-					additionalPressureTensorLeft[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-					additionalPressureTensorRight[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				}
-			}
-		}
-	}
-
-	printf("creating arrays for fluxes\n");
+	if (rank == 0) printf("creating arrays for fluxes\n");
+	fflush(stdout);
 	//if(rank == 0) printLog("creating arrays for fluxes\n");
 
-	electricFlux = new Vector3d **[xnumber + 2];
-	electricFluxMinus = new Vector3d **[xnumber + 2];
-	dielectricTensor = new Matrix3d **[xnumber + 2];
-	externalElectricFlux = new Vector3d **[xnumber + 2];
-	divPressureTensor = new Vector3d **[xnumber + 2];
+	electricFlux = new Vector3d **[xnumberAdded + 1];
+	electricFluxMinus = new Vector3d **[xnumberAdded + 1];
+	dielectricTensor = new Matrix3d **[xnumberAdded + 1];
+	externalElectricFlux = new Vector3d **[xnumberAdded + 1];
+	divPressureTensor = new Vector3d **[xnumberAdded + 1];
+	divPressureTensorMinus = new Vector3d **[xnumberAdded + 1];
 
-	for (int i = 0; i < xnumber + 2; ++i) {
-		electricFlux[i] = new Vector3d *[ynumber + 1];
-		electricFluxMinus[i] = new Vector3d *[ynumber + 1];
-		dielectricTensor[i] = new Matrix3d *[ynumber + 1];
-		externalElectricFlux[i] = new Vector3d *[ynumber + 1];
-		divPressureTensor[i] = new Vector3d *[ynumber + 1];
-		for (int j = 0; j < ynumber + 1; ++j) {
-			electricFlux[i][j] = new Vector3d[znumber + 1];
-			electricFluxMinus[i][j] = new Vector3d[znumber + 1];
-			dielectricTensor[i][j] = new Matrix3d[znumber + 1];
-			externalElectricFlux[i][j] = new Vector3d[znumber + 1];
-			divPressureTensor[i][j] = new Vector3d[znumber + 1];
-			for (int k = 0; k < znumber + 1; ++k) {
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		electricFlux[i] = new Vector3d *[ynumberAdded + 1];
+		electricFluxMinus[i] = new Vector3d *[ynumberAdded + 1];
+		dielectricTensor[i] = new Matrix3d *[ynumberAdded + 1];
+		externalElectricFlux[i] = new Vector3d *[ynumberAdded + 1];
+		divPressureTensor[i] = new Vector3d *[ynumberAdded + 1];
+		divPressureTensorMinus[i] = new Vector3d *[ynumberAdded + 1];
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			electricFlux[i][j] = new Vector3d[znumberAdded + 1];
+			electricFluxMinus[i][j] = new Vector3d[znumberAdded + 1];
+			dielectricTensor[i][j] = new Matrix3d[znumberAdded + 1];
+			externalElectricFlux[i][j] = new Vector3d[znumberAdded + 1];
+			divPressureTensor[i][j] = new Vector3d[znumberAdded + 1];
+			divPressureTensorMinus[i][j] = new Vector3d[znumberAdded + 1];
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				//if(rank == 0) printf("%d %d %d\n", i, j, k);
 				//if(rank == 0) fflush((stdout));
 				electricFlux[i][j][k] = Vector3d(0, 0, 0);
 				electricFluxMinus[i][j][k] = Vector3d(0, 0, 0);
 				externalElectricFlux[i][j][k] = Vector3d(0, 0, 0);
 				divPressureTensor[i][j][k] = Vector3d(0, 0, 0);
+				divPressureTensorMinus[i][j][k] = Vector3d(0, 0, 0);
 				dielectricTensor[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 			}
 		}
 	}
 
-	if (additionalBinNumber > 0) {
-		additionalEfieldLeft = new Vector3d **[additionalBinNumber];
-		additionalEfieldRight = new Vector3d **[additionalBinNumber];
-		additionalTempEfieldLeft = new Vector3d **[additionalBinNumber];
-		additionalTempEfieldRight = new Vector3d **[additionalBinNumber];
-		additionalNewEfieldLeft = new Vector3d **[additionalBinNumber];
-		additionalNewEfieldRight = new Vector3d **[additionalBinNumber];
-		additionalElectricFluxLeft = new Vector3d **[additionalBinNumber];
-		additionalElectricFluxMinusLeft = new Vector3d **[additionalBinNumber];
-		additionalElectricFluxRight = new Vector3d **[additionalBinNumber];
-		additionalElectricFluxMinusRight = new Vector3d **[additionalBinNumber];
-		additionalDielectricTensorLeft = new Matrix3d **[additionalBinNumber];
-		additionalDielectricTensorRight = new Matrix3d **[additionalBinNumber];
-		additionalDivPressureTensorLeft = new Vector3d **[additionalBinNumber];
-		additionalDivPressureTensorRight = new Vector3d **[additionalBinNumber];
-		for (int i = 0; i < additionalBinNumber; ++i) {
-			additionalEfieldLeft[i] = new Vector3d *[ynumber + 1];
-			additionalEfieldRight[i] = new Vector3d *[ynumber + 1];
-			additionalTempEfieldLeft[i] = new Vector3d *[ynumber + 1];
-			additionalTempEfieldRight[i] = new Vector3d *[ynumber + 1];
-			additionalNewEfieldLeft[i] = new Vector3d *[ynumber + 1];
-			additionalNewEfieldRight[i] = new Vector3d *[ynumber + 1];
-			additionalElectricFluxLeft[i] = new Vector3d *[ynumber + 1];
-			additionalElectricFluxMinusLeft[i] = new Vector3d *[ynumber + 1];
-			additionalElectricFluxRight[i] = new Vector3d *[ynumber + 1];
-			additionalElectricFluxMinusRight[i] = new Vector3d *[ynumber + 1];
-			additionalDielectricTensorLeft[i] = new Matrix3d *[ynumber + 1];
-			additionalDielectricTensorRight[i] = new Matrix3d *[ynumber + 1];
-			additionalDivPressureTensorLeft[i] = new Vector3d *[ynumber + 1];
-			additionalDivPressureTensorRight[i] = new Vector3d *[ynumber + 1];
-			for (int j = 0; j < ynumber + 1; ++j) {
-				additionalEfieldLeft[i][j] = new Vector3d[znumber + 1];
-				additionalEfieldRight[i][j] = new Vector3d[znumber + 1];
-				additionalTempEfieldLeft[i][j] = new Vector3d[znumber + 1];
-				additionalTempEfieldRight[i][j] = new Vector3d[znumber + 1];
-				additionalNewEfieldLeft[i][j] = new Vector3d[znumber + 1];
-				additionalNewEfieldRight[i][j] = new Vector3d[znumber + 1];
-				additionalElectricFluxLeft[i][j] = new Vector3d[znumber + 1];
-				additionalElectricFluxMinusLeft[i][j] = new Vector3d[znumber + 1];
-				additionalElectricFluxRight[i][j] = new Vector3d[znumber + 1];
-				additionalElectricFluxMinusRight[i][j] = new Vector3d[znumber + 1];
-				additionalDielectricTensorLeft[i][j] = new Matrix3d[znumber + 1];
-				additionalDielectricTensorRight[i][j] = new Matrix3d[znumber + 1];
-				additionalDivPressureTensorLeft[i][j] = new Vector3d[znumber + 1];
-				additionalDivPressureTensorRight[i][j] = new Vector3d[znumber + 1];
-				for (int k = 0; k < znumber + 1; ++k) {
-					additionalEfieldLeft[i][j][k] = Vector3d(0, 0, 0);
-					additionalEfieldRight[i][j][k] = Vector3d(0, 0, 0);
-					additionalTempEfieldLeft[i][j][k] = Vector3d(0, 0, 0);
-					additionalTempEfieldRight[i][j][k] = Vector3d(0, 0, 0);
-					additionalNewEfieldLeft[i][j][k] = Vector3d(0, 0, 0);
-					additionalNewEfieldRight[i][j][k] = Vector3d(0, 0, 0);
-					additionalElectricFluxLeft[i][j][k] = Vector3d(0, 0, 0);
-					additionalElectricFluxMinusLeft[i][j][k] = Vector3d(0, 0, 0);
-					additionalElectricFluxRight[i][j][k] = Vector3d(0, 0, 0);
-					additionalElectricFluxMinusRight[i][j][k] = Vector3d(0, 0, 0);
-					additionalDielectricTensorLeft[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-					additionalDielectricTensorRight[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-					additionalDivPressureTensorLeft[i][j][k] = Vector3d(0, 0, 0);
-					additionalDivPressureTensorRight[i][j][k] = Vector3d(0, 0, 0);
+	if (rank == 0) printf("creating arrays for buffers\n");
+	fflush(stdout);
+	//if(rank == 0) printLog("creating arrays for buffers\n");
+
+	rightOutNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	leftOutNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	leftInNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	rightInNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+
+	rightOutVectorNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (2 + additionalBinNumber)];
+	leftOutVectorNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (2 + additionalBinNumber)];
+	leftInVectorNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (2 + additionalBinNumber)];
+	rightInVectorNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (2 + additionalBinNumber)];
+
+	rightOutVectorCellBuffer = new double[(ynumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+	leftOutVectorCellBuffer = new double[(ynumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+	leftInVectorCellBuffer = new double[(ynumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+	rightInVectorCellBuffer = new double[(ynumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+
+	rightOutCellBuffer = new double[(ynumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+	leftOutCellBuffer = new double[(ynumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+	leftInCellBuffer = new double[(ynumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+	rightInCellBuffer = new double[(ynumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+
+	backOutVectorNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (2 + additionalBinNumber)];
+	frontOutVectorNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (2 + additionalBinNumber)];
+	backInVectorNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (2 + additionalBinNumber)];
+	frontInVectorNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (2 + additionalBinNumber)];
+
+	backOutNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	frontOutNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	backInNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	frontInNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+
+	backOutVectorCellBuffer = new double[(xnumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+	frontOutVectorCellBuffer = new double[(xnumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+	backInVectorCellBuffer = new double[(xnumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+	frontInVectorCellBuffer = new double[(xnumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+
+	backOutCellBuffer = new double[(xnumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+	frontOutCellBuffer = new double[(xnumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+	backInCellBuffer = new double[(xnumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+	frontInCellBuffer = new double[(xnumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+
+	topOutNodeBuffer = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (2 + additionalBinNumber)];
+	bottomOutNodeBuffer = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (2 + additionalBinNumber)];
+	topInNodeBuffer = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (2 + additionalBinNumber)];
+	bottomInNodeBuffer = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (2 + additionalBinNumber)];
+
+	topOutVectorNodeBuffer = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (2 + additionalBinNumber)];
+	bottomOutVectorNodeBuffer = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (2 + additionalBinNumber)];
+	topInVectorNodeBuffer = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (2 + additionalBinNumber)];
+	bottomInVectorNodeBuffer = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (2 + additionalBinNumber)];
+
+	topOutVectorCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * 3 * (1 + additionalBinNumber)];
+	bottomOutVectorCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * 3 * (1 + additionalBinNumber)];
+	topInVectorCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * 3 * (1 + additionalBinNumber)];
+	bottomInVectorCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * 3 * (1 + additionalBinNumber)];
+
+	topOutCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
+	bottomOutCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
+	topInCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
+	bottomInCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
+
+	////buneman E
+	leftOutBunemanExBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	rightOutBunemanExBuffer = new  double[(ynumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	leftInBunemanExBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	rightInBunemanExBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+
+	frontOutBunemanExBuffer = new double[(xnumberAdded) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	backOutBunemanExBuffer = new double[(xnumberAdded) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	frontInBunemanExBuffer = new double[(xnumberAdded) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	backInBunemanExBuffer = new double[(xnumberAdded) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+
+	bottomOutBunemanExBuffer = new double[(ynumberAdded + 1) * (xnumberAdded) * (2 + additionalBinNumber)];
+	topOutBunemanExBuffer = new double[(ynumberAdded + 1) * (xnumberAdded) * (2 + additionalBinNumber)];
+	bottomInBunemanExBuffer = new double[(ynumberAdded + 1) * (xnumberAdded) * (2 + additionalBinNumber)];
+	topInBunemanExBuffer = new double[(ynumberAdded + 1) * (xnumberAdded) * (2 + additionalBinNumber)];
+
+	leftOutBunemanEyBuffer = new double[(ynumberAdded) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	rightOutBunemanEyBuffer = new double[(ynumberAdded) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	leftInBunemanEyBuffer = new double[(ynumberAdded) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	rightInBunemanEyBuffer = new double[(ynumberAdded) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+
+	frontOutBunemanEyBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	backOutBunemanEyBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	frontInBunemanEyBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	backInBunemanEyBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+
+	bottomOutBunemanEyBuffer = new double[(ynumberAdded) * (xnumberAdded + 1) * (2 + additionalBinNumber)];
+	topOutBunemanEyBuffer = new double[(ynumberAdded) * (xnumberAdded + 1) * (2 + additionalBinNumber)];
+	bottomInBunemanEyBuffer = new double[(ynumberAdded) * (xnumberAdded + 1) * (2 + additionalBinNumber)];
+	topInBunemanEyBuffer = new double[(ynumberAdded) * (xnumberAdded + 1) * (2 + additionalBinNumber)];
+
+	leftOutBunemanEzBuffer = new double[(ynumberAdded + 1) * (znumberAdded) * (2 + additionalBinNumber)];
+	rightOutBunemanEzBuffer = new double[(ynumberAdded + 1) * (znumberAdded) * (2 + additionalBinNumber)];
+	leftInBunemanEzBuffer = new double[(ynumberAdded + 1) * (znumberAdded) * (2 + additionalBinNumber)];
+	rightInBunemanEzBuffer = new double[(ynumberAdded + 1) * (znumberAdded) * (2 + additionalBinNumber)];
+
+	frontOutBunemanEzBuffer = new double[(xnumberAdded + 1) * (znumberAdded) * (2 + additionalBinNumber)];
+	backOutBunemanEzBuffer = new double[(xnumberAdded + 1) * (znumberAdded) * (2 + additionalBinNumber)];
+	frontInBunemanEzBuffer = new double[(xnumberAdded + 1) * (znumberAdded) * (2 + additionalBinNumber)];
+	backInBunemanEzBuffer = new double[(xnumberAdded + 1) * (znumberAdded) * (2 + additionalBinNumber)];
+
+	bottomOutBunemanEzBuffer = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (1 + additionalBinNumber)];
+	topOutBunemanEzBuffer = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (1 + additionalBinNumber)];
+	bottomInBunemanEzBuffer = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (1 + additionalBinNumber)];
+	topInBunemanEzBuffer = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (1 + additionalBinNumber)];
+
+	///buneman B
+	leftOutBunemanBxBuffer = new double[(ynumberAdded) * (znumberAdded) * (2 + additionalBinNumber)];
+	rightOutBunemanBxBuffer = new double[(ynumberAdded) * (znumberAdded) * (2 + additionalBinNumber)];
+	leftInBunemanBxBuffer = new double[(ynumberAdded) * (znumberAdded) * (2 + additionalBinNumber)];
+	rightInBunemanBxBuffer = new double[(ynumberAdded) * (znumberAdded) * (2 + additionalBinNumber)];
+
+	frontOutBunemanBxBuffer = new double[(xnumberAdded + 1) * (znumberAdded) * (1 + additionalBinNumber)];
+	backOutBunemanBxBuffer = new double[(xnumberAdded + 1) * (znumberAdded) * (1 + additionalBinNumber)];
+	frontInBunemanBxBuffer = new double[(xnumberAdded + 1) * (znumberAdded) * (1 + additionalBinNumber)];
+	backInBunemanBxBuffer = new double[(xnumberAdded + 1) * (znumberAdded) * (1 + additionalBinNumber)];
+
+	bottomOutBunemanBxBuffer = new double[(ynumberAdded) * (xnumberAdded + 1) * (1 + additionalBinNumber)];
+	topOutBunemanBxBuffer = new double[(ynumberAdded) * (xnumberAdded + 1) * (1 + additionalBinNumber)];
+	bottomInBunemanBxBuffer = new double[(ynumberAdded) * (xnumberAdded + 1) * (1 + additionalBinNumber)];
+	topInBunemanBxBuffer = new double[(ynumberAdded) * (xnumberAdded + 1) * (1 + additionalBinNumber)];
+
+	leftOutBunemanByBuffer = new double[(ynumberAdded + 1) * (znumberAdded) * (1 + additionalBinNumber)];
+	rightOutBunemanByBuffer = new double[(ynumberAdded + 1) * (znumberAdded) * (1 + additionalBinNumber)];
+	leftInBunemanByBuffer = new double[(ynumberAdded + 1) * (znumberAdded) * (1 + additionalBinNumber)];
+	rightInBunemanByBuffer = new double[(ynumberAdded + 1) * (znumberAdded) * (1 + additionalBinNumber)];
+
+	frontOutBunemanByBuffer = new double[(xnumberAdded) * (znumberAdded) * (2 + additionalBinNumber)];
+	backOutBunemanByBuffer = new double[(xnumberAdded) * (znumberAdded) * (2 + additionalBinNumber)];
+	frontInBunemanByBuffer = new double[(xnumberAdded) * (znumberAdded) * (2 + additionalBinNumber)];
+	backInBunemanByBuffer = new double[(xnumberAdded) * (znumberAdded) * (2 + additionalBinNumber)];
+
+	bottomOutBunemanByBuffer = new double[(ynumberAdded + 1) * (xnumberAdded) * (1 + additionalBinNumber)];
+	topOutBunemanByBuffer = new double[(ynumberAdded + 1) * (xnumberAdded) * (1 + additionalBinNumber)];
+	bottomInBunemanByBuffer = new double[(ynumberAdded + 1) * (xnumberAdded) * (1 + additionalBinNumber)];
+	topInBunemanByBuffer = new double[(ynumberAdded + 1) * (xnumberAdded) * (1 + additionalBinNumber)];
+
+	leftOutBunemanBzBuffer = new double[(ynumberAdded) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	rightOutBunemanBzBuffer = new double[(ynumberAdded) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	leftInBunemanBzBuffer = new double[(ynumberAdded) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	rightInBunemanBzBuffer = new double[(ynumberAdded) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+
+	frontOutBunemanBzBuffer = new double[(xnumberAdded) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	backOutBunemanBzBuffer = new double[(xnumberAdded) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	frontInBunemanBzBuffer = new double[(xnumberAdded) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	backInBunemanBzBuffer = new double[(xnumberAdded) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+
+	bottomOutBunemanBzBuffer = new double[(ynumberAdded ) * (xnumberAdded) * (2 + additionalBinNumber)];
+	topOutBunemanBzBuffer = new double[(ynumberAdded ) * (xnumberAdded) * (2 + additionalBinNumber)];
+	bottomInBunemanBzBuffer = new double[(ynumberAdded ) * (xnumberAdded) * (2 + additionalBinNumber)];
+	topInBunemanBzBuffer = new double[(ynumberAdded ) * (xnumberAdded) * (2 + additionalBinNumber)];
+
+
+	rightOutGmresBuffer = new double[(ynumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+	leftOutGmresBuffer = new double[(ynumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+	leftInGmresBuffer = new double[(ynumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+	rightInGmresBuffer = new double[(ynumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+
+	frontOutGmresBuffer = new double[(xnumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+	backOutGmresBuffer = new double[(xnumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+	frontInGmresBuffer = new double[(xnumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+	backInGmresBuffer = new double[(xnumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
+
+	topOutGmresBuffer = new double[(ynumberAdded) * (xnumberAdded) * 3 * (1 + additionalBinNumber)];
+	topInGmresBuffer = new double[(ynumberAdded) * (xnumberAdded) * 3 * (1 + additionalBinNumber)];
+	bottomOutGmresBuffer = new double[(ynumberAdded) * (xnumberAdded) * 3 * (1 + additionalBinNumber)];
+	bottomInGmresBuffer = new double[(ynumberAdded) * (xnumberAdded) * 3 * (1 + additionalBinNumber)];
+
+	rightOutDivergenceBuffer = new double[(ynumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+	leftOutDivergenceBuffer = new double[(ynumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+	leftInDivergenceBuffer = new double[(ynumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+	rightInDivergenceBuffer = new double[(ynumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+
+	frontOutDivergenceBuffer = new double[(xnumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+	backOutDivergenceBuffer = new double[(xnumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+	frontInDivergenceBuffer = new double[(xnumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+	backInDivergenceBuffer = new double[(xnumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
+
+	topOutDivergenceBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
+	topInDivergenceBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
+	bottomOutDivergenceBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
+	bottomInDivergenceBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
+
+	tempCellParameterLeft = new double **[2 + 2 * additionalBinNumber];
+	tempCellParameterRight = new double **[2 + 2 * additionalBinNumber];
+	tempNodeParameterLeft = new double **[3 + 2 * additionalBinNumber];
+	tempNodeParameterRight = new double **[3 + 2 * additionalBinNumber];
+
+	tempCellVectorParameterLeft = new Vector3d **[2 + 2 * additionalBinNumber];
+	tempCellVectorParameterRight = new Vector3d **[2 + 2 * additionalBinNumber];
+	tempNodeVectorParameterLeft = new Vector3d **[3 + 2 * additionalBinNumber];
+	tempNodeVectorParameterRight = new Vector3d **[3 + 2 * additionalBinNumber];
+
+	tempCellMatrixParameterLeft = new Matrix3d **[2 + 2 * additionalBinNumber];
+	tempCellMatrixParameterRight = new Matrix3d **[2 + 2 * additionalBinNumber];
+	tempNodeMatrixParameterLeft = new Matrix3d **[3 + 2 * additionalBinNumber];
+	tempNodeMatrixParameterRight = new Matrix3d **[3 + 2 * additionalBinNumber];
+
+	tempNodeMassMatrixParameterLeft = new MassMatrix **[3 + 2 * additionalBinNumber];
+	tempNodeMassMatrixParameterRight = new MassMatrix **[3 + 2 * additionalBinNumber];
+
+	for (int i = 0; i < 2 + 2 * additionalBinNumber; ++i) {
+		tempCellParameterLeft[i] = new double *[ynumberAdded];
+		tempCellParameterRight[i] = new double *[ynumberAdded];
+		tempCellVectorParameterLeft[i] = new Vector3d *[ynumberAdded];
+		tempCellVectorParameterRight[i] = new Vector3d *[ynumberAdded];
+		tempCellMatrixParameterLeft[i] = new Matrix3d *[ynumberAdded];
+		tempCellMatrixParameterRight[i] = new Matrix3d *[ynumberAdded];
+		for (int j = 0; j < ynumberAdded; ++j) {
+			tempCellParameterLeft[i][j] = new double[znumberAdded];
+			tempCellParameterRight[i][j] = new double[znumberAdded];
+			tempCellVectorParameterLeft[i][j] = new Vector3d[znumberAdded];
+			tempCellVectorParameterRight[i][j] = new Vector3d[znumberAdded];
+			tempCellMatrixParameterLeft[i][j] = new Matrix3d[znumberAdded];
+			tempCellMatrixParameterRight[i][j] = new Matrix3d[znumberAdded];
+			for (int k = 0; k < znumberAdded; ++k) {
+				tempCellParameterLeft[i][j][k] = 0;
+				tempCellParameterRight[i][j][k] = 0;
+				tempCellVectorParameterLeft[i][j][k] = Vector3d(0, 0, 0);
+				tempCellVectorParameterRight[i][j][k] = Vector3d(0, 0, 0);
+				tempCellMatrixParameterLeft[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+				tempCellMatrixParameterRight[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+			}
+		}
+	}
+
+	for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
+		tempNodeParameterLeft[i] = new double *[ynumberAdded + 1];
+		tempNodeParameterRight[i] = new double *[ynumberAdded + 1];
+		tempNodeVectorParameterLeft[i] = new Vector3d *[ynumberAdded + 1];
+		tempNodeVectorParameterRight[i] = new Vector3d *[ynumberAdded + 1];
+		tempNodeMatrixParameterLeft[i] = new Matrix3d *[ynumberAdded + 1];
+		tempNodeMatrixParameterRight[i] = new Matrix3d *[ynumberAdded + 1];
+		tempNodeMassMatrixParameterLeft[i] = new MassMatrix *[ynumberAdded + 1];
+		tempNodeMassMatrixParameterRight[i] = new MassMatrix *[ynumberAdded + 1];
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			tempNodeParameterLeft[i][j] = new double[znumberAdded + 1];
+			tempNodeParameterRight[i][j] = new double[znumberAdded + 1];
+			tempNodeVectorParameterLeft[i][j] = new Vector3d[znumberAdded + 1];
+			tempNodeVectorParameterRight[i][j] = new Vector3d[znumberAdded + 1];
+			tempNodeMatrixParameterLeft[i][j] = new Matrix3d[znumberAdded + 1];
+			tempNodeMatrixParameterRight[i][j] = new Matrix3d[znumberAdded + 1];
+			tempNodeMassMatrixParameterLeft[i][j] = new MassMatrix[znumberAdded + 1];
+			tempNodeMassMatrixParameterRight[i][j] = new MassMatrix[znumberAdded + 1];
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				tempNodeParameterLeft[i][j][k] = 0;
+				tempNodeParameterRight[i][j][k] = 0;
+				tempNodeVectorParameterLeft[i][j][k] = Vector3d(0, 0, 0);
+				tempNodeVectorParameterRight[i][j][k] = Vector3d(0, 0, 0);
+				tempNodeMatrixParameterLeft[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+				tempNodeMatrixParameterRight[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
+					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
+						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+							tempNodeMassMatrixParameterLeft[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+							tempNodeMassMatrixParameterRight[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+						}
+					}
 				}
 			}
 		}
 	}
 
-	printf("creating arrays for buffers\n");
-	//if(rank == 0) printLog("creating arrays for buffers\n");
+	tempCellParameterFront = new double **[xnumberAdded];
+	tempCellParameterBack = new double **[xnumberAdded];
+	tempNodeParameterFront = new double **[xnumberAdded + 1];
+	tempNodeParameterBack = new double **[xnumberAdded + 1];
 
-	rightOutVectorNodeBuffer = new double[(ynumber + 1) * (znumber + 1) * 3 * (1 + additionalBinNumber)];
-	leftOutVectorNodeBuffer = new double[(ynumber + 1) * (znumber + 1) * 3 * (1 + additionalBinNumber)];
-	leftInVectorNodeBuffer = new double[(ynumber + 1) * (znumber + 1) * 3 * (1 + additionalBinNumber)];
-	rightInVectorNodeBuffer = new double[(ynumber + 1) * (znumber + 1) * 3 * (1 + additionalBinNumber)];
+	tempCellVectorParameterFront = new Vector3d **[xnumberAdded];
+	tempCellVectorParameterBack = new Vector3d **[xnumberAdded];
+	tempNodeVectorParameterFront = new Vector3d **[xnumberAdded + 1];
+	tempNodeVectorParameterBack = new Vector3d **[xnumberAdded + 1];
 
-	rightOutVectorCellBuffer = new double[(ynumber) * (znumber) * 3 * (1 + additionalBinNumber)];
-	leftOutVectorCellBuffer = new double[(ynumber) * (znumber) * 3 * (1 + additionalBinNumber)];
-	leftInVectorCellBuffer = new double[(ynumber) * (znumber) * 3 * (1 + additionalBinNumber)];
-	rightInVectorCellBuffer = new double[(ynumber) * (znumber) * 3 * (1 + additionalBinNumber)];
+	tempCellMatrixParameterFront = new Matrix3d **[xnumberAdded];
+	tempCellMatrixParameterBack = new Matrix3d **[xnumberAdded];
+	tempNodeMatrixParameterFront = new Matrix3d **[xnumberAdded + 1];
+	tempNodeMatrixParameterBack = new Matrix3d **[xnumberAdded + 1];
 
-	rightOutGmresBuffer = new double[(ynumber) * (znumber) * 3];
-	leftOutGmresBuffer = new double[(ynumber) * (znumber) * 3];
-	leftInGmresBuffer = new double[(ynumber) * (znumber) * 3];
-	rightInGmresBuffer = new double[(ynumber) * (znumber) * 3];
+	tempNodeMassMatrixParameterFront = new MassMatrix **[xnumberAdded + 1];
+	tempNodeMassMatrixParameterBack = new MassMatrix **[xnumberAdded + 1];
 
-	tempCellParameterLeft = new double **[2 + additionalBinNumber];
-	tempCellParameterRight = new double **[2 + additionalBinNumber];
-	tempNodeParameterLeft = new double **[2 + additionalBinNumber];
-	tempNodeParameterRight = new double **[2 + additionalBinNumber];
-
-	tempCellVectorParameterLeft = new Vector3d **[2 + additionalBinNumber];
-	tempCellVectorParameterRight = new Vector3d **[2 + additionalBinNumber];
-	tempNodeVectorParameterLeft = new Vector3d **[2 + additionalBinNumber];
-	tempNodeVectorParameterRight = new Vector3d **[2 + additionalBinNumber];
-
-	tempCellMatrixParameterLeft = new Matrix3d **[2 + additionalBinNumber];
-	tempCellMatrixParameterRight = new Matrix3d **[2 + additionalBinNumber];
-	tempNodeMatrixParameterLeft = new Matrix3d **[2 + additionalBinNumber];
-	tempNodeMatrixParameterRight = new Matrix3d **[2 + additionalBinNumber];
-
-	for (int i = 0; i < 2 + additionalBinNumber; ++i) {
-		tempCellParameterLeft[i] = new double *[ynumber];
-		tempCellParameterRight[i] = new double *[ynumber];
-		tempCellVectorParameterLeft[i] = new Vector3d *[ynumber];
-		tempCellVectorParameterRight[i] = new Vector3d *[ynumber];
-		tempCellMatrixParameterLeft[i] = new Matrix3d *[ynumber];
-		tempCellMatrixParameterRight[i] = new Matrix3d *[ynumber];
-		for (int j = 0; j < ynumber; ++j) {
-			tempCellParameterLeft[i][j] = new double[znumber];
-			tempCellParameterRight[i][j] = new double[znumber];
-			tempCellVectorParameterLeft[i][j] = new Vector3d[znumber];
-			tempCellVectorParameterRight[i][j] = new Vector3d[znumber];
-			tempCellMatrixParameterLeft[i][j] = new Matrix3d[znumber];
-			tempCellMatrixParameterRight[i][j] = new Matrix3d[znumber];
-			for (int k = 0; k < znumber; ++k) {
-				tempCellParameterLeft[i][j][k] = 0;
-				tempCellParameterRight[i][j][k] = 0;
+	for (int i = 0; i < xnumberAdded; ++i) {
+		tempCellParameterFront[i] = new double *[2 + 2 * additionalBinNumber];
+		tempCellParameterBack[i] = new double *[2 + 2 * additionalBinNumber];
+		tempCellVectorParameterFront[i] = new Vector3d *[2 + 2 * additionalBinNumber];
+		tempCellVectorParameterBack[i] = new Vector3d *[2 + 2 * additionalBinNumber];
+		tempCellMatrixParameterFront[i] = new Matrix3d *[2 + 2 * additionalBinNumber];
+		tempCellMatrixParameterBack[i] = new Matrix3d *[2 + 2 * additionalBinNumber];
+		for (int j = 0; j < 2 + 2 * additionalBinNumber; ++j) {
+			tempCellParameterFront[i][j] = new double[znumberAdded];
+			tempCellParameterBack[i][j] = new double[znumberAdded];
+			tempCellVectorParameterFront[i][j] = new Vector3d[znumberAdded];
+			tempCellVectorParameterBack[i][j] = new Vector3d[znumberAdded];
+			tempCellMatrixParameterFront[i][j] = new Matrix3d[znumberAdded];
+			tempCellMatrixParameterBack[i][j] = new Matrix3d[znumberAdded];
+			for (int k = 0; k < znumberAdded; ++k) {
+				tempCellParameterFront[i][j][k] = 0;
+				tempCellParameterBack[i][j][k] = 0;
+				tempCellVectorParameterFront[i][j][k] = Vector3d(0, 0, 0);
+				tempCellVectorParameterBack[i][j][k] = Vector3d(0, 0, 0);
+				tempCellMatrixParameterFront[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+				tempCellMatrixParameterBack[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 			}
 		}
 	}
 
-	for (int i = 0; i < 2 + additionalBinNumber; ++i) {
-		tempNodeParameterLeft[i] = new double *[ynumber + 1];
-		tempNodeParameterRight[i] = new double *[ynumber + 1];
-		tempNodeVectorParameterLeft[i] = new Vector3d *[ynumber + 1];
-		tempNodeVectorParameterRight[i] = new Vector3d *[ynumber + 1];
-		tempNodeMatrixParameterLeft[i] = new Matrix3d *[ynumber + 1];
-		tempNodeMatrixParameterRight[i] = new Matrix3d *[ynumber + 1];
-		for (int j = 0; j < ynumber + 1; ++j) {
-			tempNodeParameterLeft[i][j] = new double[znumber + 1];
-			tempNodeParameterRight[i][j] = new double[znumber + 1];
-			tempNodeVectorParameterLeft[i][j] = new Vector3d[znumber + 1];
-			tempNodeVectorParameterRight[i][j] = new Vector3d[znumber + 1];
-			tempNodeMatrixParameterLeft[i][j] = new Matrix3d[znumber + 1];
-			tempNodeMatrixParameterRight[i][j] = new Matrix3d[znumber + 1];
-			for (int k = 0; k < znumber + 1; ++k) {
-				tempNodeParameterLeft[i][j][k] = 0;
-				tempNodeParameterRight[i][j][k] = 0;
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		tempNodeParameterFront[i] = new double *[3 + 2 * additionalBinNumber];
+		tempNodeParameterBack[i] = new double *[3 + 2 * additionalBinNumber];
+		tempNodeVectorParameterFront[i] = new Vector3d *[3 + 2 * additionalBinNumber];
+		tempNodeVectorParameterBack[i] = new Vector3d *[3 + 2 * additionalBinNumber];
+		tempNodeMatrixParameterFront[i] = new Matrix3d *[3 + 2 * additionalBinNumber];
+		tempNodeMatrixParameterBack[i] = new Matrix3d *[3 + 2 * additionalBinNumber];
+		tempNodeMassMatrixParameterFront[i] = new MassMatrix *[3 + 2 * additionalBinNumber];
+		tempNodeMassMatrixParameterBack[i] = new MassMatrix *[3 + 2 * additionalBinNumber];
+		for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
+			tempNodeParameterFront[i][j] = new double[znumberAdded + 1];
+			tempNodeParameterBack[i][j] = new double[znumberAdded + 1];
+			tempNodeVectorParameterFront[i][j] = new Vector3d[znumberAdded + 1];
+			tempNodeVectorParameterBack[i][j] = new Vector3d[znumberAdded + 1];
+			tempNodeMatrixParameterFront[i][j] = new Matrix3d[znumberAdded + 1];
+			tempNodeMatrixParameterBack[i][j] = new Matrix3d[znumberAdded + 1];
+			tempNodeMassMatrixParameterFront[i][j] = new MassMatrix[znumberAdded + 1];
+			tempNodeMassMatrixParameterBack[i][j] = new MassMatrix[znumberAdded + 1];
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				tempNodeParameterFront[i][j][k] = 0;
+				tempNodeParameterBack[i][j][k] = 0;
+				tempNodeVectorParameterFront[i][j][k] = Vector3d(0, 0, 0);
+				tempNodeVectorParameterBack[i][j][k] = Vector3d(0, 0, 0);
+				tempNodeMatrixParameterFront[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+				tempNodeMatrixParameterBack[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
+					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
+						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+							tempNodeMassMatrixParameterFront[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+							tempNodeMassMatrixParameterBack[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+						}
+					}
+				}
 			}
 		}
 	}
 
+	tempCellParameterBottom = new double **[xnumberAdded];
+	tempCellParameterTop = new double **[xnumberAdded];
+	tempNodeParameterBottom = new double **[xnumberAdded + 1];
+	tempNodeParameterTop = new double **[xnumberAdded + 1];
+
+	tempCellVectorParameterBottom = new Vector3d **[xnumberAdded];
+	tempCellVectorParameterTop = new Vector3d **[xnumberAdded];
+	tempNodeVectorParameterBottom = new Vector3d **[xnumberAdded + 1];
+	tempNodeVectorParameterTop = new Vector3d **[xnumberAdded + 1];
+
+	tempCellMatrixParameterBottom = new Matrix3d **[xnumberAdded];
+	tempCellMatrixParameterTop = new Matrix3d **[xnumberAdded];
+	tempNodeMatrixParameterBottom = new Matrix3d **[xnumberAdded + 1];
+	tempNodeMatrixParameterTop = new Matrix3d **[xnumberAdded + 1];
+	tempNodeMassMatrixParameterBottom = new MassMatrix **[xnumberAdded + 1];
+	tempNodeMassMatrixParameterTop = new MassMatrix **[xnumberAdded + 1];
+
+	for (int i = 0; i < xnumberAdded; ++i) {
+		tempCellParameterBottom[i] = new double *[ynumberAdded];
+		tempCellParameterTop[i] = new double *[ynumberAdded];
+		tempCellVectorParameterBottom[i] = new Vector3d *[ynumberAdded];
+		tempCellVectorParameterTop[i] = new Vector3d *[ynumberAdded];
+		tempCellMatrixParameterBottom[i] = new Matrix3d *[ynumberAdded];
+		tempCellMatrixParameterTop[i] = new Matrix3d *[ynumberAdded];
+		for (int j = 0; j < ynumberAdded; ++j) {
+			tempCellParameterBottom[i][j] = new double[2 + 2 * additionalBinNumber];
+			tempCellParameterTop[i][j] = new double[2 + 2 * additionalBinNumber];
+			tempCellVectorParameterBottom[i][j] = new Vector3d[2 + 2 * additionalBinNumber];
+			tempCellVectorParameterTop[i][j] = new Vector3d[2 + 2 * additionalBinNumber];
+			tempCellMatrixParameterBottom[i][j] = new Matrix3d[2 + 2 * additionalBinNumber];
+			tempCellMatrixParameterTop[i][j] = new Matrix3d[2 + 2 * additionalBinNumber];
+			for (int k = 0; k < 2 + 2 * additionalBinNumber; ++k) {
+				tempCellParameterBottom[i][j][k] = 0;
+				tempCellParameterTop[i][j][k] = 0;
+				tempCellVectorParameterBottom[i][j][k] = Vector3d(0, 0, 0);
+				tempCellVectorParameterTop[i][j][k] = Vector3d(0, 0, 0);
+				tempCellMatrixParameterBottom[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+				tempCellMatrixParameterTop[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+			}
+		}
+	}
+
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		tempNodeParameterBottom[i] = new double *[ynumberAdded + 1];
+		tempNodeParameterTop[i] = new double *[ynumberAdded + 1];
+		tempNodeVectorParameterBottom[i] = new Vector3d *[ynumberAdded + 1];
+		tempNodeVectorParameterTop[i] = new Vector3d *[ynumberAdded + 1];
+		tempNodeMatrixParameterBottom[i] = new Matrix3d *[ynumberAdded + 1];
+		tempNodeMatrixParameterTop[i] = new Matrix3d *[ynumberAdded + 1];
+		tempNodeMassMatrixParameterBottom[i] = new MassMatrix *[ynumberAdded + 1];
+		tempNodeMassMatrixParameterTop[i] = new MassMatrix *[ynumberAdded + 1];
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			tempNodeParameterBottom[i][j] = new double[3 + 2 * additionalBinNumber];
+			tempNodeParameterTop[i][j] = new double[3 + 2 * additionalBinNumber];
+			tempNodeVectorParameterBottom[i][j] = new Vector3d[3 + 2 * additionalBinNumber];
+			tempNodeVectorParameterTop[i][j] = new Vector3d[3 + 2 * additionalBinNumber];
+			tempNodeMatrixParameterBottom[i][j] = new Matrix3d[3 + 2 * additionalBinNumber];
+			tempNodeMatrixParameterTop[i][j] = new Matrix3d[3 + 2 * additionalBinNumber];
+			tempNodeMassMatrixParameterBottom[i][j] = new MassMatrix[3 + 2 * additionalBinNumber];
+			tempNodeMassMatrixParameterTop[i][j] = new MassMatrix[3 + 2 * additionalBinNumber];
+			for (int k = 0; k < 3 + 2 * additionalBinNumber; ++k) {
+				tempNodeParameterBottom[i][j][k] = 0;
+				tempNodeParameterTop[i][j][k] = 0;
+				tempNodeVectorParameterBottom[i][j][k] = Vector3d(0, 0, 0);
+				tempNodeVectorParameterTop[i][j][k] = Vector3d(0, 0, 0);
+				tempNodeMatrixParameterBottom[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+				tempNodeMatrixParameterTop[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
+					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
+						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+							tempNodeMassMatrixParameterBottom[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+							tempNodeMassMatrixParameterTop[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	residualBiconjugateDivE = new double***[xnumberAdded];
+	firstResidualBiconjugateDivE = new double***[xnumberAdded];
+	pBiconjugateDivE = new double***[xnumberAdded];
+	vBiconjugateDivE = new double***[xnumberAdded];
+	sBiconjugateDivE = new double***[xnumberAdded];
+	tBiconjugateDivE = new double***[xnumberAdded];
+
+	int lnumber = 1;
+	for (int i = 0; i < xnumberAdded; ++i) {
+		residualBiconjugateDivE[i] = new double**[ynumberAdded];
+		firstResidualBiconjugateDivE[i] = new double**[ynumberAdded];
+		vBiconjugateDivE[i] = new double**[ynumberAdded];
+		pBiconjugateDivE[i] = new double**[ynumberAdded];
+		sBiconjugateDivE[i] = new double**[ynumberAdded];
+		tBiconjugateDivE[i] = new double**[ynumberAdded];
+		for (int j = 0; j < ynumberAdded; ++j) {
+			residualBiconjugateDivE[i][j] = new double*[znumberAdded];
+			firstResidualBiconjugateDivE[i][j] = new double*[znumberAdded];
+			vBiconjugateDivE[i][j] = new double*[znumberAdded];
+			pBiconjugateDivE[i][j] = new double*[znumberAdded];
+			sBiconjugateDivE[i][j] = new double*[znumberAdded];
+			tBiconjugateDivE[i][j] = new double*[znumberAdded];
+			for (int k = 0; k < znumberAdded; ++k) {
+				residualBiconjugateDivE[i][j][k] = new double[lnumber];
+				firstResidualBiconjugateDivE[i][j][k] = new double[lnumber];
+				vBiconjugateDivE[i][j][k] = new double[lnumber];
+				pBiconjugateDivE[i][j][k] = new double[lnumber];
+				sBiconjugateDivE[i][j][k] = new double[lnumber];
+				tBiconjugateDivE[i][j][k] = new double[lnumber];
+				for (int l = 0; l < lnumber; ++l) {
+					firstResidualBiconjugateDivE[i][j][k][l] = 0;
+					residualBiconjugateDivE[i][j][k][l] = 0;
+					vBiconjugateDivE[i][j][k][l] = 0;
+					pBiconjugateDivE[i][j][k][l] = 0;
+					sBiconjugateDivE[i][j][k][l] = 0;
+					tBiconjugateDivE[i][j][k][l] = 0;
+				}
+			}
+		}
+	}
+
+	residualBiconjugateMaxwell = new double***[xnumberAdded];
+	firstResidualBiconjugateMaxwell = new double***[xnumberAdded];
+	pBiconjugateMaxwell = new double***[xnumberAdded];
+	vBiconjugateMaxwell = new double***[xnumberAdded];
+	sBiconjugateMaxwell = new double***[xnumberAdded];
+	tBiconjugateMaxwell = new double***[xnumberAdded];
+
+	lnumber = 3;
+	for (int i = 0; i < xnumberAdded; ++i) {
+		residualBiconjugateMaxwell[i] = new double**[ynumberAdded];
+		firstResidualBiconjugateMaxwell[i] = new double**[ynumberAdded];
+		vBiconjugateMaxwell[i] = new double**[ynumberAdded];
+		pBiconjugateMaxwell[i] = new double**[ynumberAdded];
+		sBiconjugateMaxwell[i] = new double**[ynumberAdded];
+		tBiconjugateMaxwell[i] = new double**[ynumberAdded];
+		for (int j = 0; j < ynumberAdded; ++j) {
+			residualBiconjugateMaxwell[i][j] = new double*[znumberAdded];
+			firstResidualBiconjugateMaxwell[i][j] = new double*[znumberAdded];
+			vBiconjugateMaxwell[i][j] = new double*[znumberAdded];
+			pBiconjugateMaxwell[i][j] = new double*[znumberAdded];
+			sBiconjugateMaxwell[i][j] = new double*[znumberAdded];
+			tBiconjugateMaxwell[i][j] = new double*[znumberAdded];
+			for (int k = 0; k < znumberAdded; ++k) {
+				residualBiconjugateMaxwell[i][j][k] = new double[lnumber];
+				firstResidualBiconjugateMaxwell[i][j][k] = new double[lnumber];
+				vBiconjugateMaxwell[i][j][k] = new double[lnumber];
+				pBiconjugateMaxwell[i][j][k] = new double[lnumber];
+				sBiconjugateMaxwell[i][j][k] = new double[lnumber];
+				tBiconjugateMaxwell[i][j][k] = new double[lnumber];
+				for (int l = 0; l < lnumber; ++l) {
+					firstResidualBiconjugateMaxwell[i][j][k][l] = 0;
+					residualBiconjugateMaxwell[i][j][k][l] = 0;
+					vBiconjugateMaxwell[i][j][k][l] = 0;
+					pBiconjugateMaxwell[i][j][k][l] = 0;
+					sBiconjugateMaxwell[i][j][k][l] = 0;
+					tBiconjugateMaxwell[i][j][k][l] = 0;
+				}
+			}
+		}
+	}
+
+	///buneman
+	if(solverType == BUNEMAN){
+	bunemanJx = new double**[xnumberAdded];
+	bunemanEx = new double**[xnumberAdded];
+	bunemanNewEx = new double**[xnumberAdded];
+	tempBunemanExParameter = new double**[xnumberAdded];
+	bunemanDivCleaningEx = new double**[xnumberAdded];
+	for(int i = 0; i < xnumberAdded; ++i){
+		bunemanJx[i] = new double*[ynumberAdded + 1];
+		bunemanEx[i] = new double*[ynumberAdded + 1];
+		bunemanNewEx[i] = new double*[ynumberAdded + 1];
+		tempBunemanExParameter[i] = new double*[ynumberAdded + 1];
+		bunemanDivCleaningEx[i] = new double*[ynumberAdded + 1];
+		for(int j = 0; j < ynumberAdded + 1; ++j){
+			bunemanJx[i][j] = new double[znumberAdded + 1];
+			bunemanEx[i][j] = new double[znumberAdded + 1];
+			bunemanNewEx[i][j] = new double[znumberAdded + 1];
+			tempBunemanExParameter[i][j] = new double[znumberAdded + 1];
+			bunemanDivCleaningEx[i][j] = new double[znumberAdded + 1];
+			for(int k = 0; k < znumberAdded + 1; ++k){
+				bunemanJx[i][j][k] = 0;
+				bunemanEx[i][j][k] = 0;
+				bunemanNewEx[i][j][k] = 0;
+				tempBunemanExParameter[i][j][k] = 0;
+				bunemanDivCleaningEx[i][j][k] = 0;
+			}
+		}
+	}
+
+	bunemanJy = new double**[xnumberAdded+1];
+	bunemanEy = new double**[xnumberAdded+1];
+	bunemanNewEy = new double**[xnumberAdded+1];
+	tempBunemanEyParameter = new double**[xnumberAdded+1];
+	bunemanDivCleaningEy = new double**[xnumberAdded+1];
+	for(int i = 0; i < xnumberAdded+1; ++i){
+		bunemanJy[i] = new double*[ynumberAdded];
+		bunemanEy[i] = new double*[ynumberAdded];
+		bunemanNewEy[i] = new double*[ynumberAdded];
+		tempBunemanEyParameter[i] = new double*[ynumberAdded];
+		bunemanDivCleaningEy[i] = new double*[ynumberAdded];
+		for(int j = 0; j < ynumberAdded; ++j){
+			bunemanJy[i][j] = new double[znumberAdded + 1];
+			bunemanEy[i][j] = new double[znumberAdded + 1];
+			bunemanNewEy[i][j] = new double[znumberAdded + 1];
+			tempBunemanEyParameter[i][j] = new double[znumberAdded + 1];
+			bunemanDivCleaningEy[i][j] = new double[znumberAdded + 1];
+			for(int k = 0; k < znumberAdded + 1; ++k){
+				bunemanJy[i][j][k] = 0;
+				bunemanEy[i][j][k] = 0;
+				bunemanNewEy[i][j][k] = 0;
+				tempBunemanEyParameter[i][j][k] = 0;
+				bunemanDivCleaningEy[i][j][k] = 0;
+			}
+		}
+	}
+
+	bunemanJz = new double**[xnumberAdded+1];
+	bunemanEz = new double**[xnumberAdded+1];
+	bunemanNewEz = new double**[xnumberAdded+1];
+	tempBunemanEzParameter = new double**[xnumberAdded+1];
+	bunemanDivCleaningEz = new double**[xnumberAdded+1];
+	for(int i = 0; i < xnumberAdded+1; ++i){
+		bunemanJz[i] = new double*[ynumberAdded + 1];
+		bunemanEz[i] = new double*[ynumberAdded + 1];
+		bunemanNewEz[i] = new double*[ynumberAdded + 1];
+		tempBunemanEzParameter[i] = new double*[ynumberAdded + 1];
+		bunemanDivCleaningEz[i] = new double*[ynumberAdded + 1];
+		for(int j = 0; j < ynumberAdded + 1; ++j){
+			bunemanJz[i][j] = new double[znumberAdded];
+			bunemanEz[i][j] = new double[znumberAdded];
+			bunemanNewEz[i][j] = new double[znumberAdded];
+			tempBunemanEzParameter[i][j] = new double[znumberAdded];
+			bunemanDivCleaningEz[i][j] = new double[znumberAdded];
+			for(int k = 0; k < znumberAdded; ++k){
+				bunemanJz[i][j][k] = 0;
+				bunemanEz[i][j][k] = 0;
+				bunemanNewEz[i][j][k] = 0;
+				tempBunemanEzParameter[i][j][k] = 0;
+				bunemanDivCleaningEz[i][j][k] = 0;
+			}
+		}
+	}
+
+	bunemanBx = new double**[xnumberAdded+1];
+	bunemanNewBx = new double**[xnumberAdded+1];
+	tempBunemanBxParameter = new double**[xnumberAdded+1];
+	bunemanDivCleaningBx = new double**[xnumberAdded+1];
+	for(int i = 0; i < xnumberAdded+1; ++i){
+		bunemanBx[i] = new double*[ynumberAdded];
+		bunemanNewBx[i] = new double*[ynumberAdded];
+		tempBunemanBxParameter[i] = new double*[ynumberAdded];
+		bunemanDivCleaningBx[i] = new double*[ynumberAdded];
+		for(int j = 0; j < ynumberAdded; ++j){
+			bunemanBx[i][j] = new double[znumberAdded];
+			bunemanNewBx[i][j] = new double[znumberAdded];
+			tempBunemanBxParameter[i][j] = new double[znumberAdded];
+			bunemanDivCleaningBx[i][j] = new double[znumberAdded];
+			for(int k = 0; k < znumberAdded; ++k){
+				bunemanBx[i][j][k] = 0;
+				bunemanNewBx[i][j][k] = 0;
+				tempBunemanBxParameter[i][j][k] = 0;
+				bunemanDivCleaningBx[i][j][k] = 0;
+			}
+		}
+	}
+
+	bunemanBy = new double**[xnumberAdded];
+	bunemanNewBy = new double**[xnumberAdded];
+	tempBunemanByParameter = new double**[xnumberAdded];
+	bunemanDivCleaningBy = new double**[xnumberAdded];
+	for(int i = 0; i < xnumberAdded; ++i){
+		bunemanBy[i] = new double*[ynumberAdded+1];
+		bunemanNewBy[i] = new double*[ynumberAdded+1];
+		tempBunemanByParameter[i] = new double*[ynumberAdded + 1];
+		bunemanDivCleaningBy[i] = new double*[ynumber + 1];
+		for(int j = 0; j < ynumberAdded+1; ++j){
+			bunemanBy[i][j] = new double[znumberAdded];
+			bunemanNewBy[i][j] = new double[znumberAdded];
+			tempBunemanByParameter[i][j] = new double[znumberAdded];
+			bunemanDivCleaningBy[i][j] = new double[znumberAdded];
+			for(int k = 0; k < znumberAdded; ++k){
+				bunemanBy[i][j][k] = 0;
+				bunemanNewBy[i][j][k] = 0;
+				tempBunemanByParameter[i][j][k] = 0;
+				bunemanDivCleaningBy[i][j][k] = 0;
+			}
+		}
+	}
+
+	bunemanBz = new double**[xnumberAdded];
+	bunemanNewBz = new double**[xnumberAdded];
+	tempBunemanBzParameter = new double**[xnumberAdded];
+	bunemanDivCleaningBz = new double**[xnumberAdded];
+	for(int i = 0; i < xnumberAdded; ++i){
+		bunemanBz[i] = new double*[ynumberAdded];
+		bunemanNewBz[i] = new double*[ynumberAdded];
+		tempBunemanBzParameter[i] = new double*[ynumberAdded];
+		bunemanDivCleaningBz[i] = new double*[ynumberAdded];
+		for(int j = 0; j < ynumberAdded; ++j){
+			bunemanBz[i][j] = new double[znumberAdded+1];
+			bunemanNewBz[i][j] = new double[znumberAdded+1];
+			tempBunemanBzParameter[i][j] = new double[znumberAdded + 1];
+			bunemanDivCleaningBz[i][j] = new double[znumberAdded + 1];
+			for(int k = 0; k < znumberAdded+1; ++k){
+				bunemanBz[i][j][k] = 0;
+				bunemanNewBz[i][j][k] = 0;
+				tempBunemanBzParameter[i][j][k] = 0;
+				bunemanDivCleaningBz[i][j][k] = 0;
+			}
+		}
+	}
+
+	bunemanChargeDensity = new double** [xnumberAdded + 1];
+	bunemanDivergenceCleaningPotential = new double*** [xnumberAdded + 1];
+	for(int i = 0; i < xnumberAdded + 1; ++i){
+		bunemanChargeDensity[i] = new double* [ynumberAdded + 1];
+		bunemanDivergenceCleaningPotential[i] = new double** [ynumberAdded + 1];
+		for(int j = 0; j < ynumberAdded +1; ++j){
+			bunemanChargeDensity[i][j] = new double [znumberAdded + 1];
+			bunemanDivergenceCleaningPotential[i][j] = new double* [znumberAdded + 1];
+			for(int k = 0; k < znumberAdded + 1; ++k){
+				bunemanChargeDensity[i][j][k] = 0;
+				bunemanDivergenceCleaningPotential[i][j][k] = new double[1];
+				bunemanDivergenceCleaningPotential[i][j][k][0] = 0;
+			}
+		}
+	}
+	////temp buneman j
+
+	/// left right
+	tempBunemanJxLeft = new double **[2 + 2 * additionalBinNumber];
+	tempBunemanJxRight = new double **[2 + 2 * additionalBinNumber];
+	for(int i = 0; i < 2 + 2*additionalBinNumber; ++i){
+		tempBunemanJxLeft[i] = new double*[ynumberAdded + 1];
+		tempBunemanJxRight[i] = new double*[ynumberAdded + 1];
+		for(int j = 0; j < ynumberAdded + 1; ++j){
+			tempBunemanJxLeft[i][j] = new double[znumberAdded + 1];
+			tempBunemanJxRight[i][j] = new double[znumberAdded + 1];
+			for(int k = 0; k < znumberAdded + 1; ++k){
+				tempBunemanJxLeft[i][j][k] = 0;
+				tempBunemanJxRight[i][j][k] = 0;
+			}
+		}
+	}
+	tempBunemanJyLeft = new double **[3 + 2 * additionalBinNumber];
+	tempBunemanJyRight = new double **[3 + 2 * additionalBinNumber];
+	for(int i = 0; i < 3 + 2*additionalBinNumber; ++i){
+		tempBunemanJyLeft[i] = new double*[ynumberAdded];
+		tempBunemanJyRight[i] = new double*[ynumberAdded];
+		for(int j = 0; j < ynumberAdded; ++j){
+			tempBunemanJyLeft[i][j] = new double[znumberAdded + 1];
+			tempBunemanJyRight[i][j] = new double[znumberAdded + 1];
+			for(int k = 0; k < znumberAdded + 1; ++k){
+				tempBunemanJyLeft[i][j][k] = 0;
+				tempBunemanJyRight[i][j][k] = 0;
+			}
+		}
+	}
+	tempBunemanJzLeft = new double **[3 + 2 * additionalBinNumber];
+	tempBunemanJzRight = new double **[3 + 2 * additionalBinNumber];
+	for(int i = 0; i < 3 + 2*additionalBinNumber; ++i){
+		tempBunemanJzLeft[i] = new double*[ynumberAdded + 1];
+		tempBunemanJzRight[i] = new double*[ynumberAdded + 1];
+		for(int j = 0; j < ynumberAdded + 1; ++j){
+			tempBunemanJzLeft[i][j] = new double[znumberAdded];
+			tempBunemanJzRight[i][j] = new double[znumberAdded];
+			for(int k = 0; k < znumberAdded; ++k){
+				tempBunemanJzLeft[i][j][k] = 0;
+				tempBunemanJzRight[i][j][k] = 0;
+			}
+		}
+	}
+
+	///front back
+	tempBunemanJxFront = new double **[xnumberAdded];
+	tempBunemanJxBack = new double **[xnumberAdded];
+	for(int i = 0; i < xnumberAdded; ++i){
+		tempBunemanJxFront[i] = new double*[3 + 2*additionalBinNumber];
+		tempBunemanJxBack[i] = new double*[3 + 2*additionalBinNumber];
+		for(int j = 0; j < 3 + 2*additionalBinNumber; ++j){
+			tempBunemanJxFront[i][j] = new double[znumberAdded + 1];
+			tempBunemanJxBack[i][j] = new double[znumberAdded + 1];
+			for(int k = 0; k < znumberAdded + 1; ++k){
+				tempBunemanJxFront[i][j][k] = 0;
+				tempBunemanJxBack[i][j][k] = 0;
+			}
+		}
+	}
+
+	tempBunemanJyFront = new double **[xnumberAdded + 1];
+	tempBunemanJyBack = new double **[xnumberAdded + 1];
+	for(int i = 0; i < xnumberAdded + 1; ++i){
+		tempBunemanJyFront[i] = new double*[2 + 2*additionalBinNumber];
+		tempBunemanJyBack[i] = new double*[2 + 2*additionalBinNumber];
+		for(int j = 0; j < 2 + 2*additionalBinNumber; ++j){
+			tempBunemanJyFront[i][j] = new double[znumberAdded + 1];
+			tempBunemanJyBack[i][j] = new double[znumberAdded + 1];
+			for(int k = 0; k < znumberAdded + 1; ++k){
+				tempBunemanJyFront[i][j][k] = 0;
+				tempBunemanJyBack[i][j][k] = 0;
+			}
+		}
+	}
+
+	tempBunemanJzFront = new double **[xnumberAdded+1];
+	tempBunemanJzBack = new double **[xnumberAdded+1];
+	for(int i = 0; i < xnumberAdded+1; ++i){
+		tempBunemanJzFront[i] = new double*[3 + 2*additionalBinNumber];
+		tempBunemanJzBack[i] = new double*[3 + 2*additionalBinNumber];
+		for(int j = 0; j < 3 + 2*additionalBinNumber; ++j){
+			tempBunemanJzFront[i][j] = new double[znumberAdded];
+			tempBunemanJzBack[i][j] = new double[znumberAdded];
+			for(int k = 0; k < znumberAdded; ++k){
+				tempBunemanJzFront[i][j][k] = 0;
+				tempBunemanJzBack[i][j][k] = 0;
+			}
+		}
+	}
+	// bottom top
+
+	tempBunemanJxBottom = new double **[xnumberAdded];
+	tempBunemanJxTop = new double **[xnumberAdded];
+	for(int i = 0; i < xnumberAdded; ++i){
+		tempBunemanJxBottom[i] = new double*[ynumberAdded + 1];
+		tempBunemanJxTop[i] = new double*[ynumberAdded + 1];
+		for(int j = 0; j < ynumberAdded + 1; ++j){
+			tempBunemanJxBottom[i][j] = new double[3 + 2*additionalBinNumber];
+			tempBunemanJxTop[i][j] = new double[3 + 2*additionalBinNumber];
+			for(int k = 0; k < 3 + 2*additionalBinNumber; ++k){
+				tempBunemanJxBottom[i][j][k] = 0;
+				tempBunemanJxTop[i][j][k] = 0;
+			}
+		}
+	}
+
+	tempBunemanJyBottom = new double **[xnumberAdded + 1];
+	tempBunemanJyTop = new double **[xnumberAdded+ 1];
+	for(int i = 0; i < xnumberAdded + 1; ++i){
+		tempBunemanJyBottom[i] = new double*[ynumberAdded];
+		tempBunemanJyTop[i] = new double*[ynumberAdded];
+		for(int j = 0; j < ynumberAdded; ++j){
+			tempBunemanJyBottom[i][j] = new double[3 + 2*additionalBinNumber];
+			tempBunemanJyTop[i][j] = new double[3 + 2*additionalBinNumber];
+			for(int k = 0; k < 3 + 2*additionalBinNumber; ++k){
+				tempBunemanJyBottom[i][j][k] = 0;
+				tempBunemanJyTop[i][j][k] = 0;
+			}
+		}
+	}
+
+	tempBunemanJzBottom = new double **[xnumberAdded + 1];
+	tempBunemanJzTop = new double **[xnumberAdded + 1];
+	for(int i = 0; i < xnumberAdded + 1; ++i){
+		tempBunemanJzBottom[i] = new double*[ynumberAdded + 1];
+		tempBunemanJzTop[i] = new double*[ynumberAdded + 1];
+		for(int j = 0; j < ynumberAdded + 1; ++j){
+			tempBunemanJzBottom[i][j] = new double[2 + 2*additionalBinNumber];
+			tempBunemanJzTop[i][j] = new double[2 + 2*additionalBinNumber];
+			for(int k = 0; k < 2 + 2*additionalBinNumber; ++k){
+				tempBunemanJzBottom[i][j][k] = 0;
+				tempBunemanJzTop[i][j][k] = 0;
+			}
+		}
+	}
+	}
 
 	arrayCreated = true;
 
-	printf("finish creating arrays\n");
+	if (rank == 0) printf("finish creating arrays\n");
+	fflush(stdout);
 	// if(rank == 0) printLog("finish creating arrays\n");
 }
 
@@ -4065,8 +6529,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 			types[i].particesDeltaX = deltaX / types[i].particlesPerBin;
 			types[i].particesDeltaY = deltaY / types[i].particlesPerBin;
 			types[i].particesDeltaZ = deltaZ / types[i].particlesPerBin;
-		}
-		else {
+		} else {
 			types[i].particesDeltaX = xsize;
 			types[i].particesDeltaY = ysize;
 			types[i].particesDeltaZ = zsize;
@@ -4078,15 +6541,17 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 		types[i].generalWeight = 0;
 	}
 
-	particleTypesFile = fopen((outputDir + "particleTypes.dat").c_str(), "w");
-	for (int t = 0; t < typesNumber; ++t) {
-		fprintf(particleTypesFile, "%d\n", types[t].particlesPerBin);
+	if (rank == 0) {
+		particleTypesFile = fopen((outputDir + "particleTypes.dat").c_str(), "w");
+		for (int t = 0; t < typesNumber; ++t) {
+			fprintf(particleTypesFile, "%d\n", types[t].particlesPerBin);
+		}
+		fclose(particleTypesFile);
 	}
-	fclose(particleTypesFile);
-	
 }
 
 void Simulation::createFiles() {
+	if (rank == 0) {
 		printf("creating files\n");
 		fflush(stdout);
 		FILE* logFile = fopen((outputDir + "log.dat").c_str(), "w");
@@ -4096,47 +6561,11 @@ void Simulation::createFiles() {
 		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
 		fprintf(incrementFile, "%g %g %g %g\n", 0.0, 0.0, 0.0, 0.0);
 		fclose(incrementFile);
-		electronTraectoryFile = fopen((outputDir + "trajectory_electron.dat").c_str(), "w");
-		fclose(electronTraectoryFile);
-		electronTraectoryFile = fopen((outputDir + "trajectory_electron_1.dat").c_str(), "w");
-		fclose(electronTraectoryFile);
-		electronTraectoryFile = fopen((outputDir + "trajectory_electron_2.dat").c_str(), "w");
-		fclose(electronTraectoryFile);
-		electronTraectoryFile = fopen((outputDir + "trajectory_electron_3.dat").c_str(), "w");
-		fclose(electronTraectoryFile);
-		electronTraectoryFile = fopen((outputDir + "trajectory_electron_4.dat").c_str(), "w");
-		fclose(electronTraectoryFile);
-		electronTraectoryFile = fopen((outputDir + "trajectory_electron_5.dat").c_str(), "w");
-		fclose(electronTraectoryFile);
-		electronTraectoryFile = fopen((outputDir + "trajectory_electron_6.dat").c_str(), "w");
-		fclose(electronTraectoryFile);
-		electronTraectoryFile = fopen((outputDir + "trajectory_electron_7.dat").c_str(), "w");
-		fclose(electronTraectoryFile);
-		electronTraectoryFile = fopen((outputDir + "trajectory_electron_8.dat").c_str(), "w");
-		fclose(electronTraectoryFile);
-		electronTraectoryFile = fopen((outputDir + "trajectory_electron_9.dat").c_str(), "w");
-		fclose(electronTraectoryFile);
-		protonTraectoryFile = fopen((outputDir + "trajectory_proton.dat").c_str(), "w");
-		fclose(protonTraectoryFile);
-		protonTraectoryFile = fopen((outputDir + "trajectory_proton_1.dat").c_str(), "w");
-		fclose(protonTraectoryFile);
-		protonTraectoryFile = fopen((outputDir + "trajectory_proton_2.dat").c_str(), "w");
-		fclose(protonTraectoryFile);
-		protonTraectoryFile = fopen((outputDir + "trajectory_proton_3.dat").c_str(), "w");
-		fclose(protonTraectoryFile);
-		protonTraectoryFile = fopen((outputDir + "trajectory_proton_4.dat").c_str(), "w");
-		fclose(protonTraectoryFile);
-		protonTraectoryFile = fopen((outputDir + "trajectory_proton_5.dat").c_str(), "w");
-		fclose(protonTraectoryFile);
-		protonTraectoryFile = fopen((outputDir + "trajectory_proton_6.dat").c_str(), "w");
-		fclose(protonTraectoryFile);
-		protonTraectoryFile = fopen((outputDir + "trajectory_proton_7.dat").c_str(), "w");
-		fclose(protonTraectoryFile);
-		protonTraectoryFile = fopen((outputDir + "trajectory_proton_8.dat").c_str(), "w");
-		fclose(protonTraectoryFile);
-		protonTraectoryFile = fopen((outputDir + "trajectory_proton_9.dat").c_str(), "w");
-		fclose(protonTraectoryFile);
 
+		particlesTrajectoryFile = fopen((outputDir + "particlesTrajectories.dat").c_str(), "w");
+		fclose(particlesTrajectoryFile);
+		particlesTrajectoryFile = fopen((outputDir + "electronsTrajectories.dat").c_str(), "w");
+		fclose(particlesTrajectoryFile);
 		distributionFileProton = fopen((outputDir + "distribution_protons.dat").c_str(), "w");
 		fclose(distributionFileProton);
 		distributionFileElectron = fopen((outputDir + "distribution_electrons.dat").c_str(), "w");
@@ -4170,7 +6599,7 @@ void Simulation::createFiles() {
 		fclose(distributionFileOxygen);
 		distributionFileSilicon = fopen((outputDir + "distribution_silicon_sw.dat").c_str(), "w");
 		fclose(distributionFileSilicon);
-		
+
 		anisotropyFileElectron = fopen((outputDir + "anisotropy_electrons.dat").c_str(), "w");
 		fclose(anisotropyFileElectron);
 		anisotropyFileProton = fopen((outputDir + "anisotropy_protons.dat").c_str(), "w");
@@ -4189,15 +6618,37 @@ void Simulation::createFiles() {
 		fclose(anisotropyFileHelium3);
 		EfieldFile = fopen((outputDir + "Efield.dat").c_str(), "w");
 		fclose(EfieldFile);
+		EfieldFile = fopen((outputDir + "EfieldXY.dat").c_str(), "w");
+		fclose(EfieldFile);
+		EfieldFile = fopen((outputDir + "EfieldYZ.dat").c_str(), "w");
+		fclose(EfieldFile);
+		EfieldFile = fopen((outputDir + "EfieldXZ.dat").c_str(), "w");
+		fclose(EfieldFile);
+		EfieldFile = fopen((reducedOutputDir + "EfieldReduced.dat").c_str(), "w");
+		fclose(EfieldFile);
 		BfieldFile = fopen((outputDir + "Bfield.dat").c_str(), "w");
+		fclose(BfieldFile);
+		BfieldFile = fopen((outputDir + "BfieldXY.dat").c_str(), "w");
+		fclose(BfieldFile);
+		BfieldFile = fopen((outputDir + "BfieldYZ.dat").c_str(), "w");
+		fclose(BfieldFile);
+		BfieldFile = fopen((outputDir + "BfieldXZ.dat").c_str(), "w");
+		fclose(BfieldFile);
+		BfieldFile = fopen((reducedOutputDir + "BfieldReduced.dat").c_str(), "w");
 		fclose(BfieldFile);
 		velocityFile = fopen((outputDir + "velocity.dat").c_str(), "w");
 		fclose(velocityFile);
 		Xfile = fopen((outputDir + "Xfile.dat").c_str(), "w");
 		fclose(Xfile);
+		Xfile = fopen((reducedOutputDir + "XfileReduced.dat").c_str(), "w");
+		fclose(Xfile);
 		Yfile = fopen((outputDir + "Yfile.dat").c_str(), "w");
 		fclose(Yfile);
+		Yfile = fopen((reducedOutputDir + "YfileReduced.dat").c_str(), "w");
+		fclose(Yfile);
 		Zfile = fopen((outputDir + "Zfile.dat").c_str(), "w");
+		fclose(Zfile);
+		Zfile = fopen((reducedOutputDir + "ZfileReduced.dat").c_str(), "w");
 		fclose(Zfile);
 		generalFile = fopen((outputDir + "general.dat").c_str(), "w");
 		fclose(generalFile);
@@ -4235,41 +6686,50 @@ void Simulation::createFiles() {
 		fclose(particleDeuteriumFile);
 		particleHelium3File = fopen((outputDir + "helium3.dat").c_str(), "w");
 		fclose(particleHelium3File);
+
+		FILE* tempFile = fopen((outputDir + "rightPart.dat").c_str(), "w");
+		fclose(tempFile);
+		printf("finish creating files\n");
 		//outputEverythingFile = fopen("./output/everything.dat","w");
 		//fclose(outputEverythingFile);
+	}
 }
 
 void Simulation::checkFrequency(double omega) {
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	double cyclothronOmegaElectron = electron_charge_normalized * B0.norm() / (massElectron * speed_of_light_normalized);
 	double cyclothronOmegaProton = electron_charge_normalized * B0.norm() / (massProton * speed_of_light_normalized);
 	if (omega > cyclothronOmegaProton) {
-		printf("omega > cyclothron Omega Proton\n");
-		fprintf(informationFile, "omega > cyclothron Omega Proton\n");
+		if (rank == 0) printf("omega > cyclothron Omega Proton\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega > cyclothron Omega Proton\n");
+	} else if (omega > cyclothronOmegaProton / 100.0) {
+		if (rank == 0) printf("omega > cyclothrone Omega Proton/100\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega > cyclothron Omega Proton/100\n");
 	}
-	else if (omega > cyclothronOmegaProton / 100.0) {
-		printf("omega > cyclothrone Omega Proton/100\n");
-		fprintf(informationFile, "omega > cyclothron Omega Proton/100\n");
-	}
-	printf("omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
-	fprintf(informationFile, "omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
+	if (rank == 0) printf("omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
 
 	if (omega > 1.0) {
-		printf("omega > omega plasma\n");
-		fprintf(informationFile, "omega > omega plasma\n");
+		if (rank == 0) printf("omega > omega plasma\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega > omega plasma\n");
+	} else if (omega > 0.01) {
+		if (rank == 0) printf("omega > omega plasma/100\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "omega > omega plasma/100\n");
 	}
-	else if (omega > 0.01) {
-		printf("omega > omega plasma/100\n");
-		fprintf(informationFile, "omega > omega plasma/100\n");
-	}
-	printf("omega/omega plasma = %g\n", omega);
-	fprintf(informationFile, "omega/omega plasma = %g\n", omega);
+	if (rank == 0) printf("omega/omega plasma = %g\n", omega);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "omega/omega plasma = %g\n", omega);
 
-	fclose(informationFile);
+	if (rank == 0) fclose(informationFile);
 }
 
 void Simulation::checkDebyeParameter() {
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 
 	double debyeLength2 = 0;
@@ -4287,64 +6747,224 @@ void Simulation::checkDebyeParameter() {
 	}
 
 	if (debyeLength < deltaX) {
-		printf("debye length < deltaX\n");
-		fprintf(informationFile, "debye length < deltaX\n");
+		if (rank == 0) printf("debye length < deltaX\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "debye length < deltaX\n");
 	}
-	printf("debye length/deltaX = %g\n", debyeLength / deltaX);
-	fprintf(informationFile, "debye length/deltaX = %g\n", debyeLength / deltaX);
+	if (rank == 0) printf("debye length/deltaX = %g\n", debyeLength / deltaX);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "debye length/deltaX = %g\n", debyeLength / deltaX);
 
 	if (debyeNumber < 1.0) {
-		printf("debye number < 1\n");
-		fprintf(informationFile, "debye number < 1\n");
+		if (rank == 0) printf("debye number < 1\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "debye number < 1\n");
+	} else if (debyeNumber < 100.0) {
+		if (rank == 0) printf("debye number < 100\n");
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "debye number < 100\n");
 	}
-	else if (debyeNumber < 100.0) {
-		printf("debye number < 100\n");
-		fprintf(informationFile, "debye number < 100\n");
-	}
-	printf("debye number = %g\n", debyeNumber);
-	fprintf(informationFile, "debye number = %g\n", debyeNumber);
+	if (rank == 0) printf("debye number = %g\n", debyeNumber);
+	fflush(stdout);
+	if (rank == 0) fprintf(informationFile, "debye number = %g\n", debyeNumber);
 
-	fclose(informationFile);
+	/*double superParticleDebyeLength = 1 / sqrt(
+		4 * pi * superParticleCharge * superParticleCharge * superParticleConcentration / (kBoltzman_normalized * superParticleTemperature));
+	double superParticleDebyeNumber = 4 * pi * cube(superParticleDebyeLength) * superParticleConcentration / 3;
+
+	if (superParticleDebyeLength > deltaX) {
+		if(rank == 0) printf("super particle debye length > deltaX\n");
+		fflush(stdout);
+		if(rank == 0) fprintf(informationFile, "super particle debye length > deltaX\n");
+	}
+	if(rank == 0) printf("super particle debye length/deltaX = %g\n", superParticleDebyeLength / deltaX);
+	fflush(stdout);
+	if(rank == 0) fprintf(informationFile, "super particle debye length/deltaX = %g\n", superParticleDebyeLength / deltaX);
+
+	if (superParticleDebyeNumber < 1.0) {
+		if(rank == 0) printf("superparticle debye number < 1\n");
+		fflush(stdout);
+		if(rank == 0) fprintf(informationFile, "superparticle debye number < 1\n");
+	} else if (superParticleDebyeNumber < 100.0) {
+		if(rank == 0) printf("superparticle debye number < 100\n");
+		fflush(stdout);
+		if(rank == 0) fprintf(informationFile, "superparticle debye number < 100\n");
+	}
+	if(rank == 0) printf("superparticle debye number = %g\n", superParticleDebyeNumber);
+	fflush(stdout);
+	if(rank == 0) fprintf(informationFile, "superparticle debye number = %g\n", superParticleDebyeNumber);*/
+	if (rank == 0) fclose(informationFile);
 }
 
 void Simulation::checkGyroRadius() {
-	informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 
 	if (B0.norm() > 0) {
 		double thermalMomentumElectron = sqrt(
-			massElectron * kBoltzman_normalized * temperature) + massElectron * V0.norm();
-		double gyroRadiusElectron = thermalMomentumElectron * speed_of_light_normalized / (electron_charge_normalized * B0.norm());
-		double thermalMomentumProton = sqrt(massProton * kBoltzman_normalized * temperature) + massProton * V0.norm();
-		double gyroRadiusProton = thermalMomentumProton * speed_of_light_normalized / (electron_charge_normalized * B0.norm());
+			massElectron * kBoltzman_normalized * temperature);
+		double movingMomentumElectron = massElectron * V0.norm();
+		double momentumElectron = thermalMomentumElectron + movingMomentumElectron;
+		double gyroRadiusElectron = momentumElectron * speed_of_light_normalized / (electron_charge_normalized * B0.norm());
+		double thermalMomentumProton = sqrt(massProton * kBoltzman_normalized * temperature);
+		double movingMomentumProton = massProton * V0.norm();
+		double momentumProton = thermalMomentumProton + movingMomentumProton;
+		double gyroRadiusProton = momentumProton * speed_of_light_normalized / (electron_charge_normalized * B0.norm());
 		if (deltaX > 0.5 * gyroRadiusElectron) {
-			printf("deltaX > 0.5*gyroRadiusElectron\n");
-			fprintf(informationFile, "deltaX > 0.5*gyroRadiusElectron\n");
+			if (rank == 0) printf("deltaX > 0.5*gyroRadiusElectron\n");
+			fflush(stdout);
+			if (rank == 0) fprintf(informationFile, "deltaX > 0.5*gyroRadiusElectron\n");
 		}
 
-		printf("deltaX/gyroRadiusElectron = %g\n", deltaX / gyroRadiusElectron);
-		fprintf(informationFile, "deltaX/gyroRadiusElectron = %g\n", deltaX / gyroRadiusElectron);
+		if (rank == 0) printf("deltaX/gyroRadiusElectron = %g\n", deltaX / gyroRadiusElectron);
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "deltaX/gyroRadiusElectron = %g\n", deltaX / gyroRadiusElectron);
 
-		if (xsize < 2 * gyroRadiusProton) {
-			printf("xsize < 2*gyroRadiusProton\n");
-			fprintf(informationFile, "xsize < 2*gyroRadiusProton\n");
+		if (xsizeGeneral < 2 * gyroRadiusProton) {
+			if (rank == 0) printf("xsize < 2*gyroRadiusProton\n");
+			fflush(stdout);
+			if (rank == 0) fprintf(informationFile, "xsize < 2*gyroRadiusProton\n");
 		}
 
-		printf("xsize/gyroRadiusProton= %g\n", xsize / gyroRadiusProton);
-		fprintf(informationFile, "xsize/gyroRadiusProton = %g\n", xsize / gyroRadiusProton);
+		if (rank == 0) printf("xsize/gyroRadiusProton= %g\n", xsizeGeneral / gyroRadiusProton);
+		fflush(stdout);
+		if (rank == 0) fprintf(informationFile, "xsize/gyroRadiusProton = %g\n", xsizeGeneral / gyroRadiusProton);
 	}
 
-	fclose(informationFile);
+	if (rank == 0) fclose(informationFile);
 }
 
-void Simulation::createParticles() {
+void Simulation::initializeBell(){
+	const double protonCRfraction = 1.0/3.0;
+	const double gammaCR = 2;
+	double protonCRconcentration = types[1].concentration*protonCRfraction;
+	int protonCRperbin = types[1].particlesPerBin*protonCRfraction;
+	double electronConcentration = types[1].concentration + protonCRconcentration;
+	types[0].concentration = electronConcentration;
+	types[0].particlesPerBin += protonCRperbin;
+	types[0].particesDeltaX = deltaX / types[0].particlesPerBin;
+	types[0].particesDeltaY = deltaY / types[0].particlesPerBin;
+	types[0].particesDeltaZ = deltaZ / types[0].particlesPerBin;
+	double CRdeltaX = deltaX/protonCRperbin;
+	double CRdeltaY = deltaY/protonCRperbin;
+	double CRdeltaZ = deltaZ/protonCRperbin;
+	Vector3d Vsh = V0;
+	V0 = Vector3d(0, 0, 0);
+	Vector3d Vd = Vsh*(protonCRconcentration/electronConcentration);
+	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionType = PERIODIC;
+	//createParticles();
+	//E0 = E0 - Vsh.vectorMult(B0) / (speed_of_light_normalized);
+	//initializeAlfvenWaveY(10, 1.0E-4);
+	double alfvenV = sqrt(B0.scalarMult(B0)/(4*pi*(massElectron*types[0].concentration + massProton*types[1].concentration)));
+	double alfvenMach = Vsh.norm()/alfvenV;
+	double dzeta = protonCRconcentration*speed_of_light_normalized*sqrt(gammaCR*gammaCR - 1)/(types[1].concentration*Vsh.norm());
+	double rCR = massProton*speed_of_light_normalized_sqr*sqrt(gammaCR*gammaCR - 1)/(electron_charge_normalized*B0.norm());
+	double kmax = dzeta*0.5*sqr(Vsh.norm()/alfvenV)/rCR;
+	double lambda = 2*pi/kmax;
+	int wavesCount = xsizeGeneral/lambda;
+	double kw = 2*pi*wavesCount/xsizeGeneral;
+
+	double E = B0.x*0.1;
+	E = 0;
+	if(solverType == BUNEMAN){
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				for(int k = 0; k < znumberAdded + 1; ++k){
+					bunemanEx[i][j][k] = E0.x;
+					bunemanNewEx[i][j][k] = bunemanEx[i][j][k];
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				for(int k = 0; k < znumberAdded + 1; ++k){
+					bunemanEy[i][j][k] = E0.y + E*cos(kw*xgrid[i]);
+					if(boundaryConditionType != PERIODIC){
+					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
+						bunemanEy[i][j][k] = 0;
+					}
+					}
+					bunemanNewEy[i][j][k] = bunemanEy[i][j][k];
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				for(int k = 0; k < znumberAdded; ++k){
+					bunemanEz[i][j][k] = E0.z;
+					if(boundaryConditionType != PERIODIC){
+					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
+						bunemanEz[i][j][k] = 0;
+					}
+					}
+					bunemanNewEz[i][j][k] = bunemanEz[i][j][k];
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				for(int k = 0; k < znumberAdded; ++k){
+					bunemanBx[i][j][k] = B0.x;
+					bunemanNewBx[i][j][k] = bunemanBx[i][j][k];
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded + 1; ++j){
+				for(int k = 0; k < znumberAdded; ++k){
+					bunemanBy[i][j][k] = B0.y;
+					bunemanNewBy[i][j][k] = bunemanBy[i][j][k];
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				for(int k = 0; k < znumberAdded + 1; ++k){
+					bunemanBz[i][j][k] = B0.z + E*cos(kw*xgrid[i]);
+					bunemanNewBz[i][j][k] = bunemanBz[i][j][k];
+				}
+			}
+		}
+	} else {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					Efield[i][j][k] = E0;
+					Efield[i][j][k].y += E*cos(kw*xgrid[i]);
+					if(boundaryConditionType != PERIODIC){
+					if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
+						Efield[i][j][k].y = 0;
+						Efield[i][j][k].z = 0;
+					}
+					}
+					tempEfield[i][j][k] = Efield[i][j][k];
+					newEfield[i][j][k] = Efield[i][j][k];
+					explicitEfield[i][j][k] = Efield[i][j][k];
+				}
+			}
+		}
+
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					Bfield[i][j][k] = B0;
+					Bfield[i][j][k].z += E*cos(kw*middleXgrid[i]);
+					newBfield[i][j][k] = Bfield[i][j][k];
+				}
+			}
+		}
+	}
+
+
 	evaluateParticleTypesAlpha();
-	printf("creating particles\n");
-	printLog("creating particles\n");
+	if (rank == 0) printf("creating particles\n");
+	fflush(stdout);
+	if (rank == 0) printLog("creating particles\n");
 	int n = 0;
 	//for (int i = 0; i < xnumber; ++i) {
-	for (int i = 1; i < xnumber; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			for (int k = 0; k < znumber; ++k) {
+	for (int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i) {
+		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
+			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
 				//int maxParticlesPerBin = types[0].particlesPerBin;
 				double x = xgrid[i] + 0.0001 * deltaX;
 				double y = ygrid[j] + 0.0001 * deltaY;
@@ -4352,7 +6972,156 @@ void Simulation::createParticles() {
 				//for (int l = 0; l < maxParticlesPerBin; ++l) {
 				for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
 					double weight = (types[typeCounter].concentration / types[typeCounter].particlesPerBin) * volumeB(
-						i, j, k);
+					);
+					double deltaXParticles = types[typeCounter].particesDeltaX;
+					double deltaYParticles = types[typeCounter].particesDeltaY;
+					double deltaZParticles = types[typeCounter].particesDeltaZ;
+					//if (l < types[typeCounter].particlesPerBin) {
+					for (int l = 0; l < types[typeCounter].particlesPerBin; ++l) {
+						ParticleTypes type = types[typeCounter].type;
+						Particle* particle = createParticle(n, i, j, k, weight, type, types[typeCounter],
+						                                    types[typeCounter].temperatureX,
+						                                    types[typeCounter].temperatureY,
+						                                    types[typeCounter].temperatureZ);
+						n++;
+						//particle->coordinates.x = x + deltaXParticles * l;
+						//particle->coordinates.y = y + deltaYParticles * l;
+						//particle->coordinates.z = z + deltaZParticles * l;
+						//particle->coordinates.x = middleXgrid[i];
+						//particle->coordinates.y = middleYgrid[j];
+						//particle->coordinates.z = middleZgrid[k];
+
+						particle->coordinates.x = xgrid[i] + uniformDistribution()*deltaX;
+						particle->coordinates.y = ygrid[j] + uniformDistribution()*deltaY;
+						particle->coordinates.z = zgrid[k] + uniformDistribution()*deltaZ;
+						particle->initialCoordinates = particle->coordinates;
+						/*if (V0.norm() > 0) {
+							particle->addVelocity(V0, speed_of_light_normalized);
+						}*/
+						if(type == 0){
+							particle->addVelocity(Vd, speed_of_light_normalized);
+						}
+						Vector3d momentum = particle->getMomentum();
+						particle->initialMomentum = momentum;
+						particle->prevMomentum = momentum;
+						particles.push_back(particle);
+						particlesNumber++;
+						if (particlesNumber % 1000 == 0) {
+							if ((rank == 0) && (verbosity > 0))printf("create particle number %d\n", particlesNumber);
+						}
+						alertNaNOrInfinity(particle->coordinates.x, "particle.x = NaN in createParticles\n");
+						alertNaNOrInfinity(particle->coordinates.y, "particle.y = NaN in createParticles\n");
+						alertNaNOrInfinity(particle->coordinates.z, "particle.z = NaN in createParticles\n");
+					}
+				}
+				//create proton CRs
+				double weight = (protonCRconcentration / protonCRperbin) * volumeB();
+				for (int l = 0; l < protonCRperbin; ++l) {
+						ParticleTypes type = types[1].type;
+						Particle* particle = createParticle(n, i, j, k, weight, type, types[1],
+						                                    types[1].temperatureX,
+						                                    types[1].temperatureY,
+						                                    types[1].temperatureZ);
+						double phi = 2*pi*uniformDistribution();
+						double cosTheta = 2.0*(uniformDistribution() - 0.5);
+						double momentum = particle->mass*speed_of_light_normalized*sqrt(gammaCR*gammaCR - 1);
+						double sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+						particle->setMomentumX(momentum*cosTheta);
+						particle->setMomentumY(momentum*sinTheta*cos(phi));
+						particle->setMomentumZ(momentum*sinTheta*sin(phi));
+						n++;
+						//particle->coordinates.x = x + CRdeltaX * l;
+						//particle->coordinates.y = y + CRdeltaY * l;
+						//particle->coordinates.z = z + CRdeltaZ * l;
+						//particle->coordinates.x = middleXgrid[i];
+						//particle->coordinates.y = middleYgrid[j];
+						//particle->coordinates.z = middleZgrid[k];
+
+						particle->coordinates.x = xgrid[i] + uniformDistribution()*deltaX;
+						particle->coordinates.y = ygrid[j] + uniformDistribution()*deltaY;
+						particle->coordinates.z = zgrid[k] + uniformDistribution()*deltaZ;
+
+						particle->initialCoordinates = particle->coordinates;
+						particle->addVelocity(Vsh, speed_of_light_normalized);
+						Vector3d particleMomentum = particle->getMomentum();
+						particle->initialMomentum = particleMomentum;
+						particle->prevMomentum = particleMomentum;
+						particles.push_back(particle);
+						particlesNumber++;
+						if (particlesNumber % 1000 == 0) {
+							if ((rank == 0) && (verbosity > 0))printf("create particle number %d\n", particlesNumber);
+						}
+						alertNaNOrInfinity(particle->coordinates.x, "particle.x = NaN in createParticles\n");
+						alertNaNOrInfinity(particle->coordinates.y, "particle.y = NaN in createParticles\n");
+						alertNaNOrInfinity(particle->coordinates.z, "particle.z = NaN in createParticles\n");
+					}
+			}
+		}
+	}
+
+
+	synchronizeParticleNumber();
+
+
+	if (rank == 0) {
+		informationFile = fopen((outputDir + "information.dat").c_str(), "a");
+		fprintf(informationFile, "CR gamma = %g\n", gammaCR);
+		fprintf(informationFile, "V shock = %g\n", Vsh.x);
+		fprintf(informationFile, "alfvenV = %g\n", alfvenV);
+		fprintf(informationFile, "alfven Mach = %g\n", alfvenMach);
+		fprintf(informationFile, "dzeta = %g\n", dzeta);
+		fprintf(informationFile, "gyro radius CR = %g\n", rCR);
+		fprintf(informationFile, "kmax = %g\n", kmax);
+		double lmax = 2*pi/kmax;
+		fprintf(informationFile, "lmax = %g\n", lmax);
+		double omega_pe = sqrt(4*pi*types[0].concentration*electron_charge_normalized*electron_charge_normalized/massElectron);
+		fprintf(informationFile, "omega plasma electron = %g\n", omega_pe);
+		double omega_pp = sqrt(4*pi*types[1].concentration*electron_charge_normalized*electron_charge_normalized/massProton);
+		fprintf(informationFile, "omega plasma electron = %g\n", omega_pp);
+		double electronSkinDepth = speed_of_light_normalized/omega_pe;
+		fprintf(informationFile, "electron skin depth = %g\n", electronSkinDepth);
+		double protonSkinDepth = speed_of_light_normalized/omega_pp;
+		fprintf(informationFile, "proton skin depth = %g\n", protonSkinDepth);
+		double debyeLength = 1/sqrt(4*pi*electron_charge_normalized*electron_charge_normalized*(types[0].concentration + types[1].concentration)/(kBoltzman_normalized*temperature));
+		fprintf(informationFile, "debye length = %g\n", debyeLength);
+		fprintf(informationFile, "dx/rCR = %g\n", deltaX/rCR);
+		fprintf(informationFile, "rCR/Lx = %g\n", rCR/xsizeGeneral);
+		fprintf(informationFile, "dx/lmax = %g\n", deltaX/lmax);
+		fprintf(informationFile, "lmax/Lx = %g\n", lmax/xsizeGeneral);
+		fprintf(informationFile, "dx/electronSkinDepth = %g\n", deltaX/electronSkinDepth);
+		fprintf(informationFile, "electronSkinDepth/Lx = %g\n", electronSkinDepth/xsizeGeneral);
+		fprintf(informationFile, "dx/protonSkinDepth = %g\n", deltaX/protonSkinDepth);
+		fprintf(informationFile, "protonSkinDepth/Lx = %g\n", protonSkinDepth/xsizeGeneral);
+		fprintf(informationFile, "dx/debyeLentgth = %g\n", deltaX/debyeLength);
+		fprintf(informationFile, "debyeLentgth/Lx = %g\n", debyeLength/xsizeGeneral);
+		fclose(informationFile);
+
+		double increment = sqrt((dzeta*Vsh.scalarMult(Vsh)*kmax/rCR) - alfvenV*alfvenV*kmax*kmax);
+
+		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
+		fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, lmax, lmax * scaleFactor);
+		fclose(incrementFile);
+	}
+}
+
+void Simulation::createParticles() {
+	evaluateParticleTypesAlpha();
+	if (rank == 0) printf("creating particles\n");
+	fflush(stdout);
+	if (rank == 0) printLog("creating particles\n");
+	int n = 0;
+	//for (int i = 0; i < xnumber; ++i) {
+	for (int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i) {
+		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
+			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+				//int maxParticlesPerBin = types[0].particlesPerBin;
+				double x = xgrid[i] + 0.0001 * deltaX;
+				double y = ygrid[j] + 0.0001 * deltaY;
+				double z = zgrid[k] + 0.0001 * deltaZ;
+				//for (int l = 0; l < maxParticlesPerBin; ++l) {
+				for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
+					double weight = (types[typeCounter].concentration / types[typeCounter].particlesPerBin) * volumeB(
+					);
 					double deltaXParticles = types[typeCounter].particesDeltaX;
 					double deltaYParticles = types[typeCounter].particesDeltaY;
 					double deltaZParticles = types[typeCounter].particesDeltaZ;
@@ -4367,21 +7136,28 @@ void Simulation::createParticles() {
 						particle->coordinates.x = x + deltaXParticles * l;
 						particle->coordinates.y = y + deltaYParticles * l;
 						particle->coordinates.z = z + deltaZParticles * l;
+						//particle->coordinates.x = middleXgrid[i];
+						//particle->coordinates.y = middleYgrid[j];
+						//particle->coordinates.z = middleZgrid[k];
+
+						//particle->coordinates.x = xgrid[i] + uniformDistribution()*deltaX;
+						//particle->coordinates.y = ygrid[j] + uniformDistribution()*deltaY;
+						//particle->coordinates.z = zgrid[k] + uniformDistribution()*deltaZ;
 						particle->initialCoordinates = particle->coordinates;
 						if (V0.norm() > 0) {
 							particle->addVelocity(V0, speed_of_light_normalized);
 						}
 						Vector3d momentum = particle->getMomentum();
 						particle->initialMomentum = momentum;
-						//particle->prevMomentum = momentum;
+						particle->prevMomentum = momentum;
 						particles.push_back(particle);
 						particlesNumber++;
 						if (particlesNumber % 1000 == 0) {
-							if ((verbosity > 0))printf("create particle number %d\n", particlesNumber);
+							if ((rank == 0) && (verbosity > 0))printf("create particle number %d\n", particlesNumber);
 						}
-						alertNaNOrInfinity(particle->coordinates.x,"particle.x = NaN in createParticles\n");
-						alertNaNOrInfinity(particle->coordinates.y,"particle.y = NaN in createParticles\n");
-						alertNaNOrInfinity(particle->coordinates.z,"particle.z = NaN in createParticles\n");
+						alertNaNOrInfinity(particle->coordinates.x, "particle.x = NaN in createParticles\n");
+						alertNaNOrInfinity(particle->coordinates.y, "particle.y = NaN in createParticles\n");
+						alertNaNOrInfinity(particle->coordinates.z, "particle.z = NaN in createParticles\n");
 					}
 				}
 			}
@@ -4390,28 +7166,6 @@ void Simulation::createParticles() {
 
 
 	synchronizeParticleNumber();
-
-	protonNumber = getParticleNumber(0, PROTON);
-	protonNumber1 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[1].particlesPerBin * 0.05, PROTON);
-	protonNumber2 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[1].particlesPerBin * 0.10, PROTON);
-	protonNumber3 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[1].particlesPerBin * 0.15, PROTON);
-	protonNumber4 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[1].particlesPerBin * 0.20, PROTON);
-	protonNumber5 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[1].particlesPerBin * 0.25, PROTON);
-	protonNumber6 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[1].particlesPerBin * 0.30, PROTON);
-	protonNumber7 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[1].particlesPerBin * 0.35, PROTON);
-	protonNumber8 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[1].particlesPerBin * 0.40, PROTON);
-	protonNumber9 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[1].particlesPerBin * 0.45, PROTON);
-
-	electronNumber = getParticleNumber(0, ELECTRON);
-	electronNumber1 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[0].particlesPerBin * 0.05, ELECTRON);
-	electronNumber2 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[0].particlesPerBin * 0.10, ELECTRON);
-	electronNumber3 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[0].particlesPerBin * 0.15, ELECTRON);
-	electronNumber4 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[0].particlesPerBin * 0.20, ELECTRON);
-	electronNumber5 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[0].particlesPerBin * 0.25, ELECTRON);
-	electronNumber6 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[0].particlesPerBin * 0.30, ELECTRON);
-	electronNumber7 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[0].particlesPerBin * 0.35, ELECTRON);
-	electronNumber8 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[0].particlesPerBin * 0.40, ELECTRON);
-	electronNumber9 = getParticleNumber(xnumberGeneral * ynumberGeneral * znumberGeneral * types[0].particlesPerBin * 0.45, ELECTRON);
 
 	//printf("rank = %d p0 = %d p1 = %d p2 = %d e0 = %d e1 = %d e2 = %d Np = %d\n", rank, protonNumber, protonNumber1, protonNumber2, electronNumber, electronNumber1, electronNumber2, particlesNumber);
 
@@ -4449,6 +7203,7 @@ void Simulation::moveToPreserveChargeLocal() {
 						fflush(stdout);
 						fprintf(errorLogFile, "error in preserving charge\n");
 						fclose(errorLogFile);
+						MPI_Finalize();
 						exit(0);
 					}
 					if (particles[electronCount]->type == ELECTRON) {
@@ -4465,30 +7220,56 @@ void Simulation::moveToPreserveChargeLocal() {
 }
 
 void Simulation::addToPreserveChargeGlobal() {
-		for (int i = 0; i < escapedParticlesRight.size(); ++i) {
-			Particle* particle = escapedParticlesRight[i];
-			int typeNumber = getTypeNumber(particle);
-			ParticleTypeContainer type = types[typeNumber];
 
-			Particle* newParticle = createParticle(particlesNumber, xnumber, 0, 0, particle->weight, type.type, type, type.temperatureX, type.temperatureY, type.temperatureZ);
-			newParticle->coordinates.x = xgrid[xnumber] - 0.5 * deltaX * splineOrder;
-			newParticle->coordinates.y = particle->coordinates.y;
-			newParticle->coordinates.z = particle->coordinates.z;
-			newParticle->initialCoordinates = newParticle->coordinates;
-			newParticle->addVelocity(V0, speed_of_light_normalized);
-			Vector3d momentum = particle->getMomentum();
-			newParticle->initialMomentum = momentum;
-			//newParticle->prevMomentum = momentum;
-			particles.push_back(newParticle);
-			theoreticalEnergy += newParticle->energy(speed_of_light_normalized) * newParticle->weight * 
-				sqr(scaleFactor / plasma_period);
-			theoreticalMomentum += newParticle->getMomentum() * newParticle->weight * scaleFactor / plasma_period;
-			particlesNumber++;
+	for (int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
+		for (int cartK = 0; cartK < cartDim[2]; ++cartK) {
+			if (cartJ == cartCoord[1] && cartK == cartCoord[2] && cartCoord[0] == cartDim[0] - 1) {
+				for (int i = 0; i < escapedParticlesRight.size(); ++i) {
+					Particle* particle = escapedParticlesRight[i];
+					int typeNumber = getTypeNumber(particle);
+					ParticleTypeContainer type = types[typeNumber];
+
+					Particle* newParticle = createParticle(particlesNumber, xnumberAdded - additionalBinNumber - 2, 0, 0, particle->weight, type.type, type, type.temperatureX, type.temperatureY, type.temperatureZ);
+					newParticle->coordinates.x = xgrid[xnumberAdded - 1 - additionalBinNumber];
+					newParticle->coordinates.y = particle->coordinates.y;
+					if(newParticle->coordinates.y < ygrid[1 + additionalBinNumber]) {
+						newParticle->coordinates.y = ygrid[1 + additionalBinNumber] + deltaY*uniformDistribution();
+					}
+					if(newParticle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
+						newParticle->coordinates.y = ygrid[ynumberAdded - 1 - additionalBinNumber] - deltaY*uniformDistribution();
+					}
+					newParticle->coordinates.z = particle->coordinates.z;
+					if(newParticle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+						newParticle->coordinates.z = zgrid[1 + additionalBinNumber] + deltaZ*uniformDistribution();
+					}
+					if(newParticle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+						newParticle->coordinates.z = zgrid[znumberAdded - 1 - additionalBinNumber] - deltaZ*uniformDistribution();
+					}
+					newParticle->initialCoordinates = newParticle->coordinates;
+					newParticle->addVelocity(V0, speed_of_light_normalized);
+					Vector3d momentum = particle->getMomentum();
+					newParticle->initialMomentum = momentum;
+					//newParticle->prevMomentum = momentum;
+					particles.push_back(newParticle);
+					theoreticalEnergy += newParticle->energy(speed_of_light_normalized) * newParticle->weight *
+						sqr(scaleFactor / plasma_period);
+					theoreticalMomentum += newParticle->getMomentum() * newParticle->weight * scaleFactor / plasma_period;
+					particlesNumber++;
+				}
+			}
+			int tempRank;
+			int tempCartCoord[3];
+			tempCartCoord[0] = cartDim[0] - 1;
+			tempCartCoord[1] = cartJ;
+			tempCartCoord[2] = cartK;
+			MPI_Cart_rank(cartComm, tempCartCoord, &tempRank);
+			MPI_Barrier(cartComm);
+			int tempParticleNumber[1];
+			tempParticleNumber[0] = particlesNumber;
+			MPI_Bcast(tempParticleNumber, 1, MPI_INT, tempRank, cartComm);
+			particlesNumber = tempParticleNumber[0];
+		}
 	}
-	if ((verbosity > 1)) printf("exchanging particles number\n");
-	int tempParticleNumber[1];
-	tempParticleNumber[0] = particlesNumber;
-	particlesNumber = tempParticleNumber[0];
 }
 
 Particle* Simulation::getFirstProton() {
@@ -4547,6 +7328,7 @@ Particle* Simulation::getProton(int n) {
 	printf("can not find proton number %d\n", n);
 	fflush(stdout);
 	fclose(errorLogFile);
+	MPI_Finalize();
 	exit(0);
 	return NULL;
 }
@@ -4567,6 +7349,7 @@ Particle* Simulation::getElectron(int n) {
 	printf("can not find electron number %d\n", n);
 	fflush(stdout);
 	fclose(errorLogFile);
+	MPI_Finalize();
 	exit(0);
 	return NULL;
 }
@@ -4577,6 +7360,11 @@ int Simulation::getParticleNumber(int n, const ParticleTypes& type) {
 	int particleNumber = -1;
 	tempParticleNumber[0] = -1;
 	curParticleNumber[0] = 0;
+
+	if (rank > 0) {
+		MPI_Status status;
+		MPI_Recv(curParticleNumber, 1, MPI_INT, rank - 1, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+	}
 
 	if (curParticleNumber[0] > -1) {
 		for (int p = 0; p < particles.size(); ++p) {
@@ -4592,6 +7380,31 @@ int Simulation::getParticleNumber(int n, const ParticleTypes& type) {
 			}
 		}
 	}
+
+	if (rank < nprocs - 1) {
+		MPI_Send(curParticleNumber, 1, MPI_INT, rank + 1, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
+	}
+
+	MPI_Barrier(cartComm);
+
+	if (rank > 0) {
+		MPI_Send(tempParticleNumber, 1, MPI_INT, 0, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
+	} else {
+		particleNumber = tempParticleNumber[0];
+		for (int i = 1; i < nprocs; ++i) {
+			MPI_Status status;
+			MPI_Recv(tempParticleNumber, 1, MPI_INT, i, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm, &status);
+			if (tempParticleNumber[0] >= 0) {
+				particleNumber = tempParticleNumber[0];
+			}
+		}
+	}
+
+	tempParticleNumber[0] = particleNumber;
+
+	MPI_Bcast(tempParticleNumber, 1, MPI_INT, 0, cartComm);
+
+	particleNumber = tempParticleNumber[0];
 
 	return particleNumber;
 }
@@ -4628,8 +7441,7 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 		py = sqrt(mass * kBoltzman_normalized * localTemperatureY) * normalDistribution();
 		pz = sqrt(mass * kBoltzman_normalized * localTemperatureZ) * normalDistribution();
 		p = sqrt(px * px + py * py + pz * pz);
-	}
-	else if (localTemperatureX == localTemperatureY && localTemperatureX == localTemperatureZ) {
+	} else if (localTemperatureX == localTemperatureY && localTemperatureX == localTemperatureZ) {
 		energy = maxwellJuttnerDistribution(localTemperatureX, mass, speed_of_light_normalized, kBoltzman_normalized);
 		p = sqrt(energy * energy - sqr(mass * speed_of_light_normalized_sqr)) / speed_of_light_normalized;
 
@@ -4641,8 +7453,7 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 		double pnormal = sqrt(p * p - pz * pz);
 		px = pnormal * cos(phi);
 		py = pnormal * sin(phi);
-	}
-	else if (localTemperatureY == localTemperatureZ) {
+	} else if (localTemperatureY == localTemperatureZ) {
 		double momentumParallel;
 		double momentumNormal;
 		anisotropicMaxwellJuttnerDistribution(momentumNormal, momentumParallel, types[typeContainer.number].alphaNormal,
@@ -4654,8 +7465,7 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 		double phi = 2 * pi * uniformDistribution();
 		if (sign > 0) {
 			px = momentumParallel;
-		}
-		else {
+		} else {
 			px = -momentumParallel;
 		}
 		py = momentumNormal * cos(phi);
@@ -4663,13 +7473,13 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 		alertNaNOrInfinity(px, "px = NaN\n");
 		alertNaNOrInfinity(py, "py = NaN\n");
 		alertNaNOrInfinity(pz, "pz = NaN\n");
-	}
-	else {
+	} else {
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "can not find electron number %d\n", n);
 		printf("can not find electron number %d\n", n);
 		fflush(stdout);
 		fclose(errorLogFile);
+		MPI_Finalize();
 		exit(0);
 	}
 
@@ -4690,6 +7500,7 @@ int Simulation::getTypeNumber(Particle* particle) {
 	printf("particle has no type\n");
 	fflush(stdout);
 	fclose(errorLogFile);
+	MPI_Finalize();
 	exit(0);
 
 	return -1;
@@ -4697,6 +7508,7 @@ int Simulation::getTypeNumber(Particle* particle) {
 
 void Simulation::evaluateParticleTypesAlpha() {
 	double* alphas = new double[2 * typesNumber];
+	if (rank == 0) {
 		for (int i = 0; i < typesNumber; ++i) {
 			if (types[i].particlesPerBin > 0) {
 				double alphaNormal = types[i].mass * speed_of_light_normalized_sqr / (kBoltzman_normalized * types[i].temperatureY);
@@ -4712,8 +7524,7 @@ void Simulation::evaluateParticleTypesAlpha() {
 						minAlpha = maxAlpha;
 						maxAlpha = 2 * maxAlpha;
 					}
-				}
-				else {
+				} else {
 					maxAlpha = alphaNormal;
 					minAlpha = 0.1 * types[i].mass * speed_of_light_normalized_sqr / (kBoltzman_normalized * types[i].temperatureX);
 				}
@@ -4721,29 +7532,309 @@ void Simulation::evaluateParticleTypesAlpha() {
 				double alphaParallel = solver.solve(minAlpha, maxAlpha);
 				types[i].alphaNormal = alphaNormal;
 				types[i].alphaParallel = alphaParallel;
-			}
-			else {
+			} else {
 				types[i].alphaNormal = 1.0;
 				types[i].alphaParallel = 1.0;
 			}
 			alphas[2 * i] = types[i].alphaNormal;
 			alphas[2 * i + 1] = types[i].alphaParallel;
 		}
-	
+	}
+	MPI_Barrier(cartComm);
+	MPI_Bcast(alphas, 2 * typesNumber, MPI_DOUBLE, 0, cartComm);
 
+	MPI_Barrier(cartComm);
 	for (int i = 0; i < typesNumber; ++i) {
 		types[i].alphaNormal = alphas[2 * i];
 		types[i].alphaParallel = alphas[2 * i + 1];
 	}
+	MPI_Barrier(cartComm);
 
 	delete[] alphas;
 }
 
 void Simulation::synchronizeParticleNumber() {
-	particlesNumber = particles.size();
-	for (int p = 0; p < particles.size(); ++p) {
-		Particle* particle = particles[p];
-		particle->number = p;
+	if (nprocs > 1) {
+		int particleCount[1];
+		particleCount[0] = 0;
+		if (rank > 0) {
+			particleCount[0] = particles.size();
+			MPI_Send(particleCount, 1, MPI_INT, 0, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
+		} else {
+			particlesNumber = particles.size();
+			for (int i = 1; i < nprocs; ++i) {
+				MPI_Status status;
+				MPI_Recv(particleCount, 1, MPI_INT, i, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm, &status);
+				particlesNumber += particleCount[0];
+			}
+		}
+		particleCount[0] = particlesNumber;
+		MPI_Bcast(particleCount, 1, MPI_INT, 0, cartComm);
+		particlesNumber = particleCount[0];
+
+		particleCount[0] = 0;
+
+		if (rank > 0) {
+			MPI_Status status;
+			MPI_Recv(particleCount, 1, MPI_INT, rank - 1, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+		}
+		for (int p = 0; p < particles.size(); ++p) {
+			Particle* particle = particles[p];
+			particle->number = particleCount[0] + p;
+		}
+		particleCount[0] = particleCount[0] + particles.size();
+		if (rank < nprocs - 1) {
+			MPI_Send(particleCount, 1, MPI_INT, rank + 1, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
+		}
+	} else {
+		particlesNumber = particles.size();
+		for (int p = 0; p < particles.size(); ++p) {
+			Particle* particle = particles[p];
+			particle->number = p;
+		}
 	}
+}
+
+int Simulation::getCartCoordWithAbsoluteIndexX(int i){
+	int isInThread[1];
+	isInThread[0] = 0;
+	int coordIn[1];
+	coordIn[0] = -1;
+
+	if(cartDim[0] == 1){
+		return 0;
+	}
+
+	if(i >= firstAbsoluteXindex + additionalBinNumber && i < firstAbsoluteXindex + xnumberAdded - 2*additionalBinNumber-1){
+		isInThread[0] = 1;
+	} else {
+		if((cartCoord[0] == 0) && (i < 0)){
+			isInThread[0] = 1;
+		} else if ((cartCoord[0] == cartDim[0]-1) && (i >= firstAbsoluteXindex + xnumberAdded - 2*additionalBinNumber-1)){
+			isInThread[0] = 1;
+		}
+	}
+
+	if(cartCoord[0] == 0){
+		if(isInThread[0] == 1){
+			coordIn[0] = cartCoord[0];
+		}
+		for(int tempI = 1; tempI < cartDim[0]; ++tempI){
+			int curRank = 0;
+			int tempCoord[3];
+			tempCoord[0] = tempI;
+			tempCoord[1] = cartCoord[1];
+			tempCoord[2] = cartCoord[2];
+			MPI_Cart_rank(cartComm, tempCoord, &curRank);
+			MPI_Status status;
+			MPI_Recv(isInThread, 1, MPI_INT, curRank, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm, &status);
+			if(isInThread[0] == 1){
+				coordIn[0] = tempI;
+			}			
+		}
+	} else {
+		int firstRank = 0;
+		int tempCoord[3];
+		tempCoord[0] = 0;
+		tempCoord[1] = cartCoord[1];
+		tempCoord[2] = cartCoord[2];
+		MPI_Cart_rank(cartComm, tempCoord, &firstRank);
+		MPI_Send(isInThread, 1, MPI_INT, firstRank, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
+	}
+
+	if((cartCoord[0] == 0) && (coordIn[0] == -1)){
+		printf("wrong cartCoord in getCoordWithAbsoluteX\n");
+		MPI_Finalize();
+		exit(0);
+	}
+
+	if(cartCoord[0] == 0){
+		for(int tempI = 1; tempI < cartDim[0]; ++tempI){
+			int curRank = 0;
+			int tempCoord[3];
+			tempCoord[0] = tempI;
+			tempCoord[1] = cartCoord[1];
+			tempCoord[2] = cartCoord[2];
+			MPI_Cart_rank(cartComm, tempCoord, &curRank);
+			MPI_Send(coordIn, 1, MPI_INT, curRank, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm);
+		}
+	} else {
+		int firstRank = 0;
+		int tempCoord[3];
+		tempCoord[0] = 0;
+		tempCoord[1] = cartCoord[1];
+		tempCoord[2] = cartCoord[2];
+		MPI_Cart_rank(cartComm, tempCoord, &firstRank);
+		MPI_Status status;
+		MPI_Recv(coordIn, 1, MPI_INT, firstRank, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm, &status);
+	}
+
+	return coordIn[0];
+}
+
+int Simulation::getCartCoordWithAbsoluteIndexY(int j){
+	int isInThread[1];
+	isInThread[0] = 0;
+	int coordIn[1];
+	coordIn[0] = -1;
+
+	if(cartDim[1] == 1){
+		return 0;
+	}
+
+	if(j >= firstAbsoluteYindex + additionalBinNumber && j < firstAbsoluteYindex + ynumberAdded - 2*additionalBinNumber - 1){
+		isInThread[0] = 1;
+	} else {
+		if((cartCoord[1] == 0) && (j < 0)){
+			isInThread[0] = 1;
+		} else if ((cartCoord[1] == cartDim[1]-1) && (j >= firstAbsoluteYindex + ynumberAdded - 2*additionalBinNumber - 1)){
+			isInThread[0] = 1;
+		}
+	}
+
+	if(cartCoord[1] == 0){
+		if(isInThread[0] == 1){
+			coordIn[0] = cartCoord[1];
+		}
+		for(int tempJ = 1; tempJ < cartDim[1]; ++tempJ){
+			int curRank = 0;
+			int tempCoord[3];
+			tempCoord[1] = tempJ;
+			tempCoord[0] = cartCoord[0];
+			tempCoord[2] = cartCoord[2];
+			MPI_Cart_rank(cartComm, tempCoord, &curRank);
+			MPI_Status status;
+			MPI_Recv(isInThread, 1, MPI_INT, curRank, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm, &status);
+			if(isInThread[0] == 1){
+				coordIn[0] = tempJ;
+			}			
+		}
+	} else {
+		int firstRank = 0;
+		int tempCoord[3];
+		tempCoord[1] = 0;
+		tempCoord[0] = cartCoord[0];
+		tempCoord[2] = cartCoord[2];
+		MPI_Cart_rank(cartComm, tempCoord, &firstRank);
+		MPI_Send(isInThread, 1, MPI_INT, firstRank, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
+	}
+
+	if((cartCoord[1] == 0) && (coordIn[0] == -1)){
+		printf("wrong cartCoord in getCoordWithAbsoluteY\n");
+		MPI_Finalize();
+		exit(0);
+	}
+
+	if(cartCoord[1] == 0){
+		for(int tempJ = 1; tempJ < cartDim[1]; ++tempJ){
+			int curRank = 0;
+			int tempCoord[3];
+			tempCoord[1] = tempJ;
+			tempCoord[0] = cartCoord[0];
+			tempCoord[2] = cartCoord[2];
+			MPI_Cart_rank(cartComm, tempCoord, &curRank);
+			MPI_Send(coordIn, 1, MPI_INT, curRank, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm);
+		}
+	} else {
+		int firstRank = 0;
+		int tempCoord[3];
+		tempCoord[1] = 0;
+		tempCoord[0] = cartCoord[0];
+		tempCoord[2] = cartCoord[2];
+		MPI_Cart_rank(cartComm, tempCoord, &firstRank);
+		MPI_Status status;
+		MPI_Recv(coordIn, 1, MPI_INT, firstRank, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm, &status);
+	}
+
+	return coordIn[0];
+}
+
+int Simulation::getCartCoordWithAbsoluteIndexZ(int k){
+	int isInThread[1];
+	isInThread[0] = 0;
+	int coordIn[1];
+	coordIn[0] = -1;
+
+	if(cartDim[2] == 1){
+		return 0;
+	}
+
+	if(k >= firstAbsoluteZindex + additionalBinNumber && k < firstAbsoluteZindex + znumberAdded - 2*additionalBinNumber - 1){
+		isInThread[0] = 1;
+	} else {
+		if((cartCoord[2] == 0) && (k < 0)){
+			isInThread[0] = 1;
+		} else if ((cartCoord[2] == cartDim[2]-1) && (k >= firstAbsoluteZindex + znumberAdded - 2*additionalBinNumber - 1)){
+			isInThread[0] = 1;
+		}
+	}
+
+	if(cartCoord[2] == 0){
+		if(isInThread[0] == 1){
+			coordIn[0] = cartCoord[2];
+		}
+		for(int tempI = 1; tempI < cartDim[2]; ++tempI){
+			int curRank = 0;
+			int tempCoord[3];
+			tempCoord[2] = tempI;
+			tempCoord[1] = cartCoord[1];
+			tempCoord[0] = cartCoord[0];
+			MPI_Cart_rank(cartComm, tempCoord, &curRank);
+			MPI_Status status;
+			MPI_Recv(isInThread, 1, MPI_INT, curRank, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm, &status);
+			if(isInThread[0] == 1){
+				coordIn[0] = tempI;
+			}			
+		}
+	} else {
+		int firstRank = 0;
+		int tempCoord[3];
+		tempCoord[2] = 0;
+		tempCoord[1] = cartCoord[1];
+		tempCoord[0] = cartCoord[0];
+		MPI_Cart_rank(cartComm, tempCoord, &firstRank);
+		MPI_Send(isInThread, 1, MPI_INT, firstRank, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
+	}
+
+	if((cartCoord[2] == 0) &&(coordIn[0] == -1)){
+		printf("wrong cartCoord in getCoordWithAbsoluteZ\n");
+		MPI_Finalize();
+		exit(0);
+	}
+
+	if(cartCoord[2] == 0){
+		for(int tempI = 1; tempI < cartDim[2]; ++tempI){
+			int curRank = 0;
+			int tempCoord[3];
+			tempCoord[2] = tempI;
+			tempCoord[1] = cartCoord[1];
+			tempCoord[0] = cartCoord[0];
+			MPI_Cart_rank(cartComm, tempCoord, &curRank);
+			MPI_Send(coordIn, 1, MPI_INT, curRank, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm);
+		}
+	} else {
+		int firstRank = 0;
+		int tempCoord[3];
+		tempCoord[2] = 0;
+		tempCoord[1] = cartCoord[1];
+		tempCoord[0] = cartCoord[0];
+		MPI_Cart_rank(cartComm, tempCoord, &firstRank);
+		MPI_Status status;
+		MPI_Recv(coordIn, 1, MPI_INT, firstRank, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm, &status);
+	}
+
+	return coordIn[0];
+}
+
+int Simulation::getLocalIndexByAbsoluteX(int i){
+	return i - firstAbsoluteXindex;
+}
+
+int Simulation::getLocalIndexByAbsoluteY(int j){
+	return j - firstAbsoluteYindex;
+}
+
+int Simulation::getLocalIndexByAbsoluteZ(int k){
+	return k - firstAbsoluteZindex;
 }
 

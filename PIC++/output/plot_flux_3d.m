@@ -1,5 +1,5 @@
 clear;
-load fluxFile.dat;
+load flux.dat;
 load Xfile.dat;
 load Yfile.dat;
 load Zfile.dat;
@@ -9,7 +9,7 @@ Ny = size(Yfile, 1);
 Nz = size(Zfile, 1);
 
 NE = Nx*Ny*Nz;
-Nt = fix(size(fluxFile,1)/NE);
+Nt = fix(size(flux,1)/NE);
 
 znumber = 1;
 
@@ -24,15 +24,16 @@ Jz(1:Nx, 1:Ny) = 0;
 
 for i=1:Nx,
     for j = 1:Ny,
-        Jx(i,j) = fluxFile((Nz)*(Ny)*(i-1) + (Nz)*(j-1) + znumber + c*NE, 1);
-        Jy(i,j) = fluxFile((Nz)*(Ny)*(i-1) + (Nz)*(j-1) + znumber + c*NE, 2);
-        Jz(i,j) = fluxFile((Nz)*(Ny)*(i-1) + (Nz)*(j-1) + znumber + c*NE, 3);
+        Jx(i,j) = flux((Nz)*(Ny)*(i-1) + (Nz)*(j-1) + znumber + c*NE, 1);
+        Jy(i,j) = flux((Nz)*(Ny)*(i-1) + (Nz)*(j-1) + znumber + c*NE, 2);
+        Jz(i,j) = flux((Nz)*(Ny)*(i-1) + (Nz)*(j-1) + znumber + c*NE, 3);
     end;
 end;
 
 figure(1)
 [X, Y] = meshgrid(Yfile, Xfile);
 surf(X, Y, Jx);
+shading interp;
 title ('Jx');
 xlabel ('y');
 ylabel ('x');
@@ -42,6 +43,7 @@ grid ;
 figure(2)
 [X, Y] = meshgrid(Yfile, Xfile);
 surf(X, Y, Jy);
+shading interp;
 title ('Jy');
 xlabel ('y');
 ylabel ('x');
@@ -51,6 +53,7 @@ grid ;
 figure(3)
 [X, Y] = meshgrid(Yfile, Xfile);
 surf(X, Y, Jz);
+shading interp;
 title ('Jz');
 xlabel ('y');
 ylabel ('x');

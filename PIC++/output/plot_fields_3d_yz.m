@@ -12,11 +12,11 @@ Nz = size(Zfile, 1);
 NE = Nx*Ny*Nz;
 NB = (Nx-1)*(Ny-1)*(Nz-1);
 Nt = fix(size(Efield, 1)/NE);
-xnumber = fix(Nx/2);
+xnumber = 2;
 
 a = 0;
 b = fix(Nt/2);
-c = Nt - 1;
+c = fix(Nt)-2;
 
 Ex(1:Ny, 1:Nz) = 0;
 Ey(1:Ny, 1:Nz) = 0;
@@ -54,6 +54,7 @@ end;
 figure(1)
 [Y, Z] = meshgrid(Zfile, Yfile);
 surf(Y, Z, Ex);
+shading interp;
 title ('Ex');
 xlabel ('z');
 ylabel ('y');
@@ -63,6 +64,7 @@ grid ;
 figure(2)
 [Y, Z] = meshgrid(Zfile, Yfile);
 surf(Y, Z, Ey);
+shading interp;
 title ('Ey');
 xlabel ('z');
 ylabel ('y');
@@ -72,6 +74,7 @@ grid ;
 figure(3)
 [Y, Z] = meshgrid(Zfile, Yfile);
 surf(Y, Z, Ez);
+shading interp;
 title ('Ez');
 xlabel ('z');
 ylabel ('y');
@@ -81,6 +84,7 @@ grid ;
 figure(4)
 [Y, Z] = meshgrid(middleZ, middleY);
 surf(Y, Z, Bx);
+shading interp;
 title ('Bx');
 xlabel ('z');
 ylabel ('x');
@@ -90,6 +94,7 @@ grid ;
 figure(5)
 [Y, Z] = meshgrid(middleZ, middleY);
 surf(Y, Z, By);
+shading interp;
 title ('By');
 xlabel ('z');
 ylabel ('y');
@@ -99,6 +104,7 @@ grid ;
 figure(6)
 [Y, Z] = meshgrid(middleZ, middleY);
 surf(Y, Z, Bz);
+shading interp;
 title ('Bz');
 xlabel ('z');
 ylabel ('y');

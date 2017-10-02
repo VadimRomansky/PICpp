@@ -6,6 +6,7 @@
 
 void Simulation::cleanupDivergence() {
 	printf("cleaning up divergence\n");
+	fflush(stdout);
 
 
 	int matrixDimension = xnumber;
