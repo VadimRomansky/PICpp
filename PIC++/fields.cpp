@@ -1067,21 +1067,21 @@ void Simulation::createInternalEquationX(int i, int j, int k) {
 		}
 
 		///
-		for(int tempI = 0; tempI < 2*splineOrder + 3; ++ tempI){
+		/*for(int tempI = 0; tempI < 2*splineOrder + 3; ++ tempI){
 		for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
 			for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
 					int xindex = massMatrix[i][j][k].xindex[tempI];
 					int yindex = massMatrix[i][j][k].yindex[tempJ];
 					int zindex = massMatrix[i][j][k].zindex[tempK];
-					element = massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[2][0];
-					maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, xindex, yindex, zindex, 0));
-					element = massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[2][1];
-					maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, xindex, yindex, zindex, 1));
-					element = massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[2][2];
-					maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, xindex, yindex, zindex, 2));
+					element = massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[0][0];
+					maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(element, xindex, yindex, zindex, 0));
+					element = massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[0][1];
+					maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(element, xindex, yindex, zindex, 1));
+					element = massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[0][2];
+					maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(element, xindex, yindex, zindex, 2));
 			}
 			}
-		}
+		}*/
 		///
 	} else {
 		if (xnumberGeneral > 1) {
@@ -1520,21 +1520,21 @@ void Simulation::createInternalEquationY(int i, int j, int k) {
 			maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(element, prevI, j, k, 1));
 		}
 		///
-		for(int tempI = 0; tempI < 2*splineOrder + 3; ++ tempI){
+		/*for(int tempI = 0; tempI < 2*splineOrder + 3; ++ tempI){
 		for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
 			for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
 					int xindex = massMatrix[i][j][k].xindex[tempI];
 					int yindex = massMatrix[i][j][k].yindex[tempJ];
 					int zindex = massMatrix[i][j][k].zindex[tempK];
-					element = massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[2][0];
-					maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, xindex, yindex, zindex, 0));
-					element = massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[2][1];
-					maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, xindex, yindex, zindex, 1));
-					element = massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[2][2];
-					maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, xindex, yindex, zindex, 2));
+					element = massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[1][0];
+					maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(element, xindex, yindex, zindex, 0));
+					element = massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[1][1];
+					maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(element, xindex, yindex, zindex, 1));
+					element = massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[1][2];
+					maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(element, xindex, yindex, zindex, 2));
 			}
 			}
-		}
+		}*/
 		///
 	} else {
 		if (xnumberGeneral > 1) {
@@ -1968,7 +1968,7 @@ void Simulation::createInternalEquationZ(int i, int j, int k) {
 			maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, prevI, j, k, 2));
 		}
 		///
-		for(int tempI = 0; tempI < 2*splineOrder + 3; ++ tempI){
+		/*for(int tempI = 0; tempI < 2*splineOrder + 3; ++ tempI){
 		for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
 			for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
 					int xindex = massMatrix[i][j][k].xindex[tempI];
@@ -1982,7 +1982,7 @@ void Simulation::createInternalEquationZ(int i, int j, int k) {
 					maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(element, xindex, yindex, zindex, 2));
 			}
 			}
-		}
+		}*/
 		///
 	} else {
 		if (xnumberGeneral > 1) {

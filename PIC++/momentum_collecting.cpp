@@ -553,13 +553,13 @@ void Simulation::updateElectroMagneticParameters() {
 	////
 
 	///zero tensor
-	for(int i = 0; i < xnumberAdded + 1; ++i){
+	/*for(int i = 0; i < xnumberAdded + 1; ++i){
 		for(int j = 0; j < ynumberAdded + 1; ++j){
 			for(int k = 0; k < znumberAdded + 1; ++k){
 				dielectricTensor[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 			}
 		}
-	}
+	}*/
 	////
 	//fprintf(outputEverythingFile, "density %d afterFlux = %28.22g\n", chargeDensityHat[debugPoint - 1][0][0]);
 	//fprintf(outputEverythingFile, "density %d afterFlux = %28.22g\n", chargeDensityHat[debugPoint][0][0]);
