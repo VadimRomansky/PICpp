@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "util.h"
-#include "../../../../../../../Program Files/Microsoft SDKs/MPI/Include/mpi.h"
+#include "mpi.h"
 
 double power(double v, double p){
 	return exp(p*log(v));

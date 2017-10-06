@@ -67,10 +67,10 @@ void Simulation::setSpaceForProc() {
 
 	if (cartCoord[0] >= cartDim[0] - modXnumber) {
 		xnumber = tempXnumber + 1;
-		firstAbsoluteXindex = xnumberGeneral - (xnumber) * (cartDim[0] - cartCoord[0]) - additionalBinNumber;
+		firstAbsoluteXindex = xnumberGeneral - (xnumber) * (cartDim[0] - cartCoord[0]) - additionalBinNumber - 1;
 	} else {
 		xnumber = tempXnumber;
-		firstAbsoluteXindex = (xnumber) * cartCoord[0] - additionalBinNumber;
+		firstAbsoluteXindex = (xnumber) * cartCoord[0] - additionalBinNumber - 1;
 	}
 
 	int tempYnumber = ((ynumberGeneral) / cartDim[1]);
@@ -78,10 +78,10 @@ void Simulation::setSpaceForProc() {
 
 	if (cartCoord[1] >= cartDim[1] - modYnumber) {
 		ynumber = tempYnumber + 1;
-		firstAbsoluteYindex = ynumberGeneral - (ynumber) * (cartDim[1] - cartCoord[1]) - additionalBinNumber;
+		firstAbsoluteYindex = ynumberGeneral - (ynumber) * (cartDim[1] - cartCoord[1]) - additionalBinNumber - 1;
 	} else {
 		ynumber = tempYnumber;
-		firstAbsoluteYindex = (ynumber) * cartCoord[1] - additionalBinNumber;
+		firstAbsoluteYindex = (ynumber) * cartCoord[1] - additionalBinNumber - 1;
 	}
 
 	int tempZnumber = ((znumberGeneral) / cartDim[2]);
@@ -89,10 +89,10 @@ void Simulation::setSpaceForProc() {
 
 	if (cartCoord[2] >= cartDim[2] - modZnumber) {
 		znumber = tempZnumber + 1;
-		firstAbsoluteZindex = znumberGeneral - (znumber) * (cartDim[2] - cartCoord[2]) - additionalBinNumber;
+		firstAbsoluteZindex = znumberGeneral - (znumber) * (cartDim[2] - cartCoord[2]) - additionalBinNumber - 1;
 	} else {
 		znumber = tempZnumber;
-		firstAbsoluteZindex = (znumber) * cartCoord[2] - additionalBinNumber;
+		firstAbsoluteZindex = (znumber) * cartCoord[2] - additionalBinNumber - 1;
 	}
 
 	//todo boundary conditiontype
@@ -106,20 +106,20 @@ void Simulation::setSpaceForProc() {
 			modXnumber = firstSmallXnumber % firstSmallRegions;
 			if (cartCoord[0] >= firstSmallRegions - modXnumber) {
 				xnumber = tempXnumber + 1;
-				firstAbsoluteXindex = firstSmallXnumber - (xnumber) * (firstSmallRegions - cartCoord[0]) - additionalBinNumber;
+				firstAbsoluteXindex = firstSmallXnumber - (xnumber) * (firstSmallRegions - cartCoord[0]) - additionalBinNumber - 1;
 			} else {
 				xnumber = tempXnumber;
-				firstAbsoluteXindex = (xnumber) * cartCoord[0] - additionalBinNumber;
+				firstAbsoluteXindex = (xnumber) * cartCoord[0] - additionalBinNumber - 1;
 			}
 		} else {
 			tempXnumber = lastLargeXnumber / lastLargeRegions;
 			modXnumber = lastLargeXnumber % lastLargeRegions;
 			if (cartCoord[0] >= cartDim[0] - modXnumber) {
 				xnumber = tempXnumber + 1;
-				firstAbsoluteXindex = xnumberGeneral - (xnumber) * (cartDim[0] - cartCoord[0]) - additionalBinNumber;
+				firstAbsoluteXindex = xnumberGeneral - (xnumber) * (cartDim[0] - cartCoord[0]) - additionalBinNumber - 1;
 			} else {
 				xnumber = tempXnumber;
-				firstAbsoluteXindex = firstSmallXnumber + (xnumber) * (cartCoord[0] - firstSmallRegions) - additionalBinNumber;
+				firstAbsoluteXindex = firstSmallXnumber + (xnumber) * (cartCoord[0] - firstSmallRegions) - additionalBinNumber - 1;
 			}
 		}
 

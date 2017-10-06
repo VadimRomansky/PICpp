@@ -268,6 +268,8 @@ void Simulation::moveParticle(Particle* particle) {
 	//double error = (prevVelocity - newVelocity).norm();
 	double error = (prevMomentum - newMomentum).norm();
 	//error = 0;
+
+
 	while (error > particleVelocityErrorLevel * momentumNorm && i < particleIterations) {
 		++i;
 		prevVelocity = newVelocity;

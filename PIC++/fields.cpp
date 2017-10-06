@@ -711,8 +711,8 @@ void Simulation::createInternalEquationX(int i, int j, int k) {
 		element += fakeCondactivity*theta*deltaT;
 	}
 
-	//bool _27_points = false;
-	bool _27_points = true;
+	bool _27_points = false;
+	//bool _27_points = true;
 	int nextI = i + 1;
 	int prevI = i - 1;
 	int nextJ = j + 1;
@@ -1214,8 +1214,8 @@ void Simulation::createInternalEquationY(int i, int j, int k) {
 	int prevJ = j - 1;
 	int nextK = k + 1;
 	int prevK = k - 1;
-	//bool _27_points = false;
-	bool _27_points = true;
+	bool _27_points = false;
+	//bool _27_points = true;
 
 	if (_27_points) {
 		if (ynumberGeneral > 1 && znumberGeneral > 1) {
@@ -1663,8 +1663,8 @@ void Simulation::createInternalEquationZ(int i, int j, int k) {
 	int prevJ = j - 1;
 	int nextK = k + 1;
 	int prevK = k - 1;
-	//bool _27_points = false;
-	bool _27_points = true;
+	bool _27_points = false;
+	//bool _27_points = true;
 
 	if (_27_points) {
 		if (ynumberGeneral > 1 && znumberGeneral > 1) {

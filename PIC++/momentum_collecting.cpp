@@ -305,7 +305,7 @@ void Simulation::updateElectroMagneticParameters() {
 							}
 
 						if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
-							//if(solverType == IMPLICIT_EC){
+							if(solverType == IMPLICIT_EC){
 							for(int tempI = 0; tempI < splineOrder + 2; ++tempI){
 								for(int tempJ = 0; tempJ < splineOrder + 2; ++tempJ){
 									for(int tempK = 0; tempK < splineOrder + 2; ++tempK){
@@ -330,7 +330,7 @@ void Simulation::updateElectroMagneticParameters() {
 										}
 									}
 								}
-							//}
+							}
 							}
 
 							if (particleCharge > 0) {

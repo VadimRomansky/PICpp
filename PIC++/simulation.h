@@ -899,6 +899,10 @@ public:
 	void updateBunemanFlux();
 	void updateBunemanChargeDensity();
 
+	void filterFields(int cutWaveNumber);
+	void filterElectricFieldGeneral(Vector3d*** field, int cutWaveNumber);
+	void filterMagneticFieldGeneral(Vector3d*** field, int cutWaveNumber);
+
 
 	Vector3d getElectricFlux(int i, int j, int k);
 
