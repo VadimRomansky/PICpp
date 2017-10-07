@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include <cmath>
 #include <mpi.h>
+#include <time.h>
 
 #include "constants.h"
 #include "matrix3d.h"
@@ -9,8 +10,10 @@
 #include "simulation.h"
 #include "complex.h"
 #include "fourier.h"
+#include "util.h"
 
 void Simulation::filterFields(int cutWaveNumber){
+	MPI_Barrier(cartComm);
 	double procTime = 0;
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
@@ -160,14 +163,18 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 ///////local/////////
 
 void Simulation::filterFieldsLocal(int cutWaveNumber){
+	MPI_Barrier(cartComm);
 	double procTime = 0;
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
 	if ((rank == 0) && (verbosity > 0)) printf("filtering fields\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("filtering fields\n");
-	filterFieldGeneral(newEfield, cutWaveNumber);
+
+	if ((rank == 0) && (verbosity > 0)) printf("filtering  E field\n");
 	filterFieldGeneralLocal(newEfield, cutWaveNumber);
+	MPI_Barrier(cartComm);
+	if ((rank == 0) && (verbosity > 0)) printf("filtering B field\n");
 	filterFieldGeneralLocal(newBfield, cutWaveNumber);
 
 	exchangeGeneralEfield(newEfield);
@@ -181,14 +188,23 @@ void Simulation::filterFieldsLocal(int cutWaveNumber){
 }
 
 void Simulation::filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber){
+	if ((rank == 0) && (verbosity > 1)) printf("fourier field general\n");
+	MPI_Barrier(cartComm);
+	if ((rank == 0) && (verbosity > 1)) printf("xnumberAdded = %d ynumberAdded = %d znumberAdded = %d\n", xnumberAdded, ynumberAdded, znumberAdded);
 	for(int i = 0; i < xnumberAdded; ++i){
 		for(int j = 0; j < ynumberAdded; ++j){
 			for(int k = 0; k < znumberAdded; ++k){
+				if ((rank == 0) && (verbosity > 1)) printf("i = %d j = %d k = %d\n", i, j, k);
+				if ((rank == 0) && (verbosity > 1)) printf("field = %g\n", field[i][j][k].x);
+				if ((rank == 0) && (verbosity > 1)) printf("fourierInput = %g\n", fourierScalarInput[i][j][k].re);
+				if ((rank == 0) && (verbosity > 1)) printf("fourierOutput = %g\n", fourierScalarOutput[i][j][k].re);
 				fourierScalarInput[i][j][k] = Complex(field[i][j][k].x,0);
 				fourierScalarOutput[i][j][k] = Complex(0, 0);
 			}
 		}
 	}
+	if ((rank == 0) && (verbosity > 1)) printf("fourier field x\n");
+	MPI_Barrier(cartComm);
 
 	fourierTranslationLocal(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded);
 
@@ -205,6 +221,8 @@ void Simulation::filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber){
 			}
 		}
 	}
+
+	if ((rank == 0) && (verbosity > 1)) printf("inverse fourier field x\n");
 
 	fourierTranslationLocal(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded);
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
@@ -224,6 +242,8 @@ void Simulation::filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber){
 		}
 	}
 
+	if ((rank == 0) && (verbosity > 1)) printf("fourier field y\n");
+
 	fourierTranslationLocal(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
@@ -240,6 +260,7 @@ void Simulation::filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber){
 		}
 	}
 
+	if ((rank == 0) && (verbosity > 1)) printf("inverse fourier field y\n");
 
 	fourierTranslationLocal(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded);
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
@@ -260,6 +281,8 @@ void Simulation::filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber){
 		}
 	}
 
+	if ((rank == 0) && (verbosity > 1)) printf("fourier field z\n");
+
 	fourierTranslationLocal(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
@@ -275,6 +298,8 @@ void Simulation::filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber){
 			}
 		}
 	}
+
+	if ((rank == 0) && (verbosity > 1)) printf("inverse fourier field z\n");
 
 	fourierTranslationLocal(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded);
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){

@@ -5538,7 +5538,7 @@ void Simulation::createArrays() {
 		fourierScalarOutput[i] = new Complex*[ynumberAdded];
 		fourierScalarTempOutput[i] = new Complex*[ynumberAdded];
 		fourierScalarTempOutput1[i] = new Complex*[ynumberAdded];
-		for(int j = 0; j < xnumberAdded; ++j){
+		for(int j = 0; j < ynumberAdded; ++j){
 			fourierScalarInput[i][j] = new Complex[znumberAdded];
 			fourierScalarOutput[i][j] = new Complex[znumberAdded];
 			fourierScalarTempOutput[i][j] = new Complex[znumberAdded];
