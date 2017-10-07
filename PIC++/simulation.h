@@ -591,6 +591,11 @@ public:
 	double**** sBiconjugateMaxwell;
 	double**** tBiconjugateMaxwell;
 
+	Complex*** fourierScalarInput;
+	Complex*** fourierScalarOutput;
+	Complex*** fourierScalarTempOutput;
+	Complex*** fourierScalarTempOutput1;
+
 	Matrix3d Kronecker;
 	int LeviCivita[3][3][3];
 
@@ -900,8 +905,10 @@ public:
 	void updateBunemanChargeDensity();
 
 	void filterFields(int cutWaveNumber);
-	void filterElectricFieldGeneral(Vector3d*** field, int cutWaveNumber);
-	void filterMagneticFieldGeneral(Vector3d*** field, int cutWaveNumber);
+	void filterFieldGeneral(Vector3d*** field, int cutWaveNumber);
+
+	void filterFieldsLocal(int cutWaveNumber);
+	void filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber);
 
 
 	Vector3d getElectricFlux(int i, int j, int k);

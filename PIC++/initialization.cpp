@@ -685,8 +685,8 @@ Simulation::~Simulation() {
 		}
 		delete[] divergenceCleaningPotentialFourier;
 
-		for (int i = 0; i < xnumber; ++i) {
-			for (int j = 0; j < ynumber; ++j) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
 				delete[] fourierInput[i][j];
 				delete[] fourierImage[i][j];
 				delete[] fourierOutput[i][j];
@@ -699,6 +699,22 @@ Simulation::~Simulation() {
 		delete[] fourierImage;
 		delete[] fourierOutput;
 
+		for(int i = 0; i < xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				delete[] fourierScalarInput[i][j];
+				delete[] fourierScalarOutput[i][j];
+				delete[] fourierScalarTempOutput[i][j];
+				delete[] fourierScalarTempOutput1[i][j];
+			}
+			delete[] fourierScalarInput[i];
+			delete[] fourierScalarOutput[i];
+			delete[] fourierScalarTempOutput[i];
+			delete[] fourierScalarTempOutput1[i];
+		}
+		delete[] fourierScalarInput;
+		delete[] fourierScalarOutput;
+		delete[] fourierScalarTempOutput;
+		delete[] fourierScalarTempOutput1;
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				delete[] massMatrix[i][j];
@@ -5494,21 +5510,44 @@ void Simulation::createArrays() {
 		}
 	}
 
-	fourierInput = new Complex**[xnumber];
-	fourierImage = new Complex**[xnumber];
-	fourierOutput = new Complex**[xnumber];
-	for (int i = 0; i < xnumber; ++i) {
-		fourierInput[i] = new Complex*[ynumber];
-		fourierImage[i] = new Complex*[ynumber];
-		fourierOutput[i] = new Complex*[ynumber];
-		for (int j = 0; j < ynumber; ++j) {
-			fourierInput[i][j] = new Complex[znumber];
-			fourierImage[i][j] = new Complex[znumber];
-			fourierOutput[i][j] = new Complex[znumber];
-			for (int k = 0; k < znumber; ++k) {
+	fourierInput = new Complex**[xnumberAdded];
+	fourierImage = new Complex**[xnumberAdded];
+	fourierOutput = new Complex**[xnumberAdded];
+	for (int i = 0; i < xnumberAdded; ++i) {
+		fourierInput[i] = new Complex*[ynumberAdded];
+		fourierImage[i] = new Complex*[ynumberAdded];
+		fourierOutput[i] = new Complex*[ynumberAdded];
+		for (int j = 0; j < ynumberAdded; ++j) {
+			fourierInput[i][j] = new Complex[znumberAdded];
+			fourierImage[i][j] = new Complex[znumberAdded];
+			fourierOutput[i][j] = new Complex[znumberAdded];
+			for (int k = 0; k < znumberAdded; ++k) {
 				fourierInput[i][j][k] = Complex(0, 0);
 				fourierImage[i][j][k] = Complex(0, 0);
 				fourierOutput[i][j][k] = Complex(0, 0);
+			}
+		}
+	}
+
+	fourierScalarInput = new Complex**[xnumberAdded];
+	fourierScalarOutput = new Complex**[xnumberAdded];
+	fourierScalarTempOutput = new Complex**[xnumberAdded];
+	fourierScalarTempOutput1 = new Complex**[xnumberAdded];
+	for(int i = 0; i < xnumberAdded; ++i){
+		fourierScalarInput[i] = new Complex*[ynumberAdded];
+		fourierScalarOutput[i] = new Complex*[ynumberAdded];
+		fourierScalarTempOutput[i] = new Complex*[ynumberAdded];
+		fourierScalarTempOutput1[i] = new Complex*[ynumberAdded];
+		for(int j = 0; j < xnumberAdded; ++j){
+			fourierScalarInput[i][j] = new Complex[znumberAdded];
+			fourierScalarOutput[i][j] = new Complex[znumberAdded];
+			fourierScalarTempOutput[i][j] = new Complex[znumberAdded];
+			fourierScalarTempOutput1[i][j] = new Complex[znumberAdded];
+			for(int k = 0; k < znumberAdded; ++k){
+				fourierScalarInput[i][j][k] = Complex(0, 0);
+				fourierScalarOutput[i][j][k] = Complex(0, 0);
+				fourierScalarTempOutput[i][j][k] = Complex(0, 0);
+				fourierScalarTempOutput1[i][j][k] = Complex(0, 0);
 			}
 		}
 	}

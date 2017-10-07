@@ -193,7 +193,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 			}
 		}
 
-		fourierTranslation(fourierInput, fourierImage, true, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+		fourierTranslation(fourierInput, fourierImage, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
 
 		int halfx = xnumberGeneral / 2;
 		int halfy = ynumberGeneral / 2;
@@ -225,7 +225,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 				}
 			}
 		}
-		fourierTranslation(fourierImage, fourierOutput, false, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+		fourierTranslation(fourierImage, fourierOutput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
 
 		for (int i = 0; i < xnumber; ++i) {
 			for (int j = 0; j < ynumber; ++j) {

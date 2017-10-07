@@ -4,7 +4,7 @@
 1E4                    temperature
 -2.99698E10 0 0        velocity
 0 0 0                  elecctricField
-0 0 0             magneticField
+0 0 1.11111E-2             magneticField
 10000000              max iterations
 0.1                   max time
 0                  log verbocity level
