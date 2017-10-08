@@ -49,9 +49,9 @@ void fourierTranslationX(Complex*** input, Complex*** output, bool direct, int x
 	} else {
 		for (int knumber = 0; knumber < xnumberGeneral; ++knumber) {
 			int phaseFactor = direct ? -1 : 1;
-			Complex factor = complexExp(phaseFactor*2*pi*knumber/xnumberGeneral);
+			Complex factor = complexExp((phaseFactor*2*pi*knumber)/xnumberGeneral);
 			Complex* localFactor = new Complex[xnumberAdded];
-			localFactor[1+additionalBinNumber] = complexExp(phaseFactor * 2 * pi * xabsoluteIndex[1+additionalBinNumber] * knumber / xnumberGeneral);
+			localFactor[1+additionalBinNumber] = complexExp((phaseFactor * 2 * pi * xabsoluteIndex[1+additionalBinNumber] * knumber) / xnumberGeneral);
 			for(int i = 2 + additionalBinNumber; i < xnumberAdded; ++i){
 				localFactor[i] = localFactor[i-1]*factor;
 			}
@@ -105,9 +105,9 @@ void fourierTranslationY(Complex*** input, Complex*** output, bool direct, int x
 	} else {
 		for (int knumber = 0; knumber < ynumberGeneral; ++knumber) {
 			int phaseFactor = direct ? -1 : 1;
-			Complex factor = complexExp(phaseFactor*2*pi*knumber/ynumberGeneral);
+			Complex factor = complexExp((phaseFactor*2*pi*knumber)/ynumberGeneral);
 			Complex* localFactor = new Complex[ynumberAdded];
-			localFactor[1+additionalBinNumber] = complexExp(phaseFactor * 2 * pi * yabsoluteIndex[1+additionalBinNumber] * knumber / ynumberGeneral);
+			localFactor[1+additionalBinNumber] = complexExp((phaseFactor * 2 * pi * yabsoluteIndex[1+additionalBinNumber] * knumber) / ynumberGeneral);
 			for(int j = 2 + additionalBinNumber; j < ynumberAdded; ++j){
 				localFactor[j] = localFactor[j-1]*factor;
 			}
@@ -161,9 +161,9 @@ void fourierTranslationZ(Complex*** input, Complex*** output, bool direct, int x
 	} else {
 		for (int knumber = 0; knumber < znumberGeneral; ++knumber) {
 			int phaseFactor = direct ? -1 : 1;
-			Complex factor = complexExp(phaseFactor*2*pi*knumber/znumberGeneral);
+			Complex factor = complexExp((phaseFactor*2*pi*knumber)/znumberGeneral);
 			Complex* localFactor = new Complex[znumberAdded];
-			localFactor[1+additionalBinNumber] = complexExp(phaseFactor * 2 * pi * zabsoluteIndex[1+additionalBinNumber] * knumber / znumberGeneral);
+			localFactor[1+additionalBinNumber] = complexExp((phaseFactor * 2 * pi * zabsoluteIndex[1+additionalBinNumber] * knumber) / znumberGeneral);
 			for(int k = 2 + additionalBinNumber; k < znumberAdded; ++k){
 				localFactor[k] = localFactor[k-1]*factor;
 			}
@@ -207,7 +207,7 @@ Complex fourierTranslationXoneHarmonicLocal(Complex*** input, bool direct, int x
 	int phaseFactor = direct ? -1 : 1;
 	int maxI = xnumberAdded;
 	for (int i = 1+additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i) {
-		sum += input[i][j][k] * complexExp(phaseFactor * 2 * pi * (i - 1 - additionalBinNumber) * knumber / localXnumber);
+		sum += input[i][j][k] * complexExp((phaseFactor * 2 * pi * (i - 1 - additionalBinNumber) * knumber) / localXnumber);
 	}
 
 	if (!direct) {
@@ -246,7 +246,7 @@ Complex fourierTranslationYoneHarmonicLocal(Complex*** input, bool direct, int y
 	sum = Complex(0, 0);
 	int phaseFactor = direct ? -1 : 1;
 	for (int j = 1+additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-		sum += input[i][j][k] * complexExp(phaseFactor * 2 * pi * (j - 1 - additionalBinNumber) * knumber / localYnumber);
+		sum += input[i][j][k] * complexExp((phaseFactor * 2 * pi * (j - 1 - additionalBinNumber) * knumber) / localYnumber);
 	}
 
 	if (!direct) {
@@ -285,7 +285,7 @@ Complex fourierTranslationZoneHarmonicLocal(Complex*** input, bool direct, int z
 	sum = Complex(0, 0);
 	int phaseFactor = direct ? -1 : 1;
 	for (int k = 1+additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
-		sum += input[i][j][k] * complexExp(phaseFactor * 2 * pi * (k - 1 - additionalBinNumber) * knumber / localZnumber);
+		sum += input[i][j][k] * complexExp((phaseFactor * 2 * pi * (k - 1 - additionalBinNumber) * knumber) / localZnumber);
 	}
 	if (!direct) {
 		sum = sum / localZnumber;

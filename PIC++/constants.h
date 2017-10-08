@@ -92,6 +92,7 @@ const int writeTrajectoryNumber = 1000;
 const int writeParticleNumber = 100;
 const int writeMemoryParameter = 2000;
 const int divergenceCleanUpParameter = 1;
+const int filteringParameter = 1;
 const int writeBackupParameter = 10000000;
 const int maxNewtonIterations = 10;
 const int maxGMRESIterations = 100;

@@ -276,8 +276,10 @@ void Simulation::simulate() {
 			}
 		}
 
-		filterFields(5);
-		//filterFieldsLocal(5);
+		if(currentIteration%filteringParameter == 0){
+			filterFields(5);
+			//filterFieldsLocal(5);
+		}
 
 		updateFields();
 		if((rank == 0) && (verbosity > 0)) {
