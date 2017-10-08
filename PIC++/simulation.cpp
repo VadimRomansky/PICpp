@@ -442,43 +442,6 @@ void Simulation::output() {
 		}
 	}*/
 
-	int dimsYZ[3];
-	dimsYZ[0] = 0;
-	dimsYZ[1] = 1;
-	dimsYZ[2] = 1;
-	MPI_Comm subCommYZ;
-	MPI_Cart_sub(cartComm, dimsYZ, &subCommYZ);
-	int dimsZ[3];
-	dimsZ[0] = 0;
-	dimsZ[1] = 0;
-	dimsZ[2] = 1;
-	MPI_Comm subCommZ;
-	MPI_Cart_sub(cartComm, dimsZ, &subCommZ);
-	int dimsXY[3];
-	dimsXY[0] = 1;
-	dimsXY[1] = 1;
-	dimsXY[2] = 0;
-	MPI_Comm subCommXY;
-	MPI_Cart_sub(cartComm, dimsXY, &subCommXY);
-	int dimsY[3];
-	dimsY[0] = 0;
-	dimsY[1] = 1;
-	dimsY[2] = 0;
-	MPI_Comm subCommY;
-	MPI_Cart_sub(cartComm, dimsY, &subCommY);
-	int dimsXZ[3];
-	dimsXZ[0] = 1;
-	dimsXZ[1] = 0;
-	dimsXZ[2] = 1;
-	MPI_Comm subCommXZ;
-	MPI_Cart_sub(cartComm, dimsXZ, &subCommXZ);
-	int dimsX[3];
-	dimsX[0] = 1;
-	dimsX[1] = 0;
-	dimsX[2] = 0;
-	MPI_Comm subCommX;
-	MPI_Cart_sub(cartComm, dimsX, &subCommX);
-
 	if(verbosity > 2) printf("get cart coord with absolute index rank = %d\n", rank);
 	int coordX = getCartCoordWithAbsoluteIndexX(xnumberGeneral/2);
 	int coordY = getCartCoordWithAbsoluteIndexY(ynumberGeneral/2);
@@ -490,7 +453,7 @@ void Simulation::output() {
 		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral/2);
 		if(verbosity > 2) printf("x local index = %d\n", xindex);
 		outputFieldsCrossectionYZ((outputDir + "EfieldYZ.dat").c_str(), (outputDir + "BfieldYZ.dat").c_str(), Efield, Bfield, xnumberAdded,
-	             ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, subCommYZ, subCommZ, cartCoord, cartDim, xindex);
+	             ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommYZ, cartCommZ, cartCoord, cartDim, xindex);
 	}
 	MPI_Barrier(cartComm);
 	if(verbosity > 2) printf("output crossection fields y\n");
@@ -498,7 +461,7 @@ void Simulation::output() {
 		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral/2);
 		if(verbosity > 2) printf("y local index = %d\n", yindex);
 		outputFieldsCrossectionXZ((outputDir + "EfieldXZ.dat").c_str(), (outputDir + "BfieldXZ.dat").c_str(), Efield, Bfield, xnumberAdded,
-	             ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, subCommXZ, subCommZ, cartCoord, cartDim, yindex);
+	             ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommXZ, cartCommZ, cartCoord, cartDim, yindex);
 	}
 	MPI_Barrier(cartComm);
 	if(verbosity > 2) printf("output crossection fields z\n");
@@ -506,7 +469,7 @@ void Simulation::output() {
 		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral/2);
 		if(verbosity > 2) printf("z local index = %d\n", zindex);
 		outputFieldsCrossectionXY((outputDir + "EfieldXY.dat").c_str(), (outputDir + "BfieldXY.dat").c_str(), Efield, Bfield, xnumberAdded,
-	             ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, subCommXY, subCommY, cartCoord, cartDim, zindex);
+	             ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommXY, cartCommY, cartCoord, cartDim, zindex);
 	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing grid\n");

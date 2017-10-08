@@ -179,24 +179,7 @@ void fourierTranslationZ(Complex*** input, Complex*** output, bool direct, int x
 	}
 }
 
-void fourierTranslation(Complex*** input, Complex*** output, Complex*** tempResultX, Complex*** tempResultXY, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, MPI_Comm& cartComm, int* xabsoluteIndex, int* yabsoluteIndex, int* zabsoluteIndex, int* cartCoord, int* cartDim) {
-	MPI_Comm cartCommX;
-	MPI_Comm cartCommY;
-	MPI_Comm cartCommZ;
-
-	int dims[MPI_dim];
-	for (int i = 0; i < MPI_dim; ++i) {
-		dims[i] = 0;
-	}
-
-	dims[0] = 1;
-	MPI_Cart_sub(cartComm, dims, &cartCommX);
-	dims[0] = 0;
-	dims[1] = 1;
-	MPI_Cart_sub(cartComm, dims, &cartCommY);
-	dims[1] = 0;
-	dims[2] = 1;
-	MPI_Cart_sub(cartComm, dims, &cartCommZ);
+void fourierTranslation(Complex*** input, Complex*** output, Complex*** tempResultX, Complex*** tempResultXY, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, MPI_Comm& cartComm, MPI_Comm& cartCommX, MPI_Comm& cartCommY, MPI_Comm& cartCommZ , int* xabsoluteIndex, int* yabsoluteIndex, int* zabsoluteIndex, int* cartCoord, int* cartDim) {
 
 	fourierTranslationX(input, tempResultX, direct, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, xabsoluteIndex, cartCommX, cartCoord, cartDim);
 

@@ -455,6 +455,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		tempCoord[2] = 0;
 	}
 	MPI_Cart_rank(cartComm, tempCoord, &topRank);
+
 	arrayCreated = false;
 	timing = true;
 	outputDir = std::string(outputDirectory);
@@ -1477,6 +1478,37 @@ void Simulation::initialize() {
 	if (rank == 0) printf("initialization\n");
 	fflush(stdout);
 	if (rank == 0) printLog("initialization\n");
+
+	int dimsYZ[3];
+	dimsYZ[0] = 0;
+	dimsYZ[1] = 1;
+	dimsYZ[2] = 1;
+	MPI_Cart_sub(cartComm, dimsYZ, &cartCommYZ);
+	int dimsZ[3];
+	dimsZ[0] = 0;
+	dimsZ[1] = 0;
+	dimsZ[2] = 1;
+	MPI_Cart_sub(cartComm, dimsZ, &cartCommZ);
+	int dimsXY[3];
+	dimsXY[0] = 1;
+	dimsXY[1] = 1;
+	dimsXY[2] = 0;
+	MPI_Cart_sub(cartComm, dimsXY, &cartCommXY);
+	int dimsY[3];
+	dimsY[0] = 0;
+	dimsY[1] = 1;
+	dimsY[2] = 0;
+	MPI_Cart_sub(cartComm, dimsY, &cartCommY);
+	int dimsXZ[3];
+	dimsXZ[0] = 1;
+	dimsXZ[1] = 0;
+	dimsXZ[2] = 1;
+	MPI_Cart_sub(cartComm, dimsXZ, &cartCommXZ);
+	int dimsX[3];
+	dimsX[0] = 1;
+	dimsX[1] = 0;
+	dimsX[2] = 0;
+	MPI_Cart_sub(cartComm, dimsX, &cartCommX);
 
 	bool readTrackedParticles = false;
 
