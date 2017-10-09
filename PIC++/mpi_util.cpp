@@ -4213,7 +4213,7 @@ void sendNodeMassMatrixParametersLeft(MassMatrix*** array, double* outBuffer, in
 		}
 	}
 
-	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2+splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT,cartComm);
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT,cartComm);
 }
 
 void receiveNodeMassMatrixParametersRight(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {

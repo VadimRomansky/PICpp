@@ -23,6 +23,62 @@ void Simulation::filterFields(int cutWaveNumber){
 	filterFieldGeneral(newEfield, cutWaveNumber);
 	filterFieldGeneral(newBfield, cutWaveNumber);
 
+	if(boundaryConditionType != PERIODIC){
+		if(cartCoord[0] == cartDim[0] - 1){
+			for(int i = xnumberAdded - 1 - additionalBinNumber; i < xnumberAdded + 1; ++i){
+				for(int j = 0; j < ynumberAdded + 1; ++j){
+					for(int k = 0; k < znumberAdded + 1; ++k){
+						newEfield[i][j][k] = E0;
+					}
+				}
+			}
+
+			for(int i = xnumberAdded - 1 - additionalBinNumber; i < xnumberAdded; ++i){
+				for(int j = 0; j < ynumberAdded; ++j){
+					for(int k = 0; k < znumberAdded; ++k){
+						newBfield[i][j][k] = B0;
+					}
+				}
+			}
+		}
+		if(cartCoord[0] == 0){
+			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+				for(int i = 0; i < 1 + additionalBinNumber; ++i){
+					for(int j = 0; j < ynumberAdded + 1; ++j){
+						for(int k = 0; k < znumberAdded + 1; ++k){
+							newEfield[i][j][k].y = 0;
+							newEfield[i][j][k].z = 0;
+						}
+					}
+				}
+
+				for (int i = 0; i <= additionalBinNumber; ++i) {
+					for (int j = 0; j < ynumberAdded; ++j) {
+						for (int k = 0; k < znumberAdded; ++k) {
+							newBfield[i][j][k] = newBfield[additionalBinNumber + 1][j][k];
+						}
+					}
+				}
+			} else if(boundaryConditionType == FREE_BOTH){
+				for(int i = 0; i < 1 + additionalBinNumber; ++i){
+					for(int j = 0; j < ynumberAdded + 1; ++j){
+						for(int k = 0; k < znumberAdded + 1; ++k){
+							newEfield[i][j][k] = E0;
+						}
+					}
+				}
+
+				for (int i = 0; i <= additionalBinNumber; ++i) {
+					for (int j = 0; j < ynumberAdded; ++j) {
+						for (int k = 0; k < znumberAdded; ++k) {
+							newBfield[i][j][k] = B0;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	exchangeGeneralEfield(newEfield);
 	exchangeGeneralBfield(newBfield);
 

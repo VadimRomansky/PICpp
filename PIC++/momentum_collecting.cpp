@@ -462,9 +462,11 @@ void Simulation::updateElectroMagneticParameters() {
 	sumNodeVectorParametersY();
 	sumNodeVectorParametersZ();
 
-	sumNodeMassMatrixParametersX();
-	sumNodeMassMatrixParametersY();
-	sumNodeMassMatrixParametersZ();
+	if(solverType == IMPLICIT_EC){
+		sumNodeMassMatrixParametersX();
+		sumNodeMassMatrixParametersY();
+		sumNodeMassMatrixParametersZ();
+	}
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
