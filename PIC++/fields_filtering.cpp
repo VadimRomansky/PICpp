@@ -20,8 +20,23 @@ void Simulation::filterFields(int cutWaveNumber){
 	}
 	if ((rank == 0) && (verbosity > 0)) printf("filtering fields\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("filtering fields\n");
+
+	if(boundaryConditionType != PERIODIC){
+		if(cartCoord[0] == 0){
+			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+				for(int i = 0; i <= 1 + additionalBinNumber; ++i){
+					for(int j = 0; j < ynumberAdded + 1; ++j){
+						for(int k = 0; k < znumberAdded + 1; ++k){
+							newEfield[i][j][k] = newEfield[i][j][k] + E0;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	filterFieldGeneral(newEfield, cutWaveNumber);
-	filterFieldGeneral(newBfield, cutWaveNumber);
+	//filterFieldGeneral(newBfield, cutWaveNumber);
 
 	if(boundaryConditionType != PERIODIC){
 		if(cartCoord[0] == cartDim[0] - 1){
@@ -33,32 +48,33 @@ void Simulation::filterFields(int cutWaveNumber){
 				}
 			}
 
-			for(int i = xnumberAdded - 1 - additionalBinNumber; i < xnumberAdded; ++i){
+			/*for(int i = xnumberAdded - 1 - additionalBinNumber; i < xnumberAdded; ++i){
 				for(int j = 0; j < ynumberAdded; ++j){
 					for(int k = 0; k < znumberAdded; ++k){
 						newBfield[i][j][k] = B0;
 					}
 				}
-			}
+			}*/
 		}
 		if(cartCoord[0] == 0){
 			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-				for(int i = 0; i < 1 + additionalBinNumber; ++i){
+				for(int i = 0; i <= 1 + additionalBinNumber; ++i){
 					for(int j = 0; j < ynumberAdded + 1; ++j){
 						for(int k = 0; k < znumberAdded + 1; ++k){
+							newEfield[i][j][k] = newEfield[i][j][k] - E0;
 							newEfield[i][j][k].y = 0;
 							newEfield[i][j][k].z = 0;
 						}
 					}
 				}
 
-				for (int i = 0; i <= additionalBinNumber; ++i) {
+				/*for (int i = 0; i <= additionalBinNumber; ++i) {
 					for (int j = 0; j < ynumberAdded; ++j) {
 						for (int k = 0; k < znumberAdded; ++k) {
 							newBfield[i][j][k] = newBfield[additionalBinNumber + 1][j][k];
 						}
 					}
-				}
+				}*/
 			} else if(boundaryConditionType == FREE_BOTH){
 				for(int i = 0; i < 1 + additionalBinNumber; ++i){
 					for(int j = 0; j < ynumberAdded + 1; ++j){
@@ -68,13 +84,13 @@ void Simulation::filterFields(int cutWaveNumber){
 					}
 				}
 
-				for (int i = 0; i <= additionalBinNumber; ++i) {
+				/*for (int i = 0; i <= additionalBinNumber; ++i) {
 					for (int j = 0; j < ynumberAdded; ++j) {
 						for (int k = 0; k < znumberAdded; ++k) {
 							newBfield[i][j][k] = B0;
 						}
 					}
-				}
+				}*/
 			}
 		}
 	}
@@ -362,6 +378,38 @@ void Simulation::filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
 			for(int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k){
 				field[i][j][k].z = fourierScalarInput[i][j][k].re;
+			}
+		}
+	}
+}
+
+void Simulation::updateMaxEderivativePoint(){
+	double maxDer = 0;
+	int maxDerPoint = 1+additionalBinNumber;
+	for(int i = 1 + additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i){
+		Vector3d curE = averageEfieldYZ(i);
+		Vector3d nextE = averageEfieldYZ(i+1);
+
+		//todo sign!
+		double der = (curE - nextE).norm()/deltaX;
+		if(der > maxDer){
+			maxDer = der;
+			maxDerPoint = i;
+		}
+	}
+
+	maxDerPoint += firstAbsoluteXindex;
+}
+
+void Simulation::substractStep(Vector3d*** field, Vector3d left, Vector3d right, int sign){
+	for(int i = 0; i < xnumberAdded + 1; ++i){
+		for(int j = 0; j < ynumberAdded + 1; ++j){
+			for(int k = 0; k < znumberAdded + 1; ++k){
+				if((i + firstAbsoluteXindex) <= derExPoint){
+					field[i][j][k] = field[i][j][k] - left*sign;
+				} else {
+					field[i][j][k] = field[i][j][k] - right*sign;
+				}
 			}
 		}
 	}

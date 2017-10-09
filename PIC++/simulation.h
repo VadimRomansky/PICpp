@@ -602,6 +602,10 @@ public:
 	Complex*** fourierScalarTempOutput;
 	Complex*** fourierScalarTempOutput1;
 
+	int derExPoint;
+	Vector3d leftElevel;
+	Vector3d rightElevel;
+
 	Matrix3d Kronecker;
 	int LeviCivita[3][3][3];
 
@@ -915,6 +919,9 @@ public:
 
 	void filterFieldsLocal(int cutWaveNumber);
 	void filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber);
+
+	void updateMaxEderivativePoint();
+	void substractStep(Vector3d*** field, Vector3d left, Vector3d right, int sign);
 
 
 	Vector3d getElectricFlux(int i, int j, int k);
