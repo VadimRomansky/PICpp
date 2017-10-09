@@ -277,7 +277,9 @@ void Simulation::simulate() {
 		}
 
 		if(currentIteration%filteringParameter == 0){
+			//if(currentIteration > 150){
 			filterFields(5);
+			//}
 			//filterFieldsLocal(5);
 		}
 

@@ -59,6 +59,7 @@ Simulation::Simulation() {
 	//concentrations = new double[typesNumber];
 	//particlesPerBin = new int[typesNumber];
 	shockWaveX = -1.0;
+	derExPoint = 0;
 }
 
 void Simulation::setSpaceForProc() {
@@ -153,6 +154,7 @@ void Simulation::setSpaceForProc() {
 	rightY = leftY + ysize;
 	leftZ = zsizeGeneral + (firstAbsoluteZindex) * deltaZ;
 	rightZ = leftZ + zsize;
+	derExPoint = 0;
 }
 
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
@@ -405,6 +407,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	LeviCivita[2][0][1] = 1.0;
 	LeviCivita[2][1][0] = -1.0;
 	shockWaveX = -1.0;
+	derExPoint = 0;
 	//if(rank == 0) printf("end constructor\n");
 	//fflush(stdout);
 }
@@ -782,6 +785,13 @@ Simulation::~Simulation() {
 		delete[] divPressureTensor;
 		delete[] divPressureTensorMinus;
 		delete[] dielectricTensor;
+
+		for(int j = 0; j < ynumberAdded + 1; ++j){
+			delete[] leftElevel[j];
+			delete[] rightElevel[j];
+		}
+		delete[] leftElevel;
+		delete[] rightElevel;
 
 		for (int t = 0; t < typesNumber; ++t) {
 			for (int i = 0; i < xnumberAdded; ++i) {
@@ -5466,6 +5476,17 @@ void Simulation::createArrays() {
 					}
 				}
 			}
+		}
+	}
+
+	leftElevel = new Vector3d*[ynumberAdded + 1];
+	rightElevel = new Vector3d*[ynumberAdded + 1];
+	for(int j = 0; j < ynumberAdded + 1; ++j){
+		leftElevel[j] = new Vector3d[znumberAdded + 1];
+		rightElevel[j] = new Vector3d[znumberAdded + 1];
+		for(int k = 0; k < znumberAdded + 1; ++k){
+			leftElevel[j][k] = Vector3d(0, 0, 0);
+			rightElevel[j][k] = Vector3d(0, 0, 0);
 		}
 	}
 

@@ -11,6 +11,7 @@
 #include "complex.h"
 #include "fourier.h"
 #include "util.h"
+#include "mpi_util.h"
 
 void Simulation::filterFields(int cutWaveNumber){
 	MPI_Barrier(cartComm);
@@ -21,7 +22,7 @@ void Simulation::filterFields(int cutWaveNumber){
 	if ((rank == 0) && (verbosity > 0)) printf("filtering fields\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("filtering fields\n");
 
-	if(boundaryConditionType != PERIODIC){
+	/*if(boundaryConditionType != PERIODIC){
 		if(cartCoord[0] == 0){
 			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 				for(int i = 0; i <= 1 + additionalBinNumber; ++i){
@@ -33,6 +34,12 @@ void Simulation::filterFields(int cutWaveNumber){
 				}
 			}
 		}
+	}*/
+
+	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		updateMaxEderivativePoint();
+		updateBoundaryLevelX();
+		substractStep(newEfield, leftElevel, rightElevel, 1);
 	}
 
 	filterFieldGeneral(newEfield, cutWaveNumber);
@@ -93,6 +100,10 @@ void Simulation::filterFields(int cutWaveNumber){
 				}*/
 			}
 		}
+	}
+
+	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+		substractStep(newEfield, leftElevel, rightElevel, -1);
 	}
 
 	exchangeGeneralEfield(newEfield);
@@ -384,32 +395,130 @@ void Simulation::filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber){
 }
 
 void Simulation::updateMaxEderivativePoint(){
-	double maxDer = 0;
-	int maxDerPoint = 1+additionalBinNumber;
-	for(int i = 1 + additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i){
-		Vector3d curE = averageEfieldYZ(i);
-		Vector3d nextE = averageEfieldYZ(i+1);
+	//if(cartCoord[1] == 0 && cartCoord[2] == 0){
+		double maxDer = 0;
+		int maxDerPoint = 1+additionalBinNumber;
+		for(int i = 1 + additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i){
+			Vector3d curE = averageFieldYZ(newEfield, i);
+			Vector3d nextE = averageFieldYZ(newEfield, i+1);
 
-		//todo sign!
-		double der = (curE - nextE).norm()/deltaX;
-		if(der > maxDer){
-			maxDer = der;
-			maxDerPoint = i;
+			//todo sign!
+			double der = (curE - nextE).norm()/deltaX;
+			if(der > maxDer){
+				maxDer = der;
+				maxDerPoint = i;
+			}
+		}
+
+		maxDerPoint += firstAbsoluteXindex;
+
+		int tempPoint[1];
+		double tempDer[1];
+
+		tempPoint[0] = maxDerPoint;
+		tempDer[0] = maxDer;
+
+		if(rank == 0){
+			for(int i = 1; i < nprocs; ++i){
+				MPI_Status status;
+				MPI_Recv(tempPoint, 1, MPI_INT, i, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm, &status);
+				MPI_Recv(tempDer, 1, MPI_DOUBLE, i, MPI_SEND_DOUBLE_ALL_TO_FIRST, cartComm, &status);
+
+				if(tempDer[0] > maxDer){
+					maxDer = tempDer[0];
+					maxDerPoint = tempPoint[0];
+				}
+			}
+		} else {
+			MPI_Send(tempPoint, 1, MPI_INT, 0, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
+			MPI_Send(tempDer, 1, MPI_DOUBLE, 0, MPI_SEND_DOUBLE_ALL_TO_FIRST, cartComm);
+		}
+
+		tempPoint[0] = maxDerPoint;
+	//}
+		MPI_Bcast(tempPoint, 1, MPI_INT, 0, cartComm);
+
+		derExPoint = tempPoint[0];
+}
+void Simulation::updateBoundaryLevelX(){
+	int n = 3*(ynumberAdded + 1)*(znumberAdded+1);
+	double* buffer = new double[n];
+	int bcount = 0;
+
+	///left
+	if(cartCoord[0] = 0){
+		bcount = 0;
+		for(int j = 0; j < ynumberAdded + 1; ++j){
+			for(int k = 0; k < znumberAdded + 1; ++k){
+				leftElevel[j][k] = newEfield[1+additionalBinNumber][j][k];
+				for(int l = 0; l < 3; ++l){
+					buffer[bcount] = leftElevel[j][k][l];
+					bcount++;
+				}
+			}
 		}
 	}
 
-	maxDerPoint += firstAbsoluteXindex;
+	int rootCoord[1];
+	rootCoord[0] = 0;
 
+	int rootRank;
+
+	MPI_Cart_rank(cartCommX, rootCoord, &rootRank);
+
+	MPI_Bcast(buffer, n, MPI_DOUBLE, rootRank, cartCommX);
+
+	bcount = 0;
+	for(int j = 0; j < ynumberAdded + 1; ++j){
+		for(int k = 0; k < znumberAdded + 1; ++k){
+			for(int l = 0; l < 3; ++l){
+				leftElevel[j][k][l] = buffer[bcount];
+				bcount++;
+			}
+		}
+	}
+
+	///right
+	if(cartCoord[0] = cartDim[0] - 1){
+		bcount = 0;
+		for(int j = 0; j < ynumberAdded + 1; ++j){
+			for(int k = 0; k < znumberAdded + 1; ++k){
+				rightElevel[j][k] = newEfield[xnumberAdded - 1 - additionalBinNumber][j][k];
+				for(int l = 0; l < 3; ++l){
+					buffer[bcount] = rightElevel[j][k][l];
+					bcount++;
+				}
+			}
+		}
+	}
+
+	rootCoord[0] = cartDim[0] - 1;
+
+	MPI_Cart_rank(cartCommX, rootCoord, &rootRank);
+
+	MPI_Bcast(buffer, n, MPI_DOUBLE, rootRank, cartCommX);
+
+	bcount = 0;
+	for(int j = 0; j < ynumberAdded + 1; ++j){
+		for(int k = 0; k < znumberAdded + 1; ++k){
+			for(int l = 0; l < 3; ++l){
+				rightElevel[j][k][l] = buffer[bcount];
+				bcount++;
+			}
+		}
+	}
+
+	delete[] buffer;
 }
 
-void Simulation::substractStep(Vector3d*** field, Vector3d left, Vector3d right, int sign){
+void Simulation::substractStep(Vector3d*** field, Vector3d** left, Vector3d** right, int sign){
 	for(int i = 0; i < xnumberAdded + 1; ++i){
 		for(int j = 0; j < ynumberAdded + 1; ++j){
 			for(int k = 0; k < znumberAdded + 1; ++k){
 				if((i + firstAbsoluteXindex) <= derExPoint){
-					field[i][j][k] = field[i][j][k] - left*sign;
+					field[i][j][k] = field[i][j][k] - left[j][k]*sign;
 				} else {
-					field[i][j][k] = field[i][j][k] - right*sign;
+					field[i][j][k] = field[i][j][k] - right[j][k]*sign;
 				}
 			}
 		}

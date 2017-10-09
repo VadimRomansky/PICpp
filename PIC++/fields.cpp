@@ -2866,3 +2866,81 @@ Vector3d Simulation::getBunemanElectricField(int i, int j, int k){
 Vector3d Simulation::getBunemanMagneticField(int i, int j, int k){
 	return Vector3d(bunemanBx[i][j][k], bunemanBy[i][j][k], bunemanBz[i][j][k]);
 }
+
+Vector3d Simulation::averageFieldXY(Vector3d*** field, int k){
+	double tempField[3];
+	double sumField[3];
+	tempField[0] = 0;
+	tempField[1] = 0;
+	tempField[2] = 0;
+
+	for(int i = 1+additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i){
+		for(int j  = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j){
+			tempField[0] += field[i][j][k].x;
+			tempField[1] += field[i][j][k].y;
+			tempField[2] += field[i][j][k].z;
+		}
+	}
+
+	MPI_Allreduce(tempField, sumField, 3, MPI_DOUBLE, MPI_SUM, cartCommXY);
+
+	Vector3d result;
+
+	result.x = sumField[0]/(xnumberGeneral*ynumberGeneral);
+	result.y = sumField[1]/(xnumberGeneral*ynumberGeneral);
+	result.z = sumField[2]/(xnumberGeneral*ynumberGeneral);
+
+	return result;
+}
+
+Vector3d Simulation::averageFieldXZ(Vector3d*** field, int j){
+	double tempField[3];
+	double sumField[3];
+	tempField[0] = 0;
+	tempField[1] = 0;
+	tempField[2] = 0;
+
+	for(int i = 1+additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i){
+		for(int k  = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k){
+			tempField[0] += field[i][j][k].x;
+			tempField[1] += field[i][j][k].y;
+			tempField[2] += field[i][j][k].z;
+		}
+	}
+
+	MPI_Allreduce(tempField, sumField, 3, MPI_DOUBLE, MPI_SUM, cartCommXZ);
+
+	Vector3d result;
+
+	result.x = sumField[0]/(xnumberGeneral*znumberGeneral);
+	result.y = sumField[1]/(xnumberGeneral*znumberGeneral);
+	result.z = sumField[2]/(xnumberGeneral*znumberGeneral);
+
+	return result;
+}
+
+Vector3d Simulation::averageFieldYZ(Vector3d*** field, int i){
+	double tempField[3];
+	double sumField[3];
+	tempField[0] = 0;
+	tempField[1] = 0;
+	tempField[2] = 0;
+
+	for(int j = 1+additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j){
+		for(int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k){
+			tempField[0] += field[i][j][k].x;
+			tempField[1] += field[i][j][k].y;
+			tempField[2] += field[i][j][k].z;
+		}
+	}
+
+	MPI_Allreduce(tempField, sumField, 3, MPI_DOUBLE, MPI_SUM, cartCommYZ);
+
+	Vector3d result;
+
+	result.x = sumField[0]/(ynumberGeneral*znumberGeneral);
+	result.y = sumField[1]/(ynumberGeneral*znumberGeneral);
+	result.z = sumField[2]/(ynumberGeneral*znumberGeneral);
+
+	return result;
+}
