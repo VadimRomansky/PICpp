@@ -399,6 +399,7 @@ void Simulation::updateMaxEderivativePoint(){
 	}
 
 	maxDerPoint += firstAbsoluteXindex;
+
 }
 
 void Simulation::substractStep(Vector3d*** field, Vector3d left, Vector3d right, int sign){
