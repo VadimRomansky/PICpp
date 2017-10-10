@@ -462,6 +462,9 @@ void Simulation::updateMaxEderivativePoint(){
 		if(tempPoint[0] > derExPoint){
 			derExPoint = tempPoint[0];
 		}
+
+		////
+		derExPoint = floor(speed_of_light_normalized*time/deltaX);
 }
 void Simulation::updateBoundaryLevelX(){
 	int n = 3*(ynumberAdded + 1)*(znumberAdded+1);
