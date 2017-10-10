@@ -29,16 +29,6 @@ Complex fourierTranslationXoneHarmonic(Complex*** input, bool direct, int xnumbe
 	return sum;
 }
 
-/*void fourierTranslationXonePoint(Complex*** input, Complex*** output, bool direct, int xnumberAdded, int j, int k, int xnumberGeneral, MPI_Comm& reducedCartComm, int* xabsoluteIndex, int* cartCoord, int* cartDim) {
-	//for (int knumber = 1 + additionalBinNumber; knumber < xnumberAdded - 1 - additionalBinNumber; ++knumber) {
-	for (int knumber = 0; knumber < xnumberGeneral; ++knumber) {
-		Complex f = fourierTranslationXoneHarmonic(input, direct, xnumberAdded, j, k, xnumberGeneral, reducedCartComm, knumber, xabsoluteIndex, cartCoord, cartDim);
-		if(knumber >= xabsoluteIndex[1+additionalBinNumber] && knumber < xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber]){
-			output[knumber - xabsoluteIndex[0]][j][k] = f;
-		}
-	}
-}*/
-
 void fourierTranslationX(Complex*** input, Complex*** output, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int xnumberGeneral, int* xabsoluteIndex, MPI_Comm cartCommX, int* cartCoord, int* cartDim) {
 	if (xnumberGeneral == 1) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -85,15 +75,6 @@ Complex fourierTranslationYoneHarmonic(Complex*** input, bool direct, int ynumbe
 	}
 	return sum;
 }
-
-/*void fourierTranslationYonePoint(Complex*** input, Complex*** output, bool direct, int ynumberAdded, int i, int k, int ynumberGeneral, MPI_Comm& reducedCartComm, int* yabsoluteIndex, int* cartCoord, int* cartDim) {
-	for (int knumber = 0; knumber < ynumberGeneral; ++knumber) {
-		Complex f = fourierTranslationYoneHarmonic(input, direct, ynumberAdded, i, k, ynumberGeneral, reducedCartComm, knumber, yabsoluteIndex, cartCoord, cartDim);
-		if(knumber >= yabsoluteIndex[1+additionalBinNumber] && knumber < yabsoluteIndex[ynumberAdded - 1 - additionalBinNumber]){
-			output[i][knumber - yabsoluteIndex[0]][k] = f;
-		}
-	}
-}*/
 
 void fourierTranslationY(Complex*** input, Complex*** output, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int ynumberGeneral, int* yabsoluteIndex, MPI_Comm cartCommY, int* cartCoord, int* cartDim) {
 	if (ynumberGeneral == 1) {
@@ -142,15 +123,6 @@ Complex fourierTranslationZoneHarmonic(Complex*** input, bool direct, int znumbe
 	return sum;
 }
 
-/*void fourierTranslationZonePoint(Complex*** input, Complex*** output, bool direct, int znumberAdded, int i, int j, int znumberGeneral, MPI_Comm& reducedCartComm, int* zabsoluteIndex, int* cartCoord, int* cartDim) {
-	for (int knumber = 0; knumber < znumberGeneral; ++knumber) {
-		Complex f = fourierTranslationZoneHarmonic(input, direct, znumberAdded, i, j, znumberGeneral, reducedCartComm, knumber, zabsoluteIndex, cartCoord, cartDim);
-		if(knumber >= zabsoluteIndex[1+additionalBinNumber] && knumber < zabsoluteIndex[znumberAdded - 1 - additionalBinNumber]){
-			output[i][j][knumber - zabsoluteIndex[0]] = f;
-		}
-	}
-}*/
-
 void fourierTranslationZ(Complex*** input, Complex*** output, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int znumberGeneral, int* zabsoluteIndex, MPI_Comm cartCommZ, int* cartCoord, int* cartDim) {
 	if (znumberGeneral == 1) {
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -186,14 +158,147 @@ void fourierTranslation(Complex*** input, Complex*** output, Complex*** tempResu
 	fourierTranslationY(tempResultX, tempResultXY, direct, xnumberAdded, ynumberAdded, znumberAdded, ynumberGeneral, yabsoluteIndex, cartCommY, cartCoord, cartDim);
 
 	fourierTranslationZ(tempResultXY, output, direct, xnumberAdded, ynumberAdded, znumberAdded, znumberGeneral, zabsoluteIndex, cartCommZ, cartCoord, cartDim);
+}
 
-	/*std::string outputDir = outputDirectory;
+//////right
 
-	if(direct){
-		outputArray((outputDir + "fourierX.dat").c_str(), tempResult, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
-		outputArray((outputDir + "fourierY.dat").c_str(), tempResult1, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
-		outputArray((outputDir + "fourierZ.dat").c_str(), output, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
-	}*/
+Complex fourierTranslationXoneHarmonicRight(Complex*** input, bool direct, int xnumberAdded, int j, int k, int xnumberGeneral, MPI_Comm& reducedCartComm, int knumber, int* xabsoluteIndex, int startAbsoluteIndex, Complex* localFactor, int* cartCoord, int* cartDim) {
+	Complex sum;
+	sum = Complex(0, 0);
+	int phaseFactor = direct ? -1 : 1;
+	if(knumber >= 0){
+		for (int i = 1+additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i) {
+			if(xabsoluteIndex[i] >= startAbsoluteIndex){
+				sum += input[i][j][k] * localFactor[i];
+			}
+		}
+	} else {
+		if(knumber + startAbsoluteIndex >= xabsoluteIndex[1+additionalBinNumber] && knumber + startAbsoluteIndex < xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber]){
+			sum = input[knumber + startAbsoluteIndex - xabsoluteIndex[0]][j][k];
+		}
+	}
+	double out[2];
+	double in[2];
+	out[0] = sum.re;
+	out[1] = sum.im;
+	MPI_Allreduce(out, in, 2, MPI_DOUBLE, MPI_SUM, reducedCartComm);
+	sum = Complex(in[0], in[1]);
+	if (!direct && knumber >= 0) {
+		sum = sum / (xnumberGeneral - startAbsoluteIndex);
+	}
+	return sum;
+}
+
+void fourierTranslationXRight(Complex*** input, Complex*** output, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int xnumberGeneral, int* xabsoluteIndex, int startAbsoluteIndex, MPI_Comm cartCommX, int* cartCoord, int* cartDim) {
+	if (xnumberGeneral == 1) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				output[1+additionalBinNumber][j][k] = input[1+additionalBinNumber][j][k];
+			}
+		}
+	} else {
+		for (int knumber =  - startAbsoluteIndex; knumber < xnumberGeneral - startAbsoluteIndex; ++knumber) {
+				int phaseFactor = direct ? -1 : 1;
+				Complex factor = complexExp((phaseFactor*2*pi*knumber)/(xnumberGeneral - startAbsoluteIndex));
+				Complex* localFactor = new Complex[xnumberAdded];
+				localFactor[1+additionalBinNumber] = complexExp((phaseFactor * 2 * pi * (xabsoluteIndex[1+additionalBinNumber]-startAbsoluteIndex) * knumber) / (xnumberGeneral - startAbsoluteIndex));
+				for(int i = 2 + additionalBinNumber; i < xnumberAdded; ++i){
+					localFactor[i] = localFactor[i-1]*factor;
+				}
+				for (int j = 1+additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j) {
+					for (int k = 1+additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k) {
+						Complex f = fourierTranslationXoneHarmonicRight(input, direct, xnumberAdded, j, k, xnumberGeneral, cartCommX, knumber, xabsoluteIndex, startAbsoluteIndex, localFactor, cartCoord, cartDim);
+						if(knumber >= xabsoluteIndex[1+additionalBinNumber] - startAbsoluteIndex && knumber < xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber] - startAbsoluteIndex){
+							output[knumber - xabsoluteIndex[0] + startAbsoluteIndex][j][k] = f;
+						}
+					}
+				}
+			
+				delete[] localFactor;
+		}
+	}
+}
+
+void fourierTranslationYRight(Complex*** input, Complex*** output, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int ynumberGeneral, int* yabsoluteIndex, int startAbsoluteIndex, int* xabsoluteIndex, MPI_Comm cartCommY, int* cartCoord, int* cartDim) {
+	if (ynumberGeneral == 1) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				output[i][1+additionalBinNumber][k] = input[i][1+additionalBinNumber][k];
+			}
+		}
+	} else {
+		for (int knumber = 0; knumber < ynumberGeneral; ++knumber) {
+			int phaseFactor = direct ? -1 : 1;
+			Complex factor = complexExp((phaseFactor*2*pi*knumber)/ynumberGeneral);
+			Complex* localFactor = new Complex[ynumberAdded];
+			localFactor[1+additionalBinNumber] = complexExp((phaseFactor * 2 * pi * yabsoluteIndex[1+additionalBinNumber] * knumber) / ynumberGeneral);
+			for(int j = 2 + additionalBinNumber; j < ynumberAdded; ++j){
+				localFactor[j] = localFactor[j-1]*factor;
+			}
+			for (int i = 1+additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i) {
+				if(xabsoluteIndex[i] >= startAbsoluteIndex){
+					for (int k = 1+additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k) {
+						Complex f = fourierTranslationYoneHarmonic(input, direct, ynumberAdded, i, k, ynumberGeneral, cartCommY, knumber, yabsoluteIndex, localFactor, cartCoord, cartDim);
+						if(knumber >= yabsoluteIndex[1+additionalBinNumber] && knumber < yabsoluteIndex[ynumberAdded - 1 - additionalBinNumber]){
+							output[i][knumber - yabsoluteIndex[0]][k] = f;
+						}
+					}
+				} else {
+					for (int k = 1+additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k) {
+						if(knumber >= yabsoluteIndex[1+additionalBinNumber] && knumber < yabsoluteIndex[ynumberAdded - 1 - additionalBinNumber]){
+							output[i][knumber - yabsoluteIndex[0]][k] = input[i][knumber - yabsoluteIndex[0]][k];
+						}
+					}
+				}
+			}
+			delete[] localFactor;
+		}
+	}
+}
+
+void fourierTranslationZRight(Complex*** input, Complex*** output, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int znumberGeneral, int* zabsoluteIndex, int startAbsoluteIndex, int* xabsoluteIndex, MPI_Comm cartCommZ, int* cartCoord, int* cartDim) {
+	if (znumberGeneral == 1) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				output[i][j][1+additionalBinNumber] = input[i][j][1+additionalBinNumber];
+			}
+		}
+	} else {
+		for (int knumber = 0; knumber < znumberGeneral; ++knumber) {
+			int phaseFactor = direct ? -1 : 1;
+			Complex factor = complexExp((phaseFactor*2*pi*knumber)/znumberGeneral);
+			Complex* localFactor = new Complex[znumberAdded];
+			localFactor[1+additionalBinNumber] = complexExp((phaseFactor * 2 * pi * zabsoluteIndex[1+additionalBinNumber] * knumber) / znumberGeneral);
+			for(int k = 2 + additionalBinNumber; k < znumberAdded; ++k){
+				localFactor[k] = localFactor[k-1]*factor;
+			}
+			for (int i = 1+additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i) {
+				if(xabsoluteIndex[i] >= startAbsoluteIndex){
+					for (int j = 1+additionalBinNumber; j < ynumberAdded -1 - additionalBinNumber; ++j) {
+						Complex f = fourierTranslationZoneHarmonic(input, direct, znumberAdded, i, j, znumberGeneral, cartCommZ, knumber, zabsoluteIndex, localFactor, cartCoord, cartDim);
+						if(knumber >= zabsoluteIndex[1+additionalBinNumber] && knumber < zabsoluteIndex[znumberAdded - 1 - additionalBinNumber]){
+							output[i][j][knumber - zabsoluteIndex[0]] = f;
+						}
+					}
+				} else {
+					for (int j = 1+additionalBinNumber; j < ynumberAdded -1 - additionalBinNumber; ++j) {
+						if(knumber >= zabsoluteIndex[1+additionalBinNumber] && knumber < zabsoluteIndex[znumberAdded - 1 - additionalBinNumber]){
+							output[i][j][knumber - zabsoluteIndex[0]] = input[i][j][knumber - zabsoluteIndex[0]];
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void fourierTranslationRight(Complex*** input, Complex*** output, Complex*** tempResultX, Complex*** tempResultXY, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, int startAbsoluteIndex, MPI_Comm& cartComm, MPI_Comm& cartCommX, MPI_Comm& cartCommY, MPI_Comm& cartCommZ , int* xabsoluteIndex, int* yabsoluteIndex, int* zabsoluteIndex, int* cartCoord, int* cartDim) {
+
+	fourierTranslationXRight(input, tempResultX, direct, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, xabsoluteIndex, startAbsoluteIndex, cartCommX, cartCoord, cartDim);
+
+	fourierTranslationYRight(tempResultX, tempResultXY, direct, xnumberAdded, ynumberAdded, znumberAdded, ynumberGeneral, yabsoluteIndex, startAbsoluteIndex, xabsoluteIndex, cartCommY, cartCoord, cartDim);
+
+	fourierTranslationZRight(tempResultXY, output, direct, xnumberAdded, ynumberAdded, znumberAdded, znumberGeneral, zabsoluteIndex, startAbsoluteIndex, xabsoluteIndex, cartCommZ, cartCoord, cartDim);
 }
 
 

@@ -277,6 +277,9 @@ void Simulation::simulate() {
 		}
 
 		if(currentIteration%filteringParameter == 0){
+			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+				updateMaxEderivativePoint();
+			}
 			//if(currentIteration > 150){
 			filterFields(5);
 			//}

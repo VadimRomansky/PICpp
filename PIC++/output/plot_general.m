@@ -147,3 +147,10 @@ ylabel ('E/E_0');
 %legend('particle', 'electric','magnetic', 'full', 'theoretical','Location','southwest');
 legend('magnetic','linear','Location','southwest');
 grid ;
+
+figure(14);
+plot (general(1:N2,3)*omega_plasma, general(1:N2,36), 'red');
+title ('der Ex point');
+xlabel ('{{t \omega_p}/{2\pi}}');
+ylabel ('x cm');
+grid ;
