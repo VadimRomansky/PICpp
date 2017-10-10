@@ -602,6 +602,10 @@ public:
 	Complex*** fourierScalarTempOutput;
 	Complex*** fourierScalarTempOutput1;
 
+	Complex* localFactorX;
+	Complex* localFactorY;
+	Complex* localFactorZ;
+
 	int derExPoint;
 	Vector3d** leftElevel;
 	Vector3d** rightElevel;

@@ -719,6 +719,11 @@ Simulation::~Simulation() {
 		delete[] fourierScalarOutput;
 		delete[] fourierScalarTempOutput;
 		delete[] fourierScalarTempOutput1;
+
+		delete[] localFactorX;
+		delete[] localFactorY;
+		delete[] localFactorZ;
+
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				delete[] massMatrix[i][j];
@@ -5604,6 +5609,10 @@ void Simulation::createArrays() {
 			}
 		}
 	}
+
+	localFactorX = new Complex[xnumberAdded+1];
+	localFactorY = new Complex[ynumberAdded+1];
+	localFactorZ = new Complex[znumberAdded+1];
 
 	if (rank == 0) printf("creating arrays for particlesInBins\n");
 	if (rank == 0) fflush(stdout);

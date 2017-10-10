@@ -42,7 +42,9 @@ void Simulation::filterFields(int cutWaveNumber){
 		//substractStep(newEfield, leftElevel, rightElevel, 1);
 	}
 
-	filterFieldGeneral(newEfield, cutWaveNumber);
+	if(derExPoint < xnumberGeneral - 2*frontHalfWidth){
+		filterFieldGeneral(newEfield, cutWaveNumber);
+	}
 	//filterFieldGeneral(newBfield, cutWaveNumber);
 
 	if(boundaryConditionType != PERIODIC){
@@ -142,7 +144,7 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 	}
 
 	//fourierTranslation(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	fourierTranslationRight(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	fourierTranslationRight(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
@@ -163,7 +165,7 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 	}
 
 	//fourierTranslation(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	fourierTranslationRight(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	fourierTranslationRight(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
@@ -183,7 +185,7 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 	}
 
 	//fourierTranslation(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	fourierTranslationRight(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	fourierTranslationRight(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
@@ -205,7 +207,7 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 
 
 	//fourierTranslation(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	fourierTranslationRight(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	fourierTranslationRight(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
@@ -226,7 +228,7 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 	}
 
 	//fourierTranslation(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	fourierTranslationRight(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	fourierTranslationRight(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
@@ -247,7 +249,7 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 	}
 
 	//fourierTranslation(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	fourierTranslationRight(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	fourierTranslationRight(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
