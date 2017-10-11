@@ -720,6 +720,23 @@ Simulation::~Simulation() {
 		delete[] fourierScalarTempOutput;
 		delete[] fourierScalarTempOutput1;
 
+		for(int i = 0; i < 2*xnumberAdded; ++i){
+			for(int j = 0; j < ynumberAdded; ++j){
+				delete[] fourierScalarMirrorInput[i][j];
+				delete[] fourierScalarMirrorOutput[i][j];
+				delete[] fourierScalarMirrorTempOutput[i][j];
+				delete[] fourierScalarMirrorTempOutput1[i][j];
+			}
+			delete[] fourierScalarMirrorInput[i];
+			delete[] fourierScalarMirrorOutput[i];
+			delete[] fourierScalarMirrorTempOutput[i];
+			delete[] fourierScalarMirrorTempOutput1[i];
+		}
+		delete[] fourierScalarInput;
+		delete[] fourierScalarOutput;
+		delete[] fourierScalarTempOutput;
+		delete[] fourierScalarTempOutput1;
+
 		delete[] localFactorX;
 		delete[] localFactorY;
 		delete[] localFactorZ;
@@ -5610,7 +5627,30 @@ void Simulation::createArrays() {
 		}
 	}
 
-	localFactorX = new Complex[xnumberAdded+1];
+	fourierScalarMirrorInput = new Complex**[2*xnumberAdded];
+	fourierScalarMirrorOutput = new Complex**[2*xnumberAdded];
+	fourierScalarMirrorTempOutput = new Complex**[2*xnumberAdded];
+	fourierScalarMirrorTempOutput1 = new Complex**[2*xnumberAdded];
+	for(int i = 0; i < 2*xnumberAdded; ++i){
+		fourierScalarMirrorInput[i] = new Complex*[ynumberAdded];
+		fourierScalarMirrorOutput[i] = new Complex*[ynumberAdded];
+		fourierScalarMirrorTempOutput[i] = new Complex*[ynumberAdded];
+		fourierScalarMirrorTempOutput1[i] = new Complex*[ynumberAdded];
+		for(int j = 0; j < ynumberAdded; ++j){
+			fourierScalarMirrorInput[i][j] = new Complex[znumberAdded];
+			fourierScalarMirrorOutput[i][j] = new Complex[znumberAdded];
+			fourierScalarMirrorTempOutput[i][j] = new Complex[znumberAdded];
+			fourierScalarMirrorTempOutput1[i][j] = new Complex[znumberAdded];
+			for(int k = 0; k < znumberAdded; ++k){
+				fourierScalarMirrorInput[i][j][k] = Complex(0, 0);
+				fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+				fourierScalarMirrorTempOutput[i][j][k] = Complex(0, 0);
+				fourierScalarMirrorTempOutput1[i][j][k] = Complex(0, 0);
+			}
+		}
+	}
+
+	localFactorX = new Complex[2*(xnumberAdded+1)];
 	localFactorY = new Complex[ynumberAdded+1];
 	localFactorZ = new Complex[znumberAdded+1];
 

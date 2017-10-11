@@ -49,7 +49,7 @@ void Simulation::filterFields(int cutWaveNumber){
 
 	if(boundaryConditionType != PERIODIC){
 		if(cartCoord[0] == cartDim[0] - 1){
-			for(int i = xnumberAdded - 1 - additionalBinNumber; i < xnumberAdded + 1; ++i){
+			for(int i = xnumberAdded - additionalBinNumber; i < xnumberAdded + 1; ++i){
 				for(int j = 0; j < ynumberAdded + 1; ++j){
 					for(int k = 0; k < znumberAdded + 1; ++k){
 						newEfield[i][j][k] = E0;

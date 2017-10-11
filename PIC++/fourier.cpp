@@ -426,3 +426,69 @@ void fourierTranslationLocal(Complex*** input, Complex*** output, Complex*** tem
 
 	fourierTranslationZLocal(tempResultXY, output, direct, xnumberAdded, ynumberAdded, znumberAdded);
 }
+
+///mirror
+
+Complex fourierTranslationXoneHarmonicRightMirror(Complex*** input, bool direct, int xnumberAdded, int j, int k, int xnumberGeneral, MPI_Comm& reducedCartComm, int knumber, int* xabsoluteIndex, int startAbsoluteIndex, Complex* localFactor, int* cartCoord, int* cartDim) {
+	Complex sum;
+	sum = Complex(0, 0);
+	int phaseFactor = direct ? -1 : 1;
+	if(knumber >= 0){
+		for (int i = 1+additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i) {
+			if(xabsoluteIndex[i] >= startAbsoluteIndex){
+				sum += input[i][j][k] * (localFactor[i] + localFactor[startAbsoluteIndex + 2*(xnumberGeneral - startAbsoluteIndex) - i]);
+			}
+		}
+	} else {
+		if(knumber + startAbsoluteIndex >= xabsoluteIndex[1+additionalBinNumber] && knumber + startAbsoluteIndex < xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber]){
+			sum = input[knumber + startAbsoluteIndex - xabsoluteIndex[0]][j][k];
+		}
+	}
+	double out[2];
+	double in[2];
+	out[0] = sum.re;
+	out[1] = sum.im;
+	MPI_Allreduce(out, in, 2, MPI_DOUBLE, MPI_SUM, reducedCartComm);
+	sum = Complex(in[0], in[1]);
+	if (!direct && knumber >= 0) {
+		sum = sum / (xnumberGeneral - startAbsoluteIndex);
+	}
+	return sum;
+}
+
+void fourierTranslationXRightMirror(Complex*** input, Complex*** output, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int xnumberGeneral, int* xabsoluteIndex, int startAbsoluteIndex, Complex* localFactor, MPI_Comm cartCommX, int* cartCoord, int* cartDim) {
+	if (xnumberGeneral == 1) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				output[1+additionalBinNumber][j][k] = input[1+additionalBinNumber][j][k];
+			}
+		}
+	} else {
+		for (int knumber =  - startAbsoluteIndex; knumber < 2*(xnumberGeneral - startAbsoluteIndex); ++knumber) {
+				int phaseFactor = direct ? -1 : 1;
+				Complex factor = complexExp((phaseFactor*2*pi*knumber)/(2*(xnumberGeneral - startAbsoluteIndex)));
+				localFactor[1+additionalBinNumber] = complexExp((phaseFactor * 2 * pi * (xabsoluteIndex[1+additionalBinNumber]-startAbsoluteIndex) * knumber) / (xnumberGeneral - startAbsoluteIndex));
+				for(int i = 2 + additionalBinNumber; i < 2*xnumberAdded; ++i){
+					localFactor[i] = localFactor[i-1]*factor;
+				}
+				for (int j = 1+additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j) {
+					for (int k = 1+additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k) {
+						Complex f = fourierTranslationXoneHarmonicRightMirror(input, direct, xnumberAdded, j, k, xnumberGeneral, cartCommX, knumber, xabsoluteIndex, startAbsoluteIndex, localFactor, cartCoord, cartDim);
+						if((knumber + startAbsoluteIndex) >= 2*xabsoluteIndex[1+additionalBinNumber] && (knumber + startAbsoluteIndex) < 2*xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber]){
+							output[knumber - xabsoluteIndex[0] + startAbsoluteIndex][j][k] = f;
+						}
+					}
+				}
+			
+		}
+	}
+}
+
+void fourierTranslationRightMirror(Complex*** input, Complex*** output, Complex*** tempResultX, Complex*** tempResultXY, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, int startAbsoluteIndex, MPI_Comm& cartComm, MPI_Comm& cartCommX, MPI_Comm& cartCommY, MPI_Comm& cartCommZ , int* xabsoluteIndex, int* yabsoluteIndex, int* zabsoluteIndex, Complex* localFactorX, Complex* localFactorY, Complex* localFactorZ, int* cartCoord, int* cartDim) {
+
+	fourierTranslationXRightMirror(input, tempResultX, direct, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, xabsoluteIndex, startAbsoluteIndex, localFactorX, cartCommX, cartCoord, cartDim);
+
+	fourierTranslationYRightMirror(tempResultX, tempResultXY, direct, xnumberAdded, ynumberAdded, znumberAdded, ynumberGeneral, yabsoluteIndex, startAbsoluteIndex, xabsoluteIndex, localFactorY, cartCommY, cartCoord, cartDim);
+
+	fourierTranslationZRightMirror(tempResultXY, output, direct, xnumberAdded, ynumberAdded, znumberAdded, znumberGeneral, zabsoluteIndex, startAbsoluteIndex, xabsoluteIndex, localFactorZ, cartCommZ, cartCoord, cartDim);
+}

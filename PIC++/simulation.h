@@ -602,6 +602,11 @@ public:
 	Complex*** fourierScalarTempOutput;
 	Complex*** fourierScalarTempOutput1;
 
+	Complex*** fourierScalarMirrorInput;
+	Complex*** fourierScalarMirrorOutput;
+	Complex*** fourierScalarMirrorTempOutput;
+	Complex*** fourierScalarMirrorTempOutput1;
+
 	Complex* localFactorX;
 	Complex* localFactorY;
 	Complex* localFactorZ;
