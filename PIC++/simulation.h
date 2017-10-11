@@ -615,6 +615,8 @@ public:
 	Vector3d** leftElevel;
 	Vector3d** rightElevel;
 
+	int constMeanElevelPoint;
+
 	Matrix3d Kronecker;
 	int LeviCivita[3][3][3];
 

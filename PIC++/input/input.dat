@@ -1,11 +1,11 @@
 ﻿0                        input type CGS or Lapenta
-200 10 1                 grid numbers
-6.8E7 3.4E6 3.4E5         gridsizes
+300 10 1                 grid numbers
+1.02E8 3.4E6 3.4E5         gridsizes
 1E4                    temperature
 -2.99698E10 0 0        velocity
 0 0 0                  elecctricField
-0 0 1.11111E-2             magneticField
-50000000              max iterations
+0 0 1.1111E-2             magneticField
+10000000              max iterations
 0.1                   max time
 0                  log verbocity level
 8                  particle types number

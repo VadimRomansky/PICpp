@@ -118,11 +118,11 @@ void Simulation::filterFields(int cutWaveNumber){
 }
 
 void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
-	int* xabsoluteIndex = new int[xnumberAdded + 1];
+	int* xabsoluteIndex = new int[2*xnumberAdded + 1];
 	int* yabsoluteIndex = new int[ynumberAdded + 1];
 	int* zabsoluteIndex = new int[znumberAdded + 1];
 
-	for(int i = 0; i < xnumberAdded + 1; ++i){
+	for(int i = 0; i < 2*xnumberAdded + 1; ++i){
 		xabsoluteIndex[i] = firstAbsoluteXindex + i;
 	}
 
@@ -134,23 +134,25 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 		zabsoluteIndex[k] = firstAbsoluteZindex + k;
 	}
 
-	for(int i = 0; i < xnumberAdded; ++i){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
-				fourierScalarInput[i][j][k] = Complex(field[i][j][k].x,0);
-				fourierScalarOutput[i][j][k] = Complex(0, 0);
+	for(int i = 1 + additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i){
+		for(int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j){
+			for(int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k){
+				fourierScalarMirrorInput[i][j][k] = Complex(field[i][j][k].x,0);
+				fourierScalarMirrorInput[i + xnumber ][j][k] = Complex(field[xnumberAdded - 1 - additionalBinNumber - i][j][k].x,0);
+				fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+				fourierScalarMirrorOutput[i + xnumber][j][k] = Complex(0, 0);
 			}
 		}
 	}
 
-	//fourierTranslation(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	fourierTranslationRight(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
+	//fourierTranslation(fourierScalarMirrorInput, fourierScalarMirrorOutput, fourierScalarMirrorTempOutput, fourierScalarMirrorTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	fourierTranslationRight(fourierScalarMirrorInput, fourierScalarMirrorOutput, fourierScalarMirrorTempOutput, fourierScalarMirrorTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
 			for(int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k){
 				//double kx = (i + firstAbsoluteXindex)*2*pi/xsizeGeneral;
-				double kx = (i + firstAbsoluteXindex - (derExPoint + frontHalfWidth))*2*pi/(xsizeGeneral - (derExPoint + frontHalfWidth)*deltaX);
+				double kx = (i + firstAbsoluteXindex - (derExPoint + frontHalfWidth))*2*pi/(2*(xsizeGeneral - (derExPoint + frontHalfWidth)*deltaX));
 				double ky = (j + firstAbsoluteYindex)*2*pi/ysizeGeneral;
 				double kz = (k + firstAbsoluteZindex)*2*pi/zsizeGeneral;
 				double kw = sqrt(kx*kx + ky*ky + kz*kz);
@@ -158,14 +160,23 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 					kw = 0;
 				}
 				if(kw > 2*pi/(cutWaveNumber*deltaX)){
-					fourierScalarOutput[i][j][k] = Complex(0, 0);
+					fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+				}
+
+				kx = (2*xnumberGeneral - xabsoluteIndex[i] - 1)*2*pi/(2*(xsizeGeneral - (derExPoint + frontHalfWidth)*deltaX));
+				kw = sqrt(kx*kx + ky*ky + kz*kz);
+				if(i + firstAbsoluteXindex - (derExPoint + frontHalfWidth) < 0){
+					kw = 0;
+				}
+				if(kw > 2*pi/(cutWaveNumber*deltaX)){
+					fourierScalarMirrorOutput[i + xnumber][j][k] = Complex(0, 0);
 				}
 			}
 		}
 	}
 
-	//fourierTranslation(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	fourierTranslationRight(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
+	//fourierTranslation(fourierScalarMirrorOutput, fourierScalarMirrorInput, fourierScalarMirrorTempOutput, fourierScalarMirrorTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	fourierTranslationRight(fourierScalarMirrorOutput, fourierScalarMirrorInput, fourierScalarMirrorTempOutput, fourierScalarMirrorTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
@@ -175,17 +186,19 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 		}
 	}
 
-	for(int i = 0; i < xnumberAdded; ++i){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
-				fourierScalarInput[i][j][k] = Complex(field[i][j][k].y,0);
-				fourierScalarOutput[i][j][k] = Complex(0, 0);
+	for(int i = 1 + additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i){
+		for(int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j){
+			for(int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k){
+				fourierScalarMirrorInput[i][j][k] = Complex(field[i][j][k].y,0);
+				fourierScalarMirrorInput[i + xnumber ][j][k] = Complex(field[xnumberAdded - 1 - additionalBinNumber - i][j][k].y,0);
+				fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+				fourierScalarMirrorOutput[i + xnumber][j][k] = Complex(0, 0);
 			}
 		}
 	}
 
-	//fourierTranslation(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	fourierTranslationRight(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
+	//fourierTranslation(fourierScalarMirrorInput, fourierScalarMirrorOutput, fourierScalarMirrorTempOutput, fourierScalarMirrorTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	fourierTranslationRight(fourierScalarMirrorInput, fourierScalarMirrorOutput, fourierScalarMirrorTempOutput, fourierScalarMirrorTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
@@ -199,36 +212,47 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 					kw = 0;
 				}
 				if(kw > 2*pi/(cutWaveNumber*deltaX)){
-					fourierScalarOutput[i][j][k] = Complex(0, 0);
+					fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+				}
+
+				kx = (2*xnumberGeneral - xabsoluteIndex[i] - 1)*2*pi/(2*(xsizeGeneral - (derExPoint + frontHalfWidth)*deltaX));
+				kw = sqrt(kx*kx + ky*ky + kz*kz);
+				if(i + firstAbsoluteXindex - (derExPoint + frontHalfWidth) < 0){
+					kw = 0;
+				}
+				if(kw > 2*pi/(cutWaveNumber*deltaX)){
+					fourierScalarMirrorOutput[i + xnumber][j][k] = Complex(0, 0);
 				}
 			}
 		}
 	}
 
 
-	//fourierTranslation(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	fourierTranslationRight(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
+	//fourierTranslation(fourierScalarMirrorOutput, fourierScalarMirrorInput, fourierScalarMirrorTempOutput, fourierScalarMirrorTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	fourierTranslationRight(fourierScalarMirrorOutput, fourierScalarMirrorInput, fourierScalarMirrorTempOutput, fourierScalarMirrorTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
 			for(int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k){
-				field[i][j][k].y = fourierScalarInput[i][j][k].re;
+				field[i][j][k].y = fourierScalarMirrorInput[i][j][k].re;
 			}
 		}
 	}
 
 
-	for(int i = 0; i < xnumberAdded; ++i){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
-				fourierScalarInput[i][j][k] = Complex(field[i][j][k].z,0);
-				fourierScalarOutput[i][j][k] = Complex(0, 0);
+	for(int i = 1 + additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i){
+		for(int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j){
+			for(int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k){
+				fourierScalarMirrorInput[i][j][k] = Complex(field[i][j][k].z,0);
+				fourierScalarMirrorInput[i + xnumber][j][k] = Complex(field[xnumberAdded - 1 - additionalBinNumber - i][j][k].z,0);
+				fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+				fourierScalarMirrorOutput[i + xnumber][j][k] = Complex(0, 0);
 			}
 		}
 	}
 
-	//fourierTranslation(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	fourierTranslationRight(fourierScalarInput, fourierScalarOutput, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
+	//fourierTranslation(fourierScalarMirrorInput, fourierScalarMirrorOutput, fourierScalarMirrorTempOutput, fourierScalarMirrorTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	fourierTranslationRight(fourierScalarMirrorInput, fourierScalarMirrorOutput, fourierScalarMirrorTempOutput, fourierScalarMirrorTempOutput1, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
@@ -242,19 +266,28 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 					kw = 0;
 				}
 				if(kw > 2*pi/(cutWaveNumber*deltaX)){
-					fourierScalarOutput[i][j][k] = Complex(0, 0);
+					fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+				}
+
+				kx = (2*xnumberGeneral - xabsoluteIndex[i] - 1)*2*pi/(2*(xsizeGeneral - (derExPoint + frontHalfWidth)*deltaX));
+				kw = sqrt(kx*kx + ky*ky + kz*kz);
+				if(i + firstAbsoluteXindex - (derExPoint + frontHalfWidth) < 0){
+					kw = 0;
+				}
+				if(kw > 2*pi/(cutWaveNumber*deltaX)){
+					fourierScalarMirrorOutput[i + xnumber][j][k] = Complex(0, 0);
 				}
 			}
 		}
 	}
 
-	//fourierTranslation(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	fourierTranslationRight(fourierScalarOutput, fourierScalarInput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
+	//fourierTranslation(fourierScalarMirrorOutput, fourierScalarMirrorInput, fourierScalarMirrorTempOutput, fourierScalarMirrorTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	fourierTranslationRight(fourierScalarMirrorOutput, fourierScalarMirrorInput, fourierScalarMirrorTempOutput, fourierScalarMirrorTempOutput1, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, derExPoint + frontHalfWidth, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, localFactorX, localFactorY, localFactorZ, cartCoord, cartDim);
 
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
 			for(int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k){
-				field[i][j][k].z = fourierScalarInput[i][j][k].re;
+				field[i][j][k].z = fourierScalarMirrorInput[i][j][k].re;
 			}
 		}
 	}

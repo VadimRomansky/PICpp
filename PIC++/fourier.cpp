@@ -433,15 +433,19 @@ Complex fourierTranslationXoneHarmonicRightMirror(Complex*** input, bool direct,
 	Complex sum;
 	sum = Complex(0, 0);
 	int phaseFactor = direct ? -1 : 1;
-	if(knumber >= 0){
-		for (int i = 1+additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i) {
+	if(knumber >= 0 && knumber < 2*xnumberGeneral - 2*startAbsoluteIndex){
+		for (int i = 1+additionalBinNumber; i < 2*xnumberAdded - 3*additionalBinNumber - 3; ++i) {
 			if(xabsoluteIndex[i] >= startAbsoluteIndex){
-				sum += input[i][j][k] * (localFactor[i] + localFactor[startAbsoluteIndex + 2*(xnumberGeneral - startAbsoluteIndex) - i]);
+				sum += input[i][j][k] * (localFactor[i]);
 			}
 		}
-	} else {
+	} else if(knumber < 0){
 		if(knumber + startAbsoluteIndex >= xabsoluteIndex[1+additionalBinNumber] && knumber + startAbsoluteIndex < xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber]){
 			sum = input[knumber + startAbsoluteIndex - xabsoluteIndex[0]][j][k];
+		}
+	} else {
+		if(knumber + startAbsoluteIndex >= 2*xnumberGeneral - xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber] && knumber + startAbsoluteIndex < 2*xnumberGeneral - xabsoluteIndex[1+additionalBinNumber]){
+			sum = input[(knumber + startAbsoluteIndex - 2*xnumberGeneral + xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber]) + xnumberAdded - 1 - additionalBinNumber][j][k];
 		}
 	}
 	double out[2];
@@ -464,7 +468,7 @@ void fourierTranslationXRightMirror(Complex*** input, Complex*** output, bool di
 			}
 		}
 	} else {
-		for (int knumber =  - startAbsoluteIndex; knumber < 2*(xnumberGeneral - startAbsoluteIndex); ++knumber) {
+		for (int knumber =  - startAbsoluteIndex; knumber < 2*(xnumberGeneral - startAbsoluteIndex) + startAbsoluteIndex; ++knumber) {
 				int phaseFactor = direct ? -1 : 1;
 				Complex factor = complexExp((phaseFactor*2*pi*knumber)/(2*(xnumberGeneral - startAbsoluteIndex)));
 				localFactor[1+additionalBinNumber] = complexExp((phaseFactor * 2 * pi * (xabsoluteIndex[1+additionalBinNumber]-startAbsoluteIndex) * knumber) / (xnumberGeneral - startAbsoluteIndex));
@@ -474,12 +478,84 @@ void fourierTranslationXRightMirror(Complex*** input, Complex*** output, bool di
 				for (int j = 1+additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j) {
 					for (int k = 1+additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k) {
 						Complex f = fourierTranslationXoneHarmonicRightMirror(input, direct, xnumberAdded, j, k, xnumberGeneral, cartCommX, knumber, xabsoluteIndex, startAbsoluteIndex, localFactor, cartCoord, cartDim);
-						if((knumber + startAbsoluteIndex) >= 2*xabsoluteIndex[1+additionalBinNumber] && (knumber + startAbsoluteIndex) < 2*xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber]){
+						if((knumber + startAbsoluteIndex) >= xabsoluteIndex[1+additionalBinNumber] && (knumber + startAbsoluteIndex) < xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber]){
 							output[knumber - xabsoluteIndex[0] + startAbsoluteIndex][j][k] = f;
+						} else if(knumber + startAbsoluteIndex >= 2*xnumberGeneral - xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber] && knumber + startAbsoluteIndex < 2*xnumberGeneral - xabsoluteIndex[1+additionalBinNumber]){
+							output[(knumber + startAbsoluteIndex - 2*xnumberGeneral + xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber]) + xnumberAdded - 1 - additionalBinNumber][j][k] = f;
 						}
 					}
 				}
 			
+		}
+	}
+}
+
+void fourierTranslationYRightMirror(Complex*** input, Complex*** output, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int ynumberGeneral, int* yabsoluteIndex, int startAbsoluteIndex, int* xabsoluteIndex, Complex* localFactor, MPI_Comm cartCommY, int* cartCoord, int* cartDim) {
+	if (ynumberGeneral == 1) {
+		for (int i = 0; i < 2*xnumberAdded; ++i) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				output[i][1+additionalBinNumber][k] = input[i][1+additionalBinNumber][k];
+			}
+		}
+	} else {
+		for (int knumber = 0; knumber < ynumberGeneral; ++knumber) {
+			int phaseFactor = direct ? -1 : 1;
+			Complex factor = complexExp((phaseFactor*2*pi*knumber)/ynumberGeneral);
+			localFactor[1+additionalBinNumber] = complexExp((phaseFactor * 2 * pi * yabsoluteIndex[1+additionalBinNumber] * knumber) / ynumberGeneral);
+			for(int j = 2 + additionalBinNumber; j < ynumberAdded; ++j){
+				localFactor[j] = localFactor[j-1]*factor;
+			}
+			for (int i = 1+additionalBinNumber; i < 2*xnumberAdded - 3 - 3*additionalBinNumber; ++i) {
+				if(xabsoluteIndex[i] >= startAbsoluteIndex){
+					for (int k = 1+additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k) {
+						Complex f = fourierTranslationYoneHarmonic(input, direct, ynumberAdded, i, k, ynumberGeneral, cartCommY, knumber, yabsoluteIndex, localFactor, cartCoord, cartDim);
+						if(knumber >= yabsoluteIndex[1+additionalBinNumber] && knumber < yabsoluteIndex[ynumberAdded - 1 - additionalBinNumber]){
+							output[i][knumber - yabsoluteIndex[0]][k] = f;
+						}
+					}
+				} else {
+					for (int k = 1+additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k) {
+						if(knumber >= yabsoluteIndex[1+additionalBinNumber] && knumber < yabsoluteIndex[ynumberAdded - 1 - additionalBinNumber]){
+							output[i][knumber - yabsoluteIndex[0]][k] = input[i][knumber - yabsoluteIndex[0]][k];
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void fourierTranslationZRightMirror(Complex*** input, Complex*** output, bool direct, int xnumberAdded, int ynumberAdded, int znumberAdded, int znumberGeneral, int* zabsoluteIndex, int startAbsoluteIndex, int* xabsoluteIndex, Complex* localFactor, MPI_Comm cartCommZ, int* cartCoord, int* cartDim) {
+	if (znumberGeneral == 1) {
+		for (int i = 0; i < 2*xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				output[i][j][1+additionalBinNumber] = input[i][j][1+additionalBinNumber];
+			}
+		}
+	} else {
+		for (int knumber = 0; knumber < znumberGeneral; ++knumber) {
+			int phaseFactor = direct ? -1 : 1;
+			Complex factor = complexExp((phaseFactor*2*pi*knumber)/znumberGeneral);
+			localFactor[1+additionalBinNumber] = complexExp((phaseFactor * 2 * pi * zabsoluteIndex[1+additionalBinNumber] * knumber) / znumberGeneral);
+			for(int k = 2 + additionalBinNumber; k < znumberAdded; ++k){
+				localFactor[k] = localFactor[k-1]*factor;
+			}
+			for (int i = 1+additionalBinNumber; i < 2*xnumberAdded - 3 - 3*additionalBinNumber; ++i) {
+				if(xabsoluteIndex[i] >= startAbsoluteIndex){
+					for (int j = 1+additionalBinNumber; j < ynumberAdded -1 - additionalBinNumber; ++j) {
+						Complex f = fourierTranslationZoneHarmonic(input, direct, znumberAdded, i, j, znumberGeneral, cartCommZ, knumber, zabsoluteIndex, localFactor, cartCoord, cartDim);
+						if(knumber >= zabsoluteIndex[1+additionalBinNumber] && knumber < zabsoluteIndex[znumberAdded - 1 - additionalBinNumber]){
+							output[i][j][knumber - zabsoluteIndex[0]] = f;
+						}
+					}
+				} else {
+					for (int j = 1+additionalBinNumber; j < ynumberAdded -1 - additionalBinNumber; ++j) {
+						if(knumber >= zabsoluteIndex[1+additionalBinNumber] && knumber < zabsoluteIndex[znumberAdded - 1 - additionalBinNumber]){
+							output[i][j][knumber - zabsoluteIndex[0]] = input[i][j][knumber - zabsoluteIndex[0]];
+						}
+					}
+				}
+			}
 		}
 	}
 }

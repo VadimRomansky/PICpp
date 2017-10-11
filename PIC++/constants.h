@@ -46,16 +46,16 @@ const int MPI_dim = 3;
 //const char* const backupDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/v4/PIC++/backup/";
 
 //for windows 64 home
-//const char* const outputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/output/";
-//const char* const reducedOutputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/reduced_output/";
-//const char* const inputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/input/";
-//const char* const backupDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/backup/";
+const char* const outputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/output/";
+const char* const reducedOutputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/reduced_output/";
+const char* const inputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/input/";
+const char* const backupDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/backup/";
 
 //for windows 64
-const char* const outputDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/PICpp/PIC++/output/";
-const char* const reducedOutputDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/PICpp/PIC++/reduced_output/";
-const char* const inputDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/PICpp/PIC++/input/";
-const char* const backupDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/PICpp/PIC++/backup/";
+//const char* const outputDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/PICpp/PIC++/output/";
+//const char* const reducedOutputDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/PICpp/PIC++/reduced_output/";
+//const char* const inputDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/PICpp/PIC++/input/";
+//const char* const backupDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/PICpp/PIC++/backup/";
 
 const double atomicUnionMass = 1.66053904E-24;
 const double massProtonReal = 1.67262177E-24;
@@ -86,7 +86,7 @@ const double particleSplitLevel = 3;
 const double particleSplitAngle = 0.02;
 const int splitParticlesParameter = 100;
 const int pnumber = 500;
-const int writeParameter = 500;
+const int writeParameter = 200;
 const int writeGeneralParameter = 10;
 const int writeTrajectoryNumber = 1000;
 const int writeParticleNumber = 100;
