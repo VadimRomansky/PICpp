@@ -2,6 +2,7 @@ clear;
 load Efield.dat;
 load Bfield.dat;
 load Xfile.dat;
+
 load Yfile.dat;
 load Zfile.dat;
 load initialParameters.dat;

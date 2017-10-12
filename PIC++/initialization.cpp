@@ -60,6 +60,7 @@ Simulation::Simulation() {
 	//particlesPerBin = new int[typesNumber];
 	shockWaveX = -1.0;
 	derExPoint = 0;
+	constMeanElevelPoint = 0;
 }
 
 void Simulation::setSpaceForProc() {
@@ -155,6 +156,7 @@ void Simulation::setSpaceForProc() {
 	leftZ = zsizeGeneral + (firstAbsoluteZindex) * deltaZ;
 	rightZ = leftZ + zsize;
 	derExPoint = 0;
+	constMeanElevelPoint = 0;
 }
 
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
@@ -408,6 +410,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	LeviCivita[2][1][0] = -1.0;
 	shockWaveX = -1.0;
 	derExPoint = 0;
+	constMeanElevelPoint = 0;
 	//if(rank == 0) printf("end constructor\n");
 	//fflush(stdout);
 }
@@ -740,6 +743,8 @@ Simulation::~Simulation() {
 		delete[] localFactorX;
 		delete[] localFactorY;
 		delete[] localFactorZ;
+
+		delete[] rightMeanElevel;
 
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -5653,6 +5658,8 @@ void Simulation::createArrays() {
 	localFactorX = new Complex[2*(xnumberAdded+1)];
 	localFactorY = new Complex[ynumberAdded+1];
 	localFactorZ = new Complex[znumberAdded+1];
+
+	rightMeanElevel = new Vector3d[xnumberAdded + 1];
 
 	if (rank == 0) printf("creating arrays for particlesInBins\n");
 	if (rank == 0) fflush(stdout);

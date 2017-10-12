@@ -1996,9 +1996,9 @@ void outputGeneral(const char* outFileName, Simulation* simulation) {
 	        simulation->currentIteration, simulation->time, simulation->time * simulation->plasma_period, simulation->particleEnergy,
 	        simulation->electricFieldEnergy, simulation->magneticFieldEnergy, simulation->energy, simulation->globalMomentum.x, simulation->globalMomentum.y, simulation->globalMomentum.z, simulation->generalTheoreticalEnergy, simulation->generalTheoreticalMomentum.x, simulation->generalTheoreticalMomentum.y,
 	        simulation->generalTheoreticalMomentum.z, simulation->maxEfield.norm() / fieldFactor, simulation->maxBfield.norm() / fieldFactor, simulation->deltaT, particlesCount, simulation->shockWaveX, simulation->meanSquaredEfield[0] / fieldFactor, simulation->meanSquaredEfield[1] / fieldFactor, simulation->meanSquaredEfield[2] / fieldFactor);
-	fprintf(outFile, "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d %15.10g\n",
+	fprintf(outFile, "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d %15.10g %d %15.10g\n",
 		simulation->electricFieldEnergyX, simulation->electricFieldEnergyY, simulation->electricFieldEnergyZ, simulation->magneticFieldEnergyX, simulation->magneticFieldEnergyY, simulation->magneticFieldEnergyZ,
-		simulation->electromagneticMomentum.x, simulation->electromagneticMomentum.y, simulation->electromagneticMomentum.z, simulation->particleMomentum.x, simulation->particleMomentum.y, simulation->particleMomentum.z, simulation->derExPoint, simulation->derExPoint*simulation->deltaX*simulation->scaleFactor);
+		simulation->electromagneticMomentum.x, simulation->electromagneticMomentum.y, simulation->electromagneticMomentum.z, simulation->particleMomentum.x, simulation->particleMomentum.y, simulation->particleMomentum.z, simulation->derExPoint, simulation->derExPoint*simulation->deltaX*simulation->scaleFactor, simulation->constMeanElevelPoint, simulation->constMeanElevelPoint*simulation->deltaX*simulation->scaleFactor);
 	fclose(outFile);
 }
 

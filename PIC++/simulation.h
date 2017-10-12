@@ -615,6 +615,8 @@ public:
 	Vector3d** leftElevel;
 	Vector3d** rightElevel;
 
+	Vector3d* rightMeanElevel;
+
 	int constMeanElevelPoint;
 
 	Matrix3d Kronecker;
@@ -927,6 +929,8 @@ public:
 
 	void filterFields(int cutWaveNumber);
 	void filterFieldGeneral(Vector3d*** field, int cutWaveNumber);
+	void filterFieldGeneralRight(Vector3d*** field, int cutWaveNumber, int startIndex);
+	void filterFieldGeneralRightMirror(Vector3d*** field, int cutWaveNumber, int startIndex);
 
 	void filterFieldsLocal(int cutWaveNumber);
 	void filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber);
@@ -934,6 +938,8 @@ public:
 	void updateMaxEderivativePoint();
 	void updateBoundaryLevelX();
 	void substractStep(Vector3d*** field, Vector3d** left, Vector3d** right, int sign);
+	void updateMeanLevel(Vector3d*** field);
+	void updateLastMeanLevelPoint(double relativeError, int minValue);
 
 	Vector3d averageFieldXY(Vector3d*** field, int i);
 	Vector3d averageFieldXZ(Vector3d*** field, int i);

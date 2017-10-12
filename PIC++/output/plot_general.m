@@ -154,3 +154,10 @@ title ('der Ex point');
 xlabel ('{{t \omega_p}/{2\pi}}');
 ylabel ('x cm');
 grid ;
+
+figure(15);
+plot (general(1:N2,3)*omega_plasma, general(1:N2,38), 'red');
+title ('const mean level point');
+xlabel ('{{t \omega_p}/{2\pi}}');
+ylabel ('x cm');
+grid ;
