@@ -57,6 +57,7 @@ end;
 %ynumber = 1;
 %znumber = 1;
 for i = 1:Nx-1,
+    
    %middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2))*omegaElectron/cv;
    middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2));
    Bx(i, 1) = Bfield(((Nz-1)*(Ny-1)*(i-1) + (Nz-1)*(ynumber-1) + znumber) + a*NB, 1);
