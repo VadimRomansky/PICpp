@@ -506,7 +506,7 @@ void Simulation::output() {
 		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral/2);
 		if(verbosity > 2) printf("y local index = %d\n", yindex);
 		if(verbosity > 2) printf("x local index = %d\n", xindex);
-		outputFieldsLineZ((outputDir + "EfieldX.dat").c_str(), (outputDir + "BfieldX.dat").c_str(), Efield, Bfield, xnumberAdded,
+		outputFieldsLineZ((outputDir + "EfieldZ.dat").c_str(), (outputDir + "BfieldZ.dat").c_str(), Efield, Bfield, xnumberAdded,
 	             ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommYZ, cartCommZ, cartCoord, cartDim, xindex, yindex);
 	}
 
