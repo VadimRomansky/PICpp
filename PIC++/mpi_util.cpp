@@ -13,7 +13,7 @@
 
 void sendInput(Simulation& simulation, int nprocs) {
 	int integerData[15];
-	double doubleData[24];
+	double doubleData[26];
 
 	if (simulation.rank == 0) {
 		integerData[0] = simulation.xnumberGeneral;
@@ -64,13 +64,15 @@ void sendInput(Simulation& simulation, int nprocs) {
 		doubleData[19] = simulation.B0.y;
 		doubleData[20] = simulation.B0.z;
 		doubleData[21] = simulation.maxTime;
-		doubleData[22] = simulation.plasma_period;
-		doubleData[23] = simulation.scaleFactor;
+		doubleData[22] = simulation.preferedDeltaT;
+		doubleData[23] = simulation.electronMassInput;
+		doubleData[24] = simulation.plasma_period;
+		doubleData[25] = simulation.scaleFactor;
 
 		for (int i = 1; i < nprocs; ++i) {
 			// printf("sending input to %d\n", i);
 			MPI_Send(integerData, 15, MPI_INT, i, MPI_INPUT_INTEGER_TAG, simulation.cartComm);
-			MPI_Send(doubleData, 24, MPI_DOUBLE, i, MPI_INPUT_DOUBLE_TAG, simulation.cartComm);
+			MPI_Send(doubleData, 26, MPI_DOUBLE, i, MPI_INPUT_DOUBLE_TAG, simulation.cartComm);
 		}
 	} else {
 		printf("send input only with 0 rank!\n");
@@ -81,7 +83,7 @@ void sendInput(Simulation& simulation, int nprocs) {
 
 Simulation recieveInput(MPI_Comm cartComm) {
 	int integerData[15];
-	double doubleData[24];
+	double doubleData[26];
 
 	int rank;
 	MPI_Comm_rank(cartComm, &rank);
@@ -92,7 +94,7 @@ Simulation recieveInput(MPI_Comm cartComm) {
 		//printf("receiving\n");
 		MPI_Status status;
 		MPI_Recv(integerData, 15, MPI_INT, 0, MPI_INPUT_INTEGER_TAG, cartComm, &status);
-		MPI_Recv(doubleData, 24, MPI_DOUBLE, 0, MPI_INPUT_DOUBLE_TAG, cartComm, &status);
+		MPI_Recv(doubleData, 26, MPI_DOUBLE, 0, MPI_INPUT_DOUBLE_TAG, cartComm, &status);
 
 		int* particlesPerBin = new int[8];
 		double* concentrations = new double[8];
@@ -148,11 +150,13 @@ Simulation recieveInput(MPI_Comm cartComm) {
 		double B0y = doubleData[19];
 		double B0z = doubleData[20];
 		double maxTime = doubleData[21];
-		double plasmaPeriod = doubleData[22];
-		double scaleFactor = doubleData[23];
+		double preferedDeltaT =doubleData[22];
+		double electronMassInput = doubleData[23];
+		double plasmaPeriod = doubleData[24];
+		double scaleFactor = doubleData[25];
 		return Simulation(xnumber, ynumber, znumber, xsize, ysize, zsize, temperature, V0x, V0y, V0z, E0x, E0y, E0z,
 		                  B0x, B0y, B0z, maxIteration, maxTime, 8, particlesPerBin, concentrations, inputType, nprocs,
-		                  verbosity, plasmaPeriod, scaleFactor, solverTypev, cartComm);
+		                  verbosity, preferedDeltaT, electronMassInput, plasmaPeriod, scaleFactor, solverTypev, cartComm);
 	}
 	printf("recieve input only with not 0 rank!\n");
 	MPI_Finalize();

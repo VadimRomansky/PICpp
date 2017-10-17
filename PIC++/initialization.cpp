@@ -162,7 +162,7 @@ void Simulation::setSpaceForProc() {
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                        double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                        int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
-                       double* concentrationsV, int inType, int nprocsV, int verbosityV, MPI_Comm& comm) {
+                       double* concentrationsV, int inType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, MPI_Comm& comm) {
 	nprocs = nprocsV;
 	cartComm = comm;
 	int periods[MPI_dim];
@@ -292,10 +292,14 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	B0 = Vector3d(Bx, By, Bz);
 	E0 = Vector3d(Ex, Ey, Ez);
 
+	electronMassInput = massElectronInputV;
+	preferedDeltaT =preferedTimeStepV;
+
 
 	if (inputType == CGS) {
 		massProton = massProtonReal;
-		massElectron = massElectronFactor * massElectronReal;
+		//massElectron = massElectronFactor * massElectronReal;
+		massElectron = electronMassInput;
 		massAlpha = massAlphaReal;
 		massDeuterium = massDeuteriumReal;
 		massHelium3 = massHelium3Real;
@@ -418,7 +422,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                        double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                        int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
-                       double* concentrationsV, int inType, int nprocsV, int verbosityV, double plasmaPeriodV,
+                       double* concentrationsV, int inType, int nprocsV , int verbosityV, double preferedTimeStepV, double massElectronInputV, double plasmaPeriodV,
                        double scaleFactorV, SolverType solverTypev, MPI_Comm& comm) {
 	nprocs = nprocsV;
 	cartComm = comm;
@@ -544,10 +548,13 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 
 	B0 = Vector3d(Bx, By, Bz);
 	E0 = Vector3d(Ex, Ey, Ez);
+	electronMassInput = massElectronInputV;
+	preferedDeltaT =preferedTimeStepV;
 
 	if (inputType == CGS) {
 		massProton = massProtonReal;
-		massElectron = massElectronFactor * massElectronReal;
+		//massElectron = massElectronFactor * massElectronReal;
+		massElectron = electronMassInput;
 		massAlpha = massAlphaReal;
 		massDeuterium = massDeuteriumReal;
 		massHelium3 = massHelium3Real;
