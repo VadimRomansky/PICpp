@@ -276,9 +276,10 @@ void Simulation::simulate() {
 			}
 		}
 
+		updateMaxEderivativePoint();
 		if(currentIteration%filteringParameter == 0){
 			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
-				updateMaxEderivativePoint();
+				//updateMaxEderivativePoint();
 			}
 			//if(currentIteration > 150){
 			//filterFields(5);
@@ -722,9 +723,11 @@ void Simulation::updateDeltaT() {
 	}
 	if ((rank == 0) && (verbosity > 0)) printf("updating time step\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("updating time step\n");
+	deltaT = preferedDeltaT/plasma_period;
+
 	double delta = min2(deltaX, min2(deltaY, deltaZ));
 	//double delta = deltaX;
-	deltaT = timeEpsilonKourant * delta / speed_of_light_normalized;
+	deltaT = min2(deltaT, timeEpsilonKourant * delta / speed_of_light_normalized);
 	if ((rank == 0) && (verbosity > 1)) printLog("dx/c\n");
 	if (particles.size() > 0) {
 		double derEmax = 0;

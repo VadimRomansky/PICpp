@@ -39,7 +39,7 @@ void Simulation::filterFields(int cutWaveNumber){
 	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 		updateMaxEderivativePoint();
 		updateMeanLevel(newEfield);
-		updateLastMeanLevelPoint(1E-5, derExPoint + frontHalfWidth);
+		updateLastMeanLevelPoint(1E-3, derExPoint + frontHalfWidth);
 		//updateBoundaryLevelX();
 		//substractStep(newEfield, leftElevel, rightElevel, 1);
 	}
@@ -50,7 +50,7 @@ void Simulation::filterFields(int cutWaveNumber){
 	} else {
 		//if(derExPoint < xnumberGeneral - 2*frontHalfWidth){
 		if(constMeanElevelPoint < xnumberGeneral - 2*frontHalfWidth){
-			//filterFieldGeneralRightMirror(newEfield, cutWaveNumber, derExPoint + frontHalfWidth);
+			//filterFieldGeneralRightMirror(newEfield, cutWaveNumber, 0);
 			filterFieldGeneralRight(newEfield, cutWaveNumber, constMeanElevelPoint);
 			//filterFieldGeneralRight(newEfield, cutWaveNumber, derExPoint + frontHalfWidth);
 		}
@@ -147,7 +147,7 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j){
 			for(int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k){
 				fourierScalarMirrorInput[i][j][k] = Complex(field[i][j][k].x,0);
-				fourierScalarMirrorInput[i + xnumber ][j][k] = Complex(field[xnumberAdded - 1 - additionalBinNumber - i][j][k].x,0);
+				//fourierScalarMirrorInput[i + xnumber ][j][k] = Complex(field[xnumberAdded - 1 - additionalBinNumber - i - 1][j][k].x,0);
 			}
 		}
 	}
@@ -277,9 +277,7 @@ void Simulation::filterFieldGeneralRight(Vector3d*** field, int cutWaveNumber, i
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j){
 			for(int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k){
 				fourierScalarMirrorInput[i][j][k] = Complex(field[i][j][k].x,0);
-				fourierScalarMirrorInput[i + xnumber ][j][k] = Complex(field[xnumberAdded - 1 - additionalBinNumber - i][j][k].x,0);
 				fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
-				fourierScalarMirrorOutput[i + xnumber][j][k] = Complex(0, 0);
 			}
 		}
 	}
@@ -310,7 +308,7 @@ void Simulation::filterFieldGeneralRight(Vector3d*** field, int cutWaveNumber, i
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
 			for(int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k){
-				field[i][j][k].x = fourierScalarInput[i][j][k].re;
+				field[i][j][k].x = fourierScalarMirrorInput[i][j][k].re;
 			}
 		}
 	}
@@ -425,7 +423,7 @@ void Simulation::filterFieldGeneralRightMirror(Vector3d*** field, int cutWaveNum
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j){
 			for(int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k){
 				fourierScalarMirrorInput[i][j][k] = Complex(field[i][j][k].x,0);
-				fourierScalarMirrorInput[i + xnumber ][j][k] = Complex(field[xnumberAdded - 1 - i][j][k].x,0);
+				fourierScalarMirrorInput[i + xnumber ][j][k] = Complex(field[xnumberAdded - 1 - additionalBinNumber - i + 1][j][k].x,0);
 				fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
 				fourierScalarMirrorOutput[i + xnumber][j][k] = Complex(0, 0);
 			}
@@ -475,7 +473,7 @@ void Simulation::filterFieldGeneralRightMirror(Vector3d*** field, int cutWaveNum
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j){
 			for(int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k){
 				fourierScalarMirrorInput[i][j][k] = Complex(field[i][j][k].y,0);
-				fourierScalarMirrorInput[i + xnumber ][j][k] = Complex(field[xnumberAdded - 1 - i][j][k].y,0);
+				fourierScalarMirrorInput[i + xnumber ][j][k] = Complex(field[xnumberAdded - 1 - additionalBinNumber - i + 1][j][k].y,0);
 				fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
 				fourierScalarMirrorOutput[i + xnumber][j][k] = Complex(0, 0);
 			}
@@ -525,7 +523,7 @@ void Simulation::filterFieldGeneralRightMirror(Vector3d*** field, int cutWaveNum
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j){
 			for(int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k){
 				fourierScalarMirrorInput[i][j][k] = Complex(field[i][j][k].z,0);
-				fourierScalarMirrorInput[i + xnumber][j][k] = Complex(field[xnumberAdded - 1 - i][j][k].z,0);
+				fourierScalarMirrorInput[i + xnumber ][j][k] = Complex(field[xnumberAdded - 1 - additionalBinNumber - i + 1][j][k].z,0);
 				fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
 				fourierScalarMirrorOutput[i + xnumber][j][k] = Complex(0, 0);
 			}

@@ -441,7 +441,7 @@ Complex fourierTranslationXoneHarmonicRightMirror(Complex*** input, bool direct,
 		}
 	} else if(knumber < 0){
 		if(knumber + startAbsoluteIndex >= xabsoluteIndex[1+additionalBinNumber] && knumber + startAbsoluteIndex < xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber]){
-			sum = input[knumber + startAbsoluteIndex - xabsoluteIndex[0]][j][k];
+			sum = input[knumber + startAbsoluteIndex - xabsoluteIndex[1 + additionalBinNumber]][j][k];
 		}
 	} else {
 		if(knumber + startAbsoluteIndex >= 2*xnumberGeneral - xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber] && knumber + startAbsoluteIndex < 2*xnumberGeneral - xabsoluteIndex[1+additionalBinNumber]){

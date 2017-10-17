@@ -42,8 +42,8 @@ omegaElectron = initialParameters(20);
 
 
 for i=1:Nx,
-   Xgrid(i) = (Xfile(i) - Xfile(2))*omegaElectron/cv;
-   %Xgrid(i) = (Xfile(i) - Xfile(2));
+   %Xgrid(i) = (Xfile(i) - Xfile(2))*omegaElectron/cv;
+   Xgrid(i) = (Xfile(i) - Xfile(2));
    Ex(i,1) = Efield((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + a*NE, 1);
    Ex(i,2) = Efield((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + b*NE, 1);
    Ex(i,3) = Efield((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + c*NE, 1);
@@ -57,8 +57,9 @@ end;
 %ynumber = 1;
 %znumber = 1;
 for i = 1:Nx-1,
-   middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2))*omegaElectron/cv;
-   %middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2));
+    
+   %middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2))*omegaElectron/cv;
+   middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2));
    Bx(i, 1) = Bfield(((Nz-1)*(Ny-1)*(i-1) + (Nz-1)*(ynumber-1) + znumber) + a*NB, 1);
    Bx(i, 2) = Bfield(((Nz-1)*(Ny-1)*(i-1) + (Nz-1)*(ynumber-1) + znumber) + b*NB, 1);
    Bx(i, 3) = Bfield(((Nz-1)*(Ny-1)*(i-1) + (Nz-1)*(ynumber-1) + znumber) + c*NB, 1);

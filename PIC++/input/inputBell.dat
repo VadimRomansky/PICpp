@@ -8,6 +8,8 @@
 40001             max iterations
 0.1                   max time
 0                  log verbocity level
+1                  prefered time step
+0.910938291E-25    electron mass
 8                  particle types number
 1 50                electrons concentration and particles per bin
 1 50                protons concentration and particles per bin

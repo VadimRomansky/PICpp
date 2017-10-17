@@ -26,6 +26,7 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 	int xnumber;
 	fscanf(inputFile, "%d", &xnumber);
 
+	printf("scan xnumber = %d\n", xnumber);
 	if (xnumber < 0) {
 		printf("xnumber must be > 0\n");
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
@@ -211,6 +212,40 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 		fscanf(inputFile, "%c", &ch);
 	}
 
+	double preferedTimeStep;
+	fscanf(inputFile, "%lf", &preferedTimeStep);
+
+	if (verbocity < 0) {
+		printf("verbocity must be > 0\n");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "verbocity mast be > 0\n");
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+
+	ch = ' ';
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
+	double massElectronInput;
+	fscanf(inputFile, "%lf", &massElectronInput);
+
+	if (verbocity < 0) {
+		printf("verbocity must be > 0\n");
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "verbocity mast be > 0\n");
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+
+	ch = ' ';
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
 	int typesNumber;
 	fscanf(inputFile, "%d", &typesNumber);
 
@@ -257,8 +292,10 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 	int nprocs;
 	MPI_Comm_size(comm, &nprocs);
 
+
+	printf("finish read input\n");
 	return Simulation(xnumber, ynumber, znumber, xsize, ysize, zsize, temperature, Vx, Vy, Vz, Ex, Ey, Ez, Bx, By, Bz,
-                      maxIterations, maxTime, typesNumber, particlesPerBin, concentrations, inputType, nprocs, verbocity, comm);
+                      maxIterations, maxTime, typesNumber, particlesPerBin, concentrations, inputType, nprocs, verbocity, preferedTimeStep, massElectronInput, comm);
 }
 
 Simulation readBackup(const char* generalFileName, const char* EfileName, const char* BfileName, const char* particlesFileName, MPI_Comm& comm) {
