@@ -693,7 +693,7 @@ void Simulation::updateDeltaT() {
 	}
 	if ((rank == 0) && (verbosity > 0)) printf("updating time step\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("updating time step\n");
-	double deltaT = preferedDeltaT/plasma_period;
+	deltaT = preferedDeltaT/plasma_period;
 
 	double delta = min2(deltaX, min2(deltaY, deltaZ));
 	//double delta = deltaX;
