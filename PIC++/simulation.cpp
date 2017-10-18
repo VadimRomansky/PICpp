@@ -479,6 +479,36 @@ void Simulation::output() {
 		outputFieldsCrossectionXY((outputDir + "EfieldXY.dat").c_str(), (outputDir + "BfieldXY.dat").c_str(), Efield, Bfield, xnumberAdded,
 	             ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommXY, cartCommY, cartCoord, cartDim, zindex);
 	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output line fields x\n");
+	if(coordY == cartCoord[1] && coordZ == cartCoord[2]){
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral/2);
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral/2);
+		if(verbosity > 2) printf("y local index = %d\n", yindex);
+		if(verbosity > 2) printf("z local index = %d\n", zindex);
+		outputFieldsLineX((outputDir + "EfieldX.dat").c_str(), (outputDir + "BfieldX.dat").c_str(), Efield, Bfield, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommYZ, cartCommZ, cartCoord, cartDim, yindex, zindex);
+	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output line fields y\n");
+	if(coordX == cartCoord[0] && coordZ == cartCoord[2]){
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral/2);
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral/2);
+		if(verbosity > 2) printf("x local index = %d\n", xindex);
+		if(verbosity > 2) printf("z local index = %d\n", zindex);
+		outputFieldsLineY((outputDir + "EfieldY.dat").c_str(), (outputDir + "BfieldY.dat").c_str(), Efield, Bfield, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommYZ, cartCommZ, cartCoord, cartDim, xindex, zindex);
+	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output line fields z\n");
+	if(coordY == cartCoord[1] && coordX == cartCoord[0]){
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral/2);
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral/2);
+		if(verbosity > 2) printf("y local index = %d\n", yindex);
+		if(verbosity > 2) printf("x local index = %d\n", xindex);
+		outputFieldsLineZ((outputDir + "EfieldZ.dat").c_str(), (outputDir + "BfieldZ.dat").c_str(), Efield, Bfield, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommYZ, cartCommZ, cartCoord, cartDim, xindex, yindex);
+	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing grid\n");
 	outputGridX((outputDir + "Xfile.dat").c_str(), xgrid, xnumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim, scaleFactor);

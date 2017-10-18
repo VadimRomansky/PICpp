@@ -6779,6 +6779,12 @@ void Simulation::createFiles() {
 		fclose(EfieldFile);
 		EfieldFile = fopen((outputDir + "EfieldXZ.dat").c_str(), "w");
 		fclose(EfieldFile);
+		EfieldFile = fopen((outputDir + "EfieldX.dat").c_str(), "w");
+		fclose(EfieldFile);
+		EfieldFile = fopen((outputDir + "EfieldY.dat").c_str(), "w");
+		fclose(EfieldFile);
+		EfieldFile = fopen((outputDir + "EfieldZ.dat").c_str(), "w");
+		fclose(EfieldFile);
 		EfieldFile = fopen((reducedOutputDir + "EfieldReduced.dat").c_str(), "w");
 		fclose(EfieldFile);
 		BfieldFile = fopen((outputDir + "Bfield.dat").c_str(), "w");
@@ -6788,6 +6794,12 @@ void Simulation::createFiles() {
 		BfieldFile = fopen((outputDir + "BfieldYZ.dat").c_str(), "w");
 		fclose(BfieldFile);
 		BfieldFile = fopen((outputDir + "BfieldXZ.dat").c_str(), "w");
+		fclose(BfieldFile);
+		BfieldFile = fopen((outputDir + "BfieldX.dat").c_str(), "w");
+		fclose(BfieldFile);
+		BfieldFile = fopen((outputDir + "BfieldY.dat").c_str(), "w");
+		fclose(BfieldFile);
+		BfieldFile = fopen((outputDir + "BfieldZ.dat").c_str(), "w");
 		fclose(BfieldFile);
 		BfieldFile = fopen((reducedOutputDir + "BfieldReduced.dat").c_str(), "w");
 		fclose(BfieldFile);

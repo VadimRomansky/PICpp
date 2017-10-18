@@ -1113,6 +1113,148 @@ void outputFieldsCrossectionXZ(const char* outEfileName, const char* outBfileNam
 	}
 }
 
+void outputFieldsLineX(const char* outEfileName, const char* outBfileName, Vector3d*** Efield, Vector3d*** Bfield, int xnumberAdded,
+                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int yindex, int zindex) {
+	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
+	FILE* outFile;
+	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
+		int minI = 3 + 2 * additionalBinNumber;
+		if (cartCoord[0] == 0) {
+			minI = 0;
+		}
+		int maxI = xnumberAdded;
+		if (cartCoord[0] == cartDim[0] - 1) {
+			maxI = xnumberAdded;
+		}
+		MPI_Barrier(cartComm);
+		if (cartCoord[0] == cartI) {	
+			outFile = fopen(outEfileName, "a");			
+			for (int i = minI; i <= maxI; ++i) {
+				fprintf(outFile, "%30.20g %30.20g %30.20g\n", scale * Efield[i][yindex][zindex].x,
+								scale * Efield[i][yindex][zindex].y, scale * Efield[i][yindex][zindex].z);
+			}
+			fclose(outFile);			
+		}
+	}
+
+	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
+		int minI = 2 + 2 * additionalBinNumber;
+		if (cartCoord[0] == 0) {
+			minI = 0;
+		}
+		int maxI = xnumberAdded - 1;
+		if (cartCoord[0] == cartDim[0] - 1) {
+			maxI = xnumberAdded - 1;
+		}
+		MPI_Barrier(cartComm);
+		if (cartCoord[0] == cartI) {
+			outFile = fopen(outBfileName, "a");
+			for (int i = minI; i <= maxI; ++i) {																							
+				fprintf(outFile, "%30.20g %30.20g %30.20g\n", scale * Bfield[i][yindex][zindex].x,
+								scale * Bfield[i][yindex][zindex].y, scale * Bfield[i][yindex][zindex].z);
+			}
+			fclose(outFile);	
+		}
+	}
+}
+
+void outputFieldsLineY(const char* outEfileName, const char* outBfileName, Vector3d*** Efield, Vector3d*** Bfield, int xnumberAdded,
+                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, int zindex){
+	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
+	FILE* outFile;
+	for (int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
+		int minJ = 3 + 2 * additionalBinNumber;
+		if (cartCoord[1] == 0) {
+			minJ = 0;
+		}
+		int maxJ = ynumberAdded;
+		if (cartCoord[1] == cartDim[1] - 1) {
+			maxJ = ynumberAdded;
+		}
+		MPI_Barrier(cartComm);
+		if (cartJ == cartCoord[1]) {
+			outFile = fopen(outEfileName, "a");					
+			for (int j = minJ; j <= maxJ; ++j) {
+				fprintf(outFile, "%30.20g %30.20g %30.20g\n", scale * Efield[xindex][j][zindex].x,
+								scale * Efield[xindex][j][zindex].y, scale * Efield[xindex][j][zindex].z);
+			}
+			fclose(outFile);
+						
+		}
+	}
+
+
+	for (int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
+		int minJ = 2 + 2 * additionalBinNumber;
+		if (cartCoord[1] == 0) {
+			minJ = 0;
+		}
+		int maxJ = ynumberAdded - 1;
+		if (cartCoord[1] == cartDim[1] - 1) {
+			maxJ = ynumberAdded - 1;
+		}
+		MPI_Barrier(cartComm);
+		if (cartJ == cartCoord[1]) {
+			outFile = fopen(outBfileName, "a");					
+			for (int j = minJ; j <= maxJ; ++j) {
+				fprintf(outFile, "%30.20g %30.20g %30.20g\n", scale * Bfield[xindex][j][zindex].x,
+								scale * Bfield[xindex][j][zindex].y, scale * Bfield[xindex][j][zindex].z);
+			}
+			fclose(outFile);
+		}
+	}
+}
+
+void outputFieldsLineZ(const char* outEfileName, const char* outBfileName, Vector3d*** Efield, Vector3d*** Bfield, int xnumberAdded,
+                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, int yindex){
+	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
+	FILE* outFile;
+
+	for (int cartK = 0; cartK < cartDim[2]; ++cartK) {
+		int minK = 3 + 2 * additionalBinNumber;
+		if (cartCoord[2] == 0) {
+			minK = 0;
+		}
+		int maxK = znumberAdded;
+		if (cartCoord[2] == cartDim[2] - 1) {
+			maxK = znumberAdded;
+		}
+		MPI_Barrier(subCommY);
+		if (cartK == cartCoord[2]) {
+			outFile = fopen(outEfileName, "a");
+			for (int k = minK; k <= maxK; ++k) {
+				fprintf(outFile, "%30.20g %30.20g %30.20g\n", scale * Efield[xindex][yindex][k].x,
+										   scale * Efield[xindex][yindex][k].y, scale * Efield[xindex][yindex][k].z);
+			}
+			fclose(outFile);
+					
+		}
+	}
+
+
+
+	for (int cartK = 0; cartK < cartDim[2]; ++cartK) {
+		int minK = 2 + 2 * additionalBinNumber;
+		if (cartCoord[2] == 0) {
+			minK = 0;
+		}
+		int maxK = znumberAdded - 1;
+		if (cartCoord[2] == cartDim[2] - 1) {
+			maxK = znumberAdded - 1;
+		}
+		MPI_Barrier(subCommY);
+		if (cartK == cartCoord[2]) {
+			outFile = fopen(outBfileName, "a");
+			for (int k = minK; k <= maxK; ++k) {
+				fprintf(outFile, "%30.20g %30.20g %30.20g\n", scale * Bfield[xindex][yindex][k].x,
+										   scale * Bfield[xindex][yindex][k].y, scale * Bfield[xindex][yindex][k].z);
+			}
+			fclose(outFile);
+		}
+	}
+
+}
+
 void outputFields(const char* outEfileName, const char* outBfileName, Vector3d*** Efield, Vector3d*** Bfield, int xnumberAdded,
                   int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
@@ -2493,8 +2635,8 @@ void outputGeneralInitialParameters(const char* outFileName, const char* outFile
 		fprintf(outFileWithText, "35 critical theta in upstream system = %g\n", thetaCriticalUpstreamSystem);
 		fprintf(outFile, "%g\n", thetaCriticalUpstreamSystem);
 
-		fprintf(outFileWithText, "36 electron simulation mass = %g\n", simulation->massElectron);
-		fprintf(outFile, "%g\n", simulation->massElectron);
+		fprintf(outFileWithText, "36 electron simulation mass = %g\n", massElectronReal*massElectronFactor);
+		fprintf(outFile, "%g\n", massElectronReal*massElectronFactor);
 
 		fclose(outFile);
 		fclose(outFileWithText);
