@@ -1521,8 +1521,10 @@ void Simulation::rescaleConstantsToTheoretical() {
 void Simulation::initialize() {
 	if (rank == 0) printf("initialization\n");
 	fflush(stdout);
-	if (rank == 0) printLog("initialization\n");
+	//if (rank == 0) printLog("initialization\n");
 
+
+	if(verbosity > 2) printf("creating sub cart rank = %d\n", rank);
 	int dimsYZ[3];
 	dimsYZ[0] = 0;
 	dimsYZ[1] = 1;
@@ -1553,6 +1555,7 @@ void Simulation::initialize() {
 	dimsX[1] = 0;
 	dimsX[2] = 0;
 	MPI_Cart_sub(cartComm, dimsX, &cartCommX);
+	if(verbosity > 2) printf("finish creating sub cart rank = %d\n", rank);
 
 	bool readTrackedParticles = false;
 
@@ -1613,6 +1616,8 @@ void Simulation::initialize() {
 		}
 	}
 
+	if(verbosity > 2) printf("initialize grid rank = %d\n", rank);
+
 	xgrid[0] = leftX;
 
 	for (int i = 1; i <= xnumberAdded; ++i) {
@@ -1649,6 +1654,7 @@ void Simulation::initialize() {
 		middleZgrid[k] = (zgrid[k] + zgrid[k + 1]) / 2;
 	}
 
+	if(verbosity > 2) printf("initialize fields rank = %d\n", rank);
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -1673,6 +1679,8 @@ void Simulation::initialize() {
 			}
 		}
 	}
+
+	if(verbosity > 2) printf("creating particle types rank = %d\n", rank);
 
 	createParticleTypes(concentrations, particlesPerBin);
 
@@ -1723,6 +1731,9 @@ void Simulation::initialize() {
 	omegaGyroProton = electron_charge * B0.norm() / (massProton * speed_of_light);
 	omegaGyroProton = electron_charge * B0.norm() / (massElectron * speed_of_light);
 
+	if (rank == 0) printf("finish initialization\n");
+	fflush(stdout);
+	if (rank == 0) printLog("finish initialization\n");
 }
 
 void Simulation::initializeSimpleElectroMagneticWave() {
@@ -6581,6 +6592,7 @@ void Simulation::createArrays() {
 
 	arrayCreated = true;
 
+	MPI_Barrier(MPI_COMM_WORLD);
 	if (rank == 0) printf("finish creating arrays\n");
 	fflush(stdout);
 	// if(rank == 0) printLog("finish creating arrays\n");
