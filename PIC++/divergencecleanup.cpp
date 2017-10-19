@@ -24,15 +24,15 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 	if ((rank == 0) && (verbosity > 0)) printf("cleaning up divergence\n");
 	fflush(stdout);
 
-	/*if (ynumberGeneral == 1 && znumberGeneral == 1) {
-		cleanupDivergence1d();
+	if (ynumberGeneral == 1 && znumberGeneral == 1) {
+		cleanupDivergence1d(field, density);
 		MPI_Barrier(cartComm);
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
 			printf("cleaning divergence time = %g sec\n", procTime / CLOCKS_PER_SEC);
 		}
 		return;
-	}*/
+	}
 
 	//substractMeanChargeDensity();
 	//return;

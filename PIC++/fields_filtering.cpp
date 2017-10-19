@@ -51,8 +51,8 @@ void Simulation::filterFields(int cutWaveNumber){
 		//if(derExPoint < xnumberGeneral - 2*frontHalfWidth){
 		if(constMeanElevelPoint < xnumberGeneral - 2*frontHalfWidth){
 			//filterFieldGeneralRightMirror(newEfield, cutWaveNumber, 0);
-			filterFieldGeneralRight(newEfield, cutWaveNumber, constMeanElevelPoint);
-			//filterFieldGeneralRight(newEfield, cutWaveNumber, derExPoint + frontHalfWidth);
+			//filterFieldGeneralRight(newEfield, cutWaveNumber, constMeanElevelPoint);
+			filterFieldGeneralRight(newEfield, cutWaveNumber, derExPoint + frontHalfWidth);
 		}
 	}
 

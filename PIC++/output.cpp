@@ -2635,8 +2635,8 @@ void outputGeneralInitialParameters(const char* outFileName, const char* outFile
 		fprintf(outFileWithText, "35 critical theta in upstream system = %g\n", thetaCriticalUpstreamSystem);
 		fprintf(outFile, "%g\n", thetaCriticalUpstreamSystem);
 
-		fprintf(outFileWithText, "36 electron simulation mass = %g\n", massElectronReal*massElectronFactor);
-		fprintf(outFile, "%g\n", massElectronReal*massElectronFactor);
+		fprintf(outFileWithText, "36 electron simulation mass = %g\n", simulation->massElectron);
+		fprintf(outFile, "%g\n", simulation->massElectron);
 
 		fclose(outFile);
 		fclose(outFileWithText);
