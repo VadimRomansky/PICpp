@@ -39,11 +39,11 @@ void outputFieldsCrossectionYZ(const char *outEfileName, const char *outBfileNam
                   int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_priod, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex);
 
 void outputFieldsLineX(const char* outEfileName, const char* outBfileName, Vector3d*** Efield, Vector3d*** Bfield, int xnumberAdded,
-                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int yindex, int zindex);
+                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& subCommX, int* cartCoord, int* cartDim, int yindex, int zindex);
 void outputFieldsLineY(const char* outEfileName, const char* outBfileName, Vector3d*** Efield, Vector3d*** Bfield, int xnumberAdded,
-                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, int zindex);
+                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, int zindex);
 void outputFieldsLineZ(const char* outEfileName, const char* outBfileName, Vector3d*** Efield, Vector3d*** Bfield, int xnumberAdded,
-                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, int yindex);
+                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& subCommZ, int* cartCoord, int* cartDim, int xindex, int yindex);
 /*void outputFieldsReduced(const char *outEfileName, const char *outBfileName, Vector3d ***Efield, Vector3d ***Bfield, int xnumberAdded,
                          int ynumberAdded, int znumberAdded, int additionalBinNumber, int stepX, int stepY, int stepZ, double plasma_priod, double gyroradius);*/
 void outputConcentrations(const char *outFileName, double ****particleConcentrations, double ***chargeDensity,

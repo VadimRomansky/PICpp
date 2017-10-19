@@ -1114,7 +1114,7 @@ void outputFieldsCrossectionXZ(const char* outEfileName, const char* outBfileNam
 }
 
 void outputFieldsLineX(const char* outEfileName, const char* outBfileName, Vector3d*** Efield, Vector3d*** Bfield, int xnumberAdded,
-                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int yindex, int zindex) {
+                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& subCommX, int* cartCoord, int* cartDim, int yindex, int zindex) {
 	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
 	FILE* outFile;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
@@ -1126,7 +1126,7 @@ void outputFieldsLineX(const char* outEfileName, const char* outBfileName, Vecto
 		if (cartCoord[0] == cartDim[0] - 1) {
 			maxI = xnumberAdded;
 		}
-		MPI_Barrier(cartComm);
+		MPI_Barrier(subCommX);
 		if (cartCoord[0] == cartI) {	
 			outFile = fopen(outEfileName, "a");			
 			for (int i = minI; i <= maxI; ++i) {
@@ -1146,7 +1146,7 @@ void outputFieldsLineX(const char* outEfileName, const char* outBfileName, Vecto
 		if (cartCoord[0] == cartDim[0] - 1) {
 			maxI = xnumberAdded - 1;
 		}
-		MPI_Barrier(cartComm);
+		MPI_Barrier(subCommX);
 		if (cartCoord[0] == cartI) {
 			outFile = fopen(outBfileName, "a");
 			for (int i = minI; i <= maxI; ++i) {																							
@@ -1159,7 +1159,7 @@ void outputFieldsLineX(const char* outEfileName, const char* outBfileName, Vecto
 }
 
 void outputFieldsLineY(const char* outEfileName, const char* outBfileName, Vector3d*** Efield, Vector3d*** Bfield, int xnumberAdded,
-                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, int zindex){
+                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, int zindex){
 	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
 	FILE* outFile;
 	for (int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
@@ -1171,7 +1171,7 @@ void outputFieldsLineY(const char* outEfileName, const char* outBfileName, Vecto
 		if (cartCoord[1] == cartDim[1] - 1) {
 			maxJ = ynumberAdded;
 		}
-		MPI_Barrier(cartComm);
+		MPI_Barrier(subCommY);
 		if (cartJ == cartCoord[1]) {
 			outFile = fopen(outEfileName, "a");					
 			for (int j = minJ; j <= maxJ; ++j) {
@@ -1193,7 +1193,7 @@ void outputFieldsLineY(const char* outEfileName, const char* outBfileName, Vecto
 		if (cartCoord[1] == cartDim[1] - 1) {
 			maxJ = ynumberAdded - 1;
 		}
-		MPI_Barrier(cartComm);
+		MPI_Barrier(subCommY);
 		if (cartJ == cartCoord[1]) {
 			outFile = fopen(outBfileName, "a");					
 			for (int j = minJ; j <= maxJ; ++j) {
@@ -1206,7 +1206,7 @@ void outputFieldsLineY(const char* outEfileName, const char* outBfileName, Vecto
 }
 
 void outputFieldsLineZ(const char* outEfileName, const char* outBfileName, Vector3d*** Efield, Vector3d*** Bfield, int xnumberAdded,
-                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, int yindex){
+                  int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period, double gyroradius, MPI_Comm& subCommZ, int* cartCoord, int* cartDim, int xindex, int yindex){
 	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
 	FILE* outFile;
 
@@ -1219,7 +1219,7 @@ void outputFieldsLineZ(const char* outEfileName, const char* outBfileName, Vecto
 		if (cartCoord[2] == cartDim[2] - 1) {
 			maxK = znumberAdded;
 		}
-		MPI_Barrier(subCommY);
+		MPI_Barrier(subCommZ);
 		if (cartK == cartCoord[2]) {
 			outFile = fopen(outEfileName, "a");
 			for (int k = minK; k <= maxK; ++k) {
@@ -1242,7 +1242,7 @@ void outputFieldsLineZ(const char* outEfileName, const char* outBfileName, Vecto
 		if (cartCoord[2] == cartDim[2] - 1) {
 			maxK = znumberAdded - 1;
 		}
-		MPI_Barrier(subCommY);
+		MPI_Barrier(subCommZ);
 		if (cartK == cartCoord[2]) {
 			outFile = fopen(outBfileName, "a");
 			for (int k = minK; k <= maxK; ++k) {

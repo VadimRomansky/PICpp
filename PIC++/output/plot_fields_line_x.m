@@ -30,6 +30,7 @@ Ez(1:Nx, 1:3) = 0;
 Bx(1:Nx-1, 1:3) = 0;
 By(1:Nx-1, 1:3) = 0;
 Bz(1:Nx-1, 1:3) = 0;
+
 Bnorm(1:Nx-1, 1:3) = 0;
 
 B0=initialParameters(19);
