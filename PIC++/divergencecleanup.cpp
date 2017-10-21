@@ -160,7 +160,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 			}
 		}
 		//exchangeLargeVector(divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, 1, additionalBinNumber, boundaryConditionType == PERIODIC, cartComm, cartCoord, cartDim, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer);
-			biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, xnumberGeneral*ynumberGeneral*znumberGeneral, boundaryConditionType == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
+		biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations, boundaryConditionType == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
 			if(!converges){
 				if(rank == 0) printf("conjugate gradients did not converge\n");
 
@@ -586,8 +586,11 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k, Ve
 	divergenceCleanUpRightPart[i][j][k][0] = -cleanUpRightPart(i, j, k, field, density);
 	//divergenceCleanUpRightPart[i][j][k][0] = -cleanUpRightPart(i, j, k)*deltaX2;
 
+	bool _27points = false;
+
 	if ((ynumberGeneral > 1) && (znumberGeneral > 1)) {
-		/*double element = -2/deltaX2 - 2/deltaY2 - 2/deltaZ2;
+		if(! _27points){
+		double element = -2/deltaX2 - 2/deltaY2 - 2/deltaZ2;
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
 
 		element = 1/deltaX2;
@@ -600,8 +603,8 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k, Ve
 
 		element = 1/deltaZ2;
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));*/
-
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
+		} else {
 		double element = -1 / (2 * deltaX2) - 1 / (2 * deltaY2) - 1 / (2 * deltaZ2);
 		//double element = -44/(13*deltaX2);
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
@@ -648,7 +651,20 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k, Ve
 		element = - 1 / (4 * deltaX2) - 1 / (4 * deltaY2) + 1 / (4 * deltaZ2);
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
+		}
 	} else if (ynumberGeneral > 1) {
+		if(!_27points){
+		double element = -2/deltaX2 - 2/deltaY2;
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
+
+		element = 1/deltaX2;
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
+
+		element = 1/deltaY2;
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, k, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, k, 0));
+		} else {
 		double element = -1.0 / (deltaX2) - 1.0 / (deltaY2);
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
 
@@ -665,8 +681,21 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k, Ve
 		element = - 1.0 / (2.0 * deltaX2) + 1.0 / (2.0 * deltaY2);
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, k, 0));
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, k, 0));
+		}
 
 	} else if (znumberGeneral > 1) {
+		if(!_27points){
+		double element = -2/deltaX2 - 2/deltaZ2;
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
+
+		element = 1/deltaX2;
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
+
+		element = 1/deltaZ2;
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
+		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
+		} else {
 		double element = -1 / (deltaX2) - 1 / (deltaZ2);
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
 
@@ -685,6 +714,7 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k, Ve
 		element = - 1 / (2 * deltaX2) + 1 / (2 * deltaZ2);
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
+		}
 	} else {
 		double element = -2 / (deltaX2);
 		//double element = -2;

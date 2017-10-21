@@ -216,6 +216,7 @@
     <ClInclude Include="mpi_util.h" />
     <ClInclude Include="output.h" />
     <ClInclude Include="particle.h" />
+    <ClInclude Include="paths.h" />
     <ClInclude Include="random.h" />
     <ClInclude Include="rightPartEvaluator.h" />
     <ClInclude Include="simulation.h" />

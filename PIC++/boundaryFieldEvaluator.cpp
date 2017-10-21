@@ -3,6 +3,7 @@
 
 //#include "memory_debug.h"
 #include "boundaryFieldEvaluator.h"
+#include "paths.h"
 
 BaseBoundaryFieldEvaluator::BaseBoundaryFieldEvaluator() {
 	

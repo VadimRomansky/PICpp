@@ -1,11 +1,5 @@
-#ifndef PATHS_H
-#define PATHS_H
-
-
-//const int MPI_nx = 1;
-//const int MPI_ny = 1;
-//const int MPI_nz = 1;
-const int MPI_dim = 3;
+#ifndef MY_PATHS_H
+#define MY_PATHS_H
 
 //for plytech hpc
 //const char* const outputDirectory  = "/home/ipntsr/romansky/PIC3d1/output/";
