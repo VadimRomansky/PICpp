@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include "memory_util.h"
+#include "paths.h"
 
 void process_mem_usage(double& vm_usage, double& resident_set)
 {

@@ -3,6 +3,7 @@
 //#include "memory_debug.h"
 #include "particle.h"
 #include "constants.h"
+#include "paths.h"
 
 CorrelationMap::CorrelationMap() {
 	for(int i = 0; i < splineOrder + 2; ++i) {

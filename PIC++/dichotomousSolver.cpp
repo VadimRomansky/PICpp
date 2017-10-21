@@ -14,6 +14,7 @@
 #include "constants.h"
 #include "util.h"
 #include "dichotomousSolver.h"
+#include "paths.h"
 
 BaseDichotomousSolver::BaseDichotomousSolver() {
     maxErrorX = 1E-10;

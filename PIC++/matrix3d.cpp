@@ -8,6 +8,7 @@
 #include "matrix3d.h"
 #include "vector3d.h"
 #include "constants.h"
+#include "paths.h"
 
 Matrix3d::Matrix3d() {
 	matrix[0][0] = 0;

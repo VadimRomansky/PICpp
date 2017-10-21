@@ -21,6 +21,7 @@
 #include "mpi_util.h"
 #include "input.h"
 #include "complex.h"
+#include "paths.h"
 
 Simulation::Simulation() {
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);

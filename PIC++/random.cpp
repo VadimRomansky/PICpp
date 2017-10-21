@@ -10,6 +10,7 @@
 #include "util.h"
 #include "constants.h"
 #include "random.h"
+#include "paths.h"
 
 double uniformDistribution() {
 	return (rand() % randomSeed + 0.5) / randomSeed;

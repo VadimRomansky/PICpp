@@ -16,6 +16,7 @@
 #include "random.h"
 #include "simulation.h"
 #include "mpi_util.h"
+#include "paths.h"
 
 void Simulation::moveParticles() {
 	double procTime = 0;

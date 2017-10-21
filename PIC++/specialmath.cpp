@@ -13,6 +13,7 @@
 #include "random.h"
 #include "specialmath.h"
 #include "mpi_util.h"
+#include "paths.h"
 
 double evaluateError(double** hessenbergMatrix, double* vector, double beta, int n) {
 	double* resVector = new double[n + 1];
@@ -1653,12 +1654,14 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
                                          double**** outVector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
                                          int lnumber, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, double precision, int maxIteration, bool periodic, int verbosity, MPI_Comm& cartComm, int* cartCoord, int* cartDim,
 										 double**** residual, double**** firstResidual, double**** v, double**** p, double**** s, double**** t,
-										 double* leftOutBuffer, double* rightOutBuffer, double* leftInBuffer, double* rightInBuffer, double* frontOutBuffer, double* backOutBuffer, double* frontInBuffer, double* backInBuffer, double* bottomOutBuffer, double* topOutBuffer, double* bottomInBuffer, double* topInBuffer) {
+										 double* leftOutBuffer, double* rightOutBuffer, double* leftInBuffer, double* rightInBuffer, double* frontOutBuffer, double* backOutBuffer, double* frontInBuffer, double* backInBuffer, double* bottomOutBuffer, double* topOutBuffer, double* bottomInBuffer, double* topInBuffer, bool& converges) {
 	int rank;
 	int nprocs;
 	MPI_Comm_size(cartComm, &nprocs);
 	MPI_Comm_rank(cartComm, &rank);
 	if (rank == 0 && verbosity > 0)printf("start biconjugate gradient\n");
+
+	converges = false;
 
 	double alpha = 1;
 	double rho = 1;
@@ -1682,14 +1685,28 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
 		return;
 	}
 
+	/*for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				for (int l = 0; l < lnumber; ++l) {
+					outVector[i][j][k][l] = rightPart[i][j][k][l]/tempNorm;
+				}
+			}
+		}
+	}
+	exchangeLargeVector(outVector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodic, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);*/
+
+	multiplySpecialMatrixVector(t, matrix, outVector, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
+	exchangeLargeVector(t, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodic, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
+
 
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
 					outVector[i][j][k][l] = 0;
-					firstResidual[i][j][k][l] = rightPart[i][j][k][l]/tempNorm;
-					residual[i][j][k][l] = rightPart[i][j][k][l]/tempNorm;
+					firstResidual[i][j][k][l] = (rightPart[i][j][k][l]) - t[i][j][k][l];
+					residual[i][j][k][l] = (rightPart[i][j][k][l]) - t[i][j][k][l];
 					v[i][j][k][l] = 0;
 					p[i][j][k][l] = 0;
 					s[i][j][k][l] = 0;
@@ -1815,15 +1832,21 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
 
 		prevResidualNorm2 = residualNorm2;
 
-		relativeError = sqrt(residualNorm2/rightPartNorm2)*tempNorm;
+		relativeError = sqrt(residualNorm2/rightPartNorm2);
 		iteration++;
+	}
+
+	converges = true;
+
+	if(relativeError > 0.1){
+		converges = false;
 	}
 
 	for(int i = 0; i < xnumberAdded; ++i){
 		for(int j = 0; j < ynumberAdded; ++j){
 			for(int k = 0; k < znumberAdded; ++k){
 				for(int l = 0; l < lnumber; ++l){
-					outVector[i][j][k][l] *= tempNorm;
+					//outVector[i][j][k][l] *= tempNorm;
 				}
 			}
 		}

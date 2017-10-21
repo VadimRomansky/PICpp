@@ -8,6 +8,7 @@
 #include "complex.h"
 #include "constants.h"
 #include "output.h"
+#include "paths.h"
 
 Complex fourierTranslationXoneHarmonic(Complex*** input, bool direct, int xnumberAdded, int j, int k, int xnumberGeneral, MPI_Comm& reducedCartComm, int knumber, int* xabsoluteIndex, Complex* localFactor, int* cartCoord, int* cartDim) {
 	Complex sum;

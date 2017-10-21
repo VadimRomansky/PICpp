@@ -11,6 +11,7 @@
 
 #include "constants.h"
 #include "mpi_util.h"
+#include "paths.h"
 
 Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 	std::string outputDir = outputDirectory;

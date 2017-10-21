@@ -16,6 +16,8 @@
 #include "simulation.h"
 #include "mpi_util.h"
 #include "output.h"
+#include "paths.h"
+
 void Simulation::exchangeEfield() {
 	exchangeGeneralEfield(Efield);
 	exchangeGeneralEfield(tempEfield);

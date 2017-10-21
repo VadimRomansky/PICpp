@@ -14,6 +14,7 @@
 #include "simulation.h"
 #include "mpi_util.h"
 #include "fourier.h"
+#include "paths.h"
 
 
 void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
@@ -146,9 +147,31 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 			fullRightPart = fullRightPart;
 		}
 		if (debugMode) {
-			checkEquationMatrix(divergenceCleanUpMatrix, 1);
+			//checkEquationMatrix(divergenceCleanUpMatrix, 1);
 		}
-			biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations, boundaryConditionType == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer);
+		bool converges = true;
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					for (int l = 0; l < 1; ++l) {
+						//divergenceCleaningPotential[i][j][k][l] = chargeDensity[i][j][k]*deltaX2;
+					}
+				}
+			}
+		}
+		//exchangeLargeVector(divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, 1, additionalBinNumber, boundaryConditionType == PERIODIC, cartComm, cartCoord, cartDim, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer);
+			biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, xnumberGeneral*ynumberGeneral*znumberGeneral, boundaryConditionType == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
+			if(!converges){
+				if(rank == 0) printf("conjugate gradients did not converge\n");
+
+				for(int i = 0; i < xnumberAdded; ++i){
+					for(int j = 0; j < ynumberAdded; ++j){
+						for(int k = 0; k < znumberAdded; ++k){
+							divergenceCleaningPotential[i][j][k][0] = 0;
+						}
+					}
+				}
+			}
 		//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded,
 		                                 //znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionType == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
 
@@ -903,7 +926,8 @@ void Simulation::cleanupDivergenceMagnetic() {
 		//if (debugMode) {
 			checkEquationMatrix(divergenceCleanUpMatrix, 1);
 		//}
-		biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations, boundaryConditionType == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer);
+			bool converges;
+		biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations, boundaryConditionType == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
 		//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded,
 		                                 //znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionType == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
 

@@ -5,6 +5,7 @@
 
 //#include "memory_debug.h"
 #include "rightPartEvaluator.h"
+#include "paths.h"
 
 BaseRightPartEvaluator::BaseRightPartEvaluator(int xn, int yn, int zn, int ln) {
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);

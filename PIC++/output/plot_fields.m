@@ -32,7 +32,7 @@ By(1:Nx-1, 1:3) = 0;
 Bz(1:Nx-1, 1:3) = 0;
 Bnorm(1:Nx-1, 1:3) = 0;
 
-B0=initialParameters(19);
+B0=sqrt(initialParameters(19)^2 + initialParameters(18)^2);
 
 middleX(1:Nx-1) = 0;
 Xgrid(1:Nx) = 0;

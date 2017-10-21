@@ -6,6 +6,7 @@
 //#include "memory_debug.h"
 
 #include "complex.h"
+#include "paths.h"
 
 Complex::Complex(){
 	re = 0;

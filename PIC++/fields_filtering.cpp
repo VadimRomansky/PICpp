@@ -12,6 +12,7 @@
 #include "fourier.h"
 #include "util.h"
 #include "mpi_util.h"
+#include "paths.h"
 
 void Simulation::filterFields(int cutWaveNumber){
 	MPI_Barrier(cartComm);
@@ -46,13 +47,14 @@ void Simulation::filterFields(int cutWaveNumber){
 
 	if(boundaryConditionType == PERIODIC){
 		filterFieldGeneral(newEfield, cutWaveNumber);
-		//filterFieldGeneral(newBfield, cutWaveNumber);
+		filterFieldGeneral(newBfield, cutWaveNumber);
 	} else {
 		//if(derExPoint < xnumberGeneral - 2*frontHalfWidth){
 		if(constMeanElevelPoint < xnumberGeneral - 2*frontHalfWidth){
 			//filterFieldGeneralRightMirror(newEfield, cutWaveNumber, 0);
 			//filterFieldGeneralRight(newEfield, cutWaveNumber, constMeanElevelPoint);
 			filterFieldGeneralRight(newEfield, cutWaveNumber, derExPoint + frontHalfWidth);
+			filterFieldGeneralRight(newBfield, cutWaveNumber, derExPoint + frontHalfWidth);
 		}
 	}
 

@@ -15,6 +15,7 @@
 #include "particle.h"
 #include "simulation.h"
 #include "mpi_util.h"
+#include "paths.h"
 
 void Simulation::smoothCellParameter(double*** array) {
 	int minI = 1 + additionalBinNumber;

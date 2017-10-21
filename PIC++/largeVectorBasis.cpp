@@ -5,6 +5,7 @@
 
 //#include "memory_debug.h"
 #include "largeVectorBasis.h"
+#include "paths.h"
 
 //remember that we need xnumber + 1 size!!!
 LargeVectorBasis::LargeVectorBasis(int capacityv, int xnumberv, int ynumberv, int znumberv, int lnumberv) {

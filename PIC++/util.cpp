@@ -8,6 +8,7 @@
 //#include "memory_debug.h"
 #include "util.h"
 #include "constants.h"
+#include "paths.h"
 
 double power(const double & v, const double & p) {
 	return exp(p * log(v));

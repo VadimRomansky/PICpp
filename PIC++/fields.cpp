@@ -16,6 +16,7 @@
 #include "simulation.h"
 #include "mpi_util.h"
 #include "output.h"
+#include "paths.h"
 
 void Simulation::evaluateElectricField() {
 	double procTime = 0;

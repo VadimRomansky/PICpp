@@ -15,7 +15,7 @@
 #include "simulation.h"
 #include "matrixElement.h"
 #include "mpi_util.h"
-#include "memory_util.h"
+#include "paths.h"
 
 void outputDistribution(const char* outFileName, std::vector<Particle *>& particles, int particleType, double gyroradius,
                         double plasma_period, int verbosity) {

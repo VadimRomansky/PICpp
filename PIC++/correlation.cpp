@@ -9,6 +9,7 @@
 #include "particle.h"
 #include "vector3d.h"
 #include "simulation.h"
+#include "paths.h"
 
 
 Vector3d Simulation::correlationTempEfield(Particle* particle) {

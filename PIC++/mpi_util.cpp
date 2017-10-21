@@ -10,6 +10,7 @@
 #include "simulation.h"
 #include "util.h"
 #include "constants.h"
+#include "paths.h"
 
 void sendInput(Simulation& simulation, int nprocs) {
 	int integerData[15];

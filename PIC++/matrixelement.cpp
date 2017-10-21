@@ -2,6 +2,7 @@
 
 //#include "memory_debug.h"
 #include "matrixElement.h"
+#include "paths.h"
 
 MatrixElement::MatrixElement() {
 	value = 0;

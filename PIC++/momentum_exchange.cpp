@@ -15,6 +15,7 @@
 #include "particle.h"
 #include "random.h"
 #include "simulation.h"
+#include "paths.h"
 
 void Simulation::sumNodeMassMatrixParametersX() {
 	if (cartDim[0] > 1) {
