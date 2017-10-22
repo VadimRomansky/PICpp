@@ -119,8 +119,8 @@ grid ;
 figure(6);
 plot (middleX(1:Nx-1),Bz(1:Nx-1, 1), 'red', middleX(1:Nx-1),Bz(1:Nx-1, 2), 'green', middleX(1:Nx-1),Bz(1:Nx-1, 3), 'blue');
 %title ('B_z');
-xlabel ('x\omega_p/c');
-ylabel ('B_z');
+xlabel ('x');
+ylabel ('B_z G');
 %legend('t=0','t=T/2','t=T','Location','northeast');
 grid ;
 

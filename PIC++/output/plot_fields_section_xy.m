@@ -20,17 +20,20 @@ b = fix(Nt/2);
 c = fix(Nt)-1;
 %c = 0;
 
-Ex(1:Nx, 1:Ny) = 0;
-Ey(1:Nx, 1:Ny) = 0;
-Ez(1:Nx, 1:Ny) = 0;
+N1 = 100;
+N2 = fix(Nx/2);
 
-Bx(1:Nx-1, 1:Ny-1) = 0;
-By(1:Nx-1, 1:Ny-1) = 0;
-Bz(1:Nx-1, 1:Ny-1) = 0;
+Ex(1:N2-N1+1, 1:Ny) = 0;
+Ey(1:N2-N1+1, 1:Ny) = 0;
+Ez(1:N2-N1+1, 1:Ny) = 0;
 
-middleX(1:Nx-1) = 0;
+Bx(1:N2-N1, 1:Ny-1) = 0;
+By(1:N2-N1, 1:Ny-1) = 0;
+Bz(1:N2-N1, 1:Ny-1) = 0;
+
+middleX(1:N2-N1) = 0;
 middleY(1:Ny-1) = 0;
-Xgrid(1:Nx) = 0;
+Xgrid(1:N2-N1+1) = 0;
 Ygrid(1:Ny) = 0;
 cv = initialParameters(10);
 omega = initialParameters(21);
@@ -38,34 +41,34 @@ omegaElectron = initialParameters(20);
 
 
 
-for i=1:Nx,
-    Xgrid(i) = (Xfile(i) - Xfile(2))*omegaElectron/cv;
-   %Xgrid(i) = (Xfile(i) - Xfile(2));
+for i=1:N2-N1+1,
+    %Xgrid(i) = (Xfile(i) - Xfile(2))*omegaElectron/cv;
+   Xgrid(i) = (Xfile(i) - Xfile(2));
     for j = 1:Ny,
-        Ex(i,j) = EfieldXY((Ny)*(i-1) + j + c*NE, 1);
-        Ey(i,j) = EfieldXY((Ny)*(i-1) + j + c*NE, 2);
-        Ez(i,j) = EfieldXY((Ny)*(i-1) + j + c*NE, 3);
+        Ex(i,j) = EfieldXY((Ny)*(i+N1-1) + j + c*NE, 1);
+        Ey(i,j) = EfieldXY((Ny)*(i+N1-1) + j + c*NE, 2);
+        Ez(i,j) = EfieldXY((Ny)*(i+N1-1) + j + c*NE, 3);
     end;
 end;
 
 for j = 1:Ny,
-    Ygrid(j) = (Yfile(j) - Yfile(2))*omegaElectron/cv;
-   %Ygrid(i) = (Yfile(i) - Yfile(2));
+    %Ygrid(j) = (Yfile(j) - Yfile(2))*omegaElectron/cv;
+   Ygrid(j) = (Yfile(j) - Yfile(2));
 end;
 
-for i = 1:Nx-1,
-   middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2))*omegaElectron/cv;
-   %middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2));
+for i = 1:N2-N1,
+   %middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2))*omegaElectron/cv;
+   middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2));
    for j = 1:Ny-1,
-      Bx(i, j) = BfieldXY(((Ny-1)*(i-1) + j) + c*NB, 1);
-      By(i, j) = BfieldXY(((Ny-1)*(i-1) + j) + c*NB, 2);
-      Bz(i, j) = BfieldXY(((Ny-1)*(i-1) + j) + c*NB, 3);
+      Bx(i, j) = BfieldXY(((Ny-1)*(i+N1-1) + j) + c*NB, 1);
+      By(i, j) = BfieldXY(((Ny-1)*(i+N1-1) + j) + c*NB, 2);
+      Bz(i, j) = BfieldXY(((Ny-1)*(i+N1-1) + j) + c*NB, 3);
    end;
 end;
 
 for j = 1:Ny-1,
-    middleY(j) = (0.5*(Yfile(j) + Yfile(j+1)) - Yfile(2))*omegaElectron/cv;
-   %middleY(i) = (0.5*(Yfile(i) + Yfile(i+1)) - Yfile(2));
+    %middleY(j) = (0.5*(Yfile(j) + Yfile(j+1)) - Yfile(2))*omegaElectron/cv;
+   middleY(j) = (0.5*(Yfile(j) + Yfile(j+1)) - Yfile(2));
 end;
 
 figure(1)
@@ -118,7 +121,10 @@ figure(6)
 [X, Y] = meshgrid(middleY, middleX);
 surf(X, Y, Bz);
 shading interp;
-title ('Bz');
-xlabel ('y\omega_e/c');
-ylabel ('x\omega_e/c');
-zlabel ('B gauss');
+%title ('B_z G');
+%xlabel ('y\omega_e/c');
+%ylabel ('x\omega_e/c');
+
+xlabel ('y');
+ylabel ('x');
+zlabel ('B_z G');

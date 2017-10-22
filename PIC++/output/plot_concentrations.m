@@ -34,8 +34,8 @@ omegaElectron = initialParameters(20);
 
 
 for i=1:Nx,
-   middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2))*omegaElectron/cv;
-   %middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2));
+   %middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2))*omegaElectron/cv;
+   middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2));
    for t = 1:Ntypes,
         particle_concentrations(i, 1 + 3*(t-1)) = concentrations(Nz*Ny*(i-1) + Nz*(ynumber-1) + znumber + a*N, 2 + t);
         particle_concentrations(i, 2 + 3*(t-1)) = concentrations(Nz*Ny*(i-1) + Nz*(ynumber-1) + znumber + b*N, 2 + t);
@@ -65,13 +65,15 @@ end;
 figure(Ntypes + 1);
 plot (middleX(1:Nx),charge_density(1:Nx, 1), 'red', middleX(1:Nx), charge_density(1:Nx, 2), 'green', middleX(1:Nx), charge_density(1:Nx, 3), 'blue');
 title ('charge density');
-xlabel ('x\omega_p/c');
+%xlabel ('x\omega_p/c');
+xlabel ('x');
 ylabel ('rho cgs*cm^-3');
 grid ;
 
 figure(Ntypes + 2);
 plot (middleX(1:Nx),charge_density_hat(1:Nx, 1), 'red', middleX(1:Nx), charge_density_hat(1:Nx, 2), 'green', middleX(1:Nx), charge_density_hat(1:Nx, 3), 'blue');
 title ('charge density hat');
-xlabel ('x\omega_p/c');
+%xlabel ('x\omega_p/c');
+xlabel ('x');
 ylabel ('rho cgs*cm^-3');
 grid ;
