@@ -8,7 +8,7 @@ load initialParameters.dat;
 Np = 500;
 
 Nt = size(distribution_electrons, 1)/Np;
-%Nt = 28;
+%Nt = 3;
 
 
 a = 0;

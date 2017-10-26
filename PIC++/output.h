@@ -49,9 +49,46 @@ void outputFieldsLineZ(const char* outEfileName, const char* outBfileName, Vecto
 void outputConcentrations(const char *outFileName, double ****particleConcentrations, double ***chargeDensity,
                           double ***shiftChargeDensity, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
                           int typesNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, int* cartCoord, int* cartDim);
+void outputConcentrationsCrossectionXY(const char *outFileName, double ****particleConcentrations, double ***chargeDensity,
+                          double ***shiftChargeDensity, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
+                          int typesNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int zindex);
+void outputConcentrationsCrossectionXZ(const char *outFileName, double ****particleConcentrations, double ***chargeDensity,
+                          double ***shiftChargeDensity, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
+                          int typesNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int yindex);
+void outputConcentrationsCrossectionYZ(const char *outFileName, double ****particleConcentrations, double ***chargeDensity,
+                          double ***shiftChargeDensity, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
+                          int typesNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex);
+void outputConcentrationsLineX(const char *outFileName, double ****particleConcentrations, double ***chargeDensity,
+                          double ***shiftChargeDensity, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
+                          int typesNumber, double plasma_period, double gyroradius, MPI_Comm& subCommX, int* cartCoord, int* cartDim, int yindex, int zindex);
+void outputConcentrationsLineY(const char *outFileName, double ****particleConcentrations, double ***chargeDensity,
+                          double ***shiftChargeDensity, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
+                          int typesNumber, double plasma_period, double gyroradius, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, int zindex);
+void outputConcentrationsLineZ(const char *outFileName, double ****particleConcentrations, double ***chargeDensity,
+                          double ***shiftChargeDensity, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
+                          int typesNumber, double plasma_period, double gyroradius, MPI_Comm& subCommZ, int* cartCoord, int* cartDim, int xindex, int yindex);
+
 void outputVelocity(const char *outFileName, Vector3d ****velocity, ParticleTypeContainer* types,
                     int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int typesNumber,
                     double plasma_period, double gyroradius, MPI_Comm& cartComm, int* cartCoord, int* cartDim);
+void outputVelocityCrossectionXY(const char *outFileName, Vector3d ****velocity, ParticleTypeContainer* types,
+                    int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int typesNumber,
+                    double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int zindex);
+void outputVelocityCrossectionXZ(const char *outFileName, Vector3d ****velocity, ParticleTypeContainer* types,
+                    int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int typesNumber,
+                    double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int yindex);
+void outputVelocityCrossectionYZ(const char *outFileName, Vector3d ****velocity, ParticleTypeContainer* types,
+                    int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int typesNumber,
+                    double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex);
+void outputVelocityLineX(const char *outFileName, Vector3d ****velocity, ParticleTypeContainer* types,
+                    int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int typesNumber,
+                    double plasma_period, double gyroradius, MPI_Comm& subCommX, int* cartCoord, int* cartDim, int yindex, int zindex);
+void outputVelocityLineY(const char *outFileName, Vector3d ****velocity, ParticleTypeContainer* types,
+                    int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int typesNumber,
+                    double plasma_period, double gyroradius, MPI_Comm& subCommX, int* cartCoord, int* cartDim, int xindex, int zindex);
+void outputVelocityLineZ(const char *outFileName, Vector3d ****velocity, ParticleTypeContainer* types,
+                    int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int typesNumber,
+                    double plasma_period, double gyroradius, MPI_Comm& subCommX, int* cartCoord, int* cartDim, int xindex, int yindex);
 void outputGeneral(const char *outFileName, Simulation *simulation);
 void outputGeneralAnisotropy(const char *outFileName, Simulation *simulation);
 void outputFlux(const char *outFileName, Vector3d ***electricFlux, Vector3d ***externalElectricFlux, int xnumberAdded,

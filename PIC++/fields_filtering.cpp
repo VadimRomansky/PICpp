@@ -175,7 +175,7 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber){
 	for(int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j){
 			for(int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k){
-				field[i][j][k].x = fourierScalarInput[i][j][k].re;
+				field[i][j][k].x = fourierScalarMirrorInput[i][j][k].re;
 			}
 		}
 	}

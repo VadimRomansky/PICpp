@@ -4386,8 +4386,8 @@ void Simulation::initializeLangmuirWave() {
 }
 
 void Simulation::initializeFluxFromRight() {
-	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	//boundaryConditionType = PERIODIC;
+	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionType = PERIODIC;
 	createParticles();
 	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized);
 	//initializeAlfvenWaveY(10, 1.0E-4);
@@ -6818,6 +6818,18 @@ void Simulation::createFiles() {
 		fclose(BfieldFile);
 		velocityFile = fopen((outputDir + "velocity.dat").c_str(), "w");
 		fclose(velocityFile);
+		velocityFile = fopen((outputDir + "velocityXY.dat").c_str(), "w");
+		fclose(velocityFile);
+		velocityFile = fopen((outputDir + "velocityXZ.dat").c_str(), "w");
+		fclose(velocityFile);
+		velocityFile = fopen((outputDir + "velocityYZ.dat").c_str(), "w");
+		fclose(velocityFile);
+		velocityFile = fopen((outputDir + "velocityX.dat").c_str(), "w");
+		fclose(velocityFile);
+		velocityFile = fopen((outputDir + "velocityY.dat").c_str(), "w");
+		fclose(velocityFile);
+		velocityFile = fopen((outputDir + "velocityZ.dat").c_str(), "w");
+		fclose(velocityFile);
 		Xfile = fopen((outputDir + "Xfile.dat").c_str(), "w");
 		fclose(Xfile);
 		Xfile = fopen((reducedOutputDir + "XfileReduced.dat").c_str(), "w");
@@ -6835,6 +6847,18 @@ void Simulation::createFiles() {
 		generalAnisotropyFile = fopen((outputDir + "generalAnisotropy.dat").c_str(), "w");
 		fclose(generalAnisotropyFile);
 		densityFile = fopen((outputDir + "concentrations.dat").c_str(), "w");
+		fclose(densityFile);
+		densityFile = fopen((outputDir + "concentrationsXY.dat").c_str(), "w");
+		fclose(densityFile);
+		densityFile = fopen((outputDir + "concentrationsXZ.dat").c_str(), "w");
+		fclose(densityFile);
+		densityFile = fopen((outputDir + "concentrationsYZ.dat").c_str(), "w");
+		fclose(densityFile);
+		densityFile = fopen((outputDir + "concentrationsX.dat").c_str(), "w");
+		fclose(densityFile);
+		densityFile = fopen((outputDir + "concentrationsY.dat").c_str(), "w");
+		fclose(densityFile);
+		densityFile = fopen((outputDir + "concentrationsZ.dat").c_str(), "w");
 		fclose(densityFile);
 		divergenceErrorFile = fopen((outputDir + "divergence_error.dat").c_str(), "w");
 		fclose(divergenceErrorFile);

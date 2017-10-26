@@ -23,7 +23,7 @@ load distribution_electrons9.dat;
 
 Np = 500;
 
-Nt = 7;
+Nt = 11;
 
 
 c = Nt - 1;
