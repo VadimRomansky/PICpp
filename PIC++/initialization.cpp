@@ -227,10 +227,10 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	debugMode = false;
 	newlyStarted = true;
 	preserveChargeGlobal = true;
-	solverType = IMPLICIT; //не явный
+	//solverType = IMPLICIT; //не явный
 	//solverType = IMPLICIT_EC; //не явный с сохранением энергии
 	//solverType = EXPLICIT; //явный
-	//solverType = BUNEMAN;
+	solverType = BUNEMAN;
 	boundaryConditionType = PERIODIC;
 	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
@@ -743,10 +743,10 @@ Simulation::~Simulation() {
 			delete[] fourierScalarMirrorTempOutput[i];
 			delete[] fourierScalarMirrorTempOutput1[i];
 		}
-		delete[] fourierScalarInput;
-		delete[] fourierScalarOutput;
-		delete[] fourierScalarTempOutput;
-		delete[] fourierScalarTempOutput1;
+		delete[] fourierScalarMirrorInput;
+		delete[] fourierScalarMirrorOutput;
+		delete[] fourierScalarMirrorTempOutput;
+		delete[] fourierScalarMirrorTempOutput1;
 
 		delete[] localFactorX;
 		delete[] localFactorY;
@@ -1972,7 +1972,7 @@ void Simulation::initializeRotatedSimpleElectroMagneticWave(int waveCountX, int 
 
 void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation) {
 	boundaryConditionType = PERIODIC;
-	if (rank == 0) printf("initialization alfven wave\n");
+	if (rank == 0) printf("initiali   zation alfven wave\n");
 	fflush(stdout);
 
 
@@ -2226,60 +2226,77 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 	//VzamplitudeProton = 0.0;
 	//Byamplitude = 0.0;
 
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				Efield[i][j][k].x = 0;
-				Efield[i][j][k].y = Eyamplitude * cos(kw * xgrid[i] - phase);
-				Efield[i][j][k].z = Ezamplitude * sin(kw * xgrid[i] - phase);
-				explicitEfield[i][j][k] = Efield[i][j][k];
-				tempEfield[i][j][k] = Efield[i][j][k];
-				newEfield[i][j][k] = Efield[i][j][k];
-			}
-		}
-	}
-
-	/*if (nprocs == 1) {
-		for (int k = 0; k < znumber; ++k) {
-			for (int j = 0; j < ynumber; ++j) {
-				Efield[xnumber][j][k] = Efield[1][j][k];
-				tempEfield[xnumber][j][k] = Efield[1][j][k];
-				newEfield[xnumber][j][k] = Efield[1][j][k];
-				explicitEfield[xnumber][j][k] = explicitEfield[1][j][k];
-
-				Efield[xnumber - 1][j][k] = Efield[0][j][k];
-				tempEfield[xnumber - 1][j][k] = Efield[0][j][k];
-				newEfield[xnumber - 1][j][k] = Efield[0][j][k];
-				explicitEfield[xnumber - 1][j][k] = explicitEfield[0][j][k];
-			}
-		}
-	}
-
-	for (int i = 0; i < xnumber + 1; ++i) {
-		for (int j = 0; j < ynumber; ++j) {
-			Efield[i][j][znumber] = Efield[i][j][0];
-			tempEfield[i][j][znumber] = Efield[i][j][0];
-			newEfield[i][j][znumber] = Efield[i][j][0];
-			explicitEfield[i][j][znumber] = explicitEfield[i][j][0];
-		}
-	}
-
-	for (int k = 0; k < znumber + 1; ++k) {
-		for (int i = 0; i < xnumber + 1; ++i) {
-			Efield[i][ynumber][k] = Efield[i][0][k];
-			tempEfield[i][ynumber][k] = Efield[i][0][k];
-			newEfield[i][ynumber][k] = Efield[i][0][k];
-			explicitEfield[i][ynumber][k] = explicitEfield[i][0][k];
-		}
-	}*/
 	B0 = Vector3d(B0.norm(), 0, 0);
-	for (int i = 0; i < xnumberAdded; ++i) {
-		for (int j = 0; j < ynumberAdded; ++j) {
-			for (int k = 0; k < znumberAdded; ++k) {
-				Bfield[i][j][k].x = B0.norm();
-				Bfield[i][j][k].y = Byamplitude * sin(kw * middleXgrid[i] - phase);
-				Bfield[i][j][k].z = Bzamplitude * cos(kw * middleXgrid[i] - phase);
-				newBfield[i][j][k] = Bfield[i][j][k];
+	if(solverType == BUNEMAN){
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanEx[i][j][k] = 0;
+					bunemanNewEx[i][j][k] = 0;
+				}
+			}
+		}
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanEy[i][j][k] = Eyamplitude * cos(kw * xgrid[i] - phase);
+					bunemanNewEy[i][j][k] = bunemanEy[i][j][k];
+				}
+			}
+		}
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					bunemanEz[i][j][k] = Ezamplitude * sin(kw * xgrid[i] - phase);
+					bunemanNewEz[i][j][k] = bunemanEz[i][j][k];
+				}
+			}
+		}
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					bunemanBx[i][j][k] = B0.norm();
+					bunemanNewBx[i][j][k] = bunemanBx[i][j][k];
+				}
+			}
+		}
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					bunemanBy[i][j][k] = Byamplitude * sin(kw * middleXgrid[i] - phase);
+					bunemanNewBy[i][j][k] = bunemanBy[i][j][k];
+				}
+			}
+		}
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanBz[i][j][k] = Bzamplitude * cos(kw * middleXgrid[i] - phase);
+					bunemanNewBz[i][j][k] = bunemanBz[i][j][k];
+				}
+			}
+		}
+	} else {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					Efield[i][j][k].x = 0;
+					Efield[i][j][k].y = Eyamplitude * cos(kw * xgrid[i] - phase);
+					Efield[i][j][k].z = Ezamplitude * sin(kw * xgrid[i] - phase);
+					explicitEfield[i][j][k] = Efield[i][j][k];
+					tempEfield[i][j][k] = Efield[i][j][k];
+					newEfield[i][j][k] = Efield[i][j][k];
+				}
+			}
+		}
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					Bfield[i][j][k].x = B0.norm();
+					Bfield[i][j][k].y = Byamplitude * sin(kw * middleXgrid[i] - phase);
+					Bfield[i][j][k].z = Bzamplitude * cos(kw * middleXgrid[i] - phase);
+					newBfield[i][j][k] = Bfield[i][j][k];
+				}
 			}
 		}
 	}
@@ -2380,7 +2397,7 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		particle->addVelocity(velocity, speed_of_light_normalized);
 		Vector3d momentum = particle->getMomentum();
 		particle->initialMomentum = momentum;
-		//particle->prevMomentum = momentum;
+		particle->prevMomentum = momentum;
 	}
 
 	updateDeltaT();
@@ -2939,7 +2956,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		particle->addVelocity(velocity, speed_of_light_normalized);
 		Vector3d momentum = particle->getMomentum();
 		particle->initialMomentum = momentum;
-		//particle->prevMomentum = momentum;
+		particle->prevMomentum = momentum;
 	}
 
 	updateDeltaT();
@@ -3497,7 +3514,7 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		particle->addVelocity(velocity, speed_of_light_normalized);
 		Vector3d momentum = particle->getMomentum();
 		particle->initialMomentum = momentum;
-		//particle->prevMomentum = momentum;
+		particle->prevMomentum = momentum;
 	}
 
 	updateDeltaT();
@@ -4386,8 +4403,8 @@ void Simulation::initializeLangmuirWave() {
 }
 
 void Simulation::initializeFluxFromRight() {
-	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	boundaryConditionType = PERIODIC;
+	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	//boundaryConditionType = PERIODIC;
 	createParticles();
 	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized);
 	//initializeAlfvenWaveY(10, 1.0E-4);
