@@ -28,7 +28,7 @@ void Simulation::simulate() {
 		createFiles();
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWaveX(1, 0.01);
+		initializeAlfvenWaveX(1, 0.01);
 		//initializeAlfvenWaveY(1, 0.01);
 		//initializeAlfvenWaveZ(1, 0.01);
 		//initializeRotatedAlfvenWave(1, 1, 0, 0.01);
@@ -36,7 +36,7 @@ void Simulation::simulate() {
 		//initializeAnisotropicSilicon();
 		//initializeWeibel();
 		//initializeRingWeibel();
-		initializeFluxFromRight();
+		//initializeFluxFromRight();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();
 		//initializeSimpleElectroMagneticWaveY();
@@ -272,7 +272,7 @@ void Simulation::simulate() {
 				//cleanupDivergenceBuneman();
 				//cleanupDivergenceBunemanMagnetic();
 			} else {
-				cleanupDivergence(newEfield, chargeDensity);
+				//cleanupDivergence(newEfield, chargeDensity);
 				//cleanupDivergenceMagnetic();
 			}
 		}
@@ -526,10 +526,125 @@ void Simulation::output() {
 	outputConcentrations((outputDir + "concentrations.dat").c_str(), particleConcentrations, chargeDensity,
 	                     chargeDensityHat, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim);
 
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output crossection concentrations x\n");
+	if(coordX == cartCoord[0]){
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral/2);
+		if(verbosity > 2) printf("x local index = %d\n", xindex);
+		outputConcentrationsCrossectionYZ((outputDir + "concentrationsYZ.dat").c_str(), particleConcentrations, chargeDensity,
+	                     chargeDensityHat, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartCommYZ, cartCommZ, cartCoord, cartDim, xindex);
+	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output crossection concentrations y\n");
+	if(coordY == cartCoord[1]){
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral/2);
+		if(verbosity > 2) printf("y local index = %d\n", yindex);
+		outputConcentrationsCrossectionXZ((outputDir + "concentrationsXZ.dat").c_str(), particleConcentrations, chargeDensity,
+	                     chargeDensityHat, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartCommXZ, cartCommZ, cartCoord, cartDim, yindex);
+	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output crossection concentrations z\n");
+	if(coordZ == cartCoord[2]){
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral/2);
+		if(verbosity > 2) printf("z local index = %d\n", zindex);
+		outputConcentrationsCrossectionXY((outputDir + "concentrationsXY.dat").c_str(), particleConcentrations, chargeDensity,
+	                     chargeDensityHat, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartCommXY, cartCommY, cartCoord, cartDim, zindex);
+	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output line concentrations x\n");
+	if(coordY == cartCoord[1] && coordZ == cartCoord[2]){
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral/2);
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral/2);
+		if(verbosity > 2) printf("y local index = %d\n", yindex);
+		if(verbosity > 2) printf("z local index = %d\n", zindex);
+		outputConcentrationsLineX((outputDir + "concentrationsX.dat").c_str(), particleConcentrations, chargeDensity,
+	                     chargeDensityHat, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartCommX, cartCoord, cartDim, yindex, zindex);
+	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output line concentrations y\n");
+	if(coordX == cartCoord[0] && coordZ == cartCoord[2]){
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral/2);
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral/2);
+		if(verbosity > 2) printf("x local index = %d\n", xindex);
+		if(verbosity > 2) printf("z local index = %d\n", zindex);
+		outputConcentrationsLineY((outputDir + "concentrationsY.dat").c_str(), particleConcentrations, chargeDensity,
+	                     chargeDensityHat, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartCommY, cartCoord, cartDim, xindex, zindex);
+	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output line concentrations z\n");
+	if(coordY == cartCoord[1] && coordX == cartCoord[0]){
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral/2);
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral/2);
+		if(verbosity > 2) printf("y local index = %d\n", yindex);
+		if(verbosity > 2) printf("x local index = %d\n", xindex);
+		outputConcentrationsLineZ((outputDir + "concentrationsZ.dat").c_str(), particleConcentrations, chargeDensity,
+	                     chargeDensityHat, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartCommZ, cartCoord, cartDim, xindex, yindex);
+	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing velocity\n");
 	outputVelocity((outputDir + "velocity.dat").c_str(),
 	               particleBulkVelocities, types, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim);
+
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output crossection velocity x\n");
+	if(coordX == cartCoord[0]){
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral/2);
+		if(verbosity > 2) printf("x local index = %d\n", xindex);
+		outputVelocityCrossectionYZ((outputDir + "velocityYZ.dat").c_str(), particleBulkVelocities, types, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartCommYZ, cartCommZ, cartCoord, cartDim, xindex);
+	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output crossection velocity y\n");
+	if(coordY == cartCoord[1]){
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral/2);
+		if(verbosity > 2) printf("y local index = %d\n", yindex);
+		outputVelocityCrossectionXZ((outputDir + "velocityXZ.dat").c_str(), particleBulkVelocities, types, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartCommXZ, cartCommZ, cartCoord, cartDim, yindex);
+	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output crossection velocity z\n");
+	if(coordZ == cartCoord[2]){
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral/2);
+		if(verbosity > 2) printf("z local index = %d\n", zindex);
+		outputVelocityCrossectionXY((outputDir + "velocityXY.dat").c_str(), particleBulkVelocities, types, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartCommXY, cartCommY, cartCoord, cartDim, zindex);
+	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output line velocity x\n");
+	if(coordY == cartCoord[1] && coordZ == cartCoord[2]){
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral/2);
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral/2);
+		if(verbosity > 2) printf("y local index = %d\n", yindex);
+		if(verbosity > 2) printf("z local index = %d\n", zindex);
+		outputVelocityLineX((outputDir + "velocityX.dat").c_str(), particleBulkVelocities, types, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartCommX, cartCoord, cartDim, yindex, zindex);
+	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output line velocity y\n");
+	if(coordX == cartCoord[0] && coordZ == cartCoord[2]){
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral/2);
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral/2);
+		if(verbosity > 2) printf("x local index = %d\n", xindex);
+		if(verbosity > 2) printf("z local index = %d\n", zindex);
+		outputVelocityLineY((outputDir + "velocityY.dat").c_str(), particleBulkVelocities, types, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartCommY, cartCoord, cartDim, xindex, zindex);
+	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("output line velocity z\n");
+	if(coordY == cartCoord[1] && coordX == cartCoord[0]){
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral/2);
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral/2);
+		if(verbosity > 2) printf("y local index = %d\n", yindex);
+		if(verbosity > 2) printf("x local index = %d\n", xindex);
+		outputVelocityLineZ((outputDir + "velocityZ.dat").c_str(), particleBulkVelocities, types, xnumberAdded,
+	             ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor, cartCommZ, cartCoord, cartDim, xindex, yindex);
+	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing flux\n");
 	outputFlux((outputDir + "flux.dat").c_str(), electricFlux, externalElectricFlux, xnumberAdded, ynumberAdded,
