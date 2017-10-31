@@ -932,6 +932,7 @@ public:
 	void filterFields(int cutWaveNumber);
 	void filterFieldGeneral(Vector3d*** field, int cutWaveNumber);
 	void filterFieldGeneralRight(Vector3d*** field, int cutWaveNumber, int startIndex);
+	void filterFieldGeneralLeft(Vector3d*** field, int cutWaveNumber, int startIndex);
 	void filterFieldGeneralRightMirror(Vector3d*** field, int cutWaveNumber, int startIndex);
 
 	void filterFieldsLocal(int cutWaveNumber);

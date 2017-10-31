@@ -19,6 +19,13 @@ Complex fourierTranslationZoneHarmonicRight(Complex*** input, bool direct, int z
 
 void fourierTranslationRight(Complex*** input, Complex*** output, Complex*** tempResultX, Complex*** tempResultXY, bool direct, int xnumber, int ynumber, int znumber, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, int startAbsoluteIndex, MPI_Comm& cartComm, MPI_Comm& cartCommX, MPI_Comm& cartCommY, MPI_Comm& cartCommZ, int* xabsoluteIndex, int* yabsoluteIndex, int* zabsoluteIndex, Complex* localFactorX, Complex* localFactorY, Complex* localFactorZ, int* cartCoord, int* cartDim);
 
+Complex fourierTranslationXoneHarmonicLeft(Complex*** input, bool direct, int xnumber, int j, int k, int xnumberGeneral, MPI_Comm& reducedCartComm, int knumber, int* xabsoluteIndex, int startAbsoluteIndex, Complex* localFactor, int* cartCoord, int* cartDim);
+Complex fourierTranslationYoneHarmonicLeft(Complex*** input, bool direct, int ynumber, int i, int k, int ynumberGeneral, MPI_Comm& reducedCartComm, int knumber, int* yabsoluteIndex, int startAbsoluteIndex, Complex* localFactor, int* cartCoord, int* cartDim);
+Complex fourierTranslationZoneHarmonicLeft(Complex*** input, bool direct, int znumber, int i, int j, int znumberGeneral, MPI_Comm& reducedCartComm, int knumber, int* zabsoluteIndex, int startAbsoluteIndex, Complex* localFactor, int* cartCoord, int* cartDim);
+
+
+void fourierTranslationLeft(Complex*** input, Complex*** output, Complex*** tempResultX, Complex*** tempResultXY, bool direct, int xnumber, int ynumber, int znumber, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, int startAbsoluteIndex, MPI_Comm& cartComm, MPI_Comm& cartCommX, MPI_Comm& cartCommY, MPI_Comm& cartCommZ, int* xabsoluteIndex, int* yabsoluteIndex, int* zabsoluteIndex, Complex* localFactorX, Complex* localFactorY, Complex* localFactorZ, int* cartCoord, int* cartDim);
+
 //Complex fourierTranslationXoneHarmonicLeft(Complex*** input, bool direct, int xnumber, int j, int k, int xnumberGeneral, MPI_Comm& reducedCartComm, int knumber, int* xabsoluteIndex, int startAbsoluteIndex, Complex* localFactor, int* cartCoord, int* cartDim);
 //Complex fourierTranslationYoneHarmonicLeft(Complex*** input, bool direct, int ynumber, int i, int k, int ynumberGeneral, MPI_Comm& reducedCartComm, int knumber, int* yabsoluteIndex, int startAbsoluteIndex, Complex* localFactor, int* cartCoord, int* cartDim);
 //Complex fourierTranslationZoneHarmonicLeft(Complex*** input, bool direct, int znumber, int i, int j, int znumberGeneral, MPI_Comm& reducedCartComm, int knumber, int* zabsoluteIndex, int startAbsoluteIndex, Complex* localFactor, int* cartCoord, int* cartDim);

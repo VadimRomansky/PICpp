@@ -227,10 +227,10 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	debugMode = false;
 	newlyStarted = true;
 	preserveChargeGlobal = true;
-	//solverType = IMPLICIT; //не явный
+	solverType = IMPLICIT; //не явный
 	//solverType = IMPLICIT_EC; //не явный с сохранением энергии
 	//solverType = EXPLICIT; //явный
-	solverType = BUNEMAN;
+	//solverType = BUNEMAN;
 	boundaryConditionType = PERIODIC;
 	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
