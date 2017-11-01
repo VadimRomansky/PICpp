@@ -45,3 +45,16 @@ void outputArray(const char* outputFileName, Complex*** array, int xnumber, int 
 		}
 	}
 }
+
+void outputArray1d(const char* outputFileName, Complex* array, int xnumberAdded, int ynumberAdded, int znumberAdded, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, MPI_Comm& cartComm, int* cartCoord, int* cartDim){
+	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
+		MPI_Barrier(cartComm);
+		if (cartCoord[0] == cartI) {
+			FILE* outFile = fopen(outputFileName, "a");
+			for(int i = 0; i < xnumberAdded; ++i){
+				fprintf(outFile, "%g %g\n", array[i].re, array[i].im);
+			}
+			fclose(outFile);
+		}
+	}
+}

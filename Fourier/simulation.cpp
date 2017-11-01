@@ -235,29 +235,29 @@ void Simulation::setSpaceForProc() {
 }
 
 void Simulation::initializeArrays(){
-	for(int i = 0; i < xnumber; ++i){
+	for(int i = 0; i < xnumberAdded + 1; ++i){
 		xabsoluteIndex[i] = firstAbsoluteXindex + i;
 	}
 
-	for(int j = 0; j < ynumber; ++j){
+	for(int j = 0; j < ynumberAdded + 1; ++j){
 		yabsoluteIndex[j] = firstAbsoluteYindex + j;
 	}
 
-	for(int k = 0; k < znumber; ++k){
+	for(int k = 0; k < znumberAdded + 1; ++k){
 		zabsoluteIndex[k] = firstAbsoluteZindex + k;
 	}
 
-	for(int i = 0; i < xnumber; ++i){
+	for(int i = 0; i < xnumberAdded + 1; ++i){
 		xgrid[i] = xsizeGeneral + (xabsoluteIndex[i]) * deltaX;
 	}
 	xgrid[xnumber] = xgrid[0] + xnumber*deltaX;
 
-	for(int i = 0; i < ynumber; ++i){
+	for(int i = 0; i < ynumber + 1; ++i){
 		ygrid[i] = ysizeGeneral + (yabsoluteIndex[i]) * deltaY;
 	}
 	ygrid[ynumber] = ygrid[0] + ynumber*deltaY;
 
-	for(int i = 0; i < znumber; ++i){
+	for(int i = 0; i < znumber + 1; ++i){
 		zgrid[i] = zsizeGeneral + (zabsoluteIndex[i]) * deltaZ;
 	}
 	zgrid[znumber] = zgrid[0] + znumber*deltaZ;
@@ -291,21 +291,29 @@ void Simulation::createFiles(){
 void Simulation::randomSimulation(){
 	srand(time(NULL) + rank);
 
-	for(int i = 0; i < xnumber; ++i){
-		for(int j = 0; j < ynumber; ++j){
-			for(int k = 0; k < znumber; ++k){
-				function[i][j][k].re = rand()%randomSeed - (randomSeed/2);
-				function[i][j][k].im = rand()%randomSeed - (randomSeed/2);
+	for(int i = 0; i < xnumberAdded; ++i){
+		function1d[i].re = rand()%randomSeed - (randomSeed/2);
+		function1d[i].im = rand()%randomSeed - (randomSeed/2);
+		for(int j = 0; j < ynumberAdded; ++j){
+			for(int k = 0; k < znumberAdded; ++k){
+				function[i][j][k].re = function1d[i].re;
+				function[i][j][k].im = function1d[i].im;
 			}
 		}
 	}
 
 	std::string outputDir = outputDirectory;
-	outputArray((outputDir + "initial.dat").c_str(), function, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
-	fourierTranslation(function, fourierImage, true, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	outputArray((outputDir + "fourier.dat").c_str(), fourierImage, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
-	fourierTranslation(fourierImage, result, false, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
-	outputArray((outputDir + "final.dat").c_str(), result, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
+	/*outputArray((outputDir + "initial.dat").c_str(), function, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
+	fourierTranslation(function, fourierImage, true, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	outputArray((outputDir + "fourier.dat").c_str(), fourierImage, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
+	fourierTranslation(fourierImage, result, false, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+	outputArray((outputDir + "final.dat").c_str(), result, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);*/
+
+	outputArray1d((outputDir + "initial1d.dat").c_str(), function1d, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
+	fastFourier1d(function1d, fourierImage1d, true, xnumberAdded, xnumberGeneral, xnumberGeneral, cartComm, cartCoord, cartDim, 0, 1, xabsoluteIndex);
+	outputArray1d((outputDir + "fourier1d.dat").c_str(), fourierImage1d, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
+	fastFourier1d(fourierImage1d, result1d, false, xnumberAdded, xnumberGeneral, xnumberGeneral, cartComm, cartCoord, cartDim, 0, 1, xabsoluteIndex);
+	outputArray1d((outputDir + "fina11d.dat").c_str(), result1d, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
 }
 
 void Simulation::poissonSolving() {

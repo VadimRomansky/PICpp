@@ -31,8 +31,8 @@ int main(int argc, char **argv){
 	MPI_Comm_rank(comm, &rank);
 
 	Simulation* simulation = new Simulation(comm);
-	//simulation->randomSimulation();
-	simulation->poissonSolving();
+	simulation->randomSimulation();
+	//simulation->poissonSolving();
 
 	MPI_Finalize();
 	return 0;
