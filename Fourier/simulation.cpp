@@ -79,8 +79,8 @@ Simulation::~Simulation(){
 	delete[] yabsoluteIndex;
 	delete[] zabsoluteIndex;
 
-	for(int i = 0; i < xnumber; ++i){
-		for(int j = 0; j < ynumber; ++j){
+	for(int i = 0; i < xnumberAdded; ++i){
+		for(int j = 0; j < ynumberAdded; ++j){
 			delete[] function[i][j];
 			delete[] fourierImage[i][j];
 			delete[] result[i][j];
@@ -92,43 +92,56 @@ Simulation::~Simulation(){
 	delete[] function;
 	delete[] fourierImage;
 	delete[] result;
+
+	delete[] function1d;
+	delete[] fourierImage1d;
+	delete[] result1d;
 }
 
 
 void Simulation::createArrays() {
-	xgrid = new double[xnumber + 1];
-	ygrid = new double[ynumber + 1];
-	zgrid = new double[znumber + 1];
+	xgrid = new double[xnumberAdded + 1];
+	ygrid = new double[ynumberAdded + 1];
+	zgrid = new double[znumberAdded + 1];
 
-	middleXgrid = new double[xnumber];
-	middleYgrid = new double[ynumber];
-	middleZgrid = new double[znumber];
+	middleXgrid = new double[xnumberAdded];
+	middleYgrid = new double[ynumberAdded];
+	middleZgrid = new double[znumberAdded];
 
-	kxgrid = new double[xnumber];
-	kygrid = new double[ynumber];
-	kzgrid = new double[znumber];
+	kxgrid = new double[xnumberAdded];
+	kygrid = new double[ynumberAdded];
+	kzgrid = new double[znumberAdded];
 
-	xabsoluteIndex = new int[xnumber];
-	yabsoluteIndex = new int[ynumber];
-	zabsoluteIndex = new int[znumber];
+	xabsoluteIndex = new int[xnumberAdded+1];
+	yabsoluteIndex = new int[ynumberAdded+1];
+	zabsoluteIndex = new int[znumberAdded+1];
 
-	function = new Complex**[xnumber];
-	fourierImage = new Complex**[xnumber];
-	result = new Complex**[xnumber];
-	for(int i = 0; i < xnumber; ++i) {
-		function[i] = new Complex*[ynumber];
-		fourierImage[i] = new Complex*[ynumber];
-		result[i] = new Complex*[ynumber];
-		for(int j = 0; j < ynumber; ++j) {
-			function[i][j] = new Complex[znumber];
-			fourierImage[i][j] = new Complex[znumber];
-			result[i][j] = new Complex[znumber];
-			for(int k = 0; k < znumber; ++k) {
+	function = new Complex**[xnumberAdded];
+	fourierImage = new Complex**[xnumberAdded];
+	result = new Complex**[xnumberAdded];
+	for(int i = 0; i < xnumberAdded; ++i) {
+		function[i] = new Complex*[ynumberAdded];
+		fourierImage[i] = new Complex*[ynumberAdded];
+		result[i] = new Complex*[ynumberAdded];
+		for(int j = 0; j < ynumberAdded; ++j) {
+			function[i][j] = new Complex[znumberAdded];
+			fourierImage[i][j] = new Complex[znumberAdded];
+			result[i][j] = new Complex[znumberAdded];
+			for(int k = 0; k < znumberAdded; ++k) {
 				function[i][j][k] = Complex(0, 0);
 				fourierImage[i][j][k] = Complex(0, 0);
 				result[i][j][k] = Complex(0, 0);
 			}
 		}
+	}
+
+	function1d = new Complex[xnumberAdded];
+	fourierImage1d = new Complex[xnumberAdded];
+	result1d = new Complex[xnumberAdded];
+	for(int i = 0; i < xnumberAdded; ++i){
+		function1d[i] = Complex(0, 0);
+		fourierImage1d[i] = Complex(0, 0);
+		result1d[i] = Complex(0, 0);
 	}
 }
 
@@ -138,10 +151,10 @@ void Simulation::setSpaceForProc() {
 
 	if (cartCoord[0] >= cartDim[0] - modXnumber) {
 		xnumber = tempXnumber + 1;
-		firstXabsoluteIndex = xnumberGeneral - (xnumber) * (cartDim[0] - cartCoord[0]);
+		firstAbsoluteXindex = xnumberGeneral - (xnumber) * (cartDim[0] - cartCoord[0]) - additionalBinNumber - 1;
 	} else {
 		xnumber = tempXnumber;
-		firstXabsoluteIndex = (xnumber) * cartCoord[0];
+		firstAbsoluteXindex = (xnumber) * cartCoord[0] - additionalBinNumber - 1;
 	}
 
 	int tempYnumber = ((ynumberGeneral) / cartDim[1]);
@@ -149,10 +162,10 @@ void Simulation::setSpaceForProc() {
 
 	if (cartCoord[1] >= cartDim[1] - modYnumber) {
 		ynumber = tempYnumber + 1;
-		firstYabsoluteIndex = ynumberGeneral - (ynumber) * (cartDim[1] - cartCoord[1]);
+		firstAbsoluteYindex = ynumberGeneral - (ynumber) * (cartDim[1] - cartCoord[1]) - additionalBinNumber - 1;
 	} else {
 		ynumber = tempYnumber;
-		firstYabsoluteIndex = (ynumber) * cartCoord[1];
+		firstAbsoluteYindex = (ynumber) * cartCoord[1] - additionalBinNumber - 1;
 	}
 
 	int tempZnumber = ((znumberGeneral) / cartDim[2]);
@@ -160,32 +173,78 @@ void Simulation::setSpaceForProc() {
 
 	if (cartCoord[2] >= cartDim[2] - modZnumber) {
 		znumber = tempZnumber + 1;
-		firstZabsoluteIndex = znumberGeneral - (znumber) * (cartDim[2] - cartCoord[2]);
+		firstAbsoluteZindex = znumberGeneral - (znumber) * (cartDim[2] - cartCoord[2]) - additionalBinNumber - 1;
 	} else {
 		znumber = tempZnumber;
-		firstZabsoluteIndex = (znumber) * cartCoord[2];
+		firstAbsoluteZindex = (znumber) * cartCoord[2] - additionalBinNumber - 1;
 	}
+
+	//todo boundary conditiontype
+	/*if (cartDim[0] > 5) {
+		int firstSmallRegions = 2 * cartDim[0] / 3;
+		int firstSmallXnumber = xnumberGeneral / 3;
+		int lastLargeRegions = cartDim[0] - firstSmallRegions;
+		int lastLargeXnumber = xnumberGeneral - firstSmallXnumber;
+		if (cartCoord[0] < firstSmallRegions) {
+			tempXnumber = firstSmallXnumber / firstSmallRegions;
+			modXnumber = firstSmallXnumber % firstSmallRegions;
+			if (cartCoord[0] >= firstSmallRegions - modXnumber) {
+				xnumber = tempXnumber + 1;
+				firstAbsoluteXindex = firstSmallXnumber - (xnumber) * (firstSmallRegions - cartCoord[0]) - additionalBinNumber - 1;
+			} else {
+				xnumber = tempXnumber;
+				firstAbsoluteXindex = (xnumber) * cartCoord[0] - additionalBinNumber - 1;
+			}
+		} else {
+			tempXnumber = lastLargeXnumber / lastLargeRegions;
+			modXnumber = lastLargeXnumber % lastLargeRegions;
+			if (cartCoord[0] >= cartDim[0] - modXnumber) {
+				xnumber = tempXnumber + 1;
+				firstAbsoluteXindex = xnumberGeneral - (xnumber) * (cartDim[0] - cartCoord[0]) - additionalBinNumber - 1;
+			} else {
+				xnumber = tempXnumber;
+				firstAbsoluteXindex = firstSmallXnumber + (xnumber) * (cartCoord[0] - firstSmallRegions) - additionalBinNumber - 1;
+			}
+		}
+
+	}*/
+	//printf("xnumber = %d\n", xnumber);
+	xnumberAdded = xnumber + 2 + 2 * additionalBinNumber;
+	ynumberAdded = ynumber + 2 + 2 * additionalBinNumber;
+	znumberAdded = znumber + 2 + 2 * additionalBinNumber;
+
+	xsize = xnumberAdded * xsizeGeneral / xnumberGeneral;
+	ysize = ynumberAdded * ysizeGeneral / ynumberGeneral;
+	zsize = znumberAdded * zsizeGeneral / znumberGeneral;
+
+	//deltaX = xsize / (xnumber);
+	//deltaY = ysize / (ynumber);
+	//deltaZ = zsize / (znumber);
 
 	deltaX = xsizeGeneral / (xnumberGeneral);
 	deltaY = ysizeGeneral / (ynumberGeneral);
 	deltaZ = zsizeGeneral / (znumberGeneral);
 
-	deltaKx = 2*pi/xsizeGeneral;
-	deltaKy = 2*pi/ysizeGeneral;
-	deltaKz = 2*pi/zsizeGeneral;
+
+	leftX = xsizeGeneral + (firstAbsoluteXindex) * deltaX;
+	rightX = leftX + xsize;
+	leftY = ysizeGeneral + (firstAbsoluteYindex) * deltaY;
+	rightY = leftY + ysize;
+	leftZ = zsizeGeneral + (firstAbsoluteZindex) * deltaZ;
+	rightZ = leftZ + zsize;
 }
 
 void Simulation::initializeArrays(){
 	for(int i = 0; i < xnumber; ++i){
-		xabsoluteIndex[i] = firstXabsoluteIndex + i;
+		xabsoluteIndex[i] = firstAbsoluteXindex + i;
 	}
 
 	for(int j = 0; j < ynumber; ++j){
-		yabsoluteIndex[j] = firstYabsoluteIndex + j;
+		yabsoluteIndex[j] = firstAbsoluteYindex + j;
 	}
 
 	for(int k = 0; k < znumber; ++k){
-		zabsoluteIndex[k] = firstZabsoluteIndex + k;
+		zabsoluteIndex[k] = firstAbsoluteZindex + k;
 	}
 
 	for(int i = 0; i < xnumber; ++i){

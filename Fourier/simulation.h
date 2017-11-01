@@ -25,9 +25,24 @@ public:
 	int ynumber;
 	int znumber;
 
+	int xnumberAdded;
+	int ynumberAdded;
+	int znumberAdded;
+
 	double deltaX;
 	double deltaY;
 	double deltaZ;
+
+	double xsize;
+	double ysize;
+	double zsize;
+
+	double leftX;
+	double rightX;
+	double leftY;
+	double rightY;
+	double leftZ;
+	double rightZ;
 
 	double deltaKx;
 	double deltaKy;
@@ -49,13 +64,17 @@ public:
 	int* yabsoluteIndex;
 	int* zabsoluteIndex;
 
-	int firstXabsoluteIndex;
-	int firstYabsoluteIndex;
-	int firstZabsoluteIndex;
+	int firstAbsoluteXindex;
+	int firstAbsoluteYindex;
+	int firstAbsoluteZindex;
 
 	Complex*** function;
 	Complex*** fourierImage;
 	Complex*** result;
+
+	Complex* function1d;
+	Complex* fourierImage1d;
+	Complex* result1d;
 
 
 	Simulation(MPI_Comm& comm);

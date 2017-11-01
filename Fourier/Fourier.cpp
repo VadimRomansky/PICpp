@@ -201,3 +201,19 @@ void fourierTranslation(Complex*** input, Complex*** output, bool direct, int xn
 	delete[] tempResult;
 	delete[] tempResult1;
 }
+
+Complex fastFourier1d(Complex* input, Complex* output, bool direct, int xnumberAdded, int N, int xnumberGeneral, MPI_Comm& comm, int* cartCoord, int* cartDim, int start, int step){
+	if(N == 1){
+		output[start] = input[start];
+	} else {
+		fastFourier1d(input, output, direct, xnumberAdded, N/2, xnumberGeneral, comm, cartCoord, cartDim, start, step*2);
+		fastFourier1d(input, output, direct, xnumberAdded, N/2, xnumberGeneral, comm, cartCoord, cartDim, start + step, step*2);
+		int sign = direct ? -1 : 1;
+		for(int k = 0; k < N/2; ++k){
+			Complex factor = complexExp((sign*2*pi*k)/N);
+			Complex t = output[start + step*k];
+			output[start + step*k] = t + factor*output[start + step*(k + N/2)];
+			output[start + step*(k+N/2)) = t - factor*output[start + step*(k + N/2)];
+		}
+	}
+}

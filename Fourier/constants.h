@@ -36,6 +36,8 @@ const double xsizeGeneral = 200;
 const double ysizeGeneral = 200;
 const double zsizeGeneral = 200;
 
+const int additionalBinNumber = 1;
+
 const int MPI_nx = 1;
 const int MPI_ny = 1;
 const int MPI_nz = 1;
