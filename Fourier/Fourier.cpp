@@ -202,23 +202,23 @@ void fourierTranslation(Complex*** input, Complex*** output, bool direct, int xn
 	delete[] tempResult1;
 }
 
-void fastFourier1d(Complex* input, Complex* output, bool direct, int xnumberAdded, int N, int xnumberGeneral, MPI_Comm& comm, int* cartCoord, int* cartDim, int start, int step, int* xabsoluteIndex){
+void fastFourier1d(Complex* input, Complex* output, bool direct, int xnumberAdded, int N, int xnumberGeneral, MPI_Comm& comm, int* cartCoord, int* cartDim, int start, int step, int* xabsoluteIndex, int fourierStart){
 	if(N == 1){
 		//if(start >= xabsoluteIndex[1+additionalBinNumber] && start < xabsoluteIndex[xnumberAdded - 1 - additionalBinNumber]){
-			output[start - xabsoluteIndex[0]] = input[start - xabsoluteIndex[0]];
+			output[fourierStart - xabsoluteIndex[0]] = input[start - xabsoluteIndex[0]];
 			if(!direct){
-				output[start - xabsoluteIndex[0]] = output[start - xabsoluteIndex[0]]/xnumberGeneral;
+				output[fourierStart - xabsoluteIndex[0]] = output[fourierStart - xabsoluteIndex[0]]/xnumberGeneral;
 			}
 		//}
 	} else {
-		fastFourier1d(input, output, direct, xnumberAdded, N/2, xnumberGeneral, comm, cartCoord, cartDim, start, step*2, xabsoluteIndex);
-		fastFourier1d(input, output, direct, xnumberAdded, N/2, xnumberGeneral, comm, cartCoord, cartDim, start + step, step*2, xabsoluteIndex);
+		fastFourier1d(input, output, direct, xnumberAdded, N/2, xnumberGeneral, comm, cartCoord, cartDim, start, step*2, xabsoluteIndex, fourierStart);
+		fastFourier1d(input, output, direct, xnumberAdded, N/2, xnumberGeneral, comm, cartCoord, cartDim, start + step, step*2, xabsoluteIndex, fourierStart + N/2);
 		int sign = direct ? -1 : 1;
 		for(int k = 0; k < N/2; ++k){
 			Complex factor = complexExp((sign*2*pi*k)/N);
-			Complex t = output[start + step*k - xabsoluteIndex[0]];
-			output[start + step*k - xabsoluteIndex[0]] = t + factor*output[start + step*(k + N/2) - xabsoluteIndex[0]];
-			output[start + step*(k+N/2) - xabsoluteIndex[0]] = t - factor*output[start + step*(k + N/2) - xabsoluteIndex[0]];
+			Complex t = output[fourierStart + k - xabsoluteIndex[0]];
+			output[fourierStart + k - xabsoluteIndex[0]] = t + factor*output[fourierStart + (k + N/2) - xabsoluteIndex[0]];
+			output[fourierStart + (k+N/2) - xabsoluteIndex[0]] = t - factor*output[fourierStart + (k + N/2) - xabsoluteIndex[0]];
 		}
 	}
 }

@@ -15,6 +15,6 @@ Complex fourierTranslationZoneHarmonic(Complex*** input, bool direct, int znumbe
 
 void fourierTranslation(Complex*** input, Complex*** output, bool direct, int xnumber, int ynumber, int znumber, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, MPI_Comm& cartComm, int* xabsoluteIndex, int* yabsoluteIndex, int* zabsoluteIndex, int* cartCoord, int* cartDim);
 
-void fastFourier1d(Complex* input, Complex* output, bool direct, int xnumberAdded, int N, int xnumberGeneral, MPI_Comm& comm, int* cartCoord, int* cartDim, int start, int step, int* xabsoluteIndex);
+void fastFourier1d(Complex* input, Complex* output, bool direct, int xnumberAdded, int N, int xnumberGeneral, MPI_Comm& comm, int* cartCoord, int* cartDim, int start, int step, int* xabsoluteIndex, int fourierStart);
 
 #endif

@@ -20,10 +20,10 @@
 //char* const outputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/v4/PIC++/output/";
 
 //for windows 64 home
-const char* const outputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/Fourier/output/";
+//const char* const outputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/Fourier/output/";
 
 //for windows 64
-//const char* const outputDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/PICpp/Fourier/output/";
+const char* const outputDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/PICpp/Fourier/output/";
 
 const int randomSeed = 1024;
 const double pi = 3.1415926535897932384626433832795028841971693993751;

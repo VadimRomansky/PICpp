@@ -286,6 +286,12 @@ void Simulation::createFiles(){
 	fclose(file);
 	file = fopen((outputDir + "final.dat").c_str(), "w");
 	fclose(file);
+	file = fopen((outputDir + "initial1d.dat").c_str(), "w");
+	fclose(file);
+	file = fopen((outputDir + "fourier1d.dat").c_str(), "w");
+	fclose(file);
+	file = fopen((outputDir + "final1d.dat").c_str(), "w");
+	fclose(file);
 }
 
 void Simulation::randomSimulation(){
@@ -310,10 +316,10 @@ void Simulation::randomSimulation(){
 	outputArray((outputDir + "final.dat").c_str(), result, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);*/
 
 	outputArray1d((outputDir + "initial1d.dat").c_str(), function1d, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
-	fastFourier1d(function1d, fourierImage1d, true, xnumberAdded, xnumberGeneral, xnumberGeneral, cartComm, cartCoord, cartDim, 0, 1, xabsoluteIndex);
+	fastFourier1d(function1d, fourierImage1d, true, xnumberAdded, xnumberGeneral, xnumberGeneral, cartComm, cartCoord, cartDim, 0, 1, xabsoluteIndex, 0);
 	outputArray1d((outputDir + "fourier1d.dat").c_str(), fourierImage1d, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
-	fastFourier1d(fourierImage1d, result1d, false, xnumberAdded, xnumberGeneral, xnumberGeneral, cartComm, cartCoord, cartDim, 0, 1, xabsoluteIndex);
-	outputArray1d((outputDir + "fina11d.dat").c_str(), result1d, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
+	fastFourier1d(fourierImage1d, result1d, false, xnumberAdded, xnumberGeneral, xnumberGeneral, cartComm, cartCoord, cartDim, 0, 1, xabsoluteIndex, 0);
+	outputArray1d((outputDir + "final1d.dat").c_str(), result1d, xnumberAdded, ynumberAdded, znumberAdded, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCoord, cartDim);
 }
 
 void Simulation::poissonSolving() {
