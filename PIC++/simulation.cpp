@@ -283,7 +283,7 @@ void Simulation::simulate() {
 				//updateMaxEderivativePoint();
 			}
 			//if(currentIteration > 150){
-			filterFields(5);
+			//filterFields(5);
 			//}
 			//filterFieldsLocal(5);
 		}

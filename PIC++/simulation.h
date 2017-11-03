@@ -780,7 +780,7 @@ public:
 
 	void cleanupDivergence(Vector3d*** field, double*** density);
 	void cleanupDivergence1d(Vector3d*** field, double*** density);
-	void substractMeanEfield();
+	void substractMeanEfield(double**** field);
 	void updateFieldByCleaning(Vector3d*** field);
 	void evaluateDivergenceCleaningField();
 	void createDivergenceCleanupInternalEquation(int i, int j, int k, Vector3d*** field, double*** density);

@@ -1,6 +1,6 @@
 ﻿0                        input type CGS or Lapenta
-20000 1 1                 grid numbers
-20000E7 1E7 1E7         gridsizes
+40000 1 1                 grid numbers
+40000E7 1E7 1E7         gridsizes
 5E8                    temperature
 -6E9 0 0                  velocity
 0 0 0                  elecctricField

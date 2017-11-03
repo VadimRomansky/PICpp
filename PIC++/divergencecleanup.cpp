@@ -372,8 +372,9 @@ void Simulation::cleanupDivergence1d(Vector3d*** field, double*** density) {
 
 	MPI_Barrier(cartComm);
 
-
-	//substractMeanEfield();
+	if(boundaryConditionType == PERIODIC){
+		//substractMeanEfield(divergenceCleaningField);
+	}
 
 	updateFieldByCleaning(field);
 
@@ -396,7 +397,7 @@ void Simulation::cleanupDivergence1d(Vector3d*** field, double*** density) {
 
 }
 
-void Simulation::substractMeanEfield() {
+void Simulation::substractMeanEfield(double**** field) {
 	Vector3d meanField = Vector3d(0, 0, 0);
 	double meanFieldSquare = 0;
 
@@ -426,9 +427,9 @@ void Simulation::substractMeanEfield() {
 		for (int i = minI; i < maxI; ++i) {
 			for (int j = minJ; j < maxJ; ++j) {
 				for (int k = minK; k < maxK; ++k) {
-						meanEfield[0] += Efield[i][j][k].x;
-						meanEfield[1] += Efield[i][j][k].y;
-						meanEfield[2] += Efield[i][j][k].z;
+						meanEfield[0] += field[i][j][k][0];
+						meanEfield[1] += field[i][j][k][1];
+						meanEfield[2] += field[i][j][k][2];
 				}
 			}
 		}
@@ -445,7 +446,7 @@ void Simulation::substractMeanEfield() {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				//if (i < xnumber - additionalBinNumber ||  cartCoord[0] < cartDim[0] - 1 || boundaryConditionType == PERIODIC) {
-					newEfield[i][j][k] -= meanField;
+					field[i][j][k][0] -= meanField.x;
 				//}
 			}
 		}
