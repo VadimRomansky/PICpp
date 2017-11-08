@@ -34,7 +34,8 @@ void Simulation::moveParticles() {
 				printf("move particle number %d rank %d\n", i, rank);
 			}
 		}
-		moveParticle(particles[i]);
+		//moveParticle(particles[i]);
+		moveParticle(particles[i], 0, 10);
 		//particles[i]->momentum.x = 0;
 	}
 
@@ -380,6 +381,183 @@ void Simulation::moveParticle(Particle* particle) {
 		particle->crossBoundaryCount++;
 		particle->escaped = true;
 	}
+}
+
+void Simulation::moveParticle(Particle* particle, int cur, int N) {
+	double localTheta = cur*1.0/N;
+	if(cur == N){
+		sortParticleToEscaped(particle);
+		return;
+	}
+	updateCorrelationMaps(particle);
+	particle->prevMomentum = particle->getMomentum();
+	Vector3d E;
+	Vector3d B;
+
+	Vector3d oldE;
+	Vector3d oldB;
+
+	if(solverType == BUNEMAN){
+		E = (correlationBunemanEfield(particle) + correlationBunemanNewEfield(particle))/2.0;
+		B = (correlationBunemanBfield(particle) + correlationBunemanNewBfield(particle))/2.0;
+	} else {
+		E = correlationEfield(particle)*(1 - localTheta - theta/N) + correlationNewEfield(particle)*(localTheta + theta/N);
+		//E = correlationNewEfield(particle);
+		//B = correlationBfield(particle)*(1-theta) + correlationNewBfield(particle)*theta;
+		B = correlationBfield(particle)*(1 - localTheta) + correlationNewBfield(particle)*localTheta;
+	}
+	//B = B0;
+	//printf("E = %g %g %g\n", E.x, E.y, E.z);
+	//printf("B = %g %g %g\n", B.x, B.y, B.z);
+
+	Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+	Vector3d newVelocity = velocity;
+	Vector3d middleVelocity = velocity;
+
+	oldE = correlationEfield(particle)*(1 - localTheta - theta/N);
+	oldB = correlationBfield(particle)*(1 - localTheta);
+
+	//see Noguchi
+	double gamma = particle->gammaFactor(speed_of_light_normalized);
+	double beta = 0.5 * particle->charge * deltaT / particle->mass;
+
+	particle->rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
+
+	int particleIterations = 5;
+
+
+	Particle tempParticle = *particle;
+
+	//tempParticle.addMomentum((E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT);
+
+
+	tempParticle.addMomentum((E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT/N);
+	alertNaNOrInfinity(E.x, "E.x = Nan in move particle\n");
+
+	newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
+
+	middleVelocity = velocity * (1 - eta) + newVelocity * eta;
+
+	tempParticle.coordinates.x += middleVelocity.x * eta * deltaT;
+	tempParticle.coordinates.y += middleVelocity.y * eta * deltaT;
+	tempParticle.coordinates.z += middleVelocity.z * eta * deltaT;
+
+	if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
+		particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
+			middleVelocity.x * (1 - eta) * deltaT/N);
+		particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT/N;
+		particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * (1 - eta) * deltaT/N;
+		newVelocity.x = fabs(newVelocity.x);
+		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+		//sortParticleToEscaped(particle);
+		moveParticle(particle, cur + 1, N);
+		return;
+	}
+
+
+	Vector3d prevVelocity = velocity;
+	int i = 0;
+	Vector3d velocityHat = (particle->rotationTensor * particle->gammaFactor(
+		speed_of_light_normalized) * velocity);
+	Vector3d Eperp = E - velocity*(velocity.scalarMult(E)/(velocity.scalarMult(velocity)));
+	Vector3d electricVelocityShift = (Eperp * (2 * eta * beta / gamma));
+	//velocityHat += electricVelocityShift;
+
+	if (velocityHat.norm() > speed_of_light_normalized) {
+		//printf("velocity Hat norm > c\n");
+		//MPI_Finalize();
+		//exit(0);
+	}
+	double a = tempParticle.gammaFactor(speed_of_light_normalized);
+	double etaDeltaT = eta * deltaT/N;
+	double restEtaDeltaT = (1.0 - eta) * deltaT/N;
+	double velocityNorm = velocity.norm();
+
+	Vector3d prevMomentum = particle->getMomentum();
+	Vector3d momentum = tempParticle.getMomentum();
+	Vector3d newMomentum = tempParticle.getMomentum();
+	double momentumNorm = momentum.norm();
+
+	//double error = (prevVelocity - newVelocity).norm();
+	double error = (prevMomentum - newMomentum).norm();
+	//error = 0;
+
+
+	while (error > particleVelocityErrorLevel * momentumNorm && i < particleIterations) {
+		++i;
+		prevVelocity = newVelocity;
+		prevMomentum = newMomentum;
+
+		tempParticle = *particle;
+		Vector3d rotatedE = particle->rotationTensor * E;
+
+		middleVelocity = velocityHat + rotatedE * beta;
+
+		tempParticle.coordinates.x += (middleVelocity.x * etaDeltaT);
+		tempParticle.coordinates.y += (middleVelocity.y * etaDeltaT);
+		tempParticle.coordinates.z += (middleVelocity.z * etaDeltaT);
+
+		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
+			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
+				middleVelocity.x * restEtaDeltaT);
+			particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * restEtaDeltaT;
+			particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * restEtaDeltaT;
+
+			newVelocity.x = fabs(newVelocity.x);
+			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+			//sortParticleToEscaped(particle);
+			moveParticle(particle, cur+1, N);
+			return;
+
+		}
+
+
+		//correctParticlePosition(tempParticle);
+		updateCorrelationMaps(tempParticle);
+
+		if(solverType == BUNEMAN){
+			E = (correlationBunemanEfield(tempParticle) + correlationBunemanNewEfield(tempParticle))/2.0;
+			B = (correlationBunemanBfield(tempParticle) + correlationBunemanNewBfield(tempParticle))/2.0;
+		} else {
+			E = correlationEfield(tempParticle)*(1 - localTheta - theta/N) + correlationNewEfield(tempParticle)*(localTheta + theta/N);
+			//E = correlationNewEfield(particle);
+			//B = correlationBfield(particle)*(1-theta) + correlationNewBfield(particle)*theta;
+			B = correlationBfield(tempParticle)*(1 - localTheta) + correlationNewBfield(tempParticle)*localTheta;
+		}
+		//E = E0;
+		//B = B0;
+
+		tempParticle.addMomentum((E + (middleVelocity.vectorMult(B) / speed_of_light_normalized)) * (particle->charge * deltaT/N));
+		newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
+		newMomentum = tempParticle.getMomentum();
+		//error = (prevVelocity - newVelocity).norm();
+		error = (prevMomentum - newMomentum).norm();
+	}
+
+	particle->copyMomentum(tempParticle);
+
+	particle->coordinates.x += middleVelocity.x * deltaT/N;
+
+	particle->coordinates.y += middleVelocity.y * deltaT/N;
+	particle->coordinates.z += middleVelocity.z * deltaT/N;
+
+	//correctParticlePosition(particle);
+	/*if(particle->coordinates.x > xgrid[xnumberAdded - additionalBinNumber]){
+		printf("aaa\n");
+	}*/
+
+	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
+		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
+			particle->reflectMomentumX();
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+			//return;
+		}
+	}
+
+	moveParticle(particle, cur + 1, N);
 }
 
 void Simulation::moveParticleBoris(Particle* particle) {

@@ -705,7 +705,7 @@ void Simulation::createInternalECEquationZ(int i, int j, int k) {
 }
 
 void Simulation::createInternalEquationX(int i, int j, int k) {
-	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT);
+	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT)*speed_of_light_correction_sqr;
 	//c_theta_deltaT2 = 0;
 	double element = 1.0 - dielectricTensor[i][j][k].matrix[0][0];
 	if(isInResistiveLayer(i, j, k)){
@@ -1201,7 +1201,7 @@ void Simulation::createInternalEquationX(int i, int j, int k) {
 }
 
 void Simulation::createInternalEquationY(int i, int j, int k) {
-	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT);
+	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT)*speed_of_light_correction_sqr;
 	//c_theta_deltaT2 = 0;
 	double element = 1.0 - dielectricTensor[i][j][k].matrix[1][1];
 	if(isInResistiveLayer(i, j, k)){
@@ -1652,7 +1652,7 @@ void Simulation::createInternalEquationY(int i, int j, int k) {
 }
 
 void Simulation::createInternalEquationZ(int i, int j, int k) {
-	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT);
+	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT)*speed_of_light_correction_sqr;
 	double element = 1.0 - dielectricTensor[i][j][k].matrix[2][2];
 	//c_theta_deltaT2 = 0;
 	if(isInResistiveLayer(i, j, k)){
@@ -2120,8 +2120,8 @@ void Simulation::createInternalEquation(int i, int j, int k) {
 	//alertNaNOrInfinity(gradDensity.z, "gradDensity z = NaN in create internal\n");
 	if(solverType == IMPLICIT){
 		rightPart = rightPart +
-			(rotorB * speed_of_light_normalized - (electricFlux[i][j][k] * 4 * pi)) *(theta * deltaT) -
-			(gradDensity * speed_of_light_normalized_sqr * theta * theta * deltaT * deltaT * 4 * pi);
+			(rotorB * speed_of_light_normalized *speed_of_light_correction- (electricFlux[i][j][k] * 4 * pi)) *(theta * deltaT) -
+			(gradDensity * speed_of_light_normalized_sqr * speed_of_light_correction_sqr * theta * theta * deltaT * deltaT * 4 * pi);
 	} else if(solverType == IMPLICIT_EC){
 		rightPart = rightPart +
 			(rotorB * speed_of_light_normalized - (electricFlux[i][j][k] * 4 * pi)) *(theta * deltaT);
@@ -2200,9 +2200,9 @@ void Simulation::evaluateMagneticField() {
 			for (int k = 0; k < znumberAdded; ++k) {
 				rotE[i][j][k] = evaluateRotTempE(i, j, k);
 				if(isInResistiveLayer(i, j, k)){
-					newBfield[i][j][k] = (Bfield[i][j][k] + B0*(fakeCondactivity*deltaT) - (rotE[i][j][k]) * (speed_of_light_normalized * deltaT))/(1 + fakeCondactivity*deltaT);
+					newBfield[i][j][k] = (Bfield[i][j][k] + B0*(fakeCondactivity*deltaT) - (rotE[i][j][k]) * (speed_of_light_normalized * speed_of_light_correction * deltaT))/(1 + fakeCondactivity*deltaT);
 				} else {
-					newBfield[i][j][k] = Bfield[i][j][k] - (rotE[i][j][k]) * (speed_of_light_normalized * deltaT);
+					newBfield[i][j][k] = Bfield[i][j][k] - (rotE[i][j][k]) * (speed_of_light_normalized * speed_of_light_correction * deltaT);
 				}
 				if ((boundaryConditionType != PERIODIC) && (cartCoord[0] == cartDim[0] - 1) && (i >= xnumberAdded - 1 - additionalBinNumber)) {
 					newBfield[i][j][k] = B0;

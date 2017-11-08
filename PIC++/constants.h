@@ -1,6 +1,9 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#include "math.h"
+#include "stdio.h"
+
 const int initialRandom = 0;
 const int randomSeed = 4096;
 
@@ -27,15 +30,19 @@ const double epsilon = 1E-16;
 const double maxErrorLevel = 1E-8;
 const double maxCleanupErrorLevel = 1E-8;
 const double particleVelocityErrorLevel = 1E-14;
-const double timeEpsilonKourant = 0.2;
-const double timeEpsilonFields = 0.2;
-const double timeEpsilonPlasma = 0.2;
-const double timeEpsilonCapture = 0.2;
+const double timeEpsilonKourant = 0.4;
+const double timeEpsilonFields = 0.4;
+const double timeEpsilonPlasma = 0.4;
+const double timeEpsilonCapture = 0.4;
 const double relativisticPrecision = 0.000001;
+const double betaGodfrey = 0.25*(1.0 - timeEpsilonKourant*timeEpsilonKourant);
 const double initialTheta =  0.5;
+//const double initialTheta =  sqrt(betaGodfrey/timeEpsilonKourant);
 const double smoothingParameter = 0.001;
 const double particleSplitLevel = 3;
 const double particleSplitAngle = 0.02;
+const double speed_of_light_correction = 1;
+const double speed_of_light_correction_sqr = speed_of_light_correction*speed_of_light_correction;
 const int splitParticlesParameter = 100;
 const int pnumber = 500;
 const int writeParameter = 100;
