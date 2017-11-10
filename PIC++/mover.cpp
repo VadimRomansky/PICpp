@@ -34,8 +34,8 @@ void Simulation::moveParticles() {
 				printf("move particle number %d rank %d\n", i, rank);
 			}
 		}
-		//moveParticle(particles[i]);
-		moveParticle(particles[i], 0, 10);
+		moveParticle(particles[i]);
+		//moveParticle(particles[i], 0, 10);
 		//particles[i]->momentum.x = 0;
 	}
 
@@ -220,7 +220,7 @@ void Simulation::moveParticle(Particle* particle) {
 		return;
 	}
 	//
-	tempParticle.addMomentum((E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT);
+	tempParticle.addMomentum((E + (velocity.vectorMult(B) / (speed_of_light_normalized*speed_of_light_correction))) * particle->charge * deltaT);
 	alertNaNOrInfinity(E.x, "E.x = Nan in move particle\n");
 
 	newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
@@ -316,7 +316,7 @@ void Simulation::moveParticle(Particle* particle) {
 		//E = E0;
 		//B = B0;
 
-		tempParticle.addMomentum((E + (middleVelocity.vectorMult(B) / speed_of_light_normalized)) * (particle->charge * deltaT));
+		tempParticle.addMomentum((E + (middleVelocity.vectorMult(B) / (speed_of_light_normalized*speed_of_light_correction))) * (particle->charge * deltaT));
 		newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
 		newMomentum = tempParticle.getMomentum();
 		//error = (prevVelocity - newVelocity).norm();
@@ -691,16 +691,16 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d& velocity
 
 	double G = ((beta * (EField.scalarMult(velocity)) / speed_of_light_normalized_sqr) + gamma);
 	beta = beta / G;
-	double beta2c = beta * beta / speed_of_light_normalized_sqr;
+	double beta2c = beta * beta / (speed_of_light_normalized_sqr * speed_of_light_correction_sqr);
 	double denominator = G * (1 + beta2c * BField.scalarMult(BField));
 
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
-			result.matrix[i][j] = Kronecker.matrix[i][j] + (beta * beta * BField[i] * BField[j] / speed_of_light_normalized_sqr);
+			result.matrix[i][j] = Kronecker.matrix[i][j] + (beta2c * BField[i] * BField[j]);
 			//for (int k = 0; k < 3; ++k) {
 			for (int l = 0; l < 3; ++l) {
 				if (LeviCivita[j][i][l] != 0) {
-					result.matrix[i][j] -= (beta * LeviCivita[j][i][l] * BField[l] / speed_of_light_normalized);
+					result.matrix[i][j] -= (beta * LeviCivita[j][i][l] * BField[l] / (speed_of_light_normalized * speed_of_light_correction));
 					//result.matrix[i][j] += (beta * LeviCivita[j][k][l] * Kronecker.matrix[i][k] * BField[l] / speed_of_light_normalized);
 				}
 			}
