@@ -23,10 +23,18 @@ load distribution_electrons9.dat;
 
 Np = 500;
 
-Nt = 11;
+Nt(1:10) = 11;
 
-
-c = Nt - 1;
+%Nt(1) = fix(size(distribution_protons0,1)/Np) - 1;
+Nt(2) = fix(size(distribution_protons1,1)/Np) - 1;
+Nt(3) = fix(size(distribution_protons2,1)/Np) - 1;
+Nt(4) = fix(size(distribution_protons3,1)/Np) - 1;
+Nt(5) = fix(size(distribution_protons4,1)/Np) - 1;
+Nt(6) = fix(size(distribution_protons5,1)/Np) - 1;
+Nt(7) = fix(size(distribution_protons6,1)/Np) - 1;
+Nt(8) = fix(size(distribution_protons7,1)/Np) - 1;
+Nt(9) = fix(size(distribution_protons8,1)/Np) - 1;
+Nt(10) = fix(size(distribution_protons9,1)/Np) - 1;
 
 Fp(1:Np, 1:10) = 0;
 Fe(1:Np, 1:10) = 0;
@@ -44,48 +52,48 @@ Color = {[.7,.3,.3],'red','green','blue','black','yellow','cyan','magenta',[.5,.
 
 for i=1:Np,
    %Pp(i,1) = distribution_protons0(i + c*Np,1);
-   Pp(i,2) = distribution_protons1(i + c*Np,1);
-   Pp(i,3) = distribution_protons2(i + c*Np,1);
-   Pp(i,4) = distribution_protons3(i + c*Np,1);
-   Pp(i,5) = distribution_protons4(i + c*Np,1);
-   Pp(i,6) = distribution_protons5(i + c*Np,1);
-   Pp(i,7) = distribution_protons6(i + c*Np,1);
-   Pp(i,8) = distribution_protons7(i + c*Np,1);
-   Pp(i,9) = distribution_protons8(i + c*Np,1);
-   Pp(i,10) = distribution_protons9(i + c*Np,1);
+   Pp(i,2) = distribution_protons1(i + Nt(2)*Np,1);
+   Pp(i,3) = distribution_protons2(i + Nt(3)*Np,1);
+   Pp(i,4) = distribution_protons3(i + Nt(4)*Np,1);
+   Pp(i,5) = distribution_protons4(i + Nt(5)*Np,1);
+   Pp(i,6) = distribution_protons5(i + Nt(6)*Np,1);
+   Pp(i,7) = distribution_protons6(i + Nt(7)*Np,1);
+   Pp(i,8) = distribution_protons7(i + Nt(8)*Np,1);
+   Pp(i,9) = distribution_protons8(i + Nt(9)*Np,1);
+   Pp(i,10) = distribution_protons9(i + Nt(10)*Np,1);
    
    %Fp(i,1) = distribution_protons0(i + c*Np, 2)*Pp(i,1)*Pp(i,1);
-   Fp(i,2) = distribution_protons1(i + c*Np, 2)*Pp(i,2)*Pp(i,2);
-   Fp(i,3) = distribution_protons2(i + c*Np, 2)*Pp(i,3)*Pp(i,3);
-   Fp(i,4) = distribution_protons3(i + c*Np, 2)*Pp(i,4)*Pp(i,4);
-   Fp(i,5) = distribution_protons4(i + c*Np, 2)*Pp(i,5)*Pp(i,5);
-   Fp(i,6) = distribution_protons5(i + c*Np, 2)*Pp(i,6)*Pp(i,6);
-   Fp(i,7) = distribution_protons6(i + c*Np, 2)*Pp(i,7)*Pp(i,7);
-   Fp(i,8) = distribution_protons7(i + c*Np, 2)*Pp(i,8)*Pp(i,8);
-   Fp(i,9) = distribution_protons8(i + c*Np, 2)*Pp(i,9)*Pp(i,9);
-   Fp(i,10) = distribution_protons9(i + c*Np, 2)*Pp(i,10)*Pp(i,10);
+   Fp(i,2) = distribution_protons1(i + Nt(2)*Np, 2)*Pp(i,2)*Pp(i,2);
+   Fp(i,3) = distribution_protons2(i + Nt(3)*Np, 2)*Pp(i,3)*Pp(i,3);
+   Fp(i,4) = distribution_protons3(i + Nt(4)*Np, 2)*Pp(i,4)*Pp(i,4);
+   Fp(i,5) = distribution_protons4(i + Nt(5)*Np, 2)*Pp(i,5)*Pp(i,5);
+   Fp(i,6) = distribution_protons5(i + Nt(6)*Np, 2)*Pp(i,6)*Pp(i,6);
+   Fp(i,7) = distribution_protons6(i + Nt(7)*Np, 2)*Pp(i,7)*Pp(i,7);
+   Fp(i,8) = distribution_protons7(i + Nt(8)*Np, 2)*Pp(i,8)*Pp(i,8);
+   Fp(i,9) = distribution_protons8(i + Nt(9)*Np, 2)*Pp(i,9)*Pp(i,9);
+   Fp(i,10) = distribution_protons9(i + Nt(10)*Np, 2)*Pp(i,10)*Pp(i,10);
    
    %Pe(i,1) = distribution_electrons0(i + c*Np,1);
-   Pe(i,2) = distribution_electrons1(i + c*Np,1);
-   Pe(i,3) = distribution_electrons2(i + c*Np,1);
-   Pe(i,4) = distribution_electrons3(i + c*Np,1);
-   Pe(i,5) = distribution_electrons4(i + c*Np,1);
-   Pe(i,6) = distribution_electrons5(i + c*Np,1);
-   Pe(i,7) = distribution_electrons6(i + c*Np,1);
-   Pe(i,8) = distribution_electrons7(i + c*Np,1);
-   Pe(i,9) = distribution_electrons8(i + c*Np,1);
-   Pe(i,10) = distribution_electrons9(i + c*Np,1);
+   Pe(i,2) = distribution_electrons1(i + Nt(2)*Np,1);
+   Pe(i,3) = distribution_electrons2(i + Nt(3)*Np,1);
+   Pe(i,4) = distribution_electrons3(i + Nt(4)*Np,1);
+   Pe(i,5) = distribution_electrons4(i + Nt(5)*Np,1);
+   Pe(i,6) = distribution_electrons5(i + Nt(6)*Np,1);
+   Pe(i,7) = distribution_electrons6(i + Nt(7)*Np,1);
+   Pe(i,8) = distribution_electrons7(i + Nt(8)*Np,1);
+   Pe(i,9) = distribution_electrons8(i + Nt(9)*Np,1);
+   Pe(i,10) = distribution_electrons9(i + Nt(10)*Np,1);
    
    %Fe(i,1) = distribution_electrons0(i + c*Np, 2)*Pe(i,1)*Pe(i,1);
-   Fe(i,2) = distribution_electrons1(i + c*Np, 2)*Pe(i,2)*Pe(i,2);
-   Fe(i,3) = distribution_electrons2(i + c*Np, 2)*Pe(i,3)*Pe(i,3);
-   Fe(i,4) = distribution_electrons3(i + c*Np, 2)*Pe(i,4)*Pe(i,4);
-   Fe(i,5) = distribution_electrons4(i + c*Np, 2)*Pe(i,5)*Pe(i,5);
-   Fe(i,6) = distribution_electrons5(i + c*Np, 2)*Pe(i,6)*Pe(i,6);
-   Fe(i,7) = distribution_electrons6(i + c*Np, 2)*Pe(i,7)*Pe(i,7);
-   Fe(i,8) = distribution_electrons7(i + c*Np, 2)*Pe(i,8)*Pe(i,8);
-   Fe(i,9) = distribution_electrons8(i + c*Np, 2)*Pe(i,9)*Pe(i,9);
-   Fe(i,10) = distribution_electrons9(i + c*Np, 2)*Pe(i,10)*Pe(i,10);
+   Fe(i,2) = distribution_electrons1(i + Nt(2)*Np, 2)*Pe(i,2)*Pe(i,2);
+   Fe(i,3) = distribution_electrons2(i + Nt(3)*Np, 2)*Pe(i,3)*Pe(i,3);
+   Fe(i,4) = distribution_electrons3(i + Nt(4)*Np, 2)*Pe(i,4)*Pe(i,4);
+   Fe(i,5) = distribution_electrons4(i + Nt(5)*Np, 2)*Pe(i,5)*Pe(i,5);
+   Fe(i,6) = distribution_electrons5(i + Nt(6)*Np, 2)*Pe(i,6)*Pe(i,6);
+   Fe(i,7) = distribution_electrons6(i + Nt(7)*Np, 2)*Pe(i,7)*Pe(i,7);
+   Fe(i,8) = distribution_electrons7(i + Nt(8)*Np, 2)*Pe(i,8)*Pe(i,8);
+   Fe(i,9) = distribution_electrons8(i + Nt(9)*Np, 2)*Pe(i,9)*Pe(i,9);
+   Fe(i,10) = distribution_electrons9(i + Nt(10)*Np, 2)*Pe(i,10)*Pe(i,10);
 end;
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 

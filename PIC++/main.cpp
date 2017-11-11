@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 	//printf("hello, world!");
 	//exit(0);
 	if(rank == 0){
-		printf("start version 01.07.2017 3:00\n");
+		printf("start version 16.11.2017 21:00\n");
 	}
 
 	for(int i = 0; i < size; ++i) {

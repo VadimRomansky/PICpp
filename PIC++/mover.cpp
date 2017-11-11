@@ -879,8 +879,9 @@ void Simulation::exchangeParticles() {
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 		} else {
-			//theoreticalEnergy += particle->energy(speed_of_light_normalized);
-			//theoreticalMomentum += particle->getMomentum();
+			theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight *
+					sqr(scaleFactor / plasma_period);
+			theoreticalMomentum += particle->getMomentum()*particle->weight*scaleFactor/plasma_period;
 			particle->escaped = false;
 			particles.push_back(particle);
 		}
@@ -936,8 +937,9 @@ void Simulation::exchangeParticles() {
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 		} else {
-			//theoreticalEnergy += particle->energy(speed_of_light_normalized);
-			//theoreticalMomentum += particle->getMomentum();
+			theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight *
+					sqr(scaleFactor / plasma_period);
+			theoreticalMomentum += particle->getMomentum()*particle->weight*scaleFactor/plasma_period;
 			particle->escaped = false;
 			particles.push_back(particle);
 		}
@@ -985,8 +987,9 @@ void Simulation::exchangeParticles() {
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
 		Particle* particle = tempParticles[pcount];
-		//theoreticalEnergy += particle->energy(speed_of_light_normalized);
-		//theoreticalMomentum += particle->getMomentum();
+		theoreticalEnergy += particle->energy(speed_of_light_normalized)*particle->weight *
+					sqr(scaleFactor / plasma_period);
+		theoreticalMomentum += particle->getMomentum()*particle->weight*scaleFactor/plasma_period;
 		particle->escaped = false;
 		particles.push_back(particle);
 	}

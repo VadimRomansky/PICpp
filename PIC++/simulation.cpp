@@ -1195,7 +1195,7 @@ void Simulation::updateTheoreticalEnergy(){
 	//if (currentIteration > 0) {
 		//if (boundaryConditionType != PERIODIC) {
 
-			/*for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
+			for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
 				Particle* particle = escapedParticlesLeft[i];
 				theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
 					sqr(scaleFactor / plasma_period);
@@ -1232,7 +1232,7 @@ void Simulation::updateTheoreticalEnergy(){
 				theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
 					sqr(scaleFactor / plasma_period);
 				theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
-			}*/
+			}
 
 			for (int j = minJ; j < maxJ; ++j) {
 				for (int k = minK; k < maxK; ++k) {

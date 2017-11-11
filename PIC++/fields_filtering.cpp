@@ -51,17 +51,17 @@ void Simulation::filterFields(int cutWaveNumber){
 		filterFieldGeneral(newEfield, cutWaveNumber);
 		filterFieldGeneral(newBfield, cutWaveNumber);
 	} else {
-		if(derExPoint < xnumberGeneral - 2*frontHalfWidth){
-		//if(derConcentrationPoint < xnumberGeneral - 2*frontHalfWidth){
+		//if(derExPoint < xnumberGeneral - 2*frontHalfWidth){
+		if(derConcentrationPoint < xnumberGeneral - 2*frontHalfWidth){
 
 			//filterFieldGeneralRightMirror(newEfield, cutWaveNumber, 0);
 			//filterFieldGeneralRight(newEfield, cutWaveNumber, constMeanElevelPoint);
 
-			filterFieldGeneralRight(newEfield, cutWaveNumber, derExPoint + frontHalfWidth);
-			filterFieldGeneralRight(newBfield, cutWaveNumber, derExPoint + frontHalfWidth);
+			//filterFieldGeneralRight(newEfield, cutWaveNumber, derExPoint + frontHalfWidth);
+			//filterFieldGeneralRight(newBfield, cutWaveNumber, derExPoint + frontHalfWidth);
 
-			//filterFieldGeneralRight(newEfield, cutWaveNumber, derConcentrationPoint + frontHalfWidth);
-			//filterFieldGeneralRight(newBfield, cutWaveNumber, derConcentrationPoint + frontHalfWidth);
+			filterFieldGeneralRight(newEfield, cutWaveNumber, derConcentrationPoint + frontHalfWidth);
+			filterFieldGeneralRight(newBfield, cutWaveNumber, derConcentrationPoint + frontHalfWidth);
 		}
 		/*if(derExPoint > 10*frontHalfWidth){
 			filterFieldGeneralLeft(newEfield, cutWaveNumber, derExPoint - frontHalfWidth);
