@@ -717,6 +717,7 @@ public:
 	void initializeHomogenouseFlow();
 	void initializeKolmogorovSpectrum(int start, int end, double turbulenceFraction);
 	void initializeFake();
+	void initializeTestOneParticle();
 	void synchronizeParticleNumber();
 	void createArrays();
 	void createParticleTypes(double* concentrations, int* particlesPerBin);

@@ -184,6 +184,8 @@ void Simulation::moveParticle(Particle* particle) {
 	Vector3d E;
 	Vector3d B;
 
+	double oldGamma = particle->gammaFactor(speed_of_light_normalized);
+
 	if(solverType == BUNEMAN){
 		E = (correlationBunemanEfield(particle) + correlationBunemanNewEfield(particle))/2.0;
 		B = (correlationBunemanBfield(particle) + correlationBunemanNewBfield(particle))/2.0;
@@ -329,6 +331,12 @@ void Simulation::moveParticle(Particle* particle) {
 
 	particle->coordinates.y += middleVelocity.y * deltaT;
 	particle->coordinates.z += middleVelocity.z * deltaT;
+
+	double newGamma = particle->gammaFactor(speed_of_light_normalized);
+
+	if(fabs(newGamma - oldGamma) > 0.1){
+		printf("delta gamma > 0.1\n");
+	}
 
 	//correctParticlePosition(particle);
 	/*if(particle->coordinates.x > xgrid[xnumberAdded - additionalBinNumber]){

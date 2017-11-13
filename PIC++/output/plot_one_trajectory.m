@@ -44,3 +44,9 @@ plot(particlesTrajectories(1:N1,3 + (n-1)*8),particlesTrajectories(1:N1,6 + (n-1
 xlabel ('x cm');
 ylabel ('px g*cm/s');
 grid ;
+
+figure(8);
+plot(particlesTrajectories(1:N1,3 + (n-1)*8),particlesTrajectories(1:N1,4 + (n-1)*8), 'red');
+xlabel ('x cm');
+ylabel ('y cm');
+grid ;

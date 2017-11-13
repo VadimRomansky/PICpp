@@ -47,6 +47,7 @@ void Simulation::simulate() {
 		//createParticles();
 		//initializeShockWave();
 		//initializeFake();
+		//initializeTestOneParticle();
 	}
 
 	outputGeneralInitialParameters((outputDir + "initialParameters.dat").c_str(), (outputDir + "initialParametersWithText.dat").c_str(), this);
@@ -83,13 +84,13 @@ void Simulation::simulate() {
 			//cleanupDivergenceBuneman();
 			//cleanUpDivergenceBunemanMagnetic();
 		} else {
-			//cleanupDivergence(newEfield, chargeDensity);
+			cleanupDivergence(newEfield, chargeDensity);
 			//cleanupDivergenceMagnetic();
 		}
 	}
 	updateFields();
 	exchangeGeneralBfield(Bfield);
-	//updateEnergy();
+	updateEnergy();
 
 	for (int i = 0; i < typesNumber; ++i) {
 		types[i].injectionLength = types[i].particesDeltaX - 0.0001 * deltaX;
@@ -272,7 +273,7 @@ void Simulation::simulate() {
 				//cleanupDivergenceBuneman();
 				//cleanupDivergenceBunemanMagnetic();
 			} else {
-				//cleanupDivergence(newEfield, chargeDensity);
+				cleanupDivergence(newEfield, chargeDensity);
 				//cleanupDivergenceMagnetic();
 			}
 		}
@@ -283,7 +284,7 @@ void Simulation::simulate() {
 				//updateMaxEderivativePoint();
 			}
 			//if(currentIteration > 150){
-			//filterFields(5);
+			filterFields(5);
 			//}
 			//filterFieldsLocal(5);
 		}
