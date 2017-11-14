@@ -336,6 +336,7 @@ void Simulation::moveParticle(Particle* particle) {
 
 	if(fabs(newGamma - oldGamma) > 0.1){
 		printf("delta gamma > 0.1\n");
+		printf("oldGamma = %g newGamma = %g delta gamma = %g\n", oldGamma, newGamma, newGamma -oldGamma);
 	}
 
 	//correctParticlePosition(particle);
