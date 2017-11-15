@@ -284,7 +284,7 @@ void Simulation::simulate() {
 				//updateMaxEderivativePoint();
 			}
 			//if(currentIteration > 150){
-			filterFields(5);
+			//filterFields(5);
 			//}
 			//filterFieldsLocal(5);
 		}
@@ -850,6 +850,7 @@ void Simulation::updateDeltaT() {
 		double derEmax = 0;
 		double B = B0.norm();
 		double E = E0.norm();
+		double nmax = types[0].concentration;
 		if(solverType == BUNEMAN){
 			for (int i = 0; i < xnumberAdded; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
@@ -905,6 +906,16 @@ void Simulation::updateDeltaT() {
 						if ((Efield[i][j][k+1] - Efield[i][j][k]).norm() / deltaZ > derEmax) {
 							derEmax = (Efield[i][j+1][k] - Efield[i][j][k]).norm() / deltaZ;
 						}
+					}
+				}
+			}
+		}
+
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					if(concentrations[0] > nmax){
+						nmax = concentrations[0];
 					}
 				}
 			}
@@ -973,6 +984,10 @@ void Simulation::updateDeltaT() {
 
 		deltaT = min2(deltaT, timeEpsilonPlasma / omega);
 
+		double maxOmega = sqrt(4 * pi * nmax * types[0].charge * types[0].charge / types[0].mass);
+
+		deltaT = min2(deltaT, timeEpsilonPlasma / maxOmega);
+
 
 		double thermalMomentum = sqrt(massElectron * kBoltzman_normalized * temperature) + massElectron * V0.norm();
 
@@ -990,13 +1005,13 @@ void Simulation::updateDeltaT() {
 			              timeEpsilonFields * gamma * massElectron * speed_of_light_normalized / (electron_charge_normalized * B));
 		}
 		if (E > 0) {
-			/*if(timeEpsilonFields * massElectron * speed_of_light_normalized / (electron_charge_normalized * E) < deltaT){
+			if(timeEpsilonFields * massElectron * speed_of_light_normalized / (electron_charge_normalized * E) < deltaT){
 				if(rank == 0){
 					printf("electric acceleration time limitation\n");
 				}
 			}
 			deltaT = min2(deltaT,
-			              timeEpsilonFields * massElectron * speed_of_light_normalized / (electron_charge_normalized * E));*/
+			              timeEpsilonFields * massElectron * speed_of_light_normalized / (electron_charge_normalized * E));
 		}
 
 		if (omegaCapture > 0) {

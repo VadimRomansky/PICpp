@@ -7,7 +7,7 @@ Our code is fully three dimensional and parallelized with MPI technology, which 
 In simulation setup the homogeneous plasma, which flows in through the right boundary
 and collides with the reflecting superconducting wall on the left boundary. 
   
- Simulations are one-dimensional and have following parameters: initial flow lorenz-factor $\gamma = 1.5$, number densities $n_e = 10^{-4} \rm{cm}^{-3}$, $n_p = 10^{-4} \rm{cm}^{-3}$ , temperature $5\cdot10^8 \rm{K}$, magnetic field $B = 10^{-4} \rm{G}$, the full size of the box $L = 4\cdot10^{12} \rm{cm}$, the number of cells $N=4\cdot10^4$. Electron mass is reduced to $m_e = \frac{m_p}{20}$. The full time of simulation is $T = 5000 {\omega_p}^{-1}$. $\theta$ is angle between flow velocity and magnetic field. We present results of particle spectrum in several simulations with different $\theta$. 
+ Simulations are one-dimensional and have following parameters: initial flow lorenz-factor $\gamma = 1.5$, number densities $n_e = 10^{-4} \rm{cm}^{-3}$, $n_p = 10^{-4} \rm{cm}^{-3}$ , temperature $5\cdot10^8 \rm{K}$, magnetic field $B = 10^{-4} \rm{G}$, the full size of the box $L = 4\cdot10^{12} \rm{cm}$, the number of cells $N=4\cdot10^4$. Electron mass is reduced to $m_e = \frac{m_p}{20}$. The full time of simulation is $T = 5000 {\omega_p}^{-1}$. All values are measured in downstream frame. $\theta$ is angle between flow velocity and magnetic field. We present results of particle spectrum in several simulations with different $\theta$. 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.8\textwidth]{fig/protons.eps} 
@@ -21,4 +21,4 @@ and collides with the reflecting superconducting wall on the left boundary.
 	\label{electrons}
 \end{figure}
 
-The results presented in Figures \ref{protons}-\ref{electrons_with_alpha} show that the values of $F(p)p^4$ for high energies are much greater for protons, than for electrons in both simulations. Also electrons need much more time to be accelerated and to form spectrum $\propto p^{-4}$. It means that protons are injected into the acceleration process more efficiently, and it is consistent with the work of Park et al. {\cite{Park2015}}. Also we have shown that minority of heavy ions increases the spectrum of protons and do not have influence on the spectrum of electrons. It can be explained by the fact, that heavy ions form the large scale turbulence and protons can efficiently scatter on this turbulence. Otherwise for electrons turbulence produced by protons is already enough large-scale  and the influence of heavy ions is neglectable. 
+One can see that spectrum strongly depends of angle $\theta$. If $\theta$ is less then critical value, defined as $c\cdot cos(\theta_{crit})=v_{shock}$, measured in shock rest frame, shock is subluminal and particles can escape from front and than cross it enough of times to e accelerated.

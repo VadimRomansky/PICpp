@@ -208,7 +208,7 @@ void Simulation::moveParticle(Particle* particle) {
 	double gamma = particle->gammaFactor(speed_of_light_normalized);
 	double beta = 0.5 * particle->charge * deltaT / particle->mass;
 
-	int particleIterations = 50;
+	int particleIterations = 50*gamma;
 
 
 	Particle tempParticle = *particle;
@@ -336,13 +336,21 @@ void Simulation::moveParticle(Particle* particle) {
 
 	double deltaGammaTheor = particle->charge*deltaT*E.scalarMult(middleVelocity)/(particle->mass*speed_of_light_normalized_sqr);
 
+	/*if(i >= particleIterations){
+		printf("i >= particle iterations\n");
+		printf("error = %g\n", error);
+		printf("relative error = %g\n", error/momentumNorm);
+	}*/
+
 	if(fabs(newGamma - oldGamma) > 0.1){
 		printf("delta gamma > 0.1\n");
+		/*printf("particle iterations = %d\n", i);
 		printf("cartx = %d carty = %d cartz = %d\n", cartCoord[0], cartCoord[1], cartCoord[2]);
 		printf("oldGamma = %g newGamma = %g delta gamma = %g\n", oldGamma, newGamma, newGamma -oldGamma);
-		printf("theoretical delta gamm = %g\n", deltaGammaTheor);
+		printf("theoretical delta gamma = %g\n", deltaGammaTheor);
 		printf("particle number = %d\n", particle->number);
 		printf("x = %g y = %g z = %g\n", particle->coordinates.x, particle->coordinates.y, particle->coordinates.z);
+		printf("xindex = %d yindex = %d zindex = %d\n", particle->correlationMapCell.xindex[(2 + splineOrder)/2], particle->correlationMapCell.yindex[(2 + splineOrder)/2], particle->correlationMapCell.zindex[(2 + splineOrder)/2]);
 		printf("vx = %g vy = %g vz = %g\n", velocity.x, velocity.y, velocity.z);
 		printf("newvx = %g newvy = %g newvz = %g\n", newVelocity.x, newVelocity.y, newVelocity.z);
 		printf("Ex = %g Ey = %g Ez = %g\n", E.x, E.y, E.z);
@@ -351,7 +359,7 @@ void Simulation::moveParticle(Particle* particle) {
 			for(int j = 0; j < 3; ++j){
 				printf("alpha[%d][%d] = %g\n", i, j, particle->rotationTensor.matrix[i][j]);
 			}
-		}
+		}*/
 	}
 
 	//correctParticlePosition(particle);
