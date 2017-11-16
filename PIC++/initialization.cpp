@@ -61,6 +61,7 @@ Simulation::Simulation() {
 	//particlesPerBin = new int[typesNumber];
 	shockWaveX = -1.0;
 	derExPoint = 0;
+	derConcentrationPoint = 0;
 	constMeanElevelPoint = 0;
 }
 
@@ -416,6 +417,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	shockWaveX = -1.0;
 	derExPoint = 0;
 	constMeanElevelPoint = 0;
+	derConcentrationPoint = 0;
 	//if(rank == 0) printf("end constructor\n");
 	//fflush(stdout);
 }
@@ -616,6 +618,10 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	shockWaveX = -1.0;
 	if (rank == 0) printf("end constructor\n");
 	fflush(stdout);
+	shockWaveX = -1.0;
+	derExPoint = 0;
+	constMeanElevelPoint = 0;
+	derConcentrationPoint = 0;
 }
 
 Simulation::~Simulation() {

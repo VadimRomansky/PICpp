@@ -879,6 +879,9 @@ void Simulation::exchangeParticles() {
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 		} else {
+			//theoreticalEnergy += particle->energy(speed_of_light_normalized);
+			//theoreticalMomentum += particle->getMomentum();
+			particle->escaped = false;
 			particles.push_back(particle);
 		}
 	}
@@ -933,6 +936,9 @@ void Simulation::exchangeParticles() {
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 		} else {
+			//theoreticalEnergy += particle->energy(speed_of_light_normalized);
+			//theoreticalMomentum += particle->getMomentum();
+			particle->escaped = false;
 			particles.push_back(particle);
 		}
 	}
@@ -946,13 +952,13 @@ void Simulation::exchangeParticles() {
 			Particle* particle = escapedParticlesBottom[i];
 			particle->coordinates.z += zsizeGeneral;
 			particle->escaped = false;
-			particles.push_back(particle);
+			tempParticles.push_back(particle);
 		}
 		for (int i = 0; i < escapedParticlesTop.size(); ++i) {
 			Particle* particle = escapedParticlesTop[i];
 			particle->coordinates.z -= zsizeGeneral;
 			particle->escaped = false;
-			particles.push_back(particle);
+			tempParticles.push_back(particle);
 		}
 
 	} else {
@@ -969,13 +975,22 @@ void Simulation::exchangeParticles() {
 			}
 		}
 		if (verbosity > 2) printf("send particles bottom rank = %d\n", rank);
-		sendBottomReceiveTopParticles(escapedParticlesBottom, particles, types, typesNumber,
+		sendBottomReceiveTopParticles(escapedParticlesBottom, tempParticles, types, typesNumber,
 		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
 		MPI_Barrier(cartComm);
 		if (verbosity > 2) printf("send particles top rank = %d\n", rank);
-		sendTopReceiveBottomParticles(escapedParticlesTop, particles, types, typesNumber,
+		sendTopReceiveBottomParticles(escapedParticlesTop, tempParticles, types, typesNumber,
 		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
 	}
+
+	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
+		Particle* particle = tempParticles[pcount];
+		//theoreticalEnergy += particle->energy(speed_of_light_normalized);
+		//theoreticalMomentum += particle->getMomentum();
+		particle->escaped = false;
+		particles.push_back(particle);
+	}
+	tempParticles.clear();
 
 	MPI_Barrier(cartComm);
 	tempParticles.clear();

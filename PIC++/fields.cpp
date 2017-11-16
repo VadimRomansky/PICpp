@@ -2957,7 +2957,7 @@ double Simulation::averageConcentrationYZ(double*** concentration, int i){
 		}
 	}
 
-	MPI_Allreduce(tempField, sumField, 3, MPI_DOUBLE, MPI_SUM, cartCommYZ);
+	MPI_Allreduce(tempField, sumField, 1, MPI_DOUBLE, MPI_SUM, cartCommYZ);
 
 	double result;
 

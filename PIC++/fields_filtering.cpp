@@ -4,6 +4,7 @@
 #include <mpi.h>
 #include <time.h>
 
+#include "particle.h"
 #include "constants.h"
 #include "matrix3d.h"
 #include "vector3d.h"
@@ -39,6 +40,7 @@ void Simulation::filterFields(int cutWaveNumber){
 
 	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 		updateMaxEderivativePoint();
+		updateMaxConcentrationDerivativePoint();
 		//updateMeanLevel(newEfield);
 		//updateLastMeanLevelPoint(1E-3, derExPoint + frontHalfWidth);
 		//updateBoundaryLevelX();
@@ -50,11 +52,16 @@ void Simulation::filterFields(int cutWaveNumber){
 		filterFieldGeneral(newBfield, cutWaveNumber);
 	} else {
 		if(derExPoint < xnumberGeneral - 2*frontHalfWidth){
-		//if(constMeanElevelPoint < xnumberGeneral - 2*frontHalfWidth){
+		//if(derConcentrationPoint < xnumberGeneral - 2*frontHalfWidth){
+
 			//filterFieldGeneralRightMirror(newEfield, cutWaveNumber, 0);
 			//filterFieldGeneralRight(newEfield, cutWaveNumber, constMeanElevelPoint);
+
 			filterFieldGeneralRight(newEfield, cutWaveNumber, derExPoint + frontHalfWidth);
 			filterFieldGeneralRight(newBfield, cutWaveNumber, derExPoint + frontHalfWidth);
+
+			//filterFieldGeneralRight(newEfield, cutWaveNumber, derConcentrationPoint + frontHalfWidth);
+			//filterFieldGeneralRight(newBfield, cutWaveNumber, derConcentrationPoint + frontHalfWidth);
 		}
 		/*if(derExPoint > 10*frontHalfWidth){
 			filterFieldGeneralLeft(newEfield, cutWaveNumber, derExPoint - frontHalfWidth);
@@ -927,14 +934,19 @@ void Simulation::updateMaxEderivativePoint(){
 		}
 
 		////
-		//derExPoint = floor(speed_of_light_normalized*time/deltaX);
+		derExPoint = floor(0.5*speed_of_light_normalized*time/deltaX);
 }
 
 void Simulation::updateMaxConcentrationDerivativePoint(){
 	//if(cartCoord[1] == 0 && cartCoord[2] == 0){
 		double maxDer = 0;
 		int maxDerPoint = 1+additionalBinNumber;
-		for(int i = 1 + additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i){
+		int maxI = xnumberAdded - 1 - additionalBinNumber;
+		if(cartCoord[0] == cartDim[0] - 1){
+			maxI = xnumberAdded - 1 - additionalBinNumber - 1;
+		}
+
+		for(int i = 1 + additionalBinNumber; i < maxI; ++i){
 			double curN = averageConcentrationYZ(particleConcentrations[0], i);
 			double nextN = averageConcentrationYZ(particleConcentrations[0], i+1);
 
@@ -946,6 +958,7 @@ void Simulation::updateMaxConcentrationDerivativePoint(){
 			}
 		}
 
+
 		maxDerPoint += firstAbsoluteXindex;
 
 		int tempPoint[1];
@@ -953,6 +966,7 @@ void Simulation::updateMaxConcentrationDerivativePoint(){
 
 		tempPoint[0] = maxDerPoint;
 		tempDer[0] = maxDer;
+
 
 		if(rank == 0){
 			for(int i = 1; i < nprocs; ++i){
@@ -971,12 +985,17 @@ void Simulation::updateMaxConcentrationDerivativePoint(){
 		}
 
 		tempPoint[0] = maxDerPoint;
+		MPI_Barrier(cartComm);
 	//}
 		MPI_Bcast(tempPoint, 1, MPI_INT, 0, cartComm);
 
 
 		if(tempPoint[0] > derConcentrationPoint){
 			derConcentrationPoint = tempPoint[0];
+		}
+
+		if((verbosity > 1)) {
+			printf("derConcentration point = %d rank = %d\n", derConcentrationPoint, rank);
 		}
 
 		////

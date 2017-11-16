@@ -2657,7 +2657,7 @@ void outputGeneral(const char* outFileName, Simulation* simulation) {
 	        simulation->generalTheoreticalMomentum.z, simulation->maxEfield.norm() / fieldFactor, simulation->maxBfield.norm() / fieldFactor, simulation->deltaT, particlesCount, simulation->shockWaveX, simulation->meanSquaredEfield[0] / fieldFactor, simulation->meanSquaredEfield[1] / fieldFactor, simulation->meanSquaredEfield[2] / fieldFactor);
 	fprintf(outFile, "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d %15.10g %d %15.10g\n",
 		simulation->electricFieldEnergyX, simulation->electricFieldEnergyY, simulation->electricFieldEnergyZ, simulation->magneticFieldEnergyX, simulation->magneticFieldEnergyY, simulation->magneticFieldEnergyZ,
-		simulation->electromagneticMomentum.x, simulation->electromagneticMomentum.y, simulation->electromagneticMomentum.z, simulation->particleMomentum.x, simulation->particleMomentum.y, simulation->particleMomentum.z, simulation->derExPoint, simulation->derExPoint*simulation->deltaX*simulation->scaleFactor, simulation->constMeanElevelPoint, simulation->constMeanElevelPoint*simulation->deltaX*simulation->scaleFactor);
+		simulation->electromagneticMomentum.x, simulation->electromagneticMomentum.y, simulation->electromagneticMomentum.z, simulation->particleMomentum.x, simulation->particleMomentum.y, simulation->particleMomentum.z, simulation->derExPoint, simulation->derExPoint*simulation->deltaX*simulation->scaleFactor, simulation->constMeanElevelPoint, simulation->derConcentrationPoint*simulation->deltaX*simulation->scaleFactor);
 	fclose(outFile);
 }
 

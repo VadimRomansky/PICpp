@@ -182,7 +182,7 @@ void Simulation::simulate() {
 		if ((rank == 0) && (verbosity > 1)) printLog("start exchange particles\n");
 		if ((rank == 0) && (verbosity > 1)) printf("start exchange particles\n");
 		MPI_Barrier(cartComm);
-
+		updateTheoreticalEnergy();
 		exchangeParticles();
 
 		if ((rank == 0) && (verbosity > 1)) printLog("start injecting new particles\n");
@@ -279,12 +279,21 @@ void Simulation::simulate() {
 		}
 
 		updateMaxEderivativePoint();
+		MPI_Barrier(cartComm);
+		if((rank == 0) && (verbosity > 0)) {
+			printf("finish updating derEx point\n");
+		}
+		updateMaxConcentrationDerivativePoint();
+		MPI_Barrier(cartComm);
+		if((rank == 0) && (verbosity > 0)) {
+			printf("finish updating shock wave point\n");
+		}
 		if(currentIteration%filteringParameter == 0){
 			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
 				//updateMaxEderivativePoint();
 			}
 			//if(currentIteration > 150){
-			//filterFields(5);
+			filterFields(5);
 			//}
 			//filterFieldsLocal(5);
 		}
@@ -322,7 +331,6 @@ void Simulation::simulate() {
 
 		//smoothNewEfield();
 
-		updateTheoreticalEnergy();
 
 		if ((currentIteration + 1) % writeGeneralParameter == 0) {
 			updateParameters();
@@ -1185,9 +1193,9 @@ void Simulation::updateTheoreticalEnergy(){
 	int maxK = znumberAdded - 1 - additionalBinNumber;
 
 	//if (currentIteration > 0) {
-		if (boundaryConditionType != PERIODIC) {
+		//if (boundaryConditionType != PERIODIC) {
 
-			for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
+			/*for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
 				Particle* particle = escapedParticlesLeft[i];
 				theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
 					sqr(scaleFactor / plasma_period);
@@ -1199,6 +1207,32 @@ void Simulation::updateTheoreticalEnergy(){
 					sqr(scaleFactor / plasma_period);
 				theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 			}
+
+			for (int i = 0; i < escapedParticlesFront.size(); ++i) {
+				Particle* particle = escapedParticlesFront[i];
+				theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+					sqr(scaleFactor / plasma_period);
+				theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
+			}
+			for (int i = 0; i < escapedParticlesBack.size(); ++i) {
+				Particle* particle = escapedParticlesBack[i];
+				theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+					sqr(scaleFactor / plasma_period);
+				theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
+			}
+
+			for (int i = 0; i < escapedParticlesTop.size(); ++i) {
+				Particle* particle = escapedParticlesTop[i];
+				theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+					sqr(scaleFactor / plasma_period);
+				theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
+			}
+			for (int i = 0; i < escapedParticlesBottom.size(); ++i) {
+				Particle* particle = escapedParticlesBottom[i];
+				theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+					sqr(scaleFactor / plasma_period);
+				theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
+			}*/
 
 			for (int j = minJ; j < maxJ; ++j) {
 				for (int k = minK; k < maxK; ++k) {
@@ -1228,7 +1262,7 @@ void Simulation::updateTheoreticalEnergy(){
 						plasma_period / (4 * pi);
 				}
 			}
-		}
+		//}
 	//}
 }
 
