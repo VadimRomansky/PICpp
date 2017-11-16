@@ -614,6 +614,7 @@ public:
 	Complex* localFactorZ;
 
 	int derExPoint;
+	int derConcentrationPoint;
 	Vector3d** leftElevel;
 	Vector3d** rightElevel;
 
@@ -874,6 +875,7 @@ public:
 	void updateDensityParameters();
 
 	void updateEnergy();
+	void updateTheoreticalEnergy();
 	void updateFields();
 	void updateParameters();
 	void updateAnisotropy();
@@ -940,6 +942,7 @@ public:
 	void filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber);
 
 	void updateMaxEderivativePoint();
+	void updateMaxConcentrationDerivativePoint();
 	void updateBoundaryLevelX();
 	void substractStep(Vector3d*** field, Vector3d** left, Vector3d** right, int sign);
 	void updateMeanLevel(Vector3d*** field);
@@ -948,6 +951,8 @@ public:
 	Vector3d averageFieldXY(Vector3d*** field, int i);
 	Vector3d averageFieldXZ(Vector3d*** field, int i);
 	Vector3d averageFieldYZ(Vector3d*** field, int i);
+
+	double averageConcentrationYZ(double*** concentration, int i);
 
 
 	Vector3d getElectricFlux(int i, int j, int k);

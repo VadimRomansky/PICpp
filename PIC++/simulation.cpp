@@ -322,7 +322,7 @@ void Simulation::simulate() {
 
 		//smoothNewEfield();
 
-		//updateEnergy();
+		updateTheoreticalEnergy();
 
 		if ((currentIteration + 1) % writeGeneralParameter == 0) {
 			updateParameters();
@@ -1170,6 +1170,68 @@ void Simulation::checkParticleInBox(Particle& particle) {
 	}
 }
 
+void Simulation::updateTheoreticalEnergy(){
+	int minI = 1 + additionalBinNumber;
+	if (cartCoord[0] == 0 && boundaryConditionType != PERIODIC) {
+		minI = 0;
+	}
+	int maxI = xnumberAdded - 1 - additionalBinNumber;
+	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+		maxI = xnumberAdded - 1;
+	}
+	int minJ = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - 1 - additionalBinNumber;
+	int minK = 1 + additionalBinNumber;
+	int maxK = znumberAdded - 1 - additionalBinNumber;
+
+	//if (currentIteration > 0) {
+		if (boundaryConditionType != PERIODIC) {
+
+			for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
+				Particle* particle = escapedParticlesLeft[i];
+				theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+					sqr(scaleFactor / plasma_period);
+				theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
+			}
+			for (int i = 0; i < escapedParticlesRight.size(); ++i) {
+				Particle* particle = escapedParticlesRight[i];
+				theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+					sqr(scaleFactor / plasma_period);
+				theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
+			}
+
+			for (int j = minJ; j < maxJ; ++j) {
+				for (int k = minK; k < maxK; ++k) {
+					Vector3d Eleft;
+					Vector3d Eright;
+					Vector3d Bleft;
+					Vector3d Bright;
+					if(solverType == BUNEMAN){
+						Eleft = getBunemanElectricField(1 + additionalBinNumber, j, k);
+						Eright = getBunemanElectricField(xnumberAdded - additionalBinNumber - 1, j, k);
+						Bleft = getBunemanMagneticField(1 + additionalBinNumber, j, k);
+						Bright = getBunemanMagneticField(xnumberAdded - additionalBinNumber - 1, j, k);
+					} else {
+						Eleft = Efield[1 + additionalBinNumber][j][k];
+						Eright = Efield[xnumberAdded - additionalBinNumber - 1][j][k];
+						Bleft = Bfield[1 + additionalBinNumber][j][k];
+						Bright = Bfield[xnumberAdded - additionalBinNumber - 1][j][k];
+					}
+					theoreticalEnergy -= (Eright.vectorMult(Bright).x * deltaT *speed_of_light_normalized * deltaZ * deltaY *sqr(scaleFactor / plasma_period)) / (4 * pi);
+					theoreticalEnergy += (Eleft.vectorMult(Bleft).x * deltaT * speed_of_light_normalized * deltaZ * deltaY * sqr(scaleFactor / plasma_period)) / (4 * pi);
+
+					theoreticalMomentum -=
+						(Eright.vectorMult(Bright)) * deltaT * deltaZ * deltaY *
+						scaleFactor / plasma_period / (4 * pi);
+					theoreticalMomentum +=
+						(Eleft.vectorMult(Bleft)) * deltaT * deltaZ * deltaY * scaleFactor /
+						plasma_period / (4 * pi);
+				}
+			}
+		}
+	//}
+}
+
 void Simulation::updateEnergy() {
 	double procTime = 0;
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
@@ -1202,7 +1264,7 @@ void Simulation::updateEnergy() {
 	globalMomentum = Vector3d(0, 0, 0);
 	electromagneticMomentum = Vector3d(0, 0, 0);
 	particleMomentum = Vector3d(0, 0, 0);
-	if (currentIteration % writeGeneralParameter == 0) {
+	if ((currentIteration) % writeGeneralParameter == 0) {
 		//particlesNumber = particles.size();
 		for (int i = minI; i < maxI; ++i) {
 			for (int j = minJ; j < maxJ; ++j) {
@@ -1300,54 +1362,7 @@ void Simulation::updateEnergy() {
 		theoreticalMomentum = globalMomentum;
 	}
 
-	if (currentIteration > 0) {
-		if (boundaryConditionType != PERIODIC) {
-
-			for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
-				Particle* particle = escapedParticlesLeft[i];
-				theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
-					sqr(scaleFactor / plasma_period);
-				theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
-			}
-			for (int i = 0; i < escapedParticlesRight.size(); ++i) {
-				Particle* particle = escapedParticlesRight[i];
-				theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
-					sqr(scaleFactor / plasma_period);
-				theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
-			}
-
-			for (int j = minJ; j < maxJ; ++j) {
-				for (int k = minK; k < maxK; ++k) {
-					Vector3d Eleft;
-					Vector3d Eright;
-					Vector3d Bleft;
-					Vector3d Bright;
-					if(solverType == BUNEMAN){
-						Eleft = getBunemanElectricField(1 + additionalBinNumber, j, k);
-						Eright = getBunemanElectricField(xnumberAdded - additionalBinNumber - 1, j, k);
-						Bleft = getBunemanMagneticField(1 + additionalBinNumber, j, k);
-						Bright = getBunemanMagneticField(xnumberAdded - additionalBinNumber - 1, j, k);
-					} else {
-						Eleft = Efield[1 + additionalBinNumber][j][k];
-						Eright = Efield[xnumberAdded - additionalBinNumber - 1][j][k];
-						Bleft = Bfield[1 + additionalBinNumber][j][k];
-						Bright = Bfield[xnumberAdded - additionalBinNumber - 1][j][k];
-					}
-					theoreticalEnergy -= (Eright.vectorMult(Bright).x * deltaT *speed_of_light_normalized * deltaZ * deltaY *sqr(scaleFactor / plasma_period)) / (4 * pi);
-					theoreticalEnergy += (Eleft.vectorMult(Bleft).x * deltaT * speed_of_light_normalized * deltaZ * deltaY * sqr(scaleFactor / plasma_period)) / (4 * pi);
-
-					theoreticalMomentum -=
-						(Eright.vectorMult(Bright)) * deltaT * deltaZ * deltaY *
-						scaleFactor / plasma_period / (4 * pi);
-					theoreticalMomentum +=
-						(Eleft.vectorMult(Bleft)) * deltaT * deltaZ * deltaY * scaleFactor /
-						plasma_period / (4 * pi);
-				}
-			}
-		}
-	}
-
-	if (currentIteration % writeGeneralParameter == 0) {
+	if ((currentIteration) % writeGeneralParameter == 0) {
 		double buffer[23];
 		if (rank != 0) {
 			buffer[0] = particleEnergy;

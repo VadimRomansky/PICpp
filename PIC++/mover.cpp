@@ -342,12 +342,12 @@ void Simulation::moveParticle(Particle* particle) {
 		printf("relative error = %g\n", error/momentumNorm);
 	}*/
 
-	if(fabs(newGamma - oldGamma) > 0.1){
-		printf("delta gamma > 0.1\n");
-		/*printf("particle iterations = %d\n", i);
-		printf("cartx = %d carty = %d cartz = %d\n", cartCoord[0], cartCoord[1], cartCoord[2]);
+	if(fabs(newGamma - oldGamma) > 0.2){
+		printf("delta gamma > 0.2\n");
 		printf("oldGamma = %g newGamma = %g delta gamma = %g\n", oldGamma, newGamma, newGamma -oldGamma);
 		printf("theoretical delta gamma = %g\n", deltaGammaTheor);
+		/*printf("particle iterations = %d\n", i);
+		printf("cartx = %d carty = %d cartz = %d\n", cartCoord[0], cartCoord[1], cartCoord[2]);
 		printf("particle number = %d\n", particle->number);
 		printf("x = %g y = %g z = %g\n", particle->coordinates.x, particle->coordinates.y, particle->coordinates.z);
 		printf("xindex = %d yindex = %d zindex = %d\n", particle->correlationMapCell.xindex[(2 + splineOrder)/2], particle->correlationMapCell.yindex[(2 + splineOrder)/2], particle->correlationMapCell.zindex[(2 + splineOrder)/2]);

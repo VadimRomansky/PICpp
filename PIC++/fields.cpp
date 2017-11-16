@@ -2945,3 +2945,23 @@ Vector3d Simulation::averageFieldYZ(Vector3d*** field, int i){
 
 	return result;
 }
+
+double Simulation::averageConcentrationYZ(double*** concentration, int i){
+	double tempField[1];
+	double sumField[1];
+	tempField[0] = 0;
+
+	for(int j = 1+additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j){
+		for(int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k){
+			tempField[0] += concentration[i][j][k];
+		}
+	}
+
+	MPI_Allreduce(tempField, sumField, 3, MPI_DOUBLE, MPI_SUM, cartCommYZ);
+
+	double result;
+
+	result = sumField[0]/(ynumberGeneral*znumberGeneral);
+
+	return result;
+}

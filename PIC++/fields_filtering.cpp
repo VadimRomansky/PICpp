@@ -927,7 +927,60 @@ void Simulation::updateMaxEderivativePoint(){
 		}
 
 		////
-		derExPoint = floor(speed_of_light_normalized*time/deltaX);
+		//derExPoint = floor(speed_of_light_normalized*time/deltaX);
+}
+
+void Simulation::updateMaxConcentrationDerivativePoint(){
+	//if(cartCoord[1] == 0 && cartCoord[2] == 0){
+		double maxDer = 0;
+		int maxDerPoint = 1+additionalBinNumber;
+		for(int i = 1 + additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i){
+			double curN = averageConcentrationYZ(particleConcentrations[0], i);
+			double nextN = averageConcentrationYZ(particleConcentrations[0], i+1);
+
+			//todo sign!
+			double der = (curN - nextN)/deltaX;
+			if(der > maxDer){
+				maxDer = der;
+				maxDerPoint = i;
+			}
+		}
+
+		maxDerPoint += firstAbsoluteXindex;
+
+		int tempPoint[1];
+		double tempDer[1];
+
+		tempPoint[0] = maxDerPoint;
+		tempDer[0] = maxDer;
+
+		if(rank == 0){
+			for(int i = 1; i < nprocs; ++i){
+				MPI_Status status;
+				MPI_Recv(tempPoint, 1, MPI_INT, i, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm, &status);
+				MPI_Recv(tempDer, 1, MPI_DOUBLE, i, MPI_SEND_DOUBLE_ALL_TO_FIRST, cartComm, &status);
+
+				if(tempDer[0] > maxDer){
+					maxDer = tempDer[0];
+					maxDerPoint = tempPoint[0];
+				}
+			}
+		} else {
+			MPI_Send(tempPoint, 1, MPI_INT, 0, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
+			MPI_Send(tempDer, 1, MPI_DOUBLE, 0, MPI_SEND_DOUBLE_ALL_TO_FIRST, cartComm);
+		}
+
+		tempPoint[0] = maxDerPoint;
+	//}
+		MPI_Bcast(tempPoint, 1, MPI_INT, 0, cartComm);
+
+
+		if(tempPoint[0] > derConcentrationPoint){
+			derConcentrationPoint = tempPoint[0];
+		}
+
+		////
+		//derConcentrationPoint = floor(speed_of_light_normalized*time/deltaX);
 }
 
 void Simulation::updateBoundaryLevelX(){
