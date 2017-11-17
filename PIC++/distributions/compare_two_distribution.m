@@ -1,15 +1,15 @@
 clear;
-load distribution_protons1.dat;
-load distribution_electrons1.dat;
-load distribution_protons2.dat;
-load distribution_electrons2.dat;
+load distribution_protons.dat;
+load distribution_electrons.dat;
+load distribution_protons_rel.dat;
+load distribution_electrons_rel.dat;
 
 Np = 500;
 
 Nt(1:2) = 11;
 
-Nt(1) = fix(size(distribution_protons1,1)/Np) - 1;
-Nt(2) = fix(size(distribution_protons2,1)/Np) - 1;
+Nt(1) = fix(size(distribution_protons,1)/Np) - 1;
+Nt(2) = fix(size(distribution_protons_rel,1)/Np) - 1;
 
 
 Fp(1:Np, 1:2) = 0;
@@ -27,17 +27,17 @@ v=2.998*10^10;
 Color = {'red','blue'};
 
 for i=1:Np,
-   Pp(i,1) = distribution_protons1(i + Nt(1)*Np,1);
-   Pp(i,2) = distribution_protons2(i + Nt(2)*Np,1);
+   Pp(i,1) = distribution_protons(i + Nt(1)*Np,1);
+   Pp(i,2) = distribution_protons_rel(i + Nt(2)*Np,1);
    
-   Fp(i,1) = distribution_protons1(i + Nt(1)*Np, 2)*Pp(i,1)*Pp(i,1);
-   Fp(i,2) = distribution_protons2(i + Nt(2)*Np, 2)*Pp(i,2)*Pp(i,2);
+   Fp(i,1) = distribution_protons(i + Nt(1)*Np, 2)*Pp(i,1)*Pp(i,1);
+   Fp(i,2) = distribution_protons_rel(i + Nt(2)*Np, 2)*Pp(i,2)*Pp(i,2);
    
-   Pe(i,1) = distribution_electrons1(i + Nt(1)*Np,1);
-   Pe(i,2) = distribution_electrons2(i + Nt(2)*Np,1);
+   Pe(i,1) = distribution_electrons(i + Nt(1)*Np,1);
+   Pe(i,2) = distribution_electrons_rel(i + Nt(2)*Np,1);
    
-   Fe(i,1) = distribution_electrons1(i + Nt(1)*Np, 2)*Pe(i,1)*Pe(i,1);
-   Fe(i,2) = distribution_electrons2(i + Nt(2)*Np, 2)*Pe(i,2)*Pe(i,2);
+   Fe(i,1) = distribution_electrons(i + Nt(1)*Np, 2)*Pe(i,1)*Pe(i,1);
+   Fe(i,2) = distribution_electrons_rel(i + Nt(2)*Np, 2)*Pe(i,2)*Pe(i,2);
 end;
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
@@ -48,7 +48,7 @@ for j=1:2,
 end;
 xlabel ('p/{m_p c}');
 ylabel ('F_p(p) p^4');
-legend('{\theta} = 10','{\theta} = 20','Location','southeast');
+legend('{\gamma} = 1.5','{\gamma} = 10','Location','southeast');
 grid ;
 
 figure(2);
@@ -58,5 +58,5 @@ for j=1:2,
 end;
 xlabel ('p/{m_p c}');
 ylabel ('F_e(p) p^4');
-legend('{\theta} = 10','{\theta} = 20','Location','southeast');
+legend('{\gamma} = 1.5','{\gamma} = 10','Location','southeast');
 grid ;

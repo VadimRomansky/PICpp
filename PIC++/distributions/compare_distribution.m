@@ -36,6 +36,13 @@ Nt(8) = fix(size(distribution_protons7,1)/Np) - 1;
 Nt(9) = fix(size(distribution_protons8,1)/Np) - 1;
 Nt(10) = fix(size(distribution_protons9,1)/Np) - 1;
 
+Nt(4) = 24;
+Nt(5) = 8;
+Nt(6) = 9;
+Nt(7) = 10;
+Nt(8) = 12;
+Nt(9) = 14;
+Nt(10) = 24;
 Fp(1:Np, 1:10) = 0;
 Fe(1:Np, 1:10) = 0;
 
