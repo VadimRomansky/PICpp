@@ -8,9 +8,13 @@ Np = 500;
 
 Nt(1:2) = 11;
 
+
 Nt(1) = fix(size(distribution_protons,1)/Np) - 1;
 Nt(2) = fix(size(distribution_protons_rel,1)/Np) - 1;
 
+
+%Nt(1)=3;
+%Nt(2)=5;
 
 Fp(1:Np, 1:2) = 0;
 Fe(1:Np, 1:2) = 0;
