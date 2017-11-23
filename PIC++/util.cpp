@@ -10,7 +10,7 @@
 #include "constants.h"
 #include "paths.h"
 
-double power(const double & v, const double & p) {
+double power(const double& v, const double& p) {
 	return exp(p * log(v));
 }
 
@@ -18,43 +18,39 @@ double sqr(double v) {
 	return v * v;
 }
 
-double cube(const double & v) {
+double cube(const double& v) {
 	return v * v * v;
 }
 
-double max2(const double & a, const double & b) {
+double max2(const double& a, const double& b) {
 	if (a >= b) {
 		return a;
-	} else {
-		return b;
 	}
+	return b;
 }
 
-double max3(const double & a, const double & b, const double & c) {
+double max3(const double& a, const double& b, const double& c) {
 	if (a > b) {
 		return max2(a, c);
-	} else {
-		return max2(b, c);
 	}
+	return max2(b, c);
 }
 
-double min2(const double & a, const double & b) {
+double min2(const double& a, const double& b) {
 	if (a >= b) {
 		return b;
-	} else {
-		return a;
 	}
+	return a;
 }
 
-double min3(const double & a, const double & b, const double & c) {
+double min3(const double& a, const double& b, const double& c) {
 	if (a > b) {
 		return min2(b, c);
-	} else {
-		return min2(a, c);
 	}
+	return min2(a, c);
 }
 
-void alertNaNOrInfinity(const double & value, const char* s) {
+void alertNaNOrInfinity(const double& value, const char* s) {
 	if (value != value || 0 * value != 0 * value) {
 		std::string outputDir = outputDirectory;
 		printf("%s", s);
@@ -65,7 +61,7 @@ void alertNaNOrInfinity(const double & value, const char* s) {
 		int rank;
 		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		fprintf(errorLogFile, "thread number = %d\n", rank);
-        printf("thread number = %d\n", rank);
+		printf("thread number = %d\n", rank);
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -112,7 +108,7 @@ void alertLargeModlue(double& value, double compareValue, const char* s) {
 		int rank;
 		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		fprintf(errorLogFile, "thread number = %d\n", rank);
-        printf("thread number = %d\n", rank);
+		printf("thread number = %d\n", rank);
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -120,7 +116,7 @@ void alertLargeModlue(double& value, double compareValue, const char* s) {
 	}
 }
 
-void printErrorAndExit(const char* s){
+void printErrorAndExit(const char* s) {
 	std::string outputDir = outputDirectory;
 	printf("%s", s);
 	printf("\n");
@@ -132,7 +128,7 @@ void printErrorAndExit(const char* s){
 	exit(0);
 }
 
-void printLog(const char* s){
+void printLog(const char* s) {
 	int size;
 	int rank;
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -180,10 +176,12 @@ double McDonaldFunction(double x, double index) {
 		exit(0);
 	}
 
-    if(x > 2*index*index && x > 10){
-        double result = sqrt(pi/(2*x))*exp(-x)*(1 + ((4*index*index - 1)/(8*x)) + ((4*index*index - 1)*(4*index*index - 9)/(128*x*x)) + ((4*index*index - 1)*(4*index*index - 9)*(4*index*index - 25)/(6*cube(8*x))));
+	if (x > 2 * index * index && x > 10) {
+		double result = sqrt(pi / (2 * x)) * exp(-x) * (1 + ((4 * index * index - 1) / (8 * x)) + ((4 * index * index - 1) * (
+			4 * index * index - 9) / (128 * x * x)) + ((4 * index * index - 1) * (4 * index * index - 9) * (4 * index * index -
+			25) / (6 * cube(8 * x))));
 		return result;
-    }
+	}
 	double dt;
 	double t;
 	double prevT = 0;
@@ -235,25 +233,24 @@ double Bspline(double xcenter, double dx, double xvalue) {
 	return (1 / dx) - 2 * sqr(xvalue - xcenter) / cube(dx);
 }
 
-std::string convertIntToString(int a){
-	if(a == 0){
+std::string convertIntToString(int a) {
+	if (a == 0) {
 		std::string result = "0";
 		return result;
 	}
-	if(a > 0){
+	if (a > 0) {
 		std::string result = "";
-		while (a > 0){
-			int last = a%10;
-			a = a/10;
+		while (a > 0) {
+			int last = a % 10;
+			a = a / 10;
 			char c = last + '0';
 			result = c + result;
 		}
 		return result;
-	} else {
-		a = -a;
-		std::string result = "-";
-		return result + convertIntToString(a);
 	}
+	a = -a;
+	std::string result = "-";
+	return result + convertIntToString(a);
 }
 
 

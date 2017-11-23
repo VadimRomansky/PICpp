@@ -40,9 +40,9 @@ void Simulation::cleanupDivergenceBuneman() {
 		}
 	}
 
-	for(int i = 0; i < xnumberAdded + 1; ++i){
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			for(int k = 0; k < znumberAdded + 1; ++k){
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				bunemanDivergenceCleaningPotential[i][j][k][0] = 0;
 			}
 		}
@@ -58,25 +58,25 @@ void Simulation::cleanupDivergenceBuneman() {
 		}
 	}
 
-	for(int  i = 0; i < xnumberAdded; ++i){
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			for(int k = 0; k < znumberAdded + 1; ++k){
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				bunemanDivCleaningEx[i][j][k] = 0;
 			}
 		}
 	}
 
-	for(int  i = 0; i < xnumberAdded + 1; ++i){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded + 1; ++k){
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				bunemanDivCleaningEy[i][j][k] = 0;
 			}
 		}
 	}
 
-	for(int  i = 0; i < xnumberAdded + 1; ++i){
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				bunemanDivCleaningEz[i][j][k] = 0;
 			}
 		}
@@ -86,7 +86,8 @@ void Simulation::cleanupDivergenceBuneman() {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-					if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k >= znumberAdded - 1 - additionalBinNumber)) {
+					if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k
+						>= znumberAdded - 1 - additionalBinNumber)) {
 						createDivergenceFakeEquation(i, j, k);
 					} else {
 						if (cartCoord[0] == 0) {
@@ -133,7 +134,8 @@ void Simulation::cleanupDivergenceBuneman() {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-					if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k >= znumberAdded - 1 - additionalBinNumber)) {
+					if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k
+						>= znumberAdded - 1 - additionalBinNumber)) {
 						createDivergenceFakeEquation(i, j, k);
 					} else {
 						if (i <= additionalBinNumber) {
@@ -159,24 +161,34 @@ void Simulation::cleanupDivergenceBuneman() {
 		}
 	}
 	//if (debugMode) {
-		checkEquationMatrix(divergenceCleanUpMatrix, 1);
+	checkEquationMatrix(divergenceCleanUpMatrix, 1);
 	//}
-		bool converges;
-	biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, gmresOutput, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
+	bool converges;
+	biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, gmresOutput, xnumberAdded,
+	                                    ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral,
+	                                    znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations,
+	                                    boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC,
+	                                    boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, cartCoord, cartDim,
+	                                    residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE,
+	                                    pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer,
+	                                    rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer,
+	                                    frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer,
+	                                    backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer,
+	                                    bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
 	//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, gmresOutput, xnumberAdded, ynumberAdded,
-		                                 //znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
+	//znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
 
-	for(int i = 0; i < xnumberAdded; ++i){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				bunemanDivergenceCleaningPotential[i][j][k][0] = gmresOutput[i][j][k][0];
 			}
 		}
 	}
 
-	if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
+	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				bunemanDivergenceCleaningPotential[xnumberAdded][j][k][0] = 0;
 			}
 		}
@@ -257,7 +269,7 @@ void Simulation::createDivergenceCleanupInternalEquationBuneman(int i, int j, in
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
 
-		
+
 	} else if (ynumberGeneral > 1) {
 		double element = -2 / (deltaX2) - 2 / (deltaY2);
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
@@ -292,25 +304,25 @@ void Simulation::createDivergenceCleanupInternalEquationBuneman(int i, int j, in
 }
 
 void Simulation::evaluateDivergenceCleaningFieldBuneman() {
-	for(int  i = 0; i < xnumberAdded; ++i){
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			for(int k = 0; k < znumberAdded + 1; ++k){
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				bunemanDivCleaningEx[i][j][k] = 0;
 			}
 		}
 	}
 
-	for(int  i = 0; i < xnumberAdded + 1; ++i){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded + 1; ++k){
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				bunemanDivCleaningEy[i][j][k] = 0;
 			}
 		}
 	}
 
-	for(int  i = 0; i < xnumberAdded + 1; ++i){
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				bunemanDivCleaningEz[i][j][k] = 0;
 			}
 		}
@@ -328,9 +340,12 @@ void Simulation::evaluateDivergenceCleaningFieldBuneman() {
 				int prevK = k - 1;
 				int nextK = k + 1;
 
-				bunemanDivCleaningEx[i][j][k] = - (bunemanDivergenceCleaningPotential[nextI][j][k][0] - bunemanDivergenceCleaningPotential[i][j][k][0])/deltaX;
-				bunemanDivCleaningEy[i][j][k] = - (bunemanDivergenceCleaningPotential[i][nextJ][k][0] - bunemanDivergenceCleaningPotential[i][j][k][0])/deltaY;
-				bunemanDivCleaningEz[i][j][k] = - (bunemanDivergenceCleaningPotential[i][j][nextK][0] - bunemanDivergenceCleaningPotential[i][j][k][0])/deltaZ;
+				bunemanDivCleaningEx[i][j][k] = - (bunemanDivergenceCleaningPotential[nextI][j][k][0] -
+					bunemanDivergenceCleaningPotential[i][j][k][0]) / deltaX;
+				bunemanDivCleaningEy[i][j][k] = - (bunemanDivergenceCleaningPotential[i][nextJ][k][0] -
+					bunemanDivergenceCleaningPotential[i][j][k][0]) / deltaY;
+				bunemanDivCleaningEz[i][j][k] = - (bunemanDivergenceCleaningPotential[i][j][nextK][0] -
+					bunemanDivergenceCleaningPotential[i][j][k][0]) / deltaZ;
 			}
 		}
 	}
@@ -339,7 +354,7 @@ void Simulation::evaluateDivergenceCleaningFieldBuneman() {
 		for (int i = 0; i <= 1 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-					if(i < 1 + additionalBinNumber){
+					if (i < 1 + additionalBinNumber) {
 						bunemanDivCleaningEx[i][j][k] = 0;
 					}
 					bunemanDivCleaningEy[i][j][k] = 0;
@@ -353,7 +368,7 @@ void Simulation::evaluateDivergenceCleaningFieldBuneman() {
 		for (int i = xnumberAdded - 1 - additionalBinNumber; i <= xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-					if(i < xnumberAdded){
+					if (i < xnumberAdded) {
 						bunemanDivCleaningEx[i][j][k] = 0;
 					}
 					bunemanDivCleaningEy[i][j][k] = 0;
@@ -401,7 +416,7 @@ double Simulation::cleanUpRightPartBuneman(int i, int j, int k) {
 }
 
 void Simulation::cleanupDivergenceBunemanMagnetic() {
-	if(ynumberGeneral == 1 && znumberGeneral == 1){
+	if (ynumberGeneral == 1 && znumberGeneral == 1) {
 		return;
 	}
 	double procTime = 0;
@@ -428,9 +443,9 @@ void Simulation::cleanupDivergenceBunemanMagnetic() {
 		}
 	}
 
-	for(int i = 0; i < xnumberAdded + 1; ++i){
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			for(int k = 0; k < znumberAdded + 1; ++k){
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				divergenceCleaningPotential[i][j][k][0] = 0;
 			}
 		}
@@ -446,25 +461,25 @@ void Simulation::cleanupDivergenceBunemanMagnetic() {
 		}
 	}
 
-	for(int  i = 0; i < xnumberAdded + 1; ++i){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				bunemanDivCleaningBx[i][j][k] = 0;
 			}
 		}
 	}
 
-	for(int  i = 0; i < xnumberAdded; ++i){
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				bunemanDivCleaningBy[i][j][k] = 0;
 			}
 		}
 	}
 
-	for(int  i = 0; i < xnumberAdded; ++i){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded + 1; ++k){
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				bunemanDivCleaningBz[i][j][k] = 0;
 			}
 		}
@@ -474,7 +489,8 @@ void Simulation::cleanupDivergenceBunemanMagnetic() {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-					if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k >= znumberAdded - 1 - additionalBinNumber)) {
+					if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k
+						>= znumberAdded - 1 - additionalBinNumber)) {
 						createDivergenceFakeEquation(i, j, k);
 					} else {
 						if (cartCoord[0] == 0) {
@@ -521,7 +537,8 @@ void Simulation::cleanupDivergenceBunemanMagnetic() {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-					if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k >= znumberAdded - 1 - additionalBinNumber)) {
+					if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k
+						>= znumberAdded - 1 - additionalBinNumber)) {
 						createDivergenceFakeEquation(i, j, k);
 					} else {
 						if (i <= additionalBinNumber) {
@@ -547,24 +564,34 @@ void Simulation::cleanupDivergenceBunemanMagnetic() {
 		}
 	}
 	//if (debugMode) {
-		checkEquationMatrix(divergenceCleanUpMatrix, 1);
+	checkEquationMatrix(divergenceCleanUpMatrix, 1);
 	//}
-		bool converges;
-	biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, gmresOutput, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
+	bool converges;
+	biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, gmresOutput, xnumberAdded,
+	                                    ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral,
+	                                    znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations,
+	                                    boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC,
+	                                    boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, cartCoord, cartDim,
+	                                    residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE,
+	                                    pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer,
+	                                    rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer,
+	                                    frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer,
+	                                    backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer,
+	                                    bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
 	//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, gmresOutput, xnumberAdded, ynumberAdded,
-		                                 //znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
+	//znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
 
-	for(int i = 0; i < xnumberAdded; ++i){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				divergenceCleaningPotential[i][j][k][0] = gmresOutput[i][j][k][0];
 			}
 		}
 	}
 
-	if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
+	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				divergenceCleaningPotential[xnumberAdded][j][k][0] = 0;
 			}
 		}
@@ -645,7 +672,7 @@ void Simulation::createDivergenceCleanupInternalEquationBunemanMagnetic(int i, i
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
 
-		
+
 	} else if (ynumberGeneral > 1) {
 		double element = -2 / (deltaX2) - 2 / (deltaY2);
 		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
@@ -680,25 +707,25 @@ void Simulation::createDivergenceCleanupInternalEquationBunemanMagnetic(int i, i
 }
 
 void Simulation::evaluateDivergenceCleaningFieldBunemanMagnetic() {
-	for(int  i = 0; i < xnumberAdded + 1; ++i){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				bunemanDivCleaningBx[i][j][k] = 0;
 			}
 		}
 	}
 
-	for(int  i = 0; i < xnumberAdded; ++i){
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				bunemanDivCleaningBy[i][j][k] = 0;
 			}
 		}
 	}
 
-	for(int  i = 0; i < xnumberAdded; ++i){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded + 1; ++k){
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
 				bunemanDivCleaningBz[i][j][k] = 0;
 			}
 		}
@@ -716,9 +743,12 @@ void Simulation::evaluateDivergenceCleaningFieldBunemanMagnetic() {
 				int prevK = k - 1;
 				int nextK = k + 1;
 
-				bunemanDivCleaningBx[i][j][k] = - (divergenceCleaningPotential[i][j][k][0] - divergenceCleaningPotential[prevI][j][k][0])/deltaX;
-				bunemanDivCleaningBy[i][j][k] = - (divergenceCleaningPotential[i][j][k][0] - divergenceCleaningPotential[i][prevJ][k][0])/deltaY;
-				bunemanDivCleaningBz[i][j][k] = - (divergenceCleaningPotential[i][j][k][0] - divergenceCleaningPotential[i][j][prevK][0])/deltaZ;
+				bunemanDivCleaningBx[i][j][k] = - (divergenceCleaningPotential[i][j][k][0] - divergenceCleaningPotential[prevI][j][k
+				][0]) / deltaX;
+				bunemanDivCleaningBy[i][j][k] = - (divergenceCleaningPotential[i][j][k][0] - divergenceCleaningPotential[i][prevJ][k
+				][0]) / deltaY;
+				bunemanDivCleaningBz[i][j][k] = - (divergenceCleaningPotential[i][j][k][0] - divergenceCleaningPotential[i][j][prevK
+				][0]) / deltaZ;
 			}
 		}
 	}
@@ -728,7 +758,7 @@ void Simulation::evaluateDivergenceCleaningFieldBunemanMagnetic() {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanDivCleaningBx[i][j][k] = 0;
-					if(i < 1 + additionalBinNumber){
+					if (i < 1 + additionalBinNumber) {
 						bunemanDivCleaningBy[i][j][k] = 0;
 						bunemanDivCleaningBz[i][j][k] = 0;
 					}
@@ -742,7 +772,7 @@ void Simulation::evaluateDivergenceCleaningFieldBunemanMagnetic() {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanDivCleaningBx[i][j][k] = 0;
-					if(i < xnumberAdded){
+					if (i < xnumberAdded) {
 						bunemanDivCleaningBy[i][j][k] = 0;
 						bunemanDivCleaningBz[i][j][k] = 0;
 					}

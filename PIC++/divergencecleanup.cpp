@@ -63,7 +63,8 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 			for (int i = 0; i < xnumberAdded; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-						if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k >= znumberAdded - 1 - additionalBinNumber)) {
+						if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (
+							k >= znumberAdded - 1 - additionalBinNumber)) {
 							createDivergenceFakeEquation(i, j, k);
 						} else {
 							if (cartCoord[0] == 0) {
@@ -110,7 +111,8 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 			for (int i = 0; i < xnumberAdded; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-						if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k >= znumberAdded - 1 - additionalBinNumber)) {
+						if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (
+							k >= znumberAdded - 1 - additionalBinNumber)) {
 							createDivergenceFakeEquation(i, j, k);
 						} else {
 							if (i <= additionalBinNumber) {
@@ -160,20 +162,31 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 			}
 		}
 		//exchangeLargeVector(divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, 1, additionalBinNumber, boundaryConditionTypeX == PERIODIC, cartComm, cartCoord, cartDim, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer);
-		biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
-			if(!converges){
-				if(rank == 0) printf("conjugate gradients did not converge\n");
+		biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential,
+		                                    xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral,
+		                                    ynumberGeneral, znumberGeneral, maxCleanupErrorLevel,
+		                                    maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC,
+		                                    boundaryConditionTypeY == PERIODIC, boundaryConditionTypeZ == PERIODIC, verbosity,
+		                                    cartComm, cartCoord, cartDim, residualBiconjugateDivE,
+		                                    firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE,
+		                                    sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer,
+		                                    rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer,
+		                                    frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer,
+		                                    backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer,
+		                                    bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
+		if (!converges) {
+			if (rank == 0) printf("conjugate gradients did not converge\n");
 
-				for(int i = 0; i < xnumberAdded; ++i){
-					for(int j = 0; j < ynumberAdded; ++j){
-						for(int k = 0; k < znumberAdded; ++k){
-							divergenceCleaningPotential[i][j][k][0] = 0;
-						}
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						divergenceCleaningPotential[i][j][k][0] = 0;
 					}
 				}
 			}
+		}
 		//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded,
-		                                 //znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
+		//znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
 
 	} else {
 		//test
@@ -197,26 +210,29 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 		int* yabsoluteIndex = new int[ynumber];
 		int* zabsoluteIndex = new int[znumber];
 
-		for(int i = 0; i < xnumber; ++i) {
+		for (int i = 0; i < xnumber; ++i) {
 			xabsoluteIndex[i] = firstAbsoluteXindex + i;
 		}
-		for(int j = 0; j < ynumber; ++j) {
+		for (int j = 0; j < ynumber; ++j) {
 			yabsoluteIndex[j] = firstAbsoluteYindex + j;
 		}
-		for(int k = 0; k < znumber; ++k) {
+		for (int k = 0; k < znumber; ++k) {
 			zabsoluteIndex[k] = firstAbsoluteZindex + k;
 		}
 
 		for (int i = 0; i < xnumber; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
-					fourierInput[i][j][k].re = -cleanUpRightPart(1 + additionalBinNumber +i, 1 + additionalBinNumber + j, 1 + additionalBinNumber + k, field, density);
+					fourierInput[i][j][k].re = -cleanUpRightPart(1 + additionalBinNumber + i, 1 + additionalBinNumber + j,
+					                                             1 + additionalBinNumber + k, field, density);
 					fourierInput[i][j][k].im = 0;
 				}
 			}
 		}
 
-		fourierTranslation(fourierInput, fourierImage, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+		fourierTranslation(fourierInput, fourierImage, fourierScalarTempOutput, fourierScalarTempOutput1, true, xnumber,
+		                   ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY,
+		                   cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
 
 		int halfx = xnumberGeneral / 2;
 		int halfy = ynumberGeneral / 2;
@@ -248,32 +264,37 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 				}
 			}
 		}
-		fourierTranslation(fourierImage, fourierOutput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumber, ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY, cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
+		fourierTranslation(fourierImage, fourierOutput, fourierScalarTempOutput, fourierScalarTempOutput1, false, xnumber,
+		                   ynumber, znumber, xnumberGeneral, ynumberGeneral, znumberGeneral, cartComm, cartCommX, cartCommY,
+		                   cartCommZ, xabsoluteIndex, yabsoluteIndex, zabsoluteIndex, cartCoord, cartDim);
 
 		for (int i = 0; i < xnumber; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
-					divergenceCleaningPotential[1 + additionalBinNumber + i][1 + additionalBinNumber + j][1 + additionalBinNumber + k][0] = fourierOutput[i][j][k].re;
+					divergenceCleaningPotential[1 + additionalBinNumber + i][1 + additionalBinNumber + j][1 + additionalBinNumber + k][
+						0] = fourierOutput[i][j][k].re;
 				}
 			}
 		}
 
 		double meanPotential[1];
 		meanPotential[0] = 0;
-		for(int i = 0; i < xnumber; ++i) {
-			for(int j = 0; j < ynumber; ++j) {
-				for(int k = 0; k < znumber; ++k) {
-					meanPotential[0] += divergenceCleaningPotential[1 + additionalBinNumber + i][1 + additionalBinNumber + j][1 + additionalBinNumber + k][0];
+		for (int i = 0; i < xnumber; ++i) {
+			for (int j = 0; j < ynumber; ++j) {
+				for (int k = 0; k < znumber; ++k) {
+					meanPotential[0] += divergenceCleaningPotential[1 + additionalBinNumber + i][1 + additionalBinNumber + j][1 +
+						additionalBinNumber + k][0];
 				}
 			}
 		}
 		double temp[1];
 		MPI_Allreduce(meanPotential, temp, 1, MPI_DOUBLE, MPI_SUM, cartComm);
-		meanPotential[0] = temp[0]/(xnumberGeneral*ynumberGeneral*znumberGeneral);
-		for(int i = 0; i < xnumber; ++i) {
-			for(int j = 0; j < ynumber; ++j) {
-				for(int k = 0; k < znumber; ++k) {
-					divergenceCleaningPotential[1 + additionalBinNumber + i][1 + additionalBinNumber + j][1 + additionalBinNumber + k][0] -= meanPotential[0];
+		meanPotential[0] = temp[0] / (xnumberGeneral * ynumberGeneral * znumberGeneral);
+		for (int i = 0; i < xnumber; ++i) {
+			for (int j = 0; j < ynumber; ++j) {
+				for (int k = 0; k < znumber; ++k) {
+					divergenceCleaningPotential[1 + additionalBinNumber + i][1 + additionalBinNumber + j][1 + additionalBinNumber + k][
+						0] -= meanPotential[0];
 				}
 			}
 		}
@@ -339,7 +360,8 @@ void Simulation::cleanupDivergence1d(Vector3d*** field, double*** density) {
 
 	for (int i = xnumberAdded - 1; i >= 0; --i) {
 		double clean_up_right_part = cleanUpRightPart(i, 1 + additionalBinNumber, 1 + additionalBinNumber, field, density);
-		divergenceCleaningField[i][1 + additionalBinNumber][1 + additionalBinNumber][0] = divergenceCleaningField[i + 1][1 + additionalBinNumber][1 + additionalBinNumber][0] - clean_up_right_part * deltaX;
+		divergenceCleaningField[i][1 + additionalBinNumber][1 + additionalBinNumber][0] = divergenceCleaningField[i + 1][1 +
+			additionalBinNumber][1 + additionalBinNumber][0] - clean_up_right_part * deltaX;
 		divergenceCleaningField[i][1 + additionalBinNumber][1 + additionalBinNumber][1] = 0;
 		divergenceCleaningField[i][1 + additionalBinNumber][1 + additionalBinNumber][2] = 0;
 		if ((cartCoord[0] == cartDim[0] - 1) && (boundaryConditionTypeX != PERIODIC)) {
@@ -353,8 +375,9 @@ void Simulation::cleanupDivergence1d(Vector3d*** field, double*** density) {
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int l = 0; l < 3; ++l){
-					divergenceCleaningField[i][j][k][l] = divergenceCleaningField[i][1 + additionalBinNumber][1 + additionalBinNumber][l];
+				for (int l = 0; l < 3; ++l) {
+					divergenceCleaningField[i][j][k][l] = divergenceCleaningField[i][1 + additionalBinNumber][1 + additionalBinNumber][
+						l];
 				}
 			}
 		}
@@ -363,7 +386,8 @@ void Simulation::cleanupDivergence1d(Vector3d*** field, double*** density) {
 	double leftField[3];
 
 	for (int i = 0; i < 3; ++i) {
-		leftField[i] = divergenceCleaningField[2 + 2 * additionalBinNumber][1 + additionalBinNumber][1 + additionalBinNumber][i];
+		leftField[i] = divergenceCleaningField[2 + 2 * additionalBinNumber][1 + additionalBinNumber][1 + additionalBinNumber][
+			i];
 	}
 
 	if (cartCoord[0] != 0) {
@@ -372,7 +396,7 @@ void Simulation::cleanupDivergence1d(Vector3d*** field, double*** density) {
 
 	MPI_Barrier(cartComm);
 
-	if(boundaryConditionTypeX == PERIODIC){
+	if (boundaryConditionTypeX == PERIODIC) {
 		//substractMeanEfield(divergenceCleaningField);
 	}
 
@@ -407,32 +431,32 @@ void Simulation::substractMeanEfield(double**** field) {
 	}*/
 
 	int minI = 1 + additionalBinNumber;
-		if (cartCoord[0] == 0 && boundaryConditionTypeX != PERIODIC) {
-			minI = 0;
-		}
-		int maxI = xnumberAdded - 1 - additionalBinNumber;
-		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
-			maxI = xnumberAdded - 1;
-		}
-		int minJ = 1 + additionalBinNumber;
-		int maxJ = ynumberAdded - 1 - additionalBinNumber;
-		int minK = 1 + additionalBinNumber;
-		int maxK = znumberAdded - 1 - additionalBinNumber;
+	if (cartCoord[0] == 0 && boundaryConditionTypeX != PERIODIC) {
+		minI = 0;
+	}
+	int maxI = xnumberAdded - 1 - additionalBinNumber;
+	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
+		maxI = xnumberAdded - 1;
+	}
+	int minJ = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - 1 - additionalBinNumber;
+	int minK = 1 + additionalBinNumber;
+	int maxK = znumberAdded - 1 - additionalBinNumber;
 
-		double meanEfield[3];
+	double meanEfield[3];
 
-		meanEfield[0] = 0;
-		meanEfield[1] = 0;
-		meanEfield[2] = 0;
-		for (int i = minI; i < maxI; ++i) {
-			for (int j = minJ; j < maxJ; ++j) {
-				for (int k = minK; k < maxK; ++k) {
-						meanEfield[0] += field[i][j][k][0];
-						meanEfield[1] += field[i][j][k][1];
-						meanEfield[2] += field[i][j][k][2];
-				}
+	meanEfield[0] = 0;
+	meanEfield[1] = 0;
+	meanEfield[2] = 0;
+	for (int i = minI; i < maxI; ++i) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
+				meanEfield[0] += field[i][j][k][0];
+				meanEfield[1] += field[i][j][k][1];
+				meanEfield[2] += field[i][j][k][2];
 			}
 		}
+	}
 
 	double tempE[3];
 
@@ -446,7 +470,7 @@ void Simulation::substractMeanEfield(double**** field) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				//if (i < xnumber - additionalBinNumber ||  cartCoord[0] < cartDim[0] - 1 || boundaryConditionTypeX == PERIODIC) {
-					field[i][j][k][0] -= meanField.x;
+				field[i][j][k][0] -= meanField.x;
 				//}
 			}
 		}
@@ -495,14 +519,23 @@ void Simulation::evaluateDivergenceCleaningField() {
 
 				int prevK = k - 1;
 
-				divergenceCleaningField[i][j][k][0] = -(divergenceCleaningPotential[i][j][k][0] + divergenceCleaningPotential[i][prevJ][k][0] + divergenceCleaningPotential[i][j][prevK][0] + divergenceCleaningPotential[i][prevJ][prevK][0]
-					- divergenceCleaningPotential[prevI][j][k][0] - divergenceCleaningPotential[prevI][prevJ][k][0] - divergenceCleaningPotential[prevI][j][prevK][0] - divergenceCleaningPotential[prevI][prevJ][prevK][0]) / (4 * deltaX);
+				divergenceCleaningField[i][j][k][0] = -(divergenceCleaningPotential[i][j][k][0] + divergenceCleaningPotential[i][
+						prevJ][k][0] + divergenceCleaningPotential[i][j][prevK][0] + divergenceCleaningPotential[i][prevJ][prevK][0]
+					- divergenceCleaningPotential[prevI][j][k][0] - divergenceCleaningPotential[prevI][prevJ][k][0] -
+					divergenceCleaningPotential[prevI][j][prevK][0] - divergenceCleaningPotential[prevI][prevJ][prevK][0]) / (4 *
+					deltaX);
 
-				divergenceCleaningField[i][j][k][1] = -(divergenceCleaningPotential[i][j][k][0] + divergenceCleaningPotential[prevI][j][k][0] + divergenceCleaningPotential[i][j][prevK][0] + divergenceCleaningPotential[prevI][j][prevK][0]
-					- divergenceCleaningPotential[i][prevJ][k][0] - divergenceCleaningPotential[prevI][prevJ][k][0] - divergenceCleaningPotential[i][prevJ][prevK][0] - divergenceCleaningPotential[prevI][prevJ][prevK][0]) / (4 * deltaY);
+				divergenceCleaningField[i][j][k][1] = -(divergenceCleaningPotential[i][j][k][0] + divergenceCleaningPotential[prevI]
+					[j][k][0] + divergenceCleaningPotential[i][j][prevK][0] + divergenceCleaningPotential[prevI][j][prevK][0]
+					- divergenceCleaningPotential[i][prevJ][k][0] - divergenceCleaningPotential[prevI][prevJ][k][0] -
+					divergenceCleaningPotential[i][prevJ][prevK][0] - divergenceCleaningPotential[prevI][prevJ][prevK][0]) / (4 *
+					deltaY);
 
-				divergenceCleaningField[i][j][k][2] = -(divergenceCleaningPotential[i][j][k][0] + divergenceCleaningPotential[i][prevJ][k][0] + divergenceCleaningPotential[prevI][j][k][0] + divergenceCleaningPotential[prevI][prevJ][k][0]
-					- divergenceCleaningPotential[i][j][prevK][0] - divergenceCleaningPotential[i][prevJ][prevK][0] - divergenceCleaningPotential[prevI][j][prevK][0] - divergenceCleaningPotential[prevI][prevJ][prevK][0]) / (4 * deltaZ);
+				divergenceCleaningField[i][j][k][2] = -(divergenceCleaningPotential[i][j][k][0] + divergenceCleaningPotential[i][
+						prevJ][k][0] + divergenceCleaningPotential[prevI][j][k][0] + divergenceCleaningPotential[prevI][prevJ][k][0]
+					- divergenceCleaningPotential[i][j][prevK][0] - divergenceCleaningPotential[i][prevJ][prevK][0] -
+					divergenceCleaningPotential[prevI][j][prevK][0] - divergenceCleaningPotential[prevI][prevJ][prevK][0]) / (4 *
+					deltaZ);
 			}
 		}
 	}
@@ -534,34 +567,34 @@ void Simulation::evaluateDivergenceCleaningField() {
 }
 
 void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k, Vector3d*** field, double*** density) {
-	if(cartCoord[0] == 0 && cartCoord[1] == 0 & cartCoord[2] == 0){
-	if(i == 1 + additionalBinNumber && j == 1 + additionalBinNumber && k == 1 + additionalBinNumber){
-		createDivergenceFixEquation(i, j, k, density);
-		return;
-	}
+	if (cartCoord[0] == 0 && cartCoord[1] == 0 & cartCoord[2] == 0) {
+		if (i == 1 + additionalBinNumber && j == 1 + additionalBinNumber && k == 1 + additionalBinNumber) {
+			createDivergenceFixEquation(i, j, k, density);
+			return;
+		}
 
-	/*if(i == xnumberAdded/2 && j == ynumberAdded/2 && k == znumberAdded/2){
-		createDivergenceZeroEquation(i, j, k);
-		return;
-	}*/
+		/*if(i == xnumberAdded/2 && j == ynumberAdded/2 && k == znumberAdded/2){
+			createDivergenceZeroEquation(i, j, k);
+			return;
+		}*/
 
-	/*if(i == 2 + additionalBinNumber && j == 1 + additionalBinNumber && k == 1 + additionalBinNumber){
-		createDivergenceZeroEquation(i, j, k);
-		return;
-	}*/
+		/*if(i == 2 + additionalBinNumber && j == 1 + additionalBinNumber && k == 1 + additionalBinNumber){
+			createDivergenceZeroEquation(i, j, k);
+			return;
+		}*/
 
-	/*if(ynumberGeneral > 1){
-		if(i == 1 + additionalBinNumber && j == 2 + additionalBinNumber && k == 1 + additionalBinNumber){
-		createDivergenceZeroEquation(i, j, k);
-		return;
-	}
-	}
-	if(znumberGeneral > 1){
-		if(i == 1 + additionalBinNumber && j == 1 + additionalBinNumber && k == 2 + additionalBinNumber){
-		createDivergenceZeroEquation(i, j, k);
-		return;
-	}
-	}*/
+		/*if(ynumberGeneral > 1){
+			if(i == 1 + additionalBinNumber && j == 2 + additionalBinNumber && k == 1 + additionalBinNumber){
+			createDivergenceZeroEquation(i, j, k);
+			return;
+		}
+		}
+		if(znumberGeneral > 1){
+			if(i == 1 + additionalBinNumber && j == 1 + additionalBinNumber && k == 2 + additionalBinNumber){
+			createDivergenceZeroEquation(i, j, k);
+			return;
+		}
+		}*/
 	}
 	/*if(cartCoord[1] == 0 && cartCoord[2] == 0 && ynumberGeneral > 1 && znumberGeneral > 1){
 		if(i == 1 + additionalBinNumber && j == 1 + additionalBinNumber){
@@ -590,131 +623,131 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k, Ve
 	bool _27points = false;
 
 	if ((ynumberGeneral > 1) && (znumberGeneral > 1)) {
-		if(! _27points){
-		double element = -2/deltaX2 - 2/deltaY2 - 2/deltaZ2;
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
+		if (! _27points) {
+			double element = -2 / deltaX2 - 2 / deltaY2 - 2 / deltaZ2;
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
 
-		element = 1/deltaX2;
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
+			element = 1 / deltaX2;
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
 
-		element = 1/deltaY2;
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, k, 0));
+			element = 1 / deltaY2;
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, k, 0));
 
-		element = 1/deltaZ2;
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
+			element = 1 / deltaZ2;
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
 		} else {
-		double element = -1 / (2 * deltaX2) - 1 / (2 * deltaY2) - 1 / (2 * deltaZ2);
-		//double element = -44/(13*deltaX2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
+			double element = -1 / (2 * deltaX2) - 1 / (2 * deltaY2) - 1 / (2 * deltaZ2);
+			//double element = -44/(13*deltaX2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
 
-		element = 1 / (16 * deltaX2) + 1 / (16 * deltaY2) + 1 / (16 * deltaZ2);
-		//element = 1/(13*deltaX2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, nextJ, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, nextJ, prevK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, prevJ, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, prevJ, prevK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, nextJ, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, nextJ, prevK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, prevJ, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, prevJ, prevK, 0));
+			element = 1 / (16 * deltaX2) + 1 / (16 * deltaY2) + 1 / (16 * deltaZ2);
+			//element = 1/(13*deltaX2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, nextJ, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, nextJ, prevK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, prevJ, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, prevJ, prevK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, nextJ, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, nextJ, prevK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, prevJ, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, prevJ, prevK, 0));
 
-		element = 1 / (8 * deltaX2) + 1 / (8 * deltaY2) - 1 / (8 * deltaZ2);
-		//element = 3/(26*deltaX2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, nextJ, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, prevJ, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, nextJ, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, prevJ, k, 0));
+			element = 1 / (8 * deltaX2) + 1 / (8 * deltaY2) - 1 / (8 * deltaZ2);
+			//element = 3/(26*deltaX2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, nextJ, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, prevJ, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, nextJ, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, prevJ, k, 0));
 
-		element = 1 / (8 * deltaX2) - 1 / (8 * deltaY2) + 1 / (8 * deltaZ2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, prevK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, prevK, 0));
+			element = 1 / (8 * deltaX2) - 1 / (8 * deltaY2) + 1 / (8 * deltaZ2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, prevK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, prevK, 0));
 
-		element = - 1 / (8 * deltaX2) + 1 / (8 * deltaY2) + 1 / (8 * deltaZ2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, prevK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, prevK, 0));
+			element = - 1 / (8 * deltaX2) + 1 / (8 * deltaY2) + 1 / (8 * deltaZ2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, prevK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, prevK, 0));
 
-		//element = 3/(13*deltaX2);
-		element = 1 / (4 * deltaX2) - 1 / (4 * deltaY2) - 1 / (4 * deltaZ2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
+			//element = 3/(13*deltaX2);
+			element = 1 / (4 * deltaX2) - 1 / (4 * deltaY2) - 1 / (4 * deltaZ2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
 
-		element = - 1 / (4 * deltaX2) + 1 / (4 * deltaY2) - 1 / (4 * deltaZ2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, k, 0));
+			element = - 1 / (4 * deltaX2) + 1 / (4 * deltaY2) - 1 / (4 * deltaZ2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, k, 0));
 
-		element = - 1 / (4 * deltaX2) - 1 / (4 * deltaY2) + 1 / (4 * deltaZ2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
+			element = - 1 / (4 * deltaX2) - 1 / (4 * deltaY2) + 1 / (4 * deltaZ2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
 		}
 	} else if (ynumberGeneral > 1) {
-		if(!_27points){
-		double element = -2/deltaX2 - 2/deltaY2;
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
+		if (!_27points) {
+			double element = -2 / deltaX2 - 2 / deltaY2;
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
 
-		element = 1/deltaX2;
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
+			element = 1 / deltaX2;
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
 
-		element = 1/deltaY2;
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, k, 0));
+			element = 1 / deltaY2;
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, k, 0));
 		} else {
-		double element = -1.0 / (deltaX2) - 1.0 / (deltaY2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
+			double element = -1.0 / (deltaX2) - 1.0 / (deltaY2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
 
-		element = 1.0 / (4.0 * deltaX2) + 1 / (4.0 * deltaY2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, nextJ, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, prevJ, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, nextJ, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, prevJ, k, 0));
+			element = 1.0 / (4.0 * deltaX2) + 1 / (4.0 * deltaY2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, nextJ, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, prevJ, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, nextJ, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, prevJ, k, 0));
 
-		element = 1.0 / (2.0 * deltaX2) - 1.0 / (2.0 * deltaY2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
+			element = 1.0 / (2.0 * deltaX2) - 1.0 / (2.0 * deltaY2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
 
-		element = - 1.0 / (2.0 * deltaX2) + 1.0 / (2.0 * deltaY2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, k, 0));
+			element = - 1.0 / (2.0 * deltaX2) + 1.0 / (2.0 * deltaY2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, nextJ, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, prevJ, k, 0));
 		}
 
 	} else if (znumberGeneral > 1) {
-		if(!_27points){
-		double element = -2/deltaX2 - 2/deltaZ2;
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
+		if (!_27points) {
+			double element = -2 / deltaX2 - 2 / deltaZ2;
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
 
-		element = 1/deltaX2;
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
+			element = 1 / deltaX2;
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
 
-		element = 1/deltaZ2;
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
+			element = 1 / deltaZ2;
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
 		} else {
-		double element = -1 / (deltaX2) - 1 / (deltaZ2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
+			double element = -1 / (deltaX2) - 1 / (deltaZ2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, k, 0));
 
 
-		element = 1 / (4 * deltaX2) + 1 / (4 * deltaZ2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, prevK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, prevK, 0));
+			element = 1 / (4 * deltaX2) + 1 / (4 * deltaZ2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, prevK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, prevK, 0));
 
 
-		element = 1 / (2 * deltaX2) - 1 / (2 * deltaZ2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
+			element = 1 / (2 * deltaX2) - 1 / (2 * deltaZ2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, nextI, j, k, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, prevI, j, k, 0));
 
-		element = - 1 / (2 * deltaX2) + 1 / (2 * deltaZ2);
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
-		divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
+			element = - 1 / (2 * deltaX2) + 1 / (2 * deltaZ2);
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, nextK, 0));
+			divergenceCleanUpMatrix[i][j][k][0].push_back(MatrixElement(element, i, j, prevK, 0));
 		}
 	} else {
 		double element = -2 / (deltaX2);
@@ -799,7 +832,9 @@ Complex*** Simulation::evaluateFourierTranslation(double*** a) {
 				for (int tempi = 0; tempi < xnumber; ++tempi) {
 					for (int tempj = 0; tempj < ynumber; ++tempj) {
 						for (int tempk = 0; tempk < znumber; ++tempk) {
-							result[i][j][k] += complexExp(-2 * pi * ((i * tempi * 1.0 / xnumber) + (j * tempj * 1.0 / ynumber) + (k * tempk * 1.0 / znumber))) * a[tempi][tempj][tempk];
+							result[i][j][k] += complexExp(
+								-2 * pi * ((i * tempi * 1.0 / xnumber) + (j * tempj * 1.0 / ynumber) + (k * tempk * 1.0 / znumber))) * a[tempi][
+								tempj][tempk];
 						}
 					}
 				}
@@ -838,7 +873,8 @@ double*** Simulation::evaluateReverceFourierTranslation(Complex*** a) {
 							if (tempk >= znumber / 2.0) {
 								kz = -2 * pi * (tempk - znumber + 2);
 							}
-							result[i][j][k] += (complexExp(((i * kx / xnumber) + (j * ky / ynumber) + (k * kz / znumber))) * a[tempi][tempj][tempk]).re;
+							result[i][j][k] += (complexExp(((i * kx / xnumber) + (j * ky / ynumber) + (k * kz / znumber))) * a[tempi][tempj][
+								tempk]).re;
 						}
 					}
 				}
@@ -850,7 +886,7 @@ double*** Simulation::evaluateReverceFourierTranslation(Complex*** a) {
 }
 
 void Simulation::cleanupDivergenceMagnetic() {
-	if(ynumberGeneral == 1 && znumberGeneral == 1){
+	if (ynumberGeneral == 1 && znumberGeneral == 1) {
 		return;
 	}
 	double procTime = 0;
@@ -860,78 +896,33 @@ void Simulation::cleanupDivergenceMagnetic() {
 	if ((rank == 0) && (verbosity > 0)) printf("cleaning up divergence\n");
 	fflush(stdout);
 
-		double foolRightPart = 0;
+	double foolRightPart = 0;
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				divergenceCleanUpMatrix[i][j][k][0].clear();
+				divergenceCleanUpMatrix[i][j][k][1].clear();
+				divergenceCleanUpMatrix[i][j][k][2].clear();
+				divergenceCleanUpRightPart[i][j][k][0] = 0;
+				divergenceCleanUpRightPart[i][j][k][1] = 0;
+				divergenceCleanUpRightPart[i][j][k][2] = 0;
+				divergenceCleaningPotential[i][j][k][0] = 0;
+				divergenceCleaningField[i][j][k][0] = 0;
+				divergenceCleaningField[i][j][k][1] = 0;
+				divergenceCleaningField[i][j][k][2] = 0;
+			}
+		}
+	}
+
+	if (cartDim[0] > 1) {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-					divergenceCleanUpMatrix[i][j][k][0].clear();
-					divergenceCleanUpMatrix[i][j][k][1].clear();
-					divergenceCleanUpMatrix[i][j][k][2].clear();
-					divergenceCleanUpRightPart[i][j][k][0] = 0;
-					divergenceCleanUpRightPart[i][j][k][1] = 0;
-					divergenceCleanUpRightPart[i][j][k][2] = 0;
-					divergenceCleaningPotential[i][j][k][0] = 0;
-					divergenceCleaningField[i][j][k][0] = 0;
-					divergenceCleaningField[i][j][k][1] = 0;
-					divergenceCleaningField[i][j][k][2] = 0;
-				}
-			}
-		}
-
-		if (cartDim[0] > 1) {
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int j = 0; j < ynumberAdded; ++j) {
-					for (int k = 0; k < znumberAdded; ++k) {
-						if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k >= znumberAdded - 1 - additionalBinNumber)) {
-							createDivergenceFakeEquation(i, j, k);
-						} else {
-							if (cartCoord[0] == 0) {
-								if (i <= additionalBinNumber) {
-									createDivergenceFakeEquation(i, j, k);
-								} else if (i == 1 + additionalBinNumber) {
-									if (boundaryConditionTypeX == PERIODIC) {
-										createDivergenceCleanupInternalEquationMagnetic(i, j, k);
-									} else {
-										createDivergenceZeroEquation(i, j, k);
-									}
-								} else if (i < xnumberAdded - 1 - additionalBinNumber) {
-									createDivergenceCleanupInternalEquationMagnetic(i, j, k);
-								} else {
-									createDivergenceFakeEquation(i, j, k);
-								}
-							} else if (cartCoord[0] == cartDim[0] - 1) {
-								if (i <= additionalBinNumber) {
-									createDivergenceFakeEquation(i, j, k);
-								} else if (i < xnumberAdded - 1 - additionalBinNumber) {
-									createDivergenceCleanupInternalEquationMagnetic(i, j, k);
-								} else {
-									if (boundaryConditionTypeX == PERIODIC) {
-										createDivergenceFakeEquation(i, j, k);
-									} else {
-										createDivergenceFakeEquation(i, j, k);
-										//createDivergenceZeroEquation(i, j, k);
-									}
-								}
-							} else {
-								if (i <= additionalBinNumber) {
-									createDivergenceFakeEquation(i, j, k);
-								} else if (i < xnumberAdded - 1 - additionalBinNumber) {
-									createDivergenceCleanupInternalEquationMagnetic(i, j, k);
-								} else {
-									createDivergenceFakeEquation(i, j, k);
-								}
-							}
-						}
-					}
-				}
-			}
-		} else {
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int j = 0; j < ynumberAdded; ++j) {
-					for (int k = 0; k < znumberAdded; ++k) {
-						if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k >= znumberAdded - 1 - additionalBinNumber)) {
-							createDivergenceFakeEquation(i, j, k);
-						} else {
+					if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k
+						>= znumberAdded - 1 - additionalBinNumber)) {
+						createDivergenceFakeEquation(i, j, k);
+					} else {
+						if (cartCoord[0] == 0) {
 							if (i <= additionalBinNumber) {
 								createDivergenceFakeEquation(i, j, k);
 							} else if (i == 1 + additionalBinNumber) {
@@ -943,26 +934,84 @@ void Simulation::cleanupDivergenceMagnetic() {
 							} else if (i < xnumberAdded - 1 - additionalBinNumber) {
 								createDivergenceCleanupInternalEquationMagnetic(i, j, k);
 							} else {
+								createDivergenceFakeEquation(i, j, k);
+							}
+						} else if (cartCoord[0] == cartDim[0] - 1) {
+							if (i <= additionalBinNumber) {
+								createDivergenceFakeEquation(i, j, k);
+							} else if (i < xnumberAdded - 1 - additionalBinNumber) {
+								createDivergenceCleanupInternalEquationMagnetic(i, j, k);
+							} else {
 								if (boundaryConditionTypeX == PERIODIC) {
 									createDivergenceFakeEquation(i, j, k);
 								} else {
-									createDivergenceZeroEquation(i, j, k);
+									createDivergenceFakeEquation(i, j, k);
+									//createDivergenceZeroEquation(i, j, k);
 								}
+							}
+						} else {
+							if (i <= additionalBinNumber) {
+								createDivergenceFakeEquation(i, j, k);
+							} else if (i < xnumberAdded - 1 - additionalBinNumber) {
+								createDivergenceCleanupInternalEquationMagnetic(i, j, k);
+							} else {
+								createDivergenceFakeEquation(i, j, k);
 							}
 						}
 					}
 				}
 			}
 		}
-		//if (debugMode) {
-			checkEquationMatrix(divergenceCleanUpMatrix, 1);
-		//}
-			bool converges;
-		biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
-		//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded,
-		                                 //znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
+	} else {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					if ((j <= additionalBinNumber) || (j >= ynumberAdded - 1 - additionalBinNumber) || (k <= additionalBinNumber) || (k
+						>= znumberAdded - 1 - additionalBinNumber)) {
+						createDivergenceFakeEquation(i, j, k);
+					} else {
+						if (i <= additionalBinNumber) {
+							createDivergenceFakeEquation(i, j, k);
+						} else if (i == 1 + additionalBinNumber) {
+							if (boundaryConditionTypeX == PERIODIC) {
+								createDivergenceCleanupInternalEquationMagnetic(i, j, k);
+							} else {
+								createDivergenceZeroEquation(i, j, k);
+							}
+						} else if (i < xnumberAdded - 1 - additionalBinNumber) {
+							createDivergenceCleanupInternalEquationMagnetic(i, j, k);
+						} else {
+							if (boundaryConditionTypeX == PERIODIC) {
+								createDivergenceFakeEquation(i, j, k);
+							} else {
+								createDivergenceZeroEquation(i, j, k);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	//if (debugMode) {
+	checkEquationMatrix(divergenceCleanUpMatrix, 1);
+	//}
+	bool converges;
+	biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential,
+	                                    xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral,
+	                                    ynumberGeneral, znumberGeneral, maxCleanupErrorLevel,
+	                                    maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC,
+	                                    boundaryConditionTypeY == PERIODIC, boundaryConditionTypeZ == PERIODIC, verbosity,
+	                                    cartComm, cartCoord, cartDim, residualBiconjugateDivE,
+	                                    firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE,
+	                                    tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer,
+	                                    leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer,
+	                                    backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer,
+	                                    bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer,
+	                                    topInDivergenceBuffer, converges);
+	//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded,
+	//znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
 
-		exchangeGeneralScalarCellField(divergenceCleaningPotential);
+	exchangeGeneralScalarCellField(divergenceCleaningPotential);
 	evaluateDivergenceCleaningFieldMagnetic();
 	updateFieldByCleaningMagnetic();
 
@@ -1011,14 +1060,23 @@ void Simulation::evaluateDivergenceCleaningFieldMagnetic() {
 				int prevK = k - 1;
 				int nextK = k + 1;
 
-				divergenceCleaningField[i][j][k][0] = -(divergenceCleaningPotential[nextI][j][k][0] + divergenceCleaningPotential[nextI][nextJ][k][0] + divergenceCleaningPotential[nextI][j][nextK][0] + divergenceCleaningPotential[nextI][nextJ][nextK][0]
-					- divergenceCleaningPotential[i][j][k][0] - divergenceCleaningPotential[i][nextJ][k][0] - divergenceCleaningPotential[i][j][nextK][0] - divergenceCleaningPotential[i][nextJ][nextK][0]) / (4 * deltaX);
+				divergenceCleaningField[i][j][k][0] = -(divergenceCleaningPotential[nextI][j][k][0] + divergenceCleaningPotential[
+						nextI][nextJ][k][0] + divergenceCleaningPotential[nextI][j][nextK][0] + divergenceCleaningPotential[nextI][nextJ][
+						nextK][0]
+					- divergenceCleaningPotential[i][j][k][0] - divergenceCleaningPotential[i][nextJ][k][0] -
+					divergenceCleaningPotential[i][j][nextK][0] - divergenceCleaningPotential[i][nextJ][nextK][0]) / (4 * deltaX);
 
-				divergenceCleaningField[i][j][k][1] = -(divergenceCleaningPotential[i][nextJ][k][0] + divergenceCleaningPotential[nextI][nextJ][k][0] + divergenceCleaningPotential[i][nextJ][nextK][0] + divergenceCleaningPotential[nextI][nextJ][nextK][0]
-					- divergenceCleaningPotential[i][j][k][0] - divergenceCleaningPotential[nextI][j][k][0] - divergenceCleaningPotential[i][j][nextK][0] - divergenceCleaningPotential[nextI][j][nextK][0]) / (4 * deltaY);
+				divergenceCleaningField[i][j][k][1] = -(divergenceCleaningPotential[i][nextJ][k][0] + divergenceCleaningPotential[
+						nextI][nextJ][k][0] + divergenceCleaningPotential[i][nextJ][nextK][0] + divergenceCleaningPotential[nextI][nextJ][
+						nextK][0]
+					- divergenceCleaningPotential[i][j][k][0] - divergenceCleaningPotential[nextI][j][k][0] -
+					divergenceCleaningPotential[i][j][nextK][0] - divergenceCleaningPotential[nextI][j][nextK][0]) / (4 * deltaY);
 
-				divergenceCleaningField[i][j][k][2] = -(divergenceCleaningPotential[i][j][nextK][0] + divergenceCleaningPotential[i][nextJ][nextK][0] + divergenceCleaningPotential[nextI][j][nextK][0] + divergenceCleaningPotential[nextI][nextJ][nextK][0]
-					- divergenceCleaningPotential[i][j][k][0] - divergenceCleaningPotential[i][nextJ][k][0] - divergenceCleaningPotential[nextI][j][k][0] - divergenceCleaningPotential[nextI][nextJ][k][0]) / (4 * deltaZ);
+				divergenceCleaningField[i][j][k][2] = -(divergenceCleaningPotential[i][j][nextK][0] + divergenceCleaningPotential[i]
+					[nextJ][nextK][0] + divergenceCleaningPotential[nextI][j][nextK][0] + divergenceCleaningPotential[nextI][nextJ][
+						nextK][0]
+					- divergenceCleaningPotential[i][j][k][0] - divergenceCleaningPotential[i][nextJ][k][0] -
+					divergenceCleaningPotential[nextI][j][k][0] - divergenceCleaningPotential[nextI][nextJ][k][0]) / (4 * deltaZ);
 			}
 		}
 	}
@@ -1193,5 +1251,5 @@ void Simulation::createDivergenceCleanupInternalEquationMagnetic(int i, int j, i
 double Simulation::cleanUpRightPartMagnetic(int i, int j, int k) {
 	double div = evaluateDivNewB(i, j, k);
 
-	return  - div;
+	return - div;
 }

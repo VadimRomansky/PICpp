@@ -35,11 +35,11 @@ Vector3d& Vector3d::operator=(Vector3d const& vector) {
 	return *this;
 }
 
-double Vector3d::norm() const{
+double Vector3d::norm() const {
 	return sqrt(x * x + y * y + z * z);
 }
 
-Vector3d Vector3d::operator+(const Vector3d& vector) const{
+Vector3d Vector3d::operator+(const Vector3d& vector) const {
 	return Vector3d(x + vector.x, y + vector.y, z + vector.z);
 }
 
@@ -113,7 +113,7 @@ Matrix3d Vector3d::selfTensorMult() const {
 	return result;
 }
 
-double& Vector3d::operator[](int i){
+double& Vector3d::operator[](int i) {
 	switch (i) {
 	case 0:
 		return x;
@@ -123,7 +123,7 @@ double& Vector3d::operator[](int i){
 		return z;
 	default:
 		printf("i must be 0 < i < 3\n");
-			MPI_Finalize();
+		MPI_Finalize();
 		exit(0);
 	}
 }

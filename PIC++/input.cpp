@@ -296,10 +296,12 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 
 	printf("finish read input\n");
 	return Simulation(xnumber, ynumber, znumber, xsize, ysize, zsize, temperature, Vx, Vy, Vz, Ex, Ey, Ez, Bx, By, Bz,
-                      maxIterations, maxTime, typesNumber, particlesPerBin, concentrations, inputType, nprocs, verbocity, preferedTimeStep, massElectronInput, comm);
+	                  maxIterations, maxTime, typesNumber, particlesPerBin, concentrations, inputType, nprocs, verbocity,
+	                  preferedTimeStep, massElectronInput, comm);
 }
 
-Simulation readBackup(const char* generalFileName, const char* EfileName, const char* BfileName, const char* particlesFileName, MPI_Comm& comm) {
+Simulation readBackup(const char* generalFileName, const char* EfileName, const char* BfileName,
+                      const char* particlesFileName, MPI_Comm& comm) {
 	int size;
 	int rank;
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -474,14 +476,14 @@ void readFields(const char* EfileName, const char* BfileName, Simulation& simula
 			for (int i = 0; i < simulation.xnumberGeneral; ++i) {
 				for (int j = 0; j < simulation.ynumberGeneral; ++j) {
 					for (int k = 0; k < simulation.znumberGeneral; ++k) {
-						if(i >= simulation.firstAbsoluteXindex + simulation.xnumberAdded) {
+						if (i >= simulation.firstAbsoluteXindex + simulation.xnumberAdded) {
 							break;
 						}
 						double x;
 						double y;
 						double z;
 						fscanf(Bfile, "%lf %lf %lf", &x, &y, &z);
-						if(i >= simulation.firstAbsoluteXindex && i < simulation.firstAbsoluteXindex + simulation.xnumber) {
+						if (i >= simulation.firstAbsoluteXindex && i < simulation.firstAbsoluteXindex + simulation.xnumber) {
 							simulation.Bfield[i][j][k] = Vector3d(x, y, z);
 						}
 					}
@@ -498,14 +500,14 @@ void readFields(const char* EfileName, const char* BfileName, Simulation& simula
 			for (int i = 0; i < simulation.xnumberGeneral + 1; ++i) {
 				for (int j = 0; j < simulation.ynumberGeneral + 1; ++j) {
 					for (int k = 0; k < simulation.znumberGeneral + 1; ++k) {
-						if(i > simulation.firstAbsoluteXindex + simulation.xnumber) {
+						if (i > simulation.firstAbsoluteXindex + simulation.xnumber) {
 							break;
 						}
 						double x;
 						double y;
 						double z;
 						fscanf(Efile, "%lf %lf %lf", &x, &y, &z);
-						if(i >= simulation.firstAbsoluteXindex && i <= simulation.firstAbsoluteXindex + simulation.xnumber) {
+						if (i >= simulation.firstAbsoluteXindex && i <= simulation.firstAbsoluteXindex + simulation.xnumber) {
 							simulation.Efield[i][j][k] = Vector3d(x, y, z);
 						}
 					}
@@ -541,7 +543,8 @@ void readParticles(const char* particlesFileName, Simulation& simulation) {
 				double dy;
 				double dz;
 
-				fscanf(particlesFile, "%d %lf %lf %lf %d %lf %lf %lf %lf %lf %lf %lf %lf %lf", &number, &mass, &charge, &weight, &type, &x, &y, &z, &px, &py, &pz, &dx, &dy, &dz);
+				fscanf(particlesFile, "%d %lf %lf %lf %d %lf %lf %lf %lf %lf %lf %lf %lf %lf", &number, &mass, &charge, &weight,
+				       &type, &x, &y, &z, &px, &py, &pz, &dx, &dy, &dz);
 
 				if (x > simulation.leftX && x <= simulation.rightX) {
 
@@ -583,21 +586,21 @@ int** readTrackedParticlesNumbers(const char* particlesFile, int& number) {
 	char c;
 	number = 0;
 	int flag = fscanf(inputFile, "%c", &c);
-	while(flag > 0) {
-		if(c == '\n') {
+	while (flag > 0) {
+		if (c == '\n') {
 			number++;
 		}
 		flag = fscanf(inputFile, "%c", &c);
 	}
 	rewind(inputFile);
-	if(number == 0) {
-		return NULL;
+	if (number == 0) {
+		return nullptr;
 	}
 	int** particlesNumbers = new int*[number];
-	for(int i = 0; i < number; ++i) {
+	for (int i = 0; i < number; ++i) {
 		particlesNumbers[i] = new int[2];
 		int particleNumber;
-		double x, y ,z, px, py, pz, p;
+		double x, y, z, px, py, pz, p;
 		char ch = ' ';
 		int type;
 		//fscanf(inputFile, "%d %lf %lf %lf %lf %lf %lf", &particleNumber, &x, &y, &z, &px, &py, &pz);

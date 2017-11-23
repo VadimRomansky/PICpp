@@ -164,7 +164,8 @@ void Simulation::setSpaceForProc() {
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                        double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                        int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
-                       double* concentrationsV, int inType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, MPI_Comm& comm) {
+                       double* concentrationsV, int inType, int nprocsV, int verbosityV, double preferedTimeStepV,
+                       double massElectronInputV, MPI_Comm& comm) {
 	nprocs = nprocsV;
 	cartComm = comm;
 	int periods[MPI_dim];
@@ -295,7 +296,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	E0 = Vector3d(Ex, Ey, Ez);
 
 	electronMassInput = massElectronInputV;
-	preferedDeltaT =preferedTimeStepV;
+	preferedDeltaT = preferedTimeStepV;
 
 
 	if (inputType == CGS) {
@@ -315,7 +316,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		omega2 += 4 * pi * concentrationsV[4] * electron_charge * electron_charge / massDeuterium;
 		omega2 += 4 * pi * concentrationsV[5] * 4 * electron_charge * electron_charge / massHelium3;
 
-		double gamma = 1.0/sqrt(1.0 - V0.scalarMult(V0) / (speed_of_light * speed_of_light));
+		double gamma = 1.0 / sqrt(1.0 - V0.scalarMult(V0) / (speed_of_light * speed_of_light));
 
 		//plasma_period = sqrt(1 / omega2) * (2 * pi) * gamma * sqrt(gamma);
 		plasma_period = sqrt(1 / omega2) * sqrt(gamma);
@@ -384,7 +385,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		plasma_period = cube(speed_of_light) / (protonScale * electron_charge);
 		scaleFactor = speed_of_light * plasma_period;
 		rescaleConstantsToTheoretical();
-		double densityForUnits = massElectron * (massProton + massElectron) / (4 * pi * electron_charge_normalized * electron_charge_normalized);
+		double densityForUnits = massElectron * (massProton + massElectron) / (4 * pi * electron_charge_normalized *
+			electron_charge_normalized);
 		if (fabs(density - densityForUnits) / (densityForUnits + densityForUnits) > 1E-3) {
 			if (rank == 0) printf("density must be changed\n");
 			if (rank == 0) printf("density = %g, must be = %g\n", density, densityForUnits);
@@ -393,7 +395,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	}
 
 	resistiveLayerWidth = defaulResistiveLayerWidth;
-	fakeCondactivity = 2*speed_of_light_normalized/(deltaX*(resistiveLayerWidth+1));
+	fakeCondactivity = 2 * speed_of_light_normalized / (deltaX * (resistiveLayerWidth + 1));
 
 	maxEfield = Vector3d(0, 0, 0);
 	maxBfield = Vector3d(0, 0, 0);
@@ -425,7 +427,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                        double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                        int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
-                       double* concentrationsV, int inType, int nprocsV , int verbosityV, double preferedTimeStepV, double massElectronInputV, double plasmaPeriodV,
+                       double* concentrationsV, int inType, int nprocsV, int verbosityV, double preferedTimeStepV,
+                       double massElectronInputV, double plasmaPeriodV,
                        double scaleFactorV, SolverType solverTypev, MPI_Comm& comm) {
 	nprocs = nprocsV;
 	cartComm = comm;
@@ -552,7 +555,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	B0 = Vector3d(Bx, By, Bz);
 	E0 = Vector3d(Ex, Ey, Ez);
 	electronMassInput = massElectronInputV;
-	preferedDeltaT =preferedTimeStepV;
+	preferedDeltaT = preferedTimeStepV;
 
 	if (inputType == CGS) {
 		massProton = massProtonReal;
@@ -585,7 +588,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		plasma_period = plasmaPeriodV;
 		scaleFactor = scaleFactorV;
 		rescaleConstantsToTheoretical();
-		double densityForUnits = massElectron * (massProton + massElectron) / (4 * pi * electron_charge_normalized * electron_charge_normalized);
+		double densityForUnits = massElectron * (massProton + massElectron) / (4 * pi * electron_charge_normalized *
+			electron_charge_normalized);
 		if (fabs(density - densityForUnits) / (densityForUnits + densityForUnits) > 1E-3) {
 			if (rank == 0) printf("density must be changed\n");
 			if (rank == 0) printf("density = %g, must be = %g\n", density, densityForUnits);
@@ -594,7 +598,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	}
 
 	resistiveLayerWidth = defaulResistiveLayerWidth;
-	fakeCondactivity = 2*speed_of_light_normalized/(deltaX*(resistiveLayerWidth+1));
+	fakeCondactivity = 2 * speed_of_light_normalized / (deltaX * (resistiveLayerWidth + 1));
 
 	maxEfield = Vector3d(0, 0, 0);
 	maxBfield = Vector3d(0, 0, 0);
@@ -720,8 +724,8 @@ Simulation::~Simulation() {
 		delete[] fourierImage;
 		delete[] fourierOutput;
 
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
 				delete[] fourierScalarInput[i][j];
 				delete[] fourierScalarOutput[i][j];
 				delete[] fourierScalarTempOutput[i][j];
@@ -737,8 +741,8 @@ Simulation::~Simulation() {
 		delete[] fourierScalarTempOutput;
 		delete[] fourierScalarTempOutput1;
 
-		for(int i = 0; i < 2*xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
+		for (int i = 0; i < 2 * xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
 				delete[] fourierScalarMirrorInput[i][j];
 				delete[] fourierScalarMirrorOutput[i][j];
 				delete[] fourierScalarMirrorTempOutput[i][j];
@@ -827,7 +831,7 @@ Simulation::~Simulation() {
 		delete[] divPressureTensorMinus;
 		delete[] dielectricTensor;
 
-		for(int j = 0; j < ynumberAdded + 1; ++j){
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			delete[] leftElevel[j];
 			delete[] rightElevel[j];
 		}
@@ -961,96 +965,96 @@ Simulation::~Simulation() {
 		delete[] bottomInCellBuffer;
 
 		////buneman E
-	delete[] leftOutBunemanExBuffer;
-	delete[] rightOutBunemanExBuffer;
-	delete[] leftInBunemanExBuffer;
-	delete[] rightInBunemanExBuffer;
+		delete[] leftOutBunemanExBuffer;
+		delete[] rightOutBunemanExBuffer;
+		delete[] leftInBunemanExBuffer;
+		delete[] rightInBunemanExBuffer;
 
-	delete[] frontOutBunemanExBuffer;
-	delete[] backOutBunemanExBuffer;
-	delete[] frontInBunemanExBuffer;
-	delete[] backInBunemanExBuffer;
+		delete[] frontOutBunemanExBuffer;
+		delete[] backOutBunemanExBuffer;
+		delete[] frontInBunemanExBuffer;
+		delete[] backInBunemanExBuffer;
 
-	delete[] bottomOutBunemanExBuffer;
-	delete[] topOutBunemanExBuffer;
-	delete[] bottomInBunemanExBuffer;
-	delete[] topInBunemanExBuffer;
+		delete[] bottomOutBunemanExBuffer;
+		delete[] topOutBunemanExBuffer;
+		delete[] bottomInBunemanExBuffer;
+		delete[] topInBunemanExBuffer;
 
-	delete[] leftOutBunemanEyBuffer;
-	delete[] rightOutBunemanEyBuffer;
-	delete[] leftInBunemanEyBuffer;
-	delete[] rightInBunemanEyBuffer;
+		delete[] leftOutBunemanEyBuffer;
+		delete[] rightOutBunemanEyBuffer;
+		delete[] leftInBunemanEyBuffer;
+		delete[] rightInBunemanEyBuffer;
 
-	delete[] frontOutBunemanEyBuffer;
-	delete[] backOutBunemanEyBuffer;
-	delete[] frontInBunemanEyBuffer;
-	delete[] backInBunemanEyBuffer;
+		delete[] frontOutBunemanEyBuffer;
+		delete[] backOutBunemanEyBuffer;
+		delete[] frontInBunemanEyBuffer;
+		delete[] backInBunemanEyBuffer;
 
-	delete[] bottomOutBunemanEyBuffer;
-	delete[] topOutBunemanEyBuffer;
-	delete[] bottomInBunemanEyBuffer;
-	delete[] topInBunemanEyBuffer;
+		delete[] bottomOutBunemanEyBuffer;
+		delete[] topOutBunemanEyBuffer;
+		delete[] bottomInBunemanEyBuffer;
+		delete[] topInBunemanEyBuffer;
 
-	delete[] leftOutBunemanEzBuffer;
-	delete[] rightOutBunemanEzBuffer;
-	delete[] leftInBunemanEzBuffer;
-	delete[] rightInBunemanEzBuffer;
+		delete[] leftOutBunemanEzBuffer;
+		delete[] rightOutBunemanEzBuffer;
+		delete[] leftInBunemanEzBuffer;
+		delete[] rightInBunemanEzBuffer;
 
-	delete[] frontOutBunemanEzBuffer;
-	delete[] backOutBunemanEzBuffer;
-	delete[] frontInBunemanEzBuffer;
-	delete[] backInBunemanEzBuffer;
+		delete[] frontOutBunemanEzBuffer;
+		delete[] backOutBunemanEzBuffer;
+		delete[] frontInBunemanEzBuffer;
+		delete[] backInBunemanEzBuffer;
 
-	delete[] bottomOutBunemanEzBuffer;
-	delete[] topOutBunemanEzBuffer;
-	delete[] bottomInBunemanEzBuffer;
-	delete[] topInBunemanEzBuffer;
+		delete[] bottomOutBunemanEzBuffer;
+		delete[] topOutBunemanEzBuffer;
+		delete[] bottomInBunemanEzBuffer;
+		delete[] topInBunemanEzBuffer;
 
-	///buneman B
-	delete[] leftOutBunemanBxBuffer;
-	delete[] rightOutBunemanBxBuffer;
-	delete[] leftInBunemanBxBuffer;
-	delete[] rightInBunemanBxBuffer;
+		///buneman B
+		delete[] leftOutBunemanBxBuffer;
+		delete[] rightOutBunemanBxBuffer;
+		delete[] leftInBunemanBxBuffer;
+		delete[] rightInBunemanBxBuffer;
 
-	delete[] frontOutBunemanBxBuffer;
-	delete[] backOutBunemanBxBuffer;
-	delete[] frontInBunemanBxBuffer;
-	delete[] backInBunemanBxBuffer;
+		delete[] frontOutBunemanBxBuffer;
+		delete[] backOutBunemanBxBuffer;
+		delete[] frontInBunemanBxBuffer;
+		delete[] backInBunemanBxBuffer;
 
-	delete[] bottomOutBunemanBxBuffer;
-	delete[] topOutBunemanBxBuffer;
-	delete[] bottomInBunemanBxBuffer;
-	delete[] topInBunemanBxBuffer;
+		delete[] bottomOutBunemanBxBuffer;
+		delete[] topOutBunemanBxBuffer;
+		delete[] bottomInBunemanBxBuffer;
+		delete[] topInBunemanBxBuffer;
 
-	delete[] leftOutBunemanByBuffer;
-	delete[] rightOutBunemanByBuffer;
-	delete[] leftInBunemanByBuffer;
-	delete[] rightInBunemanByBuffer;
+		delete[] leftOutBunemanByBuffer;
+		delete[] rightOutBunemanByBuffer;
+		delete[] leftInBunemanByBuffer;
+		delete[] rightInBunemanByBuffer;
 
-	delete[] frontOutBunemanByBuffer;
-	delete[] backOutBunemanByBuffer;
-	delete[] frontInBunemanByBuffer;
-	delete[] backInBunemanByBuffer;
+		delete[] frontOutBunemanByBuffer;
+		delete[] backOutBunemanByBuffer;
+		delete[] frontInBunemanByBuffer;
+		delete[] backInBunemanByBuffer;
 
-	delete[] bottomOutBunemanByBuffer;
-	delete[] topOutBunemanByBuffer;
-	delete[] bottomInBunemanByBuffer;
-	delete[] topInBunemanByBuffer;
+		delete[] bottomOutBunemanByBuffer;
+		delete[] topOutBunemanByBuffer;
+		delete[] bottomInBunemanByBuffer;
+		delete[] topInBunemanByBuffer;
 
-	delete[] leftOutBunemanBzBuffer;
-	delete[] rightOutBunemanBzBuffer;
-	delete[] leftInBunemanBzBuffer;
-	delete[] rightInBunemanBzBuffer;
+		delete[] leftOutBunemanBzBuffer;
+		delete[] rightOutBunemanBzBuffer;
+		delete[] leftInBunemanBzBuffer;
+		delete[] rightInBunemanBzBuffer;
 
-	delete[] frontOutBunemanBzBuffer;
-	delete[] backOutBunemanBzBuffer;
-	delete[] frontInBunemanBzBuffer;
-	delete[] backInBunemanBzBuffer;
+		delete[] frontOutBunemanBzBuffer;
+		delete[] backOutBunemanBzBuffer;
+		delete[] frontInBunemanBzBuffer;
+		delete[] backInBunemanBzBuffer;
 
-	delete[] bottomOutBunemanBzBuffer;
-	delete[] topOutBunemanBzBuffer;
-	delete[] bottomInBunemanBzBuffer;
-	delete[] topInBunemanBzBuffer;
+		delete[] bottomOutBunemanBzBuffer;
+		delete[] topOutBunemanBzBuffer;
+		delete[] bottomInBunemanBzBuffer;
+		delete[] topInBunemanBzBuffer;
 
 		delete[] rightOutGmresBuffer;
 		delete[] rightInGmresBuffer;
@@ -1289,224 +1293,224 @@ Simulation::~Simulation() {
 		delete[] sBiconjugateMaxwell;
 		delete[] tBiconjugateMaxwell;
 
-		if(solverType == BUNEMAN){
+		if (solverType == BUNEMAN) {
 
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				delete[] bunemanJx[i][j];
-				delete[] bunemanEx[i][j];
-				delete[] bunemanNewEx[i][j];
-				delete[] tempBunemanExParameter[i][j];
-				delete[] bunemanDivCleaningEx[i][j];
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					delete[] bunemanJx[i][j];
+					delete[] bunemanEx[i][j];
+					delete[] bunemanNewEx[i][j];
+					delete[] tempBunemanExParameter[i][j];
+					delete[] bunemanDivCleaningEx[i][j];
+				}
+				delete[] bunemanJx[i];
+				delete[] bunemanEx[i];
+				delete[] bunemanNewEx[i];
+				delete[] tempBunemanExParameter[i];
+				delete[] bunemanDivCleaningEx[i];
 			}
-			delete[] bunemanJx[i];
-			delete[] bunemanEx[i];
-			delete[] bunemanNewEx[i];
-			delete[] tempBunemanExParameter[i];
-			delete[] bunemanDivCleaningEx[i];
-		}
-		delete[] bunemanJx;
-		delete[] bunemanEx;
-		delete[] bunemanNewEx;
-		delete[] tempBunemanExParameter;
-		delete[] bunemanDivCleaningEx;
+			delete[] bunemanJx;
+			delete[] bunemanEx;
+			delete[] bunemanNewEx;
+			delete[] tempBunemanExParameter;
+			delete[] bunemanDivCleaningEx;
 
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				delete[] bunemanJy[i][j];
-				delete[] bunemanEy[i][j];
-				delete[] bunemanNewEy[i][j];
-				delete[] tempBunemanEyParameter[i][j];
-				delete[] bunemanDivCleaningEy[i][j];
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					delete[] bunemanJy[i][j];
+					delete[] bunemanEy[i][j];
+					delete[] bunemanNewEy[i][j];
+					delete[] tempBunemanEyParameter[i][j];
+					delete[] bunemanDivCleaningEy[i][j];
+				}
+				delete[] bunemanJy[i];
+				delete[] bunemanEy[i];
+				delete[] bunemanNewEy[i];
+				delete[] tempBunemanEyParameter[i];
+				delete[] bunemanDivCleaningEy[i];
 			}
-			delete[] bunemanJy[i];
-			delete[] bunemanEy[i];
-			delete[] bunemanNewEy[i];
-			delete[] tempBunemanEyParameter[i];
-			delete[] bunemanDivCleaningEy[i];
-		}
-		delete[] bunemanJy;
-		delete[] bunemanEy;
-		delete[] bunemanNewEy;
-		delete[] tempBunemanEyParameter;
-		delete[] bunemanDivCleaningEy;
+			delete[] bunemanJy;
+			delete[] bunemanEy;
+			delete[] bunemanNewEy;
+			delete[] tempBunemanEyParameter;
+			delete[] bunemanDivCleaningEy;
 
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				delete[] bunemanJz[i][j];
-				delete[] bunemanEz[i][j];
-				delete[] bunemanNewEz[i][j];
-				delete[] tempBunemanEzParameter[i][j];
-				delete[] bunemanDivCleaningEz[i][j];
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					delete[] bunemanJz[i][j];
+					delete[] bunemanEz[i][j];
+					delete[] bunemanNewEz[i][j];
+					delete[] tempBunemanEzParameter[i][j];
+					delete[] bunemanDivCleaningEz[i][j];
+				}
+				delete[] bunemanJz[i];
+				delete[] bunemanEz[i];
+				delete[] bunemanNewEz[i];
+				delete[] tempBunemanEzParameter[i];
+				delete[] bunemanDivCleaningEz[i];
 			}
-			delete[] bunemanJz[i];
-			delete[] bunemanEz[i];
-			delete[] bunemanNewEz[i];
-			delete[] tempBunemanEzParameter[i];
-			delete[] bunemanDivCleaningEz[i];
-		}
-		delete[] bunemanJz;
-		delete[] bunemanEz;
-		delete[] bunemanNewEz;
-		delete[] tempBunemanEzParameter;
-		delete[] bunemanDivCleaningEz;
+			delete[] bunemanJz;
+			delete[] bunemanEz;
+			delete[] bunemanNewEz;
+			delete[] tempBunemanEzParameter;
+			delete[] bunemanDivCleaningEz;
 
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				delete[] bunemanBx[i][j];
-				delete[] bunemanNewBx[i][j];
-				delete[] tempBunemanBxParameter[i][j];
-				delete[] bunemanDivCleaningBx[i][j];
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					delete[] bunemanBx[i][j];
+					delete[] bunemanNewBx[i][j];
+					delete[] tempBunemanBxParameter[i][j];
+					delete[] bunemanDivCleaningBx[i][j];
+				}
+				delete[] bunemanBx[i];
+				delete[] bunemanNewBx[i];
+				delete[] tempBunemanBxParameter[i];
+				delete[] bunemanDivCleaningBx[i];
 			}
-			delete[] bunemanBx[i];
-			delete[] bunemanNewBx[i];
-			delete[] tempBunemanBxParameter[i];
-			delete[] bunemanDivCleaningBx[i];
-		}
-		delete[] bunemanBx;
-		delete[] bunemanNewBx;
-		delete[] tempBunemanBxParameter;
-		delete[] bunemanDivCleaningBx;
+			delete[] bunemanBx;
+			delete[] bunemanNewBx;
+			delete[] tempBunemanBxParameter;
+			delete[] bunemanDivCleaningBx;
 
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				delete[] bunemanBy[i][j];
-				delete[] bunemanNewBy[i][j];
-				delete[] tempBunemanByParameter[i][j];
-				delete[] bunemanDivCleaningBy[i][j];
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					delete[] bunemanBy[i][j];
+					delete[] bunemanNewBy[i][j];
+					delete[] tempBunemanByParameter[i][j];
+					delete[] bunemanDivCleaningBy[i][j];
+				}
+				delete[] bunemanBy[i];
+				delete[] bunemanNewBy[i];
+				delete[] tempBunemanByParameter[i];
+				delete[] bunemanDivCleaningBy[i];
 			}
-			delete[] bunemanBy[i];
-			delete[] bunemanNewBy[i];
-			delete[] tempBunemanByParameter[i];
-			delete[] bunemanDivCleaningBy[i];
-		}
-		delete[] bunemanBy;
-		delete[] bunemanNewBy;
-		delete[] tempBunemanByParameter;
-		delete[] bunemanDivCleaningBy;
+			delete[] bunemanBy;
+			delete[] bunemanNewBy;
+			delete[] tempBunemanByParameter;
+			delete[] bunemanDivCleaningBy;
 
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				delete[] bunemanBz[i][j];
-				delete[] bunemanNewBz[i][j];
-				delete[] tempBunemanBzParameter[i][j];
-				delete[] bunemanDivCleaningBz[i][j];
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					delete[] bunemanBz[i][j];
+					delete[] bunemanNewBz[i][j];
+					delete[] tempBunemanBzParameter[i][j];
+					delete[] bunemanDivCleaningBz[i][j];
+				}
+				delete[] bunemanBz[i];
+				delete[] bunemanNewBz[i];
+				delete[] tempBunemanBzParameter[i];
+				delete[] bunemanDivCleaningBz[i];
 			}
-			delete[] bunemanBz[i];
-			delete[] bunemanNewBz[i];
-			delete[] tempBunemanBzParameter[i];
-			delete[] bunemanDivCleaningBz[i];
-		}
-		delete[] bunemanBz;
-		delete[] bunemanNewBz;
-		delete[] tempBunemanBzParameter;
-		delete[] bunemanDivCleaningBz;
+			delete[] bunemanBz;
+			delete[] bunemanNewBz;
+			delete[] tempBunemanBzParameter;
+			delete[] bunemanDivCleaningBz;
 
-		//// temp buneman j
-		// left right
-		for(int i = 0; i < 2 + 2*additionalBinNumber; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				delete[] tempBunemanJxLeft[i][j];
-				delete[] tempBunemanJxRight[i][j];
+			//// temp buneman j
+			// left right
+			for (int i = 0; i < 2 + 2 * additionalBinNumber; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					delete[] tempBunemanJxLeft[i][j];
+					delete[] tempBunemanJxRight[i][j];
+				}
+				delete[] tempBunemanJxLeft[i];
+				delete[] tempBunemanJxRight[i];
 			}
-			delete[] tempBunemanJxLeft[i];
-			delete[] tempBunemanJxRight[i];
-		}
-		delete[] tempBunemanJxLeft;
-		delete[] tempBunemanJxRight;
+			delete[] tempBunemanJxLeft;
+			delete[] tempBunemanJxRight;
 
 
-		for(int i = 0; i < 3 + 2*additionalBinNumber; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				delete[] tempBunemanJyLeft[i][j];
-				delete[] tempBunemanJyRight[i][j];
+			for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					delete[] tempBunemanJyLeft[i][j];
+					delete[] tempBunemanJyRight[i][j];
+				}
+				delete[] tempBunemanJyLeft[i];
+				delete[] tempBunemanJyRight[i];
 			}
-			delete[] tempBunemanJyLeft[i];
-			delete[] tempBunemanJyRight[i];
-		}
-		delete[] tempBunemanJyLeft;
-		delete[] tempBunemanJyRight;
+			delete[] tempBunemanJyLeft;
+			delete[] tempBunemanJyRight;
 
-		for(int i = 0; i < 3 + 2*additionalBinNumber; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				delete[] tempBunemanJzLeft[i][j];
-				delete[] tempBunemanJzRight[i][j];
+			for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					delete[] tempBunemanJzLeft[i][j];
+					delete[] tempBunemanJzRight[i][j];
+				}
+				delete[] tempBunemanJzLeft[i];
+				delete[] tempBunemanJzRight[i];
 			}
-			delete[] tempBunemanJzLeft[i];
-			delete[] tempBunemanJzRight[i];
-		}
-		delete[] tempBunemanJzLeft;
-		delete[] tempBunemanJzRight;
-	
-		///front back
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < 3 + 2*additionalBinNumber; ++j){
-				delete[] tempBunemanJxFront[i][j];
-				delete[] tempBunemanJxBack[i][j];
-			}
-			delete[] tempBunemanJxFront[i];
-			delete[] tempBunemanJxBack[i];
-		}
-		delete[] tempBunemanJxFront;
-		delete[] tempBunemanJxBack;
+			delete[] tempBunemanJzLeft;
+			delete[] tempBunemanJzRight;
 
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < 2 + 2*additionalBinNumber; ++j){
-				delete[] tempBunemanJyFront[i][j];
-				delete[] tempBunemanJyBack[i][j];
+			///front back
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
+					delete[] tempBunemanJxFront[i][j];
+					delete[] tempBunemanJxBack[i][j];
+				}
+				delete[] tempBunemanJxFront[i];
+				delete[] tempBunemanJxBack[i];
 			}
-			delete[] tempBunemanJyFront[i];
-			delete[] tempBunemanJyBack[i];
-		}
-		delete[] tempBunemanJyFront;
-		delete[] tempBunemanJyBack;
+			delete[] tempBunemanJxFront;
+			delete[] tempBunemanJxBack;
 
-		for(int i = 0; i < xnumberAdded+1; ++i){
-			for(int j = 0; j < 3 + 2*additionalBinNumber; ++j){
-				delete[] tempBunemanJzFront[i][j];
-				delete[] tempBunemanJzBack[i][j];
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < 2 + 2 * additionalBinNumber; ++j) {
+					delete[] tempBunemanJyFront[i][j];
+					delete[] tempBunemanJyBack[i][j];
+				}
+				delete[] tempBunemanJyFront[i];
+				delete[] tempBunemanJyBack[i];
 			}
-			delete[] tempBunemanJzFront[i];
-			delete[] tempBunemanJzBack[i];
-		}
-		delete[] tempBunemanJzFront;
-		delete[] tempBunemanJzBack;
-		// bottom top
+			delete[] tempBunemanJyFront;
+			delete[] tempBunemanJyBack;
+
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
+					delete[] tempBunemanJzFront[i][j];
+					delete[] tempBunemanJzBack[i][j];
+				}
+				delete[] tempBunemanJzFront[i];
+				delete[] tempBunemanJzBack[i];
+			}
+			delete[] tempBunemanJzFront;
+			delete[] tempBunemanJzBack;
+			// bottom top
 
 
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				delete[] tempBunemanJxBottom[i][j];
-				delete[] tempBunemanJxTop[i][j];
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					delete[] tempBunemanJxBottom[i][j];
+					delete[] tempBunemanJxTop[i][j];
+				}
+				delete[] tempBunemanJxBottom[i];
+				delete[] tempBunemanJxTop[i];
 			}
-			delete[] tempBunemanJxBottom[i];
-			delete[] tempBunemanJxTop[i];
-		}
-		delete[] tempBunemanJxBottom;
-		delete[] tempBunemanJxTop;
+			delete[] tempBunemanJxBottom;
+			delete[] tempBunemanJxTop;
 
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				delete[] tempBunemanJyBottom[i][j];
-				delete[] tempBunemanJyTop[i][j];
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					delete[] tempBunemanJyBottom[i][j];
+					delete[] tempBunemanJyTop[i][j];
+				}
+				delete[] tempBunemanJyBottom[i];
+				delete[] tempBunemanJyTop[i];
 			}
-			delete[] tempBunemanJyBottom[i];
-			delete[] tempBunemanJyTop[i];
-		}
-		delete[] tempBunemanJyBottom;
-		delete[] tempBunemanJyTop;
+			delete[] tempBunemanJyBottom;
+			delete[] tempBunemanJyTop;
 
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				delete[] tempBunemanJzBottom[i][j];
-				delete[] tempBunemanJzTop[i][j];
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					delete[] tempBunemanJzBottom[i][j];
+					delete[] tempBunemanJzTop[i][j];
+				}
+				delete[] tempBunemanJzBottom[i];
+				delete[] tempBunemanJzTop[i];
 			}
-			delete[] tempBunemanJzBottom[i];
-			delete[] tempBunemanJzTop[i];
+			delete[] tempBunemanJzBottom;
+			delete[] tempBunemanJzTop;
 		}
-		delete[] tempBunemanJzBottom;
-		delete[] tempBunemanJzTop;
-	}
 	}
 }
 
@@ -1519,7 +1523,8 @@ void Simulation::rescaleConstants() {
 
 void Simulation::rescaleConstantsToTheoretical() {
 	//kBoltzman_normalized = kBoltzman * plasma_period * plasma_period / (scaleFactor * scaleFactor);
-	kBoltzman_normalized = kBoltzman * (plasma_period * plasma_period / (scaleFactor * scaleFactor)) * massProton / massProtonReal;
+	kBoltzman_normalized = kBoltzman * (plasma_period * plasma_period / (scaleFactor * scaleFactor)) * massProton /
+		massProtonReal;
 	speed_of_light_normalized = 1.0;
 	speed_of_light_normalized_sqr = 1.0;
 	electron_charge_normalized = 1.0;
@@ -1535,7 +1540,7 @@ void Simulation::initialize() {
 	//if (rank == 0) printLog("initialization\n");
 
 
-	if(verbosity > 2) printf("creating sub cart rank = %d\n", rank);
+	if (verbosity > 2) printf("creating sub cart rank = %d\n", rank);
 	int dimsYZ[3];
 	dimsYZ[0] = 0;
 	dimsYZ[1] = 1;
@@ -1566,13 +1571,14 @@ void Simulation::initialize() {
 	dimsX[1] = 0;
 	dimsX[2] = 0;
 	MPI_Cart_sub(cartComm, dimsX, &cartCommX);
-	if(verbosity > 2) printf("finish creating sub cart rank = %d\n", rank);
+	if (verbosity > 2) printf("finish creating sub cart rank = %d\n", rank);
 
 	bool readTrackedParticles = false;
 
 	if (readTrackedParticles) {
 		if (rank == 0) {
-			trackedParticlesNumbers = readTrackedParticlesNumbers((inputDir + "acceleratedParticlesNumbers.dat").c_str(), trackedParticlesNumber);
+			trackedParticlesNumbers = readTrackedParticlesNumbers((inputDir + "acceleratedParticlesNumbers.dat").c_str(),
+			                                                      trackedParticlesNumber);
 		}
 
 		if (rank == 0) {
@@ -1622,12 +1628,12 @@ void Simulation::initialize() {
 		trackedParticlesNumbers = new int*[trackedParticlesNumber];
 		for (int i = 0; i < trackedParticlesNumber; ++i) {
 			trackedParticlesNumbers[i] = new int[2];
-			trackedParticlesNumbers[i][0] = 2*i;
+			trackedParticlesNumbers[i][0] = 2 * i;
 			trackedParticlesNumbers[i][1] = 0;
 		}
 	}
 
-	if(verbosity > 2) printf("initialize grid rank = %d\n", rank);
+	if (verbosity > 2) printf("initialize grid rank = %d\n", rank);
 
 	xgrid[0] = leftX;
 
@@ -1665,7 +1671,7 @@ void Simulation::initialize() {
 		middleZgrid[k] = (zgrid[k] + zgrid[k + 1]) / 2;
 	}
 
-	if(verbosity > 2) printf("initialize fields rank = %d\n", rank);
+	if (verbosity > 2) printf("initialize fields rank = %d\n", rank);
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -1691,7 +1697,7 @@ void Simulation::initialize() {
 		}
 	}
 
-	if(verbosity > 2) printf("creating particle types rank = %d\n", rank);
+	if (verbosity > 2) printf("creating particle types rank = %d\n", rank);
 
 	createParticleTypes(concentrations, particlesPerBin);
 
@@ -1764,52 +1770,52 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 	fflush(stdout);
 	//double E = 1E-5;
 	double E = B0.norm();
-	if(solverType == BUNEMAN){
-		double omega = speed_of_light_normalized*kw;
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				for(int k = 0; k < znumberAdded + 1; ++k){
+	if (solverType == BUNEMAN) {
+		double omega = speed_of_light_normalized * kw;
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
 					bunemanEx[i][j][k] = 0;
 					bunemanNewEx[i][j][k] = 0;
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				for(int k = 0; k < znumberAdded + 1; ++k){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
 					bunemanEy[i][j][k] = E * sin(kw * xgrid[i]);
 					bunemanNewEy[i][j][k] = bunemanEy[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				for(int k = 0; k < znumberAdded; ++k){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanEz[i][j][k] = 0;
 					bunemanNewEz[i][j][k] = bunemanEz[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				for(int k = 0; k < znumberAdded; ++k){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanBx[i][j][k] = 0;
 					bunemanNewBx[i][j][k] = 0;
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				for(int k = 0; k < znumberAdded; ++k){
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanBy[i][j][k] = 0;
 					bunemanNewBy[i][j][k] = 0;
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				for(int k = 0; k < znumberAdded + 1; ++k){
-					bunemanBz[i][j][k] = E * sin(kw * middleXgrid[i] - omega*deltaT/2);
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanBz[i][j][k] = E * sin(kw * middleXgrid[i] - omega * deltaT / 2);
 					//bunemanBz[i][j][k] = E * sin(kw * middleXgrid[i]);
 					bunemanNewBz[i][j][k] = bunemanBz[i][j][k];
 				}
@@ -2210,17 +2216,23 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 	double denominator = omega * omega - Omegae2 - (omegae2 * omega * omega / (omega * omega - kc2));
 
 	//double
-	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega * omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) * denominator)) + (Omegap / omega))) * Bzamplitude;
+	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega
+		* omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) *
+		denominator)) + (Omegap / omega))) * Bzamplitude;
 	//double
-	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 * omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
+	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 *
+		omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
 
 	//double
-	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (VzamplitudeElectron - VzamplitudeProton);
+	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (
+		VzamplitudeElectron - VzamplitudeProton);
 
 	//double
-	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) * Bzamplitude;
+	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) *
+		Bzamplitude;
 	//double
-	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) * Bzamplitude;
+	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) *
+		Bzamplitude;
 
 	//double
 	Eyamplitude = (omega / kc) * Bzamplitude;
@@ -2237,7 +2249,7 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 	//Byamplitude = 0.0;
 
 	B0 = Vector3d(B0.norm(), 0, 0);
-	if(solverType == BUNEMAN){
+	if (solverType == BUNEMAN) {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -2458,14 +2470,16 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "By/Ez = %g\n", Byamplitude / Ezamplitude);
 		fprintf(informationFile, "Bz/Ey = %g\n", Bzamplitude / Eyamplitude);
 		fprintf(informationFile, "4*pi*Jy amplitude = %g\n",
-		        4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (
+			        plasma_period * plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "c*rotBy amplitude = %g\n",
 		        speed_of_light_normalized * kw * Bzamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "4*pi*Jz amplitude = %g\n",
-		        4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (
+			        plasma_period * plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "c*rotBz amplitude = %g\n",
 		        speed_of_light_normalized * kw * Byamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
@@ -2485,13 +2499,15 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "derivative Ey amplitude = %g\n",
 		        omega * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
-		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
+		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (
+			        VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ez amplitude = %g\n",
 		        -omega * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
-		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
+		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (
+			        VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 
@@ -2499,25 +2515,34 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "w*Jy amplitude = %g\n",
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
-		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) / speed_of_light_normalized);
+		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron)
+			)) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) /
+			speed_of_light_normalized
+		);
 		fprintf(informationFile, "dJy/dt amplitude = %g\n",
-		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period *
+			        plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "\n");
 		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omega;
 		fprintf(informationFile, "w*Jz amplitude = %g\n",
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
-		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) / speed_of_light_normalized);
+		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron)
+			)) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) /
+			speed_of_light_normalized
+		);
 		fprintf(informationFile, "dJz/dt amplitude = %g\n",
-		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period *
+			        plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "\n");
 
 		double derivativVyp = -omega * VyamplitudeProton;
 		fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeProton / speed_of_light_normalized) / massProton;
+		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeProton /
+			speed_of_light_normalized) / massProton;
 		fprintf(informationFile, "dVyp/dt amplitude = %g\n",
 		        derivativeVelocityProtonY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -2525,7 +2550,8 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		double derivativVzp = omega * VzamplitudeProton;
 		fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeProton / speed_of_light_normalized) / massProton;
+		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeProton /
+			speed_of_light_normalized) / massProton;
 		fprintf(informationFile, "dVzp/dt amplitude = %g\n",
 		        derivativeVelocityProtonZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -2533,7 +2559,8 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		double derivativVye = -omega * VyamplitudeElectron;
 		fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeElectron / speed_of_light_normalized) / massElectron;
+		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeElectron /
+			speed_of_light_normalized) / massElectron;
 		fprintf(informationFile, "dVye/dt amplitude = %g\n",
 		        derivativeVelocityElectronY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -2541,7 +2568,8 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		double derivativVze = omega * VzamplitudeElectron;
 		fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeElectron / speed_of_light_normalized) / massElectron;
+		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeElectron /
+			speed_of_light_normalized) / massElectron;
 		fprintf(informationFile, "dVze/dt amplitude = %g\n",
 		        derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -2784,17 +2812,23 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	double denominator = omega * omega - Omegae2 - (omegae2 * omega * omega / (omega * omega - kc2));
 
 	//double
-	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega * omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) * denominator)) + (Omegap / omega))) * Bzamplitude;
+	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega
+		* omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) *
+		denominator)) + (Omegap / omega))) * Bzamplitude;
 	//double
-	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 * omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
+	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 *
+		omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
 
 	//double
-	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (VzamplitudeElectron - VzamplitudeProton);
+	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (
+		VzamplitudeElectron - VzamplitudeProton);
 
 	//double
-	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) * Bzamplitude;
+	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) *
+		Bzamplitude;
 	//double
-	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) * Bzamplitude;
+	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) *
+		Bzamplitude;
 
 	//double
 	Eyamplitude = (omega / kc) * Bzamplitude;
@@ -3017,14 +3051,16 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "By/Ez = %g\n", Byamplitude / Ezamplitude);
 		fprintf(informationFile, "Bz/Ey = %g\n", Bzamplitude / Eyamplitude);
 		fprintf(informationFile, "4*pi*Jy amplitude = %g\n",
-		        4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (
+			        plasma_period * plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "c*rotBy amplitude = %g\n",
 		        speed_of_light_normalized * kw * Bzamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "4*pi*Jz amplitude = %g\n",
-		        4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (
+			        plasma_period * plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "c*rotBz amplitude = %g\n",
 		        speed_of_light_normalized * kw * Byamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
@@ -3044,13 +3080,15 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "derivative Ey amplitude = %g\n",
 		        omega * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
-		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
+		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (
+			        VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ez amplitude = %g\n",
 		        -omega * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
-		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
+		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (
+			        VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 
@@ -3058,25 +3096,34 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "w*Jy amplitude = %g\n",
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
-		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) / speed_of_light_normalized);
+		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron)
+			)) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) /
+			speed_of_light_normalized
+		);
 		fprintf(informationFile, "dJy/dt amplitude = %g\n",
-		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period *
+			        plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "\n");
 		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omega;
 		fprintf(informationFile, "w*Jz amplitude = %g\n",
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
-		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) / speed_of_light_normalized);
+		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron)
+			)) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) /
+			speed_of_light_normalized
+		);
 		fprintf(informationFile, "dJz/dt amplitude = %g\n",
-		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period *
+			        plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "\n");
 
 		double derivativVyp = -omega * VyamplitudeProton;
 		fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeProton / speed_of_light_normalized) / massProton;
+		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeProton /
+			speed_of_light_normalized) / massProton;
 		fprintf(informationFile, "dVyp/dt amplitude = %g\n",
 		        derivativeVelocityProtonY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -3084,7 +3131,8 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		double derivativVzp = omega * VzamplitudeProton;
 		fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeProton / speed_of_light_normalized) / massProton;
+		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeProton /
+			speed_of_light_normalized) / massProton;
 		fprintf(informationFile, "dVzp/dt amplitude = %g\n",
 		        derivativeVelocityProtonZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -3092,7 +3140,8 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		double derivativVye = -omega * VyamplitudeElectron;
 		fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeElectron / speed_of_light_normalized) / massElectron;
+		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeElectron /
+			speed_of_light_normalized) / massElectron;
 		fprintf(informationFile, "dVye/dt amplitude = %g\n",
 		        derivativeVelocityElectronY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -3100,7 +3149,8 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		double derivativVze = omega * VzamplitudeElectron;
 		fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeElectron / speed_of_light_normalized) / massElectron;
+		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeElectron /
+			speed_of_light_normalized) / massElectron;
 		fprintf(informationFile, "dVze/dt amplitude = %g\n",
 		        derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -3342,17 +3392,23 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 	double denominator = omega * omega - Omegae2 - (omegae2 * omega * omega / (omega * omega - kc2));
 
 	//double
-	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega * omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) * denominator)) + (Omegap / omega))) * Bzamplitude;
+	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega
+		* omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) *
+		denominator)) + (Omegap / omega))) * Bzamplitude;
 	//double
-	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 * omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
+	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 *
+		omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
 
 	//double
-	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (VzamplitudeElectron - VzamplitudeProton);
+	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (
+		VzamplitudeElectron - VzamplitudeProton);
 
 	//double
-	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) * Bzamplitude;
+	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) *
+		Bzamplitude;
 	//double
-	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) * Bzamplitude;
+	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) *
+		Bzamplitude;
 
 	//double
 	Eyamplitude = (omega / kc) * Bzamplitude;
@@ -3575,14 +3631,16 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "By/Ez = %g\n", Byamplitude / Ezamplitude);
 		fprintf(informationFile, "Bz/Ey = %g\n", Bzamplitude / Eyamplitude);
 		fprintf(informationFile, "4*pi*Jy amplitude = %g\n",
-		        4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (
+			        plasma_period * plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "c*rotBy amplitude = %g\n",
 		        speed_of_light_normalized * kw * Bzamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "4*pi*Jz amplitude = %g\n",
-		        4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (
+			        plasma_period * plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "c*rotBz amplitude = %g\n",
 		        speed_of_light_normalized * kw * Byamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
@@ -3602,13 +3660,15 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "derivative Ey amplitude = %g\n",
 		        omega * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
-		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
+		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (
+			        VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ez amplitude = %g\n",
 		        -omega * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
-		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
+		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (
+			        VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 
@@ -3616,25 +3676,34 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "w*Jy amplitude = %g\n",
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
-		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) / speed_of_light_normalized);
+		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron)
+			)) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) /
+			speed_of_light_normalized
+		);
 		fprintf(informationFile, "dJy/dt amplitude = %g\n",
-		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period *
+			        plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "\n");
 		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omega;
 		fprintf(informationFile, "w*Jz amplitude = %g\n",
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
-		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) / speed_of_light_normalized);
+		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron)
+			)) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) /
+			speed_of_light_normalized
+		);
 		fprintf(informationFile, "dJz/dt amplitude = %g\n",
-		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period *
+			        plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "\n");
 
 		double derivativVyp = -omega * VyamplitudeProton;
 		fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeProton / speed_of_light_normalized) / massProton;
+		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeProton /
+			speed_of_light_normalized) / massProton;
 		fprintf(informationFile, "dVyp/dt amplitude = %g\n",
 		        derivativeVelocityProtonY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -3642,7 +3711,8 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		double derivativVzp = omega * VzamplitudeProton;
 		fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeProton / speed_of_light_normalized) / massProton;
+		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeProton /
+			speed_of_light_normalized) / massProton;
 		fprintf(informationFile, "dVzp/dt amplitude = %g\n",
 		        derivativeVelocityProtonZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -3650,7 +3720,8 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		double derivativVye = -omega * VyamplitudeElectron;
 		fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeElectron / speed_of_light_normalized) / massElectron;
+		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeElectron /
+			speed_of_light_normalized) / massElectron;
 		fprintf(informationFile, "dVye/dt amplitude = %g\n",
 		        derivativeVelocityElectronY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -3658,7 +3729,8 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		double derivativVze = omega * VzamplitudeElectron;
 		fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeElectron / speed_of_light_normalized) / massElectron;
+		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeElectron /
+			speed_of_light_normalized) / massElectron;
 		fprintf(informationFile, "dVze/dt amplitude = %g\n",
 		        derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -3913,17 +3985,23 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 	double denominator = omega * omega - Omegae2 - (omegae2 * omega * omega / (omega * omega - kc2));
 
 	//double
-	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega * omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) * denominator)) + (Omegap / omega))) * Bzamplitude;
+	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega
+		* omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) *
+		denominator)) + (Omegap / omega))) * Bzamplitude;
 	//double
-	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 * omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
+	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 *
+		omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
 
 	//double
-	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (VzamplitudeElectron - VzamplitudeProton);
+	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (
+		VzamplitudeElectron - VzamplitudeProton);
 
 	//double
-	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) * Bzamplitude;
+	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) *
+		Bzamplitude;
 	//double
-	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) * Bzamplitude;
+	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) *
+		Bzamplitude;
 
 	//double
 	Eyamplitude = (omega / kc) * Bzamplitude;
@@ -4182,14 +4260,16 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		fprintf(informationFile, "By/Ez = %g\n", Byamplitude / Ezamplitude);
 		fprintf(informationFile, "Bz/Ey = %g\n", Bzamplitude / Eyamplitude);
 		fprintf(informationFile, "4*pi*Jy amplitude = %g\n",
-		        4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron) / (
+			        plasma_period * plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "c*rotBy amplitude = %g\n",
 		        speed_of_light_normalized * kw * Bzamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "4*pi*Jz amplitude = %g\n",
-		        4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron) / (
+			        plasma_period * plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "c*rotBz amplitude = %g\n",
 		        speed_of_light_normalized * kw * Byamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
@@ -4209,13 +4289,15 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		fprintf(informationFile, "derivative Ey amplitude = %g\n",
 		        omega * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
-		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
+		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (
+			        VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ez amplitude = %g\n",
 		        -omega * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
-		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
+		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (
+			        VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 
@@ -4223,25 +4305,30 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		fprintf(informationFile, "w*Jy amplitude = %g\n",
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
-		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0norm * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) / speed_of_light_normalized);
+		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron)
+		)) + B0norm * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) / speed_of_light_normalized);
 		fprintf(informationFile, "dJy/dt amplitude = %g\n",
-		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period *
+			        plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "\n");
 		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omega;
 		fprintf(informationFile, "w*Jz amplitude = %g\n",
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
-		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0norm * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) / speed_of_light_normalized);
+		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron)
+		)) - B0norm * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) / speed_of_light_normalized);
 		fprintf(informationFile, "dJz/dt amplitude = %g\n",
-		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period * plasma_period * sqrt(
-			        scaleFactor)));
+		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period *
+			        plasma_period * sqrt(
+				        scaleFactor)));
 		fprintf(informationFile, "\n");
 
 		double derivativVyp = -omega * VyamplitudeProton;
 		fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0norm * VzamplitudeProton / speed_of_light_normalized) / massProton;
+		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0norm * VzamplitudeProton /
+			speed_of_light_normalized) / massProton;
 		fprintf(informationFile, "dVyp/dt amplitude = %g\n",
 		        derivativeVelocityProtonY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -4249,7 +4336,8 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		double derivativVzp = omega * VzamplitudeProton;
 		fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0norm * VyamplitudeProton / speed_of_light_normalized) / massProton;
+		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0norm * VyamplitudeProton /
+			speed_of_light_normalized) / massProton;
 		fprintf(informationFile, "dVzp/dt amplitude = %g\n",
 		        derivativeVelocityProtonZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -4257,7 +4345,8 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		double derivativVye = -omega * VyamplitudeElectron;
 		fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0norm * VzamplitudeElectron / speed_of_light_normalized) / massElectron;
+		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0norm * VzamplitudeElectron /
+			speed_of_light_normalized) / massElectron;
 		fprintf(informationFile, "dVye/dt amplitude = %g\n",
 		        derivativeVelocityElectronY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -4265,7 +4354,8 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		double derivativVze = omega * VzamplitudeElectron;
 		fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * scaleFactor / sqr(plasma_period));
 
-		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0norm * VyamplitudeElectron / speed_of_light_normalized) / massElectron;
+		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0norm * VyamplitudeElectron /
+			speed_of_light_normalized) / massElectron;
 		fprintf(informationFile, "dVze/dt amplitude = %g\n",
 		        derivativeVelocityElectronZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
@@ -4416,62 +4506,62 @@ void Simulation::initializeFluxFromRight() {
 	boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
 	//boundaryConditionTypeX = PERIODIC;
 	createParticles();
-	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized*speed_of_light_correction);
+	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized * speed_of_light_correction);
 	//initializeAlfvenWaveY(10, 1.0E-4);
-	if(solverType == BUNEMAN){
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				for(int k = 0; k < znumberAdded + 1; ++k){
+	if (solverType == BUNEMAN) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
 					bunemanEx[i][j][k] = E0.x;
 					bunemanNewEx[i][j][k] = bunemanEx[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				for(int k = 0; k < znumberAdded + 1; ++k){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
 					bunemanEy[i][j][k] = E0.y;
-					if(boundaryConditionTypeX != PERIODIC){
-					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
-						bunemanEy[i][j][k] = 0;
-					}
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i < 1 + additionalBinNumber) {
+							bunemanEy[i][j][k] = 0;
+						}
 					}
 					bunemanNewEy[i][j][k] = bunemanEy[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				for(int k = 0; k < znumberAdded; ++k){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanEz[i][j][k] = E0.z;
-					if(boundaryConditionTypeX != PERIODIC){
-					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
-						bunemanEz[i][j][k] = 0;
-					}
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i < 1 + additionalBinNumber) {
+							bunemanEz[i][j][k] = 0;
+						}
 					}
 					bunemanNewEz[i][j][k] = bunemanEz[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				for(int k = 0; k < znumberAdded; ++k){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanBx[i][j][k] = B0.x;
 					bunemanNewBx[i][j][k] = bunemanBx[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				for(int k = 0; k < znumberAdded; ++k){
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanBy[i][j][k] = B0.y;
 					bunemanNewBy[i][j][k] = bunemanBy[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				for(int k = 0; k < znumberAdded + 1; ++k){
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
 					bunemanBz[i][j][k] = B0.z;
 					bunemanNewBz[i][j][k] = bunemanBz[i][j][k];
 				}
@@ -4482,11 +4572,11 @@ void Simulation::initializeFluxFromRight() {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					Efield[i][j][k] = E0;
-					if(boundaryConditionTypeX != PERIODIC){
-					if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
-						Efield[i][j][k].y = 0;
-						Efield[i][j][k].z = 0;
-					}
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
+							Efield[i][j][k].y = 0;
+							Efield[i][j][k].z = 0;
+						}
 					}
 					tempEfield[i][j][k] = Efield[i][j][k];
 					newEfield[i][j][k] = Efield[i][j][k];
@@ -4537,7 +4627,8 @@ void Simulation::fieldsLorentzTransitionX(const double& v) {
 				if (prevK < 0) {
 					prevK = znumber - 1;
 				}
-				Vector3d middleB = (Bfield[prevI][prevJ][prevK] + Bfield[prevI][j][prevK] + Bfield[prevI][prevJ][k] + Bfield[prevI][j][k]
+				Vector3d middleB = (Bfield[prevI][prevJ][prevK] + Bfield[prevI][j][prevK] + Bfield[prevI][prevJ][k] + Bfield[prevI][
+						j][k]
 					+ Bfield[i][prevJ][prevK] + Bfield[i][j][prevK] + Bfield[i][prevJ][k] + Bfield[i][j][k]) * 0.125;
 				newEfield[i][j][k].y = gamma * (Efield[i][j][k].y - v * middleB.z / speed_of_light_normalized);
 				newEfield[i][j][k].z = gamma * (Efield[i][j][k].z + v * middleB.y / speed_of_light_normalized);
@@ -4586,9 +4677,11 @@ void Simulation::initializeShockWave() {
 	double compressionRatio = 3.9;
 	double downstreamPressure;
 	double upstreamPressure = evaluatePressureByTemperature(temperature);
-	solveRankineHugoniot(density, V0, upstreamPressure, B0, E0, downstreamDensity, downstreamVelocity, downstreamPressure, downstreamB, downstreamE, 5.0 / 3.0, compressionRatio);
+	solveRankineHugoniot(density, V0, upstreamPressure, B0, E0, downstreamDensity, downstreamVelocity, downstreamPressure,
+	                     downstreamB, downstreamE, 5.0 / 3.0, compressionRatio);
 	double downstreamTemperature = evaluateTemperatureByPressure(downstreamPressure) / compressionRatio;
-	double velocityForRotB = -(downstreamB.z - B0.z) * speed_of_light_normalized / (8 * pi * frontWidth * electron_charge_normalized * types[0].concentration);
+	double velocityForRotB = -(downstreamB.z - B0.z) * speed_of_light_normalized / (8 * pi * frontWidth *
+		electron_charge_normalized * types[0].concentration);
 	int localI = -1;
 	int shockWaveRank[1];
 	int tempShockWaveRank[1];
@@ -4658,24 +4751,37 @@ void Simulation::initializeShockWave() {
 	double bnorm = B0.norm();
 	double alfvenV = B0.norm() / sqrt(4 * pi * density);
 
-	InitializeShockRightPartEvaluator evaluator = InitializeShockRightPartEvaluator(downstreamVelocity, V0, downstreamB, B0, E0, deltaX, speed_of_light_normalized, bnorm, alfvenV, types, typesNumber, xnumberAdded, 1, 1, lnumber);
+	InitializeShockRightPartEvaluator evaluator = InitializeShockRightPartEvaluator(
+		downstreamVelocity, V0, downstreamB, B0, E0, deltaX, speed_of_light_normalized, bnorm, alfvenV, types, typesNumber,
+		xnumberAdded, 1, 1, lnumber);
 
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
 				for (int t = 0; t < typesNumber; ++t) {
-					outVector[i][0][0][3 * t] = (0.5 * (downstreamVelocity.x + V0.x) - 0.5 * (downstreamVelocity.x - V0.x) * tanh((xgrid[i] - shockWaveX[0]) / frontWidth)) / alfvenV;
-					outVector[i][0][0][3 * t + 1] = (0.5 * (downstreamVelocity.y + V0.y) - 0.5 * (downstreamVelocity.y - V0.y) * tanh((xgrid[i] - shockWaveX[0]) / frontWidth)) / alfvenV;
-					outVector[i][0][0][3 * t + 2] = (0.5 * (downstreamVelocity.z + V0.z) - 0.5 * (downstreamVelocity.z - V0.z) * tanh((xgrid[i] - shockWaveX[0]) / frontWidth)) / alfvenV;
+					outVector[i][0][0][3 * t] = (0.5 * (downstreamVelocity.x + V0.x) - 0.5 * (downstreamVelocity.x - V0.x) * tanh(
+						(xgrid[i] - shockWaveX[0]) / frontWidth)) / alfvenV;
+					outVector[i][0][0][3 * t + 1] = (0.5 * (downstreamVelocity.y + V0.y) - 0.5 * (downstreamVelocity.y - V0.y) * tanh(
+						(xgrid[i] - shockWaveX[0]) / frontWidth)) / alfvenV;
+					outVector[i][0][0][3 * t + 2] = (0.5 * (downstreamVelocity.z + V0.z) - 0.5 * (downstreamVelocity.z - V0.z) * tanh(
+						(xgrid[i] - shockWaveX[0]) / frontWidth)) / alfvenV;
 				}
 				outVector[i][0][0][lnumber - 3] = E0.x / bnorm;
-				outVector[i][0][0][lnumber - 2] = (0.5 * (downstreamB.y + B0.y) - 0.5 * (downstreamB.y - B0.y) * tanh((xgrid[i] - shockWaveX[0]) / frontWidth)) / bnorm;
-				outVector[i][0][0][lnumber - 1] = (0.5 * (downstreamB.z + B0.z) - 0.5 * (downstreamB.z - B0.z) * tanh((xgrid[i] - shockWaveX[0]) / frontWidth)) / bnorm;
+				outVector[i][0][0][lnumber - 2] = (0.5 * (downstreamB.y + B0.y) - 0.5 * (downstreamB.y - B0.y) * tanh(
+					(xgrid[i] - shockWaveX[0]) / frontWidth)) / bnorm;
+				outVector[i][0][0][lnumber - 1] = (0.5 * (downstreamB.z + B0.z) - 0.5 * (downstreamB.z - B0.z) * tanh(
+					(xgrid[i] - shockWaveX[0]) / frontWidth)) / bnorm;
 			}
 		}
 	}
 
-	simpleIterationSolver(outVector, xnumberAdded, 1, 1, additionalBinNumber, lnumber, rank, nprocs, xnumberGeneral, ynumberGeneral, znumberGeneral, maxErrorLevel, maxSimpleIterationSolverIterations, boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC, boundaryConditionTypeZ == PERIODIC, verbosity, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer, evaluator, cartComm, cartCoord, cartDim);
+	simpleIterationSolver(outVector, xnumberAdded, 1, 1, additionalBinNumber, lnumber, rank, nprocs, xnumberGeneral,
+	                      ynumberGeneral, znumberGeneral, maxErrorLevel, maxSimpleIterationSolverIterations,
+	                      boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC,
+	                      boundaryConditionTypeZ == PERIODIC, verbosity, leftOutGmresBuffer, rightOutGmresBuffer,
+	                      leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer,
+	                      frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer,
+	                      bottomInGmresBuffer, topInGmresBuffer, evaluator, cartComm, cartCoord, cartDim);
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -4725,8 +4831,10 @@ void Simulation::initializeShockWave() {
 					double localParticleDeltaZ;
 					Vector3d localVelocity;
 					if (types[typeCounter].concentration > 0) {
-						localConcentration = types[typeCounter].concentration * V0.x / (0.5 * alfvenV * (outVector[i][0][0][3 * typeCounter] + outVector[i + 1][0][0][3 * typeCounter]));
-						localParticlesPerBin = types[typeCounter].particlesPerBin * V0.x / (0.5 * alfvenV * (outVector[i][0][0][3 * typeCounter] + outVector[i + 1][0][0][3 * typeCounter]));
+						localConcentration = types[typeCounter].concentration * V0.x / (0.5 * alfvenV * (outVector[i][0][0][3 *
+							typeCounter] + outVector[i + 1][0][0][3 * typeCounter]));
+						localParticlesPerBin = types[typeCounter].particlesPerBin * V0.x / (0.5 * alfvenV * (outVector[i][0][0][3 *
+							typeCounter] + outVector[i + 1][0][0][3 * typeCounter]));
 					} else {
 						localConcentration = 0;
 						localParticlesPerBin = 0;
@@ -4741,10 +4849,13 @@ void Simulation::initializeShockWave() {
 						localParticleDeltaY = ysize;
 						localParticleDeltaZ = zsize;
 					}
-					localTemperature = (downstreamTemperature + types[typeCounter].temperatureX) * 0.5 - (downstreamTemperature - types[typeCounter].temperatureX) * 0.5 * tanh((middleXgrid[i] - shockWaveX[0]) / frontWidth);
+					localTemperature = (downstreamTemperature + types[typeCounter].temperatureX) * 0.5 - (downstreamTemperature - types
+						[typeCounter].temperatureX) * 0.5 * tanh((middleXgrid[i] - shockWaveX[0]) / frontWidth);
 					localVelocity.x = 0.5 * (outVector[i][0][0][3 * typeCounter] + outVector[i + 1][0][0][3 * typeCounter]) * alfvenV;
-					localVelocity.y = 0.5 * (outVector[i][0][0][3 * typeCounter + 1] + outVector[i + 1][0][0][3 * typeCounter + 1]) * alfvenV;
-					localVelocity.z = 0.5 * (outVector[i][0][0][3 * typeCounter + 2] + outVector[i + 1][0][0][3 * typeCounter + 2]) * alfvenV;
+					localVelocity.y = 0.5 * (outVector[i][0][0][3 * typeCounter + 1] + outVector[i + 1][0][0][3 * typeCounter + 1]) *
+						alfvenV;
+					localVelocity.z = 0.5 * (outVector[i][0][0][3 * typeCounter + 2] + outVector[i + 1][0][0][3 * typeCounter + 2]) *
+						alfvenV;
 					//if (l < types[typeCounter].particlesPerBin) {
 					for (int l = 0; l < localParticlesPerBin; ++l) {
 						ParticleTypes type = types[typeCounter].type;
@@ -4759,7 +4870,8 @@ void Simulation::initializeShockWave() {
 						particle->initialCoordinates = particle->coordinates;
 						Vector3d particleVelocity = localVelocity;
 						if (typeCounter == 0) {
-							double denominator = (sqr(cosh((particle->coordinates.x - shockWaveX[0]) / frontWidth)) * ((compressionRatio + 1) * 0.5 - (compressionRatio - 1) * 0.5 * tanh(particle->coordinates.x - shockWaveX[0]) / frontWidth));
+							double denominator = (sqr(cosh((particle->coordinates.x - shockWaveX[0]) / frontWidth)) * ((compressionRatio + 1)
+								* 0.5 - (compressionRatio - 1) * 0.5 * tanh(particle->coordinates.x - shockWaveX[0]) / frontWidth));
 							if (fabs(denominator) < 1.0) {
 								printf("aaa\n");
 							}
@@ -4794,7 +4906,10 @@ void Simulation::initializeShockWave() {
 
 }
 
-void Simulation::solveRankineHugoniot(double upstreamDensity, Vector3d upstreamVelocity, double upstreamPressure, Vector3d upstreamB, Vector3d upstreamE, double& downstreamDensity, Vector3d& downstreamVelocity, double& downstreamPressure, Vector3d& downstreamB, Vector3d& downstreamE, double adiabaticParameter, double compressionRatio) {
+void Simulation::solveRankineHugoniot(double upstreamDensity, Vector3d upstreamVelocity, double upstreamPressure,
+                                      Vector3d upstreamB, Vector3d upstreamE, double& downstreamDensity,
+                                      Vector3d& downstreamVelocity, double& downstreamPressure, Vector3d& downstreamB,
+                                      Vector3d& downstreamE, double adiabaticParameter, double compressionRatio) {
 	double j = upstreamDensity * upstreamVelocity.x;
 	double magneticE = upstreamB.x * upstreamB.x / (4 * pi);
 	downstreamDensity = compressionRatio * upstreamDensity;
@@ -4809,9 +4924,11 @@ void Simulation::solveRankineHugoniot(double upstreamDensity, Vector3d upstreamV
 
 	downstreamE = upstreamE;
 
-	double a = (1.0 / ((adiabaticParameter - 1) * downstreamDensity)) + (0.5 / downstreamDensity) - (0.5 / upstreamDensity);
+	double a = (1.0 / ((adiabaticParameter - 1) * downstreamDensity)) + (0.5 / downstreamDensity) - (0.5 / upstreamDensity
+	);
 	double b = (1.0 / ((adiabaticParameter - 1) * upstreamDensity)) + (0.5 / upstreamDensity) - (0.5 / downstreamDensity);
-	double c = ((1 / downstreamDensity) - (1 / upstreamDensity)) * (sqr(downstreamB.y) + sqr(downstreamB.z) - sqr(upstreamB.y) - sqr(upstreamB.z)) / (16 * pi);
+	double c = ((1 / downstreamDensity) - (1 / upstreamDensity)) * (sqr(downstreamB.y) + sqr(downstreamB.z) -
+		sqr(upstreamB.y) - sqr(upstreamB.z)) / (16 * pi);
 
 	downstreamPressure = (b * upstreamPressure - c) / a;
 }
@@ -5173,7 +5290,8 @@ void Simulation::initializeWeibel() {
 	//types[0].alphaParallel = 1.3*types[0].alphaNormal;
 	types[0].alphaParallel = 1.1 * types[0].alphaNormal;
 
-	types[0].temperatureX = ((types[0].mass * speed_of_light_normalized_sqr / types[0].alphaParallel) / (1 + (types[0].alphaParallel / types[0].alphaNormal - 1) * McDonaldFunction(
+	types[0].temperatureX = ((types[0].mass * speed_of_light_normalized_sqr / types[0].alphaParallel) / (1 + (types[0].
+		alphaParallel / types[0].alphaNormal - 1) * McDonaldFunction(
 		types[0].alphaParallel, 1) / (types[0].alphaParallel * McDonaldFunction(types[0].alphaParallel,
 		                                                                        2)))) / kBoltzman_normalized;
 	types[0].temperatureY = (types[0].mass * speed_of_light_normalized_sqr / types[0].alphaNormal) / kBoltzman_normalized;
@@ -5211,7 +5329,8 @@ void Simulation::initializeWeibel() {
 
 		//todo check indexes of alpha and mcDonald ... somehow
 
-		double k02 = (omegaPlasmaElectron * omegaPlasmaElectron / speed_of_light_normalized_sqr) * (alphaParallel / alphaNormal - 1)
+		double k02 = (omegaPlasmaElectron * omegaPlasmaElectron / speed_of_light_normalized_sqr) * (alphaParallel /
+				alphaNormal - 1)
 			* (McDonaldFunction(alphaParallel, 1) / McDonaldFunction(alphaParallel, 2) + McDonaldFunction(
 				alphaParallel, 0) / (alphaParallel * McDonaldFunction(alphaParallel, 2)))
 			/ (1 + (alphaParallel / alphaNormal - 1) * McDonaldFunction(alphaParallel,
@@ -5232,7 +5351,8 @@ void Simulation::initializeWeibel() {
 		}
 
 		double temp = ((kmaxIncrement * kmaxIncrement / k02) * sqr(
-			1 - kmaxIncrement * kmaxIncrement / k02) * (kBoltzman_normalized * types[0].temperatureX / (types[0].mass * speed_of_light_normalized)) * cube(
+			1 - kmaxIncrement * kmaxIncrement / k02) * (kBoltzman_normalized * types[0].temperatureX / (types[0].mass *
+			speed_of_light_normalized)) * cube(
 			types[0].temperatureY / types[0].temperatureX - 1) * cube(
 			alphaNormal * McDonaldFunction(alphaParallel, 2) + McDonaldFunction(alphaParallel, 0)) / cube(
 			alphaNormal * McDonaldFunction(alphaParallel, 2) + McDonaldFunction(alphaParallel, 1))) * sqr(
@@ -5310,17 +5430,20 @@ void Simulation::initializeRingWeibel() {
 		double length;
 
 
-		double k02 = (omegaPlasmaElectron * omegaPlasmaElectron / (gamma * speed_of_light_normalized_sqr)) * ((betaNormal * betaNormal / (2 * betaParallel * betaParallel * (1 - betaParallel * betaParallel))) - G);
+		double k02 = (omegaPlasmaElectron * omegaPlasmaElectron / (gamma * speed_of_light_normalized_sqr)) * ((betaNormal *
+			betaNormal / (2 * betaParallel * betaParallel * (1 - betaParallel * betaParallel))) - G);
 		if (k02 < 0) {
 			increment = 0;
 			length = 0;
 		} else {
 
-			double a = omegaPlasmaElectron * omegaPlasmaElectron * betaNormal * betaNormal / (2 * gamma * betaParallel * betaParallel);
+			double a = omegaPlasmaElectron * omegaPlasmaElectron * betaNormal * betaNormal / (2 * gamma * betaParallel *
+				betaParallel);
 
 			double bParallel2 = betaParallel * betaParallel;
 
-			double kmaxIncrement2 = ((speed_of_light_normalized_sqr * k02 - a - bParallel2 * (speed_of_light_normalized_sqr * k02 + a)) +
+			double kmaxIncrement2 = ((speed_of_light_normalized_sqr * k02 - a - bParallel2 * (speed_of_light_normalized_sqr * k02
+						+ a)) +
 					sqrt(a * sqr(
 						bParallel2 + 1) * (bParallel2 * speed_of_light_normalized_sqr * k02 - speed_of_light_normalized_sqr * k02 + a))) /
 				sqr(speed_of_light_normalized * (betaParallel + 1) * (betaParallel - 1));
@@ -5336,8 +5459,11 @@ void Simulation::initializeRingWeibel() {
 
 				increment = (1 / sqrt(2.0)) * sqrt(
 					sqrt(
-						sqr(speed_of_light_normalized_sqr * kmaxIncrement2 * bParallel2 + a - speed_of_light_normalized_sqr * (k02 - kmaxIncrement2)) + 4 * speed_of_light_normalized_sqr * speed_of_light_normalized_sqr * kmaxIncrement2 * bParallel2 * (k02 - kmaxIncrement2)) -
-					(speed_of_light_normalized_sqr * kmaxIncrement2 * bParallel2 + a - speed_of_light_normalized_sqr * (k02 - kmaxIncrement2))
+						sqr(speed_of_light_normalized_sqr * kmaxIncrement2 * bParallel2 + a - speed_of_light_normalized_sqr * (k02 -
+							kmaxIncrement2)) + 4 * speed_of_light_normalized_sqr * speed_of_light_normalized_sqr * kmaxIncrement2 *
+						bParallel2 * (k02 - kmaxIncrement2)) -
+					(speed_of_light_normalized_sqr * kmaxIncrement2 * bParallel2 + a - speed_of_light_normalized_sqr * (k02 -
+						kmaxIncrement2))
 				);
 			}
 		}
@@ -5374,27 +5500,27 @@ void Simulation::initializeHomogenouseFlow() {
 	}*/
 }
 
-void Simulation::initializeFake(){
+void Simulation::initializeFake() {
 	boundaryConditionTypeX = PERIODIC;
 	createParticles();
 	//E0.y = -B0.z;
 	E0.y = B0.x;
 	E0.x = 0;
 	E0.z = 0;
-	double kw = 2*pi/ysizeGeneral;
-	for(int i = 0; i < xnumberAdded + 1; ++i){
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			for(int k = 0; k < znumberAdded + 1; ++k){
-				Efield[i][j][k] = E0*cos(kw*ygrid[j]);
+	double kw = 2 * pi / ysizeGeneral;
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				Efield[i][j][k] = E0 * cos(kw * ygrid[j]);
 				tempEfield[i][j][k] = Efield[i][j][k];
 				newEfield[i][j][k] = Efield[i][j][k];
 				explicitEfield[i][j][k] = Efield[i][j][k];
 			}
 		}
 	}
-	for(int i = 0; i < xnumberAdded; ++i){
-		for(int j = 0; j < ynumberAdded; ++j){
-			for(int k = 0; k < znumberAdded; ++k){
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
 				Bfield[i][j][k] = B0;
 				//Bfield[i][j][k] = B0*(middleYgrid[j] - ysizeGeneral)/ysizeGeneral;
 				newBfield[i][j][k] = Bfield[i][j][k];
@@ -5528,11 +5654,11 @@ void Simulation::createArrays() {
 				rotB[i][j][k] = Vector3d(0, 0, 0);
 				Ederivative[i][j][k] = Vector3d(0, 0, 0);
 
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
-							for(int curI = 0; curI < 3; ++curI){
-								for(int curJ = 0; curJ < 3; ++curJ){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
+							for (int curI = 0; curI < 3; ++curI) {
+								for (int curJ = 0; curJ < 3; ++curJ) {
 									massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[curI][curJ] = 0;
 									tempMassMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[curI][curJ] = 0;
 								}
@@ -5554,10 +5680,10 @@ void Simulation::createArrays() {
 
 	leftElevel = new Vector3d*[ynumberAdded + 1];
 	rightElevel = new Vector3d*[ynumberAdded + 1];
-	for(int j = 0; j < ynumberAdded + 1; ++j){
+	for (int j = 0; j < ynumberAdded + 1; ++j) {
 		leftElevel[j] = new Vector3d[znumberAdded + 1];
 		rightElevel[j] = new Vector3d[znumberAdded + 1];
-		for(int k = 0; k < znumberAdded + 1; ++k){
+		for (int k = 0; k < znumberAdded + 1; ++k) {
 			leftElevel[j][k] = Vector3d(0, 0, 0);
 			rightElevel[j][k] = Vector3d(0, 0, 0);
 		}
@@ -5659,17 +5785,17 @@ void Simulation::createArrays() {
 	fourierScalarOutput = new Complex**[xnumberAdded];
 	fourierScalarTempOutput = new Complex**[xnumberAdded];
 	fourierScalarTempOutput1 = new Complex**[xnumberAdded];
-	for(int i = 0; i < xnumberAdded; ++i){
+	for (int i = 0; i < xnumberAdded; ++i) {
 		fourierScalarInput[i] = new Complex*[ynumberAdded];
 		fourierScalarOutput[i] = new Complex*[ynumberAdded];
 		fourierScalarTempOutput[i] = new Complex*[ynumberAdded];
 		fourierScalarTempOutput1[i] = new Complex*[ynumberAdded];
-		for(int j = 0; j < ynumberAdded; ++j){
+		for (int j = 0; j < ynumberAdded; ++j) {
 			fourierScalarInput[i][j] = new Complex[znumberAdded];
 			fourierScalarOutput[i][j] = new Complex[znumberAdded];
 			fourierScalarTempOutput[i][j] = new Complex[znumberAdded];
 			fourierScalarTempOutput1[i][j] = new Complex[znumberAdded];
-			for(int k = 0; k < znumberAdded; ++k){
+			for (int k = 0; k < znumberAdded; ++k) {
 				fourierScalarInput[i][j][k] = Complex(0, 0);
 				fourierScalarOutput[i][j][k] = Complex(0, 0);
 				fourierScalarTempOutput[i][j][k] = Complex(0, 0);
@@ -5678,21 +5804,21 @@ void Simulation::createArrays() {
 		}
 	}
 
-	fourierScalarMirrorInput = new Complex**[2*xnumberAdded];
-	fourierScalarMirrorOutput = new Complex**[2*xnumberAdded];
-	fourierScalarMirrorTempOutput = new Complex**[2*xnumberAdded];
-	fourierScalarMirrorTempOutput1 = new Complex**[2*xnumberAdded];
-	for(int i = 0; i < 2*xnumberAdded; ++i){
+	fourierScalarMirrorInput = new Complex**[2 * xnumberAdded];
+	fourierScalarMirrorOutput = new Complex**[2 * xnumberAdded];
+	fourierScalarMirrorTempOutput = new Complex**[2 * xnumberAdded];
+	fourierScalarMirrorTempOutput1 = new Complex**[2 * xnumberAdded];
+	for (int i = 0; i < 2 * xnumberAdded; ++i) {
 		fourierScalarMirrorInput[i] = new Complex*[ynumberAdded];
 		fourierScalarMirrorOutput[i] = new Complex*[ynumberAdded];
 		fourierScalarMirrorTempOutput[i] = new Complex*[ynumberAdded];
 		fourierScalarMirrorTempOutput1[i] = new Complex*[ynumberAdded];
-		for(int j = 0; j < ynumberAdded; ++j){
+		for (int j = 0; j < ynumberAdded; ++j) {
 			fourierScalarMirrorInput[i][j] = new Complex[znumberAdded];
 			fourierScalarMirrorOutput[i][j] = new Complex[znumberAdded];
 			fourierScalarMirrorTempOutput[i][j] = new Complex[znumberAdded];
 			fourierScalarMirrorTempOutput1[i][j] = new Complex[znumberAdded];
-			for(int k = 0; k < znumberAdded; ++k){
+			for (int k = 0; k < znumberAdded; ++k) {
 				fourierScalarMirrorInput[i][j][k] = Complex(0, 0);
 				fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
 				fourierScalarMirrorTempOutput[i][j][k] = Complex(0, 0);
@@ -5701,9 +5827,9 @@ void Simulation::createArrays() {
 		}
 	}
 
-	localFactorX = new Complex[2*(xnumberAdded+1)];
-	localFactorY = new Complex[ynumberAdded+1];
-	localFactorZ = new Complex[znumberAdded+1];
+	localFactorX = new Complex[2 * (xnumberAdded + 1)];
+	localFactorY = new Complex[ynumberAdded + 1];
+	localFactorZ = new Complex[znumberAdded + 1];
 
 	rightMeanElevel = new Vector3d[xnumberAdded + 1];
 
@@ -5714,7 +5840,7 @@ void Simulation::createArrays() {
 	fflush(stdout);
 	//if(rank == 0) printLog("creating arrays for parameters\n");
 
-	mostAcceleratedParticlesNumbers = new std::list<std::pair<int, double> >[typesNumber];
+	mostAcceleratedParticlesNumbers = new std::list<std::pair<int, double>>[typesNumber];
 
 	particleConcentrations = new double ***[typesNumber];
 	particleEnergies = new double ***[typesNumber];
@@ -5870,7 +5996,7 @@ void Simulation::createArrays() {
 
 	////buneman E
 	leftOutBunemanExBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
-	rightOutBunemanExBuffer = new  double[(ynumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
+	rightOutBunemanExBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
 	leftInBunemanExBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
 	rightInBunemanExBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
 
@@ -5955,10 +6081,10 @@ void Simulation::createArrays() {
 	frontInBunemanBzBuffer = new double[(xnumberAdded) * (znumberAdded + 1) * (1 + additionalBinNumber)];
 	backInBunemanBzBuffer = new double[(xnumberAdded) * (znumberAdded + 1) * (1 + additionalBinNumber)];
 
-	bottomOutBunemanBzBuffer = new double[(ynumberAdded ) * (xnumberAdded) * (2 + additionalBinNumber)];
-	topOutBunemanBzBuffer = new double[(ynumberAdded ) * (xnumberAdded) * (2 + additionalBinNumber)];
-	bottomInBunemanBzBuffer = new double[(ynumberAdded ) * (xnumberAdded) * (2 + additionalBinNumber)];
-	topInBunemanBzBuffer = new double[(ynumberAdded ) * (xnumberAdded) * (2 + additionalBinNumber)];
+	bottomOutBunemanBzBuffer = new double[(ynumberAdded) * (xnumberAdded) * (2 + additionalBinNumber)];
+	topOutBunemanBzBuffer = new double[(ynumberAdded) * (xnumberAdded) * (2 + additionalBinNumber)];
+	bottomInBunemanBzBuffer = new double[(ynumberAdded) * (xnumberAdded) * (2 + additionalBinNumber)];
+	topInBunemanBzBuffer = new double[(ynumberAdded) * (xnumberAdded) * (2 + additionalBinNumber)];
 
 
 	rightOutGmresBuffer = new double[(ynumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
@@ -6059,9 +6185,9 @@ void Simulation::createArrays() {
 				tempNodeVectorParameterRight[i][j][k] = Vector3d(0, 0, 0);
 				tempNodeMatrixParameterLeft[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 				tempNodeMatrixParameterRight[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							tempNodeMassMatrixParameterLeft[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 							tempNodeMassMatrixParameterRight[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 						}
@@ -6139,9 +6265,9 @@ void Simulation::createArrays() {
 				tempNodeVectorParameterBack[i][j][k] = Vector3d(0, 0, 0);
 				tempNodeMatrixParameterFront[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 				tempNodeMatrixParameterBack[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							tempNodeMassMatrixParameterFront[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 							tempNodeMassMatrixParameterBack[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 						}
@@ -6218,9 +6344,9 @@ void Simulation::createArrays() {
 				tempNodeVectorParameterTop[i][j][k] = Vector3d(0, 0, 0);
 				tempNodeMatrixParameterBottom[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 				tempNodeMatrixParameterTop[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							tempNodeMassMatrixParameterBottom[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 							tempNodeMassMatrixParameterTop[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 						}
@@ -6313,309 +6439,309 @@ void Simulation::createArrays() {
 	}
 
 	///buneman
-	if(solverType == BUNEMAN){
-	bunemanJx = new double**[xnumberAdded];
-	bunemanEx = new double**[xnumberAdded];
-	bunemanNewEx = new double**[xnumberAdded];
-	tempBunemanExParameter = new double**[xnumberAdded];
-	bunemanDivCleaningEx = new double**[xnumberAdded];
-	for(int i = 0; i < xnumberAdded; ++i){
-		bunemanJx[i] = new double*[ynumberAdded + 1];
-		bunemanEx[i] = new double*[ynumberAdded + 1];
-		bunemanNewEx[i] = new double*[ynumberAdded + 1];
-		tempBunemanExParameter[i] = new double*[ynumberAdded + 1];
-		bunemanDivCleaningEx[i] = new double*[ynumberAdded + 1];
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			bunemanJx[i][j] = new double[znumberAdded + 1];
-			bunemanEx[i][j] = new double[znumberAdded + 1];
-			bunemanNewEx[i][j] = new double[znumberAdded + 1];
-			tempBunemanExParameter[i][j] = new double[znumberAdded + 1];
-			bunemanDivCleaningEx[i][j] = new double[znumberAdded + 1];
-			for(int k = 0; k < znumberAdded + 1; ++k){
-				bunemanJx[i][j][k] = 0;
-				bunemanEx[i][j][k] = 0;
-				bunemanNewEx[i][j][k] = 0;
-				tempBunemanExParameter[i][j][k] = 0;
-				bunemanDivCleaningEx[i][j][k] = 0;
+	if (solverType == BUNEMAN) {
+		bunemanJx = new double**[xnumberAdded];
+		bunemanEx = new double**[xnumberAdded];
+		bunemanNewEx = new double**[xnumberAdded];
+		tempBunemanExParameter = new double**[xnumberAdded];
+		bunemanDivCleaningEx = new double**[xnumberAdded];
+		for (int i = 0; i < xnumberAdded; ++i) {
+			bunemanJx[i] = new double*[ynumberAdded + 1];
+			bunemanEx[i] = new double*[ynumberAdded + 1];
+			bunemanNewEx[i] = new double*[ynumberAdded + 1];
+			tempBunemanExParameter[i] = new double*[ynumberAdded + 1];
+			bunemanDivCleaningEx[i] = new double*[ynumberAdded + 1];
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				bunemanJx[i][j] = new double[znumberAdded + 1];
+				bunemanEx[i][j] = new double[znumberAdded + 1];
+				bunemanNewEx[i][j] = new double[znumberAdded + 1];
+				tempBunemanExParameter[i][j] = new double[znumberAdded + 1];
+				bunemanDivCleaningEx[i][j] = new double[znumberAdded + 1];
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanJx[i][j][k] = 0;
+					bunemanEx[i][j][k] = 0;
+					bunemanNewEx[i][j][k] = 0;
+					tempBunemanExParameter[i][j][k] = 0;
+					bunemanDivCleaningEx[i][j][k] = 0;
+				}
 			}
 		}
-	}
 
-	bunemanJy = new double**[xnumberAdded+1];
-	bunemanEy = new double**[xnumberAdded+1];
-	bunemanNewEy = new double**[xnumberAdded+1];
-	tempBunemanEyParameter = new double**[xnumberAdded+1];
-	bunemanDivCleaningEy = new double**[xnumberAdded+1];
-	for(int i = 0; i < xnumberAdded+1; ++i){
-		bunemanJy[i] = new double*[ynumberAdded];
-		bunemanEy[i] = new double*[ynumberAdded];
-		bunemanNewEy[i] = new double*[ynumberAdded];
-		tempBunemanEyParameter[i] = new double*[ynumberAdded];
-		bunemanDivCleaningEy[i] = new double*[ynumberAdded];
-		for(int j = 0; j < ynumberAdded; ++j){
-			bunemanJy[i][j] = new double[znumberAdded + 1];
-			bunemanEy[i][j] = new double[znumberAdded + 1];
-			bunemanNewEy[i][j] = new double[znumberAdded + 1];
-			tempBunemanEyParameter[i][j] = new double[znumberAdded + 1];
-			bunemanDivCleaningEy[i][j] = new double[znumberAdded + 1];
-			for(int k = 0; k < znumberAdded + 1; ++k){
-				bunemanJy[i][j][k] = 0;
-				bunemanEy[i][j][k] = 0;
-				bunemanNewEy[i][j][k] = 0;
-				tempBunemanEyParameter[i][j][k] = 0;
-				bunemanDivCleaningEy[i][j][k] = 0;
+		bunemanJy = new double**[xnumberAdded + 1];
+		bunemanEy = new double**[xnumberAdded + 1];
+		bunemanNewEy = new double**[xnumberAdded + 1];
+		tempBunemanEyParameter = new double**[xnumberAdded + 1];
+		bunemanDivCleaningEy = new double**[xnumberAdded + 1];
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			bunemanJy[i] = new double*[ynumberAdded];
+			bunemanEy[i] = new double*[ynumberAdded];
+			bunemanNewEy[i] = new double*[ynumberAdded];
+			tempBunemanEyParameter[i] = new double*[ynumberAdded];
+			bunemanDivCleaningEy[i] = new double*[ynumberAdded];
+			for (int j = 0; j < ynumberAdded; ++j) {
+				bunemanJy[i][j] = new double[znumberAdded + 1];
+				bunemanEy[i][j] = new double[znumberAdded + 1];
+				bunemanNewEy[i][j] = new double[znumberAdded + 1];
+				tempBunemanEyParameter[i][j] = new double[znumberAdded + 1];
+				bunemanDivCleaningEy[i][j] = new double[znumberAdded + 1];
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanJy[i][j][k] = 0;
+					bunemanEy[i][j][k] = 0;
+					bunemanNewEy[i][j][k] = 0;
+					tempBunemanEyParameter[i][j][k] = 0;
+					bunemanDivCleaningEy[i][j][k] = 0;
+				}
 			}
 		}
-	}
 
-	bunemanJz = new double**[xnumberAdded+1];
-	bunemanEz = new double**[xnumberAdded+1];
-	bunemanNewEz = new double**[xnumberAdded+1];
-	tempBunemanEzParameter = new double**[xnumberAdded+1];
-	bunemanDivCleaningEz = new double**[xnumberAdded+1];
-	for(int i = 0; i < xnumberAdded+1; ++i){
-		bunemanJz[i] = new double*[ynumberAdded + 1];
-		bunemanEz[i] = new double*[ynumberAdded + 1];
-		bunemanNewEz[i] = new double*[ynumberAdded + 1];
-		tempBunemanEzParameter[i] = new double*[ynumberAdded + 1];
-		bunemanDivCleaningEz[i] = new double*[ynumberAdded + 1];
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			bunemanJz[i][j] = new double[znumberAdded];
-			bunemanEz[i][j] = new double[znumberAdded];
-			bunemanNewEz[i][j] = new double[znumberAdded];
-			tempBunemanEzParameter[i][j] = new double[znumberAdded];
-			bunemanDivCleaningEz[i][j] = new double[znumberAdded];
-			for(int k = 0; k < znumberAdded; ++k){
-				bunemanJz[i][j][k] = 0;
-				bunemanEz[i][j][k] = 0;
-				bunemanNewEz[i][j][k] = 0;
-				tempBunemanEzParameter[i][j][k] = 0;
-				bunemanDivCleaningEz[i][j][k] = 0;
+		bunemanJz = new double**[xnumberAdded + 1];
+		bunemanEz = new double**[xnumberAdded + 1];
+		bunemanNewEz = new double**[xnumberAdded + 1];
+		tempBunemanEzParameter = new double**[xnumberAdded + 1];
+		bunemanDivCleaningEz = new double**[xnumberAdded + 1];
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			bunemanJz[i] = new double*[ynumberAdded + 1];
+			bunemanEz[i] = new double*[ynumberAdded + 1];
+			bunemanNewEz[i] = new double*[ynumberAdded + 1];
+			tempBunemanEzParameter[i] = new double*[ynumberAdded + 1];
+			bunemanDivCleaningEz[i] = new double*[ynumberAdded + 1];
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				bunemanJz[i][j] = new double[znumberAdded];
+				bunemanEz[i][j] = new double[znumberAdded];
+				bunemanNewEz[i][j] = new double[znumberAdded];
+				tempBunemanEzParameter[i][j] = new double[znumberAdded];
+				bunemanDivCleaningEz[i][j] = new double[znumberAdded];
+				for (int k = 0; k < znumberAdded; ++k) {
+					bunemanJz[i][j][k] = 0;
+					bunemanEz[i][j][k] = 0;
+					bunemanNewEz[i][j][k] = 0;
+					tempBunemanEzParameter[i][j][k] = 0;
+					bunemanDivCleaningEz[i][j][k] = 0;
+				}
 			}
 		}
-	}
 
-	bunemanBx = new double**[xnumberAdded+1];
-	bunemanNewBx = new double**[xnumberAdded+1];
-	tempBunemanBxParameter = new double**[xnumberAdded+1];
-	bunemanDivCleaningBx = new double**[xnumberAdded+1];
-	for(int i = 0; i < xnumberAdded+1; ++i){
-		bunemanBx[i] = new double*[ynumberAdded];
-		bunemanNewBx[i] = new double*[ynumberAdded];
-		tempBunemanBxParameter[i] = new double*[ynumberAdded];
-		bunemanDivCleaningBx[i] = new double*[ynumberAdded];
-		for(int j = 0; j < ynumberAdded; ++j){
-			bunemanBx[i][j] = new double[znumberAdded];
-			bunemanNewBx[i][j] = new double[znumberAdded];
-			tempBunemanBxParameter[i][j] = new double[znumberAdded];
-			bunemanDivCleaningBx[i][j] = new double[znumberAdded];
-			for(int k = 0; k < znumberAdded; ++k){
-				bunemanBx[i][j][k] = 0;
-				bunemanNewBx[i][j][k] = 0;
-				tempBunemanBxParameter[i][j][k] = 0;
-				bunemanDivCleaningBx[i][j][k] = 0;
+		bunemanBx = new double**[xnumberAdded + 1];
+		bunemanNewBx = new double**[xnumberAdded + 1];
+		tempBunemanBxParameter = new double**[xnumberAdded + 1];
+		bunemanDivCleaningBx = new double**[xnumberAdded + 1];
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			bunemanBx[i] = new double*[ynumberAdded];
+			bunemanNewBx[i] = new double*[ynumberAdded];
+			tempBunemanBxParameter[i] = new double*[ynumberAdded];
+			bunemanDivCleaningBx[i] = new double*[ynumberAdded];
+			for (int j = 0; j < ynumberAdded; ++j) {
+				bunemanBx[i][j] = new double[znumberAdded];
+				bunemanNewBx[i][j] = new double[znumberAdded];
+				tempBunemanBxParameter[i][j] = new double[znumberAdded];
+				bunemanDivCleaningBx[i][j] = new double[znumberAdded];
+				for (int k = 0; k < znumberAdded; ++k) {
+					bunemanBx[i][j][k] = 0;
+					bunemanNewBx[i][j][k] = 0;
+					tempBunemanBxParameter[i][j][k] = 0;
+					bunemanDivCleaningBx[i][j][k] = 0;
+				}
 			}
 		}
-	}
 
-	bunemanBy = new double**[xnumberAdded];
-	bunemanNewBy = new double**[xnumberAdded];
-	tempBunemanByParameter = new double**[xnumberAdded];
-	bunemanDivCleaningBy = new double**[xnumberAdded];
-	for(int i = 0; i < xnumberAdded; ++i){
-		bunemanBy[i] = new double*[ynumberAdded+1];
-		bunemanNewBy[i] = new double*[ynumberAdded+1];
-		tempBunemanByParameter[i] = new double*[ynumberAdded + 1];
-		bunemanDivCleaningBy[i] = new double*[ynumber + 1];
-		for(int j = 0; j < ynumberAdded+1; ++j){
-			bunemanBy[i][j] = new double[znumberAdded];
-			bunemanNewBy[i][j] = new double[znumberAdded];
-			tempBunemanByParameter[i][j] = new double[znumberAdded];
-			bunemanDivCleaningBy[i][j] = new double[znumberAdded];
-			for(int k = 0; k < znumberAdded; ++k){
-				bunemanBy[i][j][k] = 0;
-				bunemanNewBy[i][j][k] = 0;
-				tempBunemanByParameter[i][j][k] = 0;
-				bunemanDivCleaningBy[i][j][k] = 0;
+		bunemanBy = new double**[xnumberAdded];
+		bunemanNewBy = new double**[xnumberAdded];
+		tempBunemanByParameter = new double**[xnumberAdded];
+		bunemanDivCleaningBy = new double**[xnumberAdded];
+		for (int i = 0; i < xnumberAdded; ++i) {
+			bunemanBy[i] = new double*[ynumberAdded + 1];
+			bunemanNewBy[i] = new double*[ynumberAdded + 1];
+			tempBunemanByParameter[i] = new double*[ynumberAdded + 1];
+			bunemanDivCleaningBy[i] = new double*[ynumber + 1];
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				bunemanBy[i][j] = new double[znumberAdded];
+				bunemanNewBy[i][j] = new double[znumberAdded];
+				tempBunemanByParameter[i][j] = new double[znumberAdded];
+				bunemanDivCleaningBy[i][j] = new double[znumberAdded];
+				for (int k = 0; k < znumberAdded; ++k) {
+					bunemanBy[i][j][k] = 0;
+					bunemanNewBy[i][j][k] = 0;
+					tempBunemanByParameter[i][j][k] = 0;
+					bunemanDivCleaningBy[i][j][k] = 0;
+				}
 			}
 		}
-	}
 
-	bunemanBz = new double**[xnumberAdded];
-	bunemanNewBz = new double**[xnumberAdded];
-	tempBunemanBzParameter = new double**[xnumberAdded];
-	bunemanDivCleaningBz = new double**[xnumberAdded];
-	for(int i = 0; i < xnumberAdded; ++i){
-		bunemanBz[i] = new double*[ynumberAdded];
-		bunemanNewBz[i] = new double*[ynumberAdded];
-		tempBunemanBzParameter[i] = new double*[ynumberAdded];
-		bunemanDivCleaningBz[i] = new double*[ynumberAdded];
-		for(int j = 0; j < ynumberAdded; ++j){
-			bunemanBz[i][j] = new double[znumberAdded+1];
-			bunemanNewBz[i][j] = new double[znumberAdded+1];
-			tempBunemanBzParameter[i][j] = new double[znumberAdded + 1];
-			bunemanDivCleaningBz[i][j] = new double[znumberAdded + 1];
-			for(int k = 0; k < znumberAdded+1; ++k){
-				bunemanBz[i][j][k] = 0;
-				bunemanNewBz[i][j][k] = 0;
-				tempBunemanBzParameter[i][j][k] = 0;
-				bunemanDivCleaningBz[i][j][k] = 0;
+		bunemanBz = new double**[xnumberAdded];
+		bunemanNewBz = new double**[xnumberAdded];
+		tempBunemanBzParameter = new double**[xnumberAdded];
+		bunemanDivCleaningBz = new double**[xnumberAdded];
+		for (int i = 0; i < xnumberAdded; ++i) {
+			bunemanBz[i] = new double*[ynumberAdded];
+			bunemanNewBz[i] = new double*[ynumberAdded];
+			tempBunemanBzParameter[i] = new double*[ynumberAdded];
+			bunemanDivCleaningBz[i] = new double*[ynumberAdded];
+			for (int j = 0; j < ynumberAdded; ++j) {
+				bunemanBz[i][j] = new double[znumberAdded + 1];
+				bunemanNewBz[i][j] = new double[znumberAdded + 1];
+				tempBunemanBzParameter[i][j] = new double[znumberAdded + 1];
+				bunemanDivCleaningBz[i][j] = new double[znumberAdded + 1];
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanBz[i][j][k] = 0;
+					bunemanNewBz[i][j][k] = 0;
+					tempBunemanBzParameter[i][j][k] = 0;
+					bunemanDivCleaningBz[i][j][k] = 0;
+				}
 			}
 		}
-	}
 
-	bunemanChargeDensity = new double** [xnumberAdded + 1];
-	bunemanDivergenceCleaningPotential = new double*** [xnumberAdded + 1];
-	for(int i = 0; i < xnumberAdded + 1; ++i){
-		bunemanChargeDensity[i] = new double* [ynumberAdded + 1];
-		bunemanDivergenceCleaningPotential[i] = new double** [ynumberAdded + 1];
-		for(int j = 0; j < ynumberAdded +1; ++j){
-			bunemanChargeDensity[i][j] = new double [znumberAdded + 1];
-			bunemanDivergenceCleaningPotential[i][j] = new double* [znumberAdded + 1];
-			for(int k = 0; k < znumberAdded + 1; ++k){
-				bunemanChargeDensity[i][j][k] = 0;
-				bunemanDivergenceCleaningPotential[i][j][k] = new double[1];
-				bunemanDivergenceCleaningPotential[i][j][k][0] = 0;
+		bunemanChargeDensity = new double** [xnumberAdded + 1];
+		bunemanDivergenceCleaningPotential = new double*** [xnumberAdded + 1];
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			bunemanChargeDensity[i] = new double* [ynumberAdded + 1];
+			bunemanDivergenceCleaningPotential[i] = new double** [ynumberAdded + 1];
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				bunemanChargeDensity[i][j] = new double [znumberAdded + 1];
+				bunemanDivergenceCleaningPotential[i][j] = new double* [znumberAdded + 1];
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanChargeDensity[i][j][k] = 0;
+					bunemanDivergenceCleaningPotential[i][j][k] = new double[1];
+					bunemanDivergenceCleaningPotential[i][j][k][0] = 0;
+				}
 			}
 		}
-	}
-	////temp buneman j
+		////temp buneman j
 
-	/// left right
-	tempBunemanJxLeft = new double **[2 + 2 * additionalBinNumber];
-	tempBunemanJxRight = new double **[2 + 2 * additionalBinNumber];
-	for(int i = 0; i < 2 + 2*additionalBinNumber; ++i){
-		tempBunemanJxLeft[i] = new double*[ynumberAdded + 1];
-		tempBunemanJxRight[i] = new double*[ynumberAdded + 1];
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			tempBunemanJxLeft[i][j] = new double[znumberAdded + 1];
-			tempBunemanJxRight[i][j] = new double[znumberAdded + 1];
-			for(int k = 0; k < znumberAdded + 1; ++k){
-				tempBunemanJxLeft[i][j][k] = 0;
-				tempBunemanJxRight[i][j][k] = 0;
+		/// left right
+		tempBunemanJxLeft = new double **[2 + 2 * additionalBinNumber];
+		tempBunemanJxRight = new double **[2 + 2 * additionalBinNumber];
+		for (int i = 0; i < 2 + 2 * additionalBinNumber; ++i) {
+			tempBunemanJxLeft[i] = new double*[ynumberAdded + 1];
+			tempBunemanJxRight[i] = new double*[ynumberAdded + 1];
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				tempBunemanJxLeft[i][j] = new double[znumberAdded + 1];
+				tempBunemanJxRight[i][j] = new double[znumberAdded + 1];
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					tempBunemanJxLeft[i][j][k] = 0;
+					tempBunemanJxRight[i][j][k] = 0;
+				}
 			}
 		}
-	}
-	tempBunemanJyLeft = new double **[3 + 2 * additionalBinNumber];
-	tempBunemanJyRight = new double **[3 + 2 * additionalBinNumber];
-	for(int i = 0; i < 3 + 2*additionalBinNumber; ++i){
-		tempBunemanJyLeft[i] = new double*[ynumberAdded];
-		tempBunemanJyRight[i] = new double*[ynumberAdded];
-		for(int j = 0; j < ynumberAdded; ++j){
-			tempBunemanJyLeft[i][j] = new double[znumberAdded + 1];
-			tempBunemanJyRight[i][j] = new double[znumberAdded + 1];
-			for(int k = 0; k < znumberAdded + 1; ++k){
-				tempBunemanJyLeft[i][j][k] = 0;
-				tempBunemanJyRight[i][j][k] = 0;
+		tempBunemanJyLeft = new double **[3 + 2 * additionalBinNumber];
+		tempBunemanJyRight = new double **[3 + 2 * additionalBinNumber];
+		for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
+			tempBunemanJyLeft[i] = new double*[ynumberAdded];
+			tempBunemanJyRight[i] = new double*[ynumberAdded];
+			for (int j = 0; j < ynumberAdded; ++j) {
+				tempBunemanJyLeft[i][j] = new double[znumberAdded + 1];
+				tempBunemanJyRight[i][j] = new double[znumberAdded + 1];
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					tempBunemanJyLeft[i][j][k] = 0;
+					tempBunemanJyRight[i][j][k] = 0;
+				}
 			}
 		}
-	}
-	tempBunemanJzLeft = new double **[3 + 2 * additionalBinNumber];
-	tempBunemanJzRight = new double **[3 + 2 * additionalBinNumber];
-	for(int i = 0; i < 3 + 2*additionalBinNumber; ++i){
-		tempBunemanJzLeft[i] = new double*[ynumberAdded + 1];
-		tempBunemanJzRight[i] = new double*[ynumberAdded + 1];
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			tempBunemanJzLeft[i][j] = new double[znumberAdded];
-			tempBunemanJzRight[i][j] = new double[znumberAdded];
-			for(int k = 0; k < znumberAdded; ++k){
-				tempBunemanJzLeft[i][j][k] = 0;
-				tempBunemanJzRight[i][j][k] = 0;
+		tempBunemanJzLeft = new double **[3 + 2 * additionalBinNumber];
+		tempBunemanJzRight = new double **[3 + 2 * additionalBinNumber];
+		for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
+			tempBunemanJzLeft[i] = new double*[ynumberAdded + 1];
+			tempBunemanJzRight[i] = new double*[ynumberAdded + 1];
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				tempBunemanJzLeft[i][j] = new double[znumberAdded];
+				tempBunemanJzRight[i][j] = new double[znumberAdded];
+				for (int k = 0; k < znumberAdded; ++k) {
+					tempBunemanJzLeft[i][j][k] = 0;
+					tempBunemanJzRight[i][j][k] = 0;
+				}
 			}
 		}
-	}
 
-	///front back
-	tempBunemanJxFront = new double **[xnumberAdded];
-	tempBunemanJxBack = new double **[xnumberAdded];
-	for(int i = 0; i < xnumberAdded; ++i){
-		tempBunemanJxFront[i] = new double*[3 + 2*additionalBinNumber];
-		tempBunemanJxBack[i] = new double*[3 + 2*additionalBinNumber];
-		for(int j = 0; j < 3 + 2*additionalBinNumber; ++j){
-			tempBunemanJxFront[i][j] = new double[znumberAdded + 1];
-			tempBunemanJxBack[i][j] = new double[znumberAdded + 1];
-			for(int k = 0; k < znumberAdded + 1; ++k){
-				tempBunemanJxFront[i][j][k] = 0;
-				tempBunemanJxBack[i][j][k] = 0;
+		///front back
+		tempBunemanJxFront = new double **[xnumberAdded];
+		tempBunemanJxBack = new double **[xnumberAdded];
+		for (int i = 0; i < xnumberAdded; ++i) {
+			tempBunemanJxFront[i] = new double*[3 + 2 * additionalBinNumber];
+			tempBunemanJxBack[i] = new double*[3 + 2 * additionalBinNumber];
+			for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
+				tempBunemanJxFront[i][j] = new double[znumberAdded + 1];
+				tempBunemanJxBack[i][j] = new double[znumberAdded + 1];
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					tempBunemanJxFront[i][j][k] = 0;
+					tempBunemanJxBack[i][j][k] = 0;
+				}
 			}
 		}
-	}
 
-	tempBunemanJyFront = new double **[xnumberAdded + 1];
-	tempBunemanJyBack = new double **[xnumberAdded + 1];
-	for(int i = 0; i < xnumberAdded + 1; ++i){
-		tempBunemanJyFront[i] = new double*[2 + 2*additionalBinNumber];
-		tempBunemanJyBack[i] = new double*[2 + 2*additionalBinNumber];
-		for(int j = 0; j < 2 + 2*additionalBinNumber; ++j){
-			tempBunemanJyFront[i][j] = new double[znumberAdded + 1];
-			tempBunemanJyBack[i][j] = new double[znumberAdded + 1];
-			for(int k = 0; k < znumberAdded + 1; ++k){
-				tempBunemanJyFront[i][j][k] = 0;
-				tempBunemanJyBack[i][j][k] = 0;
+		tempBunemanJyFront = new double **[xnumberAdded + 1];
+		tempBunemanJyBack = new double **[xnumberAdded + 1];
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			tempBunemanJyFront[i] = new double*[2 + 2 * additionalBinNumber];
+			tempBunemanJyBack[i] = new double*[2 + 2 * additionalBinNumber];
+			for (int j = 0; j < 2 + 2 * additionalBinNumber; ++j) {
+				tempBunemanJyFront[i][j] = new double[znumberAdded + 1];
+				tempBunemanJyBack[i][j] = new double[znumberAdded + 1];
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					tempBunemanJyFront[i][j][k] = 0;
+					tempBunemanJyBack[i][j][k] = 0;
+				}
 			}
 		}
-	}
 
-	tempBunemanJzFront = new double **[xnumberAdded+1];
-	tempBunemanJzBack = new double **[xnumberAdded+1];
-	for(int i = 0; i < xnumberAdded+1; ++i){
-		tempBunemanJzFront[i] = new double*[3 + 2*additionalBinNumber];
-		tempBunemanJzBack[i] = new double*[3 + 2*additionalBinNumber];
-		for(int j = 0; j < 3 + 2*additionalBinNumber; ++j){
-			tempBunemanJzFront[i][j] = new double[znumberAdded];
-			tempBunemanJzBack[i][j] = new double[znumberAdded];
-			for(int k = 0; k < znumberAdded; ++k){
-				tempBunemanJzFront[i][j][k] = 0;
-				tempBunemanJzBack[i][j][k] = 0;
+		tempBunemanJzFront = new double **[xnumberAdded + 1];
+		tempBunemanJzBack = new double **[xnumberAdded + 1];
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			tempBunemanJzFront[i] = new double*[3 + 2 * additionalBinNumber];
+			tempBunemanJzBack[i] = new double*[3 + 2 * additionalBinNumber];
+			for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
+				tempBunemanJzFront[i][j] = new double[znumberAdded];
+				tempBunemanJzBack[i][j] = new double[znumberAdded];
+				for (int k = 0; k < znumberAdded; ++k) {
+					tempBunemanJzFront[i][j][k] = 0;
+					tempBunemanJzBack[i][j][k] = 0;
+				}
 			}
 		}
-	}
-	// bottom top
+		// bottom top
 
-	tempBunemanJxBottom = new double **[xnumberAdded];
-	tempBunemanJxTop = new double **[xnumberAdded];
-	for(int i = 0; i < xnumberAdded; ++i){
-		tempBunemanJxBottom[i] = new double*[ynumberAdded + 1];
-		tempBunemanJxTop[i] = new double*[ynumberAdded + 1];
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			tempBunemanJxBottom[i][j] = new double[3 + 2*additionalBinNumber];
-			tempBunemanJxTop[i][j] = new double[3 + 2*additionalBinNumber];
-			for(int k = 0; k < 3 + 2*additionalBinNumber; ++k){
-				tempBunemanJxBottom[i][j][k] = 0;
-				tempBunemanJxTop[i][j][k] = 0;
+		tempBunemanJxBottom = new double **[xnumberAdded];
+		tempBunemanJxTop = new double **[xnumberAdded];
+		for (int i = 0; i < xnumberAdded; ++i) {
+			tempBunemanJxBottom[i] = new double*[ynumberAdded + 1];
+			tempBunemanJxTop[i] = new double*[ynumberAdded + 1];
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				tempBunemanJxBottom[i][j] = new double[3 + 2 * additionalBinNumber];
+				tempBunemanJxTop[i][j] = new double[3 + 2 * additionalBinNumber];
+				for (int k = 0; k < 3 + 2 * additionalBinNumber; ++k) {
+					tempBunemanJxBottom[i][j][k] = 0;
+					tempBunemanJxTop[i][j][k] = 0;
+				}
 			}
 		}
-	}
 
-	tempBunemanJyBottom = new double **[xnumberAdded + 1];
-	tempBunemanJyTop = new double **[xnumberAdded+ 1];
-	for(int i = 0; i < xnumberAdded + 1; ++i){
-		tempBunemanJyBottom[i] = new double*[ynumberAdded];
-		tempBunemanJyTop[i] = new double*[ynumberAdded];
-		for(int j = 0; j < ynumberAdded; ++j){
-			tempBunemanJyBottom[i][j] = new double[3 + 2*additionalBinNumber];
-			tempBunemanJyTop[i][j] = new double[3 + 2*additionalBinNumber];
-			for(int k = 0; k < 3 + 2*additionalBinNumber; ++k){
-				tempBunemanJyBottom[i][j][k] = 0;
-				tempBunemanJyTop[i][j][k] = 0;
+		tempBunemanJyBottom = new double **[xnumberAdded + 1];
+		tempBunemanJyTop = new double **[xnumberAdded + 1];
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			tempBunemanJyBottom[i] = new double*[ynumberAdded];
+			tempBunemanJyTop[i] = new double*[ynumberAdded];
+			for (int j = 0; j < ynumberAdded; ++j) {
+				tempBunemanJyBottom[i][j] = new double[3 + 2 * additionalBinNumber];
+				tempBunemanJyTop[i][j] = new double[3 + 2 * additionalBinNumber];
+				for (int k = 0; k < 3 + 2 * additionalBinNumber; ++k) {
+					tempBunemanJyBottom[i][j][k] = 0;
+					tempBunemanJyTop[i][j][k] = 0;
+				}
 			}
 		}
-	}
 
-	tempBunemanJzBottom = new double **[xnumberAdded + 1];
-	tempBunemanJzTop = new double **[xnumberAdded + 1];
-	for(int i = 0; i < xnumberAdded + 1; ++i){
-		tempBunemanJzBottom[i] = new double*[ynumberAdded + 1];
-		tempBunemanJzTop[i] = new double*[ynumberAdded + 1];
-		for(int j = 0; j < ynumberAdded + 1; ++j){
-			tempBunemanJzBottom[i][j] = new double[2 + 2*additionalBinNumber];
-			tempBunemanJzTop[i][j] = new double[2 + 2*additionalBinNumber];
-			for(int k = 0; k < 2 + 2*additionalBinNumber; ++k){
-				tempBunemanJzBottom[i][j][k] = 0;
-				tempBunemanJzTop[i][j][k] = 0;
+		tempBunemanJzBottom = new double **[xnumberAdded + 1];
+		tempBunemanJzTop = new double **[xnumberAdded + 1];
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			tempBunemanJzBottom[i] = new double*[ynumberAdded + 1];
+			tempBunemanJzTop[i] = new double*[ynumberAdded + 1];
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				tempBunemanJzBottom[i][j] = new double[2 + 2 * additionalBinNumber];
+				tempBunemanJzTop[i][j] = new double[2 + 2 * additionalBinNumber];
+				for (int k = 0; k < 2 + 2 * additionalBinNumber; ++k) {
+					tempBunemanJzBottom[i][j][k] = 0;
+					tempBunemanJzTop[i][j][k] = 0;
+				}
 			}
 		}
-	}
 	}
 
 	arrayCreated = true;
@@ -6966,7 +7092,8 @@ void Simulation::checkDebyeParameter() {
 	double debyeLength2 = 0;
 	for (int i = 0; i < typesNumber; ++i) {
 		if (types[i].concentration > 0) {
-			debyeLength2 += (4 * pi * types[i].concentration * sqr(types[i].charge)) / (kBoltzman_normalized * types[i].temperatureX);
+			debyeLength2 += (4 * pi * types[i].concentration * sqr(types[i].charge)) / (kBoltzman_normalized * types[i].
+				temperatureX);
 		}
 	}
 
@@ -7064,94 +7191,97 @@ void Simulation::checkGyroRadius() {
 	if (rank == 0) fclose(informationFile);
 }
 
-void Simulation::initializeBell(){
-	const double protonCRfraction = 1.0/3.0;
+void Simulation::initializeBell() {
+	const double protonCRfraction = 1.0 / 3.0;
 	const double gammaCR = 2;
-	double protonCRconcentration = types[1].concentration*protonCRfraction;
-	int protonCRperbin = types[1].particlesPerBin*protonCRfraction;
+	double protonCRconcentration = types[1].concentration * protonCRfraction;
+	int protonCRperbin = types[1].particlesPerBin * protonCRfraction;
 	double electronConcentration = types[1].concentration + protonCRconcentration;
 	types[0].concentration = electronConcentration;
 	types[0].particlesPerBin += protonCRperbin;
 	types[0].particesDeltaX = deltaX / types[0].particlesPerBin;
 	types[0].particesDeltaY = deltaY / types[0].particlesPerBin;
 	types[0].particesDeltaZ = deltaZ / types[0].particlesPerBin;
-	double CRdeltaX = deltaX/protonCRperbin;
-	double CRdeltaY = deltaY/protonCRperbin;
-	double CRdeltaZ = deltaZ/protonCRperbin;
+	double CRdeltaX = deltaX / protonCRperbin;
+	double CRdeltaY = deltaY / protonCRperbin;
+	double CRdeltaZ = deltaZ / protonCRperbin;
 	Vector3d Vsh = V0;
 	V0 = Vector3d(0, 0, 0);
-	Vector3d Vd = Vsh*(protonCRconcentration/electronConcentration);
+	Vector3d Vd = Vsh * (protonCRconcentration / electronConcentration);
 	//boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
 	boundaryConditionTypeX = PERIODIC;
 	//createParticles();
 	//E0 = E0 - Vsh.vectorMult(B0) / (speed_of_light_normalized);
 	//initializeAlfvenWaveY(10, 1.0E-4);
-	double alfvenV = sqrt(B0.scalarMult(B0)/(4*pi*(massElectron*types[0].concentration + massProton*types[1].concentration)));
-	double alfvenMach = Vsh.norm()/alfvenV;
-	double dzeta = protonCRconcentration*speed_of_light_normalized*sqrt(gammaCR*gammaCR - 1)/(types[1].concentration*Vsh.norm());
-	double rCR = massProton*speed_of_light_normalized_sqr*sqrt(gammaCR*gammaCR - 1)/(electron_charge_normalized*B0.norm());
-	double kmax = dzeta*0.5*sqr(Vsh.norm()/alfvenV)/rCR;
-	double lambda = 2*pi/kmax;
-	int wavesCount = xsizeGeneral/lambda;
-	double kw = 2*pi*wavesCount/xsizeGeneral;
+	double alfvenV = sqrt(
+		B0.scalarMult(B0) / (4 * pi * (massElectron * types[0].concentration + massProton * types[1].concentration)));
+	double alfvenMach = Vsh.norm() / alfvenV;
+	double dzeta = protonCRconcentration * speed_of_light_normalized * sqrt(gammaCR * gammaCR - 1) / (types[1].
+		concentration * Vsh.norm());
+	double rCR = massProton * speed_of_light_normalized_sqr * sqrt(gammaCR * gammaCR - 1) / (electron_charge_normalized *
+		B0.norm());
+	double kmax = dzeta * 0.5 * sqr(Vsh.norm() / alfvenV) / rCR;
+	double lambda = 2 * pi / kmax;
+	int wavesCount = xsizeGeneral / lambda;
+	double kw = 2 * pi * wavesCount / xsizeGeneral;
 
-	double E = B0.x*0.1;
+	double E = B0.x * 0.1;
 	E = 0;
-	if(solverType == BUNEMAN){
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				for(int k = 0; k < znumberAdded + 1; ++k){
+	if (solverType == BUNEMAN) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
 					bunemanEx[i][j][k] = E0.x;
 					bunemanNewEx[i][j][k] = bunemanEx[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				for(int k = 0; k < znumberAdded + 1; ++k){
-					bunemanEy[i][j][k] = E0.y + E*cos(kw*xgrid[i]);
-					if(boundaryConditionTypeX != PERIODIC){
-					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
-						bunemanEy[i][j][k] = 0;
-					}
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanEy[i][j][k] = E0.y + E * cos(kw * xgrid[i]);
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i < 1 + additionalBinNumber) {
+							bunemanEy[i][j][k] = 0;
+						}
 					}
 					bunemanNewEy[i][j][k] = bunemanEy[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				for(int k = 0; k < znumberAdded; ++k){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanEz[i][j][k] = E0.z;
-					if(boundaryConditionTypeX != PERIODIC){
-					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
-						bunemanEz[i][j][k] = 0;
-					}
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i < 1 + additionalBinNumber) {
+							bunemanEz[i][j][k] = 0;
+						}
 					}
 					bunemanNewEz[i][j][k] = bunemanEz[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				for(int k = 0; k < znumberAdded; ++k){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanBx[i][j][k] = B0.x;
 					bunemanNewBx[i][j][k] = bunemanBx[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				for(int k = 0; k < znumberAdded; ++k){
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanBy[i][j][k] = B0.y;
 					bunemanNewBy[i][j][k] = bunemanBy[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				for(int k = 0; k < znumberAdded + 1; ++k){
-					bunemanBz[i][j][k] = B0.z + E*cos(kw*xgrid[i]);
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanBz[i][j][k] = B0.z + E * cos(kw * xgrid[i]);
 					bunemanNewBz[i][j][k] = bunemanBz[i][j][k];
 				}
 			}
@@ -7161,12 +7291,12 @@ void Simulation::initializeBell(){
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					Efield[i][j][k] = E0;
-					Efield[i][j][k].y += E*cos(kw*xgrid[i]);
-					if(boundaryConditionTypeX != PERIODIC){
-					if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
-						Efield[i][j][k].y = 0;
-						Efield[i][j][k].z = 0;
-					}
+					Efield[i][j][k].y += E * cos(kw * xgrid[i]);
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
+							Efield[i][j][k].y = 0;
+							Efield[i][j][k].z = 0;
+						}
 					}
 					tempEfield[i][j][k] = Efield[i][j][k];
 					newEfield[i][j][k] = Efield[i][j][k];
@@ -7179,7 +7309,7 @@ void Simulation::initializeBell(){
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					Bfield[i][j][k] = B0;
-					Bfield[i][j][k].z += E*cos(kw*middleXgrid[i]);
+					Bfield[i][j][k].z += E * cos(kw * middleXgrid[i]);
 					newBfield[i][j][k] = Bfield[i][j][k];
 				}
 			}
@@ -7222,14 +7352,14 @@ void Simulation::initializeBell(){
 						//particle->coordinates.y = middleYgrid[j];
 						//particle->coordinates.z = middleZgrid[k];
 
-						particle->coordinates.x = xgrid[i] + uniformDistribution()*deltaX;
-						particle->coordinates.y = ygrid[j] + uniformDistribution()*deltaY;
-						particle->coordinates.z = zgrid[k] + uniformDistribution()*deltaZ;
+						particle->coordinates.x = xgrid[i] + uniformDistribution() * deltaX;
+						particle->coordinates.y = ygrid[j] + uniformDistribution() * deltaY;
+						particle->coordinates.z = zgrid[k] + uniformDistribution() * deltaZ;
 						particle->initialCoordinates = particle->coordinates;
 						/*if (V0.norm() > 0) {
 							particle->addVelocity(V0, speed_of_light_normalized);
 						}*/
-						if(type == 0){
+						if (type == 0) {
 							particle->addVelocity(Vd, speed_of_light_normalized);
 						}
 						Vector3d momentum = particle->getMomentum();
@@ -7248,44 +7378,44 @@ void Simulation::initializeBell(){
 				//create proton CRs
 				double weight = (protonCRconcentration / protonCRperbin) * volumeB();
 				for (int l = 0; l < protonCRperbin; ++l) {
-						ParticleTypes type = types[1].type;
-						Particle* particle = createParticle(n, i, j, k, weight, type, types[1],
-						                                    types[1].temperatureX,
-						                                    types[1].temperatureY,
-						                                    types[1].temperatureZ);
-						double phi = 2*pi*uniformDistribution();
-						double cosTheta = 2.0*(uniformDistribution() - 0.5);
-						double momentum = particle->mass*speed_of_light_normalized*sqrt(gammaCR*gammaCR - 1);
-						double sinTheta = sqrt(1.0 - cosTheta*cosTheta);
-						particle->setMomentumX(momentum*cosTheta);
-						particle->setMomentumY(momentum*sinTheta*cos(phi));
-						particle->setMomentumZ(momentum*sinTheta*sin(phi));
-						n++;
-						//particle->coordinates.x = x + CRdeltaX * l;
-						//particle->coordinates.y = y + CRdeltaY * l;
-						//particle->coordinates.z = z + CRdeltaZ * l;
-						//particle->coordinates.x = middleXgrid[i];
-						//particle->coordinates.y = middleYgrid[j];
-						//particle->coordinates.z = middleZgrid[k];
+					ParticleTypes type = types[1].type;
+					Particle* particle = createParticle(n, i, j, k, weight, type, types[1],
+					                                    types[1].temperatureX,
+					                                    types[1].temperatureY,
+					                                    types[1].temperatureZ);
+					double phi = 2 * pi * uniformDistribution();
+					double cosTheta = 2.0 * (uniformDistribution() - 0.5);
+					double momentum = particle->mass * speed_of_light_normalized * sqrt(gammaCR * gammaCR - 1);
+					double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+					particle->setMomentumX(momentum * cosTheta);
+					particle->setMomentumY(momentum * sinTheta * cos(phi));
+					particle->setMomentumZ(momentum * sinTheta * sin(phi));
+					n++;
+					//particle->coordinates.x = x + CRdeltaX * l;
+					//particle->coordinates.y = y + CRdeltaY * l;
+					//particle->coordinates.z = z + CRdeltaZ * l;
+					//particle->coordinates.x = middleXgrid[i];
+					//particle->coordinates.y = middleYgrid[j];
+					//particle->coordinates.z = middleZgrid[k];
 
-						particle->coordinates.x = xgrid[i] + uniformDistribution()*deltaX;
-						particle->coordinates.y = ygrid[j] + uniformDistribution()*deltaY;
-						particle->coordinates.z = zgrid[k] + uniformDistribution()*deltaZ;
+					particle->coordinates.x = xgrid[i] + uniformDistribution() * deltaX;
+					particle->coordinates.y = ygrid[j] + uniformDistribution() * deltaY;
+					particle->coordinates.z = zgrid[k] + uniformDistribution() * deltaZ;
 
-						particle->initialCoordinates = particle->coordinates;
-						particle->addVelocity(Vsh, speed_of_light_normalized);
-						Vector3d particleMomentum = particle->getMomentum();
-						particle->initialMomentum = particleMomentum;
-						particle->prevMomentum = particleMomentum;
-						particles.push_back(particle);
-						particlesNumber++;
-						if (particlesNumber % 1000 == 0) {
-							if ((rank == 0) && (verbosity > 0))printf("create particle number %d\n", particlesNumber);
-						}
-						alertNaNOrInfinity(particle->coordinates.x, "particle.x = NaN in createParticles\n");
-						alertNaNOrInfinity(particle->coordinates.y, "particle.y = NaN in createParticles\n");
-						alertNaNOrInfinity(particle->coordinates.z, "particle.z = NaN in createParticles\n");
+					particle->initialCoordinates = particle->coordinates;
+					particle->addVelocity(Vsh, speed_of_light_normalized);
+					Vector3d particleMomentum = particle->getMomentum();
+					particle->initialMomentum = particleMomentum;
+					particle->prevMomentum = particleMomentum;
+					particles.push_back(particle);
+					particlesNumber++;
+					if (particlesNumber % 1000 == 0) {
+						if ((rank == 0) && (verbosity > 0))printf("create particle number %d\n", particlesNumber);
 					}
+					alertNaNOrInfinity(particle->coordinates.x, "particle.x = NaN in createParticles\n");
+					alertNaNOrInfinity(particle->coordinates.y, "particle.y = NaN in createParticles\n");
+					alertNaNOrInfinity(particle->coordinates.z, "particle.z = NaN in createParticles\n");
+				}
 			}
 		}
 	}
@@ -7303,31 +7433,35 @@ void Simulation::initializeBell(){
 		fprintf(informationFile, "dzeta = %g\n", dzeta);
 		fprintf(informationFile, "gyro radius CR = %g\n", rCR);
 		fprintf(informationFile, "kmax = %g\n", kmax);
-		double lmax = 2*pi/kmax;
+		double lmax = 2 * pi / kmax;
 		fprintf(informationFile, "lmax = %g\n", lmax);
-		double omega_pe = sqrt(4*pi*types[0].concentration*electron_charge_normalized*electron_charge_normalized/massElectron);
+		double omega_pe = sqrt(
+			4 * pi * types[0].concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
 		fprintf(informationFile, "omega plasma electron = %g\n", omega_pe);
-		double omega_pp = sqrt(4*pi*types[1].concentration*electron_charge_normalized*electron_charge_normalized/massProton);
+		double omega_pp = sqrt(
+			4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / massProton);
 		fprintf(informationFile, "omega plasma electron = %g\n", omega_pp);
-		double electronSkinDepth = speed_of_light_normalized/omega_pe;
+		double electronSkinDepth = speed_of_light_normalized / omega_pe;
 		fprintf(informationFile, "electron skin depth = %g\n", electronSkinDepth);
-		double protonSkinDepth = speed_of_light_normalized/omega_pp;
+		double protonSkinDepth = speed_of_light_normalized / omega_pp;
 		fprintf(informationFile, "proton skin depth = %g\n", protonSkinDepth);
-		double debyeLength = 1/sqrt(4*pi*electron_charge_normalized*electron_charge_normalized*(types[0].concentration + types[1].concentration)/(kBoltzman_normalized*temperature));
+		double debyeLength = 1 / sqrt(
+			4 * pi * electron_charge_normalized * electron_charge_normalized * (types[0].concentration + types[1].concentration)
+			/ (kBoltzman_normalized * temperature));
 		fprintf(informationFile, "debye length = %g\n", debyeLength);
-		fprintf(informationFile, "dx/rCR = %g\n", deltaX/rCR);
-		fprintf(informationFile, "rCR/Lx = %g\n", rCR/xsizeGeneral);
-		fprintf(informationFile, "dx/lmax = %g\n", deltaX/lmax);
-		fprintf(informationFile, "lmax/Lx = %g\n", lmax/xsizeGeneral);
-		fprintf(informationFile, "dx/electronSkinDepth = %g\n", deltaX/electronSkinDepth);
-		fprintf(informationFile, "electronSkinDepth/Lx = %g\n", electronSkinDepth/xsizeGeneral);
-		fprintf(informationFile, "dx/protonSkinDepth = %g\n", deltaX/protonSkinDepth);
-		fprintf(informationFile, "protonSkinDepth/Lx = %g\n", protonSkinDepth/xsizeGeneral);
-		fprintf(informationFile, "dx/debyeLentgth = %g\n", deltaX/debyeLength);
-		fprintf(informationFile, "debyeLentgth/Lx = %g\n", debyeLength/xsizeGeneral);
+		fprintf(informationFile, "dx/rCR = %g\n", deltaX / rCR);
+		fprintf(informationFile, "rCR/Lx = %g\n", rCR / xsizeGeneral);
+		fprintf(informationFile, "dx/lmax = %g\n", deltaX / lmax);
+		fprintf(informationFile, "lmax/Lx = %g\n", lmax / xsizeGeneral);
+		fprintf(informationFile, "dx/electronSkinDepth = %g\n", deltaX / electronSkinDepth);
+		fprintf(informationFile, "electronSkinDepth/Lx = %g\n", electronSkinDepth / xsizeGeneral);
+		fprintf(informationFile, "dx/protonSkinDepth = %g\n", deltaX / protonSkinDepth);
+		fprintf(informationFile, "protonSkinDepth/Lx = %g\n", protonSkinDepth / xsizeGeneral);
+		fprintf(informationFile, "dx/debyeLentgth = %g\n", deltaX / debyeLength);
+		fprintf(informationFile, "debyeLentgth/Lx = %g\n", debyeLength / xsizeGeneral);
 		fclose(informationFile);
 
-		double increment = sqrt((dzeta*Vsh.scalarMult(Vsh)*kmax/rCR) - alfvenV*alfvenV*kmax*kmax);
+		double increment = sqrt((dzeta * Vsh.scalarMult(Vsh) * kmax / rCR) - alfvenV * alfvenV * kmax * kmax);
 
 		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
 		fprintf(incrementFile, "%g %g %g %g\n", increment, increment / plasma_period, lmax, lmax * scaleFactor);
@@ -7338,62 +7472,62 @@ void Simulation::initializeBell(){
 void Simulation::initializeTestOneParticle() {
 	//boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
 	boundaryConditionTypeX = PERIODIC;
-	
+
 	//initializeAlfvenWaveY(10, 1.0E-4);
-	if(solverType == BUNEMAN){
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				for(int k = 0; k < znumberAdded + 1; ++k){
+	if (solverType == BUNEMAN) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
 					bunemanEx[i][j][k] = E0.x;
 					bunemanNewEx[i][j][k] = bunemanEx[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				for(int k = 0; k < znumberAdded + 1; ++k){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
 					bunemanEy[i][j][k] = E0.y;
-					if(boundaryConditionTypeX != PERIODIC){
-					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
-						bunemanEy[i][j][k] = 0;
-					}
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i < 1 + additionalBinNumber) {
+							bunemanEy[i][j][k] = 0;
+						}
 					}
 					bunemanNewEy[i][j][k] = bunemanEy[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				for(int k = 0; k < znumberAdded; ++k){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanEz[i][j][k] = E0.z;
-					if(boundaryConditionTypeX != PERIODIC){
-					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
-						bunemanEz[i][j][k] = 0;
-					}
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i < 1 + additionalBinNumber) {
+							bunemanEz[i][j][k] = 0;
+						}
 					}
 					bunemanNewEz[i][j][k] = bunemanEz[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				for(int k = 0; k < znumberAdded; ++k){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanBx[i][j][k] = B0.x;
 					bunemanNewBx[i][j][k] = bunemanBx[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded + 1; ++j){
-				for(int k = 0; k < znumberAdded; ++k){
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
 					bunemanBy[i][j][k] = B0.y;
 					bunemanNewBy[i][j][k] = bunemanBy[i][j][k];
 				}
 			}
 		}
-		for(int i = 0; i < xnumberAdded; ++i){
-			for(int j = 0; j < ynumberAdded; ++j){
-				for(int k = 0; k < znumberAdded + 1; ++k){
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
 					bunemanBz[i][j][k] = B0.z;
 					bunemanNewBz[i][j][k] = bunemanBz[i][j][k];
 				}
@@ -7404,11 +7538,11 @@ void Simulation::initializeTestOneParticle() {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					Efield[i][j][k] = E0;
-					if(boundaryConditionTypeX != PERIODIC){
-					if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
-						Efield[i][j][k].y = 0;
-						Efield[i][j][k].z = 0;
-					}
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
+							Efield[i][j][k].y = 0;
+							Efield[i][j][k].z = 0;
+						}
 					}
 					tempEfield[i][j][k] = Efield[i][j][k];
 					newEfield[i][j][k] = Efield[i][j][k];
@@ -7418,14 +7552,15 @@ void Simulation::initializeTestOneParticle() {
 		}
 	}
 
-	if(rank == 0){
+	if (rank == 0) {
 		double weight = (types[0].concentration / types[0].particlesPerBin) * volumeB();
 		ParticleTypes type = types[0].type;
-		Particle* particle = createParticle(0, 1+additionalBinNumber, 1+additionalBinNumber, 1+additionalBinNumber, weight, type, types[0], 0, 0, 0);
+		Particle* particle = createParticle(0, 1 + additionalBinNumber, 1 + additionalBinNumber, 1 + additionalBinNumber,
+		                                    weight, type, types[0], 0, 0, 0);
 
-		particle->coordinates.x = middleXgrid[xnumberAdded/2];
-		particle->coordinates.y = middleYgrid[ynumberAdded/2];
-		particle->coordinates.z = middleZgrid[znumberAdded/2];
+		particle->coordinates.x = middleXgrid[xnumberAdded / 2];
+		particle->coordinates.y = middleYgrid[ynumberAdded / 2];
+		particle->coordinates.z = middleZgrid[znumberAdded / 2];
 
 		//particle->coordinates.x = xgrid[i] + uniformDistribution()*deltaX;
 		//particle->coordinates.y = ygrid[j] + uniformDistribution()*deltaY;
@@ -7522,8 +7657,8 @@ void Simulation::createParticles() {
 }
 
 void Simulation::moveToPreserveChargeLocal() {
-	Particle* electron = NULL;
-	Particle* notElectron = NULL;
+	Particle* electron = nullptr;
+	Particle* notElectron = nullptr;
 	Particle* particle;
 	int electronCount = 0;
 	int notElectronCount = 0;
@@ -7542,8 +7677,8 @@ void Simulation::moveToPreserveChargeLocal() {
 			}
 
 			while (necessaryElectrons > 0) {
-				electron = NULL;
-				while (electron == NULL) {
+				electron = nullptr;
+				while (electron == nullptr) {
 					if (electronCount >= particles.size()) {
 						errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 						printf("error in preserving charge\n");
@@ -7576,21 +7711,23 @@ void Simulation::addToPreserveChargeGlobal() {
 					int typeNumber = getTypeNumber(particle);
 					ParticleTypeContainer type = types[typeNumber];
 
-					Particle* newParticle = createParticle(particlesNumber, xnumberAdded - additionalBinNumber - 2, 0, 0, particle->weight, type.type, type, type.temperatureX, type.temperatureY, type.temperatureZ);
+					Particle* newParticle = createParticle(particlesNumber, xnumberAdded - additionalBinNumber - 2, 0, 0,
+					                                       particle->weight, type.type, type, type.temperatureX, type.temperatureY,
+					                                       type.temperatureZ);
 					newParticle->coordinates.x = xgrid[xnumberAdded - 1 - additionalBinNumber];
 					newParticle->coordinates.y = particle->coordinates.y;
-					if(newParticle->coordinates.y < ygrid[1 + additionalBinNumber]) {
-						newParticle->coordinates.y = ygrid[1 + additionalBinNumber] + deltaY*uniformDistribution();
+					if (newParticle->coordinates.y < ygrid[1 + additionalBinNumber]) {
+						newParticle->coordinates.y = ygrid[1 + additionalBinNumber] + deltaY * uniformDistribution();
 					}
-					if(newParticle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
-						newParticle->coordinates.y = ygrid[ynumberAdded - 1 - additionalBinNumber] - deltaY*uniformDistribution();
+					if (newParticle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
+						newParticle->coordinates.y = ygrid[ynumberAdded - 1 - additionalBinNumber] - deltaY * uniformDistribution();
 					}
 					newParticle->coordinates.z = particle->coordinates.z;
-					if(newParticle->coordinates.z < zgrid[1 + additionalBinNumber]) {
-						newParticle->coordinates.z = zgrid[1 + additionalBinNumber] + deltaZ*uniformDistribution();
+					if (newParticle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+						newParticle->coordinates.z = zgrid[1 + additionalBinNumber] + deltaZ * uniformDistribution();
 					}
-					if(newParticle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
-						newParticle->coordinates.z = zgrid[znumberAdded - 1 - additionalBinNumber] - deltaZ*uniformDistribution();
+					if (newParticle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+						newParticle->coordinates.z = zgrid[znumberAdded - 1 - additionalBinNumber] - deltaZ * uniformDistribution();
 					}
 					newParticle->initialCoordinates = newParticle->coordinates;
 					newParticle->addVelocity(V0, speed_of_light_normalized);
@@ -7626,7 +7763,7 @@ Particle* Simulation::getFirstProton() {
 			return particle;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 Particle* Simulation::getFirstElectron() {
@@ -7636,7 +7773,7 @@ Particle* Simulation::getFirstElectron() {
 			return particle;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 Particle* Simulation::getLastProton() {
@@ -7646,7 +7783,7 @@ Particle* Simulation::getLastProton() {
 			return particle;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 Particle* Simulation::getLastElectron() {
@@ -7656,7 +7793,7 @@ Particle* Simulation::getLastElectron() {
 			return particle;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 Particle* Simulation::getProton(int n) {
@@ -7677,7 +7814,7 @@ Particle* Simulation::getProton(int n) {
 	fclose(errorLogFile);
 	MPI_Finalize();
 	exit(0);
-	return NULL;
+	return nullptr;
 }
 
 Particle* Simulation::getElectron(int n) {
@@ -7698,7 +7835,7 @@ Particle* Simulation::getElectron(int n) {
 	fclose(errorLogFile);
 	MPI_Finalize();
 	exit(0);
-	return NULL;
+	return nullptr;
 }
 
 int Simulation::getParticleNumber(int n, const ParticleTypes& type) {
@@ -7758,7 +7895,8 @@ int Simulation::getParticleNumber(int n, const ParticleTypes& type) {
 
 
 Particle* Simulation::createParticle(int n, int i, int j, int k, const double& weight,
-                                     const ParticleTypes& type, const ParticleTypeContainer& typeContainer, const double& localTemperatureX,
+                                     const ParticleTypes& type, const ParticleTypeContainer& typeContainer,
+                                     const double& localTemperatureX,
                                      const double& localTemperatureY, const double& localTemperatureZ) {
 	int chargeCount = typeContainer.chargeCount;
 	double charge = typeContainer.charge;
@@ -7780,7 +7918,8 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 	double p = 0;
 	double px, py, pz = 0;
 
-	double thetaParamter = kBoltzman_normalized * (localTemperatureX + localTemperatureY + localTemperatureZ) / (3 * mass * speed_of_light_normalized_sqr);
+	double thetaParamter = kBoltzman_normalized * (localTemperatureX + localTemperatureY + localTemperatureZ) / (3 * mass *
+		speed_of_light_normalized_sqr);
 
 	if (thetaParamter < 0.01) {
 		//energy = maxwellDistribution(localTemparature, kBoltzman_normalized);
@@ -7860,7 +7999,9 @@ void Simulation::evaluateParticleTypesAlpha() {
 			if (types[i].particlesPerBin > 0) {
 				double alphaNormal = types[i].mass * speed_of_light_normalized_sqr / (kBoltzman_normalized * types[i].temperatureY);
 				TemperatureRelativisticMaxwellSolver solver = TemperatureRelativisticMaxwellSolver(alphaNormal,
-				                                                                                   kBoltzman_normalized * types[i].temperatureX / (types[i].mass * speed_of_light_normalized_sqr));
+				                                                                                   kBoltzman_normalized * types[i].
+				                                                                                   temperatureX / (types[i].mass *
+					                                                                                   speed_of_light_normalized_sqr));
 				double tempValue = solver.function(alphaNormal);
 				double minAlpha;
 				double maxAlpha;
@@ -7875,7 +8016,8 @@ void Simulation::evaluateParticleTypesAlpha() {
 					maxAlpha = alphaNormal;
 					minAlpha = 0.1 * types[i].mass * speed_of_light_normalized_sqr / (kBoltzman_normalized * types[i].temperatureX);
 				}
-				double simpleAlphaParallel = types[i].mass * speed_of_light_normalized_sqr / (kBoltzman_normalized * types[i].temperatureX);
+				double simpleAlphaParallel = types[i].mass * speed_of_light_normalized_sqr / (kBoltzman_normalized * types[i].
+					temperatureX);
 				double alphaParallel = solver.solve(minAlpha, maxAlpha);
 				types[i].alphaNormal = alphaNormal;
 				types[i].alphaParallel = alphaParallel;
@@ -7942,31 +8084,33 @@ void Simulation::synchronizeParticleNumber() {
 	}
 }
 
-int Simulation::getCartCoordWithAbsoluteIndexX(int i){
+int Simulation::getCartCoordWithAbsoluteIndexX(int i) {
 	int isInThread[1];
 	isInThread[0] = 0;
 	int coordIn[1];
 	coordIn[0] = -1;
 
-	if(cartDim[0] == 1){
+	if (cartDim[0] == 1) {
 		return 0;
 	}
 
-	if(i >= firstAbsoluteXindex + additionalBinNumber && i < firstAbsoluteXindex + xnumberAdded - 2*additionalBinNumber-1){
+	if (i >= firstAbsoluteXindex + additionalBinNumber && i < firstAbsoluteXindex + xnumberAdded - 2 * additionalBinNumber
+		- 1) {
 		isInThread[0] = 1;
 	} else {
-		if((cartCoord[0] == 0) && (i < 0)){
+		if ((cartCoord[0] == 0) && (i < 0)) {
 			isInThread[0] = 1;
-		} else if ((cartCoord[0] == cartDim[0]-1) && (i >= firstAbsoluteXindex + xnumberAdded - 2*additionalBinNumber-1)){
+		} else if ((cartCoord[0] == cartDim[0] - 1) && (i >= firstAbsoluteXindex + xnumberAdded - 2 * additionalBinNumber - 1)
+		) {
 			isInThread[0] = 1;
 		}
 	}
 
-	if(cartCoord[0] == 0){
-		if(isInThread[0] == 1){
+	if (cartCoord[0] == 0) {
+		if (isInThread[0] == 1) {
 			coordIn[0] = cartCoord[0];
 		}
-		for(int tempI = 1; tempI < cartDim[0]; ++tempI){
+		for (int tempI = 1; tempI < cartDim[0]; ++tempI) {
 			int curRank = 0;
 			int tempCoord[3];
 			tempCoord[0] = tempI;
@@ -7975,9 +8119,9 @@ int Simulation::getCartCoordWithAbsoluteIndexX(int i){
 			MPI_Cart_rank(cartComm, tempCoord, &curRank);
 			MPI_Status status;
 			MPI_Recv(isInThread, 1, MPI_INT, curRank, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm, &status);
-			if(isInThread[0] == 1){
+			if (isInThread[0] == 1) {
 				coordIn[0] = tempI;
-			}			
+			}
 		}
 	} else {
 		int firstRank = 0;
@@ -7989,14 +8133,14 @@ int Simulation::getCartCoordWithAbsoluteIndexX(int i){
 		MPI_Send(isInThread, 1, MPI_INT, firstRank, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
 	}
 
-	if((cartCoord[0] == 0) && (coordIn[0] == -1)){
+	if ((cartCoord[0] == 0) && (coordIn[0] == -1)) {
 		printf("wrong cartCoord in getCoordWithAbsoluteX\n");
 		MPI_Finalize();
 		exit(0);
 	}
 
-	if(cartCoord[0] == 0){
-		for(int tempI = 1; tempI < cartDim[0]; ++tempI){
+	if (cartCoord[0] == 0) {
+		for (int tempI = 1; tempI < cartDim[0]; ++tempI) {
 			int curRank = 0;
 			int tempCoord[3];
 			tempCoord[0] = tempI;
@@ -8019,31 +8163,33 @@ int Simulation::getCartCoordWithAbsoluteIndexX(int i){
 	return coordIn[0];
 }
 
-int Simulation::getCartCoordWithAbsoluteIndexY(int j){
+int Simulation::getCartCoordWithAbsoluteIndexY(int j) {
 	int isInThread[1];
 	isInThread[0] = 0;
 	int coordIn[1];
 	coordIn[0] = -1;
 
-	if(cartDim[1] == 1){
+	if (cartDim[1] == 1) {
 		return 0;
 	}
 
-	if(j >= firstAbsoluteYindex + additionalBinNumber && j < firstAbsoluteYindex + ynumberAdded - 2*additionalBinNumber - 1){
+	if (j >= firstAbsoluteYindex + additionalBinNumber && j < firstAbsoluteYindex + ynumberAdded - 2 * additionalBinNumber
+		- 1) {
 		isInThread[0] = 1;
 	} else {
-		if((cartCoord[1] == 0) && (j < 0)){
+		if ((cartCoord[1] == 0) && (j < 0)) {
 			isInThread[0] = 1;
-		} else if ((cartCoord[1] == cartDim[1]-1) && (j >= firstAbsoluteYindex + ynumberAdded - 2*additionalBinNumber - 1)){
+		} else if ((cartCoord[1] == cartDim[1] - 1) && (j >= firstAbsoluteYindex + ynumberAdded - 2 * additionalBinNumber - 1)
+		) {
 			isInThread[0] = 1;
 		}
 	}
 
-	if(cartCoord[1] == 0){
-		if(isInThread[0] == 1){
+	if (cartCoord[1] == 0) {
+		if (isInThread[0] == 1) {
 			coordIn[0] = cartCoord[1];
 		}
-		for(int tempJ = 1; tempJ < cartDim[1]; ++tempJ){
+		for (int tempJ = 1; tempJ < cartDim[1]; ++tempJ) {
 			int curRank = 0;
 			int tempCoord[3];
 			tempCoord[1] = tempJ;
@@ -8052,9 +8198,9 @@ int Simulation::getCartCoordWithAbsoluteIndexY(int j){
 			MPI_Cart_rank(cartComm, tempCoord, &curRank);
 			MPI_Status status;
 			MPI_Recv(isInThread, 1, MPI_INT, curRank, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm, &status);
-			if(isInThread[0] == 1){
+			if (isInThread[0] == 1) {
 				coordIn[0] = tempJ;
-			}			
+			}
 		}
 	} else {
 		int firstRank = 0;
@@ -8066,14 +8212,14 @@ int Simulation::getCartCoordWithAbsoluteIndexY(int j){
 		MPI_Send(isInThread, 1, MPI_INT, firstRank, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
 	}
 
-	if((cartCoord[1] == 0) && (coordIn[0] == -1)){
+	if ((cartCoord[1] == 0) && (coordIn[0] == -1)) {
 		printf("wrong cartCoord in getCoordWithAbsoluteY\n");
 		MPI_Finalize();
 		exit(0);
 	}
 
-	if(cartCoord[1] == 0){
-		for(int tempJ = 1; tempJ < cartDim[1]; ++tempJ){
+	if (cartCoord[1] == 0) {
+		for (int tempJ = 1; tempJ < cartDim[1]; ++tempJ) {
 			int curRank = 0;
 			int tempCoord[3];
 			tempCoord[1] = tempJ;
@@ -8096,31 +8242,33 @@ int Simulation::getCartCoordWithAbsoluteIndexY(int j){
 	return coordIn[0];
 }
 
-int Simulation::getCartCoordWithAbsoluteIndexZ(int k){
+int Simulation::getCartCoordWithAbsoluteIndexZ(int k) {
 	int isInThread[1];
 	isInThread[0] = 0;
 	int coordIn[1];
 	coordIn[0] = -1;
 
-	if(cartDim[2] == 1){
+	if (cartDim[2] == 1) {
 		return 0;
 	}
 
-	if(k >= firstAbsoluteZindex + additionalBinNumber && k < firstAbsoluteZindex + znumberAdded - 2*additionalBinNumber - 1){
+	if (k >= firstAbsoluteZindex + additionalBinNumber && k < firstAbsoluteZindex + znumberAdded - 2 * additionalBinNumber
+		- 1) {
 		isInThread[0] = 1;
 	} else {
-		if((cartCoord[2] == 0) && (k < 0)){
+		if ((cartCoord[2] == 0) && (k < 0)) {
 			isInThread[0] = 1;
-		} else if ((cartCoord[2] == cartDim[2]-1) && (k >= firstAbsoluteZindex + znumberAdded - 2*additionalBinNumber - 1)){
+		} else if ((cartCoord[2] == cartDim[2] - 1) && (k >= firstAbsoluteZindex + znumberAdded - 2 * additionalBinNumber - 1)
+		) {
 			isInThread[0] = 1;
 		}
 	}
 
-	if(cartCoord[2] == 0){
-		if(isInThread[0] == 1){
+	if (cartCoord[2] == 0) {
+		if (isInThread[0] == 1) {
 			coordIn[0] = cartCoord[2];
 		}
-		for(int tempI = 1; tempI < cartDim[2]; ++tempI){
+		for (int tempI = 1; tempI < cartDim[2]; ++tempI) {
 			int curRank = 0;
 			int tempCoord[3];
 			tempCoord[2] = tempI;
@@ -8129,9 +8277,9 @@ int Simulation::getCartCoordWithAbsoluteIndexZ(int k){
 			MPI_Cart_rank(cartComm, tempCoord, &curRank);
 			MPI_Status status;
 			MPI_Recv(isInThread, 1, MPI_INT, curRank, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm, &status);
-			if(isInThread[0] == 1){
+			if (isInThread[0] == 1) {
 				coordIn[0] = tempI;
-			}			
+			}
 		}
 	} else {
 		int firstRank = 0;
@@ -8143,14 +8291,14 @@ int Simulation::getCartCoordWithAbsoluteIndexZ(int k){
 		MPI_Send(isInThread, 1, MPI_INT, firstRank, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
 	}
 
-	if((cartCoord[2] == 0) &&(coordIn[0] == -1)){
+	if ((cartCoord[2] == 0) && (coordIn[0] == -1)) {
 		printf("wrong cartCoord in getCoordWithAbsoluteZ\n");
 		MPI_Finalize();
 		exit(0);
 	}
 
-	if(cartCoord[2] == 0){
-		for(int tempI = 1; tempI < cartDim[2]; ++tempI){
+	if (cartCoord[2] == 0) {
+		for (int tempI = 1; tempI < cartDim[2]; ++tempI) {
 			int curRank = 0;
 			int tempCoord[3];
 			tempCoord[2] = tempI;
@@ -8173,15 +8321,15 @@ int Simulation::getCartCoordWithAbsoluteIndexZ(int k){
 	return coordIn[0];
 }
 
-int Simulation::getLocalIndexByAbsoluteX(int i){
+int Simulation::getLocalIndexByAbsoluteX(int i) {
 	return i - firstAbsoluteXindex;
 }
 
-int Simulation::getLocalIndexByAbsoluteY(int j){
+int Simulation::getLocalIndexByAbsoluteY(int j) {
 	return j - firstAbsoluteYindex;
 }
 
-int Simulation::getLocalIndexByAbsoluteZ(int k){
+int Simulation::getLocalIndexByAbsoluteZ(int k) {
 	return k - firstAbsoluteZindex;
 }
 

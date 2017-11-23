@@ -83,9 +83,8 @@ double solveInverceJuttnerFunction(double x, double theta, double besselK, doubl
 
 	if (integral > x) {
 		return solveInverceJuttnerFunction(x, theta, besselK, left, gamma);
-	} else {
-		return solveInverceJuttnerFunction(x, theta, besselK, gamma, right);
 	}
+	return solveInverceJuttnerFunction(x, theta, besselK, gamma, right);
 }
 
 double maxwellJuttnerFunction(double gamma, double theta, double besselK) {
@@ -108,66 +107,71 @@ double maxwellJuttnerIntegral(double gamma, double theta, double besselK) {
 	return sum;
 }
 
-void anisotropicMaxwellJuttnerDistribution(double &momentumNormal, double &momentumParallel, double alphaNormal,
+void anisotropicMaxwellJuttnerDistribution(double& momentumNormal, double& momentumParallel, double alphaNormal,
                                            double alphaParallel, double m_c) {
 
-    double maxMomentumNormal = 10.0/alphaNormal;
-    double maxMomentumParallel = 10.0/alphaParallel;
+	double maxMomentumNormal = 10.0 / alphaNormal;
+	double maxMomentumParallel = 10.0 / alphaParallel;
 
-    double b = 2*alphaNormal*alphaNormal*alphaParallel*(2*alphaNormal + alphaParallel)/sqr(alphaNormal - alphaParallel);
+	double b = 2 * alphaNormal * alphaNormal * alphaParallel * (2 * alphaNormal + alphaParallel) / sqr(
+		alphaNormal - alphaParallel);
 
-    double extremumP2PointSqr = ((4*sqr(alphaNormal) + 2*b)/(b*b) - 1);
-    double extremumP2Point = 0;
-    if(extremumP2PointSqr && (alphaNormal > alphaParallel) > 0){
-        extremumP2Point = sqrt(extremumP2PointSqr);
-    }
+	double extremumP2PointSqr = ((4 * sqr(alphaNormal) + 2 * b) / (b * b) - 1);
+	double extremumP2Point = 0;
+	if (extremumP2PointSqr && (alphaNormal > alphaParallel) > 0) {
+		extremumP2Point = sqrt(extremumP2PointSqr);
+	}
 
-    double extremumP1Point = sqrt((1 + sqrt(1 + 4*sqr(alphaNormal)*(sqr(extremumP2Point) + 1)))/(2*sqr(alphaNormal)));
+	double extremumP1Point = sqrt(
+		(1 + sqrt(1 + 4 * sqr(alphaNormal) * (sqr(extremumP2Point) + 1))) / (2 * sqr(alphaNormal)));
 
-    double maxFunctionValue = anisotropicMaxwellJuttnerFunction(extremumP1Point, extremumP2Point, alphaNormal, alphaParallel);
+	double maxFunctionValue = anisotropicMaxwellJuttnerFunction(extremumP1Point, extremumP2Point, alphaNormal,
+	                                                            alphaParallel);
 
-    double tempP1 = uniformDistribution()*maxMomentumNormal;
-    double tempP2 = uniformDistribution()*maxMomentumParallel;
+	double tempP1 = uniformDistribution() * maxMomentumNormal;
+	double tempP2 = uniformDistribution() * maxMomentumParallel;
 
-    double functionValue = anisotropicMaxwellJuttnerFunction(tempP1, tempP2, alphaNormal, alphaParallel);
+	double functionValue = anisotropicMaxwellJuttnerFunction(tempP1, tempP2, alphaNormal, alphaParallel);
 
-    if(functionValue > maxFunctionValue){
-        printf("functionValue > maxFunctionValue\n");
-        std::string outputDir = outputDirectory;
-        FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-        fprintf(errorLogFile, "functionValue > maxFunctionValue in anisotropicMaxwellJuttnerDistribution\n");
-        fprintf(errorLogFile, "functionValue = %g maxValue = %g p1 = %g p2 = %g alpha1 = %g alpha2 = %g\n", functionValue, maxFunctionValue, tempP1, tempP2, alphaNormal, alphaParallel);
-        fclose(errorLogFile);
-        MPI_Finalize();
-        exit(0);
-    }
+	if (functionValue > maxFunctionValue) {
+		printf("functionValue > maxFunctionValue\n");
+		std::string outputDir = outputDirectory;
+		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "functionValue > maxFunctionValue in anisotropicMaxwellJuttnerDistribution\n");
+		fprintf(errorLogFile, "functionValue = %g maxValue = %g p1 = %g p2 = %g alpha1 = %g alpha2 = %g\n", functionValue,
+		        maxFunctionValue, tempP1, tempP2, alphaNormal, alphaParallel);
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
 
-    double tempValue = uniformDistribution()*maxFunctionValue;
+	double tempValue = uniformDistribution() * maxFunctionValue;
 
-    while(tempValue > functionValue){
-        tempP1 = uniformDistribution()*maxMomentumNormal;
-        tempP2 = uniformDistribution()*maxMomentumParallel;
+	while (tempValue > functionValue) {
+		tempP1 = uniformDistribution() * maxMomentumNormal;
+		tempP2 = uniformDistribution() * maxMomentumParallel;
 
-        functionValue = anisotropicMaxwellJuttnerFunction(tempP1, tempP2, alphaNormal, alphaParallel);
+		functionValue = anisotropicMaxwellJuttnerFunction(tempP1, tempP2, alphaNormal, alphaParallel);
 
-        if(functionValue > maxFunctionValue){
-            printf("functionValue > maxFunctionValue\n");
-            std::string outputDir = outputDirectory;
-            FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-            fprintf(errorLogFile, "functionValue > maxFunctionValue in anisotropicMaxwellJuttnerDistribution\n");
-            fprintf(errorLogFile, "functionValue = %g maxValue = %g p1 = %g p2 = %g alpha1 = %g alpha2 = %g\n", functionValue, maxFunctionValue, tempP1, tempP2, alphaNormal, alphaParallel);
-            fclose(errorLogFile);
-            MPI_Finalize();
-            exit(0);
-        }
+		if (functionValue > maxFunctionValue) {
+			printf("functionValue > maxFunctionValue\n");
+			std::string outputDir = outputDirectory;
+			FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+			fprintf(errorLogFile, "functionValue > maxFunctionValue in anisotropicMaxwellJuttnerDistribution\n");
+			fprintf(errorLogFile, "functionValue = %g maxValue = %g p1 = %g p2 = %g alpha1 = %g alpha2 = %g\n", functionValue,
+			        maxFunctionValue, tempP1, tempP2, alphaNormal, alphaParallel);
+			fclose(errorLogFile);
+			MPI_Finalize();
+			exit(0);
+		}
 
-        tempValue = uniformDistribution()*maxFunctionValue;
-    }
+		tempValue = uniformDistribution() * maxFunctionValue;
+	}
 
-    momentumNormal = tempP1*m_c;
-    momentumParallel = tempP2*m_c;
+	momentumNormal = tempP1 * m_c;
+	momentumParallel = tempP2 * m_c;
 }
 
 double anisotropicMaxwellJuttnerFunction(double p1, double p2, double alpha1, double alpha2) {
-    return p1*exp(-alpha1*(sqrt(1 + p1*p1 + p2*p2) - sqrt(1 + p2*p2)) - alpha2*sqrt(1 + p2*p2));
+	return p1 * exp(-alpha1 * (sqrt(1 + p1 * p1 + p2 * p2) - sqrt(1 + p2 * p2)) - alpha2 * sqrt(1 + p2 * p2));
 }

@@ -34,7 +34,8 @@ Matrix3d::Matrix3d(const Matrix3d& m) {
 	matrix[2][2] = m.matrix[2][2];
 }
 
-Matrix3d::Matrix3d(double m11, double m12, double m13, double m21, double m22, double m23, double m31, double m32, double m33) {
+Matrix3d::Matrix3d(double m11, double m12, double m13, double m21, double m22, double m23, double m31, double m32,
+                   double m33) {
 	matrix[0][0] = m11;
 	matrix[0][1] = m12;
 	matrix[0][2] = m13;
@@ -121,29 +122,29 @@ Matrix3d Matrix3d::operator*(const Matrix3d& matr) {
 
 Matrix3d Matrix3d::operator*(const double& v) {
 	Matrix3d newMatrix;
-	newMatrix.matrix[0][0] = matrix[0][0]*v;
-	newMatrix.matrix[0][1] = matrix[0][1]*v;
-	newMatrix.matrix[0][2] = matrix[0][2]*v;
-	newMatrix.matrix[1][0] = matrix[1][0]*v;
-	newMatrix.matrix[1][1] = matrix[1][1]*v;
-	newMatrix.matrix[1][2] = matrix[1][2]*v;
-	newMatrix.matrix[2][0] = matrix[2][0]*v;
-	newMatrix.matrix[2][1] = matrix[2][1]*v;
-	newMatrix.matrix[2][2] = matrix[2][2]*v;
+	newMatrix.matrix[0][0] = matrix[0][0] * v;
+	newMatrix.matrix[0][1] = matrix[0][1] * v;
+	newMatrix.matrix[0][2] = matrix[0][2] * v;
+	newMatrix.matrix[1][0] = matrix[1][0] * v;
+	newMatrix.matrix[1][1] = matrix[1][1] * v;
+	newMatrix.matrix[1][2] = matrix[1][2] * v;
+	newMatrix.matrix[2][0] = matrix[2][0] * v;
+	newMatrix.matrix[2][1] = matrix[2][1] * v;
+	newMatrix.matrix[2][2] = matrix[2][2] * v;
 	return newMatrix;
 }
 
 Matrix3d Matrix3d::operator/(const double& v) {
 	Matrix3d newMatrix;
-	newMatrix.matrix[0][0] = matrix[0][0]/v;
-	newMatrix.matrix[0][1] = matrix[0][1]/v;
-	newMatrix.matrix[0][2] = matrix[0][2]/v;
-	newMatrix.matrix[1][0] = matrix[1][0]/v;
-	newMatrix.matrix[1][1] = matrix[1][1]/v;
-	newMatrix.matrix[1][2] = matrix[1][2]/v;
-	newMatrix.matrix[2][0] = matrix[2][0]/v;
-	newMatrix.matrix[2][1] = matrix[2][1]/v;
-	newMatrix.matrix[2][2] = matrix[2][2]/v;
+	newMatrix.matrix[0][0] = matrix[0][0] / v;
+	newMatrix.matrix[0][1] = matrix[0][1] / v;
+	newMatrix.matrix[0][2] = matrix[0][2] / v;
+	newMatrix.matrix[1][0] = matrix[1][0] / v;
+	newMatrix.matrix[1][1] = matrix[1][1] / v;
+	newMatrix.matrix[1][2] = matrix[1][2] / v;
+	newMatrix.matrix[2][0] = matrix[2][0] / v;
+	newMatrix.matrix[2][1] = matrix[2][1] / v;
+	newMatrix.matrix[2][2] = matrix[2][2] / v;
 	return newMatrix;
 }
 
@@ -209,5 +210,6 @@ Matrix3d* Matrix3d::createBasisByOneVector(const Vector3d& v) {
 	double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 	double cosPhi = v.x / sqrt(v.x * v.x + v.y * v.y);
 	double sinPhi = v.y / sqrt(v.x * v.x + v.y * v.y);
-	return new Matrix3d(sinPhi, cosTheta * cosPhi, sinTheta * cosPhi, -cosPhi, cosTheta * sinPhi, sinTheta * sinPhi, 0, -sinTheta, cosTheta);
+	return new Matrix3d(sinPhi, cosTheta * cosPhi, sinTheta * cosPhi, -cosPhi, cosTheta * sinPhi, sinTheta * sinPhi, 0,
+	                    -sinTheta, cosTheta);
 }

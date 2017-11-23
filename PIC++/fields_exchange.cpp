@@ -49,7 +49,8 @@ void Simulation::exchangeGeneralEfieldX(Vector3d*** field) {
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutVectorNodeBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInVectorNodeBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_LEFT, cartComm, &status);
+			MPI_Sendrecv(leftOutVectorNodeBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInVectorNodeBuffer, number,
+			             MPI_DOUBLE, rightRank, MPI_EFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Status status;
@@ -113,9 +114,12 @@ void Simulation::exchangeGeneralEfieldX(Vector3d*** field) {
 		}
 		//int numberLeft = (1 + additionalBinNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1);
 		if ((cartCoord[0] < cartDim[0] - 1 && cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
-			if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			if (verbosity > 2) printf(
+				"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+				rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 			MPI_Status status;
-			MPI_Sendrecv(rightOutVectorNodeBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, leftInVectorNodeBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_RIGHT, cartComm, &status);
+			MPI_Sendrecv(rightOutVectorNodeBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, leftInVectorNodeBuffer,
+			             number, MPI_DOUBLE, leftRank, MPI_EFIELD_RIGHT, cartComm, &status);
 			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Send(rightOutVectorNodeBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, cartComm);
@@ -193,13 +197,14 @@ void Simulation::exchangeGeneralEfieldY(Vector3d*** field) {
 		}
 
 		MPI_Status status;
-		MPI_Sendrecv(frontOutVectorNodeBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInVectorNodeBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(frontOutVectorNodeBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInVectorNodeBuffer, number,
+		             MPI_DOUBLE, backRank, MPI_EFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
 
 		bcount = 0;
 
 		if (verbosity > 2) printf("receive general field rigth from %d to %d\n", backRank, rank);
-		for (int i = 0; i < xnumberAdded + 1; ++i){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					for (int l = 0; l < 3; ++l) {
@@ -224,8 +229,11 @@ void Simulation::exchangeGeneralEfieldY(Vector3d*** field) {
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
-		MPI_Sendrecv(backOutVectorNodeBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInVectorNodeBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		MPI_Sendrecv(backOutVectorNodeBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInVectorNodeBuffer, number,
+		             MPI_DOUBLE, frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
 
 		//MPI_Barrier(cartComm);
@@ -285,13 +293,14 @@ void Simulation::exchangeGeneralEfieldZ(Vector3d*** field) {
 		}
 
 		MPI_Status status;
-		MPI_Sendrecv(bottomOutVectorNodeBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_LEFT, topInVectorNodeBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(bottomOutVectorNodeBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_LEFT, topInVectorNodeBuffer,
+		             number, MPI_DOUBLE, topRank, MPI_EFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, bottomRank);
 
 		//MPI_Barrier(cartComm);
 		bcount = 0;
 		if (verbosity > 2) printf("receive general field rigth from %d to %d\n", topRank, rank);
-		for (int i = 0; i < xnumberAdded + 1; ++i){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
 					for (int l = 0; l < 3; ++l) {
@@ -316,8 +325,11 @@ void Simulation::exchangeGeneralEfieldZ(Vector3d*** field) {
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
-		MPI_Sendrecv(topOutVectorNodeBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInVectorNodeBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		MPI_Sendrecv(topOutVectorNodeBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInVectorNodeBuffer, number,
+		             MPI_DOUBLE, bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
 
 		//MPI_Barrier(cartComm);
@@ -383,9 +395,12 @@ void Simulation::exchangeGeneralBfieldX(Vector3d*** field) {
 		}
 		int number = (1 + additionalBinNumber) * 3 * (ynumberAdded) * (znumberAdded);
 		if ((cartCoord[0] < cartDim[0] - 1 && cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
-			if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			if (verbosity > 2) printf(
+				"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+				rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 			MPI_Status status;
-			MPI_Sendrecv(rightOutVectorCellBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, leftInVectorCellBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, cartComm, &status);
+			MPI_Sendrecv(rightOutVectorCellBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, leftInVectorCellBuffer,
+			             number, MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, cartComm, &status);
 			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Send(rightOutVectorCellBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, cartComm);
@@ -415,7 +430,8 @@ void Simulation::exchangeGeneralBfieldX(Vector3d*** field) {
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutVectorCellBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInVectorCellBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_LEFT, cartComm, &status);
+			MPI_Sendrecv(leftOutVectorCellBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInVectorCellBuffer, number,
+			             MPI_DOUBLE, rightRank, MPI_BFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Status status;
@@ -511,10 +527,13 @@ void Simulation::exchangeGeneralBfieldY(Vector3d*** field) {
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (1 + additionalBinNumber) * 3 * (xnumberAdded) * (znumberAdded);
-		MPI_Sendrecv(backOutVectorCellBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_RIGHT, frontInVectorCellBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(backOutVectorCellBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_RIGHT, frontInVectorCellBuffer, number,
+		             MPI_DOUBLE, frontRank, MPI_BFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
 
 		//MPI_Barrier(cartComm);
@@ -536,7 +555,8 @@ void Simulation::exchangeGeneralBfieldY(Vector3d*** field) {
 		MPI_Barrier(cartComm);
 
 
-		MPI_Sendrecv(frontOutVectorCellBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInVectorCellBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(frontOutVectorCellBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInVectorCellBuffer, number,
+		             MPI_DOUBLE, backRank, MPI_BFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
 
 		//MPI_Barrier(cartComm);
@@ -589,10 +609,13 @@ void Simulation::exchangeGeneralBfieldZ(Vector3d*** field) {
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (1 + additionalBinNumber) * 3 * (xnumberAdded) * (ynumberAdded);
-		MPI_Sendrecv(topOutVectorCellBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_RIGHT, bottomInVectorCellBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(topOutVectorCellBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_RIGHT, bottomInVectorCellBuffer, number,
+		             MPI_DOUBLE, bottomRank, MPI_BFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
 
 		//MPI_Barrier(cartComm);
@@ -614,7 +637,8 @@ void Simulation::exchangeGeneralBfieldZ(Vector3d*** field) {
 		MPI_Barrier(cartComm);
 
 
-		MPI_Sendrecv(bottomOutVectorCellBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInVectorCellBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(bottomOutVectorCellBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInVectorCellBuffer,
+		             number, MPI_DOUBLE, topRank, MPI_BFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, bottomRank);
 
 		//MPI_Barrier(cartComm);
@@ -664,17 +688,20 @@ void Simulation::exchangeGeneralScalarCellFieldX(double**** field) {
 		for (int i = 0; i <= additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						rightOutCellBuffer[bcount] = field[xnumberAdded - additionalBinNumber - 2 - i][j][k][0];
-						leftOutCellBuffer[bcount] = field[1 + additionalBinNumber + i][j][k][0];
-						bcount++;
+					rightOutCellBuffer[bcount] = field[xnumberAdded - additionalBinNumber - 2 - i][j][k][0];
+					leftOutCellBuffer[bcount] = field[1 + additionalBinNumber + i][j][k][0];
+					bcount++;
 				}
 			}
 		}
-		int number = (1 + additionalBinNumber)* (ynumberAdded) * (znumberAdded);
+		int number = (1 + additionalBinNumber) * (ynumberAdded) * (znumberAdded);
 		if ((cartCoord[0] < cartDim[0] - 1 && cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
-			if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			if (verbosity > 2) printf(
+				"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+				rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 			MPI_Status status;
-			MPI_Sendrecv(rightOutCellBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, leftInCellBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, cartComm, &status);
+			MPI_Sendrecv(rightOutCellBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, leftInCellBuffer, number,
+			             MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, cartComm, &status);
 			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Send(rightOutCellBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, cartComm);
@@ -700,7 +727,8 @@ void Simulation::exchangeGeneralScalarCellFieldX(double**** field) {
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutCellBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInCellBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_LEFT, cartComm, &status);
+			MPI_Sendrecv(leftOutCellBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInCellBuffer, number, MPI_DOUBLE,
+			             rightRank, MPI_BFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Status status;
@@ -715,8 +743,8 @@ void Simulation::exchangeGeneralScalarCellFieldX(double**** field) {
 			for (int i = 0; i <= additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-							field[xnumberAdded - 1 - additionalBinNumber + i][j][k][0] = rightInVectorCellBuffer[bcount];
-							bcount++;
+						field[xnumberAdded - 1 - additionalBinNumber + i][j][k][0] = rightInVectorCellBuffer[bcount];
+						bcount++;
 					}
 				}
 			}
@@ -792,10 +820,13 @@ void Simulation::exchangeGeneralScalarCellFieldY(double**** field) {
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (1 + additionalBinNumber) * (xnumberAdded) * (znumberAdded);
-		MPI_Sendrecv(backOutCellBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_RIGHT, frontInCellBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(backOutCellBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_RIGHT, frontInCellBuffer, number, MPI_DOUBLE,
+		             frontRank, MPI_BFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
 
 		//MPI_Barrier(cartComm);
@@ -815,7 +846,8 @@ void Simulation::exchangeGeneralScalarCellFieldY(double**** field) {
 		MPI_Barrier(cartComm);
 
 
-		MPI_Sendrecv(frontOutCellBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInCellBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(frontOutCellBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInCellBuffer, number, MPI_DOUBLE,
+		             backRank, MPI_BFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
 
 		//MPI_Barrier(cartComm);
@@ -864,10 +896,13 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double**** field) {
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (1 + additionalBinNumber) * (xnumberAdded) * (ynumberAdded);
-		MPI_Sendrecv(topOutCellBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_RIGHT, bottomInCellBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(topOutCellBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_RIGHT, bottomInCellBuffer, number, MPI_DOUBLE,
+		             bottomRank, MPI_BFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
 
 		//MPI_Barrier(cartComm);
@@ -887,7 +922,8 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double**** field) {
 		MPI_Barrier(cartComm);
 
 
-		MPI_Sendrecv(bottomOutCellBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInCellBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(bottomOutCellBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInCellBuffer, number,
+		             MPI_DOUBLE, topRank, MPI_BFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, bottomRank);
 
 		//MPI_Barrier(cartComm);
@@ -921,13 +957,13 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double**** field) {
 	}
 }
 
-void Simulation::exchangeGeneralScalarNodeField(double**** field){
+void Simulation::exchangeGeneralScalarNodeField(double**** field) {
 	exchangeGeneralScalarNodeFieldX(field);
 	exchangeGeneralScalarNodeFieldY(field);
 	exchangeGeneralScalarNodeFieldZ(field);
 }
 
-void Simulation::exchangeGeneralScalarNodeFieldX(double**** field){
+void Simulation::exchangeGeneralScalarNodeFieldX(double**** field) {
 	if (cartDim[0] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
@@ -935,17 +971,20 @@ void Simulation::exchangeGeneralScalarNodeFieldX(double**** field){
 		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						rightOutNodeBuffer[bcount] = field[xnumberAdded - additionalBinNumber - 1 - i][j][k][0];
-						bcount++;
+					rightOutNodeBuffer[bcount] = field[xnumberAdded - additionalBinNumber - 1 - i][j][k][0];
+					bcount++;
 				}
 			}
 		}
 		int number = (2 + additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1);
 		//int numberLeft = (1 + additionalBinNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1);
 		if ((cartCoord[0] < cartDim[0] - 1 && cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
-			if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			if (verbosity > 2) printf(
+				"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+				rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 			MPI_Status status;
-			MPI_Sendrecv(rightOutNodeBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, leftInNodeBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_RIGHT, cartComm, &status);
+			MPI_Sendrecv(rightOutNodeBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, leftInNodeBuffer, number,
+			             MPI_DOUBLE, leftRank, MPI_EFIELD_RIGHT, cartComm, &status);
 			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Send(rightOutNodeBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, cartComm);
@@ -960,8 +999,8 @@ void Simulation::exchangeGeneralScalarNodeFieldX(double**** field){
 			for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-							field[additionalBinNumber + 1 - i][j][k][0] = leftInNodeBuffer[bcount];
-							bcount++;
+						field[additionalBinNumber + 1 - i][j][k][0] = leftInNodeBuffer[bcount];
+						bcount++;
 					}
 				}
 			}
@@ -972,15 +1011,16 @@ void Simulation::exchangeGeneralScalarNodeFieldX(double**** field){
 		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						leftOutNodeBuffer[bcount] = field[1 + additionalBinNumber + i][j][k][0];
-						bcount++;
+					leftOutNodeBuffer[bcount] = field[1 + additionalBinNumber + i][j][k][0];
+					bcount++;
 				}
 			}
 		}
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutNodeBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInNodeBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_LEFT, cartComm, &status);
+			MPI_Sendrecv(leftOutNodeBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInNodeBuffer, number, MPI_DOUBLE,
+			             rightRank, MPI_EFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Status status;
@@ -995,8 +1035,8 @@ void Simulation::exchangeGeneralScalarNodeFieldX(double**** field){
 			for (int i = 0; i < 2 + additionalBinNumber; ++i)
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-							field[xnumberAdded - additionalBinNumber - 1 + i][j][k][0] = rightInNodeBuffer[bcount];
-							bcount++;
+						field[xnumberAdded - additionalBinNumber - 1 + i][j][k][0] = rightInNodeBuffer[bcount];
+						bcount++;
 					}
 				}
 		}
@@ -1058,7 +1098,7 @@ void Simulation::exchangeGeneralScalarNodeFieldX(double**** field){
 	}
 }
 
-void Simulation::exchangeGeneralScalarNodeFieldY(double**** field){
+void Simulation::exchangeGeneralScalarNodeFieldY(double**** field) {
 	if (cartDim[1] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
@@ -1066,16 +1106,19 @@ void Simulation::exchangeGeneralScalarNodeFieldY(double**** field){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						backOutNodeBuffer[bcount] = field[i][ynumberAdded - additionalBinNumber - 1 - j][k][0];
-						bcount++;
+					backOutNodeBuffer[bcount] = field[i][ynumberAdded - additionalBinNumber - 1 - j][k][0];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (2 + additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1);
-		MPI_Sendrecv(backOutNodeBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInNodeBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(backOutNodeBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInNodeBuffer, number, MPI_DOUBLE,
+		             frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
 
 		//MPI_Barrier(cartComm);
@@ -1084,8 +1127,8 @@ void Simulation::exchangeGeneralScalarNodeFieldY(double**** field){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						field[i][additionalBinNumber + 1 - j][k][0] = frontInNodeBuffer[bcount];
-						bcount++;
+					field[i][additionalBinNumber + 1 - j][k][0] = frontInNodeBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -1098,13 +1141,14 @@ void Simulation::exchangeGeneralScalarNodeFieldY(double**** field){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						frontOutNodeBuffer[bcount] = field[i][1 + additionalBinNumber + j][k][0];
-						bcount++;
+					frontOutNodeBuffer[bcount] = field[i][1 + additionalBinNumber + j][k][0];
+					bcount++;
 				}
 			}
 		}
 
-		MPI_Sendrecv(frontOutNodeBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInNodeBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(frontOutNodeBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInNodeBuffer, number, MPI_DOUBLE,
+		             backRank, MPI_EFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
 
 		bcount = 0;
@@ -1113,8 +1157,8 @@ void Simulation::exchangeGeneralScalarNodeFieldY(double**** field){
 		for (int i = 0; i < xnumberAdded + 1; ++i)
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						field[i][ynumberAdded - additionalBinNumber - 1 + j][k][0] = backInNodeBuffer[bcount];
-						bcount++;
+					field[i][ynumberAdded - additionalBinNumber - 1 + j][k][0] = backInNodeBuffer[bcount];
+					bcount++;
 				}
 			}
 
@@ -1138,7 +1182,7 @@ void Simulation::exchangeGeneralScalarNodeFieldY(double**** field){
 	}
 }
 
-void Simulation::exchangeGeneralScalarNodeFieldZ(double**** field){
+void Simulation::exchangeGeneralScalarNodeFieldZ(double**** field) {
 	if (cartDim[2] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
@@ -1146,16 +1190,19 @@ void Simulation::exchangeGeneralScalarNodeFieldZ(double**** field){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						topOutNodeBuffer[bcount] = field[i][j][znumberAdded - additionalBinNumber - 1 - k][0];
-						bcount++;
+					topOutNodeBuffer[bcount] = field[i][j][znumberAdded - additionalBinNumber - 1 - k][0];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (2 + additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1);
-		MPI_Sendrecv(topOutNodeBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInNodeBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(topOutNodeBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInNodeBuffer, number, MPI_DOUBLE,
+		             bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
 
 		//MPI_Barrier(cartComm);
@@ -1164,8 +1211,8 @@ void Simulation::exchangeGeneralScalarNodeFieldZ(double**** field){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						field[i][j][additionalBinNumber + 1 - k][0] = bottomInNodeBuffer[bcount];
-						bcount++;
+					field[i][j][additionalBinNumber + 1 - k][0] = bottomInNodeBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -1178,14 +1225,15 @@ void Simulation::exchangeGeneralScalarNodeFieldZ(double**** field){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						bottomOutNodeBuffer[bcount] = field[i][j][1 + additionalBinNumber + k][0];
-						bcount++;
+					bottomOutNodeBuffer[bcount] = field[i][j][1 + additionalBinNumber + k][0];
+					bcount++;
 				}
 			}
 		}
 
 
-		MPI_Sendrecv(bottomOutNodeBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_LEFT, topInNodeBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(bottomOutNodeBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_LEFT, topInNodeBuffer, number,
+		             MPI_DOUBLE, topRank, MPI_EFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, bottomRank);
 
 		//MPI_Barrier(cartComm);
@@ -1194,8 +1242,8 @@ void Simulation::exchangeGeneralScalarNodeFieldZ(double**** field){
 		for (int i = 0; i < xnumberAdded + 1; ++i)
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						field[i][j][znumberAdded - additionalBinNumber - 1 + k][0] = topInNodeBuffer[bcount];
-						bcount++;
+					field[i][j][znumberAdded - additionalBinNumber - 1 + k][0] = topInNodeBuffer[bcount];
+					bcount++;
 				}
 			}
 
@@ -1219,7 +1267,7 @@ void Simulation::exchangeGeneralScalarNodeFieldZ(double**** field){
 	}
 }
 
-void Simulation::exchangeBunemanEfield(double*** fieldX, double*** fieldY, double*** fieldZ){
+void Simulation::exchangeBunemanEfield(double*** fieldX, double*** fieldY, double*** fieldZ) {
 	exchangeBunemanExAlongX(fieldX);
 	exchangeBunemanExAlongY(fieldX);
 	exchangeBunemanExAlongZ(fieldX);
@@ -1233,25 +1281,28 @@ void Simulation::exchangeBunemanEfield(double*** fieldX, double*** fieldY, doubl
 	exchangeBunemanEzAlongZ(fieldZ);
 }
 
-void Simulation::exchangeBunemanExAlongX(double*** fieldX){
-	if(cartDim[0] > 1){
+void Simulation::exchangeBunemanExAlongX(double*** fieldX) {
+	if (cartDim[0] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i <= additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						rightOutBunemanExBuffer[bcount] = fieldX[xnumberAdded - additionalBinNumber - 2 - i][j][k];
-						leftOutBunemanExBuffer[bcount] = fieldX[1 + additionalBinNumber + i][j][k];
-						bcount++;
+					rightOutBunemanExBuffer[bcount] = fieldX[xnumberAdded - additionalBinNumber - 2 - i][j][k];
+					leftOutBunemanExBuffer[bcount] = fieldX[1 + additionalBinNumber + i][j][k];
+					bcount++;
 				}
 			}
 		}
 		int number = (1 + additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1);
 		if ((cartCoord[0] < cartDim[0] - 1 && cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
-			if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			if (verbosity > 2) printf(
+				"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+				rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 			MPI_Status status;
-			MPI_Sendrecv(rightOutBunemanExBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, leftInBunemanExBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, cartComm, &status);
+			MPI_Sendrecv(rightOutBunemanExBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, leftInBunemanExBuffer, number,
+			             MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, cartComm, &status);
 			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Send(rightOutBunemanExBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, cartComm);
@@ -1266,8 +1317,8 @@ void Simulation::exchangeBunemanExAlongX(double*** fieldX){
 			for (int i = 0; i <= additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-							fieldX[additionalBinNumber - i][j][k] = leftInBunemanExBuffer[bcount];
-							bcount++;
+						fieldX[additionalBinNumber - i][j][k] = leftInBunemanExBuffer[bcount];
+						bcount++;
 					}
 				}
 			}
@@ -1277,7 +1328,8 @@ void Simulation::exchangeBunemanExAlongX(double*** fieldX){
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutBunemanExBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInBunemanExBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_LEFT, cartComm, &status);
+			MPI_Sendrecv(leftOutBunemanExBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInBunemanExBuffer, number,
+			             MPI_DOUBLE, rightRank, MPI_BFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Status status;
@@ -1292,8 +1344,8 @@ void Simulation::exchangeBunemanExAlongX(double*** fieldX){
 			for (int i = 0; i <= additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-							fieldX[xnumberAdded - 1 - additionalBinNumber + i][j][k] = rightInBunemanExBuffer[bcount];
-							bcount++;
+						fieldX[xnumberAdded - 1 - additionalBinNumber + i][j][k] = rightInBunemanExBuffer[bcount];
+						bcount++;
 					}
 				}
 			}
@@ -1354,24 +1406,27 @@ void Simulation::exchangeBunemanExAlongX(double*** fieldX){
 	}
 }
 
-void Simulation::exchangeBunemanExAlongY(double*** fieldX){
-	if(cartDim[1] > 1){
+void Simulation::exchangeBunemanExAlongY(double*** fieldX) {
+	if (cartDim[1] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						backOutBunemanExBuffer[bcount] = fieldX[i][ynumberAdded - additionalBinNumber - 1 - j][k];
-						bcount++;
+					backOutBunemanExBuffer[bcount] = fieldX[i][ynumberAdded - additionalBinNumber - 1 - j][k];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (2 + additionalBinNumber) * (xnumberAdded) * (znumberAdded + 1);
-		MPI_Sendrecv(backOutBunemanExBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInBunemanExBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(backOutBunemanExBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInBunemanExBuffer, number,
+		             MPI_DOUBLE, frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
 
 		//MPI_Barrier(cartComm);
@@ -1380,8 +1435,8 @@ void Simulation::exchangeBunemanExAlongY(double*** fieldX){
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						fieldX[i][additionalBinNumber + 1 - j][k] = frontInBunemanExBuffer[bcount];
-						bcount++;
+					fieldX[i][additionalBinNumber + 1 - j][k] = frontInBunemanExBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -1394,13 +1449,14 @@ void Simulation::exchangeBunemanExAlongY(double*** fieldX){
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						frontOutBunemanExBuffer[bcount] = fieldX[i][1 + additionalBinNumber + j][k];
-						bcount++;
+					frontOutBunemanExBuffer[bcount] = fieldX[i][1 + additionalBinNumber + j][k];
+					bcount++;
 				}
 			}
 		}
 
-		MPI_Sendrecv(frontOutBunemanExBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInBunemanExBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(frontOutBunemanExBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInBunemanExBuffer, number,
+		             MPI_DOUBLE, backRank, MPI_EFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
 
 		bcount = 0;
@@ -1409,8 +1465,8 @@ void Simulation::exchangeBunemanExAlongY(double*** fieldX){
 		for (int i = 0; i < xnumberAdded; ++i)
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						fieldX[i][ynumberAdded - additionalBinNumber - 1 + j][k] = backInBunemanExBuffer[bcount];
-						bcount++;
+					fieldX[i][ynumberAdded - additionalBinNumber - 1 + j][k] = backInBunemanExBuffer[bcount];
+					bcount++;
 				}
 			}
 
@@ -1434,24 +1490,27 @@ void Simulation::exchangeBunemanExAlongY(double*** fieldX){
 	}
 }
 
-void Simulation::exchangeBunemanExAlongZ(double*** fieldX){
-	if(cartDim[2] > 1){
+void Simulation::exchangeBunemanExAlongZ(double*** fieldX) {
+	if (cartDim[2] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						topOutBunemanExBuffer[bcount] = fieldX[i][j][znumberAdded - additionalBinNumber - 1 - k];
-						bcount++;
+					topOutBunemanExBuffer[bcount] = fieldX[i][j][znumberAdded - additionalBinNumber - 1 - k];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (2 + additionalBinNumber) * (xnumberAdded) * (ynumberAdded + 1);
-		MPI_Sendrecv(topOutBunemanExBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInBunemanExBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(topOutBunemanExBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInBunemanExBuffer, number,
+		             MPI_DOUBLE, bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
 
 		//MPI_Barrier(cartComm);
@@ -1460,8 +1519,8 @@ void Simulation::exchangeBunemanExAlongZ(double*** fieldX){
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						fieldX[i][j][additionalBinNumber + 1 - k] = bottomInBunemanExBuffer[bcount];
-						bcount++;
+					fieldX[i][j][additionalBinNumber + 1 - k] = bottomInBunemanExBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -1474,14 +1533,15 @@ void Simulation::exchangeBunemanExAlongZ(double*** fieldX){
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						bottomOutBunemanExBuffer[bcount] = fieldX[i][j][1 + additionalBinNumber + k];
-						bcount++;
+					bottomOutBunemanExBuffer[bcount] = fieldX[i][j][1 + additionalBinNumber + k];
+					bcount++;
 				}
 			}
 		}
 
 
-		MPI_Sendrecv(bottomOutBunemanExBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_LEFT, topInBunemanExBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(bottomOutBunemanExBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_LEFT, topInBunemanExBuffer, number,
+		             MPI_DOUBLE, topRank, MPI_EFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, bottomRank);
 
 		//MPI_Barrier(cartComm);
@@ -1490,8 +1550,8 @@ void Simulation::exchangeBunemanExAlongZ(double*** fieldX){
 		for (int i = 0; i < xnumberAdded; ++i)
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						fieldX[i][j][znumberAdded - additionalBinNumber - 1 + k] = topInBunemanExBuffer[bcount];
-						bcount++;
+					fieldX[i][j][znumberAdded - additionalBinNumber - 1 + k] = topInBunemanExBuffer[bcount];
+					bcount++;
 				}
 			}
 
@@ -1515,25 +1575,28 @@ void Simulation::exchangeBunemanExAlongZ(double*** fieldX){
 	}
 }
 
-void Simulation::exchangeBunemanEyAlongX(double*** fieldY){
-	if(cartDim[0] > 1){
+void Simulation::exchangeBunemanEyAlongX(double*** fieldY) {
+	if (cartDim[0] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						rightOutBunemanEyBuffer[bcount] = fieldY[xnumberAdded - additionalBinNumber - 1 - i][j][k];
-						bcount++;
+					rightOutBunemanEyBuffer[bcount] = fieldY[xnumberAdded - additionalBinNumber - 1 - i][j][k];
+					bcount++;
 				}
 			}
 		}
 		int number = (2 + additionalBinNumber) * (ynumberAdded) * (znumberAdded + 1);
 		//int numberLeft = (1 + additionalBinNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1);
 		if ((cartCoord[0] < cartDim[0] - 1 && cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
-			if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			if (verbosity > 2) printf(
+				"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+				rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 			MPI_Status status;
-			MPI_Sendrecv(rightOutBunemanEyBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, leftInBunemanEyBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_RIGHT, cartComm, &status);
+			MPI_Sendrecv(rightOutBunemanEyBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, leftInBunemanEyBuffer, number,
+			             MPI_DOUBLE, leftRank, MPI_EFIELD_RIGHT, cartComm, &status);
 			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Send(rightOutBunemanEyBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, cartComm);
@@ -1548,8 +1611,8 @@ void Simulation::exchangeBunemanEyAlongX(double*** fieldY){
 			for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-							fieldY[additionalBinNumber + 1 - i][j][k] = leftInBunemanEyBuffer[bcount];
-							bcount++;
+						fieldY[additionalBinNumber + 1 - i][j][k] = leftInBunemanEyBuffer[bcount];
+						bcount++;
 					}
 				}
 			}
@@ -1560,15 +1623,16 @@ void Simulation::exchangeBunemanEyAlongX(double*** fieldY){
 		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						leftOutBunemanEyBuffer[bcount] = fieldY[1 + additionalBinNumber + i][j][k];
-						bcount++;
+					leftOutBunemanEyBuffer[bcount] = fieldY[1 + additionalBinNumber + i][j][k];
+					bcount++;
 				}
 			}
 		}
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutBunemanEyBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInBunemanEyBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_LEFT, cartComm, &status);
+			MPI_Sendrecv(leftOutBunemanEyBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInBunemanEyBuffer, number,
+			             MPI_DOUBLE, rightRank, MPI_EFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Status status;
@@ -1583,8 +1647,8 @@ void Simulation::exchangeBunemanEyAlongX(double*** fieldY){
 			for (int i = 0; i < 2 + additionalBinNumber; ++i)
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-							fieldY[xnumberAdded - additionalBinNumber - 1 + i][j][k] = rightInBunemanEyBuffer[bcount];
-							bcount++;
+						fieldY[xnumberAdded - additionalBinNumber - 1 + i][j][k] = rightInBunemanEyBuffer[bcount];
+						bcount++;
 					}
 				}
 		}
@@ -1646,25 +1710,28 @@ void Simulation::exchangeBunemanEyAlongX(double*** fieldY){
 	}
 }
 
-void Simulation::exchangeBunemanEyAlongY(double*** fieldY){
-	if(cartDim[1] > 1){
+void Simulation::exchangeBunemanEyAlongY(double*** fieldY) {
+	if (cartDim[1] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j <= additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						backOutBunemanEyBuffer[bcount] = fieldY[i][ynumberAdded - additionalBinNumber - 2 - j][k];
-						frontOutBunemanEyBuffer[bcount] = fieldY[i][1 + additionalBinNumber + j][k];
-						bcount++;
+					backOutBunemanEyBuffer[bcount] = fieldY[i][ynumberAdded - additionalBinNumber - 2 - j][k];
+					frontOutBunemanEyBuffer[bcount] = fieldY[i][1 + additionalBinNumber + j][k];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (1 + additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1);
-		MPI_Sendrecv(backOutBunemanEyBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_RIGHT, frontInBunemanEyBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(backOutBunemanEyBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_RIGHT, frontInBunemanEyBuffer, number,
+		             MPI_DOUBLE, frontRank, MPI_BFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
 
 		//MPI_Barrier(cartComm);
@@ -1674,8 +1741,8 @@ void Simulation::exchangeBunemanEyAlongY(double*** fieldY){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j <= additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						fieldY[i][additionalBinNumber - j][k] = frontInBunemanEyBuffer[bcount];
-						bcount++;
+					fieldY[i][additionalBinNumber - j][k] = frontInBunemanEyBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -1684,7 +1751,8 @@ void Simulation::exchangeBunemanEyAlongY(double*** fieldY){
 		MPI_Barrier(cartComm);
 
 
-		MPI_Sendrecv(frontOutBunemanEyBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInBunemanEyBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(frontOutBunemanEyBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInBunemanEyBuffer, number,
+		             MPI_DOUBLE, backRank, MPI_BFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
 
 		//MPI_Barrier(cartComm);
@@ -1694,8 +1762,8 @@ void Simulation::exchangeBunemanEyAlongY(double*** fieldY){
 		for (int i = 0; i < xnumberAdded + 1; ++i)
 			for (int j = 0; j <= additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						fieldY[i][ynumberAdded - additionalBinNumber - 1 + j][k] = backInBunemanEyBuffer[bcount];
-						bcount++;
+					fieldY[i][ynumberAdded - additionalBinNumber - 1 + j][k] = backInBunemanEyBuffer[bcount];
+					bcount++;
 				}
 			}
 
@@ -1718,24 +1786,27 @@ void Simulation::exchangeBunemanEyAlongY(double*** fieldY){
 	}
 }
 
-void Simulation::exchangeBunemanEyAlongZ(double*** fieldY){
-	if(cartDim[2] > 1){
+void Simulation::exchangeBunemanEyAlongZ(double*** fieldY) {
+	if (cartDim[2] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						topOutBunemanEyBuffer[bcount] = fieldY[i][j][znumberAdded - additionalBinNumber - 1 - k];
-						bcount++;
+					topOutBunemanEyBuffer[bcount] = fieldY[i][j][znumberAdded - additionalBinNumber - 1 - k];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (2 + additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded);
-		MPI_Sendrecv(topOutBunemanEyBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInBunemanEyBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(topOutBunemanEyBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInBunemanEyBuffer, number,
+		             MPI_DOUBLE, bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
 
 		//MPI_Barrier(cartComm);
@@ -1744,8 +1815,8 @@ void Simulation::exchangeBunemanEyAlongZ(double*** fieldY){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						fieldY[i][j][additionalBinNumber + 1 - k] = bottomInBunemanEyBuffer[bcount];
-						bcount++;
+					fieldY[i][j][additionalBinNumber + 1 - k] = bottomInBunemanEyBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -1758,14 +1829,15 @@ void Simulation::exchangeBunemanEyAlongZ(double*** fieldY){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						bottomOutBunemanEyBuffer[bcount] = fieldY[i][j][1 + additionalBinNumber + k];
-						bcount++;
+					bottomOutBunemanEyBuffer[bcount] = fieldY[i][j][1 + additionalBinNumber + k];
+					bcount++;
 				}
 			}
 		}
 
 
-		MPI_Sendrecv(bottomOutBunemanEyBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_LEFT, topInBunemanEyBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(bottomOutBunemanEyBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_LEFT, topInBunemanEyBuffer, number,
+		             MPI_DOUBLE, topRank, MPI_EFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, bottomRank);
 
 		//MPI_Barrier(cartComm);
@@ -1774,8 +1846,8 @@ void Simulation::exchangeBunemanEyAlongZ(double*** fieldY){
 		for (int i = 0; i < xnumberAdded + 1; ++i)
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						fieldY[i][j][znumberAdded - additionalBinNumber - 1 + k] = topInBunemanEyBuffer[bcount];
-						bcount++;
+					fieldY[i][j][znumberAdded - additionalBinNumber - 1 + k] = topInBunemanEyBuffer[bcount];
+					bcount++;
 				}
 			}
 
@@ -1799,25 +1871,28 @@ void Simulation::exchangeBunemanEyAlongZ(double*** fieldY){
 	}
 }
 
-void Simulation::exchangeBunemanEzAlongX(double*** fieldZ){
-	if(cartDim[0] > 1){
+void Simulation::exchangeBunemanEzAlongX(double*** fieldZ) {
+	if (cartDim[0] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						rightOutBunemanEzBuffer[bcount] = fieldZ[xnumberAdded - additionalBinNumber - 1 - i][j][k];
-						bcount++;
+					rightOutBunemanEzBuffer[bcount] = fieldZ[xnumberAdded - additionalBinNumber - 1 - i][j][k];
+					bcount++;
 				}
 			}
 		}
 		int number = (2 + additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded);
 		//int numberLeft = (1 + additionalBinNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1);
 		if ((cartCoord[0] < cartDim[0] - 1 && cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
-			if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			if (verbosity > 2) printf(
+				"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+				rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 			MPI_Status status;
-			MPI_Sendrecv(rightOutBunemanEzBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, leftInBunemanEzBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_RIGHT, cartComm, &status);
+			MPI_Sendrecv(rightOutBunemanEzBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, leftInBunemanEzBuffer, number,
+			             MPI_DOUBLE, leftRank, MPI_EFIELD_RIGHT, cartComm, &status);
 			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Send(rightOutBunemanEzBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, cartComm);
@@ -1832,8 +1907,8 @@ void Simulation::exchangeBunemanEzAlongX(double*** fieldZ){
 			for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-							fieldZ[additionalBinNumber + 1 - i][j][k] = leftInBunemanEzBuffer[bcount];
-							bcount++;
+						fieldZ[additionalBinNumber + 1 - i][j][k] = leftInBunemanEzBuffer[bcount];
+						bcount++;
 					}
 				}
 			}
@@ -1844,15 +1919,16 @@ void Simulation::exchangeBunemanEzAlongX(double*** fieldZ){
 		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						leftOutBunemanEzBuffer[bcount] = fieldZ[1 + additionalBinNumber + i][j][k];
-						bcount++;
+					leftOutBunemanEzBuffer[bcount] = fieldZ[1 + additionalBinNumber + i][j][k];
+					bcount++;
 				}
 			}
 		}
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutBunemanEzBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInBunemanEzBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_LEFT, cartComm, &status);
+			MPI_Sendrecv(leftOutBunemanEzBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInBunemanEzBuffer, number,
+			             MPI_DOUBLE, rightRank, MPI_EFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Status status;
@@ -1867,8 +1943,8 @@ void Simulation::exchangeBunemanEzAlongX(double*** fieldZ){
 			for (int i = 0; i < 2 + additionalBinNumber; ++i)
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-							fieldZ[xnumberAdded - additionalBinNumber - 1 + i][j][k] = rightInBunemanEzBuffer[bcount];
-							bcount++;
+						fieldZ[xnumberAdded - additionalBinNumber - 1 + i][j][k] = rightInBunemanEzBuffer[bcount];
+						bcount++;
 					}
 				}
 		}
@@ -1929,24 +2005,27 @@ void Simulation::exchangeBunemanEzAlongX(double*** fieldZ){
 	}
 }
 
-void Simulation::exchangeBunemanEzAlongY(double*** fieldZ){
-	if(cartDim[1] > 1){
+void Simulation::exchangeBunemanEzAlongY(double*** fieldZ) {
+	if (cartDim[1] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						backOutBunemanEzBuffer[bcount] = fieldZ[i][ynumberAdded - additionalBinNumber - 1 - j][k];
-						bcount++;
+					backOutBunemanEzBuffer[bcount] = fieldZ[i][ynumberAdded - additionalBinNumber - 1 - j][k];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (2 + additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded);
-		MPI_Sendrecv(backOutBunemanEzBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInBunemanEzBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(backOutBunemanEzBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInBunemanEzBuffer, number,
+		             MPI_DOUBLE, frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
 
 		//MPI_Barrier(cartComm);
@@ -1955,8 +2034,8 @@ void Simulation::exchangeBunemanEzAlongY(double*** fieldZ){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						fieldZ[i][additionalBinNumber + 1 - j][k] = frontInBunemanEzBuffer[bcount];
-						bcount++;
+					fieldZ[i][additionalBinNumber + 1 - j][k] = frontInBunemanEzBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -1969,13 +2048,14 @@ void Simulation::exchangeBunemanEzAlongY(double*** fieldZ){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						frontOutBunemanEzBuffer[bcount] = fieldZ[i][1 + additionalBinNumber + j][k];
-						bcount++;
+					frontOutBunemanEzBuffer[bcount] = fieldZ[i][1 + additionalBinNumber + j][k];
+					bcount++;
 				}
 			}
 		}
 
-		MPI_Sendrecv(frontOutBunemanEzBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInBunemanEzBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(frontOutBunemanEzBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInBunemanEzBuffer, number,
+		             MPI_DOUBLE, backRank, MPI_EFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
 
 		bcount = 0;
@@ -1984,8 +2064,8 @@ void Simulation::exchangeBunemanEzAlongY(double*** fieldZ){
 		for (int i = 0; i < xnumberAdded + 1; ++i)
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						fieldZ[i][ynumberAdded - additionalBinNumber - 1 + j][k] = backInBunemanEzBuffer[bcount];
-						bcount++;
+					fieldZ[i][ynumberAdded - additionalBinNumber - 1 + j][k] = backInBunemanEzBuffer[bcount];
+					bcount++;
 				}
 			}
 
@@ -2009,25 +2089,28 @@ void Simulation::exchangeBunemanEzAlongY(double*** fieldZ){
 	}
 }
 
-void Simulation::exchangeBunemanEzAlongZ(double*** fieldZ){
-	if(cartDim[2] > 1){
+void Simulation::exchangeBunemanEzAlongZ(double*** fieldZ) {
+	if (cartDim[2] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k <= additionalBinNumber; ++k) {
-						topOutBunemanEzBuffer[bcount] = fieldZ[i][j][znumberAdded - additionalBinNumber - 2 - k];
-						bottomOutBunemanEzBuffer[bcount] = fieldZ[i][j][1 + additionalBinNumber + k];
-						bcount++;
+					topOutBunemanEzBuffer[bcount] = fieldZ[i][j][znumberAdded - additionalBinNumber - 2 - k];
+					bottomOutBunemanEzBuffer[bcount] = fieldZ[i][j][1 + additionalBinNumber + k];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (1 + additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1);
-		MPI_Sendrecv(topOutBunemanEzBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_RIGHT, bottomInBunemanEzBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(topOutBunemanEzBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_RIGHT, bottomInBunemanEzBuffer, number,
+		             MPI_DOUBLE, bottomRank, MPI_BFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
 
 		//MPI_Barrier(cartComm);
@@ -2037,8 +2120,8 @@ void Simulation::exchangeBunemanEzAlongZ(double*** fieldZ){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k <= additionalBinNumber; ++k) {
-						fieldZ[i][j][additionalBinNumber - k] = bottomInBunemanEzBuffer[bcount];
-						bcount++;
+					fieldZ[i][j][additionalBinNumber - k] = bottomInBunemanEzBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -2047,7 +2130,8 @@ void Simulation::exchangeBunemanEzAlongZ(double*** fieldZ){
 		MPI_Barrier(cartComm);
 
 
-		MPI_Sendrecv(bottomOutBunemanEzBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInBunemanEzBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(bottomOutBunemanEzBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInBunemanEzBuffer, number,
+		             MPI_DOUBLE, topRank, MPI_BFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, bottomRank);
 
 		//MPI_Barrier(cartComm);
@@ -2057,8 +2141,8 @@ void Simulation::exchangeBunemanEzAlongZ(double*** fieldZ){
 		for (int i = 0; i < xnumberAdded + 1; ++i)
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k <= additionalBinNumber; ++k) {
-						fieldZ[i][j][znumberAdded - 1 - additionalBinNumber + k] = topInBunemanEzBuffer[bcount];
-						bcount++;
+					fieldZ[i][j][znumberAdded - 1 - additionalBinNumber + k] = topInBunemanEzBuffer[bcount];
+					bcount++;
 				}
 			}
 
@@ -2081,7 +2165,7 @@ void Simulation::exchangeBunemanEzAlongZ(double*** fieldZ){
 	}
 }
 
-void Simulation::exchangeBunemanBfield(double*** fieldX, double*** fieldY, double*** fieldZ){
+void Simulation::exchangeBunemanBfield(double*** fieldX, double*** fieldY, double*** fieldZ) {
 	exchangeBunemanBxAlongX(fieldX);
 	exchangeBunemanBxAlongY(fieldX);
 	exchangeBunemanBxAlongZ(fieldX);
@@ -2095,25 +2179,28 @@ void Simulation::exchangeBunemanBfield(double*** fieldX, double*** fieldY, doubl
 	exchangeBunemanBzAlongZ(fieldZ);
 }
 
-void Simulation::exchangeBunemanBxAlongX(double*** fieldX){
-	if(cartDim[0] > 1){
+void Simulation::exchangeBunemanBxAlongX(double*** fieldX) {
+	if (cartDim[0] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						rightOutBunemanBxBuffer[bcount] = fieldX[xnumberAdded - additionalBinNumber - 1 - i][j][k];
-						bcount++;
+					rightOutBunemanBxBuffer[bcount] = fieldX[xnumberAdded - additionalBinNumber - 1 - i][j][k];
+					bcount++;
 				}
 			}
 		}
 		int number = (2 + additionalBinNumber) * (ynumberAdded) * (znumberAdded);
 		//int numberLeft = (1 + additionalBinNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1);
 		if ((cartCoord[0] < cartDim[0] - 1 && cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
-			if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			if (verbosity > 2) printf(
+				"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+				rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 			MPI_Status status;
-			MPI_Sendrecv(rightOutBunemanBxBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, leftInBunemanBxBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_RIGHT, cartComm, &status);
+			MPI_Sendrecv(rightOutBunemanBxBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, leftInBunemanBxBuffer, number,
+			             MPI_DOUBLE, leftRank, MPI_EFIELD_RIGHT, cartComm, &status);
 			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Send(rightOutBunemanBxBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, cartComm);
@@ -2128,8 +2215,8 @@ void Simulation::exchangeBunemanBxAlongX(double*** fieldX){
 			for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-							fieldX[additionalBinNumber + 1 - i][j][k] = leftInBunemanBxBuffer[bcount];
-							bcount++;
+						fieldX[additionalBinNumber + 1 - i][j][k] = leftInBunemanBxBuffer[bcount];
+						bcount++;
 					}
 				}
 			}
@@ -2140,15 +2227,16 @@ void Simulation::exchangeBunemanBxAlongX(double*** fieldX){
 		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						leftOutBunemanBxBuffer[bcount] = fieldX[1 + additionalBinNumber + i][j][k];
-						bcount++;
+					leftOutBunemanBxBuffer[bcount] = fieldX[1 + additionalBinNumber + i][j][k];
+					bcount++;
 				}
 			}
 		}
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutBunemanBxBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInBunemanBxBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_LEFT, cartComm, &status);
+			MPI_Sendrecv(leftOutBunemanBxBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInBunemanBxBuffer, number,
+			             MPI_DOUBLE, rightRank, MPI_EFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Status status;
@@ -2163,8 +2251,8 @@ void Simulation::exchangeBunemanBxAlongX(double*** fieldX){
 			for (int i = 0; i < 2 + additionalBinNumber; ++i)
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-							fieldX[xnumberAdded - additionalBinNumber - 1 + i][j][k] = rightInBunemanBxBuffer[bcount];
-							bcount++;
+						fieldX[xnumberAdded - additionalBinNumber - 1 + i][j][k] = rightInBunemanBxBuffer[bcount];
+						bcount++;
 					}
 				}
 		}
@@ -2225,25 +2313,28 @@ void Simulation::exchangeBunemanBxAlongX(double*** fieldX){
 	}
 }
 
-void Simulation::exchangeBunemanBxAlongY(double*** fieldX){
-	if(cartDim[1] > 1){
+void Simulation::exchangeBunemanBxAlongY(double*** fieldX) {
+	if (cartDim[1] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j <= additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						backOutBunemanByBuffer[bcount] = fieldX[i][ynumberAdded - additionalBinNumber - 2 - j][k];
-						frontOutBunemanByBuffer[bcount] = fieldX[i][1 + additionalBinNumber + j][k];
-						bcount++;
+					backOutBunemanByBuffer[bcount] = fieldX[i][ynumberAdded - additionalBinNumber - 2 - j][k];
+					frontOutBunemanByBuffer[bcount] = fieldX[i][1 + additionalBinNumber + j][k];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (1 + additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded);
-		MPI_Sendrecv(backOutBunemanByBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_RIGHT, frontInBunemanByBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(backOutBunemanByBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_RIGHT, frontInBunemanByBuffer, number,
+		             MPI_DOUBLE, frontRank, MPI_BFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
 
 		//MPI_Barrier(cartComm);
@@ -2253,8 +2344,8 @@ void Simulation::exchangeBunemanBxAlongY(double*** fieldX){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j <= additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						fieldX[i][additionalBinNumber - j][k] = frontInBunemanByBuffer[bcount];
-						bcount++;
+					fieldX[i][additionalBinNumber - j][k] = frontInBunemanByBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -2263,7 +2354,8 @@ void Simulation::exchangeBunemanBxAlongY(double*** fieldX){
 		MPI_Barrier(cartComm);
 
 
-		MPI_Sendrecv(frontOutBunemanByBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInBunemanByBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(frontOutBunemanByBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInBunemanByBuffer, number,
+		             MPI_DOUBLE, backRank, MPI_BFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
 
 		//MPI_Barrier(cartComm);
@@ -2273,8 +2365,8 @@ void Simulation::exchangeBunemanBxAlongY(double*** fieldX){
 		for (int i = 0; i < xnumberAdded + 1; ++i)
 			for (int j = 0; j <= additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						fieldX[i][ynumberAdded - additionalBinNumber - 1 + j][k] = backInBunemanByBuffer[bcount];
-						bcount++;
+					fieldX[i][ynumberAdded - additionalBinNumber - 1 + j][k] = backInBunemanByBuffer[bcount];
+					bcount++;
 				}
 			}
 
@@ -2297,25 +2389,28 @@ void Simulation::exchangeBunemanBxAlongY(double*** fieldX){
 	}
 }
 
-void Simulation::exchangeBunemanBxAlongZ(double*** fieldX){
-	if(cartDim[2] > 1){
+void Simulation::exchangeBunemanBxAlongZ(double*** fieldX) {
+	if (cartDim[2] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k <= additionalBinNumber; ++k) {
-						topOutBunemanBxBuffer[bcount] = fieldX[i][j][znumberAdded - additionalBinNumber - 2 - k];
-						bottomOutBunemanBxBuffer[bcount] = fieldX[i][j][1 + additionalBinNumber + k];
-						bcount++;
+					topOutBunemanBxBuffer[bcount] = fieldX[i][j][znumberAdded - additionalBinNumber - 2 - k];
+					bottomOutBunemanBxBuffer[bcount] = fieldX[i][j][1 + additionalBinNumber + k];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (1 + additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded);
-		MPI_Sendrecv(topOutBunemanBxBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_RIGHT, bottomInBunemanBxBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(topOutBunemanBxBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_RIGHT, bottomInBunemanBxBuffer, number,
+		             MPI_DOUBLE, bottomRank, MPI_BFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
 
 		//MPI_Barrier(cartComm);
@@ -2325,8 +2420,8 @@ void Simulation::exchangeBunemanBxAlongZ(double*** fieldX){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k <= additionalBinNumber; ++k) {
-						fieldX[i][j][additionalBinNumber - k] = bottomInBunemanBxBuffer[bcount];
-						bcount++;
+					fieldX[i][j][additionalBinNumber - k] = bottomInBunemanBxBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -2335,18 +2430,19 @@ void Simulation::exchangeBunemanBxAlongZ(double*** fieldX){
 		MPI_Barrier(cartComm);
 
 
-		MPI_Sendrecv(bottomOutBunemanBxBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInBunemanBxBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(bottomOutBunemanBxBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInBunemanBxBuffer, number,
+		             MPI_DOUBLE, topRank, MPI_BFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, bottomRank);
 
 		//MPI_Barrier(cartComm);
 		bcount = 0;
 
 		if (verbosity > 2) printf("receive general field rigth from %d to %d\n", topRank, rank);
-		for (int i = 0; i < xnumberAdded + 1; ++i){
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k <= additionalBinNumber; ++k) {
-						fieldX[i][j][znumberAdded - 1 - additionalBinNumber + k] = topInBunemanBxBuffer[bcount];
-						bcount++;
+					fieldX[i][j][znumberAdded - 1 - additionalBinNumber + k] = topInBunemanBxBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -2369,25 +2465,28 @@ void Simulation::exchangeBunemanBxAlongZ(double*** fieldX){
 	}
 }
 
-void Simulation::exchangeBunemanByAlongX(double*** fieldY){
-	if(cartDim[0] > 1){
+void Simulation::exchangeBunemanByAlongX(double*** fieldY) {
+	if (cartDim[0] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i <= additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						rightOutBunemanByBuffer[bcount] = fieldY[xnumberAdded - additionalBinNumber - 2 - i][j][k];
-						leftOutBunemanByBuffer[bcount] = fieldY[1 + additionalBinNumber + i][j][k];
-						bcount++;
+					rightOutBunemanByBuffer[bcount] = fieldY[xnumberAdded - additionalBinNumber - 2 - i][j][k];
+					leftOutBunemanByBuffer[bcount] = fieldY[1 + additionalBinNumber + i][j][k];
+					bcount++;
 				}
 			}
 		}
 		int number = (1 + additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded);
 		if ((cartCoord[0] < cartDim[0] - 1 && cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
-			if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			if (verbosity > 2) printf(
+				"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+				rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 			MPI_Status status;
-			MPI_Sendrecv(rightOutBunemanByBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, leftInBunemanByBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, cartComm, &status);
+			MPI_Sendrecv(rightOutBunemanByBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, leftInBunemanByBuffer, number,
+			             MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, cartComm, &status);
 			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Send(rightOutBunemanByBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, cartComm);
@@ -2402,8 +2501,8 @@ void Simulation::exchangeBunemanByAlongX(double*** fieldY){
 			for (int i = 0; i <= additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-							fieldY[additionalBinNumber - i][j][k] = leftInBunemanByBuffer[bcount];
-							bcount++;
+						fieldY[additionalBinNumber - i][j][k] = leftInBunemanByBuffer[bcount];
+						bcount++;
 					}
 				}
 			}
@@ -2413,7 +2512,8 @@ void Simulation::exchangeBunemanByAlongX(double*** fieldY){
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutBunemanByBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInBunemanByBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_LEFT, cartComm, &status);
+			MPI_Sendrecv(leftOutBunemanByBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInBunemanByBuffer, number,
+			             MPI_DOUBLE, rightRank, MPI_BFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Status status;
@@ -2428,8 +2528,8 @@ void Simulation::exchangeBunemanByAlongX(double*** fieldY){
 			for (int i = 0; i <= additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-							fieldY[xnumberAdded - 1 - additionalBinNumber + i][j][k] = rightInBunemanByBuffer[bcount];
-							bcount++;
+						fieldY[xnumberAdded - 1 - additionalBinNumber + i][j][k] = rightInBunemanByBuffer[bcount];
+						bcount++;
 					}
 				}
 			}
@@ -2490,24 +2590,27 @@ void Simulation::exchangeBunemanByAlongX(double*** fieldY){
 	}
 }
 
-void Simulation::exchangeBunemanByAlongY(double*** fieldY){
-	if(cartDim[1] > 1){
+void Simulation::exchangeBunemanByAlongY(double*** fieldY) {
+	if (cartDim[1] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						backOutBunemanByBuffer[bcount] = fieldY[i][ynumberAdded - additionalBinNumber - 1 - j][k];
-						bcount++;
+					backOutBunemanByBuffer[bcount] = fieldY[i][ynumberAdded - additionalBinNumber - 1 - j][k];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (2 + additionalBinNumber) * (xnumberAdded) * (znumberAdded);
-		MPI_Sendrecv(backOutBunemanByBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInBunemanByBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(backOutBunemanByBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInBunemanByBuffer, number,
+		             MPI_DOUBLE, frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
 
 		//MPI_Barrier(cartComm);
@@ -2516,8 +2619,8 @@ void Simulation::exchangeBunemanByAlongY(double*** fieldY){
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						fieldY[i][additionalBinNumber + 1 - j][k] = frontInBunemanByBuffer[bcount];
-						bcount++;
+					fieldY[i][additionalBinNumber + 1 - j][k] = frontInBunemanByBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -2530,13 +2633,14 @@ void Simulation::exchangeBunemanByAlongY(double*** fieldY){
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						frontOutBunemanByBuffer[bcount] = fieldY[i][1 + additionalBinNumber + j][k];
-						bcount++;
+					frontOutBunemanByBuffer[bcount] = fieldY[i][1 + additionalBinNumber + j][k];
+					bcount++;
 				}
 			}
 		}
 
-		MPI_Sendrecv(frontOutBunemanByBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInBunemanByBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(frontOutBunemanByBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInBunemanByBuffer, number,
+		             MPI_DOUBLE, backRank, MPI_EFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
 
 		bcount = 0;
@@ -2545,8 +2649,8 @@ void Simulation::exchangeBunemanByAlongY(double*** fieldY){
 		for (int i = 0; i < xnumberAdded; ++i)
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
-						fieldY[i][ynumberAdded - additionalBinNumber - 1 + j][k] = backInBunemanByBuffer[bcount];
-						bcount++;
+					fieldY[i][ynumberAdded - additionalBinNumber - 1 + j][k] = backInBunemanByBuffer[bcount];
+					bcount++;
 				}
 			}
 
@@ -2570,25 +2674,28 @@ void Simulation::exchangeBunemanByAlongY(double*** fieldY){
 	}
 }
 
-void Simulation::exchangeBunemanByAlongZ(double*** fieldY){
-	if(cartDim[2] > 1){
+void Simulation::exchangeBunemanByAlongZ(double*** fieldY) {
+	if (cartDim[2] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k <= additionalBinNumber; ++k) {
-						topOutBunemanByBuffer[bcount] = fieldY[i][j][znumberAdded - additionalBinNumber - 2 - k];
-						bottomOutBunemanByBuffer[bcount] = fieldY[i][j][1 + additionalBinNumber + k];
-						bcount++;
+					topOutBunemanByBuffer[bcount] = fieldY[i][j][znumberAdded - additionalBinNumber - 2 - k];
+					bottomOutBunemanByBuffer[bcount] = fieldY[i][j][1 + additionalBinNumber + k];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (1 + additionalBinNumber) * (xnumberAdded) * (ynumberAdded + 1);
-		MPI_Sendrecv(topOutBunemanByBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_RIGHT, bottomInBunemanByBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(topOutBunemanByBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_RIGHT, bottomInBunemanByBuffer, number,
+		             MPI_DOUBLE, bottomRank, MPI_BFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
 
 		//MPI_Barrier(cartComm);
@@ -2598,8 +2705,8 @@ void Simulation::exchangeBunemanByAlongZ(double*** fieldY){
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k <= additionalBinNumber; ++k) {
-						fieldY[i][j][additionalBinNumber - k] = bottomInBunemanByBuffer[bcount];
-						bcount++;
+					fieldY[i][j][additionalBinNumber - k] = bottomInBunemanByBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -2608,7 +2715,8 @@ void Simulation::exchangeBunemanByAlongZ(double*** fieldY){
 		MPI_Barrier(cartComm);
 
 
-		MPI_Sendrecv(bottomOutBunemanByBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInBunemanByBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(bottomOutBunemanByBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInBunemanByBuffer, number,
+		             MPI_DOUBLE, topRank, MPI_BFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, bottomRank);
 
 		//MPI_Barrier(cartComm);
@@ -2618,8 +2726,8 @@ void Simulation::exchangeBunemanByAlongZ(double*** fieldY){
 		for (int i = 0; i < xnumberAdded; ++i)
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k <= additionalBinNumber; ++k) {
-						fieldY[i][j][znumberAdded - 1 - additionalBinNumber + k] = topInBunemanByBuffer[bcount];
-						bcount++;
+					fieldY[i][j][znumberAdded - 1 - additionalBinNumber + k] = topInBunemanByBuffer[bcount];
+					bcount++;
 				}
 			}
 
@@ -2642,25 +2750,28 @@ void Simulation::exchangeBunemanByAlongZ(double*** fieldY){
 	}
 }
 
-void Simulation::exchangeBunemanBzAlongX(double*** fieldZ){
-	if(cartDim[0] > 1){
+void Simulation::exchangeBunemanBzAlongX(double*** fieldZ) {
+	if (cartDim[0] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i <= additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						rightOutBunemanBzBuffer[bcount] = fieldZ[xnumberAdded - additionalBinNumber - 2 - i][j][k];
-						leftOutBunemanBzBuffer[bcount] = fieldZ[1 + additionalBinNumber + i][j][k];
-						bcount++;
+					rightOutBunemanBzBuffer[bcount] = fieldZ[xnumberAdded - additionalBinNumber - 2 - i][j][k];
+					leftOutBunemanBzBuffer[bcount] = fieldZ[1 + additionalBinNumber + i][j][k];
+					bcount++;
 				}
 			}
 		}
 		int number = (1 + additionalBinNumber) * (ynumberAdded) * (znumberAdded + 1);
 		if ((cartCoord[0] < cartDim[0] - 1 && cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
-			if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			if (verbosity > 2) printf(
+				"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+				rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 			MPI_Status status;
-			MPI_Sendrecv(rightOutBunemanBzBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, leftInBunemanBzBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, cartComm, &status);
+			MPI_Sendrecv(rightOutBunemanBzBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, leftInBunemanBzBuffer, number,
+			             MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, cartComm, &status);
 			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Send(rightOutBunemanBzBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, cartComm);
@@ -2675,8 +2786,8 @@ void Simulation::exchangeBunemanBzAlongX(double*** fieldZ){
 			for (int i = 0; i <= additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-							fieldZ[additionalBinNumber - i][j][k] = leftInBunemanBzBuffer[bcount];
-							bcount++;
+						fieldZ[additionalBinNumber - i][j][k] = leftInBunemanBzBuffer[bcount];
+						bcount++;
 					}
 				}
 			}
@@ -2686,7 +2797,8 @@ void Simulation::exchangeBunemanBzAlongX(double*** fieldZ){
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutBunemanBzBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInBunemanBzBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_LEFT, cartComm, &status);
+			MPI_Sendrecv(leftOutBunemanBzBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInBunemanBzBuffer, number,
+			             MPI_DOUBLE, rightRank, MPI_BFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
 			MPI_Status status;
@@ -2701,8 +2813,8 @@ void Simulation::exchangeBunemanBzAlongX(double*** fieldZ){
 			for (int i = 0; i <= additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-							fieldZ[xnumberAdded - 1 - additionalBinNumber + i][j][k] = rightInBunemanBzBuffer[bcount];
-							bcount++;
+						fieldZ[xnumberAdded - 1 - additionalBinNumber + i][j][k] = rightInBunemanBzBuffer[bcount];
+						bcount++;
 					}
 				}
 			}
@@ -2763,25 +2875,28 @@ void Simulation::exchangeBunemanBzAlongX(double*** fieldZ){
 	}
 }
 
-void Simulation::exchangeBunemanBzAlongY(double*** fieldZ){
-	if(cartDim[1] > 1){
+void Simulation::exchangeBunemanBzAlongY(double*** fieldZ) {
+	if (cartDim[1] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j <= additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						backOutBunemanBzBuffer[bcount] = fieldZ[i][ynumberAdded - additionalBinNumber - 2 - j][k];
-						frontOutBunemanBzBuffer[bcount] = fieldZ[i][1 + additionalBinNumber + j][k];
-						bcount++;
+					backOutBunemanBzBuffer[bcount] = fieldZ[i][ynumberAdded - additionalBinNumber - 2 - j][k];
+					frontOutBunemanBzBuffer[bcount] = fieldZ[i][1 + additionalBinNumber + j][k];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (1 + additionalBinNumber) * (xnumberAdded) * (znumberAdded + 1);
-		MPI_Sendrecv(backOutBunemanBzBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_RIGHT, frontInBunemanBzBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(backOutBunemanBzBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_RIGHT, frontInBunemanBzBuffer, number,
+		             MPI_DOUBLE, frontRank, MPI_BFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
 
 		//MPI_Barrier(cartComm);
@@ -2791,8 +2906,8 @@ void Simulation::exchangeBunemanBzAlongY(double*** fieldZ){
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j <= additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						fieldZ[i][additionalBinNumber - j][k] = frontInBunemanBzBuffer[bcount];
-						bcount++;
+					fieldZ[i][additionalBinNumber - j][k] = frontInBunemanBzBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -2801,21 +2916,22 @@ void Simulation::exchangeBunemanBzAlongY(double*** fieldZ){
 		MPI_Barrier(cartComm);
 
 
-		MPI_Sendrecv(frontOutBunemanBzBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInBunemanBzBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(frontOutBunemanBzBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInBunemanBzBuffer, number,
+		             MPI_DOUBLE, backRank, MPI_BFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
 
 		//MPI_Barrier(cartComm);
 		bcount = 0;
 
 		if (verbosity > 2) printf("receive general field rigth from %d to %d\n", backRank, rank);
-		for (int i = 0; i < xnumberAdded; ++i){
+		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j <= additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-						fieldZ[i][ynumberAdded - additionalBinNumber - 1 + j][k] = backInBunemanBzBuffer[bcount];
-						bcount++;
+					fieldZ[i][ynumberAdded - additionalBinNumber - 1 + j][k] = backInBunemanBzBuffer[bcount];
+					bcount++;
 				}
 			}
-	}
+		}
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
@@ -2836,24 +2952,27 @@ void Simulation::exchangeBunemanBzAlongY(double*** fieldZ){
 	}
 }
 
-void Simulation::exchangeBunemanBzAlongZ(double*** fieldZ){
-	if(cartDim[2] > 1){
+void Simulation::exchangeBunemanBzAlongZ(double*** fieldZ) {
+	if (cartDim[2] > 1) {
 		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						topOutBunemanBzBuffer[bcount] = fieldZ[i][j][znumberAdded - additionalBinNumber - 1 - k];
-						bcount++;
+					topOutBunemanBzBuffer[bcount] = fieldZ[i][j][znumberAdded - additionalBinNumber - 1 - k];
+					bcount++;
 				}
 			}
 		}
 
-		if (verbosity > 2) printf("before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n", rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		if (verbosity > 2) printf(
+			"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+			rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (2 + additionalBinNumber) * (xnumberAdded) * (ynumberAdded);
-		MPI_Sendrecv(topOutBunemanBzBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInBunemanBzBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		MPI_Sendrecv(topOutBunemanBzBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInBunemanBzBuffer, number,
+		             MPI_DOUBLE, bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
 
 		//MPI_Barrier(cartComm);
@@ -2862,8 +2981,8 @@ void Simulation::exchangeBunemanBzAlongZ(double*** fieldZ){
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						fieldZ[i][j][additionalBinNumber + 1 - k] = bottomInBunemanBzBuffer[bcount];
-						bcount++;
+					fieldZ[i][j][additionalBinNumber + 1 - k] = bottomInBunemanBzBuffer[bcount];
+					bcount++;
 				}
 			}
 		}
@@ -2876,14 +2995,15 @@ void Simulation::exchangeBunemanBzAlongZ(double*** fieldZ){
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						bottomOutBunemanBzBuffer[bcount] = fieldZ[i][j][1 + additionalBinNumber + k];
-						bcount++;
+					bottomOutBunemanBzBuffer[bcount] = fieldZ[i][j][1 + additionalBinNumber + k];
+					bcount++;
 				}
 			}
 		}
 
 
-		MPI_Sendrecv(bottomOutBunemanBzBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_LEFT, topInBunemanBzBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_LEFT, cartComm, &status);
+		MPI_Sendrecv(bottomOutBunemanBzBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_LEFT, topInBunemanBzBuffer, number,
+		             MPI_DOUBLE, topRank, MPI_EFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, bottomRank);
 
 		//MPI_Barrier(cartComm);
@@ -2892,8 +3012,8 @@ void Simulation::exchangeBunemanBzAlongZ(double*** fieldZ){
 		for (int i = 0; i < xnumberAdded; ++i)
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-						fieldZ[i][j][znumberAdded - additionalBinNumber - 1 + k] = topInBunemanBzBuffer[bcount];
-						bcount++;
+					fieldZ[i][j][znumberAdded - additionalBinNumber - 1 + k] = topInBunemanBzBuffer[bcount];
+					bcount++;
 				}
 			}
 

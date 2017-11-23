@@ -32,13 +32,13 @@ void sendInput(Simulation& simulation, int nprocs) {
 		integerData[12] = simulation.inputType;
 		integerData[13] = simulation.verbosity;
 		int solverType = -1;
-		if(simulation.solverType == IMPLICIT){
+		if (simulation.solverType == IMPLICIT) {
 			solverType = 0;
-		} else if(simulation.solverType == EXPLICIT){
+		} else if (simulation.solverType == EXPLICIT) {
 			solverType = 1;
-		} else if(simulation.solverType == BUNEMAN){
+		} else if (simulation.solverType == BUNEMAN) {
 			solverType = 2;
-		} else if(simulation.solverType == IMPLICIT_EC){
+		} else if (simulation.solverType == IMPLICIT_EC) {
 			solverType = 3;
 		}
 		integerData[14] = solverType;
@@ -116,13 +116,13 @@ Simulation recieveInput(MPI_Comm cartComm) {
 		int verbosity = integerData[13];
 		int solverType = integerData[14];
 		SolverType solverTypev;
-		if(solverType == 0){
+		if (solverType == 0) {
 			solverTypev = IMPLICIT;
-		} else if(solverType == 1){
+		} else if (solverType == 1) {
 			solverTypev = EXPLICIT;
-		} else if(solverType == 2){
+		} else if (solverType == 2) {
 			solverTypev = BUNEMAN;
-		} else if(solverType == 3){
+		} else if (solverType == 3) {
 			solverTypev = IMPLICIT_EC;
 		} else {
 			printf("wrong solver type\n");
@@ -151,7 +151,7 @@ Simulation recieveInput(MPI_Comm cartComm) {
 		double B0y = doubleData[19];
 		double B0z = doubleData[20];
 		double maxTime = doubleData[21];
-		double preferedDeltaT =doubleData[22];
+		double preferedDeltaT = doubleData[22];
 		double electronMassInput = doubleData[23];
 		double plasmaPeriod = doubleData[24];
 		double scaleFactor = doubleData[25];
@@ -164,7 +164,8 @@ Simulation recieveInput(MPI_Comm cartComm) {
 	exit(0);
 }
 
-void sendLargeVectorToRightReceiveFromLeft(double**** tempVector, double* outBuffer, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void sendLargeVectorToRightReceiveFromLeft(double**** tempVector, double* outBuffer, double* inBuffer, int xnumberAdded,
+                                           int ynumberAdded, int znumberAdded,
                                            int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 	int rank;
 	int size;
@@ -208,11 +209,12 @@ void sendLargeVectorToRightReceiveFromLeft(double**** tempVector, double* outBuf
 		int leftRank;
 		MPI_Cart_rank(cartComm, leftCoord, &leftRank);
 
-		
+
 		MPI_Status status;
 		int number = ynumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber);
-		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_TEMPVECTOR_RIGHT, inBuffer, number, MPI_DOUBLE, leftRank, MPI_TEMPVECTOR_RIGHT, cartComm, &status);
-		
+		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_TEMPVECTOR_RIGHT, inBuffer, number, MPI_DOUBLE, leftRank,
+		             MPI_TEMPVECTOR_RIGHT, cartComm, &status);
+
 		bcount = 0;
 		for (int i = 0; i <= additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -237,7 +239,8 @@ void sendLargeVectorToRightReceiveFromLeft(double**** tempVector, double* outBuf
 	}
 }
 
-void sendLargeVectorToLeftReceiveFromRight(double**** tempVector, double* outBuffer, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void sendLargeVectorToLeftReceiveFromRight(double**** tempVector, double* outBuffer, double* inBuffer, int xnumberAdded,
+                                           int ynumberAdded, int znumberAdded,
                                            int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 	int rank;
 	int size;
@@ -285,8 +288,9 @@ void sendLargeVectorToLeftReceiveFromRight(double**** tempVector, double* outBuf
 
 		MPI_Status status;
 		int number = ynumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber);
-		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_TEMPVECTOR_LEFT, inBuffer, number, MPI_DOUBLE, rightRank, MPI_TEMPVECTOR_LEFT, cartComm, &status);
-		
+		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_TEMPVECTOR_LEFT, inBuffer, number, MPI_DOUBLE, rightRank,
+		             MPI_TEMPVECTOR_LEFT, cartComm, &status);
+
 
 		bcount = 0;
 		for (int i = 0; i <= additionalBinNumber; ++i) {
@@ -304,7 +308,8 @@ void sendLargeVectorToLeftReceiveFromRight(double**** tempVector, double* outBuf
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int l = 0; l < lnumber; ++l) {
-						tempVector[xnumberAdded - 1 - additionalBinNumber + i][j][k][l] = tempVector[1 + additionalBinNumber + i][j][k][l];
+						tempVector[xnumberAdded - 1 - additionalBinNumber + i][j][k][l] = tempVector[1 + additionalBinNumber + i][j][k][l
+						];
 					}
 				}
 			}
@@ -356,7 +361,8 @@ void sendLargeVectorToRight(double**** tempVector, double* buffer, int xnumberAd
 		int leftRank;
 		MPI_Cart_rank(cartComm, leftCoord, &leftRank);
 
-		MPI_Send(buffer, ynumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, rightRank, MPI_TEMPVECTOR_RIGHT, cartComm);
+		MPI_Send(buffer, ynumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, rightRank,
+		         MPI_TEMPVECTOR_RIGHT, cartComm);
 	}
 
 }
@@ -397,12 +403,14 @@ void sendLargeVectorToLeft(double**** tempVector, double* buffer, int xnumberAdd
 		int leftRank;
 		MPI_Cart_rank(cartComm, leftCoord, &leftRank);
 
-		MPI_Send(buffer, ynumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, leftRank, MPI_TEMPVECTOR_LEFT, cartComm);
+		MPI_Send(buffer, ynumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, leftRank,
+		         MPI_TEMPVECTOR_LEFT, cartComm);
 	}
 
 }
 
-void receiveLargeVectorFromRight(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void receiveLargeVectorFromRight(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded,
+                                 int znumberAdded,
                                  int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 	int rank;
 	int size;
@@ -424,7 +432,8 @@ void receiveLargeVectorFromRight(double**** tempVector, double* buffer, int xnum
 		int rightRank;
 		MPI_Cart_rank(cartComm, rightCoord, &rightRank);
 		MPI_Status status;
-		MPI_Recv(buffer, ynumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, rightRank, MPI_TEMPVECTOR_LEFT, cartComm,
+		MPI_Recv(buffer, ynumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, rightRank,
+		         MPI_TEMPVECTOR_LEFT, cartComm,
 		         &status);
 
 		int bcount = 0;
@@ -452,7 +461,8 @@ void receiveLargeVectorFromRight(double**** tempVector, double* buffer, int xnum
 	}
 }
 
-void receiveLargeVectorFromLeft(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void receiveLargeVectorFromLeft(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded,
+                                int znumberAdded,
                                 int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 	int rank;
 	int size;
@@ -474,7 +484,8 @@ void receiveLargeVectorFromLeft(double**** tempVector, double* buffer, int xnumb
 		int leftRank;
 		MPI_Cart_rank(cartComm, leftCoord, &leftRank);
 		MPI_Status status;
-		MPI_Recv(buffer, ynumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, leftRank, MPI_TEMPVECTOR_RIGHT, cartComm,
+		MPI_Recv(buffer, ynumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, leftRank,
+		         MPI_TEMPVECTOR_RIGHT, cartComm,
 		         &status);
 
 		int bcount = 0;
@@ -502,7 +513,8 @@ void receiveLargeVectorFromLeft(double**** tempVector, double* buffer, int xnumb
 	}
 }
 
-void sendLargeVectorToBackReceiveFromFront(double**** tempVector, double* outBuffer, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void sendLargeVectorToBackReceiveFromFront(double**** tempVector, double* outBuffer, double* inBuffer, int xnumberAdded,
+                                           int ynumberAdded, int znumberAdded,
                                            int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 	int rank;
 	int size;
@@ -548,8 +560,9 @@ void sendLargeVectorToBackReceiveFromFront(double**** tempVector, double* outBuf
 
 		MPI_Status status;
 		int number = xnumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber);
-		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_TEMPVECTOR_RIGHT, inBuffer, number, MPI_DOUBLE, frontRank, MPI_TEMPVECTOR_RIGHT, cartComm, &status);
-		
+		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_TEMPVECTOR_RIGHT, inBuffer, number, MPI_DOUBLE, frontRank,
+		             MPI_TEMPVECTOR_RIGHT, cartComm, &status);
+
 
 		bcount = 0;
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -576,7 +589,8 @@ void sendLargeVectorToBackReceiveFromFront(double**** tempVector, double* outBuf
 	}
 }
 
-void sendLargeVectorToFrontReceiveFromBack(double**** tempVector, double* outBuffer, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void sendLargeVectorToFrontReceiveFromBack(double**** tempVector, double* outBuffer, double* inBuffer, int xnumberAdded,
+                                           int ynumberAdded, int znumberAdded,
                                            int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 	int rank;
 	int size;
@@ -623,11 +637,12 @@ void sendLargeVectorToFrontReceiveFromBack(double**** tempVector, double* outBuf
 		int backRank;
 		MPI_Cart_rank(cartComm, backCoord, &backRank);
 
-		
+
 		MPI_Status status;
 		int number = xnumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber);
-		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_TEMPVECTOR_LEFT, inBuffer, number, MPI_DOUBLE, backRank, MPI_TEMPVECTOR_LEFT, cartComm, &status);
-		
+		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_TEMPVECTOR_LEFT, inBuffer, number, MPI_DOUBLE, backRank,
+		             MPI_TEMPVECTOR_LEFT, cartComm, &status);
+
 
 		bcount = 0;
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -645,7 +660,8 @@ void sendLargeVectorToFrontReceiveFromBack(double**** tempVector, double* outBuf
 			for (int j = 0; j <= additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int l = 0; l < lnumber; ++l) {
-						tempVector[i][ynumberAdded - 1 - additionalBinNumber + j][k][l] = tempVector[i][1 + additionalBinNumber + j][k][l];
+						tempVector[i][ynumberAdded - 1 - additionalBinNumber + j][k][l] = tempVector[i][1 + additionalBinNumber + j][k][l
+						];
 					}
 				}
 			}
@@ -686,8 +702,9 @@ void sendLargeVectorToBack(double**** tempVector, double* buffer, int xnumberAdd
 		int backRank;
 		MPI_Cart_rank(cartComm, backCoord, &backRank);
 
-		
-		MPI_Send(buffer, xnumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, backRank, MPI_TEMPVECTOR_RIGHT, cartComm);
+
+		MPI_Send(buffer, xnumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, backRank,
+		         MPI_TEMPVECTOR_RIGHT, cartComm);
 	}
 
 }
@@ -728,13 +745,15 @@ void sendLargeVectorToFront(double**** tempVector, double* buffer, int xnumberAd
 		int frontRank;
 		MPI_Cart_rank(cartComm, frontCoord, &frontRank);
 
-		
-		MPI_Send(buffer, xnumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, frontRank, MPI_TEMPVECTOR_LEFT, cartComm);
+
+		MPI_Send(buffer, xnumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, frontRank,
+		         MPI_TEMPVECTOR_LEFT, cartComm);
 	}
 
 }
 
-void receiveLargeVectorFromBack(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void receiveLargeVectorFromBack(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded,
+                                int znumberAdded,
                                 int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 	int rank;
 	int size;
@@ -756,7 +775,8 @@ void receiveLargeVectorFromBack(double**** tempVector, double* buffer, int xnumb
 		int backRank;
 		MPI_Cart_rank(cartComm, backCoord, &backRank);
 		MPI_Status status;
-		MPI_Recv(buffer, xnumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, backRank, MPI_TEMPVECTOR_LEFT, cartComm,
+		MPI_Recv(buffer, xnumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, backRank,
+		         MPI_TEMPVECTOR_LEFT, cartComm,
 		         &status);
 
 		int bcount = 0;
@@ -775,7 +795,8 @@ void receiveLargeVectorFromBack(double**** tempVector, double* buffer, int xnumb
 			for (int j = 0; j <= additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int l = 0; l < lnumber; ++l) {
-						tempVector[i][ynumberAdded - 1 - additionalBinNumber + j][k][l] = tempVector[i][1 + additionalBinNumber + j][k][l];
+						tempVector[i][ynumberAdded - 1 - additionalBinNumber + j][k][l] = tempVector[i][1 + additionalBinNumber + j][k][l
+						];
 					}
 				}
 			}
@@ -783,7 +804,8 @@ void receiveLargeVectorFromBack(double**** tempVector, double* buffer, int xnumb
 	}
 }
 
-void receiveLargeVectorFromFront(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void receiveLargeVectorFromFront(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded,
+                                 int znumberAdded,
                                  int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 	int rank;
 	int size;
@@ -805,7 +827,8 @@ void receiveLargeVectorFromFront(double**** tempVector, double* buffer, int xnum
 		int frontRank;
 		MPI_Cart_rank(cartComm, frontCoord, &frontRank);
 		MPI_Status status;
-		MPI_Recv(buffer, xnumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, frontRank, MPI_TEMPVECTOR_RIGHT, cartComm,
+		MPI_Recv(buffer, xnumberAdded * znumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, frontRank,
+		         MPI_TEMPVECTOR_RIGHT, cartComm,
 		         &status);
 
 		int bcount = 0;
@@ -832,7 +855,8 @@ void receiveLargeVectorFromFront(double**** tempVector, double* buffer, int xnum
 	}
 }
 
-void sendLargeVectorToTopReceiveFromBottom(double**** tempVector, double* outBuffer, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void sendLargeVectorToTopReceiveFromBottom(double**** tempVector, double* outBuffer, double* inBuffer, int xnumberAdded,
+                                           int ynumberAdded, int znumberAdded,
                                            int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 	int rank;
 	int size;
@@ -878,8 +902,9 @@ void sendLargeVectorToTopReceiveFromBottom(double**** tempVector, double* outBuf
 
 		MPI_Status status;
 		int number = xnumberAdded * ynumberAdded * lnumber * (1 + additionalBinNumber);
-		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_TEMPVECTOR_RIGHT, inBuffer, number, MPI_DOUBLE, bottomRank, MPI_TEMPVECTOR_RIGHT, cartComm, &status);
-		
+		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_TEMPVECTOR_RIGHT, inBuffer, number, MPI_DOUBLE, bottomRank,
+		             MPI_TEMPVECTOR_RIGHT, cartComm, &status);
+
 
 		bcount = 0;
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -905,7 +930,8 @@ void sendLargeVectorToTopReceiveFromBottom(double**** tempVector, double* outBuf
 	}
 }
 
-void sendLargeVectorToBottomReceiveFromTop(double**** tempVector, double* outBuffer, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void sendLargeVectorToBottomReceiveFromTop(double**** tempVector, double* outBuffer, double* inBuffer, int xnumberAdded,
+                                           int ynumberAdded, int znumberAdded,
                                            int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 	int rank;
 	int size;
@@ -953,8 +979,9 @@ void sendLargeVectorToBottomReceiveFromTop(double**** tempVector, double* outBuf
 
 		MPI_Status status;
 		int number = xnumberAdded * ynumberAdded * lnumber * (1 + additionalBinNumber);
-		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_TEMPVECTOR_LEFT, inBuffer, number, MPI_DOUBLE, topRank, MPI_TEMPVECTOR_LEFT, cartComm, &status);
-		
+		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_TEMPVECTOR_LEFT, inBuffer, number, MPI_DOUBLE, topRank,
+		             MPI_TEMPVECTOR_LEFT, cartComm, &status);
+
 
 		bcount = 0;
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -972,7 +999,8 @@ void sendLargeVectorToBottomReceiveFromTop(double**** tempVector, double* outBuf
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k <= additionalBinNumber; ++k) {
 					for (int l = 0; l < lnumber; ++l) {
-						tempVector[i][j][znumberAdded - 1 - additionalBinNumber + k][l] = tempVector[i][j][1 + additionalBinNumber + k][l];
+						tempVector[i][j][znumberAdded - 1 - additionalBinNumber + k][l] = tempVector[i][j][1 + additionalBinNumber + k][l
+						];
 					}
 				}
 			}
@@ -1013,12 +1041,14 @@ void sendLargeVectorToTop(double**** tempVector, double* buffer, int xnumberAdde
 		int topRank;
 		MPI_Cart_rank(cartComm, topCoord, &topRank);
 
-		MPI_Send(buffer, xnumberAdded * ynumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, topRank, MPI_TEMPVECTOR_RIGHT, cartComm);
+		MPI_Send(buffer, xnumberAdded * ynumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, topRank,
+		         MPI_TEMPVECTOR_RIGHT, cartComm);
 	}
 
 }
 
-void sendLargeVectorToBottom(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void sendLargeVectorToBottom(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded,
+                             int znumberAdded,
                              int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 
 	int rank;
@@ -1054,12 +1084,14 @@ void sendLargeVectorToBottom(double**** tempVector, double* buffer, int xnumberA
 		int bottomRank;
 		MPI_Cart_rank(cartComm, bottomCoord, &bottomRank);
 
-		MPI_Send(buffer, xnumberAdded * ynumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, bottomRank, MPI_TEMPVECTOR_LEFT, cartComm);
+		MPI_Send(buffer, xnumberAdded * ynumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, bottomRank,
+		         MPI_TEMPVECTOR_LEFT, cartComm);
 	}
 
 }
 
-void receiveLargeVectorFromTop(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void receiveLargeVectorFromTop(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded,
+                               int znumberAdded,
                                int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 	int rank;
 	int size;
@@ -1081,7 +1113,8 @@ void receiveLargeVectorFromTop(double**** tempVector, double* buffer, int xnumbe
 		int topRank;
 		MPI_Cart_rank(cartComm, topCoord, &topRank);
 		MPI_Status status;
-		MPI_Recv(buffer, xnumberAdded * ynumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, topRank, MPI_TEMPVECTOR_LEFT, cartComm,
+		MPI_Recv(buffer, xnumberAdded * ynumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, topRank,
+		         MPI_TEMPVECTOR_LEFT, cartComm,
 		         &status);
 
 		int bcount = 0;
@@ -1100,7 +1133,8 @@ void receiveLargeVectorFromTop(double**** tempVector, double* buffer, int xnumbe
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k <= additionalBinNumber; ++k) {
 					for (int l = 0; l < lnumber; ++l) {
-						tempVector[i][j][znumberAdded - 1 - additionalBinNumber + k][l] = tempVector[i][j][1 + additionalBinNumber + k][l];
+						tempVector[i][j][znumberAdded - 1 - additionalBinNumber + k][l] = tempVector[i][j][1 + additionalBinNumber + k][l
+						];
 					}
 				}
 			}
@@ -1108,7 +1142,8 @@ void receiveLargeVectorFromTop(double**** tempVector, double* buffer, int xnumbe
 	}
 }
 
-void receiveLargeVectorFromBottom(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void receiveLargeVectorFromBottom(double**** tempVector, double* buffer, int xnumberAdded, int ynumberAdded,
+                                  int znumberAdded,
                                   int lnumber, int additionalBinNumber, MPI_Comm& cartComm) {
 	int rank;
 	int size;
@@ -1130,7 +1165,8 @@ void receiveLargeVectorFromBottom(double**** tempVector, double* buffer, int xnu
 		int bottomRank;
 		MPI_Cart_rank(cartComm, bottomCoord, &bottomRank);
 		MPI_Status status;
-		MPI_Recv(buffer, xnumberAdded * ynumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, bottomRank, MPI_TEMPVECTOR_RIGHT, cartComm,
+		MPI_Recv(buffer, xnumberAdded * ynumberAdded * lnumber * (1 + additionalBinNumber), MPI_DOUBLE, bottomRank,
+		         MPI_TEMPVECTOR_RIGHT, cartComm,
 		         &status);
 
 		int bcount = 0;
@@ -1157,7 +1193,10 @@ void receiveLargeVectorFromBottom(double**** tempVector, double* buffer, int xnu
 	}
 }
 
-void sendCellParametersToLeftReceiveFromRight(double*** array, double* outBuffer, double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendCellParametersToLeftReceiveFromRight(double*** array, double* outBuffer, double*** tempArray, double* inBuffer,
+                                              int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                              int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank,
+                                              int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1176,7 +1215,8 @@ void sendCellParametersToLeftReceiveFromRight(double*** array, double* outBuffer
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * ynumberAdded * znumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             rightRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 
 	bcount = 0;
 
@@ -1190,7 +1230,10 @@ void sendCellParametersToLeftReceiveFromRight(double*** array, double* outBuffer
 	}
 }
 
-void sendCellParametersToRightReceiveFromLeft(double*** array, double* outBuffer, double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendCellParametersToRightReceiveFromLeft(double*** array, double* outBuffer, double*** tempArray, double* inBuffer,
+                                              int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                              int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank,
+                                              int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1208,7 +1251,8 @@ void sendCellParametersToRightReceiveFromLeft(double*** array, double* outBuffer
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * ynumberAdded * znumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             leftRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < 2 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -1220,7 +1264,8 @@ void sendCellParametersToRightReceiveFromLeft(double*** array, double* outBuffer
 	}
 }
 
-void sendCellParametersLeft(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void sendCellParametersLeft(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                            int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1238,12 +1283,14 @@ void sendCellParametersLeft(double*** array, double* outBuffer, int xnumberAdded
 			}
 		}
 
-		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * ynumberAdded * znumberAdded, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_LEFT, cartComm);
+		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * ynumberAdded * znumberAdded, MPI_DOUBLE, leftRank,
+		         MPI_CELL_PARAMETERS_LEFT, cartComm);
 	}
 
 }
 
-void receiveCellParametersRight(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void receiveCellParametersRight(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1251,7 +1298,8 @@ void receiveCellParametersRight(double*** tempArray, double* inBuffer, int xnumb
 
 	if (cartDim[0] > 1) {
 		MPI_Status status;
-		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * ynumberAdded * znumberAdded, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * ynumberAdded * znumberAdded, MPI_DOUBLE, rightRank,
+		         MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 
 		int bcount = 0;
 
@@ -1266,7 +1314,8 @@ void receiveCellParametersRight(double*** tempArray, double* inBuffer, int xnumb
 	}
 }
 
-void sendCellParametersRight(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void sendCellParametersRight(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                             int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1282,18 +1331,21 @@ void sendCellParametersRight(double*** array, double* outBuffer, int xnumberAdde
 			}
 		}
 
-		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * ynumberAdded * znumberAdded, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_RIGHT, cartComm);
+		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * ynumberAdded * znumberAdded, MPI_DOUBLE, rightRank,
+		         MPI_CELL_PARAMETERS_RIGHT, cartComm);
 	}
 }
 
-void receiveCellParametersLeft(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void receiveCellParametersLeft(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                               int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 	if (cartDim[0] > 1) {
 		MPI_Status status;
-		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * ynumberAdded * znumberAdded, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * ynumberAdded * znumberAdded, MPI_DOUBLE, leftRank,
+		         MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 
 		int bcount = 0;
 		for (int i = 0; i < 2 + 2 * additionalNumber; ++i) {
@@ -1307,41 +1359,48 @@ void receiveCellParametersLeft(double*** tempArray, double* inBuffer, int xnumbe
 	}
 }
 
-void sendCellParametersToFrontReceiveFromBack(double*** array, double* outBuffer, double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendCellParametersToFrontReceiveFromBack(double*** array, double* outBuffer, double*** tempArray, double* inBuffer,
+                                              int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                              int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank,
+                                              int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	//if (cartDim[1] > 1) {
-		int bcount = 0;
+	int bcount = 0;
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < 2 * additionalNumber + 2; ++j) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					outBuffer[bcount] = array[i][j][k];
-					bcount++;
-				}
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < 2 * additionalNumber + 2; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				outBuffer[bcount] = array[i][j][k];
+				bcount++;
 			}
 		}
-		MPI_Status status;
-		int number = (2 + 2 * additionalNumber) * xnumberAdded * znumberAdded;
-		MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	}
+	MPI_Status status;
+	int number = (2 + 2 * additionalNumber) * xnumberAdded * znumberAdded;
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             backRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 
-		bcount = 0;
+	bcount = 0;
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < 2 + 2 * additionalNumber; ++j) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					tempArray[i][j][k] = inBuffer[bcount];
-					bcount++;
-				}
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < 2 + 2 * additionalNumber; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				tempArray[i][j][k] = inBuffer[bcount];
+				bcount++;
 			}
 		}
+	}
 	//}
 }
 
-void sendCellParametersToBackReceiveFromFront(double*** array, double* outBuffer, double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendCellParametersToBackReceiveFromFront(double*** array, double* outBuffer, double*** tempArray, double* inBuffer,
+                                              int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                              int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank,
+                                              int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1360,7 +1419,8 @@ void sendCellParametersToBackReceiveFromFront(double*** array, double* outBuffer
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * xnumberAdded * znumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             frontRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
@@ -1374,7 +1434,8 @@ void sendCellParametersToBackReceiveFromFront(double*** array, double* outBuffer
 	//}
 }
 
-void sendCellParametersFront(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void sendCellParametersFront(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                             int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1391,12 +1452,14 @@ void sendCellParametersFront(double*** array, double* outBuffer, int xnumberAdde
 			}
 		}
 
-		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * xnumberAdded * znumberAdded, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_LEFT, cartComm);
+		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * xnumberAdded * znumberAdded, MPI_DOUBLE, frontRank,
+		         MPI_CELL_PARAMETERS_LEFT, cartComm);
 	}
 
 }
 
-void receiveCellParametersBack(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void receiveCellParametersBack(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                               int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1404,7 +1467,8 @@ void receiveCellParametersBack(double*** tempArray, double* inBuffer, int xnumbe
 
 	if (cartDim[1] > 1) {
 		MPI_Status status;
-		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * xnumberAdded * znumberAdded, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * xnumberAdded * znumberAdded, MPI_DOUBLE, backRank,
+		         MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 
 		int bcount = 0;
 
@@ -1419,7 +1483,8 @@ void receiveCellParametersBack(double*** tempArray, double* inBuffer, int xnumbe
 	}
 }
 
-void sendCellParametersBack(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void sendCellParametersBack(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                            int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1435,18 +1500,21 @@ void sendCellParametersBack(double*** array, double* outBuffer, int xnumberAdded
 			}
 		}
 
-		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * xnumberAdded * znumberAdded, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_RIGHT, cartComm);
+		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * xnumberAdded * znumberAdded, MPI_DOUBLE, backRank,
+		         MPI_CELL_PARAMETERS_RIGHT, cartComm);
 	}
 }
 
-void receiveCellParametersFront(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void receiveCellParametersFront(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 	if (cartDim[1] > 1) {
 		MPI_Status status;
-		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * xnumberAdded * znumberAdded, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * xnumberAdded * znumberAdded, MPI_DOUBLE, frontRank,
+		         MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 
 		int bcount = 0;
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -1460,7 +1528,10 @@ void receiveCellParametersFront(double*** tempArray, double* inBuffer, int xnumb
 	}
 }
 
-void sendCellParametersToBottomReceiveFromTop(double*** array, double* outBuffer, double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendCellParametersToBottomReceiveFromTop(double*** array, double* outBuffer, double*** tempArray, double* inBuffer,
+                                              int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                              int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank,
+                                              int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1479,7 +1550,8 @@ void sendCellParametersToBottomReceiveFromTop(double*** array, double* outBuffer
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             topRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 
 	bcount = 0;
 
@@ -1493,7 +1565,10 @@ void sendCellParametersToBottomReceiveFromTop(double*** array, double* outBuffer
 	}
 }
 
-void sendCellParametersToTopReceiveFromBottom(double*** array, double* outBuffer, double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendCellParametersToTopReceiveFromBottom(double*** array, double* outBuffer, double*** tempArray, double* inBuffer,
+                                              int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                              int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank,
+                                              int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1511,10 +1586,12 @@ void sendCellParametersToTopReceiveFromBottom(double*** array, double* outBuffer
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             bottomRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 }
 
-void sendCellParametersBottom(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void sendCellParametersBottom(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                              int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1531,11 +1608,13 @@ void sendCellParametersBottom(double*** array, double* outBuffer, int xnumberAdd
 			}
 		}
 
-		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_LEFT, cartComm);
+		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded, MPI_DOUBLE, bottomRank,
+		         MPI_CELL_PARAMETERS_LEFT, cartComm);
 	}
 }
 
-void receiveCellParametersTop(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void receiveCellParametersTop(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                              int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1543,7 +1622,8 @@ void receiveCellParametersTop(double*** tempArray, double* inBuffer, int xnumber
 
 	if (cartDim[2] > 1) {
 		MPI_Status status;
-		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded, MPI_DOUBLE, topRank,
+		         MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 
 		int bcount = 0;
 
@@ -1558,7 +1638,8 @@ void receiveCellParametersTop(double*** tempArray, double* inBuffer, int xnumber
 	}
 }
 
-void sendCellParametersTop(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void sendCellParametersTop(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                           int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1574,11 +1655,13 @@ void sendCellParametersTop(double*** array, double* outBuffer, int xnumberAdded,
 			}
 		}
 
-		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_RIGHT, cartComm);
+		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded, MPI_DOUBLE, topRank,
+		         MPI_CELL_PARAMETERS_RIGHT, cartComm);
 	}
 }
 
-void receiveCellParametersBottom(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void receiveCellParametersBottom(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                 int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1586,7 +1669,8 @@ void receiveCellParametersBottom(double*** tempArray, double* inBuffer, int xnum
 
 	if (cartDim[2] > 1) {
 		MPI_Status status;
-		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded, MPI_DOUBLE, bottomRank,
+		         MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 
 		int bcount = 0;
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -1600,7 +1684,10 @@ void receiveCellParametersBottom(double*** tempArray, double* inBuffer, int xnum
 	}
 }
 
-void sendCellVectorParametersToLeftReceiveFromRight(Vector3d*** array, double* outBuffer, Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendCellVectorParametersToLeftReceiveFromRight(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int leftRank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1620,7 +1707,8 @@ void sendCellVectorParametersToLeftReceiveFromRight(Vector3d*** array, double* o
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * 3 * ynumberAdded * znumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             rightRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < 2 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -1634,7 +1722,10 @@ void sendCellVectorParametersToLeftReceiveFromRight(Vector3d*** array, double* o
 	}
 }
 
-void sendCellVectorParametersToRightReceiveFromLeft(Vector3d*** array, double* outBuffer, Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendCellVectorParametersToRightReceiveFromLeft(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int leftRank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1654,7 +1745,8 @@ void sendCellVectorParametersToRightReceiveFromLeft(Vector3d*** array, double* o
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * 3 * ynumberAdded * znumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             leftRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < 2 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -1668,7 +1760,8 @@ void sendCellVectorParametersToRightReceiveFromLeft(Vector3d*** array, double* o
 	}
 }
 
-void sendCellVectorParametersLeft(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void sendCellVectorParametersLeft(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                  int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1686,11 +1779,14 @@ void sendCellVectorParametersLeft(Vector3d*** array, double* outBuffer, int xnum
 		}
 	}
 
-	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * znumberAdded, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_LEFT, cartComm);
+	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * znumberAdded, MPI_DOUBLE, leftRank,
+	         MPI_CELL_PARAMETERS_LEFT, cartComm);
 
 }
 
-void receiveCellVectorParametersRight(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void receiveCellVectorParametersRight(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                      int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                      int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1698,7 +1794,8 @@ void receiveCellVectorParametersRight(Vector3d*** tempArray, double* inBuffer, i
 
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * znumberAdded, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * znumberAdded, MPI_DOUBLE, rightRank,
+	         MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 
 	int bcount = 0;
 	for (int i = 0; i < 2 + 2 * additionalNumber; ++i) {
@@ -1713,7 +1810,9 @@ void receiveCellVectorParametersRight(Vector3d*** tempArray, double* inBuffer, i
 	}
 }
 
-void sendCellVectorParametersRight(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void sendCellVectorParametersRight(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                   int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                   int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1731,17 +1830,21 @@ void sendCellVectorParametersRight(Vector3d*** array, double* outBuffer, int xnu
 		}
 	}
 
-	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * znumberAdded, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_RIGHT, cartComm);
+	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * znumberAdded, MPI_DOUBLE, rightRank,
+	         MPI_CELL_PARAMETERS_RIGHT, cartComm);
 }
 
-void receiveCellVectorParametersLeft(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void receiveCellVectorParametersLeft(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                     int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                     int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * znumberAdded, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * znumberAdded, MPI_DOUBLE, leftRank,
+	         MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 
 	int bcount = 0;
 	for (int i = 0; i < 2 + 2 * additionalNumber; ++i) {
@@ -1756,7 +1859,10 @@ void receiveCellVectorParametersLeft(Vector3d*** tempArray, double* inBuffer, in
 	}
 }
 
-void sendCellVectorParametersToFrontReceiveFromBack(Vector3d*** array, double* outBuffer, Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendCellVectorParametersToFrontReceiveFromBack(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int frontRank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1776,7 +1882,8 @@ void sendCellVectorParametersToFrontReceiveFromBack(Vector3d*** array, double* o
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * 3 * xnumberAdded * znumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             backRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < 2 + 2 * additionalNumber; ++j) {
@@ -1790,7 +1897,10 @@ void sendCellVectorParametersToFrontReceiveFromBack(Vector3d*** array, double* o
 	}
 }
 
-void sendCellVectorParametersToBackReceiveFromFront(Vector3d*** array, double* outBuffer, Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendCellVectorParametersToBackReceiveFromFront(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int frontRank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1810,7 +1920,8 @@ void sendCellVectorParametersToBackReceiveFromFront(Vector3d*** array, double* o
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * 3 * xnumberAdded * znumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             frontRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < 2 + 2 * additionalNumber; ++j) {
@@ -1824,7 +1935,9 @@ void sendCellVectorParametersToBackReceiveFromFront(Vector3d*** array, double* o
 	}
 }
 
-void sendCellVectorParametersFront(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void sendCellVectorParametersFront(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                   int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                   int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1842,11 +1955,14 @@ void sendCellVectorParametersFront(Vector3d*** array, double* outBuffer, int xnu
 		}
 	}
 
-	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 3 * xnumberAdded * znumberAdded, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_LEFT, cartComm);
+	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 3 * xnumberAdded * znumberAdded, MPI_DOUBLE, frontRank,
+	         MPI_CELL_PARAMETERS_LEFT, cartComm);
 
 }
 
-void receiveCellVectorParametersBack(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void receiveCellVectorParametersBack(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                     int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                     int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1854,7 +1970,8 @@ void receiveCellVectorParametersBack(Vector3d*** tempArray, double* inBuffer, in
 
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 3 * xnumberAdded * znumberAdded, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 3 * xnumberAdded * znumberAdded, MPI_DOUBLE, backRank,
+	         MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 
 	int bcount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
@@ -1869,7 +1986,8 @@ void receiveCellVectorParametersBack(Vector3d*** tempArray, double* inBuffer, in
 	}
 }
 
-void sendCellVectorParametersBack(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void sendCellVectorParametersBack(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                  int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1887,17 +2005,21 @@ void sendCellVectorParametersBack(Vector3d*** array, double* outBuffer, int xnum
 		}
 	}
 
-	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 3 * xnumberAdded * znumberAdded, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_RIGHT, cartComm);
+	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 3 * xnumberAdded * znumberAdded, MPI_DOUBLE, backRank,
+	         MPI_CELL_PARAMETERS_RIGHT, cartComm);
 }
 
-void receiveCellVectorParametersFront(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void receiveCellVectorParametersFront(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                      int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                      int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 3 * xnumberAdded * znumberAdded, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 3 * xnumberAdded * znumberAdded, MPI_DOUBLE, frontRank,
+	         MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 
 	int bcount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
@@ -1912,7 +2034,10 @@ void receiveCellVectorParametersFront(Vector3d*** tempArray, double* inBuffer, i
 	}
 }
 
-void sendCellVectorParametersToBottomReceiveFromTop(Vector3d*** array, double* outBuffer, Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendCellVectorParametersToBottomReceiveFromTop(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int bottomRank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1932,7 +2057,8 @@ void sendCellVectorParametersToBottomReceiveFromTop(Vector3d*** array, double* o
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * 3 * ynumberAdded * xnumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             topRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -1946,7 +2072,10 @@ void sendCellVectorParametersToBottomReceiveFromTop(Vector3d*** array, double* o
 	}
 }
 
-void sendCellVectorParametersToTopReceiveFromBottom(Vector3d*** array, double* outBuffer, Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendCellVectorParametersToTopReceiveFromBottom(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int bottomRank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1966,7 +2095,8 @@ void sendCellVectorParametersToTopReceiveFromBottom(Vector3d*** array, double* o
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * 3 * ynumberAdded * xnumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             bottomRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -1980,7 +2110,9 @@ void sendCellVectorParametersToTopReceiveFromBottom(Vector3d*** array, double* o
 	}
 }
 
-void sendCellVectorParametersBottom(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void sendCellVectorParametersBottom(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                    int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -1998,11 +2130,13 @@ void sendCellVectorParametersBottom(Vector3d*** array, double* outBuffer, int xn
 		}
 	}
 
-	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * xnumberAdded, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_LEFT, cartComm);
+	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * xnumberAdded, MPI_DOUBLE, bottomRank,
+	         MPI_CELL_PARAMETERS_LEFT, cartComm);
 
 }
 
-void receiveCellVectorParametersTop(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void receiveCellVectorParametersTop(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2010,7 +2144,8 @@ void receiveCellVectorParametersTop(Vector3d*** tempArray, double* inBuffer, int
 
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * xnumberAdded, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * xnumberAdded, MPI_DOUBLE, topRank,
+	         MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 
 	int bcount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
@@ -2025,7 +2160,8 @@ void receiveCellVectorParametersTop(Vector3d*** tempArray, double* inBuffer, int
 	}
 }
 
-void sendCellVectorParametersTop(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void sendCellVectorParametersTop(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                 int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2043,17 +2179,21 @@ void sendCellVectorParametersTop(Vector3d*** array, double* outBuffer, int xnumb
 		}
 	}
 
-	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * xnumberAdded, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_RIGHT, cartComm);
+	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * xnumberAdded, MPI_DOUBLE, topRank,
+	         MPI_CELL_PARAMETERS_RIGHT, cartComm);
 }
 
-void receiveCellVectorParametersBottom(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void receiveCellVectorParametersBottom(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                       int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                       int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * xnumberAdded, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 3 * ynumberAdded * xnumberAdded, MPI_DOUBLE, bottomRank,
+	         MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 
 	int bcount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
@@ -2068,7 +2208,10 @@ void receiveCellVectorParametersBottom(Vector3d*** tempArray, double* inBuffer, 
 	}
 }
 
-void sendCellMatrixParametersToLeftReceiveFromRight(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendCellMatrixParametersToLeftReceiveFromRight(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int leftRank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2090,7 +2233,8 @@ void sendCellMatrixParametersToLeftReceiveFromRight(Matrix3d*** array, double* o
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * 9 * ynumberAdded * znumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             rightRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < 2 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -2106,7 +2250,10 @@ void sendCellMatrixParametersToLeftReceiveFromRight(Matrix3d*** array, double* o
 	}
 }
 
-void sendCellMatrixParametersToRightReceiveFromLeft(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendCellMatrixParametersToRightReceiveFromLeft(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int leftRank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2128,7 +2275,8 @@ void sendCellMatrixParametersToRightReceiveFromLeft(Matrix3d*** array, double* o
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * 9 * ynumberAdded * znumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             leftRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < 2 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -2144,7 +2292,8 @@ void sendCellMatrixParametersToRightReceiveFromLeft(Matrix3d*** array, double* o
 	}
 }
 
-void sendCellMatrixParametersLeft(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void sendCellMatrixParametersLeft(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                  int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2164,17 +2313,21 @@ void sendCellMatrixParametersLeft(Matrix3d*** array, double* outBuffer, int xnum
 		}
 	}
 
-	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 9 * ynumberAdded * znumberAdded, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_LEFT, cartComm);
+	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 9 * ynumberAdded * znumberAdded, MPI_DOUBLE, leftRank,
+	         MPI_CELL_PARAMETERS_LEFT, cartComm);
 }
 
-void receiveCellMatrixParametersRight(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void receiveCellMatrixParametersRight(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                      int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                      int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 9 * ynumberAdded * znumberAdded, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 9 * ynumberAdded * znumberAdded, MPI_DOUBLE, rightRank,
+	         MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 
 	int bcount = 0;
 	for (int i = 0; i < 2 + 2 * additionalNumber; ++i) {
@@ -2191,7 +2344,9 @@ void receiveCellMatrixParametersRight(Matrix3d*** tempArray, double* inBuffer, i
 	}
 }
 
-void sendCellMatrixParametersRight(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void sendCellMatrixParametersRight(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                   int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                   int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2211,17 +2366,21 @@ void sendCellMatrixParametersRight(Matrix3d*** array, double* outBuffer, int xnu
 		}
 	}
 
-	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 9 * ynumberAdded * znumberAdded, MPI_DOUBLE, rightRank, MPI_CELL_PARAMETERS_RIGHT, cartComm);
+	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 9 * ynumberAdded * znumberAdded, MPI_DOUBLE, rightRank,
+	         MPI_CELL_PARAMETERS_RIGHT, cartComm);
 }
 
-void receiveCellMatrixParametersLeft(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void receiveCellMatrixParametersLeft(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                     int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                     int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 9 * ynumberAdded * znumberAdded, MPI_DOUBLE, leftRank, MPI_CELL_PARAMETERS_RIGHT, cartComm,
+	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 9 * ynumberAdded * znumberAdded, MPI_DOUBLE, leftRank,
+	         MPI_CELL_PARAMETERS_RIGHT, cartComm,
 	         &status);
 
 	int bcount = 0;
@@ -2240,7 +2399,10 @@ void receiveCellMatrixParametersLeft(Matrix3d*** tempArray, double* inBuffer, in
 	}
 }
 
-void sendCellMatrixParametersToFrontReceiveFromBack(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendCellMatrixParametersToFrontReceiveFromBack(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int frontRank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2262,7 +2424,8 @@ void sendCellMatrixParametersToFrontReceiveFromBack(Matrix3d*** array, double* o
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * 9 * xnumberAdded * znumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             backRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < 2 + 2 * additionalNumber; ++j) {
@@ -2278,7 +2441,10 @@ void sendCellMatrixParametersToFrontReceiveFromBack(Matrix3d*** array, double* o
 	}
 }
 
-void sendCellMatrixParametersToBackReceiveFromFront(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendCellMatrixParametersToBackReceiveFromFront(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int frontRank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2300,7 +2466,8 @@ void sendCellMatrixParametersToBackReceiveFromFront(Matrix3d*** array, double* o
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * 9 * xnumberAdded * znumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             frontRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 
 	bcount = 0;
 
@@ -2318,7 +2485,9 @@ void sendCellMatrixParametersToBackReceiveFromFront(Matrix3d*** array, double* o
 	}
 }
 
-void sendCellMatrixParametersFront(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void sendCellMatrixParametersFront(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                   int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                   int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2338,17 +2507,21 @@ void sendCellMatrixParametersFront(Matrix3d*** array, double* outBuffer, int xnu
 		}
 	}
 
-	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * znumberAdded, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_LEFT, cartComm);
+	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * znumberAdded, MPI_DOUBLE, frontRank,
+	         MPI_CELL_PARAMETERS_LEFT, cartComm);
 }
 
-void receiveCellMatrixParametersBack(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void receiveCellMatrixParametersBack(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                     int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                     int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * znumberAdded, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_LEFT, cartComm,
+	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * znumberAdded, MPI_DOUBLE, backRank,
+	         MPI_CELL_PARAMETERS_LEFT, cartComm,
 	         &status);
 
 	int bcount = 0;
@@ -2366,7 +2539,8 @@ void receiveCellMatrixParametersBack(Matrix3d*** tempArray, double* inBuffer, in
 	}
 }
 
-void sendCellMatrixParametersBack(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void sendCellMatrixParametersBack(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                  int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2386,17 +2560,21 @@ void sendCellMatrixParametersBack(Matrix3d*** array, double* outBuffer, int xnum
 		}
 	}
 
-	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * znumberAdded, MPI_DOUBLE, backRank, MPI_CELL_PARAMETERS_RIGHT, cartComm);
+	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * znumberAdded, MPI_DOUBLE, backRank,
+	         MPI_CELL_PARAMETERS_RIGHT, cartComm);
 }
 
-void receiveCellMatrixParametersFront(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void receiveCellMatrixParametersFront(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                      int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                      int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * znumberAdded, MPI_DOUBLE, frontRank, MPI_CELL_PARAMETERS_RIGHT, cartComm,
+	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * znumberAdded, MPI_DOUBLE, frontRank,
+	         MPI_CELL_PARAMETERS_RIGHT, cartComm,
 	         &status);
 
 	int bcount = 0;
@@ -2415,7 +2593,10 @@ void receiveCellMatrixParametersFront(Matrix3d*** tempArray, double* inBuffer, i
 	}
 }
 
-void sendCellMatrixParametersToBottomReceiveFromTop(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendCellMatrixParametersToBottomReceiveFromTop(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int bottomRank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2437,7 +2618,8 @@ void sendCellMatrixParametersToBottomReceiveFromTop(Matrix3d*** array, double* o
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * 9 * xnumberAdded * ynumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             topRank, MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -2453,7 +2635,10 @@ void sendCellMatrixParametersToBottomReceiveFromTop(Matrix3d*** array, double* o
 	}
 }
 
-void sendCellMatrixParametersToTopReceiveFromBottom(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendCellMatrixParametersToTopReceiveFromBottom(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int bottomRank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2475,7 +2660,8 @@ void sendCellMatrixParametersToTopReceiveFromBottom(Matrix3d*** array, double* o
 
 	MPI_Status status;
 	int number = (2 + 2 * additionalNumber) * 9 * xnumberAdded * ynumberAdded;
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             bottomRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -2491,7 +2677,9 @@ void sendCellMatrixParametersToTopReceiveFromBottom(Matrix3d*** array, double* o
 	}
 }
 
-void sendCellMatrixParametersBottom(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void sendCellMatrixParametersBottom(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                    int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2511,17 +2699,20 @@ void sendCellMatrixParametersBottom(Matrix3d*** array, double* outBuffer, int xn
 		}
 	}
 
-	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * ynumberAdded, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_LEFT, cartComm);
+	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * ynumberAdded, MPI_DOUBLE, bottomRank,
+	         MPI_CELL_PARAMETERS_LEFT, cartComm);
 }
 
-void receiveCellMatrixParametersTop(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void receiveCellMatrixParametersTop(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * ynumberAdded, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_LEFT, cartComm,
+	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * ynumberAdded, MPI_DOUBLE, topRank,
+	         MPI_CELL_PARAMETERS_LEFT, cartComm,
 	         &status);
 
 	int bcount = 0;
@@ -2539,7 +2730,8 @@ void receiveCellMatrixParametersTop(Matrix3d*** tempArray, double* inBuffer, int
 	}
 }
 
-void sendCellMatrixParametersTop(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void sendCellMatrixParametersTop(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                 int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2559,17 +2751,21 @@ void sendCellMatrixParametersTop(Matrix3d*** array, double* outBuffer, int xnumb
 		}
 	}
 
-	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * ynumberAdded, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_RIGHT, cartComm);
+	MPI_Send(outBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * ynumberAdded, MPI_DOUBLE, topRank,
+	         MPI_CELL_PARAMETERS_RIGHT, cartComm);
 }
 
-void receiveCellMatrixParametersBottom(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void receiveCellMatrixParametersBottom(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                       int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                       int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * ynumberAdded, MPI_DOUBLE, bottomRank, MPI_CELL_PARAMETERS_RIGHT, cartComm,
+	MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * 9 * xnumberAdded * ynumberAdded, MPI_DOUBLE, bottomRank,
+	         MPI_CELL_PARAMETERS_RIGHT, cartComm,
 	         &status);
 
 	int bcount = 0;
@@ -2588,7 +2784,10 @@ void receiveCellMatrixParametersBottom(Matrix3d*** tempArray, double* inBuffer, 
 	}
 }
 
-void sendNodeParametersToLeftReceiveFromRight(double*** array, double* outBuffer, double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendNodeParametersToLeftReceiveFromRight(double*** array, double* outBuffer, double*** tempArray, double* inBuffer,
+                                              int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                              int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank,
+                                              int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2607,7 +2806,8 @@ void sendNodeParametersToLeftReceiveFromRight(double*** array, double* outBuffer
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * (ynumberAdded + 1) * (znumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             rightRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -2619,7 +2819,10 @@ void sendNodeParametersToLeftReceiveFromRight(double*** array, double* outBuffer
 	}
 }
 
-void sendNodeParametersToRightReceiveFromLeft(double*** array, double* outBuffer, double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendNodeParametersToRightReceiveFromLeft(double*** array, double* outBuffer, double*** tempArray, double* inBuffer,
+                                              int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                              int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank,
+                                              int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2637,7 +2840,8 @@ void sendNodeParametersToRightReceiveFromLeft(double*** array, double* outBuffer
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * (ynumberAdded + 1) * (znumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             leftRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -2649,7 +2853,8 @@ void sendNodeParametersToRightReceiveFromLeft(double*** array, double* outBuffer
 	}
 }
 
-void sendNodeParametersLeft(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void sendNodeParametersLeft(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                            int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2666,19 +2871,22 @@ void sendNodeParametersLeft(double*** array, double* outBuffer, int xnumberAdded
 		}
 	}
 
-	
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT,
-		         cartComm);
+
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, leftRank,
+	         MPI_NODE_PARAMETERS_LEFT,
+	         cartComm);
 }
 
-void receiveNodeParametersRight(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void receiveNodeParametersRight(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_LEFT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, rightRank,
+	         MPI_NODE_PARAMETERS_LEFT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -2692,7 +2900,8 @@ void receiveNodeParametersRight(double*** tempArray, double* inBuffer, int xnumb
 	}
 }
 
-void sendNodeParametersRight(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void sendNodeParametersRight(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                             int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2708,18 +2917,21 @@ void sendNodeParametersRight(double*** array, double* outBuffer, int xnumberAdde
 		}
 	}
 
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT,
-		         cartComm);
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, rightRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
+	         cartComm);
 }
 
-void receiveNodeParametersLeft(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void receiveNodeParametersLeft(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                               int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_RIGHT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, leftRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -2733,7 +2945,10 @@ void receiveNodeParametersLeft(double*** tempArray, double* inBuffer, int xnumbe
 	}
 }
 
-void sendNodeParametersToFrontReceiveFromBack(double*** array, double* outBuffer, double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendNodeParametersToFrontReceiveFromBack(double*** array, double* outBuffer, double*** tempArray, double* inBuffer,
+                                              int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                              int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank,
+                                              int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2751,7 +2966,8 @@ void sendNodeParametersToFrontReceiveFromBack(double*** array, double* outBuffer
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (znumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             backRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < 3 + 2 * additionalNumber; ++j) {
@@ -2763,7 +2979,10 @@ void sendNodeParametersToFrontReceiveFromBack(double*** array, double* outBuffer
 	}
 }
 
-void sendNodeParametersToBackReceiveFromFront(double*** array, double* outBuffer, double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendNodeParametersToBackReceiveFromFront(double*** array, double* outBuffer, double*** tempArray, double* inBuffer,
+                                              int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                              int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank,
+                                              int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2781,7 +3000,8 @@ void sendNodeParametersToBackReceiveFromFront(double*** array, double* outBuffer
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (znumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             frontRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < 3 + 2 * additionalNumber; ++j) {
@@ -2793,7 +3013,8 @@ void sendNodeParametersToBackReceiveFromFront(double*** array, double* outBuffer
 	}
 }
 
-void sendNodeParametersFront(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void sendNodeParametersFront(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                             int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2809,19 +3030,22 @@ void sendNodeParametersFront(double*** array, double* outBuffer, int xnumberAdde
 		}
 	}
 
-	
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT,
-		         cartComm);
+
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, frontRank,
+	         MPI_NODE_PARAMETERS_LEFT,
+	         cartComm);
 }
 
-void receiveNodeParametersBack(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void receiveNodeParametersBack(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                               int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_LEFT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, backRank,
+	         MPI_NODE_PARAMETERS_LEFT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -2835,7 +3059,8 @@ void receiveNodeParametersBack(double*** tempArray, double* inBuffer, int xnumbe
 	}
 }
 
-void sendNodeParametersBack(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void sendNodeParametersBack(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                            int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2851,19 +3076,22 @@ void sendNodeParametersBack(double*** array, double* outBuffer, int xnumberAdded
 		}
 	}
 
-	
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT,
-		         cartComm);
+
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, backRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
+	         cartComm);
 }
 
-void receiveNodeParametersFront(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void receiveNodeParametersFront(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_RIGHT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, frontRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -2877,7 +3105,10 @@ void receiveNodeParametersFront(double*** tempArray, double* inBuffer, int xnumb
 	}
 }
 
-void sendNodeParametersToBottomReceiveFromTop(double*** array, double* outBuffer, double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendNodeParametersToBottomReceiveFromTop(double*** array, double* outBuffer, double*** tempArray, double* inBuffer,
+                                              int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                              int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank,
+                                              int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2895,7 +3126,8 @@ void sendNodeParametersToBottomReceiveFromTop(double*** array, double* outBuffer
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (ynumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             topRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
 
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
@@ -2908,7 +3140,10 @@ void sendNodeParametersToBottomReceiveFromTop(double*** array, double* outBuffer
 	}
 }
 
-void sendNodeParametersToTopReceiveFromBottom(double*** array, double* outBuffer, double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendNodeParametersToTopReceiveFromBottom(double*** array, double* outBuffer, double*** tempArray, double* inBuffer,
+                                              int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                              int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank,
+                                              int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2926,7 +3161,8 @@ void sendNodeParametersToTopReceiveFromBottom(double*** array, double* outBuffer
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (ynumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             bottomRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -2938,7 +3174,8 @@ void sendNodeParametersToTopReceiveFromBottom(double*** array, double* outBuffer
 	}
 }
 
-void sendNodeParametersBottom(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void sendNodeParametersBottom(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                              int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2954,19 +3191,22 @@ void sendNodeParametersBottom(double*** array, double* outBuffer, int xnumberAdd
 		}
 	}
 
-	
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT,
-		         cartComm);
+
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, bottomRank,
+	         MPI_NODE_PARAMETERS_LEFT,
+	         cartComm);
 }
 
-void receiveNodeParametersTop(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void receiveNodeParametersTop(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                              int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_LEFT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, topRank,
+	         MPI_NODE_PARAMETERS_LEFT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -2980,7 +3220,8 @@ void receiveNodeParametersTop(double*** tempArray, double* inBuffer, int xnumber
 	}
 }
 
-void sendNodeParametersTop(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void sendNodeParametersTop(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                           int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -2996,19 +3237,22 @@ void sendNodeParametersTop(double*** array, double* outBuffer, int xnumberAdded,
 		}
 	}
 
-	
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT,
-		         cartComm);
+
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, topRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
+	         cartComm);
 }
 
-void receiveNodeParametersBottom(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void receiveNodeParametersBottom(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                 int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_RIGHT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, bottomRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -3022,7 +3266,10 @@ void receiveNodeParametersBottom(double*** tempArray, double* inBuffer, int xnum
 	}
 }
 
-void sendNodeVectorParametersToLeftReceiveFromRight(Vector3d*** array, double* outBuffer, Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendNodeVectorParametersToLeftReceiveFromRight(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int leftRank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3043,7 +3290,8 @@ void sendNodeVectorParametersToLeftReceiveFromRight(Vector3d*** array, double* o
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             rightRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -3057,7 +3305,10 @@ void sendNodeVectorParametersToLeftReceiveFromRight(Vector3d*** array, double* o
 	}
 }
 
-void sendNodeVectorParametersToRightReceiveFromLeft(Vector3d*** array, double* outBuffer, Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendNodeVectorParametersToRightReceiveFromLeft(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int leftRank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3078,7 +3329,8 @@ void sendNodeVectorParametersToRightReceiveFromLeft(Vector3d*** array, double* o
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             leftRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
@@ -3093,7 +3345,8 @@ void sendNodeVectorParametersToRightReceiveFromLeft(Vector3d*** array, double* o
 	}
 }
 
-void sendNodeVectorParametersLeft(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void sendNodeVectorParametersLeft(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                  int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3112,12 +3365,15 @@ void sendNodeVectorParametersLeft(Vector3d*** array, double* outBuffer, int xnum
 		}
 	}
 
-	
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT,
-		         cartComm);
+
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, leftRank,
+	         MPI_NODE_PARAMETERS_LEFT,
+	         cartComm);
 }
 
-void receiveNodeVectorParametersRight(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void receiveNodeVectorParametersRight(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                      int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                      int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3126,7 +3382,8 @@ void receiveNodeVectorParametersRight(Vector3d*** tempArray, double* inBuffer, i
 
 	MPI_Status status;
 	//printf("receive node vector right from %d to %d\n", rightRank, rank);
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_LEFT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, rightRank,
+	         MPI_NODE_PARAMETERS_LEFT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -3143,7 +3400,9 @@ void receiveNodeVectorParametersRight(Vector3d*** tempArray, double* inBuffer, i
 	}
 }
 
-void sendNodeVectorParametersRight(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void sendNodeVectorParametersRight(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                   int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                   int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3162,12 +3421,15 @@ void sendNodeVectorParametersRight(Vector3d*** array, double* outBuffer, int xnu
 		}
 	}
 
-	
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT,
-		         cartComm);
+
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, rightRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
+	         cartComm);
 }
 
-void receiveNodeVectorParametersLeft(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void receiveNodeVectorParametersLeft(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                     int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                     int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3175,7 +3437,8 @@ void receiveNodeVectorParametersLeft(Vector3d*** tempArray, double* inBuffer, in
 
 	MPI_Status status;
 	//printf("receive node vector left from %d to %d\n", leftRank, rank);
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_RIGHT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, leftRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -3193,7 +3456,10 @@ void receiveNodeVectorParametersLeft(Vector3d*** tempArray, double* inBuffer, in
 	}
 }
 
-void sendNodeVectorParametersToFrontReceiveFromBack(Vector3d*** array, double* outBuffer, Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendNodeVectorParametersToFrontReceiveFromBack(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int frontRank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3216,7 +3482,8 @@ void sendNodeVectorParametersToFrontReceiveFromBack(Vector3d*** array, double* o
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (znumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             backRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
 
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
@@ -3232,7 +3499,10 @@ void sendNodeVectorParametersToFrontReceiveFromBack(Vector3d*** array, double* o
 	}
 }
 
-void sendNodeVectorParametersToBackReceiveFromFront(Vector3d*** array, double* outBuffer, Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendNodeVectorParametersToBackReceiveFromFront(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int frontRank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3254,7 +3524,8 @@ void sendNodeVectorParametersToBackReceiveFromFront(Vector3d*** array, double* o
 	//printf("send node vector right from %d to %d\n", rank, rightRank);
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (znumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             frontRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < 3 + 2 * additionalNumber; ++j) {
@@ -3269,7 +3540,9 @@ void sendNodeVectorParametersToBackReceiveFromFront(Vector3d*** array, double* o
 	}
 }
 
-void sendNodeVectorParametersFront(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void sendNodeVectorParametersFront(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                   int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                   int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3288,11 +3561,14 @@ void sendNodeVectorParametersFront(Vector3d*** array, double* outBuffer, int xnu
 		}
 	}
 
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT,
-		         cartComm);
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, frontRank,
+	         MPI_NODE_PARAMETERS_LEFT,
+	         cartComm);
 }
 
-void receiveNodeVectorParametersBack(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void receiveNodeVectorParametersBack(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                     int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                     int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3301,7 +3577,8 @@ void receiveNodeVectorParametersBack(Vector3d*** tempArray, double* inBuffer, in
 
 	MPI_Status status;
 	//printf("receive node vector right from %d to %d\n", rightRank, rank);
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_LEFT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, backRank,
+	         MPI_NODE_PARAMETERS_LEFT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -3318,7 +3595,8 @@ void receiveNodeVectorParametersBack(Vector3d*** tempArray, double* inBuffer, in
 	}
 }
 
-void sendNodeVectorParametersBack(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void sendNodeVectorParametersBack(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                  int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3338,11 +3616,14 @@ void sendNodeVectorParametersBack(Vector3d*** array, double* outBuffer, int xnum
 	}
 
 
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT,
-		         cartComm);
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, backRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
+	         cartComm);
 }
 
-void receiveNodeVectorParametersFront(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void receiveNodeVectorParametersFront(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                      int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                      int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3350,7 +3631,8 @@ void receiveNodeVectorParametersFront(Vector3d*** tempArray, double* inBuffer, i
 
 	MPI_Status status;
 	//printf("receive node vector left from %d to %d\n", frontRank, rank);
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_RIGHT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, frontRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -3368,7 +3650,10 @@ void receiveNodeVectorParametersFront(Vector3d*** tempArray, double* inBuffer, i
 	}
 }
 
-void sendNodeVectorParametersToBottomReceiveFromTop(Vector3d*** array, double* outBuffer, Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendNodeVectorParametersToBottomReceiveFromTop(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int bottomRank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3390,7 +3675,8 @@ void sendNodeVectorParametersToBottomReceiveFromTop(Vector3d*** array, double* o
 	//printf("send node vector left from %d to %d\n", rank, leftRank);
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (ynumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             topRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -3405,7 +3691,10 @@ void sendNodeVectorParametersToBottomReceiveFromTop(Vector3d*** array, double* o
 	}
 }
 
-void sendNodeVectorParametersToTopReceiveFromBottom(Vector3d*** array, double* outBuffer, Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendNodeVectorParametersToTopReceiveFromBottom(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int bottomRank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3427,7 +3716,8 @@ void sendNodeVectorParametersToTopReceiveFromBottom(Vector3d*** array, double* o
 	//printf("send node vector right from %d to %d\n", rank, rightRank);
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (ynumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             bottomRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
 
 	bcount = 0;
 
@@ -3444,7 +3734,9 @@ void sendNodeVectorParametersToTopReceiveFromBottom(Vector3d*** array, double* o
 	}
 }
 
-void sendNodeVectorParametersBottom(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void sendNodeVectorParametersBottom(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                    int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3464,11 +3756,13 @@ void sendNodeVectorParametersBottom(Vector3d*** array, double* outBuffer, int xn
 	}
 
 
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT,
-		         cartComm);
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, bottomRank,
+	         MPI_NODE_PARAMETERS_LEFT,
+	         cartComm);
 }
 
-void receiveNodeVectorParametersTop(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void receiveNodeVectorParametersTop(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3477,7 +3771,8 @@ void receiveNodeVectorParametersTop(Vector3d*** tempArray, double* inBuffer, int
 
 	MPI_Status status;
 	//printf("receive node vector right from %d to %d\n", rightRank, rank);
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_LEFT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, topRank,
+	         MPI_NODE_PARAMETERS_LEFT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -3494,7 +3789,8 @@ void receiveNodeVectorParametersTop(Vector3d*** tempArray, double* inBuffer, int
 	}
 }
 
-void sendNodeVectorParametersTop(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void sendNodeVectorParametersTop(Vector3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                 int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3514,11 +3810,14 @@ void sendNodeVectorParametersTop(Vector3d*** array, double* outBuffer, int xnumb
 	}
 
 
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT,
-		         cartComm);
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, topRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
+	         cartComm);
 }
 
-void receiveNodeVectorParametersBottom(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void receiveNodeVectorParametersBottom(Vector3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                       int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                       int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3526,7 +3825,8 @@ void receiveNodeVectorParametersBottom(Vector3d*** tempArray, double* inBuffer, 
 
 	MPI_Status status;
 	//printf("receive node vector left from %d to %d\n", frontRank, rank);
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_RIGHT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 3 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, bottomRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -3544,7 +3844,10 @@ void receiveNodeVectorParametersBottom(Vector3d*** tempArray, double* inBuffer, 
 	}
 }
 
-void sendNodeMatrixParametersToLeftReceiveFromRight(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendNodeMatrixParametersToLeftReceiveFromRight(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int leftRank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3566,7 +3869,8 @@ void sendNodeMatrixParametersToLeftReceiveFromRight(Matrix3d*** array, double* o
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             rightRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
@@ -3583,7 +3887,10 @@ void sendNodeMatrixParametersToLeftReceiveFromRight(Matrix3d*** array, double* o
 	}
 }
 
-void sendNodeMatrixParametersToRightReceiveFromLeft(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendNodeMatrixParametersToRightReceiveFromLeft(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int leftRank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3606,7 +3913,8 @@ void sendNodeMatrixParametersToRightReceiveFromLeft(Matrix3d*** array, double* o
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             leftRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
@@ -3623,7 +3931,8 @@ void sendNodeMatrixParametersToRightReceiveFromLeft(Matrix3d*** array, double* o
 	}
 }
 
-void sendNodeMatrixParametersLeft(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void sendNodeMatrixParametersLeft(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                  int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3643,11 +3952,14 @@ void sendNodeMatrixParametersLeft(Matrix3d*** array, double* outBuffer, int xnum
 		}
 	}
 
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT,
-		         cartComm);
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, leftRank,
+	         MPI_NODE_PARAMETERS_LEFT,
+	         cartComm);
 }
 
-void receiveNodeMatrixParametersRight(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void receiveNodeMatrixParametersRight(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                      int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                      int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3655,7 +3967,8 @@ void receiveNodeMatrixParametersRight(Matrix3d*** tempArray, double* inBuffer, i
 
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_LEFT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, rightRank,
+	         MPI_NODE_PARAMETERS_LEFT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -3674,7 +3987,9 @@ void receiveNodeMatrixParametersRight(Matrix3d*** tempArray, double* inBuffer, i
 	}
 }
 
-void sendNodeMatrixParametersRight(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void sendNodeMatrixParametersRight(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                   int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                   int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3695,18 +4010,22 @@ void sendNodeMatrixParametersRight(Matrix3d*** array, double* outBuffer, int xnu
 		}
 	}
 
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT,
-		         cartComm);
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, rightRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
+	         cartComm);
 }
 
-void receiveNodeMatrixParametersLeft(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void receiveNodeMatrixParametersLeft(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                     int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                     int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_RIGHT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, leftRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -3725,7 +4044,10 @@ void receiveNodeMatrixParametersLeft(Matrix3d*** tempArray, double* inBuffer, in
 	}
 }
 
-void sendNodeMatrixParametersToFrontReceiveFromBack(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendNodeMatrixParametersToFrontReceiveFromBack(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int frontRank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3748,7 +4070,8 @@ void sendNodeMatrixParametersToFrontReceiveFromBack(Matrix3d*** array, double* o
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             backRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
@@ -3765,7 +4088,10 @@ void sendNodeMatrixParametersToFrontReceiveFromBack(Matrix3d*** array, double* o
 	}
 }
 
-void sendNodeMatrixParametersToBackReceiveFromFront(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendNodeMatrixParametersToBackReceiveFromFront(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int frontRank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3788,7 +4114,8 @@ void sendNodeMatrixParametersToBackReceiveFromFront(Matrix3d*** array, double* o
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             frontRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
@@ -3805,7 +4132,9 @@ void sendNodeMatrixParametersToBackReceiveFromFront(Matrix3d*** array, double* o
 	}
 }
 
-void sendNodeMatrixParametersFront(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void sendNodeMatrixParametersFront(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                   int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                   int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3825,11 +4154,14 @@ void sendNodeMatrixParametersFront(Matrix3d*** array, double* outBuffer, int xnu
 		}
 	}
 
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT,
-		         cartComm);
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, frontRank,
+	         MPI_NODE_PARAMETERS_LEFT,
+	         cartComm);
 }
 
-void receiveNodeMatrixParametersBack(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void receiveNodeMatrixParametersBack(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                     int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                     int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3837,7 +4169,8 @@ void receiveNodeMatrixParametersBack(Matrix3d*** tempArray, double* inBuffer, in
 
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_LEFT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, backRank,
+	         MPI_NODE_PARAMETERS_LEFT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -3856,7 +4189,8 @@ void receiveNodeMatrixParametersBack(Matrix3d*** tempArray, double* inBuffer, in
 	}
 }
 
-void sendNodeMatrixParametersBack(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void sendNodeMatrixParametersBack(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                  int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3877,18 +4211,22 @@ void sendNodeMatrixParametersBack(Matrix3d*** array, double* outBuffer, int xnum
 		}
 	}
 
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT,
-		         cartComm);
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, backRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
+	         cartComm);
 }
 
-void receiveNodeMatrixParametersFront(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void receiveNodeMatrixParametersFront(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                      int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                      int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_RIGHT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1), MPI_DOUBLE, frontRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -3907,7 +4245,10 @@ void receiveNodeMatrixParametersFront(Matrix3d*** tempArray, double* inBuffer, i
 	}
 }
 
-void sendNodeMatrixParametersToBottomReceiveFromTop(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendNodeMatrixParametersToBottomReceiveFromTop(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int bottomRank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3929,7 +4270,8 @@ void sendNodeMatrixParametersToBottomReceiveFromTop(Matrix3d*** array, double* o
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             topRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
@@ -3946,7 +4288,10 @@ void sendNodeMatrixParametersToBottomReceiveFromTop(Matrix3d*** array, double* o
 	}
 }
 
-void sendNodeMatrixParametersToTopReceiveFromBottom(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendNodeMatrixParametersToTopReceiveFromBottom(Matrix3d*** array, double* outBuffer, Matrix3d*** tempArray,
+                                                    double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                    int rank, int bottomRank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -3969,7 +4314,8 @@ void sendNodeMatrixParametersToTopReceiveFromBottom(Matrix3d*** array, double* o
 
 	MPI_Status status;
 	int number = (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             bottomRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
@@ -3986,7 +4332,9 @@ void sendNodeMatrixParametersToTopReceiveFromBottom(Matrix3d*** array, double* o
 	}
 }
 
-void sendNodeMatrixParametersBottom(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void sendNodeMatrixParametersBottom(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                    int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4007,11 +4355,13 @@ void sendNodeMatrixParametersBottom(Matrix3d*** array, double* outBuffer, int xn
 	}
 
 
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT,
-		         cartComm);
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, bottomRank,
+	         MPI_NODE_PARAMETERS_LEFT,
+	         cartComm);
 }
 
-void receiveNodeMatrixParametersTop(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void receiveNodeMatrixParametersTop(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                    int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4019,7 +4369,8 @@ void receiveNodeMatrixParametersTop(Matrix3d*** tempArray, double* inBuffer, int
 
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_LEFT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, topRank,
+	         MPI_NODE_PARAMETERS_LEFT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -4038,7 +4389,8 @@ void receiveNodeMatrixParametersTop(Matrix3d*** tempArray, double* inBuffer, int
 	}
 }
 
-void sendNodeMatrixParametersTop(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void sendNodeMatrixParametersTop(Matrix3d*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                 int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4059,18 +4411,22 @@ void sendNodeMatrixParametersTop(Matrix3d*** array, double* outBuffer, int xnumb
 		}
 	}
 
-		MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT,
-		         cartComm);
+	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, topRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
+	         cartComm);
 }
 
-void receiveNodeMatrixParametersBottom(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void receiveNodeMatrixParametersBottom(Matrix3d*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                       int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                       int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_RIGHT,
+	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1), MPI_DOUBLE, bottomRank,
+	         MPI_NODE_PARAMETERS_RIGHT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -4089,7 +4445,10 @@ void receiveNodeMatrixParametersBottom(Matrix3d*** tempArray, double* inBuffer, 
 	}
 }
 
-void sendNodeMassMatrixParametersToLeftReceiveFromRight(MassMatrix*** array, double* outBuffer, MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendNodeMassMatrixParametersToLeftReceiveFromRight(MassMatrix*** array, double* outBuffer, MassMatrix*** tempArray,
+                                                        double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                        int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                        int rank, int leftRank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4099,9 +4458,9 @@ void sendNodeMassMatrixParametersToLeftReceiveFromRight(MassMatrix*** array, dou
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									outBuffer[bcount] = array[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
@@ -4116,16 +4475,18 @@ void sendNodeMassMatrixParametersToLeftReceiveFromRight(MassMatrix*** array, dou
 	}
 
 	MPI_Status status;
-	int number = (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1) * (2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
+	int number = (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		splineOrder + 3) * (2 * splineOrder + 3);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             rightRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									tempArray[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = inBuffer[bcount];
@@ -4140,7 +4501,10 @@ void sendNodeMassMatrixParametersToLeftReceiveFromRight(MassMatrix*** array, dou
 	}
 }
 
-void sendNodeMassMatrixParametersToRightReceiveFromLeft(MassMatrix*** array, double* outBuffer, MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+void sendNodeMassMatrixParametersToRightReceiveFromLeft(MassMatrix*** array, double* outBuffer, MassMatrix*** tempArray,
+                                                        double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                        int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                        int rank, int leftRank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4151,12 +4515,13 @@ void sendNodeMassMatrixParametersToRightReceiveFromLeft(MassMatrix*** array, dou
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
-									outBuffer[bcount] = array[xnumberAdded - 2 - 2 * additionalNumber + i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
+									outBuffer[bcount] = array[xnumberAdded - 2 - 2 * additionalNumber + i][j][k].matrix[tempI][tempJ][tempK].matrix
+										[l][m];
 									bcount++;
 								}
 							}
@@ -4168,16 +4533,18 @@ void sendNodeMassMatrixParametersToRightReceiveFromLeft(MassMatrix*** array, dou
 	}
 
 	MPI_Status status;
-	int number = (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	int number = (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		splineOrder + 3) * (2 * splineOrder + 3);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             leftRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									tempArray[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = inBuffer[bcount];
@@ -4192,7 +4559,9 @@ void sendNodeMassMatrixParametersToRightReceiveFromLeft(MassMatrix*** array, dou
 	}
 }
 
-void sendNodeMassMatrixParametersLeft(MassMatrix*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void sendNodeMassMatrixParametersLeft(MassMatrix*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                      int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                      int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4202,9 +4571,9 @@ void sendNodeMassMatrixParametersLeft(MassMatrix*** array, double* outBuffer, in
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									outBuffer[bcount] = array[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
@@ -4218,10 +4587,14 @@ void sendNodeMassMatrixParametersLeft(MassMatrix*** array, double* outBuffer, in
 		}
 	}
 
-	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT,cartComm);
+	MPI_Send(outBuffer,
+	         (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		         splineOrder + 3) * (2 * splineOrder + 3), MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_LEFT, cartComm);
 }
 
-void receiveNodeMassMatrixParametersRight(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void receiveNodeMassMatrixParametersRight(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                          int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                          int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4229,7 +4602,9 @@ void receiveNodeMassMatrixParametersRight(MassMatrix*** tempArray, double* inBuf
 
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_LEFT,
+	MPI_Recv(inBuffer,
+	         (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		         splineOrder + 3) * (2 * splineOrder + 3), MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_LEFT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -4237,9 +4612,9 @@ void receiveNodeMassMatrixParametersRight(MassMatrix*** tempArray, double* inBuf
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									tempArray[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = inBuffer[bcount];
@@ -4254,7 +4629,9 @@ void receiveNodeMassMatrixParametersRight(MassMatrix*** tempArray, double* inBuf
 	}
 }
 
-void sendNodeMassMatrixParametersRight(MassMatrix*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int rightRank) {
+void sendNodeMassMatrixParametersRight(MassMatrix*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                       int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                       int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4265,12 +4642,13 @@ void sendNodeMassMatrixParametersRight(MassMatrix*** array, double* outBuffer, i
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
-									outBuffer[bcount] = array[xnumberAdded - 2 - 2 * additionalNumber + i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
+									outBuffer[bcount] = array[xnumberAdded - 2 - 2 * additionalNumber + i][j][k].matrix[tempI][tempJ][tempK].matrix
+										[l][m];
 									bcount++;
 								}
 							}
@@ -4281,26 +4659,33 @@ void sendNodeMassMatrixParametersRight(MassMatrix*** array, double* outBuffer, i
 		}
 	}
 
-	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT, cartComm);
+	MPI_Send(outBuffer,
+	         (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		         splineOrder + 3) * (2 * splineOrder + 3), MPI_DOUBLE, rightRank, MPI_NODE_PARAMETERS_RIGHT, cartComm);
 }
 
-void receiveNodeMassMatrixParametersLeft(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int leftRank) {
+void receiveNodeMassMatrixParametersLeft(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                         int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                         int leftRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	MPI_Recv(inBuffer,
+	         (3 + 2 * additionalNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		         splineOrder + 3) * (2 * splineOrder + 3), MPI_DOUBLE, leftRank, MPI_NODE_PARAMETERS_RIGHT, cartComm,
+	         &status);
 
 	int bcount = 0;
 
 	for (int i = 0; i < 3 + 2 * additionalNumber; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									tempArray[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = inBuffer[bcount];
@@ -4315,7 +4700,10 @@ void receiveNodeMassMatrixParametersLeft(MassMatrix*** tempArray, double* inBuff
 	}
 }
 
-void sendNodeMassMatrixParametersToFrontReceiveFromBack(MassMatrix*** array, double* outBuffer, MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendNodeMassMatrixParametersToFrontReceiveFromBack(MassMatrix*** array, double* outBuffer, MassMatrix*** tempArray,
+                                                        double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                        int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                        int rank, int frontRank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4325,9 +4713,9 @@ void sendNodeMassMatrixParametersToFrontReceiveFromBack(MassMatrix*** array, dou
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < 3 + 2 * additionalNumber; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									outBuffer[bcount] = array[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
@@ -4343,16 +4731,18 @@ void sendNodeMassMatrixParametersToFrontReceiveFromBack(MassMatrix*** array, dou
 
 
 	MPI_Status status;
-	int number = (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
+	int number = (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		splineOrder + 3) * (2 * splineOrder + 3);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             backRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < 3 + 2 * additionalNumber; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									tempArray[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = inBuffer[bcount];
@@ -4367,7 +4757,10 @@ void sendNodeMassMatrixParametersToFrontReceiveFromBack(MassMatrix*** array, dou
 	}
 }
 
-void sendNodeMassMatrixParametersToBackReceiveFromFront(MassMatrix*** array, double* outBuffer, MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+void sendNodeMassMatrixParametersToBackReceiveFromFront(MassMatrix*** array, double* outBuffer, MassMatrix*** tempArray,
+                                                        double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                        int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                        int rank, int frontRank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4378,12 +4771,13 @@ void sendNodeMassMatrixParametersToBackReceiveFromFront(MassMatrix*** array, dou
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < 3 + 2 * additionalNumber; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
-									outBuffer[bcount] = array[i][ynumberAdded - 2 - 2 * additionalNumber + j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
+									outBuffer[bcount] = array[i][ynumberAdded - 2 - 2 * additionalNumber + j][k].matrix[tempI][tempJ][tempK].matrix
+										[l][m];
 									bcount++;
 								}
 							}
@@ -4395,16 +4789,18 @@ void sendNodeMassMatrixParametersToBackReceiveFromFront(MassMatrix*** array, dou
 	}
 
 	MPI_Status status;
-	int number = (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	int number = (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		splineOrder + 3) * (2 * splineOrder + 3);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             frontRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < 3 + 2 * additionalNumber; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									tempArray[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = inBuffer[bcount];
@@ -4419,7 +4815,9 @@ void sendNodeMassMatrixParametersToBackReceiveFromFront(MassMatrix*** array, dou
 	}
 }
 
-void sendNodeMassMatrixParametersFront(MassMatrix*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void sendNodeMassMatrixParametersFront(MassMatrix*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                       int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                       int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4429,9 +4827,9 @@ void sendNodeMassMatrixParametersFront(MassMatrix*** array, double* outBuffer, i
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < 3 + 2 * additionalNumber; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									outBuffer[bcount] = array[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
@@ -4445,10 +4843,14 @@ void sendNodeMassMatrixParametersFront(MassMatrix*** array, double* outBuffer, i
 		}
 	}
 
-	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT,cartComm);
+	MPI_Send(outBuffer,
+	         (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		         splineOrder + 3) * (2 * splineOrder + 3), MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_LEFT, cartComm);
 }
 
-void receiveNodeMassMatrixParametersBack(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void receiveNodeMassMatrixParametersBack(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                         int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                         int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4456,7 +4858,9 @@ void receiveNodeMassMatrixParametersBack(MassMatrix*** tempArray, double* inBuff
 
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_LEFT,
+	MPI_Recv(inBuffer,
+	         (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		         splineOrder + 3) * (2 * splineOrder + 3), MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_LEFT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -4464,9 +4868,9 @@ void receiveNodeMassMatrixParametersBack(MassMatrix*** tempArray, double* inBuff
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < 3 + 2 * additionalNumber; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									tempArray[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = inBuffer[bcount];
@@ -4481,7 +4885,9 @@ void receiveNodeMassMatrixParametersBack(MassMatrix*** tempArray, double* inBuff
 	}
 }
 
-void sendNodeMassMatrixParametersBack(MassMatrix*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int backRank) {
+void sendNodeMassMatrixParametersBack(MassMatrix*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                      int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                      int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4492,12 +4898,13 @@ void sendNodeMassMatrixParametersBack(MassMatrix*** array, double* outBuffer, in
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < 3 + 2 * additionalNumber; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
-									outBuffer[bcount] = array[i][ynumberAdded - 2 - 2 * additionalNumber + j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
+									outBuffer[bcount] = array[i][ynumberAdded - 2 - 2 * additionalNumber + j][k].matrix[tempI][tempJ][tempK].matrix
+										[l][m];
 									bcount++;
 								}
 							}
@@ -4508,17 +4915,23 @@ void sendNodeMassMatrixParametersBack(MassMatrix*** array, double* outBuffer, in
 		}
 	}
 
-	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT, cartComm);
+	MPI_Send(outBuffer,
+	         (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		         splineOrder + 3) * (2 * splineOrder + 3), MPI_DOUBLE, backRank, MPI_NODE_PARAMETERS_RIGHT, cartComm);
 }
 
-void receiveNodeMassMatrixParametersFront(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int frontRank) {
+void receiveNodeMassMatrixParametersFront(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                          int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                          int frontRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_RIGHT,
+	MPI_Recv(inBuffer,
+	         (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		         splineOrder + 3) * (2 * splineOrder + 3), MPI_DOUBLE, frontRank, MPI_NODE_PARAMETERS_RIGHT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -4526,9 +4939,9 @@ void receiveNodeMassMatrixParametersFront(MassMatrix*** tempArray, double* inBuf
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < 3 + 2 * additionalNumber; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									tempArray[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = inBuffer[bcount];
@@ -4543,7 +4956,10 @@ void receiveNodeMassMatrixParametersFront(MassMatrix*** tempArray, double* inBuf
 	}
 }
 
-void sendNodeMassMatrixParametersToBottomReceiveFromTop(MassMatrix*** array, double* outBuffer, MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendNodeMassMatrixParametersToBottomReceiveFromTop(MassMatrix*** array, double* outBuffer, MassMatrix*** tempArray,
+                                                        double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                        int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                        int rank, int bottomRank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4553,9 +4969,9 @@ void sendNodeMassMatrixParametersToBottomReceiveFromTop(MassMatrix*** array, dou
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < 3 + 2 * additionalNumber; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									outBuffer[bcount] = array[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
@@ -4570,16 +4986,18 @@ void sendNodeMassMatrixParametersToBottomReceiveFromTop(MassMatrix*** array, dou
 	}
 
 	MPI_Status status;
-	int number = (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
+	int number = (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		splineOrder + 3) * (2 * splineOrder + 3);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT, inBuffer, number, MPI_DOUBLE,
+	             topRank, MPI_NODE_PARAMETERS_LEFT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < 3 + 2 * additionalNumber; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									tempArray[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = inBuffer[bcount];
@@ -4594,7 +5012,10 @@ void sendNodeMassMatrixParametersToBottomReceiveFromTop(MassMatrix*** array, dou
 	}
 }
 
-void sendNodeMassMatrixParametersToTopReceiveFromBottom(MassMatrix*** array, double* outBuffer, MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+void sendNodeMassMatrixParametersToTopReceiveFromBottom(MassMatrix*** array, double* outBuffer, MassMatrix*** tempArray,
+                                                        double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                                        int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                                        int rank, int bottomRank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4605,12 +5026,13 @@ void sendNodeMassMatrixParametersToTopReceiveFromBottom(MassMatrix*** array, dou
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < 3 + 2 * additionalNumber; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
-									outBuffer[bcount] = array[i][j][znumberAdded - 2 - 2 * additionalNumber + k].matrix[tempI][tempJ][tempK].matrix[l][m];
+									outBuffer[bcount] = array[i][j][znumberAdded - 2 - 2 * additionalNumber + k].matrix[tempI][tempJ][tempK].matrix
+										[l][m];
 									bcount++;
 								}
 							}
@@ -4622,16 +5044,18 @@ void sendNodeMassMatrixParametersToTopReceiveFromBottom(MassMatrix*** array, dou
 	}
 
 	MPI_Status status;
-	int number = (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3);
-	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
+	int number = (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		splineOrder + 3) * (2 * splineOrder + 3);
+	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
+	             bottomRank, MPI_NODE_PARAMETERS_RIGHT, cartComm, &status);
 	bcount = 0;
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < 3 + 2 * additionalNumber; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									tempArray[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = inBuffer[bcount];
@@ -4646,7 +5070,9 @@ void sendNodeMassMatrixParametersToTopReceiveFromBottom(MassMatrix*** array, dou
 	}
 }
 
-void sendNodeMassMatrixParametersBottom(MassMatrix*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void sendNodeMassMatrixParametersBottom(MassMatrix*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                        int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                        int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4656,9 +5082,9 @@ void sendNodeMassMatrixParametersBottom(MassMatrix*** array, double* outBuffer, 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < 3 + 2 * additionalNumber; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									outBuffer[bcount] = array[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
@@ -4673,10 +5099,14 @@ void sendNodeMassMatrixParametersBottom(MassMatrix*** array, double* outBuffer, 
 	}
 
 
-	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT, cartComm);
+	MPI_Send(outBuffer,
+	         (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		         splineOrder + 3) * (2 * splineOrder + 3), MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_LEFT, cartComm);
 }
 
-void receiveNodeMassMatrixParametersTop(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void receiveNodeMassMatrixParametersTop(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
+                                        int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                        int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4684,7 +5114,9 @@ void receiveNodeMassMatrixParametersTop(MassMatrix*** tempArray, double* inBuffe
 
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_LEFT,
+	MPI_Recv(inBuffer,
+	         (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		         splineOrder + 3) * (2 * splineOrder + 3), MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_LEFT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -4692,9 +5124,9 @@ void receiveNodeMassMatrixParametersTop(MassMatrix*** tempArray, double* inBuffe
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < 3 + 2 * additionalNumber; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									tempArray[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = inBuffer[bcount];
@@ -4709,7 +5141,9 @@ void receiveNodeMassMatrixParametersTop(MassMatrix*** tempArray, double* inBuffe
 	}
 }
 
-void sendNodeMassMatrixParametersTop(MassMatrix*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int topRank) {
+void sendNodeMassMatrixParametersTop(MassMatrix*** array, double* outBuffer, int xnumberAdded, int ynumberAdded,
+                                     int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank,
+                                     int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4720,12 +5154,13 @@ void sendNodeMassMatrixParametersTop(MassMatrix*** array, double* outBuffer, int
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < 3 + 2 * additionalNumber; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
-									outBuffer[bcount] = array[i][j][znumberAdded - 2 - 2 * additionalNumber + k].matrix[tempI][tempJ][tempK].matrix[l][m];
+									outBuffer[bcount] = array[i][j][znumberAdded - 2 - 2 * additionalNumber + k].matrix[tempI][tempJ][tempK].matrix
+										[l][m];
 									bcount++;
 								}
 							}
@@ -4736,17 +5171,23 @@ void sendNodeMassMatrixParametersTop(MassMatrix*** array, double* outBuffer, int
 		}
 	}
 
-	MPI_Send(outBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT, cartComm);
+	MPI_Send(outBuffer,
+	         (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		         splineOrder + 3) * (2 * splineOrder + 3), MPI_DOUBLE, topRank, MPI_NODE_PARAMETERS_RIGHT, cartComm);
 }
 
-void receiveNodeMassMatrixParametersBottom(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank) {
+void receiveNodeMassMatrixParametersBottom(MassMatrix*** tempArray, double* inBuffer, int xnumberAdded,
+                                           int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm,
+                                           int rank, int bottomRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
 	MPI_Status status;
-	MPI_Recv(inBuffer, (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1)*(2*splineOrder + 3)*(2*splineOrder + 3)*(2*splineOrder + 3), MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_RIGHT,
+	MPI_Recv(inBuffer,
+	         (3 + 2 * additionalNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1) * (2 * splineOrder + 3) * (2 *
+		         splineOrder + 3) * (2 * splineOrder + 3), MPI_DOUBLE, bottomRank, MPI_NODE_PARAMETERS_RIGHT,
 	         cartComm, &status);
 
 	int bcount = 0;
@@ -4754,9 +5195,9 @@ void receiveNodeMassMatrixParametersBottom(MassMatrix*** tempArray, double* inBu
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < 3 + 2 * additionalNumber; ++k) {
-				for(int tempI = 0; tempI < 2*splineOrder + 3; ++tempI){
-					for(int tempJ = 0; tempJ < 2*splineOrder + 3; ++tempJ){
-						for(int tempK = 0; tempK < 2*splineOrder + 3; ++tempK){
+				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
 							for (int l = 0; l < 3; ++l) {
 								for (int m = 0; m < 3; ++m) {
 									tempArray[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = inBuffer[bcount];
@@ -4772,7 +5213,8 @@ void receiveNodeMassMatrixParametersBottom(MassMatrix*** tempArray, double* inBu
 }
 
 void sendLeftReceiveRightParticles(std::vector<Particle *>& outParticles, std::vector<Particle *>& inParticles,
-                                   ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+                                   ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity,
+                                   MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -4789,7 +5231,8 @@ void sendLeftReceiveRightParticles(std::vector<Particle *>& outParticles, std::v
 	if (verbosity > 2) printf("send outParticlesNumber left rank = %d number = %d\n", rank, outParticlesNumber[0]);
 	if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || periodic) {
 		MPI_Status status;
-		MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, leftRank, MPI_SEND_INTEGER_NUMBER_LEFT, inParticlesNumber, 1, MPI_INT, rightRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+		MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, leftRank, MPI_SEND_INTEGER_NUMBER_LEFT, inParticlesNumber, 1, MPI_INT,
+		             rightRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
 	} else if (cartCoord[0] == 0) {
 		MPI_Status status;
 		MPI_Recv(inParticlesNumber, 1, MPI_INT, rightRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
@@ -4844,12 +5287,17 @@ void sendLeftReceiveRightParticles(std::vector<Particle *>& outParticles, std::v
 
 	if (sendingLeft && receivingRight) {
 		MPI_Status status;
-		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, leftRank, MPI_SEND_INTEGER_NUMBER_LEFT, inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, rightRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, leftRank,
+		             MPI_SEND_INTEGER_NUMBER_LEFT, inIntegerParticlesParameters,
+		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, rightRank, MPI_SEND_INTEGER_NUMBER_LEFT,
+		             cartComm, &status);
 	} else if (sendingLeft) {
-		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, leftRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm);
+		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, leftRank,
+		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm);
 	} else if (receivingRight) {
 		MPI_Status status;
-		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, rightRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, rightRank,
+		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
 	}
 
 	MPI_Barrier(cartComm);
@@ -4912,12 +5360,17 @@ void sendLeftReceiveRightParticles(std::vector<Particle *>& outParticles, std::v
 
 	if (sendingLeft && receivingRight) {
 		MPI_Status status;
-		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, leftRank, MPI_SEND_DOUBLE_NUMBER_LEFT, inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, rightRank, MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
+		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, leftRank,
+		             MPI_SEND_DOUBLE_NUMBER_LEFT, inDoubleParticlesParameters,
+		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, rightRank, MPI_SEND_DOUBLE_NUMBER_LEFT,
+		             cartComm, &status);
 	} else if (sendingLeft) {
-		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, leftRank, MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm);
+		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, leftRank,
+		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm);
 	} else if (receivingRight) {
 		MPI_Status status;
-		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, rightRank, MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
+		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, rightRank,
+		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
 	}
 
 	if (receivingRight) {
@@ -5013,7 +5466,8 @@ void sendLeftReceiveRightParticles(std::vector<Particle *>& outParticles, std::v
 }
 
 void sendRightReceiveLeftParticles(std::vector<Particle *>& outParticles, std::vector<Particle *>& inParticles,
-                                   ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
+                                   ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity,
+                                   MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -5031,7 +5485,8 @@ void sendRightReceiveLeftParticles(std::vector<Particle *>& outParticles, std::v
 
 	if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || periodic) {
 		MPI_Status status;
-		MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, rightRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inParticlesNumber, 1, MPI_INT, leftRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+		MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, rightRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inParticlesNumber, 1, MPI_INT,
+		             leftRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
 	} else if (cartCoord[0] == 0) {
 		MPI_Send(outParticlesNumber, 1, MPI_INT, rightRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
 	} else if (cartCoord[0] == cartDim[0] - 1) {
@@ -5090,12 +5545,17 @@ void sendRightReceiveLeftParticles(std::vector<Particle *>& outParticles, std::v
 
 	if (sendingRight && receivingLeft) {
 		MPI_Status status;
-		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, rightRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, leftRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, rightRank,
+		             MPI_SEND_INTEGER_NUMBER_RIGHT, inIntegerParticlesParameters,
+		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, leftRank, MPI_SEND_INTEGER_NUMBER_RIGHT,
+		             cartComm, &status);
 	} else if (sendingRight) {
-		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, rightRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
+		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, rightRank,
+		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
 	} else if (receivingLeft) {
 		MPI_Status status;
-		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, leftRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, leftRank,
+		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
 	}
 
 	MPI_Barrier(cartComm);
@@ -5159,12 +5619,17 @@ void sendRightReceiveLeftParticles(std::vector<Particle *>& outParticles, std::v
 
 	if (sendingRight && receivingLeft) {
 		MPI_Status status;
-		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, rightRank, MPI_SEND_DOUBLE_NUMBER_RIGHT, inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, leftRank, MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
+		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, rightRank,
+		             MPI_SEND_DOUBLE_NUMBER_RIGHT, inDoubleParticlesParameters,
+		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, leftRank, MPI_SEND_DOUBLE_NUMBER_RIGHT,
+		             cartComm, &status);
 	} else if (sendingRight) {
-		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, rightRank, MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm);
+		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, rightRank,
+		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm);
 	} else if (receivingLeft) {
 		MPI_Status status;
-		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, leftRank, MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
+		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, leftRank,
+		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
 	}
 
 	if (receivingLeft) {
@@ -5258,7 +5723,8 @@ void sendRightReceiveLeftParticles(std::vector<Particle *>& outParticles, std::v
 }
 
 void sendFrontReceiveBackParticles(std::vector<Particle *>& outParticles, std::vector<Particle *>& inParticles,
-                                   ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+                                   ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity,
+                                   MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -5273,7 +5739,8 @@ void sendFrontReceiveBackParticles(std::vector<Particle *>& outParticles, std::v
 	inParticlesNumber[0] = 0;
 
 	MPI_Status status;
-	MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_LEFT, inParticlesNumber, 1, MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+	MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_LEFT, inParticlesNumber, 1, MPI_INT,
+	             backRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
 
 	if (verbosity > 2) printf("in particle number = %d\n", inParticlesNumber[0]);
 
@@ -5324,11 +5791,16 @@ void sendFrontReceiveBackParticles(std::vector<Particle *>& outParticles, std::v
 	MPI_Barrier(cartComm);
 
 	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_LEFT, inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, frontRank,
+		             MPI_SEND_INTEGER_NUMBER_LEFT, inIntegerParticlesParameters,
+		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_LEFT,
+		             cartComm, &status);
 	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm);
+		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, frontRank,
+		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm);
 	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, backRank,
+		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
 	}
 
 	MPI_Barrier(cartComm);
@@ -5391,11 +5863,16 @@ void sendFrontReceiveBackParticles(std::vector<Particle *>& outParticles, std::v
 	}
 
 	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, frontRank, MPI_SEND_DOUBLE_NUMBER_LEFT, inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, backRank, MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
+		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, frontRank,
+		             MPI_SEND_DOUBLE_NUMBER_LEFT, inDoubleParticlesParameters,
+		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, backRank, MPI_SEND_DOUBLE_NUMBER_LEFT,
+		             cartComm, &status);
 	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, frontRank, MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm);
+		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, frontRank,
+		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm);
 	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, backRank, MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
+		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, backRank,
+		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
 	}
 
 	MPI_Barrier(cartComm);
@@ -5493,7 +5970,8 @@ void sendFrontReceiveBackParticles(std::vector<Particle *>& outParticles, std::v
 }
 
 void sendBackReceiveFrontParticles(std::vector<Particle *>& outParticles, std::vector<Particle *>& inParticles,
-                                   ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
+                                   ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity,
+                                   MPI_Comm& cartComm, int rank, int frontRank, int backRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -5508,7 +5986,8 @@ void sendBackReceiveFrontParticles(std::vector<Particle *>& outParticles, std::v
 	inParticlesNumber[0] = 0;
 
 	MPI_Status status;
-	MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inParticlesNumber, 1, MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inParticlesNumber, 1, MPI_INT,
+	             frontRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
 
 	MPI_Barrier(cartComm);
 
@@ -5557,11 +6036,16 @@ void sendBackReceiveFrontParticles(std::vector<Particle *>& outParticles, std::v
 	}
 
 	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, backRank,
+		             MPI_SEND_INTEGER_NUMBER_RIGHT, inIntegerParticlesParameters,
+		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_RIGHT,
+		             cartComm, &status);
 	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
+		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, backRank,
+		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
 	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, frontRank,
+		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
 	}
 
 	MPI_Barrier(cartComm);
@@ -5624,11 +6108,16 @@ void sendBackReceiveFrontParticles(std::vector<Particle *>& outParticles, std::v
 	}
 
 	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, backRank, MPI_SEND_DOUBLE_NUMBER_RIGHT, inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, frontRank, MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
+		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, backRank,
+		             MPI_SEND_DOUBLE_NUMBER_RIGHT, inDoubleParticlesParameters,
+		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, frontRank, MPI_SEND_DOUBLE_NUMBER_RIGHT,
+		             cartComm, &status);
 	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, backRank, MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm);
+		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, backRank,
+		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm);
 	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, frontRank, MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
+		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, frontRank,
+		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
 	}
 
 	if (inParticlesNumber[0] > 0) {
@@ -5723,7 +6212,8 @@ void sendBackReceiveFrontParticles(std::vector<Particle *>& outParticles, std::v
 }
 
 void sendBottomReceiveTopParticles(std::vector<Particle *>& outParticles, std::vector<Particle *>& inParticles,
-                                   ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+                                   ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity,
+                                   MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -5738,7 +6228,8 @@ void sendBottomReceiveTopParticles(std::vector<Particle *>& outParticles, std::v
 	inParticlesNumber[0] = 0;
 
 	MPI_Status status;
-	MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_LEFT, inParticlesNumber, 1, MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+	MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_LEFT, inParticlesNumber, 1, MPI_INT,
+	             topRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
 
 	MPI_Barrier(cartComm);
 
@@ -5779,7 +6270,8 @@ void sendBottomReceiveTopParticles(std::vector<Particle *>& outParticles, std::v
 			outIntegerParticlesParameters[bcount] = particle->crossBoundaryCount;
 			bcount++;
 		}
-		if (verbosity > 2) printf("send outIntegerParameters bottom cart coord = %d %d %d\n", cartCoord[0], cartCoord[1], cartCoord[2]);
+		if (verbosity > 2) printf("send outIntegerParameters bottom cart coord = %d %d %d\n", cartCoord[0], cartCoord[1],
+		                          cartCoord[2]);
 	}
 
 	if (inParticlesNumber[0] > 0) {
@@ -5787,11 +6279,16 @@ void sendBottomReceiveTopParticles(std::vector<Particle *>& outParticles, std::v
 	}
 
 	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_LEFT, inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, bottomRank,
+		             MPI_SEND_INTEGER_NUMBER_LEFT, inIntegerParticlesParameters,
+		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_LEFT,
+		             cartComm, &status);
 	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm);
+		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, bottomRank,
+		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm);
 	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, topRank,
+		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
 	}
 
 	MPI_Barrier(cartComm);
@@ -5845,7 +6342,8 @@ void sendBottomReceiveTopParticles(std::vector<Particle *>& outParticles, std::v
 				}
 			}
 		}
-		if (verbosity > 2) printf("send outDoubleParameters bottom cart coord = %d %d %d\n", cartCoord[0], cartCoord[1], cartCoord[2]);
+		if (verbosity > 2) printf("send outDoubleParameters bottom cart coord = %d %d %d\n", cartCoord[0], cartCoord[1],
+		                          cartCoord[2]);
 	}
 
 	if (inParticlesNumber[0] > 0) {
@@ -5853,11 +6351,16 @@ void sendBottomReceiveTopParticles(std::vector<Particle *>& outParticles, std::v
 	}
 
 	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, bottomRank, MPI_SEND_DOUBLE_NUMBER_LEFT, inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, topRank, MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
+		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, bottomRank,
+		             MPI_SEND_DOUBLE_NUMBER_LEFT, inDoubleParticlesParameters,
+		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, topRank, MPI_SEND_DOUBLE_NUMBER_LEFT,
+		             cartComm, &status);
 	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, bottomRank, MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm);
+		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, bottomRank,
+		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm);
 	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, topRank, MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
+		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, topRank,
+		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
 	}
 
 	if (inParticlesNumber[0] > 0) {
@@ -5949,11 +6452,13 @@ void sendBottomReceiveTopParticles(std::vector<Particle *>& outParticles, std::v
 		delete[] outIntegerParticlesParameters;
 		delete[] outDoubleParticlesParameters;
 	}
-	if (verbosity > 2) printf("finish send bottom receive top cart coord = %d %d %d\n", cartCoord[0], cartCoord[1], cartCoord[2]);
+	if (verbosity > 2) printf("finish send bottom receive top cart coord = %d %d %d\n", cartCoord[0], cartCoord[1],
+	                          cartCoord[2]);
 }
 
 void sendTopReceiveBottomParticles(std::vector<Particle *>& outParticles, std::vector<Particle *>& inParticles,
-                                   ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
+                                   ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity,
+                                   MPI_Comm& cartComm, int rank, int bottomRank, int topRank) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -5968,7 +6473,8 @@ void sendTopReceiveBottomParticles(std::vector<Particle *>& outParticles, std::v
 	inParticlesNumber[0] = 0;
 
 	MPI_Status status;
-	MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inParticlesNumber, 1, MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+	MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inParticlesNumber, 1, MPI_INT,
+	             bottomRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
 
 	MPI_Barrier(cartComm);
 
@@ -6025,11 +6531,16 @@ void sendTopReceiveBottomParticles(std::vector<Particle *>& outParticles, std::v
 	}
 
 	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, topRank,
+		             MPI_SEND_INTEGER_NUMBER_RIGHT, inIntegerParticlesParameters,
+		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_RIGHT,
+		             cartComm, &status);
 	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
+		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, topRank,
+		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
 	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, bottomRank,
+		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
 	}
 
 	if ((outParticlesNumber[0] > 0)) {
@@ -6090,11 +6601,16 @@ void sendTopReceiveBottomParticles(std::vector<Particle *>& outParticles, std::v
 	}
 
 	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, topRank, MPI_SEND_DOUBLE_NUMBER_RIGHT, inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, bottomRank, MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
+		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, topRank,
+		             MPI_SEND_DOUBLE_NUMBER_RIGHT, inDoubleParticlesParameters,
+		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, bottomRank, MPI_SEND_DOUBLE_NUMBER_RIGHT,
+		             cartComm, &status);
 	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, topRank, MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm);
+		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, topRank,
+		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm);
 	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, bottomRank, MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
+		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, bottomRank,
+		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
 	}
 
 	if (inParticlesNumber[0] > 0) {
@@ -6188,53 +6704,76 @@ void sendTopReceiveBottomParticles(std::vector<Particle *>& outParticles, std::v
 	if (verbosity > 2) printf("finish send top receive bottom rank = %d\n", rank);
 }
 
-void exchangeLargeVector(double**** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int lnumber, int additionalBinNumber, bool periodicX, bool
-                         periodicY, bool periodicZ, MPI_Comm& cartComm, int* cartCoord, int* cartDim, double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer, double* rightInGmresBuffer, double* frontOutGmresBuffer, double* backOutGmresBuffer, double* frontInGmresBuffer, double* backInGmresBuffer, double* bottomOutGmresBuffer, double* topOutGmresBuffer, double* bottomInGmresBuffer, double* topInGmresBuffer){
+void exchangeLargeVector(double**** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int lnumber,
+                         int additionalBinNumber, bool periodicX, bool
+                         periodicY, bool periodicZ, MPI_Comm& cartComm, int* cartCoord, int* cartDim,
+                         double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer,
+                         double* rightInGmresBuffer, double* frontOutGmresBuffer, double* backOutGmresBuffer,
+                         double* frontInGmresBuffer, double* backInGmresBuffer, double* bottomOutGmresBuffer,
+                         double* topOutGmresBuffer, double* bottomInGmresBuffer, double* topInGmresBuffer) {
 	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-		sendLargeVectorToLeftReceiveFromRight(vector, leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		sendLargeVectorToLeftReceiveFromRight(vector, leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded, ynumberAdded,
+		                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[0] == 0 && cartDim[0] > 1) {
-		receiveLargeVectorFromRight(vector, rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		receiveLargeVectorFromRight(vector, rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+		                            additionalBinNumber, cartComm);
 	} else if (cartCoord[0] == cartDim[0] - 1 && cartDim[0] > 1) {
-		sendLargeVectorToLeft(vector, leftOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		sendLargeVectorToLeft(vector, leftOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+		                      additionalBinNumber, cartComm);
 	}
 
 	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-		sendLargeVectorToRightReceiveFromLeft(vector, rightOutGmresBuffer, leftInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		sendLargeVectorToRightReceiveFromLeft(vector, rightOutGmresBuffer, leftInGmresBuffer, xnumberAdded, ynumberAdded,
+		                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[0] == 0 && cartDim[0] > 1) {
-		sendLargeVectorToRight(vector, rightOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		sendLargeVectorToRight(vector, rightOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+		                       additionalBinNumber, cartComm);
 	} else if (cartCoord[0] == cartDim[0] - 1 && cartDim[0] > 1) {
-		receiveLargeVectorFromLeft(vector, leftInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		receiveLargeVectorFromLeft(vector, leftInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+		                           additionalBinNumber, cartComm);
 	}
 
 	if (periodicY || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
-		sendLargeVectorToFrontReceiveFromBack(vector, frontOutGmresBuffer, backInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		sendLargeVectorToFrontReceiveFromBack(vector, frontOutGmresBuffer, backInGmresBuffer, xnumberAdded, ynumberAdded,
+		                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[1] == 0 && cartDim[1] > 1) {
-		receiveLargeVectorFromBack(vector, backInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		receiveLargeVectorFromBack(vector, backInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+		                           additionalBinNumber, cartComm);
 	} else if (cartCoord[1] == cartDim[1] - 1 && cartDim[1] > 1) {
-		sendLargeVectorToFront(vector, frontOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		sendLargeVectorToFront(vector, frontOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+		                       additionalBinNumber, cartComm);
 	}
 
 	if (periodicY || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
-		sendLargeVectorToBackReceiveFromFront(vector, backOutGmresBuffer, frontInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		sendLargeVectorToBackReceiveFromFront(vector, backOutGmresBuffer, frontInGmresBuffer, xnumberAdded, ynumberAdded,
+		                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[1] == 0 && cartDim[1] > 1) {
-		sendLargeVectorToBack(vector, backOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		sendLargeVectorToBack(vector, backOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+		                      additionalBinNumber, cartComm);
 	} else if (cartCoord[1] == cartDim[1] - 1 && cartDim[1] > 1) {
-		receiveLargeVectorFromFront(vector, frontInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		receiveLargeVectorFromFront(vector, frontInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+		                            additionalBinNumber, cartComm);
 	}
 
 	if (periodicZ || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
-	sendLargeVectorToBottomReceiveFromTop(vector, bottomOutGmresBuffer, topInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		sendLargeVectorToBottomReceiveFromTop(vector, bottomOutGmresBuffer, topInGmresBuffer, xnumberAdded, ynumberAdded,
+		                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[2] == 0 && cartDim[2] > 1) {
-		receiveLargeVectorFromTop(vector, topInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		receiveLargeVectorFromTop(vector, topInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+		                          additionalBinNumber, cartComm);
 	} else if (cartCoord[2] == cartDim[2] - 1 && cartDim[2] > 1) {
-		sendLargeVectorToBottom(vector, bottomOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		sendLargeVectorToBottom(vector, bottomOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+		                        additionalBinNumber, cartComm);
 	}
 
 	if (periodicZ || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
-		sendLargeVectorToTopReceiveFromBottom(vector, topOutGmresBuffer, bottomInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		sendLargeVectorToTopReceiveFromBottom(vector, topOutGmresBuffer, bottomInGmresBuffer, xnumberAdded, ynumberAdded,
+		                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[2] == 0 && cartDim[2] > 1) {
-		sendLargeVectorToTop(vector, topOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		sendLargeVectorToTop(vector, topOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+		                     additionalBinNumber, cartComm);
 	} else if (cartCoord[2] == cartDim[2] - 1 && cartDim[2] > 1) {
-		receiveLargeVectorFromBottom(vector, bottomInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+		receiveLargeVectorFromBottom(vector, bottomInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+		                             additionalBinNumber, cartComm);
 	}
 }

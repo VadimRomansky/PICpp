@@ -6,7 +6,7 @@
 #include "paths.h"
 
 CorrelationMap::CorrelationMap() {
-	for(int i = 0; i < splineOrder + 2; ++i) {
+	for (int i = 0; i < splineOrder + 2; ++i) {
 		xindex[i] = - splineOrder;
 		yindex[i] = - splineOrder;
 		zindex[i] = - splineOrder;

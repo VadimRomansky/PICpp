@@ -14,7 +14,7 @@
 #include "mpi_util.h"
 #include "paths.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
 	int size;
 	int rank;
@@ -28,12 +28,12 @@ int main(int argc, char **argv) {
 
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	if(rank == 0){
+	if (rank == 0) {
 		std::string inputDir = inputDirectory;
-		FILE *MPI_inputFile = fopen((inputDir + "MPI_input.dat").c_str(), "r");
+		FILE* MPI_inputFile = fopen((inputDir + "MPI_input.dat").c_str(), "r");
 		fscanf(MPI_inputFile, "%d %d %d", &dims[0], &dims[1], &dims[2]);
 		fclose(MPI_inputFile);
-		if(size != dims[0]*dims[1]*dims[2]) {
+		if (size != dims[0] * dims[1] * dims[2]) {
 			printf("wrong MPI dimensions\n");
 			MPI_Finalize();
 			exit(0);
@@ -50,13 +50,13 @@ int main(int argc, char **argv) {
 
 	//printf("hello, world!");
 	//exit(0);
-	if(rank == 0){
+	if (rank == 0) {
 		printf("start version 16.11.2017 21:00\n");
 	}
 
-	for(int i = 0; i < size; ++i) {
+	for (int i = 0; i < size; ++i) {
 		MPI_Barrier(MPI_COMM_WORLD);
-		if(i == rank) {
+		if (i == rank) {
 			printf("start thread number %d\n", rank);
 			fflush(stdout);
 		}
@@ -64,12 +64,12 @@ int main(int argc, char **argv) {
 	printf("additionalBinNumber = %d\n", additionalBinNumber);
 	MPI_Barrier(MPI_COMM_WORLD);
 
-	if(rank == 0) printf("start\n");
+	if (rank == 0) printf("start\n");
 	//fflush(stdout);
 
-	if(rank == 0) printf("random initialize\n");
+	if (rank == 0) printf("random initialize\n");
 
-	srand(time(NULL) + rank);
+	srand(time(nullptr) + rank);
 	//srand(initialRandom);
 	//srand(initialRandom + rank);
 
@@ -79,11 +79,11 @@ int main(int argc, char **argv) {
 
 	if (startNew) {
 		Simulation simulation;
-		if(rank == 0) {
+		if (rank == 0) {
 			printf("open input\n");
 			//fflush(stdout);
 			std::string inputDir = inputDirectory;
-			FILE *inputFile = fopen((inputDir + "input.dat").c_str(), "r");
+			FILE* inputFile = fopen((inputDir + "input.dat").c_str(), "r");
 			printf("read input\n");
 			//fflush(stdout);
 			simulation = readInput(inputFile, comm);
@@ -98,31 +98,31 @@ int main(int argc, char **argv) {
 			//simulation.rank = rank;
 		}
 
-		if(rank == 0) printf("simulate\n");
+		if (rank == 0) printf("simulate\n");
 		//fflush(stdout);
 		simulation.simulate();
-		if(rank == 0) printf("end\n");
+		if (rank == 0) printf("end\n");
 		fflush(stdout);
 	} else {
 		//todo parallel
 		Simulation simulation;
-			printf("reading backup\n");
-			fflush(stdout);
+		printf("reading backup\n");
+		fflush(stdout);
 
-			std::string backupDir = backupDirectory;
-			const char* backupGeneralFileName = (backupDir + "general.dat").c_str();
-			const char* backupEfieldFileName = (backupDir + "Efield.dat").c_str();
-			const char* backupBfieldFileName = (backupDir + "Bfield.dat").c_str();
-			const char* backupParticlesFileName = (backupDir + "particles.dat").c_str();
+		std::string backupDir = backupDirectory;
+		const char* backupGeneralFileName = (backupDir + "general.dat").c_str();
+		const char* backupEfieldFileName = (backupDir + "Efield.dat").c_str();
+		const char* backupBfieldFileName = (backupDir + "Bfield.dat").c_str();
+		const char* backupParticlesFileName = (backupDir + "particles.dat").c_str();
 
-			simulation = readBackup(backupGeneralFileName, backupEfieldFileName, backupBfieldFileName, backupParticlesFileName, comm);
+		simulation = readBackup(backupGeneralFileName, backupEfieldFileName, backupBfieldFileName, backupParticlesFileName,
+		                        comm);
 
 
-
-		if(rank == 0) printf("simulate\n");
+		if (rank == 0) printf("simulate\n");
 		fflush(stdout);
 		simulation.simulate();
-		if(rank == 0) printf("end\n");
+		if (rank == 0) printf("end\n");
 		fflush(stdout);
 	}
 
