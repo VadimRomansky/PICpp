@@ -19,7 +19,7 @@
 
 void Simulation::smoothCellParameter(double*** array) {
 	int minI = 1 + additionalBinNumber;
-	/*if (cartCoord[0] == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+	/*if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 		minI = 2 + additionalBinNumber;
 	}*/
 	int maxI = xnumberAdded - additionalBinNumber;
@@ -28,7 +28,7 @@ void Simulation::smoothCellParameter(double*** array) {
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
 			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
-				if (boundaryConditionType == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 1) {
+				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 1) {
 					tempCellParameter[i][j][k] = array[i][j][k] * (1 - smoothingParameter);
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -79,7 +79,7 @@ void Simulation::smoothChargeDensityHat() {
 
 void Simulation::smoothEfieldGeneral(Vector3d*** E) {
 	int minI = 1 + additionalBinNumber;
-	/*if (cartCoord[0] == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+	/*if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 		minI = 2 + additionalBinNumber;
 	}*/
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
@@ -98,7 +98,7 @@ void Simulation::smoothEfieldGeneral(Vector3d*** E) {
 						}
 					}
 				} else if (i == 1 + additionalBinNumber){
-					if( boundaryConditionType != PERIODIC && cartCoord[0] == 0) {
+					if( boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
 						tempNodeVectorParameter[i][j][k] = E[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 						for (int tempI = 0; tempI <= 1; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -118,7 +118,7 @@ void Simulation::smoothEfieldGeneral(Vector3d*** E) {
 						}
 					}
 				} else if (i == xnumberAdded - 1 - additionalBinNumber){
-					if(boundaryConditionType != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
+					if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
 						tempNodeVectorParameter[i][j][k] = E[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 						for (int tempI = -1; tempI <= 0; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -185,7 +185,7 @@ void Simulation::smoothNewEfield() {
 
 void Simulation::smoothBfieldGeneral(Vector3d*** B) {
 	int minI = 1 + additionalBinNumber;
-	/*if (cartCoord[0] == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+	/*if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 		minI = 2 + additionalBinNumber;
 	}*/
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
@@ -194,7 +194,7 @@ void Simulation::smoothBfieldGeneral(Vector3d*** B) {
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
 			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
-				if (boundaryConditionType == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 2) {
+				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 2) {
 					tempCellVectorParameter[i][j][k] = B[i][j][k] * (1 - smoothingParameter);
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -204,7 +204,7 @@ void Simulation::smoothBfieldGeneral(Vector3d*** B) {
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
-					if( boundaryConditionType != PERIODIC && cartCoord[0] == 0) {
+					if( boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
 					tempCellVectorParameter[i][j][k] = B[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 					for (int tempI = 0; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -224,7 +224,7 @@ void Simulation::smoothBfieldGeneral(Vector3d*** B) {
 						}
 					}
 				} else if (i == xnumberAdded - additionalBinNumber - 2) {
-					if(boundaryConditionType != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
+					if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
 					tempCellVectorParameter[i][j][k] = B[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 					for (int tempI = -1; tempI <= 0; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -275,7 +275,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
 			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
-				if (boundaryConditionType == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 1) {
+				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 1) {
 					tempBunemanExParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter);
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -285,7 +285,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
-					if( boundaryConditionType != PERIODIC && cartCoord[0] == 0) {
+					if( boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
 						tempBunemanExParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 						for (int tempI = 0; tempI <= 1; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -305,7 +305,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == xnumberAdded - additionalBinNumber - 2) {
-					if(boundaryConditionType != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
+					if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
 						tempBunemanExParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 						for (int tempI = -1; tempI <= 0; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -355,7 +355,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == 1 + additionalBinNumber){
-					if( boundaryConditionType != PERIODIC && cartCoord[0] == 0) {
+					if( boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
 						tempBunemanEyParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 						for (int tempI = 0; tempI <= 1; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -375,7 +375,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == xnumberAdded - 1 - additionalBinNumber){
-					if(boundaryConditionType != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
+					if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
 						tempBunemanEyParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 						for (int tempI = -1; tempI <= 0; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -425,7 +425,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == 1 + additionalBinNumber){
-					if( boundaryConditionType != PERIODIC && cartCoord[0] == 0) {
+					if( boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
 						tempBunemanEzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 						for (int tempI = 0; tempI <= 1; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -445,7 +445,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == xnumberAdded - 1 - additionalBinNumber){
-					if(boundaryConditionType != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
+					if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
 						tempBunemanEzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 						for (int tempI = -1; tempI <= 0; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -498,7 +498,7 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == 1 + additionalBinNumber){
-					if( boundaryConditionType != PERIODIC && cartCoord[0] == 0) {
+					if( boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
 						tempBunemanBxParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 						for (int tempI = 0; tempI <= 1; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -518,7 +518,7 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == xnumberAdded - 1 - additionalBinNumber){
-					if(boundaryConditionType != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
+					if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
 						tempBunemanBxParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 						for (int tempI = -1; tempI <= 0; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -558,7 +558,7 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
 			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
-				if (boundaryConditionType == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 2) {
+				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 2) {
 					tempBunemanByParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter);
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -568,7 +568,7 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
-					if( boundaryConditionType != PERIODIC && cartCoord[0] == 0) {
+					if( boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
 					tempBunemanByParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 					for (int tempI = 0; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -588,7 +588,7 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == xnumberAdded - additionalBinNumber - 2) {
-					if(boundaryConditionType != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
+					if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
 					tempBunemanByParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 					for (int tempI = -1; tempI <= 0; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -628,7 +628,7 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
 			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
-				if (boundaryConditionType == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 2) {
+				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 2) {
 					tempBunemanBzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter);
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -638,7 +638,7 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
-					if( boundaryConditionType != PERIODIC && cartCoord[0] == 0) {
+					if( boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
 					tempBunemanBzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 					for (int tempI = 0; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -658,7 +658,7 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == xnumberAdded - additionalBinNumber - 2) {
-					if(boundaryConditionType != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
+					if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
 					tempBunemanBzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
 					for (int tempI = -1; tempI <= 0; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {

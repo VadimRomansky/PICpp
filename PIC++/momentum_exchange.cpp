@@ -28,7 +28,7 @@ void Simulation::sumNodeMassMatrixParametersX() {
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
 			sendNodeMassMatrixParametersToLeftReceiveFromRight(massMatrix, outBufferLeft, tempNodeMassMatrixParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			receiveNodeMassMatrixParametersRight(tempNodeMassMatrixParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -38,7 +38,7 @@ void Simulation::sumNodeMassMatrixParametersX() {
 
 		//MPI_Barrier(cartComm);
 
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendNodeMassMatrixParametersToRightReceiveFromLeft(massMatrix, outBufferRight, tempNodeMassMatrixParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			sendNodeMassMatrixParametersRight(massMatrix, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -58,7 +58,7 @@ void Simulation::sumNodeMassMatrixParametersX() {
 		delete[] outBufferRight;
 
 	} else {
-		if (boundaryConditionType == PERIODIC) {
+		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j <= ynumberAdded; ++j) {
 				for (int k = 0; k <= znumberAdded; ++k) {
 					for (int i = 0; i <= 2*additionalBinNumber + 2; ++i) {
@@ -213,7 +213,7 @@ void Simulation::sumNodeMassMatrixParametersZ() {
 }
 
 void Simulation::sumTempNodeMassMatrixParametersX(MassMatrix*** array) {
-	if (cartCoord[0] > 0 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] > 0 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				for (int i = 0; i < 2 * additionalBinNumber + 3; ++i) {
@@ -233,7 +233,7 @@ void Simulation::sumTempNodeMassMatrixParametersX(MassMatrix*** array) {
 		}
 	}
 	//todo
-	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
@@ -307,7 +307,7 @@ void Simulation::sumNodeVectorParametersX() {
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
 			sendNodeVectorParametersToLeftReceiveFromRight(electricFlux, outBufferLeft, tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -317,7 +317,7 @@ void Simulation::sumNodeVectorParametersX() {
 
 		//MPI_Barrier(cartComm);
 
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendNodeVectorParametersToRightReceiveFromLeft(electricFlux, outBufferRight, tempNodeVectorParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			sendNodeVectorParametersRight(electricFlux, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -330,7 +330,7 @@ void Simulation::sumNodeVectorParametersX() {
 		//////
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
 			sendNodeVectorParametersToLeftReceiveFromRight(electricFluxMinus, outBufferLeft, tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -340,7 +340,7 @@ void Simulation::sumNodeVectorParametersX() {
 
 		//MPI_Barrier(cartComm);
 
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendNodeVectorParametersToRightReceiveFromLeft(electricFluxMinus, outBufferRight, tempNodeVectorParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			sendNodeVectorParametersRight(electricFluxMinus, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -355,7 +355,7 @@ void Simulation::sumNodeVectorParametersX() {
 		//printf("send divPressureTensor\n");
 		if ((verbosity > 2)) printf("sending left div pressure tensor sum node vector parameters x rank = %d\n", rank);
 
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
 			sendNodeVectorParametersToLeftReceiveFromRight(divPressureTensor, outBufferLeft, tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -365,7 +365,7 @@ void Simulation::sumNodeVectorParametersX() {
 
 		//MPI_Barrier(cartComm);
 
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendNodeVectorParametersToRightReceiveFromLeft(divPressureTensor, outBufferRight, tempNodeVectorParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			sendNodeVectorParametersRight(divPressureTensor, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -378,7 +378,7 @@ void Simulation::sumNodeVectorParametersX() {
 		//printf("send divPressureTensor\n");
 		if ((verbosity > 2)) printf("sending left div pressure tensor sum node vector parameters x rank = %d\n", rank);
 
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
 			sendNodeVectorParametersToLeftReceiveFromRight(divPressureTensorMinus, outBufferLeft, tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -388,7 +388,7 @@ void Simulation::sumNodeVectorParametersX() {
 
 		//MPI_Barrier(cartComm);
 
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendNodeVectorParametersToRightReceiveFromLeft(divPressureTensorMinus, outBufferRight, tempNodeVectorParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			sendNodeVectorParametersRight(divPressureTensorMinus, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -418,7 +418,7 @@ void Simulation::sumNodeVectorParametersX() {
 			}
 		}
 	} else {
-		if (boundaryConditionType == PERIODIC) {
+		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j <= ynumberAdded; ++j) {
 				for (int k = 0; k <= znumberAdded; ++k) {
 					for (int i = 0; i <= 2*additionalBinNumber + 2; ++i) {
@@ -609,7 +609,7 @@ void Simulation::sumNodeVectorParametersZ() {
 }
 
 void Simulation::sumTempNodeVectorParametersX(Vector3d*** array) {
-	if (cartCoord[0] > 0 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] > 0 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				for (int i = 0; i < 2 * additionalBinNumber + 3; ++i) {
@@ -619,7 +619,7 @@ void Simulation::sumTempNodeVectorParametersX(Vector3d*** array) {
 		}
 	}
 	//todo
-	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
@@ -662,7 +662,7 @@ void Simulation::sumNodeMatrixParametersX() {
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("send left dielectric tensor sum node matrix parameters x rank = %d\n", rank);
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
 			sendNodeMatrixParametersToLeftReceiveFromRight(dielectricTensor, outBufferLeft, tempNodeMatrixParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			receiveNodeMatrixParametersRight(tempNodeMatrixParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -670,7 +670,7 @@ void Simulation::sumNodeMatrixParametersX() {
 			sendNodeMatrixParametersLeft(dielectricTensor, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank);
 		}
 
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendNodeMatrixParametersToRightReceiveFromLeft(dielectricTensor, outBufferRight, tempNodeMatrixParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			sendNodeMatrixParametersRight(dielectricTensor, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -686,7 +686,7 @@ void Simulation::sumNodeMatrixParametersX() {
 		delete[] outBufferLeft;
 		delete[] outBufferRight;
 	} else {
-		if (boundaryConditionType == PERIODIC) {
+		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j <= ynumberAdded; ++j) {
 				for (int k = 0; k <= znumberAdded; ++k) {
 					for (int l = 0; l < 3; ++l) {
@@ -783,7 +783,7 @@ void Simulation::sumNodeMatrixParametersZ() {
 }
 
 void Simulation::sumTempNodeMatrixParametersX(Matrix3d*** array) {
-	if (cartCoord[0] > 0 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] > 0 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				for (int i = 0; i < 2 * additionalBinNumber + 3; ++i) {
@@ -793,7 +793,7 @@ void Simulation::sumTempNodeMatrixParametersX(Matrix3d*** array) {
 		}
 	}
 
-	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
@@ -828,7 +828,7 @@ void Simulation::sumTempNodeMatrixParametersZ(Matrix3d*** array) {
 
 
 void Simulation::sumTempNodeParametersX(double*** array) {
-	if (cartCoord[0] > 0 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] > 0 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				for (int i = 0; i < 2 * additionalBinNumber + 3; ++i) {
@@ -838,7 +838,7 @@ void Simulation::sumTempNodeParametersX(double*** array) {
 		}
 	}
 
-	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
@@ -882,7 +882,7 @@ void Simulation::sumChargeDensityHatX() {
 		//MPI_Barrier(cartComm);
 		if ((rank == 0) && (verbosity > 2)) printf("sending left sum charge density hat x rank = %d\n", rank);
 
-		if (boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendCellParametersToLeftReceiveFromRight(chargeDensityHat, outBufferLeft, tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -890,7 +890,7 @@ void Simulation::sumChargeDensityHatX() {
 			sendCellParametersLeft(chargeDensityHat, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank);
 		}
 
-		if (boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendCellParametersToRightReceiveFromLeft(chargeDensityHat, outBufferRight, tempCellParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			sendCellParametersRight(chargeDensityHat, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -902,7 +902,7 @@ void Simulation::sumChargeDensityHatX() {
 		/////
 		if ((rank == 0) && (verbosity > 2)) printf("sending left sum charge density minus x rank = %d\n", rank);
 
-		if (boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendCellParametersToLeftReceiveFromRight(chargeDensityMinus, outBufferLeft, tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -910,7 +910,7 @@ void Simulation::sumChargeDensityHatX() {
 			sendCellParametersLeft(chargeDensityMinus, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank);
 		}
 
-		if (boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendCellParametersToRightReceiveFromLeft(chargeDensityMinus, outBufferRight, tempCellParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			sendCellParametersRight(chargeDensityMinus, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -927,7 +927,7 @@ void Simulation::sumChargeDensityHatX() {
 		delete[] inBufferLeft;
 		delete[] outBufferLeft;
 	} else {
-		if (boundaryConditionType == PERIODIC) {
+		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int i = 0; i < 2*additionalBinNumber + 2; ++i) {
@@ -1042,7 +1042,7 @@ void Simulation::sumCellParametersX() {
 		for (int t = 0; t < typesNumber; ++t) {
 			//MPI_Barrier(cartComm);
 			if (types[t].particlesPerBin > 0) {
-				if (boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+				if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 					sendCellParametersToLeftReceiveFromRight(particleConcentrations[t], outBufferLeft, tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 				} else if (cartCoord[0] == 0) {
 					receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -1050,7 +1050,7 @@ void Simulation::sumCellParametersX() {
 					sendCellParametersLeft(particleConcentrations[t], outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank);
 				}
 
-				if (boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+				if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 					sendCellParametersToRightReceiveFromLeft(particleConcentrations[t], outBufferRight, tempCellParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 				} else if (cartCoord[0] == 0) {
 					sendCellParametersRight(particleConcentrations[t], outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -1066,7 +1066,7 @@ void Simulation::sumCellParametersX() {
 		for (int t = 0; t < typesNumber; ++t) {
 			//MPI_Barrier(cartComm);
 			if (types[t].particlesPerBin > 0) {
-				if (boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+				if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 					sendCellParametersToLeftReceiveFromRight(particleEnergies[t], outBufferLeft, tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 				} else if (cartCoord[0] == 0) {
 					receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -1074,7 +1074,7 @@ void Simulation::sumCellParametersX() {
 					sendCellParametersLeft(particleEnergies[t], outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank);
 				}
 
-				if (boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+				if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 					sendCellParametersToRightReceiveFromLeft(particleEnergies[t], outBufferRight, tempCellParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 				} else if (cartCoord[0] == 0) {
 					sendCellParametersRight(particleEnergies[t], outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -1089,7 +1089,7 @@ void Simulation::sumCellParametersX() {
 		//MPI_Barrier(cartComm);
 
 
-		if (boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendCellParametersToLeftReceiveFromRight(chargeDensity, outBufferLeft, tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -1097,7 +1097,7 @@ void Simulation::sumCellParametersX() {
 			sendCellParametersLeft(chargeDensity, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank);
 		}
 
-		if (boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendCellParametersToRightReceiveFromLeft(chargeDensity, outBufferRight, tempCellParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if (cartCoord[0] == 0) {
 			sendCellParametersRight(chargeDensity, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -1109,7 +1109,7 @@ void Simulation::sumCellParametersX() {
 
 		//MPI_Barrier(cartComm);
 
-		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 			//todo!
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
@@ -1132,7 +1132,7 @@ void Simulation::sumCellParametersX() {
 		delete[] inBufferLeft;
 		delete[] outBufferLeft;
 	} else {
-		if (boundaryConditionType == PERIODIC) {
+		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int i = 0; i < 2 + 2*additionalBinNumber; ++i) {
@@ -1166,7 +1166,7 @@ void Simulation::sumCellParametersX() {
 				}
 			}
 
-			if (boundaryConditionType == FREE_BOTH) {
+			if (boundaryConditionTypeX == FREE_BOTH) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
 						for (int i = 0; i <= additionalBinNumber; ++i) {
@@ -1351,7 +1351,7 @@ void Simulation::sumCellParametersZ() {
 }
 
 void Simulation::sumCellTempParametersX(double*** array) {
-	if (cartCoord[0] > 0 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] > 0 || boundaryConditionTypeX == PERIODIC) {
 		for (int i = 0; i < 2 * additionalBinNumber + 2; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
@@ -1361,7 +1361,7 @@ void Simulation::sumCellTempParametersX(double*** array) {
 		}
 	}
 
-	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionTypeX == PERIODIC) {
 		for (int i = 0; i < 2 * additionalBinNumber + 2; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
@@ -1404,7 +1404,7 @@ void Simulation::sumCellVectorParametersX() {
 		for (int t = 0; t < typesNumber; ++t) {
 			//MPI_Barrier(cartComm);
 			if (types[t].particlesPerBin > 0) {
-				if(boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+				if(boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 					sendCellVectorParametersToLeftReceiveFromRight(particleBulkVelocities[t], outBufferLeft, tempCellVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 				} else if(cartCoord[0] == 0) {
 					receiveCellVectorParametersRight(tempCellVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -1412,7 +1412,7 @@ void Simulation::sumCellVectorParametersX() {
 					sendCellVectorParametersLeft(particleBulkVelocities[t], outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank);
 				}
 
-				if(boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+				if(boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 					sendCellVectorParametersToRightReceiveFromLeft(particleBulkVelocities[t], outBufferRight, tempCellVectorParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 				} else if(cartCoord[0] == 0) {
 					sendCellVectorParametersRight(particleBulkVelocities[t], outBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -1424,7 +1424,7 @@ void Simulation::sumCellVectorParametersX() {
 			}
 		}
 
-		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 			//todo!
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
@@ -1444,7 +1444,7 @@ void Simulation::sumCellVectorParametersX() {
 		delete[] outBufferLeft;
 
 	} else {
-		if (boundaryConditionType == PERIODIC) {
+		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int i = 0; i < 2 + 2*additionalBinNumber; ++i) {
@@ -1468,7 +1468,7 @@ void Simulation::sumCellVectorParametersX() {
 				}
 			}
 
-			if (boundaryConditionType == FREE_BOTH) {
+			if (boundaryConditionTypeX == FREE_BOTH) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
 						for (int i = 0; i <= additionalBinNumber; ++i) {
@@ -1575,7 +1575,7 @@ void Simulation::sumCellVectorParametersZ() {
 }
 
 void Simulation::sumCellVectorTempParametersX(Vector3d*** array) {
-	if (cartCoord[0] > 0 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] > 0 || boundaryConditionTypeX == PERIODIC) {
 		for (int i = 0; i < 2 * additionalBinNumber + 2; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
@@ -1585,7 +1585,7 @@ void Simulation::sumCellVectorTempParametersX(Vector3d*** array) {
 		}
 	}
 
-	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionTypeX == PERIODIC) {
 		for (int i = 0; i < 2 * additionalBinNumber + 2; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
@@ -1629,7 +1629,7 @@ void Simulation::sumCellMatrixParametersX() {
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("sending left  pressure tensor sum cell matrix parameters rank = %d\n", rank);
 
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendCellMatrixParametersToLeftReceiveFromRight(pressureTensor, outBufferLeft, tempCellMatrixParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			receiveCellMatrixParametersRight(tempCellMatrixParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -1638,7 +1638,7 @@ void Simulation::sumCellMatrixParametersX() {
 		}
 
 		if ((verbosity > 2)) printf("sending right pressure tensor sum cell matrix parameters rank = %d\n", rank);
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendCellMatrixParametersToRightReceiveFromLeft(pressureTensor, outBufferRight, tempCellMatrixParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			sendCellMatrixParametersRight(pressureTensor, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -1654,7 +1654,7 @@ void Simulation::sumCellMatrixParametersX() {
 		delete[] inBufferLeft;
 		delete[] outBufferLeft;
 	} else {
-		if (boundaryConditionType == PERIODIC) {
+		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int i = 0; i < additionalBinNumber + 2; ++i) {
@@ -1747,7 +1747,7 @@ void Simulation::sumCellMatrixParametersZ() {
 }
 
 void Simulation::sumCellTempMatrixParametersX(Matrix3d*** array) {
-	if (cartCoord[0] > 0 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] > 0 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
 				for (int i = 0; i < 2 * additionalBinNumber + 2; ++i) {
@@ -1757,7 +1757,7 @@ void Simulation::sumCellTempMatrixParametersX(Matrix3d*** array) {
 		}
 	}
 
-	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
 				for (int i = 0; i < 2 * additionalBinNumber + 2; ++i) {
@@ -1811,7 +1811,7 @@ void Simulation::sumBunemanJxAlongX(){
 		double* inBufferLeft = new double[(2 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1)];
 		double* outBufferLeft = new double[(2 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1)];
 
-		if(boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if(boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendCellParametersToLeftReceiveFromRight(bunemanJx, outBufferLeft, tempBunemanJxRight, inBufferRight, xnumberAdded, ynumberAdded+1, znumberAdded+1, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			receiveCellParametersRight(tempBunemanJxRight, inBufferRight, xnumberAdded, ynumberAdded+1, znumberAdded+1, additionalBinNumber, cartComm, rank, rightRank);
@@ -1819,7 +1819,7 @@ void Simulation::sumBunemanJxAlongX(){
 			sendCellParametersLeft(bunemanJx, outBufferLeft, xnumberAdded, ynumberAdded+1, znumberAdded+1, additionalBinNumber, cartComm, rank, leftRank);
 		}
 
-		if(boundaryConditionType == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if(boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendCellParametersToRightReceiveFromLeft(bunemanJx, outBufferRight, tempBunemanJxLeft, inBufferLeft, xnumberAdded, ynumberAdded+1, znumberAdded+1, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			sendCellParametersRight(bunemanJx, outBufferRight, xnumberAdded, ynumberAdded+1, znumberAdded+1, additionalBinNumber, cartComm, rank, rightRank);
@@ -1837,7 +1837,7 @@ void Simulation::sumBunemanJxAlongX(){
 		delete[] outBufferLeft;
 
 	} else {
-		if (boundaryConditionType == PERIODIC) {
+		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j < ynumberAdded+1; ++j) {
 				for (int k = 0; k < znumberAdded+1; ++k) {
 					for (int i = 0; i < 2 + 2*additionalBinNumber; ++i) {
@@ -1858,7 +1858,7 @@ void Simulation::sumBunemanJxAlongX(){
 				}
 			}
 
-			if (boundaryConditionType == FREE_BOTH) {
+			if (boundaryConditionTypeX == FREE_BOTH) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
 						for (int i = 0; i <= additionalBinNumber; ++i) {
@@ -1971,7 +1971,7 @@ void Simulation::sumBunemanJyAlongX(){
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
 			sendNodeParametersToLeftReceiveFromRight(bunemanJy, outBufferLeft, tempBunemanJyRight, inBufferRight, xnumberAdded, ynumberAdded-1, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			receiveNodeParametersRight(tempBunemanJyRight, inBufferRight, xnumberAdded, ynumberAdded-1, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -1981,7 +1981,7 @@ void Simulation::sumBunemanJyAlongX(){
 
 		//MPI_Barrier(cartComm);
 
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendNodeParametersToRightReceiveFromLeft(bunemanJy, outBufferRight, tempBunemanJyLeft, inBufferLeft, xnumberAdded, ynumberAdded-1, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			sendNodeParametersRight(bunemanJy, outBufferRight, xnumberAdded, ynumberAdded-1, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -2000,7 +2000,7 @@ void Simulation::sumBunemanJyAlongX(){
 		delete[] outBufferLeft;
 		delete[] outBufferRight;
 	} else {
-		if (boundaryConditionType == PERIODIC) {
+		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k <= znumberAdded; ++k) {
 					for (int i = 0; i <= 2*additionalBinNumber + 2; ++i) {
@@ -2101,7 +2101,7 @@ void Simulation::sumBunemanJzAlongX(){
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
 			sendNodeParametersToLeftReceiveFromRight(bunemanJz, outBufferLeft, tempBunemanJzRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded-1, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			receiveNodeParametersRight(tempBunemanJzRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded-1, additionalBinNumber, cartComm, rank, rightRank);
@@ -2111,7 +2111,7 @@ void Simulation::sumBunemanJzAlongX(){
 
 		//MPI_Barrier(cartComm);
 
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendNodeParametersToRightReceiveFromLeft(bunemanJz, outBufferRight, tempBunemanJzLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded-1, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			sendNodeParametersRight(bunemanJz, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded-1, additionalBinNumber, cartComm, rank, rightRank);
@@ -2128,7 +2128,7 @@ void Simulation::sumBunemanJzAlongX(){
 		delete[] outBufferLeft;
 		delete[] outBufferRight;
 	} else {
-		if (boundaryConditionType == PERIODIC) {
+		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j <= ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int i = 0; i <= 2*additionalBinNumber + 2; ++i) {
@@ -2220,7 +2220,7 @@ void Simulation::sumBunemanJzAlongZ(){
 ///
 
 void Simulation::sumTempBunemanJxAlongX(){
-	if (cartCoord[0] > 0 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] > 0 || boundaryConditionTypeX == PERIODIC) {
 		for (int i = 0; i < 2 * additionalBinNumber + 2; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -2230,7 +2230,7 @@ void Simulation::sumTempBunemanJxAlongX(){
 		}
 	}
 
-	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionTypeX == PERIODIC) {
 		for (int i = 0; i < 2 * additionalBinNumber + 2; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -2264,7 +2264,7 @@ void Simulation::sumTempBunemanJxAlongZ(){
 }
 
 void Simulation::sumTempBunemanJyAlongX(){
-	if (cartCoord[0] > 0 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] > 0 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				for (int i = 0; i < 2 * additionalBinNumber + 3; ++i) {
@@ -2274,7 +2274,7 @@ void Simulation::sumTempBunemanJyAlongX(){
 		}
 	}
 	//todo
-	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
@@ -2308,7 +2308,7 @@ void Simulation::sumTempBunemanJyAlongZ(){
 }
 
 void Simulation::sumTempBunemanJzAlongX(){
-		if (cartCoord[0] > 0 || boundaryConditionType == PERIODIC) {
+		if (cartCoord[0] > 0 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
 				for (int i = 0; i < 2 * additionalBinNumber + 3; ++i) {
@@ -2318,7 +2318,7 @@ void Simulation::sumTempBunemanJzAlongX(){
 		}
 	}
 	//todo
-	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionType == PERIODIC) {
+	if (cartCoord[0] < cartDim[0] - 1 || boundaryConditionTypeX == PERIODIC) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
 				for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
@@ -2361,7 +2361,7 @@ void Simulation::sumNodeParametersX(){
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)){
 			sendNodeParametersToLeftReceiveFromRight(bunemanChargeDensity, outBufferLeft, tempNodeParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			receiveNodeParametersRight(tempNodeParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -2371,7 +2371,7 @@ void Simulation::sumNodeParametersX(){
 
 		//MPI_Barrier(cartComm);
 
-		if((boundaryConditionType == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendNodeParametersToRightReceiveFromLeft(bunemanChargeDensity, outBufferRight, tempNodeParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if(cartCoord[0] == 0) {
 			sendNodeParametersRight(bunemanChargeDensity, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
@@ -2389,7 +2389,7 @@ void Simulation::sumNodeParametersX(){
 		delete[] outBufferLeft;
 		delete[] outBufferRight;
 	} else {
-		if (boundaryConditionType == PERIODIC) {
+		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j <= ynumberAdded; ++j) {
 				for (int k = 0; k <= znumberAdded; ++k) {
 					for (int i = 0; i <= 2*additionalBinNumber + 2; ++i) {

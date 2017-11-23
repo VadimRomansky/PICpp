@@ -55,17 +55,19 @@ void Simulation::evaluateElectricField() {
 		}
 
 
-		bool periodic = (boundaryConditionType == PERIODIC);
+		bool periodicX = (boundaryConditionTypeX == PERIODIC);
+		bool periodicY = (boundaryConditionTypeY == PERIODIC);
+		bool periodicZ = (boundaryConditionTypeZ == PERIODIC);
 		generalizedMinimalResidualMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumberAdded, ynumberAdded,
 		                                 znumberAdded, maxwellEquationMatrixSize, xnumberGeneral, ynumberGeneral,
-		                                 znumberGeneral, additionalBinNumber, maxErrorLevel, maxGMRESIterations, periodic, verbosity, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer, gmresMaxwellBasis, cartComm, cartCoord, cartDim);
-		//biconjugateStabilizedGradientMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, maxwellEquationMatrixSize, maxErrorLevel, maxGMRESIterations, boundaryConditionType == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateMaxwell, firstResidualBiconjugateMaxwell, vBiconjugateMaxwell, pBiconjugateMaxwell, sBiconjugateMaxwell, tBiconjugateMaxwell, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
+		                                 znumberGeneral, additionalBinNumber, maxErrorLevel, maxGMRESIterations, periodicX, periodicY, periodicZ, verbosity, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer, gmresMaxwellBasis, cartComm, cartCoord, cartDim);
+		//biconjugateStabilizedGradientMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, maxwellEquationMatrixSize, maxErrorLevel, maxGMRESIterations, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateMaxwell, firstResidualBiconjugateMaxwell, vBiconjugateMaxwell, pBiconjugateMaxwell, sBiconjugateMaxwell, tBiconjugateMaxwell, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
 
 
 
 		MPI_Barrier(cartComm);
 
-		if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendLargeVectorToLeftReceiveFromRight(gmresOutput, leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 		} else if (cartCoord[0] == 0) {
 			receiveLargeVectorFromRight(gmresOutput, rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
@@ -73,7 +75,7 @@ void Simulation::evaluateElectricField() {
 			sendLargeVectorToLeft(gmresOutput, leftOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 		}
 
-		if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendLargeVectorToRightReceiveFromLeft(gmresOutput, rightOutGmresBuffer, leftInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 		} else if (cartCoord[0] == 0) {
 			sendLargeVectorToRight(gmresOutput, rightOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
@@ -126,7 +128,7 @@ void Simulation::evaluateElectricField() {
 		}
 
 		//evaluateMagneticField();
-		/*if (boundaryConditionType == PERIODIC) {
+		/*if (boundaryConditionTypeX == PERIODIC) {
 		    for (int j = 0; j < ynumber; ++j) {
 		        for (int k = 0; k < znumber; ++k) {
 		            tempEfield[xnumber][j][k] = tempEfield[0][j][k];
@@ -157,7 +159,7 @@ void Simulation::evaluateElectricField() {
 			}
 		}*/
 
-		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					tempEfield[xnumberAdded][j][k] = E0;
@@ -182,7 +184,7 @@ void Simulation::evaluateElectricField() {
 			}
 		}
 
-		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					newEfield[xnumberAdded][j][k] = E0;
@@ -227,7 +229,7 @@ void Simulation::evaluateExplicitDerivative() {
 				rotB[i][j][k] = evaluateRotB(i, j, k) * speed_of_light_normalized;
 				Ederivative[i][j][k] = rotB[i][j][k] -
 					(electricFlux[i][j][k] * 4 * pi);
-				if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+				if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 					if (i <= 1 + additionalBinNumber) {
 						Ederivative[i][j][k].y = 0;
 						Ederivative[i][j][k].z = 0;
@@ -303,13 +305,13 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 					} else {
 						if (cartCoord[0] == 0) {
 							if (i <= additionalBinNumber) {
-								if (boundaryConditionType == FREE_BOTH) {
+								if (boundaryConditionTypeX == FREE_BOTH) {
 									createFreeLeftEquation(i, j, k);
 								} else {
 									createFakeEquation(i, j, k);
 								}
 							} else if (i == 1 + additionalBinNumber) {
-								if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+								if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 									createSuperConductorLeftEquation(i, j, k);
 								} else {
 									createInternalEquation(i, j, k);
@@ -328,13 +330,13 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 								createInternalEquation(i, j, k);
 								//createResistiveEquation(i, j, k);
 							} else if (i < xnumberAdded - 1) {
-								if (boundaryConditionType != PERIODIC) {
+								if (boundaryConditionTypeX != PERIODIC) {
 									createFreeRightEquation(i, j, k);
 								} else {
 									createInternalEquation(i, j, k);
 								}
 							} else {
-								if (boundaryConditionType != PERIODIC) {
+								if (boundaryConditionTypeX != PERIODIC) {
 									createFreeRightEquation(i, j, k);
 								} else {
 									createFakeEquation(i, j, k);
@@ -359,13 +361,13 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 						createFakeEquation(i, j, k);
 					} else {
 						if (i <= additionalBinNumber) {
-							if (boundaryConditionType == FREE_BOTH) {
+							if (boundaryConditionTypeX == FREE_BOTH) {
 								createFreeLeftEquation(i, j, k);
 							} else {
 								createFakeEquation(i, j, k);
 							}
 						} else if (i == 1 + additionalBinNumber) {
-							if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+							if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 								createSuperConductorLeftEquation(i, j, k);
 							} else {
 								createInternalEquation(i, j, k);
@@ -376,13 +378,13 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 							createInternalEquation(i, j, k);
 							//createResistiveEquation(i, j, k);
 						} else if (i < xnumberAdded - 1) {
-							if (boundaryConditionType != PERIODIC) {
+							if (boundaryConditionTypeX != PERIODIC) {
 								createFreeRightEquation(i, j, k);
 							} else {
 								createInternalEquation(i, j, k);
 							}
 						} else {
-							if (boundaryConditionType != PERIODIC) {
+							if (boundaryConditionTypeX != PERIODIC) {
 								createFreeRightEquation(i, j, k);
 							} else {
 								createFakeEquation(i, j, k);
@@ -2204,14 +2206,14 @@ void Simulation::evaluateMagneticField() {
 				} else {
 					newBfield[i][j][k] = Bfield[i][j][k] - (rotE[i][j][k]) * (speed_of_light_normalized * speed_of_light_correction * deltaT);
 				}
-				if ((boundaryConditionType != PERIODIC) && (cartCoord[0] == cartDim[0] - 1) && (i >= xnumberAdded - 1 - additionalBinNumber)) {
+				if ((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1) && (i >= xnumberAdded - 1 - additionalBinNumber)) {
 					newBfield[i][j][k] = B0;
 				}
 			}
 		}
 	}
 
-	if ((boundaryConditionType != PERIODIC) && (cartCoord[0] == 0)) {
+	if ((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == 0)) {
 		for (int i = 0; i <= additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
@@ -2238,7 +2240,7 @@ void Simulation::evaluateMagneticField() {
 
 bool Simulation::isInResistiveLayer(int i, int j, int k){
 	//return false;
-	if(boundaryConditionType == PERIODIC){
+	if(boundaryConditionTypeX == PERIODIC){
 		return false;
 	}
 	if(cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1){
@@ -2250,7 +2252,7 @@ bool Simulation::isInResistiveLayer(int i, int j, int k){
 	}
 
 	if(i > 1 + additionalBinNumber && i <= 1 + additionalBinNumber + resistiveLayerWidth){
-		if(boundaryConditionType != FREE_BOTH){
+		if(boundaryConditionTypeX != FREE_BOTH){
 			return false;
 		}
 		return cartCoord[0] == 0;
@@ -2712,7 +2714,7 @@ void Simulation::evaluateBunemanElectricFieldY(){
 		for(int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j){
 			for(int k = 1 + additionalBinNumber; k <= znumberAdded - 1 - additionalBinNumber; ++k){
 				bunemanNewEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_normalized*evaluateBunemanRotBy(i, j, k) - 4*pi*bunemanJy[i][j][k])*deltaT;
-				if(cartCoord[0] == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT && i <= 1 + additionalBinNumber){
+				if(cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= 1 + additionalBinNumber){
 					bunemanNewEy[i][j][k] = 0;
 				}
 				//bunemanNewEy[i][j][k] = 0;
@@ -2726,7 +2728,7 @@ void Simulation::evaluateBunemanElectricFieldZ(){
 		for(int j = 1 + additionalBinNumber; j <= ynumberAdded - 1 - additionalBinNumber; ++j){
 			for(int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k){
 				bunemanNewEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_normalized*evaluateBunemanRotBz(i, j, k) - 4*pi*bunemanJz[i][j][k])*deltaT;
-				if(cartCoord[0] == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT && i <= 1 + additionalBinNumber){
+				if(cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= 1 + additionalBinNumber){
 					bunemanNewEz[i][j][k] = 0;
 				}
 				//bunemanNewEz[i][j][k] = 0;

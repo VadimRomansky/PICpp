@@ -38,15 +38,16 @@ double evaluateError(double** hessenbergMatrix, double* vector, double beta, int
 	return sqrt(norm);
 }
 
-double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, bool periodic, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, bool periodicX, bool
+                                       periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	double**** result = new double***[xnumberAdded];
 
 	int minI = 1 + additionalBinNumber;
-	if (cartCoord[0] == 0 && !periodic) {
+	if (cartCoord[0] == 0 && !periodicX) {
 		minI = 0;
 	}
 	int maxI = xnumberAdded - 2 - additionalBinNumber;
-	if (cartCoord[0] == cartDim[0] - 1 && !periodic) {
+	if (cartCoord[0] == cartDim[0] - 1 && !periodicX) {
 		maxI = xnumberAdded - 1;
 	}
 	int minJ = 1 + additionalBinNumber;
@@ -89,15 +90,16 @@ double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Ve
 	return result;
 }
 
-double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, double**** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, bool periodic, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, double**** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, bool periodicX, bool
+                                       periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	double**** result = new double***[xnumberAdded];
 
 	int minI = 1 + additionalBinNumber;
-	if (cartCoord[0] == 0 && !periodic) {
+	if (cartCoord[0] == 0 && !periodicX) {
 		minI = 0;
 	}
 	int maxI = xnumberAdded - 2 - additionalBinNumber;
-	if (cartCoord[0] == cartDim[0] - 1 && !periodic) {
+	if (cartCoord[0] == cartDim[0] - 1 && !periodicX) {
 		maxI = xnumberAdded - 1;
 	}
 	int minJ = 1 + additionalBinNumber;
@@ -140,13 +142,14 @@ double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, do
 	return result;
 }
 
-void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, bool periodic, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, bool periodicX, bool
+                                 periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	int minI = 1 + additionalBinNumber;
-	if (cartCoord[0] == 0 && !periodic) {
+	if (cartCoord[0] == 0 && !periodicX) {
 		minI = 0;
 	}
 	int maxI = xnumberAdded - 2 - additionalBinNumber;
-	if (cartCoord[0] == cartDim[0] - 1 && !periodic) {
+	if (cartCoord[0] == cartDim[0] - 1 && !periodicX) {
 		maxI = xnumberAdded - 1;
 	}
 	int minJ = 1 + additionalBinNumber;
@@ -180,13 +183,14 @@ void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**
 	}
 }
 
-void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, double**** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, bool periodic, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, double**** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, bool periodicX, bool
+                                 periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	int minI = 1 + additionalBinNumber;
-	if (cartCoord[0] == 0 && !periodic) {
+	if (cartCoord[0] == 0 && !periodicX) {
 		minI = 0;
 	}
 	int maxI = xnumberAdded - 2 - additionalBinNumber;
-	if (cartCoord[0] == cartDim[0] - 1 && !periodic) {
+	if (cartCoord[0] == cartDim[0] - 1 && !periodicX) {
 		maxI = xnumberAdded - 1;
 	}
 	int minJ = 1 + additionalBinNumber;
@@ -223,7 +227,7 @@ void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**
 
 void arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessenbergMatrix, int n,
                        LargeVectorBasis* gmresBasis, double** prevHessenbergMatrix, int xnumberAdded, int ynumberAdded,
-                       int znumberAdded, int additionalBinNumber, int lnumber, bool periodic, int rank, int nprocs, double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer, double* rightInGmresBuffer, double* frontOutGmresBuffer, double* backOutGmresBuffer, double* frontInGmresBuffer, double* backInGmresBuffer, double* bottomOutGmresBuffer, double* topOutGmresBuffer, double* bottomInGmresBuffer, double* topInGmresBuffer, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+                       int znumberAdded, int additionalBinNumber, int lnumber, bool periodicX, bool periodicY, bool periodicZ, int rank, int nprocs, double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer, double* rightInGmresBuffer, double* frontOutGmresBuffer, double* backOutGmresBuffer, double* frontInGmresBuffer, double* backInGmresBuffer, double* bottomOutGmresBuffer, double* topOutGmresBuffer, double* bottomInGmresBuffer, double* topInGmresBuffer, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 
 	MPI_Barrier(cartComm);
 
@@ -244,7 +248,7 @@ void arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessen
 	if (n >= gmresBasis->capacity) {
 		gmresBasis->resize(2 * n);
 	}
-	multiplySpecialMatrixVector(gmresBasis->array[n - 1], matrix, gmresBasis->array[n - 2], xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
+	multiplySpecialMatrixVector(gmresBasis->array[n - 1], matrix, gmresBasis->array[n - 2], xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 	gmresBasis->size += 1;
 	//printf("mult special matrix");
 
@@ -252,7 +256,7 @@ void arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessen
 
 	MPI_Barrier(cartComm);
 
-	if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 		sendLargeVectorToLeftReceiveFromRight(gmresBasis->array[n - 1], leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[0] == 0) {
 		receiveLargeVectorFromRight(gmresBasis->array[n - 1], rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
@@ -260,7 +264,7 @@ void arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessen
 		sendLargeVectorToLeft(gmresBasis->array[n - 1], leftOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 	}
 
-	if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 		sendLargeVectorToRightReceiveFromLeft(gmresBasis->array[n - 1], rightOutGmresBuffer, leftInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[0] == 0) {
 		sendLargeVectorToRight(gmresBasis->array[n - 1], rightOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
@@ -278,17 +282,17 @@ void arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessen
 	for (int m = 0; m < n - 1; ++m) {
 		//double a = scalarMultiplyLargeVectors(resultBasis[m], tempVector, xnumber, ynumber, znumber, lnumber);
 		outHessenbergMatrix[m][n - 2] = scalarMultiplyLargeVectors(gmresBasis->array[m], gmresBasis->array[n - 1], xnumberAdded, ynumberAdded,
-		                                                           znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
+		                                                           znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 		//printf("outHessenbergMatrix[%d][%d] = %g\n", m, n-2, outHessenbergMatrix[m][n - 2]);
 
 		//for (int i = 0; i < xnumber+1; ++i) {
 
 		int minI = 1 + additionalBinNumber;
-		if (cartCoord[0] == 0 && !periodic) {
+		if (cartCoord[0] == 0 && !periodicX) {
 			minI = 0;
 		}
 		int maxI = xnumberAdded - 2 - additionalBinNumber;
-		if (cartCoord[0] == cartDim[0] - 1 && !periodic) {
+		if (cartCoord[0] == cartDim[0] - 1 && !periodicX) {
 			maxI = xnumberAdded - 1;
 		}
 		int minJ = 1 + additionalBinNumber;
@@ -312,7 +316,7 @@ void arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessen
 	}
 	//printf("finish orthogonalisation\n");
 	outHessenbergMatrix[n - 1][n - 2] = sqrt(
-		scalarMultiplyLargeVectors(gmresBasis->array[n - 1], gmresBasis->array[n - 1], xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim));
+		scalarMultiplyLargeVectors(gmresBasis->array[n - 1], gmresBasis->array[n - 1], xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim));
 	//printf("outHessenbergMatrix[%d][%d] = %g\n", n-1, n-2, outHessenbergMatrix[n - 1][n - 2]);
 	if (outHessenbergMatrix[n - 1][n - 2] > 0) {
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -339,7 +343,7 @@ void arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessen
 		}
 	}
 
-	if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendLargeVectorToLeftReceiveFromRight(gmresBasis->array[n - 1], leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 		} else if (cartCoord[0] == 0) {
 			receiveLargeVectorFromRight(gmresBasis->array[n - 1], rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
@@ -347,7 +351,7 @@ void arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessen
 			sendLargeVectorToLeft(gmresBasis->array[n - 1], leftOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 		}
 
-		if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendLargeVectorToRightReceiveFromLeft(gmresBasis->array[n - 1], rightOutGmresBuffer, leftInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 		} else if (cartCoord[0] == 0) {
 			sendLargeVectorToRight(gmresBasis->array[n - 1], rightOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
@@ -365,7 +369,7 @@ void arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessen
 void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outvector,
                                       int xnumberAdded, int ynumberAdded, int znumberAdded, int lnumber, int xnumberGeneral,
                                       int znumberGeneral, int ynumberGeneral, int additionalBinNumber, double precision,
-                                      int maxIteration, bool periodic, int verbocity, double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer, double* rightInGmresBuffer, double* frontOutGmresBuffer, double* backOutGmresBuffer, double* frontInGmresBuffer, double* backInGmresBuffer, double* bottomOutGmresBuffer, double* topOutGmresBuffer, double* bottomInGmresBuffer, double* topInGmresBuffer, LargeVectorBasis* gmresBasis, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+                                      int maxIteration, bool periodicX, bool periodicY, bool periodicZ, int verbocity, double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer, double* rightInGmresBuffer, double* frontOutGmresBuffer, double* backOutGmresBuffer, double* frontInGmresBuffer, double* backInGmresBuffer, double* bottomOutGmresBuffer, double* topOutGmresBuffer, double* bottomInGmresBuffer, double* topInGmresBuffer, LargeVectorBasis* gmresBasis, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	int rank;
 	int nprocs;
 	MPI_Comm_size(cartComm, &nprocs);
@@ -376,9 +380,9 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 
 
 	MPI_Barrier(cartComm);
-	exchangeLargeVector(rightPart, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodic, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
+	exchangeLargeVector(rightPart, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
 
-	double norm = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim));
+	double norm = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim));
 	//printf("norm = %g\n", norm);
 	alertNaNOrInfinity(norm, "right partnorm = NaN in gmres\n");
 
@@ -406,7 +410,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 		}
 	}
 
-	double normRightPart = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim));
+	double normRightPart = sqrt(scalarMultiplyLargeVectors(rightPart, rightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim));
 	int matrixDimension = lnumber * xnumberGeneral * ynumberGeneral * znumberGeneral;
 
 	double** hessenbergMatrix;
@@ -468,7 +472,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 			newHessenbergMatrix[i] = new double[n - 1];
 		}
 		arnoldiIterations(matrix, newHessenbergMatrix, n, gmresBasis, hessenbergMatrix, xnumberAdded, ynumberAdded, znumberAdded,
-		                  additionalBinNumber, lnumber, periodic, rank, nprocs, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer, cartComm, cartCoord, cartDim);
+		                  additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer, cartComm, cartCoord, cartDim);
 
 		hessenbergMatrix = newHessenbergMatrix;
 
@@ -625,7 +629,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 
 	MPI_Barrier(cartComm);
 
-	if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 		sendLargeVectorToLeftReceiveFromRight(outvector, leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[0] == 0) {
 		receiveLargeVectorFromRight(outvector, rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
@@ -633,7 +637,7 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 		sendLargeVectorToLeft(outvector, leftOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 	}
 
-	if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 		sendLargeVectorToRightReceiveFromLeft(outvector, rightOutGmresBuffer, leftInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[0] == 0) {
 		sendLargeVectorToRight(outvector, rightOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
@@ -681,13 +685,13 @@ void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, dou
 }
 
 double scalarMultiplyLargeVectors(double**** a, double**** b, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
-                                  int lnumber, bool periodic, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+                                  int lnumber, bool periodicX, bool periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	int minI = 1 + additionalBinNumber;
-	if (cartCoord[0] == 0 && !periodic) {
+	if (cartCoord[0] == 0 && !periodicX) {
 		minI = 0;
 	}
 	int maxI = xnumberAdded - 2 - additionalBinNumber;
-	if (cartCoord[0] == cartDim[0] - 1 && !periodic) {
+	if (cartCoord[0] == cartDim[0] - 1 && !periodicX) {
 		maxI = xnumberAdded - 1;
 	}
 	int minJ = 1 + additionalBinNumber;
@@ -717,13 +721,13 @@ double scalarMultiplyLargeVectors(double**** a, double**** b, int xnumberAdded, 
 }
 
 double scalarMultiplyLargeVectors(Vector3d*** a, Vector3d*** b, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
-                                  int lnumber, bool periodic, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+                                  int lnumber, bool periodicX, bool periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	int minI = 1 + additionalBinNumber;
-	if (cartCoord[0] == 0 && !periodic) {
+	if (cartCoord[0] == 0 && !periodicX) {
 		minI = 0;
 	}
 	int maxI = xnumberAdded - 2 - additionalBinNumber;
-	if (cartCoord[0] == cartDim[0] - 1 && !periodic) {
+	if (cartCoord[0] == cartDim[0] - 1 && !periodicX) {
 		maxI = xnumberAdded - 1;
 	}
 	int minJ = 1 + additionalBinNumber;
@@ -750,7 +754,8 @@ double scalarMultiplyLargeVectors(Vector3d*** a, Vector3d*** b, int xnumberAdded
 	return globalResult[0];
 }
 
-void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, int rank, int nprocs, int xnumberGeneral, int znumberGeneral, int ynumberGeneral, double precision, int maxIteration, bool periodic, int verbocity, double* leftOutBuffer, double* rightOutBuffer, double* leftInBuffer, double* rightInBuffer, double* frontOutBuffer, double* backOutBuffer, double* frontInBuffer, double* backInBuffer, double* bottomOutBuffer, double* topOutBuffer, double* bottomInBuffer, double* topInBuffer, BaseRightPartEvaluator& rightPartEvaluator, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, int rank, int nprocs, int xnumberGeneral, int znumberGeneral, int ynumberGeneral, double precision, int maxIteration, bool periodicX, bool
+                           periodicY, bool periodicZ, int verbocity, double* leftOutBuffer, double* rightOutBuffer, double* leftInBuffer, double* rightInBuffer, double* frontOutBuffer, double* backOutBuffer, double* frontInBuffer, double* backInBuffer, double* bottomOutBuffer, double* topOutBuffer, double* bottomInBuffer, double* topInBuffer, BaseRightPartEvaluator& rightPartEvaluator, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	double**** tempVector = new double***[xnumberAdded + 1];
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		tempVector[i] = new double**[ynumberAdded];
@@ -767,7 +772,7 @@ void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAd
 	double maxErrorLevel = precision / (xnumberGeneral * ynumberAdded * znumberAdded * lnumber);
 	double relativeError = 1;
 	int iterationCount = 0;
-	double norm = scalarMultiplyLargeVectors(outVector, outVector, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
+	double norm = scalarMultiplyLargeVectors(outVector, outVector, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 	while (iterationCount < maxIteration && relativeError > maxErrorLevel) {
 		iterationCount++;
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
@@ -780,7 +785,7 @@ void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAd
 				}
 			}
 		}
-		if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendLargeVectorToLeftReceiveFromRight(tempVector, leftOutBuffer, rightInBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 		} else if (cartCoord[0] == 0) {
 			receiveLargeVectorFromRight(tempVector, rightInBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
@@ -788,7 +793,7 @@ void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAd
 			sendLargeVectorToLeft(tempVector, leftOutBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 		}
 
-		if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendLargeVectorToRightReceiveFromLeft(tempVector, rightOutBuffer, leftInBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 		} else if (cartCoord[0] == 0) {
 			sendLargeVectorToRight(tempVector, rightOutBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
@@ -802,7 +807,7 @@ void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAd
 		sendLargeVectorToBottomReceiveFromTop(tempVector, bottomOutBuffer, topInBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 		sendLargeVectorToTopReceiveFromBottom(tempVector, topOutBuffer, bottomInBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 
-		relativeError = normDifferenceLargeVectors(tempVector, outVector, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim) / norm;
+		relativeError = normDifferenceLargeVectors(tempVector, outVector, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim) / norm;
 		double weight = 0.2;
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -827,13 +832,14 @@ void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAd
 	delete[] tempVector;
 }
 
-double normDifferenceLargeVectors(double**** a, double**** b, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, bool periodic, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+double normDifferenceLargeVectors(double**** a, double**** b, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, bool periodicX, bool
+                                  periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	int minI = 1 + additionalBinNumber;
-	if (cartCoord[0] == 0 && !periodic) {
+	if (cartCoord[0] == 0 && !periodicX) {
 		minI = 0;
 	}
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
-	if (cartCoord[0] == cartDim[0] - 1 && !periodic) {
+	if (cartCoord[0] == cartDim[0] - 1 && !periodicX) {
 		maxI = xnumberAdded - 1;
 	}
 	int minJ = 1 + additionalBinNumber;
@@ -1377,7 +1383,8 @@ void sortInputFastFourierZ(Complex*** a, int xnumber, int ynumber, int znumber) 
 }
 
 void conjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector,
-                             int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, double precision, int maxIteration, bool periodic, int verbosity, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+                             int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, double precision, int maxIteration, bool periodicX, bool
+                             periodicY, bool periodicZ, int verbosity, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	int rank;
 	int nprocs;
 	MPI_Comm_size(cartComm, &nprocs);
@@ -1432,19 +1439,19 @@ void conjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** r
 
 
 	double prevResidualNorm2 = scalarMultiplyLargeVectors(prevResidual, prevResidual, xnumberAdded, ynumberAdded, znumberAdded,
-	                                                      additionalBinNumber, lnumber, false, rank, nprocs, cartComm, cartCoord, cartDim);
+	                                                      additionalBinNumber, lnumber,periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 	double residualNorm2 = prevResidualNorm2;
-	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, false, rank, nprocs, cartComm, cartCoord, cartDim);
+	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 
 	double relativeError = sqrt(residualNorm2 / rightPartNorm2);
 
 	while ((iteration < maxIteration) && (iteration < xnumberAdded * ynumberAdded * znumberAdded * lnumber) && (relativeError > (precision / (xnumberAdded * ynumberAdded * znumberAdded * lnumber)))) {
 		if (rank == 0 && verbosity > 1) printf("conjugate gradient iteration %d\n", iteration);
 
-		multiplySpecialMatrixVector(tempVector, matrix, z, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
+		multiplySpecialMatrixVector(tempVector, matrix, z, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 
 		double alpha = prevResidualNorm2 / scalarMultiplyLargeVectors(tempVector, z, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber,
-		                                                              lnumber, false, rank, nprocs, cartComm, cartCoord, cartDim);
+		                                                              lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -1457,7 +1464,7 @@ void conjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** r
 			}
 		}
 
-		residualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, false, rank, nprocs, cartComm, cartCoord, cartDim);
+		residualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber,periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 
 		double beta = residualNorm2 / prevResidualNorm2;
 
@@ -1501,7 +1508,8 @@ void conjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** r
 	delete[] tempVector;
 }
 
-void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, double precision, int maxIteration, bool periodic, int verbosity, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, double precision, int maxIteration, bool periodicX, bool
+                               periodicY, bool periodicZ, int verbosity, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	int rank;
 	int nprocs;
 	MPI_Comm_size(cartComm, &nprocs);
@@ -1562,20 +1570,20 @@ void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double****
 	int iteration = 0;
 
 
-	double prevResidualNorm2 = scalarMultiplyLargeVectors(p, prevResidual, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, false, rank, nprocs, cartComm, cartCoord, cartDim);
+	double prevResidualNorm2 = scalarMultiplyLargeVectors(p, prevResidual, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 	double residualNorm2 = prevResidualNorm2;
-	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, false, rank, nprocs, cartComm, cartCoord, cartDim);
+	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 
 	double relativeError = sqrt(residualNorm2 / rightPartNorm2);
 
 	while ((iteration < maxIteration) && (iteration < xnumberAdded * ynumberAdded * znumberAdded * lnumber) && (relativeError > (precision / (xnumberAdded * ynumberAdded * znumberAdded * lnumber)))) {
 		if (rank == 0 && verbosity > 1) printf("biconjugate gradient iteration %d\n", iteration);
 
-		multiplySpecialMatrixVector(tempVector, matrix, z, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
-		multiplySpecialMatrixVector(tempVector2, transposedMatrix, s, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
+		multiplySpecialMatrixVector(tempVector, matrix, z, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
+		multiplySpecialMatrixVector(tempVector2, transposedMatrix, s, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 
 		double alpha = prevResidualNorm2 / scalarMultiplyLargeVectors(tempVector, s, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber,
-		                                                              lnumber, false, rank, nprocs, cartComm, cartCoord, cartDim);
+		                                                              lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -1589,7 +1597,7 @@ void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double****
 			}
 		}
 
-		residualNorm2 = scalarMultiplyLargeVectors(p, residual, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, false, rank, nprocs, cartComm, cartCoord, cartDim);
+		residualNorm2 = scalarMultiplyLargeVectors(p, residual, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber,periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 
 		double beta = residualNorm2 / prevResidualNorm2;
 
@@ -1652,9 +1660,10 @@ void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double****
 
 void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart,
                                          double**** outVector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
-                                         int lnumber, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, double precision, int maxIteration, bool periodic, int verbosity, MPI_Comm& cartComm, int* cartCoord, int* cartDim,
-										 double**** residual, double**** firstResidual, double**** v, double**** p, double**** s, double**** t,
-										 double* leftOutBuffer, double* rightOutBuffer, double* leftInBuffer, double* rightInBuffer, double* frontOutBuffer, double* backOutBuffer, double* frontInBuffer, double* backInBuffer, double* bottomOutBuffer, double* topOutBuffer, double* bottomInBuffer, double* topInBuffer, bool& converges) {
+                                         int lnumber, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, double precision, int maxIteration, bool periodicX, bool
+                                         periodicY, bool periodicZ, int verbosity, MPI_Comm& cartComm,
+                                         int* cartCoord, int* cartDim, double**** residual, double**** firstResidual, double**** v, double**** p,
+                                         double**** s, double**** t, double* leftOutBuffer, double* rightOutBuffer, double* leftInBuffer, double* rightInBuffer, double* frontOutBuffer, double* backOutBuffer, double* frontInBuffer, double* backInBuffer, double* bottomOutBuffer, double* topOutBuffer, double* bottomInBuffer, double* topInBuffer, bool& converges) {
 	int rank;
 	int nprocs;
 	MPI_Comm_size(cartComm, &nprocs);
@@ -1667,8 +1676,8 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
 	double rho = 1;
 	double omega = 1;
 	int totalNumber = xnumberGeneral*ynumberGeneral*znumberGeneral*lnumber;
-	exchangeLargeVector(rightPart, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodic, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
-	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
+	exchangeLargeVector(rightPart, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
+	double rightPartNorm2 = scalarMultiplyLargeVectors(rightPart, rightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 
 	double tempNorm = sqrt(rightPartNorm2)/totalNumber;
 
@@ -1694,10 +1703,10 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
 			}
 		}
 	}
-	exchangeLargeVector(outVector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodic, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);*/
+	exchangeLargeVector(outVector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);*/
 
-	multiplySpecialMatrixVector(t, matrix, outVector, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
-	exchangeLargeVector(t, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodic, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
+	multiplySpecialMatrixVector(t, matrix, outVector, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
+	exchangeLargeVector(t, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
 
 
 	for (int i = 0; i < xnumberAdded; ++i) {
@@ -1720,7 +1729,7 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
 	int iteration = 0;
 
 
-	double prevResidualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
+	double prevResidualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 	double residualNorm2 = prevResidualNorm2;
 
 	double relativeError = sqrt(residualNorm2 / prevResidualNorm2);
@@ -1732,7 +1741,7 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
 	while ((iteration < maxIteration) && (iteration < totalNumber) && (relativeError > (precision / (totalNumber)))) {
 		if (rank == 0 && verbosity > 1) printf("biconjugate gradient iteration %d\n", iteration);
 
-		double newRho = scalarMultiplyLargeVectors(firstResidual, residual, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
+		double newRho = scalarMultiplyLargeVectors(firstResidual, residual, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 		if(fabs(rho) < 1E-100){
 			if(rank == 0) printf("rho = 0 in biconjugate\n");
 			return;
@@ -1745,11 +1754,11 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
 		rho = newRho;
 
 		int minI = 1 + additionalBinNumber;
-		if (cartCoord[0] == 0 && !periodic) {
+		if (cartCoord[0] == 0 && !periodicX) {
 			minI = 0;
 		}
 		int maxI = xnumberAdded - 2 - additionalBinNumber;
-		if (cartCoord[0] == cartDim[0] - 1 && !periodic) {
+		if (cartCoord[0] == cartDim[0] - 1 && !periodicX) {
 			maxI = xnumberAdded - 1;
 		}
 		int minJ = 1 + additionalBinNumber;
@@ -1779,10 +1788,10 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
 				}
 			}
 		}
-		exchangeLargeVector(p, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodic, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
-		multiplySpecialMatrixVector(v, matrix, p, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
-		exchangeLargeVector(v, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodic, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
-		double firstRscalarV = scalarMultiplyLargeVectors(firstResidual, v, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
+		exchangeLargeVector(p, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
+		multiplySpecialMatrixVector(v, matrix, p, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
+		exchangeLargeVector(v, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
+		double firstRscalarV = scalarMultiplyLargeVectors(firstResidual, v, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 		if(fabs(firstRscalarV) < 1E-100){
 			if(rank == 0) printf("firstRscalarV = 0 in biconjugate\n");
 			return;
@@ -1802,15 +1811,15 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
 			}
 		}
 
-		exchangeLargeVector(s, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodic, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
-		multiplySpecialMatrixVector(t, matrix, s, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
-		exchangeLargeVector(t, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodic, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
-		double tnorm2 = scalarMultiplyLargeVectors(t, t,xnumberAdded,ynumberAdded,znumberAdded,additionalBinNumber,lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
+		exchangeLargeVector(s, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
+		multiplySpecialMatrixVector(t, matrix, s, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
+		exchangeLargeVector(t, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
+		double tnorm2 = scalarMultiplyLargeVectors(t, t,xnumberAdded,ynumberAdded,znumberAdded,additionalBinNumber,lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 		if(fabs(tnorm2) < 1E-100){
 			if(rank == 0) printf("tnorm2 = 0 in biconjugate\n");
 			return;
 		}
-		omega = scalarMultiplyLargeVectors(t, s, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim) / tnorm2;
+		omega = scalarMultiplyLargeVectors(t, s, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim) / tnorm2;
 
 		//for (int i = 0; i < xnumberAdded; ++i) {
 			//for (int j = 0; j < ynumberAdded; ++j) {
@@ -1825,10 +1834,10 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
 				}
 			}
 		}
-		exchangeLargeVector(outVector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodic, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
-		exchangeLargeVector(residual, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodic, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
+		exchangeLargeVector(outVector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
+		exchangeLargeVector(residual, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
 
-		residualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim);
+		residualNorm2 = scalarMultiplyLargeVectors(residual, residual, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim);
 
 		prevResidualNorm2 = residualNorm2;
 
@@ -1855,7 +1864,8 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
 
 void gaussSeidelMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector, int xnumberAdded,
                        int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, int xnumberGeneral,
-                       int znumberGeneral, int ynumberGeneral, double precision, int maxIteration, bool periodic, bool startFromZero, int verbocity, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
+                       int znumberGeneral, int ynumberGeneral, double precision, int maxIteration, bool periodicX, bool periodicY, bool
+                       periodicZ, bool startFromZero, int verbocity, MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
 	int rank;
 	int nprocs;
 	MPI_Comm_size(cartComm, &nprocs);
@@ -1876,7 +1886,7 @@ void gaussSeidelMethod(std::vector<MatrixElement>**** matrix, double**** rightPa
 	double* bottomInBuffer = new double[ynumberAdded * xnumberAdded * lnumber];
 
 	if ((rank == 0) && (verbocity > 0)) printf("start gauss-seidel\n");
-	double normRightPart = scalarMultiplyLargeVectors(rightPart, rightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodic, rank, nprocs, cartComm, cartCoord, cartDim) / (xnumberGeneral * ynumberGeneral * znumberGeneral * lnumber);
+	double normRightPart = scalarMultiplyLargeVectors(rightPart, rightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, cartComm, cartCoord, cartDim) / (xnumberGeneral * ynumberGeneral * znumberGeneral * lnumber);
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
@@ -1914,7 +1924,7 @@ void gaussSeidelMethod(std::vector<MatrixElement>**** matrix, double**** rightPa
 				}
 			}
 		}
-		if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendLargeVectorToLeftReceiveFromRight(outVector, leftOutBuffer, rightInBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 		} else if (cartCoord[0] == 0) {
 			receiveLargeVectorFromRight(outVector, rightInBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
@@ -1922,7 +1932,7 @@ void gaussSeidelMethod(std::vector<MatrixElement>**** matrix, double**** rightPa
 			sendLargeVectorToLeft(outVector, leftOutBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 		}
 
-		if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 			sendLargeVectorToRightReceiveFromLeft(outVector, rightOutBuffer, leftInBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 		} else if (cartCoord[0] == 0) {
 			sendLargeVectorToRight(outVector, rightOutBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);

@@ -74,7 +74,7 @@ void Simulation::simulate() {
 	evaluateParticlesRotationTensor();
 	updateElectroMagneticParameters();
 	updateDensityParameters();
-	if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+	if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 		//updateShockWaveX();
 	}
 
@@ -195,7 +195,7 @@ void Simulation::simulate() {
 		for (int i = 0; i < typesNumber; ++i) {
 			types[i].injectionLength += fabs(V0.x * deltaT);
 		}
-		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT || boundaryConditionType == FREE_BOTH) {
+		if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX == FREE_BOTH) {
 			for(int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
 				for(int cartK = 0; cartK < cartDim[2]; ++cartK){
 					if (cartJ == cartCoord[1] && cartK == cartCoord[2] && cartCoord[0] == cartDim[0] - 1) {
@@ -225,7 +225,7 @@ void Simulation::simulate() {
 				}
 			}
 		}
-		if (preserveChargeGlobal && (boundaryConditionType != PERIODIC)) {
+		if (preserveChargeGlobal && (boundaryConditionTypeX != PERIODIC)) {
 			addToPreserveChargeGlobal();
 		}
 		MPI_Barrier(cartComm);
@@ -289,11 +289,11 @@ void Simulation::simulate() {
 			printf("finish updating shock wave point\n");
 		}
 		if(currentIteration%filteringParameter == 0){
-			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+			if(boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT){
 				//updateMaxEderivativePoint();
 			}
 			//if(currentIteration > 150){
-			filterFields(5);
+			filterFields(10);
 			//}
 			//filterFieldsLocal(5);
 		}
@@ -337,7 +337,7 @@ void Simulation::simulate() {
 			updateAnisotropy();
 		}
 
-		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+		if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 			//todo
 			//updateShockWaveX();
 		}
@@ -1180,11 +1180,11 @@ void Simulation::checkParticleInBox(Particle& particle) {
 
 void Simulation::updateTheoreticalEnergy(){
 	int minI = 1 + additionalBinNumber;
-	if (cartCoord[0] == 0 && boundaryConditionType != PERIODIC) {
+	if (cartCoord[0] == 0 && boundaryConditionTypeX != PERIODIC) {
 		minI = 0;
 	}
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
-	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 		maxI = xnumberAdded - 1;
 	}
 	int minJ = 1 + additionalBinNumber;
@@ -1193,7 +1193,7 @@ void Simulation::updateTheoreticalEnergy(){
 	int maxK = znumberAdded - 1 - additionalBinNumber;
 
 	//if (currentIteration > 0) {
-		//if (boundaryConditionType != PERIODIC) {
+		//if (boundaryConditionTypeX != PERIODIC) {
 
 			for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
 				Particle* particle = escapedParticlesLeft[i];
@@ -1283,11 +1283,11 @@ void Simulation::updateEnergy() {
 	energy = 0;
 
 	int minI = 1 + additionalBinNumber;
-	if (cartCoord[0] == 0 && boundaryConditionType != PERIODIC) {
+	if (cartCoord[0] == 0 && boundaryConditionTypeX != PERIODIC) {
 		minI = 0;
 	}
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
-	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 		maxI = xnumberAdded - 1;
 	}
 	int minJ = 1 + additionalBinNumber;
@@ -1313,7 +1313,7 @@ void Simulation::updateEnergy() {
 					electricFieldEnergyX += E.x*E.x* volumeE() / (8 * pi);
 					electricFieldEnergyY += E.y*E.y* volumeE() / (8 * pi);
 					electricFieldEnergyZ += E.z*E.z* volumeE() / (8 * pi);
-					//if (boundaryConditionType == PERIODIC || rank > 0 || i > 1) {
+					//if (boundaryConditionTypeX == PERIODIC || rank > 0 || i > 1) {
 						//electricFieldEnergy -= E0.scalarMult(E0) * volumeE() / (8 * pi);
 					//}
 				}
@@ -1333,7 +1333,7 @@ void Simulation::updateEnergy() {
 					magneticFieldEnergyX += B.x*B.x* volumeB() / (8 * pi);
 					magneticFieldEnergyY += B.y*B.y* volumeB() / (8 * pi);
 					magneticFieldEnergyZ += B.z*B.z* volumeB() / (8 * pi);
-					//if (boundaryConditionType == PERIODIC || rank > 0 || i > 0) {
+					//if (boundaryConditionTypeX == PERIODIC || rank > 0 || i > 0) {
 						//magneticFieldEnergy -= B0.scalarMult(B0) * volumeB() / (8 * pi);
 					//}
 				}
@@ -1475,11 +1475,11 @@ void Simulation:: updateParameters() {
 		maxEfield = Vector3d(bunemanEx[0][0][0], bunemanEy[0][0][0], bunemanEz[0][0][0]);
 
 		int minI = 1 + additionalBinNumber;
-		if (cartCoord[0] == 0 && boundaryConditionType != PERIODIC) {
+		if (cartCoord[0] == 0 && boundaryConditionTypeX != PERIODIC) {
 			minI = 0;
 		}
 		int maxI = xnumberAdded - 1 - additionalBinNumber;
-		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 			maxI = xnumberAdded - 1;
 		}
 		int minJ = 1 + additionalBinNumber;
@@ -1523,11 +1523,11 @@ void Simulation:: updateParameters() {
 		maxEfield = Efield[0][0][0];
 
 		int minI = 1 + additionalBinNumber;
-		if (cartCoord[0] == 0 && boundaryConditionType != PERIODIC) {
+		if (cartCoord[0] == 0 && boundaryConditionTypeX != PERIODIC) {
 			minI = 0;
 		}
 		int maxI = xnumberAdded - 1 - additionalBinNumber;
-		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 			maxI = xnumberAdded - 1;
 		}
 		int minJ = 1 + additionalBinNumber;

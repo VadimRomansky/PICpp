@@ -39,7 +39,7 @@ void Simulation::moveParticles() {
 		//particles[i]->momentum.x = 0;
 	}
 
-	//if (boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+	//if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 	//removeEscapedParticles();
 	//}
 	if ((rank == 0) && (verbosity > 0)) printf("end moving particles\n");
@@ -96,7 +96,7 @@ void Simulation::removeEscapedParticles() {
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if ((cartDim[0] > 1) || (boundaryConditionType == FREE_BOTH)) {
+	if ((cartDim[0] > 1) || (boundaryConditionTypeX == FREE_BOTH)) {
 		for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
 			Particle* particle = escapedParticlesLeft[i];
 			delete particle;
@@ -104,7 +104,7 @@ void Simulation::removeEscapedParticles() {
 	}
 	escapedParticlesLeft.clear();
 
-	if ((cartDim[0] > 1) || (boundaryConditionType != PERIODIC)) {
+	if ((cartDim[0] > 1) || (boundaryConditionTypeX != PERIODIC)) {
 		for (int i = 0; i < escapedParticlesRight.size(); ++i) {
 			Particle* particle = escapedParticlesRight[i];
 			delete particle;
@@ -233,7 +233,7 @@ void Simulation::moveParticle(Particle* particle) {
 	tempParticle.coordinates.y += middleVelocity.y * eta * deltaT;
 	tempParticle.coordinates.z += middleVelocity.z * eta * deltaT;
 
-	if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
+	if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
 		particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 			middleVelocity.x * (1 - eta) * deltaT);
 		particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
@@ -288,7 +288,7 @@ void Simulation::moveParticle(Particle* particle) {
 		tempParticle.coordinates.y += (middleVelocity.y * etaDeltaT);
 		tempParticle.coordinates.z += (middleVelocity.z * etaDeltaT);
 
-		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
+		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 				middleVelocity.x * restEtaDeltaT);
 			particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * restEtaDeltaT;
@@ -368,7 +368,7 @@ void Simulation::moveParticle(Particle* particle) {
 	}*/
 
 	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
-		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+		if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
 			particle->reflectMomentumX();
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
@@ -474,7 +474,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 	tempParticle.coordinates.y += middleVelocity.y * eta * deltaT;
 	tempParticle.coordinates.z += middleVelocity.z * eta * deltaT;
 
-	if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
+	if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
 		particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 			middleVelocity.x * (1 - eta) * deltaT/N);
 		particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT/N;
@@ -530,7 +530,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 		tempParticle.coordinates.y += (middleVelocity.y * etaDeltaT);
 		tempParticle.coordinates.z += (middleVelocity.z * etaDeltaT);
 
-		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionType == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
+		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 				middleVelocity.x * restEtaDeltaT);
 			particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * restEtaDeltaT;
@@ -581,7 +581,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 	}*/
 
 	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
-		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+		if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
 			particle->reflectMomentumX();
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
@@ -638,7 +638,7 @@ void Simulation::moveParticleBoris(Particle* particle) {
 	particle->coordinates += newVelocity*deltaT;
 
 	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
-		if (boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+		if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
 			particle->reflectMomentumX();
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
@@ -824,7 +824,7 @@ void Simulation::exchangeParticles() {
 		procTime = clock();
 	}
 	if (cartDim[0] == 1) {
-		if (boundaryConditionType == PERIODIC) {
+		if (boundaryConditionTypeX == PERIODIC) {
 			for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
 				Particle* particle = escapedParticlesLeft[i];
 				particle->coordinates.x += xsizeGeneral;
@@ -839,13 +839,13 @@ void Simulation::exchangeParticles() {
 			}
 		}
 	} else {
-		if (cartCoord[0] == 0 && boundaryConditionType == PERIODIC) {
+		if (cartCoord[0] == 0 && boundaryConditionTypeX == PERIODIC) {
 			for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
 				Particle* particle = escapedParticlesLeft[i];
 				particle->coordinates.x += xsizeGeneral;
 			}
 		}
-		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType == PERIODIC) {
+		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX == PERIODIC) {
 			for (int i = 0; i < escapedParticlesRight.size(); ++i) {
 				Particle* particle = escapedParticlesRight[i];
 				particle->coordinates.x -= xsizeGeneral;
@@ -853,11 +853,11 @@ void Simulation::exchangeParticles() {
 		}
 		if (verbosity > 2) printf("send particles left rank = %d\n", rank);
 		sendLeftReceiveRightParticles(escapedParticlesLeft, tempParticles, types, typesNumber,
-		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank);
+		                              boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank);
 		MPI_Barrier(cartComm);
 		if (verbosity > 2) printf("send particles right rank = %d\n", rank);
 		sendRightReceiveLeftParticles(escapedParticlesRight, tempParticles, types, typesNumber,
-		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank);
+		                              boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
@@ -919,11 +919,11 @@ void Simulation::exchangeParticles() {
 		}
 		if (verbosity > 2) printf("send particles front rank = %d\n", rank);
 		sendFrontReceiveBackParticles(escapedParticlesFront, tempParticles, types, typesNumber,
-		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
+		                              boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
 		MPI_Barrier(cartComm);
 		if (verbosity > 2) printf("send particles back rank = %d\n", rank);
 		sendBackReceiveFrontParticles(escapedParticlesBack, tempParticles, types, typesNumber,
-		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
+		                              boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
@@ -978,11 +978,11 @@ void Simulation::exchangeParticles() {
 		}
 		if (verbosity > 2) printf("send particles bottom rank = %d\n", rank);
 		sendBottomReceiveTopParticles(escapedParticlesBottom, tempParticles, types, typesNumber,
-		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
+		                              boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
 		MPI_Barrier(cartComm);
 		if (verbosity > 2) printf("send particles top rank = %d\n", rank);
 		sendTopReceiveBottomParticles(escapedParticlesTop, tempParticles, types, typesNumber,
-		                              boundaryConditionType == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
+		                              boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {

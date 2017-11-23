@@ -232,8 +232,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	//solverType = IMPLICIT_EC; //не явный с сохранением энергии
 	//solverType = EXPLICIT; //явный
 	//solverType = BUNEMAN;
-	boundaryConditionType = PERIODIC;
-	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionTypeX = PERIODIC;
+	//boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
 	verbosity = verbosityV;
 
@@ -491,8 +491,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	newlyStarted = true;
 	preserveChargeGlobal = true;
 	solverType = solverTypev;
-	boundaryConditionType = PERIODIC;
-	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionTypeX = PERIODIC;
+	//boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
 	maxwellEquationMatrixSize = 3;
 	verbosity = verbosityV;
 
@@ -1528,6 +1528,10 @@ void Simulation::rescaleConstantsToTheoretical() {
 void Simulation::initialize() {
 	if (rank == 0) printf("initialization\n");
 	fflush(stdout);
+
+	boundaryConditionTypeX == PERIODIC;
+	boundaryConditionTypeY == PERIODIC;
+	boundaryConditionTypeZ == PERIODIC;
 	//if (rank == 0) printLog("initialization\n");
 
 
@@ -1744,7 +1748,7 @@ void Simulation::initialize() {
 }
 
 void Simulation::initializeSimpleElectroMagneticWave() {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	//E0 = Vector3d(0, 0, 0);
 	//B0 = Vector3d(0, 0, 0);
 	for (int i = 0; i < xnumberAdded; ++i) {
@@ -1837,7 +1841,7 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 }
 
 void Simulation::initializeSimpleElectroMagneticWaveY() {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	//E0 = Vector3d(0, 0, 0);
 	//B0 = Vector3d(0, 0, 0);
 	for (int i = 0; i < xnumberAdded; ++i) {
@@ -1878,7 +1882,7 @@ void Simulation::initializeSimpleElectroMagneticWaveY() {
 }
 
 void Simulation::initializeSimpleElectroMagneticWaveZ() {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	//E0 = Vector3d(0, 0, 0);
 	//B0 = Vector3d(0, 0, 0);
 	for (int i = 0; i < xnumberAdded; ++i) {
@@ -1919,7 +1923,7 @@ void Simulation::initializeSimpleElectroMagneticWaveZ() {
 }
 
 void Simulation::initializeRotatedSimpleElectroMagneticWave(int waveCountX, int waveCountY, int waveCountZ) {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 
 	Eyamplitude = 1;
 	Ezamplitude = 0;
@@ -1977,7 +1981,7 @@ void Simulation::initializeRotatedSimpleElectroMagneticWave(int waveCountX, int 
 }
 
 void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation) {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	if (rank == 0) printf("initiali   zation alfven wave\n");
 	fflush(stdout);
 
@@ -2548,7 +2552,7 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 
 
 void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation) {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	if (rank == 0)printf("initialization alfven wave\n");
 	fflush(stdout);
 
@@ -3106,7 +3110,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 }
 
 void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation) {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	if (rank == 0)printf("initialization alfven wave\n");
 	fflush(stdout);
 
@@ -3664,7 +3668,7 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 }
 
 void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int waveCountZ, double amplitudeRelation) {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	if (rank == 0) printf("initialization alfven wave\n");
 	fflush(stdout);
 
@@ -4271,7 +4275,7 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 }
 
 void Simulation::initializeLangmuirWave() {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	double concentration = density / (massProton + massElectron);
 	types[1].particesDeltaX = types[0].particesDeltaX;
 	types[1].particlesPerBin = types[0].particlesPerBin;
@@ -4409,8 +4413,8 @@ void Simulation::initializeLangmuirWave() {
 }
 
 void Simulation::initializeFluxFromRight() {
-	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	//boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
+	//boundaryConditionTypeX = PERIODIC;
 	createParticles();
 	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized*speed_of_light_correction);
 	//initializeAlfvenWaveY(10, 1.0E-4);
@@ -4427,7 +4431,7 @@ void Simulation::initializeFluxFromRight() {
 			for(int j = 0; j < ynumberAdded; ++j){
 				for(int k = 0; k < znumberAdded + 1; ++k){
 					bunemanEy[i][j][k] = E0.y;
-					if(boundaryConditionType != PERIODIC){
+					if(boundaryConditionTypeX != PERIODIC){
 					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
 						bunemanEy[i][j][k] = 0;
 					}
@@ -4440,7 +4444,7 @@ void Simulation::initializeFluxFromRight() {
 			for(int j = 0; j < ynumberAdded + 1; ++j){
 				for(int k = 0; k < znumberAdded; ++k){
 					bunemanEz[i][j][k] = E0.z;
-					if(boundaryConditionType != PERIODIC){
+					if(boundaryConditionTypeX != PERIODIC){
 					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
 						bunemanEz[i][j][k] = 0;
 					}
@@ -4478,7 +4482,7 @@ void Simulation::initializeFluxFromRight() {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					Efield[i][j][k] = E0;
-					if(boundaryConditionType != PERIODIC){
+					if(boundaryConditionTypeX != PERIODIC){
 					if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
 						Efield[i][j][k].y = 0;
 						Efield[i][j][k].z = 0;
@@ -4517,7 +4521,7 @@ void Simulation::fieldsLorentzTransitionX(const double& v) {
 	for (int i = 0; i < xnumberAdded; ++i) {
 		int prevI = i - 1;
 		if (prevI < 0) {
-			if (boundaryConditionType == PERIODIC) {
+			if (boundaryConditionTypeX == PERIODIC) {
 				prevI = xnumberAdded - 1;
 			} else {
 				prevI = 0;
@@ -4571,7 +4575,7 @@ void Simulation::fieldsLorentzTransitionX(const double& v) {
 }
 
 void Simulation::initializeShockWave() {
-	boundaryConditionType = FREE_BOTH;
+	boundaryConditionTypeX = FREE_BOTH;
 
 	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized);
 	double frontWidth = 500 * deltaX;
@@ -4671,7 +4675,7 @@ void Simulation::initializeShockWave() {
 		}
 	}
 
-	simpleIterationSolver(outVector, xnumberAdded, 1, 1, additionalBinNumber, lnumber, rank, nprocs, xnumberGeneral, ynumberGeneral, znumberGeneral, maxErrorLevel, maxSimpleIterationSolverIterations, false, verbosity, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer, evaluator, cartComm, cartCoord, cartDim);
+	simpleIterationSolver(outVector, xnumberAdded, 1, 1, additionalBinNumber, lnumber, rank, nprocs, xnumberGeneral, ynumberGeneral, znumberGeneral, maxErrorLevel, maxSimpleIterationSolverIterations, boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC, boundaryConditionTypeZ == PERIODIC, verbosity, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer, evaluator, cartComm, cartCoord, cartDim);
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -4878,7 +4882,7 @@ void Simulation::initializeKolmogorovSpectrum(int first, int last, double turbul
 }
 
 void Simulation::initializeTwoStream() {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	createParticles();
 	double u = 0.99 * speed_of_light_normalized;
 	double gamma = 1 / sqrt(1 - u * u / speed_of_light_normalized_sqr);
@@ -4981,7 +4985,7 @@ void Simulation::initializeTwoStream() {
 }
 
 void Simulation::initializeExternalFluxInstability() {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	createParticles();
 	double alfvenV = B0.norm() / sqrt(4 * pi * density);
 	double concentration = density / (massProton + massElectron);
@@ -5028,7 +5032,7 @@ void Simulation::initializeExternalFluxInstability() {
 }
 
 void Simulation::initializeAnisotropic() {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	/*double Tx = temperature*10;
 	double Ty = temperature*1000;
 	double Tz = temperature*1000;*/
@@ -5098,7 +5102,7 @@ void Simulation::initializeAnisotropic() {
 }
 
 void Simulation::initializeAnisotropicSilicon() {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	/*double Tx = temperature*10;
 	double Ty = temperature*1000;
 	double Tz = temperature*1000;*/
@@ -5161,7 +5165,7 @@ void Simulation::initializeAnisotropicSilicon() {
 
 
 void Simulation::initializeWeibel() {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 
 
 	types[0].alphaNormal = 10;
@@ -5246,7 +5250,7 @@ void Simulation::initializeWeibel() {
 
 
 void Simulation::initializeRingWeibel() {
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 
 	/*double temperatureIon = types[1].temperatureX;
 
@@ -5346,9 +5350,9 @@ void Simulation::initializeRingWeibel() {
 }
 
 void Simulation::initializeHomogenouseFlow() {
-	boundaryConditionType = FREE_BOTH;
-	boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	//boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = FREE_BOTH;
+	boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
+	//boundaryConditionTypeX = PERIODIC;
 	createParticles();
 	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized);
 	//initializeAlfvenWaveY(10, 1.0E-4);
@@ -5371,7 +5375,7 @@ void Simulation::initializeHomogenouseFlow() {
 }
 
 void Simulation::initializeFake(){
-	boundaryConditionType = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	createParticles();
 	//E0.y = -B0.z;
 	E0.y = B0.x;
@@ -7077,8 +7081,8 @@ void Simulation::initializeBell(){
 	Vector3d Vsh = V0;
 	V0 = Vector3d(0, 0, 0);
 	Vector3d Vd = Vsh*(protonCRconcentration/electronConcentration);
-	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	boundaryConditionType = PERIODIC;
+	//boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionTypeX = PERIODIC;
 	//createParticles();
 	//E0 = E0 - Vsh.vectorMult(B0) / (speed_of_light_normalized);
 	//initializeAlfvenWaveY(10, 1.0E-4);
@@ -7106,7 +7110,7 @@ void Simulation::initializeBell(){
 			for(int j = 0; j < ynumberAdded; ++j){
 				for(int k = 0; k < znumberAdded + 1; ++k){
 					bunemanEy[i][j][k] = E0.y + E*cos(kw*xgrid[i]);
-					if(boundaryConditionType != PERIODIC){
+					if(boundaryConditionTypeX != PERIODIC){
 					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
 						bunemanEy[i][j][k] = 0;
 					}
@@ -7119,7 +7123,7 @@ void Simulation::initializeBell(){
 			for(int j = 0; j < ynumberAdded + 1; ++j){
 				for(int k = 0; k < znumberAdded; ++k){
 					bunemanEz[i][j][k] = E0.z;
-					if(boundaryConditionType != PERIODIC){
+					if(boundaryConditionTypeX != PERIODIC){
 					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
 						bunemanEz[i][j][k] = 0;
 					}
@@ -7158,7 +7162,7 @@ void Simulation::initializeBell(){
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					Efield[i][j][k] = E0;
 					Efield[i][j][k].y += E*cos(kw*xgrid[i]);
-					if(boundaryConditionType != PERIODIC){
+					if(boundaryConditionTypeX != PERIODIC){
 					if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
 						Efield[i][j][k].y = 0;
 						Efield[i][j][k].z = 0;
@@ -7332,8 +7336,8 @@ void Simulation::initializeBell(){
 }
 
 void Simulation::initializeTestOneParticle() {
-	//boundaryConditionType = SUPER_CONDUCTOR_LEFT;
-	boundaryConditionType = PERIODIC;
+	//boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionTypeX = PERIODIC;
 	
 	//initializeAlfvenWaveY(10, 1.0E-4);
 	if(solverType == BUNEMAN){
@@ -7349,7 +7353,7 @@ void Simulation::initializeTestOneParticle() {
 			for(int j = 0; j < ynumberAdded; ++j){
 				for(int k = 0; k < znumberAdded + 1; ++k){
 					bunemanEy[i][j][k] = E0.y;
-					if(boundaryConditionType != PERIODIC){
+					if(boundaryConditionTypeX != PERIODIC){
 					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
 						bunemanEy[i][j][k] = 0;
 					}
@@ -7362,7 +7366,7 @@ void Simulation::initializeTestOneParticle() {
 			for(int j = 0; j < ynumberAdded + 1; ++j){
 				for(int k = 0; k < znumberAdded; ++k){
 					bunemanEz[i][j][k] = E0.z;
-					if(boundaryConditionType != PERIODIC){
+					if(boundaryConditionTypeX != PERIODIC){
 					if(cartCoord[0] == 0 && i < 1 + additionalBinNumber){
 						bunemanEz[i][j][k] = 0;
 					}
@@ -7400,7 +7404,7 @@ void Simulation::initializeTestOneParticle() {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					Efield[i][j][k] = E0;
-					if(boundaryConditionType != PERIODIC){
+					if(boundaryConditionTypeX != PERIODIC){
 					if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
 						Efield[i][j][k].y = 0;
 						Efield[i][j][k].z = 0;

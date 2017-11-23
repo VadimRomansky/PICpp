@@ -70,7 +70,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 								if (i <= additionalBinNumber) {
 									createDivergenceFakeEquation(i, j, k);
 								} else if (i == 1 + additionalBinNumber) {
-									if (boundaryConditionType == PERIODIC) {
+									if (boundaryConditionTypeX == PERIODIC) {
 										createDivergenceCleanupInternalEquation(i, j, k, field, density);
 									} else {
 										createDivergenceZeroEquation(i, j, k);
@@ -86,7 +86,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 								} else if (i < xnumberAdded - 1 - additionalBinNumber) {
 									createDivergenceCleanupInternalEquation(i, j, k, field, density);
 								} else {
-									if (boundaryConditionType == PERIODIC) {
+									if (boundaryConditionTypeX == PERIODIC) {
 										createDivergenceFakeEquation(i, j, k);
 									} else {
 										createDivergenceFakeEquation(i, j, k);
@@ -116,7 +116,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 							if (i <= additionalBinNumber) {
 								createDivergenceFakeEquation(i, j, k);
 							} else if (i == 1 + additionalBinNumber) {
-								if (boundaryConditionType == PERIODIC) {
+								if (boundaryConditionTypeX == PERIODIC) {
 									createDivergenceCleanupInternalEquation(i, j, k, field, density);
 								} else {
 									createDivergenceZeroEquation(i, j, k);
@@ -124,7 +124,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 							} else if (i < xnumberAdded - 1 - additionalBinNumber) {
 								createDivergenceCleanupInternalEquation(i, j, k, field, density);
 							} else {
-								if (boundaryConditionType == PERIODIC) {
+								if (boundaryConditionTypeX == PERIODIC) {
 									createDivergenceFakeEquation(i, j, k);
 								} else {
 									createDivergenceZeroEquation(i, j, k);
@@ -159,8 +159,8 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 				}
 			}
 		}
-		//exchangeLargeVector(divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, 1, additionalBinNumber, boundaryConditionType == PERIODIC, cartComm, cartCoord, cartDim, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer);
-		biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations, boundaryConditionType == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
+		//exchangeLargeVector(divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, 1, additionalBinNumber, boundaryConditionTypeX == PERIODIC, cartComm, cartCoord, cartDim, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer);
+		biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
 			if(!converges){
 				if(rank == 0) printf("conjugate gradients did not converge\n");
 
@@ -173,7 +173,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 				}
 			}
 		//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded,
-		                                 //znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionType == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
+		                                 //znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
 
 	} else {
 		//test
@@ -278,7 +278,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 			}
 		}
 
-		if (boundaryConditionType != PERIODIC) {
+		if (boundaryConditionTypeX != PERIODIC) {
 			if (cartCoord[0] == 0) {
 				for (int i = 0; i <= additionalBinNumber; ++i) {
 					for (int j = 0; j < ynumberAdded; ++j) {
@@ -342,7 +342,7 @@ void Simulation::cleanupDivergence1d(Vector3d*** field, double*** density) {
 		divergenceCleaningField[i][1 + additionalBinNumber][1 + additionalBinNumber][0] = divergenceCleaningField[i + 1][1 + additionalBinNumber][1 + additionalBinNumber][0] - clean_up_right_part * deltaX;
 		divergenceCleaningField[i][1 + additionalBinNumber][1 + additionalBinNumber][1] = 0;
 		divergenceCleaningField[i][1 + additionalBinNumber][1 + additionalBinNumber][2] = 0;
-		if ((cartCoord[0] == cartDim[0] - 1) && (boundaryConditionType != PERIODIC)) {
+		if ((cartCoord[0] == cartDim[0] - 1) && (boundaryConditionTypeX != PERIODIC)) {
 			if (i >= xnumberAdded - 1 - additionalBinNumber) {
 				//if(i >= xnumber){
 				divergenceCleaningField[i][1 + additionalBinNumber][1 + additionalBinNumber][0] = 0;
@@ -372,13 +372,13 @@ void Simulation::cleanupDivergence1d(Vector3d*** field, double*** density) {
 
 	MPI_Barrier(cartComm);
 
-	if(boundaryConditionType == PERIODIC){
+	if(boundaryConditionTypeX == PERIODIC){
 		//substractMeanEfield(divergenceCleaningField);
 	}
 
 	updateFieldByCleaning(field);
 
-	if (cartCoord[0] == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+	if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 		for (int i = 0; i <= 1 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -390,7 +390,7 @@ void Simulation::cleanupDivergence1d(Vector3d*** field, double*** density) {
 		}
 	}
 
-	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 		newEfield[xnumber][0][0] = E0;
 		newEfield[xnumber + 1][0][0] = E0;
 	}
@@ -402,16 +402,16 @@ void Simulation::substractMeanEfield(double**** field) {
 	double meanFieldSquare = 0;
 
 	/*int maxI = xnumber;
-	if(rank == nprocs-1 && boundaryConditionType != PERIODIC){
+	if(rank == nprocs-1 && boundaryConditionTypeX != PERIODIC){
 		maxI = xnumber+1;
 	}*/
 
 	int minI = 1 + additionalBinNumber;
-		if (cartCoord[0] == 0 && boundaryConditionType != PERIODIC) {
+		if (cartCoord[0] == 0 && boundaryConditionTypeX != PERIODIC) {
 			minI = 0;
 		}
 		int maxI = xnumberAdded - 1 - additionalBinNumber;
-		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+		if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 			maxI = xnumberAdded - 1;
 		}
 		int minJ = 1 + additionalBinNumber;
@@ -445,7 +445,7 @@ void Simulation::substractMeanEfield(double**** field) {
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				//if (i < xnumber - additionalBinNumber ||  cartCoord[0] < cartDim[0] - 1 || boundaryConditionType == PERIODIC) {
+				//if (i < xnumber - additionalBinNumber ||  cartCoord[0] < cartDim[0] - 1 || boundaryConditionTypeX == PERIODIC) {
 					field[i][j][k][0] -= meanField.x;
 				//}
 			}
@@ -507,7 +507,7 @@ void Simulation::evaluateDivergenceCleaningField() {
 		}
 	}
 
-	if (cartCoord[0] == 0 && boundaryConditionType != PERIODIC) {
+	if (cartCoord[0] == 0 && boundaryConditionTypeX != PERIODIC) {
 		for (int i = 0; i <= 1 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
@@ -519,7 +519,7 @@ void Simulation::evaluateDivergenceCleaningField() {
 		}
 	}
 
-	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 		for (int i = xnumberAdded - 1 - additionalBinNumber; i <= xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
@@ -770,11 +770,11 @@ double Simulation::evaluateMeanChargeDensity() {
 void Simulation::substractMeanChargeDensity() {
 	double meanChargeDensity = evaluateMeanChargeDensity();
 	int minI = 0;
-	if (cartCoord[0] == 0 && boundaryConditionType != PERIODIC) {
+	if (cartCoord[0] == 0 && boundaryConditionTypeX != PERIODIC) {
 		minI = 1 + additionalBinNumber;
 	}
 	int maxI = xnumberAdded - 1;
-	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 		maxI = xnumber - 2 - additionalBinNumber;
 	}
 	for (int i = 0; i < znumberAdded; ++i) {
@@ -889,7 +889,7 @@ void Simulation::cleanupDivergenceMagnetic() {
 								if (i <= additionalBinNumber) {
 									createDivergenceFakeEquation(i, j, k);
 								} else if (i == 1 + additionalBinNumber) {
-									if (boundaryConditionType == PERIODIC) {
+									if (boundaryConditionTypeX == PERIODIC) {
 										createDivergenceCleanupInternalEquationMagnetic(i, j, k);
 									} else {
 										createDivergenceZeroEquation(i, j, k);
@@ -905,7 +905,7 @@ void Simulation::cleanupDivergenceMagnetic() {
 								} else if (i < xnumberAdded - 1 - additionalBinNumber) {
 									createDivergenceCleanupInternalEquationMagnetic(i, j, k);
 								} else {
-									if (boundaryConditionType == PERIODIC) {
+									if (boundaryConditionTypeX == PERIODIC) {
 										createDivergenceFakeEquation(i, j, k);
 									} else {
 										createDivergenceFakeEquation(i, j, k);
@@ -935,7 +935,7 @@ void Simulation::cleanupDivergenceMagnetic() {
 							if (i <= additionalBinNumber) {
 								createDivergenceFakeEquation(i, j, k);
 							} else if (i == 1 + additionalBinNumber) {
-								if (boundaryConditionType == PERIODIC) {
+								if (boundaryConditionTypeX == PERIODIC) {
 									createDivergenceCleanupInternalEquationMagnetic(i, j, k);
 								} else {
 									createDivergenceZeroEquation(i, j, k);
@@ -943,7 +943,7 @@ void Simulation::cleanupDivergenceMagnetic() {
 							} else if (i < xnumberAdded - 1 - additionalBinNumber) {
 								createDivergenceCleanupInternalEquationMagnetic(i, j, k);
 							} else {
-								if (boundaryConditionType == PERIODIC) {
+								if (boundaryConditionTypeX == PERIODIC) {
 									createDivergenceFakeEquation(i, j, k);
 								} else {
 									createDivergenceZeroEquation(i, j, k);
@@ -958,9 +958,9 @@ void Simulation::cleanupDivergenceMagnetic() {
 			checkEquationMatrix(divergenceCleanUpMatrix, 1);
 		//}
 			bool converges;
-		biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations, boundaryConditionType == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
+		biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral, ynumberGeneral, znumberGeneral, maxCleanupErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateDivE, firstResidualBiconjugateDivE, vBiconjugateDivE, pBiconjugateDivE, sBiconjugateDivE, tBiconjugateDivE, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, converges);
 		//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded,
-		                                 //znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionType == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
+		                                 //znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
 
 		exchangeGeneralScalarCellField(divergenceCleaningPotential);
 	evaluateDivergenceCleaningFieldMagnetic();
@@ -1023,7 +1023,7 @@ void Simulation::evaluateDivergenceCleaningFieldMagnetic() {
 		}
 	}
 
-	if (cartCoord[0] == 0 && boundaryConditionType != PERIODIC) {
+	if (cartCoord[0] == 0 && boundaryConditionTypeX != PERIODIC) {
 		for (int i = 0; i < 1 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
@@ -1035,7 +1035,7 @@ void Simulation::evaluateDivergenceCleaningFieldMagnetic() {
 		}
 	}
 
-	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionType != PERIODIC) {
+	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 		for (int i = xnumberAdded - 1 - additionalBinNumber; i <= xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {

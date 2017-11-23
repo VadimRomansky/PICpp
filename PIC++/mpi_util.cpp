@@ -6188,8 +6188,9 @@ void sendTopReceiveBottomParticles(std::vector<Particle *>& outParticles, std::v
 	if (verbosity > 2) printf("finish send top receive bottom rank = %d\n", rank);
 }
 
-void exchangeLargeVector(double**** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int lnumber, int additionalBinNumber, bool periodic, MPI_Comm& cartComm, int* cartCoord, int* cartDim, double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer, double* rightInGmresBuffer, double* frontOutGmresBuffer, double* backOutGmresBuffer, double* frontInGmresBuffer, double* backInGmresBuffer, double* bottomOutGmresBuffer, double* topOutGmresBuffer, double* bottomInGmresBuffer, double* topInGmresBuffer){
-	if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+void exchangeLargeVector(double**** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int lnumber, int additionalBinNumber, bool periodicX, bool
+                         periodicY, bool periodicZ, MPI_Comm& cartComm, int* cartCoord, int* cartDim, double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer, double* rightInGmresBuffer, double* frontOutGmresBuffer, double* backOutGmresBuffer, double* frontInGmresBuffer, double* backInGmresBuffer, double* bottomOutGmresBuffer, double* topOutGmresBuffer, double* bottomInGmresBuffer, double* topInGmresBuffer){
+	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 		sendLargeVectorToLeftReceiveFromRight(vector, leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[0] == 0 && cartDim[0] > 1) {
 		receiveLargeVectorFromRight(vector, rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
@@ -6197,7 +6198,7 @@ void exchangeLargeVector(double**** vector, int xnumberAdded, int ynumberAdded, 
 		sendLargeVectorToLeft(vector, leftOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 	}
 
-	if (periodic || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 		sendLargeVectorToRightReceiveFromLeft(vector, rightOutGmresBuffer, leftInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[0] == 0 && cartDim[0] > 1) {
 		sendLargeVectorToRight(vector, rightOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
@@ -6205,9 +6206,35 @@ void exchangeLargeVector(double**** vector, int xnumberAdded, int ynumberAdded, 
 		receiveLargeVectorFromLeft(vector, leftInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 	}
 
-	sendLargeVectorToFrontReceiveFromBack(vector, frontOutGmresBuffer, backInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
-	sendLargeVectorToBackReceiveFromFront(vector, backOutGmresBuffer, frontInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	if (periodicY || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
+		sendLargeVectorToFrontReceiveFromBack(vector, frontOutGmresBuffer, backInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	} else if (cartCoord[1] == 0 && cartDim[1] > 1) {
+		receiveLargeVectorFromBack(vector, backInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	} else if (cartCoord[1] == cartDim[1] - 1 && cartDim[1] > 1) {
+		sendLargeVectorToFront(vector, frontOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	}
 
+	if (periodicY || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
+		sendLargeVectorToBackReceiveFromFront(vector, backOutGmresBuffer, frontInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	} else if (cartCoord[1] == 0 && cartDim[1] > 1) {
+		sendLargeVectorToBack(vector, backOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	} else if (cartCoord[1] == cartDim[1] - 1 && cartDim[1] > 1) {
+		receiveLargeVectorFromFront(vector, frontInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	}
+
+	if (periodicZ || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
 	sendLargeVectorToBottomReceiveFromTop(vector, bottomOutGmresBuffer, topInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
-	sendLargeVectorToTopReceiveFromBottom(vector, topOutGmresBuffer, bottomInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	} else if (cartCoord[2] == 0 && cartDim[2] > 1) {
+		receiveLargeVectorFromTop(vector, topInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	} else if (cartCoord[2] == cartDim[2] - 1 && cartDim[2] > 1) {
+		sendLargeVectorToBottom(vector, bottomOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	}
+
+	if (periodicZ || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
+		sendLargeVectorToTopReceiveFromBottom(vector, topOutGmresBuffer, bottomInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	} else if (cartCoord[2] == 0 && cartDim[2] > 1) {
+		sendLargeVectorToTop(vector, topOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	} else if (cartCoord[2] == cartDim[2] - 1 && cartDim[2] > 1) {
+		receiveLargeVectorFromBottom(vector, bottomInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	}
 }

@@ -138,7 +138,9 @@ public:
 
 	InputType inputType;
 	SolverType solverType;
-	BoundaryConditionType boundaryConditionType;
+	BoundaryConditionType boundaryConditionTypeX;
+	BoundaryConditionType boundaryConditionTypeY;
+	BoundaryConditionType boundaryConditionTypeZ;
 	int maxwellEquationMatrixSize;
 
 	double particleEnergy;

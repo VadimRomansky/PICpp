@@ -24,7 +24,8 @@ enum MPI_TAGS{MPI_INPUT_INTEGER_TAG = 1, MPI_INPUT_DOUBLE_TAG = 2, MPI_BFIELD_LE
 void sendInput(Simulation &simulation, int nprocs);
 Simulation recieveInput(MPI_Comm comm);
 
-void exchangeLargeVector(double**** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int lnumber, int additionalBinNumber, bool periodic, MPI_Comm& cartComm, int* cartCoord, int* cartDim, double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer, double* rightInGmresBuffer, double* frontOutGmresBuffer, double* backOutGmresBuffer, double* frontInGmresBuffer, double* backInGmresBuffer, double* bottomOutGmresBuffer, double* topOutGmresBuffer, double* bottomInGmresBuffer, double* topInGmresBuffer);
+void exchangeLargeVector(double**** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int lnumber, int additionalBinNumber, bool periodicX, bool
+                         periodicY, bool periodicZ, MPI_Comm& cartComm, int* cartCoord, int* cartDim, double* leftOutGmresBuffer, double* rightOutGmresBuffer, double* leftInGmresBuffer, double* rightInGmresBuffer, double* frontOutGmresBuffer, double* backOutGmresBuffer, double* frontInGmresBuffer, double* backInGmresBuffer, double* bottomOutGmresBuffer, double* topOutGmresBuffer, double* bottomInGmresBuffer, double* topInGmresBuffer);
 
 void sendLargeVectorToRightReceiveFromLeft(double ****tempVector, double* outBuffer, double *inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
                             int lnumber, int additionalBinNumber, MPI_Comm& cartComm);

@@ -157,7 +157,7 @@ void Simulation::updateElectroMagneticParameters() {
 
 					double correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k] / volumeE();
 					double particleCharge = particle->charge * particle->weight;
-					if (curI <= additionalBinNumber && boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+					if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
 						Particle tempParticle = *particle;
 						//updateCorrelationMaps(tempParticle);
 						//Vector3d oldE = correlationEfield(tempParticleShiftX);
@@ -387,7 +387,7 @@ void Simulation::updateElectroMagneticParameters() {
 	///
 
 
-	if (cartCoord[0] == 0 && boundaryConditionType == SUPER_CONDUCTOR_LEFT) {
+	if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				electricFlux[1 + additionalBinNumber][j][k] = Vector3d(0, 0, 0);
@@ -427,7 +427,7 @@ void Simulation::updateElectroMagneticParameters() {
 					double particleCharge = particle->charge * particle->weight;
 
 
-					if (curI <= additionalBinNumber && boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+					if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
 						if (particleCharge > 0) {
 							chargeDensityHat[1 + 2 * additionalBinNumber - curI][curJ][curK] += particleCharge * correlation;
 						} else {
@@ -504,7 +504,7 @@ void Simulation::updateElectroMagneticParameters() {
 	}
 
 	//todo realy?
-	if (boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+	if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				for (int i = 0; i <= additionalBinNumber + 1; ++i){
@@ -518,7 +518,7 @@ void Simulation::updateElectroMagneticParameters() {
 
 	if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
 		int minI = 0;
-		/*if(boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0){
+		/*if(boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0){
 			minI = 2 + additionalBinNumber;
 		}*/
 		for (int i = minI; i < xnumberAdded; ++i) {
@@ -729,7 +729,7 @@ void Simulation::updateDensityParameters() {
 					double particleCharge = particle->charge * particle->weight;
 					int typeN = getTypeNumber(particle);
 
-					if (curI <= additionalBinNumber && boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+					if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
 						Vector3d reflectedMomentum = particle->getMomentum();
 						reflectedMomentum.x = -reflectedMomentum.x;
 						particleBulkVelocities[typeN][1 + 2 * additionalBinNumber - curI][curJ][curK] += reflectedMomentum * particle->weight * correlation;
@@ -929,7 +929,7 @@ void Simulation::updateBunemanChargeDensity(){
 					double correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k] / volumeB();
 					double particleCharge = particle->charge * particle->weight;
 
-					if (curI <= additionalBinNumber && boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {					
+					if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {					
 						bunemanChargeDensity[2 + 2 * additionalBinNumber - curI][curJ][curK] += particleCharge * correlation;
 					} else {
 						bunemanChargeDensity[curI][curJ][curK] += particleCharge * correlation;
@@ -949,7 +949,7 @@ void Simulation::smoothDensity() {
 		for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
 			double newLeftDensity = (chargeDensityHat[0][j][k] + chargeDensityHat[1][j][k]) / 2.0;
 			double newRightDensity = (chargeDensityHat[xnumberAdded - 1][j][k] + chargeDensityHat[xnumberAdded - 2][j][k]) / 2.0;
-			if (boundaryConditionType == PERIODIC) {
+			if (boundaryConditionTypeX == PERIODIC) {
 				newLeftDensity = (chargeDensityHat[xnumberAdded - 1][j][k] + 2.0 * chargeDensityHat[0][j][k] + chargeDensityHat[1][j][k]) / 4.0;
 				newRightDensity = (chargeDensityHat[xnumberAdded - 2][j][k] + 2.0 * chargeDensityHat[xnumberAdded - 1][j][k] + chargeDensityHat[0][j][k]) / 4.0;
 			}
@@ -1041,7 +1041,7 @@ void Simulation::updateBunemanFlux(){
 
 					double correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k] / volumeE();
 
-					if (curI <= additionalBinNumber && boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+					if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
 						velocity.x = -velocity.x;
 						bunemanJx[2 + 2 * additionalBinNumber - curI][curJ][curK] += velocity.x * (particleCharge * correlation);	
 					} else {
@@ -1053,7 +1053,7 @@ void Simulation::updateBunemanFlux(){
 					curK = particle->correlationMapNode.zindex[k];
 
 					correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k] / volumeE();
-					if (curI <= additionalBinNumber && boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+					if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
 						bunemanJy[2 + 2 * additionalBinNumber - curI][curJ][curK] += velocity.y * (particleCharge * correlation);	
 					} else {
 						bunemanJy[curI][curJ][curK] += velocity.y * (particleCharge * correlation);														
@@ -1064,7 +1064,7 @@ void Simulation::updateBunemanFlux(){
 					curK = particle->correlationMapCell.zindex[k];
 
 					correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapCell.zcorrelation[k] / volumeE();
-					if (curI <= additionalBinNumber && boundaryConditionType == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+					if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
 						bunemanJz[2 + 2 * additionalBinNumber - curI][curJ][curK] += velocity.z * (particleCharge * correlation);	
 					} else {
 						bunemanJz[curI][curJ][curK] += velocity.z * (particleCharge * correlation);														

@@ -24,9 +24,9 @@ void Simulation::filterFields(int cutWaveNumber){
 	if ((rank == 0) && (verbosity > 0)) printf("filtering fields\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("filtering fields\n");
 
-	/*if(boundaryConditionType != PERIODIC){
+	/*if(boundaryConditionTypeX != PERIODIC){
 		if(cartCoord[0] == 0){
-			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+			if(boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT){
 				for(int i = 0; i <= 1 + additionalBinNumber; ++i){
 					for(int j = 0; j < ynumberAdded + 1; ++j){
 						for(int k = 0; k < znumberAdded + 1; ++k){
@@ -38,7 +38,7 @@ void Simulation::filterFields(int cutWaveNumber){
 		}
 	}*/
 
-	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+	if(boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT){
 		updateMaxEderivativePoint();
 		updateMaxConcentrationDerivativePoint();
 		//updateMeanLevel(newEfield);
@@ -47,7 +47,7 @@ void Simulation::filterFields(int cutWaveNumber){
 		//substractStep(newEfield, leftElevel, rightElevel, 1);
 	}
 
-	if(boundaryConditionType == PERIODIC){
+	if(boundaryConditionTypeX == PERIODIC){
 		filterFieldGeneral(newEfield, cutWaveNumber);
 		filterFieldGeneral(newBfield, cutWaveNumber);
 	} else {
@@ -69,7 +69,7 @@ void Simulation::filterFields(int cutWaveNumber){
 		}*/
 	}
 
-	if(boundaryConditionType != PERIODIC){
+	if(boundaryConditionTypeX != PERIODIC){
 		if(cartCoord[0] == cartDim[0] - 1){
 			for(int i = xnumberAdded - additionalBinNumber - 1; i < xnumberAdded + 1; ++i){
 				for(int j = 0; j < ynumberAdded + 1; ++j){
@@ -88,7 +88,7 @@ void Simulation::filterFields(int cutWaveNumber){
 			}*/
 		}
 		if(cartCoord[0] == 0){
-			if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+			if(boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT){
 				for(int i = 0; i <= 1 + additionalBinNumber; ++i){
 					for(int j = 0; j < ynumberAdded + 1; ++j){
 						for(int k = 0; k < znumberAdded + 1; ++k){
@@ -105,7 +105,7 @@ void Simulation::filterFields(int cutWaveNumber){
 						}
 					}
 				}*/
-			} else if(boundaryConditionType == FREE_BOTH){
+			} else if(boundaryConditionTypeX == FREE_BOTH){
 				for(int i = 0; i < 1 + additionalBinNumber; ++i){
 					for(int j = 0; j < ynumberAdded + 1; ++j){
 						for(int k = 0; k < znumberAdded + 1; ++k){
@@ -125,7 +125,7 @@ void Simulation::filterFields(int cutWaveNumber){
 		}
 	}
 
-	if(boundaryConditionType == SUPER_CONDUCTOR_LEFT){
+	if(boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT){
 		//substractStep(newEfield, leftElevel, rightElevel, -1);
 	}
 
@@ -990,7 +990,7 @@ void Simulation::updateMaxConcentrationDerivativePoint(){
 		MPI_Bcast(tempPoint, 1, MPI_INT, 0, cartComm);
 
 
-		if(tempPoint[0] > derConcentrationPoint){
+		if(tempPoint[0] > derConcentrationPoint - 20){
 			derConcentrationPoint = tempPoint[0];
 		}
 

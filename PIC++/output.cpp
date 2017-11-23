@@ -2924,7 +2924,7 @@ void outputSimulationBackup(const char* generalFileName, const char* EfileName, 
 		fprintf(generalFile, "%d\n", solverType);
 
 		int boundaryConditionType = 0;
-		if (simulation->boundaryConditionType == PERIODIC) {
+		if (simulation->boundaryConditionTypeX == PERIODIC) {
 			boundaryConditionType = 1;
 		} else {
 			boundaryConditionType = 0;

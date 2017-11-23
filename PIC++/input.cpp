@@ -390,9 +390,9 @@ Simulation readBackup(const char* generalFileName, const char* EfileName, const 
 		fscanf(generalFile, "%d", &boundaryConditionType);
 
 		if (boundaryConditionType == 1) {
-			simulation.boundaryConditionType = PERIODIC;
+			simulation.boundaryConditionTypeX = PERIODIC;
 		} else {
-			simulation.boundaryConditionType = SUPER_CONDUCTOR_LEFT;
+			simulation.boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
 		}
 
 		fscanf(generalFile, "%d", &simulation.maxwellEquationMatrixSize);
