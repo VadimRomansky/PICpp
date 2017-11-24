@@ -101,12 +101,31 @@ void Simulation::sumNodeMassMatrixParametersY() {
 
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters y rank = %d\n", rank);
 
-		sendNodeMassMatrixParametersToFrontReceiveFromBack(massMatrix, outBufferFront, tempNodeMassMatrixParameterBack,
-		                                                   inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
-		                                                   additionalBinNumber, cartComm, rank, frontRank, backRank);
-		sendNodeMassMatrixParametersToBackReceiveFromFront(massMatrix, outBufferBack, tempNodeMassMatrixParameterFront,
-		                                                   inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-		                                                   additionalBinNumber, cartComm, rank, frontRank, backRank);
+		if ((boundaryConditionTypeY == PERIODIC) || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
+			sendNodeMassMatrixParametersToFrontReceiveFromBack(massMatrix, outBufferFront, tempNodeMassMatrixParameterBack,
+			                                                   inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
+			                                                   additionalBinNumber, cartComm, rank, frontRank, backRank);
+		} else if (cartCoord[1] == 0) {
+			receiveNodeMassMatrixParametersBack(tempNodeMassMatrixParameterBack, inBufferBack, xnumberAdded, ynumberAdded,
+			                                     znumberAdded, additionalBinNumber, cartComm, rank, backRank);
+		} else if (cartCoord[1] == cartDim[1] - 1) {
+			sendNodeMassMatrixParametersFront(massMatrix, outBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+			                                 additionalBinNumber, cartComm, rank, frontRank);
+		}
+
+		//MPI_Barrier(cartComm);
+
+		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
+			sendNodeMassMatrixParametersToBackReceiveFromFront(massMatrix, outBufferBack, tempNodeMassMatrixParameterFront,
+			                                                   inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+			                                                   additionalBinNumber, cartComm, rank, frontRank, backRank);
+		} else if (cartCoord[1] == 0) {
+			sendNodeMassMatrixParametersBack(massMatrix, outBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
+			                                  additionalBinNumber, cartComm, rank, backRank);
+		} else if (cartCoord[1] == cartDim[1] - 1) {
+			receiveNodeMassMatrixParametersFront(tempNodeMassMatrixParameterFront, inBufferFront, xnumberAdded, ynumberAdded,
+			                                    znumberAdded, additionalBinNumber, cartComm, rank, frontRank);
+		}
 
 		sumTempNodeMassMatrixParametersY(massMatrix);
 
@@ -118,6 +137,7 @@ void Simulation::sumNodeMassMatrixParametersY() {
 		delete[] outBufferBack;
 		delete[] outBufferFront;
 	} else {
+		if(boundaryConditionTypeY == PERIODIC){
 		for (int i = 0; i <= xnumberAdded; ++i) {
 			for (int k = 0; k <= znumberAdded; ++k) {
 				for (int j = 0; j <= 2 * additionalBinNumber + 2; ++j) {
@@ -138,20 +158,19 @@ void Simulation::sumNodeMassMatrixParametersY() {
 				}
 			}
 		}
+		}
 
 		if (ynumberGeneral == 1) {
 			for (int i = 0; i <= xnumberAdded; ++i) {
 				for (int k = 0; k <= znumberAdded; ++k) {
 					for (int j = 0; j <= ynumberAdded; ++j) {
-						for (int j = 0; j <= 2 * additionalBinNumber + 2; ++j) {
-							for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
-								for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
-									for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
-										for (int l = 0; l < 3; ++l) {
-											for (int m = 0; m < 3; ++m) {
-												massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = massMatrix[i][1 + additionalBinNumber][k].
-													matrix[tempI][tempJ][tempK].matrix[l][m];
-											}
+						for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+							for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+								for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
+									for (int l = 0; l < 3; ++l) {
+										for (int m = 0; m < 3; ++m) {
+											massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = massMatrix[i][1 + additionalBinNumber][k].
+												matrix[tempI][tempJ][tempK].matrix[l][m];
 										}
 									}
 								}
@@ -174,12 +193,31 @@ void Simulation::sumNodeMassMatrixParametersZ() {
 
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters z rank = %d\n", rank);
 
-		sendNodeMassMatrixParametersToBottomReceiveFromTop(massMatrix, outBufferBottom, tempNodeMassMatrixParameterTop,
-		                                                   inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
-		                                                   additionalBinNumber, cartComm, rank, bottomRank, topRank);
-		sendNodeMassMatrixParametersToTopReceiveFromBottom(massMatrix, outBufferTop, tempNodeMassMatrixParameterBottom,
-		                                                   inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-		                                                   additionalBinNumber, cartComm, rank, bottomRank, topRank);
+		if ((boundaryConditionTypeZ == PERIODIC) || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
+			sendNodeMassMatrixParametersToBottomReceiveFromTop(massMatrix, outBufferBottom, tempNodeMassMatrixParameterTop,
+			                                                   inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
+			                                                   additionalBinNumber, cartComm, rank, bottomRank, topRank);
+		} else if (cartCoord[2] == 0) {
+			receiveNodeMassMatrixParametersTop(tempNodeMassMatrixParameterTop, inBufferTop, xnumberAdded, ynumberAdded,
+			                                     znumberAdded, additionalBinNumber, cartComm, rank, topRank);
+		} else if (cartCoord[2] == cartDim[2] - 1) {
+			sendNodeMassMatrixParametersBottom(massMatrix, outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+			                                 additionalBinNumber, cartComm, rank, bottomRank);
+		}
+
+		//MPI_Barrier(cartComm);
+
+		if ((boundaryConditionTypeZ == PERIODIC) || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
+			sendNodeMassMatrixParametersToTopReceiveFromBottom(massMatrix, outBufferTop, tempNodeMassMatrixParameterBottom,
+			                                                   inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+			                                                   additionalBinNumber, cartComm, rank, bottomRank, topRank);
+		} else if (cartCoord[2] == 0) {
+			sendNodeMassMatrixParametersTop(massMatrix, outBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
+			                                  additionalBinNumber, cartComm, rank, topRank);
+		} else if (cartCoord[2] == cartDim[2] - 1) {
+			receiveNodeMassMatrixParametersBottom(tempNodeMassMatrixParameterBottom, inBufferBottom, xnumberAdded, ynumberAdded,
+			                                    znumberAdded, additionalBinNumber, cartComm, rank, bottomRank);
+		}
 
 		sumTempNodeMassMatrixParametersZ(massMatrix);
 
@@ -193,6 +231,7 @@ void Simulation::sumNodeMassMatrixParametersZ() {
 		delete[] outBufferTop;
 
 	} else {
+		if(boundaryConditionTypeZ == PERIODIC){
 		for (int i = 0; i <= xnumberAdded; ++i) {
 			for (int j = 0; j <= ynumberAdded; ++j) {
 				for (int k = 0; k <= 2 * additionalBinNumber + 2; ++k) {
@@ -212,6 +251,7 @@ void Simulation::sumNodeMassMatrixParametersZ() {
 					}
 				}
 			}
+		}
 		}
 		if (znumberGeneral == 1) {
 			for (int i = 0; i <= xnumberAdded; ++i) {
@@ -281,18 +321,38 @@ void Simulation::sumTempNodeMassMatrixParametersX(MassMatrix*** array) {
 }
 
 void Simulation::sumTempNodeMassMatrixParametersY(MassMatrix*** array) {
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		for (int k = 0; k < znumberAdded + 1; ++k) {
-			for (int j = 0; j < 2 * additionalBinNumber + 3; ++j) {
-				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
-					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
-						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
-							for (int l = 0; l < 3; ++l) {
-								for (int m = 0; m < 3; ++m) {
-									array[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] += tempNodeMassMatrixParameterFront[i][j][k].matrix[
-										tempI][tempJ][tempK].matrix[l][m];
-									array[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k].matrix[tempI][tempJ][tempK].matrix[l][m] +=
-										tempNodeMassMatrixParameterBack[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
+	if (cartCoord[1] > 0 || boundaryConditionTypeY == PERIODIC) {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				for (int j = 0; j < 2 * additionalBinNumber + 3; ++j) {
+					for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+						for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+							for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
+								for (int l = 0; l < 3; ++l) {
+									for (int m = 0; m < 3; ++m) {
+										array[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] += tempNodeMassMatrixParameterFront[i][j][k].matrix[
+											tempI][tempJ][tempK].matrix[l][m];
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	if (cartCoord[1] < cartDim[1] - 1 || boundaryConditionTypeY == PERIODIC) {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				for (int j = 0; j < 2 * additionalBinNumber + 3; ++j) {
+					for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+						for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+							for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
+								for (int l = 0; l < 3; ++l) {
+									for (int m = 0; m < 3; ++m) {
+										array[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k].matrix[tempI][tempJ][tempK].matrix[l][m] +=
+											tempNodeMassMatrixParameterBack[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
+									}
 								}
 							}
 						}
@@ -304,18 +364,38 @@ void Simulation::sumTempNodeMassMatrixParametersY(MassMatrix*** array) {
 }
 
 void Simulation::sumTempNodeMassMatrixParametersZ(MassMatrix*** array) {
-	for (int j = 0; j < ynumberAdded + 1; ++j) {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int k = 0; k < 2 * additionalBinNumber + 3; ++k) {
-				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
-					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
-						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
-							for (int l = 0; l < 3; ++l) {
-								for (int m = 0; m < 3; ++m) {
-									array[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] += tempNodeMassMatrixParameterBottom[i][j][k].matrix[
-										tempI][tempJ][tempK].matrix[l][m];
-									array[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k].matrix[tempI][tempJ][tempK].matrix[l][m] +=
-										tempNodeMassMatrixParameterTop[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
+	if (cartCoord[2] > 0 || boundaryConditionTypeZ == PERIODIC) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < 2 * additionalBinNumber + 3; ++k) {
+					for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+						for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+							for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
+								for (int l = 0; l < 3; ++l) {
+									for (int m = 0; m < 3; ++m) {
+										array[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m] += tempNodeMassMatrixParameterBottom[i][j][k].matrix[
+											tempI][tempJ][tempK].matrix[l][m];
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	if (cartCoord[1] < cartDim[1] - 1 || boundaryConditionTypeY == PERIODIC) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < 2 * additionalBinNumber + 3; ++k) {
+					for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+						for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+							for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
+								for (int l = 0; l < 3; ++l) {
+									for (int m = 0; m < 3; ++m) {
+										array[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k].matrix[tempI][tempJ][tempK].matrix[l][m] +=
+											tempNodeMassMatrixParameterTop[i][j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
+									}
 								}
 							}
 						}
