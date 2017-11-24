@@ -933,11 +933,11 @@ void Simulation::exchangeParticles() {
 		}
 		if (verbosity > 2) printf("send particles front rank = %d\n", rank);
 		sendFrontReceiveBackParticles(escapedParticlesFront, tempParticles, types, typesNumber,
-		                              boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
+		                              boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
 		MPI_Barrier(cartComm);
 		if (verbosity > 2) printf("send particles back rank = %d\n", rank);
 		sendBackReceiveFrontParticles(escapedParticlesBack, tempParticles, types, typesNumber,
-		                              boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
+		                              boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
@@ -992,11 +992,11 @@ void Simulation::exchangeParticles() {
 		}
 		if (verbosity > 2) printf("send particles bottom rank = %d\n", rank);
 		sendBottomReceiveTopParticles(escapedParticlesBottom, tempParticles, types, typesNumber,
-		                              boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
+		                              boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
 		MPI_Barrier(cartComm);
 		if (verbosity > 2) printf("send particles top rank = %d\n", rank);
 		sendTopReceiveBottomParticles(escapedParticlesTop, tempParticles, types, typesNumber,
-		                              boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
+		                              boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {

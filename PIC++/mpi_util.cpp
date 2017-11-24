@@ -5212,6 +5212,309 @@ void receiveNodeMassMatrixParametersBottom(MassMatrix*** tempArray, double* inBu
 	}
 }
 
+void collectOutDoubleParameters(std::vector<Particle*>& outParticles, double* outDoubleParticlesParameters) {
+	int doubleBcount = 0;
+	for (int i = 0; i < outParticles.size(); ++i) {
+		Particle* particle = outParticles[i];
+
+		outDoubleParticlesParameters[doubleBcount] = particle->mass;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->charge;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->weight;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->coordinates.x;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->coordinates.y;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->coordinates.z;
+		doubleBcount++;
+		Vector3d momentum = particle->getMomentum();
+		outDoubleParticlesParameters[doubleBcount] = momentum.x;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = momentum.y;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = momentum.z;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.x;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.y;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.z;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.x;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.y;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.z;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->dx;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->dy;
+		doubleBcount++;
+		outDoubleParticlesParameters[doubleBcount] = particle->dz;
+		doubleBcount++;
+		for (int j = 0; j < 3; ++j) {
+			for (int k = 0; k < 3; ++k) {
+				outDoubleParticlesParameters[doubleBcount] = particle->rotationTensor.matrix[j][k];
+				doubleBcount++;
+			}
+		}
+	}
+}
+
+void collectOutIntegerParameters(std::vector<Particle*>& outParticles, ParticleTypeContainer* types, int typesNumber, int* outIntegerParticlesParameters) {
+	int bcount = 0;
+	for (int i = 0; i < outParticles.size(); ++i) {
+		Particle* particle = outParticles[i];
+		outIntegerParticlesParameters[bcount] = particle->number;
+		bcount++;
+		outIntegerParticlesParameters[bcount] = particle->chargeCount;
+		bcount++;
+		int type = -1;
+		for (int t = 0; t < typesNumber; ++t) {
+			if (particle->type == types[t].type) {
+				type = t;
+				break;
+			}
+		}
+		if (type == -1) {
+			std::string outputDir = outputDirectory;
+			FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+			fprintf(errorLogFile, "particle has no type in send particles\n");
+			fclose(errorLogFile);
+			MPI_Finalize();
+			exit(0);
+		}
+		outIntegerParticlesParameters[bcount] = type;
+		bcount++;
+		outIntegerParticlesParameters[bcount] = particle->crossBoundaryCount;
+		bcount++;
+	}
+}
+
+void addParticlesFromParameters(std::vector<Particle*>& inParticles, ParticleTypeContainer* types, int typesNumber, int inParticlesNumber[1], int* inIntegerParticlesParameters, double* inDoubleParticlesParameters) {
+	int bcount = 0;
+	int doubleBcount = 0;
+	for (int i = 0; i < inParticlesNumber[0]; ++i) {
+
+		int number = inIntegerParticlesParameters[bcount];
+		bcount++;
+		int chargeCount = inIntegerParticlesParameters[bcount];
+		bcount++;
+		int type = inIntegerParticlesParameters[bcount];
+		if (type < 0 || type >= typesNumber) {
+			std::string outputDir = outputDirectory;
+			FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+			fprintf(errorLogFile, "particle has wrong type in receive particles\n");
+			fclose(errorLogFile);
+			MPI_Finalize();
+			exit(0);
+		}
+		ParticleTypes particleType = types[type].type;
+		bcount++;
+		int crossBoundary = inIntegerParticlesParameters[bcount];
+		bcount++;
+
+		double mass = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double charge = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double weight = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double x = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double y = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double z = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double momentumX = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double momentumY = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double momentumZ = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double initialMomentumX = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double initialMomentumY = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double initialMomentumZ = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double prevMomentumX = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double prevMomentumY = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double prevMomentumZ = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double dx = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double dy = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+		double dz = inDoubleParticlesParameters[doubleBcount];
+		doubleBcount++;
+
+		Particle* particle = new Particle(number, mass, chargeCount, charge, weight, particleType, x, y, z,
+		                                  initialMomentumX, initialMomentumY, initialMomentumZ, dx, dy, dz);
+
+		particle->setMomentum(momentumX, momentumY, momentumZ);
+		particle->prevMomentum.x = prevMomentumX;
+		particle->prevMomentum.x = prevMomentumY;
+		particle->prevMomentum.x = prevMomentumZ;
+		particle->crossBoundaryCount = crossBoundary;
+
+		for (int j = 0; j < 3; ++j) {
+			for (int k = 0; k < 3; ++k) {
+				particle->rotationTensor.matrix[j][k] = inDoubleParticlesParameters[doubleBcount];
+				doubleBcount++;
+			}
+		}
+
+
+		inParticles.push_back(particle);
+	}
+}
+
+void sendLeftReceiveRightParticlesGeneral(std::vector<Particle*>& outParticles, std::vector<Particle*>& inParticles, ParticleTypeContainer* types, int typesNumber, int verbosity, MPI_Comm& cartComm, int rank, int leftRank, int rightRank, const int numberOfIntegerParameters, const int numberOfDoubleParameters, int outParticlesNumber[1], int inParticlesNumber[1], const bool sendingLeft, const bool receivingRight) {
+	int* outIntegerParticlesParameters;
+	int* inIntegerParticlesParameters;
+	double* outDoubleParticlesParameters;
+	double* inDoubleParticlesParameters;
+
+	if (sendingLeft) {
+		outIntegerParticlesParameters = new int[numberOfIntegerParameters * outParticlesNumber[0]];
+		collectOutIntegerParameters(outParticles, types, typesNumber, outIntegerParticlesParameters);
+	}
+
+	if (receivingRight) {
+		inIntegerParticlesParameters = new int[numberOfIntegerParameters * inParticlesNumber[0]];
+	}
+
+	if (sendingLeft && receivingRight) {
+		MPI_Status status;
+		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, leftRank,
+		             MPI_SEND_INTEGER_NUMBER_LEFT, inIntegerParticlesParameters,
+		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, rightRank, MPI_SEND_INTEGER_NUMBER_LEFT,
+		             cartComm, &status);
+	} else if (sendingLeft) {
+		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, leftRank,
+		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm);
+	} else if (receivingRight) {
+		MPI_Status status;
+		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, rightRank,
+		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+	}
+
+	MPI_Barrier(cartComm);
+	if (sendingLeft) {
+		outDoubleParticlesParameters = new double[numberOfDoubleParameters * outParticlesNumber[0]];
+		collectOutDoubleParameters(outParticles, outDoubleParticlesParameters);
+	}
+
+	if (receivingRight) {
+		inDoubleParticlesParameters = new double[numberOfDoubleParameters * inParticlesNumber[0]];
+		if (verbosity > 2) printf("receive inDoubleParameters right rank = %d\n", rank);
+	}
+
+	if (sendingLeft && receivingRight) {
+		MPI_Status status;
+		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, leftRank,
+		             MPI_SEND_DOUBLE_NUMBER_LEFT, inDoubleParticlesParameters,
+		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, rightRank, MPI_SEND_DOUBLE_NUMBER_LEFT,
+		             cartComm, &status);
+	} else if (sendingLeft) {
+		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, leftRank,
+		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm);
+	} else if (receivingRight) {
+		MPI_Status status;
+		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, rightRank,
+		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
+	}
+
+	if (receivingRight) {
+		addParticlesFromParameters(inParticles, types, typesNumber, inParticlesNumber, inIntegerParticlesParameters, inDoubleParticlesParameters);
+	}
+
+	if (sendingLeft) {
+		delete[] outIntegerParticlesParameters;
+		delete[] outDoubleParticlesParameters;
+	}
+	if (receivingRight) {
+		delete[] inIntegerParticlesParameters;
+		delete[] inDoubleParticlesParameters;
+	}
+	if (verbosity > 2) printf("finish send left receive right rank = %d\n", rank);
+}
+
+void sendRightReceiveLeftParticlesGeneral(std::vector<Particle*>& outParticles, std::vector<Particle*>& inParticles, ParticleTypeContainer* types, int typesNumber, int verbosity, MPI_Comm& cartComm, int rank, int leftRank, int rightRank, const int numberOfIntegerParameters, const int numberOfDoubleParameters, int outParticlesNumber[1], int inParticlesNumber[1], const bool sendingRight, const bool receivingLeft) {
+	int* outIntegerParticlesParameters;
+	int* inIntegerParticlesParameters;
+	double* outDoubleParticlesParameters;
+	double* inDoubleParticlesParameters;
+
+	if (sendingRight) {
+		outIntegerParticlesParameters = new int[numberOfIntegerParameters * outParticlesNumber[0]];
+		collectOutIntegerParameters(outParticles, types, typesNumber, outIntegerParticlesParameters);
+	}
+
+	if (receivingLeft) {
+		inIntegerParticlesParameters = new int[numberOfIntegerParameters * inParticlesNumber[0]];
+	}
+
+	if (sendingRight && receivingLeft) {
+		MPI_Status status;
+		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, rightRank,
+		             MPI_SEND_INTEGER_NUMBER_RIGHT, inIntegerParticlesParameters,
+		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, leftRank, MPI_SEND_INTEGER_NUMBER_RIGHT,
+		             cartComm, &status);
+	} else if (sendingRight) {
+		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, rightRank,
+		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
+	} else if (receivingLeft) {
+		MPI_Status status;
+		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, leftRank,
+		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+	}
+
+	MPI_Barrier(cartComm);
+
+	if (sendingRight) {
+		outDoubleParticlesParameters = new double[numberOfDoubleParameters * outParticlesNumber[0]];
+		collectOutDoubleParameters(outParticles, outDoubleParticlesParameters);
+	}
+
+	if (receivingLeft) {
+		inDoubleParticlesParameters = new double[numberOfDoubleParameters * inParticlesNumber[0]];
+	}
+
+	if (sendingRight && receivingLeft) {
+		MPI_Status status;
+		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, rightRank,
+		             MPI_SEND_DOUBLE_NUMBER_RIGHT, inDoubleParticlesParameters,
+		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, leftRank, MPI_SEND_DOUBLE_NUMBER_RIGHT,
+		             cartComm, &status);
+	} else if (sendingRight) {
+		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, rightRank,
+		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm);
+	} else if (receivingLeft) {
+		MPI_Status status;
+		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, leftRank,
+		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
+	}
+
+	if (receivingLeft) {
+		addParticlesFromParameters(inParticles, types, typesNumber, inParticlesNumber, inIntegerParticlesParameters, inDoubleParticlesParameters);
+	}
+	if (sendingRight) {
+		delete[] outDoubleParticlesParameters;
+		delete[] outIntegerParticlesParameters;
+	}
+	if (receivingLeft) {
+		delete[] inIntegerParticlesParameters;
+		delete[] inDoubleParticlesParameters;
+	}
+	if (verbosity > 2) printf("finish send righ receive left rank = %d\n", rank);
+}
+
 void sendLeftReceiveRightParticles(std::vector<Particle *>& outParticles, std::vector<Particle *>& inParticles,
                                    ParticleTypeContainer* types, int typesNumber, bool periodic, int verbosity,
                                    MPI_Comm& cartComm, int rank, int leftRank, int rightRank) {
@@ -5245,224 +5548,9 @@ void sendLeftReceiveRightParticles(std::vector<Particle *>& outParticles, std::v
 	const bool sendingLeft = (outParticlesNumber[0] > 0) && (cartCoord[0] > 0 || periodic);
 	const bool receivingRight = (inParticlesNumber[0] > 0) && (cartCoord[0] < cartDim[0] - 1 || periodic);
 
-	int* outIntegerParticlesParameters;
-	int* inIntegerParticlesParameters;
-	double* outDoubleParticlesParameters;
-	double* inDoubleParticlesParameters;
-
-	if (sendingLeft) {
-		int bcount = 0;
-		outIntegerParticlesParameters = new int[numberOfIntegerParameters * outParticlesNumber[0]];
-		for (int i = 0; i < outParticles.size(); ++i) {
-			Particle* particle = outParticles[i];
-			outIntegerParticlesParameters[bcount] = particle->number;
-			bcount++;
-			outIntegerParticlesParameters[bcount] = particle->chargeCount;
-			bcount++;
-			int type = -1;
-			for (int t = 0; t < typesNumber; ++t) {
-				if (particle->type == types[t].type) {
-					type = t;
-					break;
-				}
-			}
-			if (type == -1) {
-				std::string outputDir = outputDirectory;
-				FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-				fprintf(errorLogFile, "particle has no type in send particles left\n");
-				fclose(errorLogFile);
-				MPI_Finalize();
-				exit(0);
-			}
-			outIntegerParticlesParameters[bcount] = type;
-			bcount++;
-			outIntegerParticlesParameters[bcount] = particle->crossBoundaryCount;
-			bcount++;
-		}
-	}
-
-	if (receivingRight) {
-		inIntegerParticlesParameters = new int[numberOfIntegerParameters * inParticlesNumber[0]];
-	}
-
-	if (sendingLeft && receivingRight) {
-		MPI_Status status;
-		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, leftRank,
-		             MPI_SEND_INTEGER_NUMBER_LEFT, inIntegerParticlesParameters,
-		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, rightRank, MPI_SEND_INTEGER_NUMBER_LEFT,
-		             cartComm, &status);
-	} else if (sendingLeft) {
-		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, leftRank,
-		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm);
-	} else if (receivingRight) {
-		MPI_Status status;
-		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, rightRank,
-		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
-	}
-
-	MPI_Barrier(cartComm);
-	if (sendingLeft) {
-		int doubleBcount = 0;
-		outDoubleParticlesParameters = new double[numberOfDoubleParameters * outParticlesNumber[0]];
-		for (int i = 0; i < outParticles.size(); ++i) {
-			Particle* particle = outParticles[i];
-
-			outDoubleParticlesParameters[doubleBcount] = particle->mass;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->charge;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->weight;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.z;
-			doubleBcount++;
-			Vector3d momentum = particle->getMomentum();
-			outDoubleParticlesParameters[doubleBcount] = momentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = momentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = momentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dx;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dy;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dz;
-			doubleBcount++;
-			for (int j = 0; j < 3; ++j) {
-				for (int k = 0; k < 3; ++k) {
-					outDoubleParticlesParameters[doubleBcount] = particle->rotationTensor.matrix[j][k];
-					doubleBcount++;
-				}
-			}
-		}
-	}
-
-	if (receivingRight) {
-		inDoubleParticlesParameters = new double[numberOfDoubleParameters * inParticlesNumber[0]];
-		if (verbosity > 2) printf("receive inDoubleParameters right rank = %d\n", rank);
-	}
-
-	if (sendingLeft && receivingRight) {
-		MPI_Status status;
-		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, leftRank,
-		             MPI_SEND_DOUBLE_NUMBER_LEFT, inDoubleParticlesParameters,
-		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, rightRank, MPI_SEND_DOUBLE_NUMBER_LEFT,
-		             cartComm, &status);
-	} else if (sendingLeft) {
-		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, leftRank,
-		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm);
-	} else if (receivingRight) {
-		MPI_Status status;
-		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, rightRank,
-		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
-	}
-
-	if (receivingRight) {
-		int bcount = 0;
-		int doubleBcount = 0;
-		for (int i = 0; i < inParticlesNumber[0]; ++i) {
-
-			int number = inIntegerParticlesParameters[bcount];
-			bcount++;
-			int chargeCount = inIntegerParticlesParameters[bcount];
-			bcount++;
-			int type = inIntegerParticlesParameters[bcount];
-			if (type < 0 || type >= typesNumber) {
-				std::string outputDir = outputDirectory;
-				FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-				fprintf(errorLogFile, "particle has wrong type in receive particles right\n");
-				fclose(errorLogFile);
-				MPI_Finalize();
-				exit(0);
-			}
-			ParticleTypes particleType = types[type].type;
-			bcount++;
-			int crossBoundary = inIntegerParticlesParameters[bcount];
-			bcount++;
-
-			double mass = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double charge = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double weight = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double x = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double y = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double z = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dx = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dy = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dz = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-
-			Particle* particle = new Particle(number, mass, chargeCount, charge, weight, particleType, x, y, z,
-			                                  initialMomentumX, initialMomentumY, initialMomentumZ, dx, dy, dz);
-
-			particle->setMomentum(momentumX, momentumY, momentumZ);
-			particle->prevMomentum.x = prevMomentumX;
-			particle->prevMomentum.x = prevMomentumY;
-			particle->prevMomentum.x = prevMomentumZ;
-			particle->crossBoundaryCount = crossBoundary;
-
-			for (int j = 0; j < 3; ++j) {
-				for (int k = 0; k < 3; ++k) {
-					particle->rotationTensor.matrix[j][k] = inDoubleParticlesParameters[doubleBcount];
-					doubleBcount++;
-				}
-			}
-
-
-			inParticles.push_back(particle);
-		}
-	}
-
-	if (sendingLeft) {
-		delete[] outIntegerParticlesParameters;
-		delete[] outDoubleParticlesParameters;
-	}
-	if (receivingRight) {
-		delete[] inIntegerParticlesParameters;
-		delete[] inDoubleParticlesParameters;
-	}
-	if (verbosity > 2) printf("finish send left receive right rank = %d\n", rank);
+	sendLeftReceiveRightParticlesGeneral(outParticles, inParticles, types, typesNumber, verbosity, cartComm, rank, leftRank,
+	                                     rightRank, numberOfIntegerParameters, numberOfDoubleParameters, outParticlesNumber,
+	                                     inParticlesNumber, sendingLeft, receivingRight);
 }
 
 void sendRightReceiveLeftParticles(std::vector<Particle *>& outParticles, std::vector<Particle *>& inParticles,
@@ -5501,225 +5589,9 @@ void sendRightReceiveLeftParticles(std::vector<Particle *>& outParticles, std::v
 	const bool sendingRight = (outParticlesNumber[0] > 0) && (cartCoord[0] < cartDim[0] - 1 || periodic);
 	const bool receivingLeft = (inParticlesNumber[0] > 0) && (cartCoord[0] > 0 || periodic);
 
-	int* outIntegerParticlesParameters;
-	int* inIntegerParticlesParameters;
-	double* outDoubleParticlesParameters;
-	double* inDoubleParticlesParameters;
-
-	if (sendingRight) {
-		int bcount = 0;
-		outIntegerParticlesParameters = new int[numberOfIntegerParameters * outParticlesNumber[0]];
-		for (int i = 0; i < outParticles.size(); ++i) {
-			Particle* particle = outParticles[i];
-			outIntegerParticlesParameters[bcount] = particle->number;
-			bcount++;
-			outIntegerParticlesParameters[bcount] = particle->chargeCount;
-			bcount++;
-			int type = -1;
-			for (int t = 0; t < typesNumber; ++t) {
-				if (particle->type == types[t].type) {
-					type = t;
-					break;
-				}
-			}
-			if (type == -1) {
-				std::string outputDir = outputDirectory;
-				FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-				fprintf(errorLogFile, "particle has no type in send particles right\n");
-				fclose(errorLogFile);
-				MPI_Finalize();
-				exit(0);
-			}
-			outIntegerParticlesParameters[bcount] = type;
-			bcount++;
-			outIntegerParticlesParameters[bcount] = particle->crossBoundaryCount;
-			bcount++;
-		}
-
-		if (verbosity > 2) printf("send outIntegerParameters right rank = %d\n", rank);
-	}
-
-	if (receivingLeft) {
-		inIntegerParticlesParameters = new int[numberOfIntegerParameters * inParticlesNumber[0]];
-	}
-
-	if (sendingRight && receivingLeft) {
-		MPI_Status status;
-		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, rightRank,
-		             MPI_SEND_INTEGER_NUMBER_RIGHT, inIntegerParticlesParameters,
-		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, leftRank, MPI_SEND_INTEGER_NUMBER_RIGHT,
-		             cartComm, &status);
-	} else if (sendingRight) {
-		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, rightRank,
-		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
-	} else if (receivingLeft) {
-		MPI_Status status;
-		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, leftRank,
-		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
-	}
-
-	MPI_Barrier(cartComm);
-
-	if (sendingRight) {
-		int doubleBcount = 0;
-		outDoubleParticlesParameters = new double[numberOfDoubleParameters * outParticlesNumber[0]];
-		for (int i = 0; i < outParticlesNumber[0]; ++i) {
-			Particle* particle = outParticles[i];
-
-			outDoubleParticlesParameters[doubleBcount] = particle->mass;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->charge;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->weight;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.z;
-			doubleBcount++;
-			Vector3d momentum = particle->getMomentum();
-			outDoubleParticlesParameters[doubleBcount] = momentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = momentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = momentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dx;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dy;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dz;
-			doubleBcount++;
-			for (int j = 0; j < 3; ++j) {
-				for (int k = 0; k < 3; ++k) {
-					outDoubleParticlesParameters[doubleBcount] = particle->rotationTensor.matrix[j][k];
-					doubleBcount++;
-				}
-			}
-		}
-		if (verbosity > 2) printf("send outDoubleParameters right rank = %d\n", rank);
-	}
-
-	if (receivingLeft) {
-		inDoubleParticlesParameters = new double[numberOfDoubleParameters * inParticlesNumber[0]];
-	}
-
-	if (sendingRight && receivingLeft) {
-		MPI_Status status;
-		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, rightRank,
-		             MPI_SEND_DOUBLE_NUMBER_RIGHT, inDoubleParticlesParameters,
-		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, leftRank, MPI_SEND_DOUBLE_NUMBER_RIGHT,
-		             cartComm, &status);
-	} else if (sendingRight) {
-		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, rightRank,
-		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm);
-	} else if (receivingLeft) {
-		MPI_Status status;
-		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, leftRank,
-		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
-	}
-
-	if (receivingLeft) {
-		int bcount = 0;
-		int doubleBcount = 0;
-
-		for (int i = 0; i < inParticlesNumber[0]; ++i) {
-
-			int number = inIntegerParticlesParameters[bcount];
-			bcount++;
-			int chargeCount = inIntegerParticlesParameters[bcount];
-			bcount++;
-			int type = inIntegerParticlesParameters[bcount];
-			if (type < 0 || type >= typesNumber) {
-				std::string outputDir = outputDirectory;
-				FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-				fprintf(errorLogFile, "particle has wrong type in receive particles right\n");
-				fclose(errorLogFile);
-				MPI_Finalize();
-				exit(0);
-			}
-			ParticleTypes particleType = types[type].type;
-			bcount++;
-			int crossBoundary = inIntegerParticlesParameters[bcount];
-			bcount++;
-
-			double mass = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double charge = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double weight = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double x = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double y = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double z = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dx = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dy = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dz = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-
-			Particle* particle = new Particle(number, mass, chargeCount, charge, weight, particleType, x, y, z,
-			                                  initialMomentumX, initialMomentumY, initialMomentumZ, dx, dy, dz);
-			particle->setMomentum(momentumX, momentumY, momentumZ);
-			particle->prevMomentum.x = prevMomentumX;
-			particle->prevMomentum.x = prevMomentumY;
-			particle->prevMomentum.x = prevMomentumZ;
-			particle->crossBoundaryCount = crossBoundary;
-
-			for (int j = 0; j < 3; ++j) {
-				for (int k = 0; k < 3; ++k) {
-					particle->rotationTensor.matrix[j][k] = inDoubleParticlesParameters[doubleBcount];
-					doubleBcount++;
-				}
-			}
-
-			inParticles.push_back(particle);
-		}
-	}
-	if (sendingRight) {
-		delete[] outDoubleParticlesParameters;
-		delete[] outIntegerParticlesParameters;
-	}
-	if (receivingLeft) {
-		delete[] inIntegerParticlesParameters;
-		delete[] inDoubleParticlesParameters;
-	}
-	if (verbosity > 2) printf("finish send righ receive left rank = %d\n", rank);
+	sendRightReceiveLeftParticlesGeneral(outParticles, inParticles, types, typesNumber, verbosity, cartComm, rank, leftRank,
+	                                     rightRank, numberOfIntegerParameters, numberOfDoubleParameters, outParticlesNumber,
+	                                     inParticlesNumber, sendingRight, receivingLeft);
 }
 
 void sendFrontReceiveBackParticles(std::vector<Particle *>& outParticles, std::vector<Particle *>& inParticles,
@@ -5738,235 +5610,26 @@ void sendFrontReceiveBackParticles(std::vector<Particle *>& outParticles, std::v
 	outParticlesNumber[0] = outParticles.size();
 	inParticlesNumber[0] = 0;
 
-	MPI_Status status;
-	MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_LEFT, inParticlesNumber, 1, MPI_INT,
-	             backRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
-
-	if (verbosity > 2) printf("in particle number = %d\n", inParticlesNumber[0]);
-
-
-	MPI_Barrier(cartComm);
-
-	int* outIntegerParticlesParameters;
-	int* inIntegerParticlesParameters;
-	double* outDoubleParticlesParameters;
-	double* inDoubleParticlesParameters;
-
-	if ((outParticlesNumber[0] > 0)) {
-		int bcount = 0;
-		outIntegerParticlesParameters = new int[numberOfIntegerParameters * outParticlesNumber[0]];
-		for (int i = 0; i < outParticles.size(); ++i) {
-			Particle* particle = outParticles[i];
-			outIntegerParticlesParameters[bcount] = particle->number;
-			bcount++;
-			outIntegerParticlesParameters[bcount] = particle->chargeCount;
-			bcount++;
-			int type = -1;
-			for (int t = 0; t < typesNumber; ++t) {
-				if (particle->type == types[t].type) {
-					type = t;
-					break;
-				}
-			}
-			if (type == -1) {
-				std::string outputDir = outputDirectory;
-				FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-				fprintf(errorLogFile, "particle has no type in send particles left\n");
-				fclose(errorLogFile);
-				MPI_Finalize();
-				exit(0);
-			}
-			outIntegerParticlesParameters[bcount] = type;
-			bcount++;
-			outIntegerParticlesParameters[bcount] = particle->crossBoundaryCount;
-			bcount++;
-		}
-		if (verbosity > 2) printf("send outIntegerParameters front rank = %d\n", rank);
-	}
-
-	if (inParticlesNumber[0] > 0) {
-		inIntegerParticlesParameters = new int[numberOfIntegerParameters * inParticlesNumber[0]];
+	if (verbosity > 2) printf("send outParticlesNumber left rank = %d number = %d\n", rank, outParticlesNumber[0]);
+	if ((cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1) || periodic) {
+		MPI_Status status;
+		MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_LEFT, inParticlesNumber, 1, MPI_INT,
+		             backRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+	} else if (cartCoord[1] == 0) {
+		MPI_Status status;
+		MPI_Recv(inParticlesNumber, 1, MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+	} else if (cartCoord[1] == cartDim[1] - 1) {
+		MPI_Send(outParticlesNumber, 1, MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm);
 	}
 
 	MPI_Barrier(cartComm);
 
-	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, frontRank,
-		             MPI_SEND_INTEGER_NUMBER_LEFT, inIntegerParticlesParameters,
-		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_LEFT,
-		             cartComm, &status);
-	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, frontRank,
-		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm);
-	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, backRank,
-		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
-	}
+	const bool sendingLeft = (outParticlesNumber[0] > 0) && (cartCoord[1] > 0 || periodic);
+	const bool receivingRight = (inParticlesNumber[0] > 0) && (cartCoord[1] < cartDim[1] - 1 || periodic);
 
-	MPI_Barrier(cartComm);
-
-	if ((outParticlesNumber[0] > 0)) {
-		int doubleBcount = 0;
-		outDoubleParticlesParameters = new double[numberOfDoubleParameters * outParticlesNumber[0]];
-		for (int i = 0; i < outParticles.size(); ++i) {
-			Particle* particle = outParticles[i];
-
-			outDoubleParticlesParameters[doubleBcount] = particle->mass;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->charge;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->weight;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.z;
-			doubleBcount++;
-			Vector3d momentum = particle->getMomentum();
-			outDoubleParticlesParameters[doubleBcount] = momentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = momentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = momentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dx;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dy;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dz;
-			doubleBcount++;
-			for (int j = 0; j < 3; ++j) {
-				for (int k = 0; k < 3; ++k) {
-					outDoubleParticlesParameters[doubleBcount] = particle->rotationTensor.matrix[j][k];
-					doubleBcount++;
-				}
-			}
-		}
-		if (verbosity > 2) printf("send outDoubleParameters front rank = %d\n", rank);
-	}
-
-	if (inParticlesNumber[0] > 0) {
-		inDoubleParticlesParameters = new double[numberOfDoubleParameters * inParticlesNumber[0]];
-	}
-
-	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, frontRank,
-		             MPI_SEND_DOUBLE_NUMBER_LEFT, inDoubleParticlesParameters,
-		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, backRank, MPI_SEND_DOUBLE_NUMBER_LEFT,
-		             cartComm, &status);
-	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, frontRank,
-		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm);
-	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, backRank,
-		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
-	}
-
-	MPI_Barrier(cartComm);
-
-	if (inParticlesNumber[0] > 0) {
-		int bcount = 0;
-		int doubleBcount = 0;
-
-		for (int i = 0; i < inParticlesNumber[0]; ++i) {
-
-			int number = inIntegerParticlesParameters[bcount];
-			bcount++;
-			int chargeCount = inIntegerParticlesParameters[bcount];
-			bcount++;
-			int type = inIntegerParticlesParameters[bcount];
-			if (type < 0 || type >= typesNumber) {
-				std::string outputDir = outputDirectory;
-				FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-				fprintf(errorLogFile, "particle has wrong type in receive particles back\n");
-				fclose(errorLogFile);
-				MPI_Finalize();
-				exit(0);
-			}
-			ParticleTypes particleType = types[type].type;
-			bcount++;
-			int crossBoundary = inIntegerParticlesParameters[bcount];
-			bcount++;
-
-			double mass = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double charge = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double weight = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double x = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double y = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double z = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dx = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dy = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dz = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-
-			Particle* particle = new Particle(number, mass, chargeCount, charge, weight, particleType, x, y, z,
-			                                  initialMomentumX, initialMomentumY, initialMomentumZ, dx, dy, dz);
-
-			particle->setMomentum(momentumX, momentumY, momentumZ);
-			particle->prevMomentum.x = prevMomentumX;
-			particle->prevMomentum.x = prevMomentumY;
-			particle->prevMomentum.x = prevMomentumZ;
-			particle->crossBoundaryCount = crossBoundary;
-
-			for (int j = 0; j < 3; ++j) {
-				for (int k = 0; k < 3; ++k) {
-					particle->rotationTensor.matrix[j][k] = inDoubleParticlesParameters[doubleBcount];
-					doubleBcount++;
-				}
-			}
-
-
-			inParticles.push_back(particle);
-		}
-	}
-	if (inParticlesNumber[0] > 0) {
-		delete[] inIntegerParticlesParameters;
-		delete[] inDoubleParticlesParameters;
-	}
-	if (outParticlesNumber[0] > 0) {
-		delete[] outIntegerParticlesParameters;
-		delete[] outDoubleParticlesParameters;
-	}
-	if (verbosity > 2) printf("finish send front receive back rank = %d\n", rank);
+	sendLeftReceiveRightParticlesGeneral(outParticles, inParticles, types, typesNumber, verbosity, cartComm, rank, frontRank,
+	                                     backRank, numberOfIntegerParameters, numberOfDoubleParameters, outParticlesNumber,
+	                                     inParticlesNumber, sendingLeft, receivingRight);
 }
 
 void sendBackReceiveFrontParticles(std::vector<Particle *>& outParticles, std::vector<Particle *>& inParticles,
@@ -5985,230 +5648,29 @@ void sendBackReceiveFrontParticles(std::vector<Particle *>& outParticles, std::v
 	outParticlesNumber[0] = outParticles.size();
 	inParticlesNumber[0] = 0;
 
-	MPI_Status status;
-	MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inParticlesNumber, 1, MPI_INT,
-	             frontRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+	if (verbosity > 2) printf("send outParticlesNumber right rank = %d number = %d\n", rank, outParticlesNumber[0]);
 
-	MPI_Barrier(cartComm);
-
-	int* outIntegerParticlesParameters;
-	int* inIntegerParticlesParameters;
-	double* outDoubleParticlesParameters;
-	double* inDoubleParticlesParameters;
+	if ((cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1) || periodic) {
+		MPI_Status status;
+		MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inParticlesNumber, 1, MPI_INT,
+		             frontRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+	} else if (cartCoord[1] == 0) {
+		MPI_Send(outParticlesNumber, 1, MPI_INT, backRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
+	} else if (cartCoord[1] == cartDim[1] - 1) {
+		MPI_Status status;
+		MPI_Recv(inParticlesNumber, 1, MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+	}
 
 	if (verbosity > 2) printf("in particle number = %d\n", inParticlesNumber[0]);
 
-	if ((outParticlesNumber[0] > 0)) {
-		int bcount = 0;
-		outIntegerParticlesParameters = new int[numberOfIntegerParameters * outParticlesNumber[0]];
-		for (int i = 0; i < outParticles.size(); ++i) {
-			Particle* particle = outParticles[i];
-			outIntegerParticlesParameters[bcount] = particle->number;
-			bcount++;
-			outIntegerParticlesParameters[bcount] = particle->chargeCount;
-			bcount++;
-			int type = -1;
-			for (int t = 0; t < typesNumber; ++t) {
-				if (particle->type == types[t].type) {
-					type = t;
-					break;
-				}
-			}
-			if (type == -1) {
-				std::string outputDir = outputDirectory;
-				FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-				fprintf(errorLogFile, "particle has no type in send particles right\n");
-				fclose(errorLogFile);
-				MPI_Finalize();
-				exit(0);
-			}
-			outIntegerParticlesParameters[bcount] = type;
-			bcount++;
-			outIntegerParticlesParameters[bcount] = particle->crossBoundaryCount;
-			bcount++;
-		}
-
-		if (verbosity > 2) printf("send outIntegerParameters back rank = %d\n", rank);
-	}
-
-	if (inParticlesNumber[0] > 0) {
-		inIntegerParticlesParameters = new int[numberOfIntegerParameters * inParticlesNumber[0]];
-	}
-
-	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, backRank,
-		             MPI_SEND_INTEGER_NUMBER_RIGHT, inIntegerParticlesParameters,
-		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, frontRank, MPI_SEND_INTEGER_NUMBER_RIGHT,
-		             cartComm, &status);
-	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, backRank,
-		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
-	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, frontRank,
-		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
-	}
-
 	MPI_Barrier(cartComm);
 
-	if ((outParticlesNumber[0] > 0)) {
-		int doubleBcount = 0;
-		outDoubleParticlesParameters = new double[numberOfDoubleParameters * outParticlesNumber[0]];
-		for (int i = 0; i < outParticlesNumber[0]; ++i) {
-			Particle* particle = outParticles[i];
+	const bool sendingRight = (outParticlesNumber[0] > 0) && (cartCoord[1] < cartDim[1] - 1 || periodic);
+	const bool receivingLeft = (inParticlesNumber[0] > 0) && (cartCoord[1] > 0 || periodic);
 
-			outDoubleParticlesParameters[doubleBcount] = particle->mass;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->charge;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->weight;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.z;
-			doubleBcount++;
-			Vector3d momentum = particle->getMomentum();
-			outDoubleParticlesParameters[doubleBcount] = momentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = momentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = momentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dx;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dy;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dz;
-			doubleBcount++;
-			for (int j = 0; j < 3; ++j) {
-				for (int k = 0; k < 3; ++k) {
-					outDoubleParticlesParameters[doubleBcount] = particle->rotationTensor.matrix[j][k];
-					doubleBcount++;
-				}
-			}
-		}
-		if (verbosity > 2) printf("send outDoubleParameters back rank = %d\n", rank);
-	}
-
-	if (inParticlesNumber[0] > 0) {
-		inDoubleParticlesParameters = new double[numberOfDoubleParameters * inParticlesNumber[0]];
-	}
-
-	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, backRank,
-		             MPI_SEND_DOUBLE_NUMBER_RIGHT, inDoubleParticlesParameters,
-		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, frontRank, MPI_SEND_DOUBLE_NUMBER_RIGHT,
-		             cartComm, &status);
-	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, backRank,
-		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm);
-	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, frontRank,
-		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
-	}
-
-	if (inParticlesNumber[0] > 0) {
-		int bcount = 0;
-		int doubleBcount = 0;
-
-		for (int i = 0; i < inParticlesNumber[0]; ++i) {
-
-			int number = inIntegerParticlesParameters[bcount];
-			bcount++;
-			int chargeCount = inIntegerParticlesParameters[bcount];
-			bcount++;
-			int type = inIntegerParticlesParameters[bcount];
-			if (type < 0 || type >= typesNumber) {
-				std::string outputDir = outputDirectory;
-				FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-				fprintf(errorLogFile, "particle has wrong type in receive particles front\n");
-				fclose(errorLogFile);
-				MPI_Finalize();
-				exit(0);
-			}
-			ParticleTypes particleType = types[type].type;
-			bcount++;
-			int crossBoundary = inIntegerParticlesParameters[bcount];
-			bcount++;
-
-			double mass = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double charge = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double weight = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double x = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double y = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double z = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dx = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dy = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dz = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-
-			Particle* particle = new Particle(number, mass, chargeCount, charge, weight, particleType, x, y, z,
-			                                  initialMomentumX, initialMomentumY, initialMomentumZ, dx, dy, dz);
-			particle->setMomentum(momentumX, momentumY, momentumZ);
-			particle->prevMomentum.x = prevMomentumX;
-			particle->prevMomentum.x = prevMomentumY;
-			particle->prevMomentum.x = prevMomentumZ;
-			particle->crossBoundaryCount = crossBoundary;
-
-			for (int j = 0; j < 3; ++j) {
-				for (int k = 0; k < 3; ++k) {
-					particle->rotationTensor.matrix[j][k] = inDoubleParticlesParameters[doubleBcount];
-					doubleBcount++;
-				}
-			}
-
-
-			inParticles.push_back(particle);
-		}
-	}
-	if (inParticlesNumber[0] > 0) {
-		delete[] inIntegerParticlesParameters;
-		delete[] inDoubleParticlesParameters;
-	}
-	if (outParticlesNumber[0] > 0) {
-		delete[] outIntegerParticlesParameters;
-		delete[] outDoubleParticlesParameters;
-	}
-	if (verbosity > 2) printf("finish send back receive front rank = %d\n", rank);
+	sendRightReceiveLeftParticlesGeneral(outParticles, inParticles, types, typesNumber, verbosity, cartComm, rank, frontRank,
+	                                     backRank, numberOfIntegerParameters, numberOfDoubleParameters, outParticlesNumber,
+	                                     inParticlesNumber, sendingRight, receivingLeft);
 }
 
 void sendBottomReceiveTopParticles(std::vector<Particle *>& outParticles, std::vector<Particle *>& inParticles,
@@ -6227,233 +5689,26 @@ void sendBottomReceiveTopParticles(std::vector<Particle *>& outParticles, std::v
 	outParticlesNumber[0] = outParticles.size();
 	inParticlesNumber[0] = 0;
 
-	MPI_Status status;
-	MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_LEFT, inParticlesNumber, 1, MPI_INT,
-	             topRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
-
-	MPI_Barrier(cartComm);
-
-	int* outIntegerParticlesParameters;
-	int* inIntegerParticlesParameters;
-	double* outDoubleParticlesParameters;
-	double* inDoubleParticlesParameters;
-
-	if (verbosity > 2) printf("in particle number = %d\n", inParticlesNumber[0]);
-
-	MPI_Barrier(cartComm);
-	if ((outParticlesNumber[0] > 0)) {
-		int bcount = 0;
-		outIntegerParticlesParameters = new int[numberOfIntegerParameters * outParticlesNumber[0]];
-		for (int i = 0; i < outParticles.size(); ++i) {
-			Particle* particle = outParticles[i];
-			outIntegerParticlesParameters[bcount] = particle->number;
-			bcount++;
-			outIntegerParticlesParameters[bcount] = particle->chargeCount;
-			bcount++;
-			int type = -1;
-			for (int t = 0; t < typesNumber; ++t) {
-				if (particle->type == types[t].type) {
-					type = t;
-					break;
-				}
-			}
-			if (type == -1) {
-				std::string outputDir = outputDirectory;
-				FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-				fprintf(errorLogFile, "particle has no type in send particles bottom\n");
-				fclose(errorLogFile);
-				MPI_Finalize();
-				exit(0);
-			}
-			outIntegerParticlesParameters[bcount] = type;
-			bcount++;
-			outIntegerParticlesParameters[bcount] = particle->crossBoundaryCount;
-			bcount++;
-		}
-		if (verbosity > 2) printf("send outIntegerParameters bottom cart coord = %d %d %d\n", cartCoord[0], cartCoord[1],
-		                          cartCoord[2]);
-	}
-
-	if (inParticlesNumber[0] > 0) {
-		inIntegerParticlesParameters = new int[numberOfIntegerParameters * inParticlesNumber[0]];
-	}
-
-	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, bottomRank,
-		             MPI_SEND_INTEGER_NUMBER_LEFT, inIntegerParticlesParameters,
-		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_LEFT,
-		             cartComm, &status);
-	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, bottomRank,
-		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm);
-	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, topRank,
-		         MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+	if (verbosity > 2) printf("send outParticlesNumber left rank = %d number = %d\n", rank, outParticlesNumber[0]);
+	if ((cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1) || periodic) {
+		MPI_Status status;
+		MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_LEFT, inParticlesNumber, 1, MPI_INT,
+		             topRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+	} else if (cartCoord[2] == 0) {
+		MPI_Status status;
+		MPI_Recv(inParticlesNumber, 1, MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm, &status);
+	} else if (cartCoord[2] == cartDim[2] - 1) {
+		MPI_Send(outParticlesNumber, 1, MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_LEFT, cartComm);
 	}
 
 	MPI_Barrier(cartComm);
-	if ((outParticlesNumber[0] > 0)) {
-		int doubleBcount = 0;
-		outDoubleParticlesParameters = new double[numberOfDoubleParameters * outParticlesNumber[0]];
-		for (int i = 0; i < outParticles.size(); ++i) {
-			Particle* particle = outParticles[i];
 
-			outDoubleParticlesParameters[doubleBcount] = particle->mass;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->charge;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->weight;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.z;
-			doubleBcount++;
-			Vector3d momentum = particle->getMomentum();
-			outDoubleParticlesParameters[doubleBcount] = momentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = momentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = momentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dx;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dy;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dz;
-			doubleBcount++;
-			for (int j = 0; j < 3; ++j) {
-				for (int k = 0; k < 3; ++k) {
-					outDoubleParticlesParameters[doubleBcount] = particle->rotationTensor.matrix[j][k];
-					doubleBcount++;
-				}
-			}
-		}
-		if (verbosity > 2) printf("send outDoubleParameters bottom cart coord = %d %d %d\n", cartCoord[0], cartCoord[1],
-		                          cartCoord[2]);
-	}
+	const bool sendingLeft = (outParticlesNumber[0] > 0) && (cartCoord[2] > 0 || periodic);
+	const bool receivingRight = (inParticlesNumber[0] > 0) && (cartCoord[2] < cartDim[2] - 1 || periodic);
 
-	if (inParticlesNumber[0] > 0) {
-		inDoubleParticlesParameters = new double[numberOfDoubleParameters * inParticlesNumber[0]];
-	}
-
-	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, bottomRank,
-		             MPI_SEND_DOUBLE_NUMBER_LEFT, inDoubleParticlesParameters,
-		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, topRank, MPI_SEND_DOUBLE_NUMBER_LEFT,
-		             cartComm, &status);
-	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, bottomRank,
-		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm);
-	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, topRank,
-		         MPI_SEND_DOUBLE_NUMBER_LEFT, cartComm, &status);
-	}
-
-	if (inParticlesNumber[0] > 0) {
-		int bcount = 0;
-		int doubleBcount = 0;
-
-		for (int i = 0; i < inParticlesNumber[0]; ++i) {
-
-			int number = inIntegerParticlesParameters[bcount];
-			bcount++;
-			int chargeCount = inIntegerParticlesParameters[bcount];
-			bcount++;
-			int type = inIntegerParticlesParameters[bcount];
-			if (type < 0 || type >= typesNumber) {
-				std::string outputDir = outputDirectory;
-				FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-				fprintf(errorLogFile, "particle has wrong type in receive particles top\n");
-				fclose(errorLogFile);
-				MPI_Finalize();
-				exit(0);
-			}
-			ParticleTypes particleType = types[type].type;
-			bcount++;
-			int crossBoundary = inIntegerParticlesParameters[bcount];
-			bcount++;
-
-			double mass = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double charge = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double weight = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double x = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double y = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double z = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dx = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dy = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dz = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-
-			Particle* particle = new Particle(number, mass, chargeCount, charge, weight, particleType, x, y, z,
-			                                  initialMomentumX, initialMomentumY, initialMomentumZ, dx, dy, dz);
-
-			particle->setMomentum(momentumX, momentumY, momentumZ);
-			particle->prevMomentum.x = prevMomentumX;
-			particle->prevMomentum.x = prevMomentumY;
-			particle->prevMomentum.x = prevMomentumZ;
-			particle->crossBoundaryCount = crossBoundary;
-
-			for (int j = 0; j < 3; ++j) {
-				for (int k = 0; k < 3; ++k) {
-					particle->rotationTensor.matrix[j][k] = inDoubleParticlesParameters[doubleBcount];
-					doubleBcount++;
-				}
-			}
-
-
-			inParticles.push_back(particle);
-		}
-	}
-	if (inParticlesNumber[0] > 0) {
-		delete[] inIntegerParticlesParameters;
-		delete[] inDoubleParticlesParameters;
-	}
-	if (outParticlesNumber[0] > 0) {
-		delete[] outIntegerParticlesParameters;
-		delete[] outDoubleParticlesParameters;
-	}
-	if (verbosity > 2) printf("finish send bottom receive top cart coord = %d %d %d\n", cartCoord[0], cartCoord[1],
-	                          cartCoord[2]);
+	sendLeftReceiveRightParticlesGeneral(outParticles, inParticles, types, typesNumber, verbosity, cartComm, rank, bottomRank,
+	                                     topRank, numberOfIntegerParameters, numberOfDoubleParameters, outParticlesNumber,
+	                                     inParticlesNumber, sendingLeft, receivingRight);
 }
 
 void sendTopReceiveBottomParticles(std::vector<Particle *>& outParticles, std::vector<Particle *>& inParticles,
@@ -6472,236 +5727,29 @@ void sendTopReceiveBottomParticles(std::vector<Particle *>& outParticles, std::v
 	outParticlesNumber[0] = outParticles.size();
 	inParticlesNumber[0] = 0;
 
-	MPI_Status status;
-	MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inParticlesNumber, 1, MPI_INT,
-	             bottomRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+	if (verbosity > 2) printf("send outParticlesNumber right rank = %d number = %d\n", rank, outParticlesNumber[0]);
 
-	MPI_Barrier(cartComm);
-
-	int* outIntegerParticlesParameters;
-	int* inIntegerParticlesParameters;
-	double* outDoubleParticlesParameters;
-	double* inDoubleParticlesParameters;
+	if ((cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1) || periodic) {
+		MPI_Status status;
+		MPI_Sendrecv(outParticlesNumber, 1, MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_RIGHT, inParticlesNumber, 1, MPI_INT,
+		             bottomRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+	} else if (cartCoord[2] == 0) {
+		MPI_Send(outParticlesNumber, 1, MPI_INT, topRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
+	} else if (cartCoord[2] == cartDim[2] - 1) {
+		MPI_Status status;
+		MPI_Recv(inParticlesNumber, 1, MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
+	}
 
 	if (verbosity > 2) printf("in particle number = %d\n", inParticlesNumber[0]);
 
-	if ((outParticlesNumber[0] > 0)) {
-		if (verbosity > 2) printf("collecting integer parameters rank = %d\n", rank);
-		int bcount = 0;
-		outIntegerParticlesParameters = new int[numberOfIntegerParameters * outParticlesNumber[0]];
-		for (int i = 0; i < outParticles.size(); ++i) {
-			if (verbosity > 2) printf("collecting integer parameters rank = %d particle = %d\n", rank, i);
-			Particle* particle = outParticles[i];
-			if (verbosity > 2) printf("get particele\n");
-			outIntegerParticlesParameters[bcount] = particle->number;
-			bcount++;
-			if (verbosity > 2) printf("get number\n");
-			outIntegerParticlesParameters[bcount] = particle->chargeCount;
-			bcount++;
-			if (verbosity > 2) printf("get charge\n");
-			int type = -1;
-			for (int t = 0; t < typesNumber; ++t) {
-				if (particle->type == types[t].type) {
-					type = t;
-					break;
-				}
-			}
-			if (verbosity > 2) printf("get type\n");
-			if (type == -1) {
-				std::string outputDir = outputDirectory;
-				FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-				fprintf(errorLogFile, "particle has no type in send particles top\n");
-				fclose(errorLogFile);
-				MPI_Finalize();
-				exit(0);
-			}
-			outIntegerParticlesParameters[bcount] = type;
-			bcount++;
-			if (verbosity > 2) printf("get type\n");
-			outIntegerParticlesParameters[bcount] = particle->crossBoundaryCount;
-			bcount++;
-			if (verbosity > 2) printf("get cross boundary count\n");
-		}
+	MPI_Barrier(cartComm);
 
-		if (verbosity > 2) printf("send outIntegerParameters top rank = %d\n", rank);
-	}
+	const bool sendingRight = (outParticlesNumber[0] > 0) && (cartCoord[2] < cartDim[2] - 1 || periodic);
+	const bool receivingLeft = (inParticlesNumber[0] > 0) && (cartCoord[2] > 0 || periodic);
 
-	if (inParticlesNumber[0] > 0) {
-		inIntegerParticlesParameters = new int[numberOfIntegerParameters * inParticlesNumber[0]];
-	}
-
-	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, topRank,
-		             MPI_SEND_INTEGER_NUMBER_RIGHT, inIntegerParticlesParameters,
-		             numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, bottomRank, MPI_SEND_INTEGER_NUMBER_RIGHT,
-		             cartComm, &status);
-	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outIntegerParticlesParameters, numberOfIntegerParameters * outParticlesNumber[0], MPI_INT, topRank,
-		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
-	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inIntegerParticlesParameters, numberOfIntegerParameters * inParticlesNumber[0], MPI_INT, bottomRank,
-		         MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm, &status);
-	}
-
-	if ((outParticlesNumber[0] > 0)) {
-		int doubleBcount = 0;
-		outDoubleParticlesParameters = new double[numberOfDoubleParameters * outParticlesNumber[0]];
-		for (int i = 0; i < outParticlesNumber[0]; ++i) {
-			Particle* particle = outParticles[i];
-
-			outDoubleParticlesParameters[doubleBcount] = particle->mass;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->charge;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->weight;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->coordinates.z;
-			doubleBcount++;
-			Vector3d momentum = particle->getMomentum();
-			outDoubleParticlesParameters[doubleBcount] = momentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = momentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = momentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->initialMomentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.x;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.y;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->prevMomentum.z;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dx;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dy;
-			doubleBcount++;
-			outDoubleParticlesParameters[doubleBcount] = particle->dz;
-			doubleBcount++;
-			for (int j = 0; j < 3; ++j) {
-				for (int k = 0; k < 3; ++k) {
-					outDoubleParticlesParameters[doubleBcount] = particle->rotationTensor.matrix[j][k];
-					doubleBcount++;
-				}
-			}
-		}
-		if (verbosity > 2) printf("send outDoubleParameters top rank = %d\n", rank);
-	}
-
-	if (inParticlesNumber[0] > 0) {
-		inDoubleParticlesParameters = new double[numberOfDoubleParameters * inParticlesNumber[0]];
-	}
-
-	if (outParticlesNumber[0] > 0 && inParticlesNumber[0] > 0) {
-		MPI_Sendrecv(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, topRank,
-		             MPI_SEND_DOUBLE_NUMBER_RIGHT, inDoubleParticlesParameters,
-		             numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, bottomRank, MPI_SEND_DOUBLE_NUMBER_RIGHT,
-		             cartComm, &status);
-	} else if (outParticlesNumber[0] > 0) {
-		MPI_Send(outDoubleParticlesParameters, numberOfDoubleParameters * outParticlesNumber[0], MPI_DOUBLE, topRank,
-		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm);
-	} else if (inParticlesNumber[0] > 0) {
-		MPI_Recv(inDoubleParticlesParameters, numberOfDoubleParameters * inParticlesNumber[0], MPI_DOUBLE, bottomRank,
-		         MPI_SEND_DOUBLE_NUMBER_RIGHT, cartComm, &status);
-	}
-
-	if (inParticlesNumber[0] > 0) {
-		int bcount = 0;
-		int doubleBcount = 0;
-
-		for (int i = 0; i < inParticlesNumber[0]; ++i) {
-
-			int number = inIntegerParticlesParameters[bcount];
-			bcount++;
-			int chargeCount = inIntegerParticlesParameters[bcount];
-			bcount++;
-			int type = inIntegerParticlesParameters[bcount];
-			if (type < 0 || type >= typesNumber) {
-				std::string outputDir = outputDirectory;
-				FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-				fprintf(errorLogFile, "particle has wrong type in receive particles top\n");
-				fclose(errorLogFile);
-				MPI_Finalize();
-				exit(0);
-			}
-			ParticleTypes particleType = types[type].type;
-			bcount++;
-			int crossBoundary = inIntegerParticlesParameters[bcount];
-			bcount++;
-
-			double mass = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double charge = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double weight = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double x = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double y = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double z = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double momentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double initialMomentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumX = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumY = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double prevMomentumZ = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dx = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dy = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-			double dz = inDoubleParticlesParameters[doubleBcount];
-			doubleBcount++;
-
-			Particle* particle = new Particle(number, mass, chargeCount, charge, weight, particleType, x, y, z,
-			                                  initialMomentumX, initialMomentumY, initialMomentumZ, dx, dy, dz);
-			particle->setMomentum(momentumX, momentumY, momentumZ);
-			particle->prevMomentum.x = prevMomentumX;
-			particle->prevMomentum.x = prevMomentumY;
-			particle->prevMomentum.x = prevMomentumZ;
-			particle->crossBoundaryCount = crossBoundary;
-
-			for (int j = 0; j < 3; ++j) {
-				for (int k = 0; k < 3; ++k) {
-					particle->rotationTensor.matrix[j][k] = inDoubleParticlesParameters[doubleBcount];
-					doubleBcount++;
-				}
-			}
-
-
-			inParticles.push_back(particle);
-		}
-	}
-	if (inParticlesNumber[0] > 0) {
-		delete[] inIntegerParticlesParameters;
-		delete[] inDoubleParticlesParameters;
-	}
-	if (outParticlesNumber[0] > 0) {
-		delete[] outIntegerParticlesParameters;
-		delete[] outDoubleParticlesParameters;
-	}
-	if (verbosity > 2) printf("finish send top receive bottom rank = %d\n", rank);
+	sendRightReceiveLeftParticlesGeneral(outParticles, inParticles, types, typesNumber, verbosity, cartComm, rank, bottomRank,
+	                                     topRank, numberOfIntegerParameters, numberOfDoubleParameters, outParticlesNumber,
+	                                     inParticlesNumber, sendingRight, receivingLeft);
 }
 
 void exchangeLargeVector(double**** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int lnumber,
