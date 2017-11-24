@@ -565,10 +565,8 @@ void Simulation::sumNodeVectorParametersX() {
 							divPressureTensor[xnumberAdded - i][j][k][l] += divPressureTensor[2 + 2 * additionalBinNumber - i][j][k][l];
 							divPressureTensor[2 + 2 * additionalBinNumber - i][j][k][l] = divPressureTensor[xnumberAdded - i][j][k][l];
 
-							divPressureTensorMinus[xnumberAdded - i][j][k][l] += divPressureTensorMinus[2 + 2 * additionalBinNumber - i][j][k
-							][l];
-							divPressureTensorMinus[2 + 2 * additionalBinNumber - i][j][k][l] = divPressureTensorMinus[xnumberAdded - i][j][k]
-								[l];
+							divPressureTensorMinus[xnumberAdded - i][j][k][l] += divPressureTensorMinus[2 + 2 * additionalBinNumber - i][j][k][l];
+							divPressureTensorMinus[2 + 2 * additionalBinNumber - i][j][k][l] = divPressureTensorMinus[xnumberAdded - i][j][k][l];
 						}
 					}
 				}
@@ -705,10 +703,8 @@ void Simulation::sumNodeVectorParametersZ() {
 							divPressureTensor[i][j][znumberAdded - k][l] += divPressureTensor[i][j][2 + 2 * additionalBinNumber - k][l];
 							divPressureTensor[i][j][2 + 2 * additionalBinNumber - k][l] = divPressureTensor[i][j][znumberAdded - k][l];
 
-							divPressureTensorMinus[i][j][znumberAdded - k][l] += divPressureTensorMinus[i][j][2 + 2 * additionalBinNumber - k
-							][l];
-							divPressureTensorMinus[i][j][2 + 2 * additionalBinNumber - k][l] = divPressureTensorMinus[i][j][znumberAdded - k]
-								[l];
+							divPressureTensorMinus[i][j][znumberAdded - k][l] += divPressureTensorMinus[i][j][2 + 2 * additionalBinNumber - k][l];
+							divPressureTensorMinus[i][j][2 + 2 * additionalBinNumber - k][l] = divPressureTensorMinus[i][j][znumberAdded - k][l];
 						}
 					}
 				}
@@ -862,12 +858,29 @@ void Simulation::sumNodeMatrixParametersY() {
 		double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 9];
 		double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 9];
 
-		sendNodeMatrixParametersToBackReceiveFromFront(dielectricTensor, outBufferBack, tempNodeMatrixParameterFront,
-		                                               inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
-		sendNodeMatrixParametersToFrontReceiveFromBack(dielectricTensor, outBufferFront, tempNodeMatrixParameterBack,
-		                                               inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
+		if ((boundaryConditionTypeY == PERIODIC) || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
+			sendNodeMatrixParametersToFrontReceiveFromBack(dielectricTensor, outBufferFront, tempNodeMatrixParameterBack,
+			                                               inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
+			                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
+		} else if (cartCoord[1] == 0) {
+			receiveNodeMatrixParametersBack(tempNodeMatrixParameterBack, inBufferBack, xnumberAdded, ynumberAdded,
+			                                znumberAdded, additionalBinNumber, cartComm, rank, backRank);
+		} else if (cartCoord[1] == cartDim[1] - 1) {
+			sendNodeMatrixParametersFront(dielectricTensor, outBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+			                              additionalBinNumber, cartComm, rank, frontRank);
+		}
+
+		if ((boundaryConditionTypeY == PERIODIC) || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
+			sendNodeMatrixParametersToBackReceiveFromFront(dielectricTensor, outBufferBack, tempNodeMatrixParameterFront,
+			                                               inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+			                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
+		} else if (cartCoord[1] == 0) {
+			sendNodeMatrixParametersBack(dielectricTensor, outBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
+			                             additionalBinNumber, cartComm, rank, backRank);
+		} else if (cartCoord[1] == cartDim[1] - 1) {
+			receiveNodeMatrixParametersFront(tempNodeMatrixParameterFront, inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+			                                 additionalBinNumber, cartComm, rank, frontRank);
+		}
 
 
 		sumTempNodeMatrixParametersY(dielectricTensor);
@@ -878,12 +891,14 @@ void Simulation::sumNodeMatrixParametersY() {
 		delete[] outBufferFront;
 		delete[] outBufferBack;
 	} else {
-		for (int i = 0; i <= xnumberAdded; ++i) {
-			for (int k = 0; k <= znumberAdded; ++k) {
-				for (int j = 0; j <= 2 * additionalBinNumber + 2; ++j) {
-					dielectricTensor[i][ynumberAdded - j][k] = dielectricTensor[i][ynumberAdded - j][k] + dielectricTensor[i][2 + 2 *
-						additionalBinNumber - j][k];
-					dielectricTensor[i][2 + 2 * additionalBinNumber - j][k] = dielectricTensor[i][ynumberAdded - j][k];
+		if (boundaryConditionTypeY == PERIODIC) {
+			for (int i = 0; i <= xnumberAdded; ++i) {
+				for (int k = 0; k <= znumberAdded; ++k) {
+					for (int j = 0; j <= 2 * additionalBinNumber + 2; ++j) {
+						dielectricTensor[i][ynumberAdded - j][k] = dielectricTensor[i][ynumberAdded - j][k] + dielectricTensor[i][2 + 2 *
+							additionalBinNumber - j][k];
+						dielectricTensor[i][2 + 2 * additionalBinNumber - j][k] = dielectricTensor[i][ynumberAdded - j][k];
+					}
 				}
 			}
 		}
@@ -907,12 +922,29 @@ void Simulation::sumNodeMatrixParametersZ() {
 		double* inBufferTop = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1) * 9];
 		double* outBufferTop = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1) * 9];
 
-		sendNodeMatrixParametersToTopReceiveFromBottom(dielectricTensor, outBufferTop, tempNodeMatrixParameterBottom,
-		                                               inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
-		sendNodeMatrixParametersToBottomReceiveFromTop(dielectricTensor, outBufferBottom, tempNodeMatrixParameterTop,
-		                                               inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
+		if ((boundaryConditionTypeZ == PERIODIC) || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
+			sendNodeMatrixParametersToBottomReceiveFromTop(dielectricTensor, outBufferBottom, tempNodeMatrixParameterTop,
+			                                               inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
+			                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
+		} else if (cartCoord[2] == 0) {
+			receiveNodeMatrixParametersTop(tempNodeMatrixParameterTop, inBufferTop, xnumberAdded, ynumberAdded,
+			                               znumberAdded, additionalBinNumber, cartComm, rank, topRank);
+		} else if (cartCoord[2] == cartDim[2] - 1) {
+			sendNodeMatrixParametersBottom(dielectricTensor, outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+			                               additionalBinNumber, cartComm, rank, bottomRank);
+		}
+
+		if ((boundaryConditionTypeZ == PERIODIC) || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
+			sendNodeMatrixParametersToTopReceiveFromBottom(dielectricTensor, outBufferTop, tempNodeMatrixParameterBottom,
+			                                               inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+			                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
+		} else if (cartCoord[2] == 0) {
+			sendNodeMatrixParametersTop(dielectricTensor, outBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
+			                            additionalBinNumber, cartComm, rank, topRank);
+		} else if (cartCoord[2] == cartDim[2] - 1) {
+			receiveNodeMatrixParametersBottom(tempNodeMatrixParameterBottom, inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+			                                  additionalBinNumber, cartComm, rank, bottomRank);
+		}
 
 		sumTempNodeMatrixParametersZ(dielectricTensor);
 		//MPI_Barrier(cartComm);
@@ -922,12 +954,14 @@ void Simulation::sumNodeMatrixParametersZ() {
 		delete[] outBufferBottom;
 		delete[] outBufferTop;
 	} else {
-		for (int i = 0; i <= xnumberAdded; ++i) {
-			for (int j = 0; j <= ynumberAdded; ++j) {
-				for (int k = 0; k <= 2 * additionalBinNumber + 2; ++k) {
-					dielectricTensor[i][j][znumberAdded - k] = dielectricTensor[i][j][znumberAdded - k] + dielectricTensor[i][j][2 + 2
-						* additionalBinNumber - k];
-					dielectricTensor[i][j][2 + 2 * additionalBinNumber - k] = dielectricTensor[i][j][znumberAdded - k];
+		if (boundaryConditionTypeZ == PERIODIC) {
+			for (int i = 0; i <= xnumberAdded; ++i) {
+				for (int j = 0; j <= ynumberAdded; ++j) {
+					for (int k = 0; k <= 2 * additionalBinNumber + 2; ++k) {
+						dielectricTensor[i][j][znumberAdded - k] = dielectricTensor[i][j][znumberAdded - k] + dielectricTensor[i][j][2 + 2
+							* additionalBinNumber - k];
+						dielectricTensor[i][j][2 + 2 * additionalBinNumber - k] = dielectricTensor[i][j][znumberAdded - k];
+					}
 				}
 			}
 		}
@@ -966,22 +1000,42 @@ void Simulation::sumTempNodeMatrixParametersX(Matrix3d*** array) {
 }
 
 void Simulation::sumTempNodeMatrixParametersY(Matrix3d*** array) {
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		for (int k = 0; k < znumberAdded + 1; ++k) {
-			for (int j = 0; j < 2 * additionalBinNumber + 3; ++j) {
-				array[i][j][k] += tempNodeMatrixParameterFront[i][j][k];
-				array[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k] += tempNodeMatrixParameterBack[i][j][k];
+	if (cartCoord[1] > 0 || boundaryConditionTypeY == PERIODIC) {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				for (int j = 0; j < 2 * additionalBinNumber + 3; ++j) {
+					array[i][j][k] += tempNodeMatrixParameterFront[i][j][k];
+				}
+			}
+		}
+	}
+	if (cartCoord[1] < cartDim[1] - 1 || boundaryConditionTypeY == PERIODIC) {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				for (int j = 0; j < 2 * additionalBinNumber + 3; ++j) {
+					array[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k] += tempNodeMatrixParameterBack[i][j][k];
+				}
 			}
 		}
 	}
 }
 
 void Simulation::sumTempNodeMatrixParametersZ(Matrix3d*** array) {
-	for (int j = 0; j < ynumberAdded + 1; ++j) {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int k = 0; k < 2 * additionalBinNumber + 3; ++k) {
-				array[i][j][k] += tempNodeMatrixParameterBottom[i][j][k];
-				array[i][j][znumberAdded - 2 - 2 * additionalBinNumber - k] += tempNodeMatrixParameterTop[i][j][k];
+	if (cartCoord[2] > 0 || boundaryConditionTypeZ == PERIODIC) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < 2 * additionalBinNumber + 3; ++k) {
+					array[i][j][k] += tempNodeMatrixParameterBottom[i][j][k];
+				}
+			}
+		}
+	}
+	if (cartCoord[2] < cartDim[2] - 1 || boundaryConditionTypeZ == PERIODIC) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < 2 * additionalBinNumber + 3; ++k) {
+					array[i][j][znumberAdded - 2 - 2 * additionalBinNumber - k] += tempNodeMatrixParameterTop[i][j][k];
+				}
 			}
 		}
 	}
