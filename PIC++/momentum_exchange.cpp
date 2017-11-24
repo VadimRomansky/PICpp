@@ -1621,6 +1621,99 @@ void Simulation::sumCellTempParametersZ(double*** array) {
 	}
 }
 
+void Simulation::sumCellVectorParametersGeneralX(Vector3d*** array, double* inBufferRight, double* outBufferRight, double* inBufferLeft,
+                                                 double* outBufferLeft) {
+	if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		sendCellVectorParametersToLeftReceiveFromRight(array, outBufferLeft,
+		                                               tempCellVectorParameterRight, inBufferRight, xnumberAdded,
+		                                               ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank,
+		                                               leftRank, rightRank);
+	} else if (cartCoord[0] == 0) {
+		receiveCellVectorParametersRight(tempCellVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded,
+		                                 znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
+	} else if (cartCoord[0] == cartDim[0] - 1) {
+		sendCellVectorParametersLeft(array, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
+		                             additionalBinNumber, cartComm, rank, leftRank);
+	}
+
+	if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		sendCellVectorParametersToRightReceiveFromLeft(array, outBufferRight,
+		                                               tempCellVectorParameterLeft, inBufferLeft, xnumberAdded,
+		                                               ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank,
+		                                               leftRank, rightRank);
+	} else if (cartCoord[0] == 0) {
+		sendCellVectorParametersRight(array, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
+		                              additionalBinNumber, cartComm, rank, rightRank);
+	} else if (cartCoord[0] == cartDim[0] - 1) {
+		receiveCellVectorParametersLeft(tempCellVectorParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded,
+		                                znumberAdded, additionalBinNumber, cartComm, rank, leftRank);
+	}
+
+	sumCellVectorTempParametersX(array);
+}
+
+void Simulation::sumCellVectorParametersGeneralY(Vector3d*** array, double* inBufferBack, double* outBufferBack, double* inBufferFront,
+                                                 double* outBufferFront) {
+	if (boundaryConditionTypeY == PERIODIC || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
+		sendCellVectorParametersToFrontReceiveFromBack(array, outBufferFront,
+		                                               tempCellVectorParameterBack, inBufferBack, xnumberAdded,
+		                                               ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank,
+		                                               frontRank, backRank);
+	} else if (cartCoord[1] == 0) {
+		receiveCellVectorParametersBack(tempCellVectorParameterBack, inBufferBack, xnumberAdded, ynumberAdded,
+		                                znumberAdded, additionalBinNumber, cartComm, rank, backRank);
+	} else if (cartCoord[1] == cartDim[1] - 1) {
+		sendCellVectorParametersFront(array, outBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+		                              additionalBinNumber, cartComm, rank, frontRank);
+	}
+
+	if (boundaryConditionTypeY == PERIODIC || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
+		sendCellVectorParametersToBackReceiveFromFront(array, outBufferBack,
+		                                               tempCellVectorParameterFront, inBufferFront, xnumberAdded,
+		                                               ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank,
+		                                               frontRank, backRank);
+	} else if (cartCoord[1] == 0) {
+		sendCellVectorParametersBack(array, outBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
+		                             additionalBinNumber, cartComm, rank, backRank);
+	} else if (cartCoord[1] == cartDim[1] - 1) {
+		receiveCellVectorParametersFront(tempCellVectorParameterFront, inBufferFront, xnumberAdded, ynumberAdded,
+		                                 znumberAdded, additionalBinNumber, cartComm, rank, frontRank);
+	}
+
+	sumCellVectorTempParametersY(array);
+}
+
+void Simulation::sumCellVectorParametersGeneralZ(Vector3d*** array, double* inBufferTop, double* outBufferTop, double* inBufferBottom,
+                                                 double* outBufferBottom) {
+	if (boundaryConditionTypeZ == PERIODIC || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
+		sendCellVectorParametersToBottomReceiveFromTop(array, outBufferBottom,
+		                                               tempCellVectorParameterTop, inBufferTop, xnumberAdded,
+		                                               ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank,
+		                                               bottomRank, topRank);
+	} else if (cartCoord[2] == 0) {
+		receiveCellVectorParametersTop(tempCellVectorParameterTop, inBufferTop, xnumberAdded, ynumberAdded,
+		                               znumberAdded, additionalBinNumber, cartComm, rank, topRank);
+	} else if (cartCoord[2] == cartDim[2] - 1) {
+		sendCellVectorParametersBottom(array, outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+		                               additionalBinNumber, cartComm, rank, bottomRank);
+	}
+
+	if (boundaryConditionTypeZ == PERIODIC || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
+		sendCellVectorParametersToTopReceiveFromBottom(array, outBufferTop,
+		                                               tempCellVectorParameterBottom, inBufferBottom, xnumberAdded,
+		                                               ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank,
+		                                               bottomRank, topRank);
+	} else if (cartCoord[2] == 2) {
+		sendCellVectorParametersTop(array, outBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
+		                            additionalBinNumber, cartComm, rank, topRank);
+	} else if (cartCoord[2] == cartDim[2] - 1) {
+		receiveCellVectorParametersBottom(tempCellVectorParameterBottom, inBufferBottom, xnumberAdded, ynumberAdded,
+		                                  znumberAdded, additionalBinNumber, cartComm, rank, bottomRank);
+	}
+
+	sumCellVectorTempParametersZ(array);
+}
+
 void Simulation::sumCellVectorParametersX() {
 	if (cartDim[0] > 1) {
 		double* inBufferRight = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * znumberAdded];
@@ -1631,33 +1724,7 @@ void Simulation::sumCellVectorParametersX() {
 		for (int t = 0; t < typesNumber; ++t) {
 			//MPI_Barrier(cartComm);
 			if (types[t].particlesPerBin > 0) {
-				if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-					sendCellVectorParametersToLeftReceiveFromRight(particleBulkVelocities[t], outBufferLeft,
-					                                               tempCellVectorParameterRight, inBufferRight, xnumberAdded,
-					                                               ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank,
-					                                               leftRank, rightRank);
-				} else if (cartCoord[0] == 0) {
-					receiveCellVectorParametersRight(tempCellVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded,
-					                                 znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
-				} else if (cartCoord[0] == cartDim[0] - 1) {
-					sendCellVectorParametersLeft(particleBulkVelocities[t], outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-					                             additionalBinNumber, cartComm, rank, leftRank);
-				}
-
-				if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-					sendCellVectorParametersToRightReceiveFromLeft(particleBulkVelocities[t], outBufferRight,
-					                                               tempCellVectorParameterLeft, inBufferLeft, xnumberAdded,
-					                                               ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank,
-					                                               leftRank, rightRank);
-				} else if (cartCoord[0] == 0) {
-					sendCellVectorParametersRight(particleBulkVelocities[t], outBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-					                              additionalBinNumber, cartComm, rank, rightRank);
-				} else if (cartCoord[0] == cartDim[0] - 1) {
-					receiveCellVectorParametersLeft(tempCellVectorParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded,
-					                                znumberAdded, additionalBinNumber, cartComm, rank, leftRank);
-				}
-
-				sumCellVectorTempParametersX(particleBulkVelocities[t]);
+				sumCellVectorParametersGeneralX(particleBulkVelocities[t], inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
 			}
 		}
 
@@ -1735,16 +1802,7 @@ void Simulation::sumCellVectorParametersY() {
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sendCellVectorParametersToBackReceiveFromFront(particleBulkVelocities[t], outBufferBack,
-				                                               tempCellVectorParameterFront, inBufferFront, xnumberAdded,
-				                                               ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank,
-				                                               frontRank, backRank);
-				sendCellVectorParametersToFrontReceiveFromBack(particleBulkVelocities[t], outBufferFront,
-				                                               tempCellVectorParameterBack, inBufferBack, xnumberAdded,
-				                                               ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank,
-				                                               frontRank, backRank);
-
-				sumCellVectorTempParametersY(particleBulkVelocities[t]);
+				sumCellVectorParametersGeneralY(particleBulkVelocities[t], inBufferBack, outBufferBack, inBufferFront, outBufferFront);
 			}
 		}
 
@@ -1756,15 +1814,19 @@ void Simulation::sumCellVectorParametersY() {
 	} else {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int k = 0; k < znumberAdded; ++k) {
-				for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
-					for (int t = 0; t < typesNumber; ++t) {
-						if (types[t].particlesPerBin > 0) {
-							particleBulkVelocities[t][i][ynumberAdded - 1 - j][k] += particleBulkVelocities[t][i][1 + 2 * additionalBinNumber
-								- j][k];
-							particleBulkVelocities[t][i][1 + 2 * additionalBinNumber - j][k] = particleBulkVelocities[t][i][ynumberAdded - 1
-								- j][k];
+				if (boundaryConditionTypeY == PERIODIC) {
+					for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
+						for (int t = 0; t < typesNumber; ++t) {
+							if (types[t].particlesPerBin > 0) {
+								particleBulkVelocities[t][i][ynumberAdded - 1 - j][k] += particleBulkVelocities[t][i][1 + 2 * additionalBinNumber
+									- j][k];
+								particleBulkVelocities[t][i][1 + 2 * additionalBinNumber - j][k] = particleBulkVelocities[t][i][ynumberAdded - 1
+									- j][k];
+							}
 						}
 					}
+				} else {
+					//todo
 				}
 				if (ynumberGeneral == 1) {
 					for (int j = 0; j < ynumberAdded; ++j) {
@@ -1789,17 +1851,7 @@ void Simulation::sumCellVectorParametersZ() {
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sendCellVectorParametersToBottomReceiveFromTop(particleBulkVelocities[t], outBufferBottom,
-				                                               tempCellVectorParameterTop, inBufferTop, xnumberAdded, ynumberAdded,
-				                                               znumberAdded, additionalBinNumber, cartComm, rank, bottomRank,
-				                                               topRank);
-				sendCellVectorParametersToTopReceiveFromBottom(particleBulkVelocities[t], outBufferTop,
-				                                               tempCellVectorParameterBottom, inBufferBottom, xnumberAdded,
-				                                               ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank,
-				                                               bottomRank, topRank);
-
-
-				sumCellVectorTempParametersZ(particleBulkVelocities[t]);
+				sumCellVectorParametersGeneralZ(particleBulkVelocities[t], inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
 			}
 		}
 
@@ -1810,13 +1862,17 @@ void Simulation::sumCellVectorParametersZ() {
 	} else {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
-					for (int t = 0; t < typesNumber; ++t) {
-						particleBulkVelocities[t][i][j][znumberAdded - 1 - k] += particleBulkVelocities[t][i][j][1 + 2 *
-							additionalBinNumber - k];
-						particleBulkVelocities[t][i][j][1 + 2 * additionalBinNumber - k] = particleBulkVelocities[t][i][j][znumberAdded -
-							1 - k];
+				if (boundaryConditionTypeZ == PERIODIC) {
+					for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
+						for (int t = 0; t < typesNumber; ++t) {
+							particleBulkVelocities[t][i][j][znumberAdded - 1 - k] += particleBulkVelocities[t][i][j][1 + 2 *
+								additionalBinNumber - k];
+							particleBulkVelocities[t][i][j][1 + 2 * additionalBinNumber - k] = particleBulkVelocities[t][i][j][znumberAdded -
+								1 - k];
+						}
 					}
+				} else {
+					//todo
 				}
 				if (znumberGeneral == 1) {
 					for (int k = 0; k < znumberAdded; ++k) {
@@ -1855,22 +1911,42 @@ void Simulation::sumCellVectorTempParametersX(Vector3d*** array) {
 }
 
 void Simulation::sumCellVectorTempParametersY(Vector3d*** array) {
-	for (int i = 0; i < xnumberAdded; ++i) {
-		for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
-			for (int k = 0; k < znumberAdded; ++k) {
-				array[i][j][k] += tempCellVectorParameterFront[i][j][k];
-				array[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k] += tempCellVectorParameterBack[i][j][k];
+	if (cartCoord[1] > 0 || boundaryConditionTypeY == PERIODIC) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					array[i][j][k] += tempCellVectorParameterFront[i][j][k];
+				}
+			}
+		}
+	}
+	if (cartCoord[1] < cartDim[1] - 1 || boundaryConditionTypeY == PERIODIC) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					array[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k] += tempCellVectorParameterBack[i][j][k];
+				}
 			}
 		}
 	}
 }
 
 void Simulation::sumCellVectorTempParametersZ(Vector3d*** array) {
-	for (int i = 0; i < xnumberAdded; ++i) {
-		for (int j = 0; j < ynumberAdded; ++j) {
-			for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
-				array[i][j][k] += tempCellVectorParameterBottom[i][j][k];
-				array[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k] += tempCellVectorParameterTop[i][j][k];
+	if (cartCoord[2] > 0 || boundaryConditionTypeZ == PERIODIC) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
+					array[i][j][k] += tempCellVectorParameterBottom[i][j][k];
+				}
+			}
+		}
+	}
+	if (cartCoord[2] < cartDim[2] - 1 || boundaryConditionTypeZ == PERIODIC) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
+					array[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k] += tempCellVectorParameterTop[i][j][k];
+				}
 			}
 		}
 	}
