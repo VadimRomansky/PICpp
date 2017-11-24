@@ -1086,7 +1086,8 @@ void Simulation::sumTempNodeParametersZ(double*** array) {
 	}
 }
 
-void Simulation::sumCellParametersGeneralX(double*** array, double* inBufferRight, double* outBufferRight, double* inBufferLeft, double* outBufferLeft) {
+void Simulation::sumCellParametersGeneralX(double*** array, double* inBufferRight, double* outBufferRight, double* inBufferLeft,
+                                           double* outBufferLeft) {
 	if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 		sendCellParametersToLeftReceiveFromRight(array, outBufferLeft, tempCellParameterRight, inBufferRight,
 		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
@@ -1114,17 +1115,18 @@ void Simulation::sumCellParametersGeneralX(double*** array, double* inBufferRigh
 	sumCellTempParametersX(array);
 }
 
-void Simulation::sumCellParametersGeneralY(double*** array, double* inBufferBack, double* outBufferBack, double* inBufferFront, double* outBufferFront) {
+void Simulation::sumCellParametersGeneralY(double*** array, double* inBufferBack, double* outBufferBack, double* inBufferFront,
+                                           double* outBufferFront) {
 	if (boundaryConditionTypeY == PERIODIC || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
 		sendCellParametersToFrontReceiveFromBack(array, outBufferFront, tempCellParameterBack, inBufferBack,
 		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
 		                                         rank, frontRank, backRank);
 	} else if (cartCoord[1] == 0) {
 		receiveCellParametersBack(tempCellParameterBack, inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
-		                           additionalBinNumber, cartComm, rank, backRank);
+		                          additionalBinNumber, cartComm, rank, backRank);
 	} else if (cartCoord[1] == cartDim[1] - 1) {
 		sendCellParametersFront(array, outBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-		                       additionalBinNumber, cartComm, rank, frontRank);
+		                        additionalBinNumber, cartComm, rank, frontRank);
 	}
 
 	if (boundaryConditionTypeY == PERIODIC || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
@@ -1133,26 +1135,27 @@ void Simulation::sumCellParametersGeneralY(double*** array, double* inBufferBack
 		                                         rank, frontRank, backRank);
 	} else if (cartCoord[1] == 0) {
 		sendCellParametersBack(array, outBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-		                        additionalBinNumber, cartComm, rank, backRank);
+		                       additionalBinNumber, cartComm, rank, backRank);
 	} else if (cartCoord[1] == cartDim[1] - 1) {
 		receiveCellParametersFront(tempCellParameterFront, inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-		                          additionalBinNumber, cartComm, rank, frontRank);
+		                           additionalBinNumber, cartComm, rank, frontRank);
 	}
 
 	sumCellTempParametersY(array);
 }
 
-void Simulation::sumCellParametersGeneralZ(double*** array, double* inBufferTop, double* outBufferTop, double* inBufferBottom, double* outBufferBottom) {
+void Simulation::sumCellParametersGeneralZ(double*** array, double* inBufferTop, double* outBufferTop, double* inBufferBottom,
+                                           double* outBufferBottom) {
 	if (boundaryConditionTypeZ == PERIODIC || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
 		sendCellParametersToBottomReceiveFromTop(array, outBufferBottom, tempCellParameterTop, inBufferTop,
 		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
 		                                         rank, bottomRank, topRank);
 	} else if (cartCoord[2] == 0) {
 		receiveCellParametersTop(tempCellParameterTop, inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
-		                           additionalBinNumber, cartComm, rank, topRank);
+		                         additionalBinNumber, cartComm, rank, topRank);
 	} else if (cartCoord[2] == cartDim[2] - 1) {
 		sendCellParametersBottom(array, outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-		                       additionalBinNumber, cartComm, rank, bottomRank);
+		                         additionalBinNumber, cartComm, rank, bottomRank);
 	}
 
 	if (boundaryConditionTypeZ == PERIODIC || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
@@ -1161,10 +1164,10 @@ void Simulation::sumCellParametersGeneralZ(double*** array, double* inBufferTop,
 		                                         rank, bottomRank, topRank);
 	} else if (cartCoord[2] == 0) {
 		sendCellParametersTop(array, outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-		                        additionalBinNumber, cartComm, rank, topRank);
+		                      additionalBinNumber, cartComm, rank, topRank);
 	} else if (cartCoord[2] == cartDim[2] - 1) {
 		receiveCellParametersBottom(tempCellParameterBottom, inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-		                          additionalBinNumber, cartComm, rank, bottomRank);
+		                            additionalBinNumber, cartComm, rank, bottomRank);
 	}
 
 	sumCellTempParametersZ(array);
@@ -1183,9 +1186,9 @@ void Simulation::sumChargeDensityHatX() {
 
 		sumCellParametersGeneralX(chargeDensityHat, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
 		/////
-		
+
 		sumCellParametersGeneralX(chargeDensityMinus, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
-		
+
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum charge density hat x rank = %d\n", rank);
@@ -1231,7 +1234,7 @@ void Simulation::sumChargeDensityHatY() {
 	} else {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int k = 0; k < znumberAdded; ++k) {
-				if(boundaryConditionTypeY == PERIODIC){
+				if (boundaryConditionTypeY == PERIODIC) {
 					for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
 						chargeDensityHat[i][ynumberAdded - 1 - j][k] += chargeDensityHat[i][1 + 2 * additionalBinNumber - j][k];
 						chargeDensityHat[i][1 + 2 * additionalBinNumber - j][k] = chargeDensityHat[i][ynumberAdded - 1 - j][k];
@@ -1271,7 +1274,7 @@ void Simulation::sumChargeDensityHatZ() {
 	} else {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int i = 0; i < xnumberAdded; ++i) {
-				if(boundaryConditionTypeZ == PERIODIC){
+				if (boundaryConditionTypeZ == PERIODIC) {
 					for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
 						chargeDensityHat[i][j][znumberAdded - 1 - k] += chargeDensityHat[i][j][1 + 2 * additionalBinNumber - k];
 						chargeDensityHat[i][j][1 + 2 * additionalBinNumber - k] = chargeDensityHat[i][j][znumberAdded - 1 - k];
@@ -1300,31 +1303,7 @@ void Simulation::sumCellParametersX() {
 		for (int t = 0; t < typesNumber; ++t) {
 			//MPI_Barrier(cartComm);
 			if (types[t].particlesPerBin > 0) {
-				if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-					sendCellParametersToLeftReceiveFromRight(particleConcentrations[t], outBufferLeft, tempCellParameterRight,
-					                                         inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-					                                         additionalBinNumber, cartComm, rank, leftRank, rightRank);
-				} else if (cartCoord[0] == 0) {
-					receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-					                           additionalBinNumber, cartComm, rank, rightRank);
-				} else if (cartCoord[0] == cartDim[0] - 1) {
-					sendCellParametersLeft(particleConcentrations[t], outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-					                       additionalBinNumber, cartComm, rank, leftRank);
-				}
-
-				if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-					sendCellParametersToRightReceiveFromLeft(particleConcentrations[t], outBufferRight, tempCellParameterLeft,
-					                                         inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-					                                         additionalBinNumber, cartComm, rank, leftRank, rightRank);
-				} else if (cartCoord[0] == 0) {
-					sendCellParametersRight(particleConcentrations[t], outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-					                        additionalBinNumber, cartComm, rank, rightRank);
-				} else if (cartCoord[0] == cartDim[0] - 1) {
-					receiveCellParametersLeft(tempCellParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-					                          additionalBinNumber, cartComm, rank, leftRank);
-				}
-
-				sumCellTempParametersX(particleConcentrations[t]);
+				sumCellParametersGeneralX(particleConcentrations[t], inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
 
 			}
 		}
@@ -1332,62 +1311,16 @@ void Simulation::sumCellParametersX() {
 		for (int t = 0; t < typesNumber; ++t) {
 			//MPI_Barrier(cartComm);
 			if (types[t].particlesPerBin > 0) {
-				if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-					sendCellParametersToLeftReceiveFromRight(particleEnergies[t], outBufferLeft, tempCellParameterRight, inBufferRight,
-					                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-					                                         rank, leftRank, rightRank);
-				} else if (cartCoord[0] == 0) {
-					receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-					                           additionalBinNumber, cartComm, rank, rightRank);
-				} else if (cartCoord[0] == cartDim[0] - 1) {
-					sendCellParametersLeft(particleEnergies[t], outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-					                       additionalBinNumber, cartComm, rank, leftRank);
-				}
-
-				if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-					sendCellParametersToRightReceiveFromLeft(particleEnergies[t], outBufferRight, tempCellParameterLeft, inBufferLeft,
-					                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-					                                         rank, leftRank, rightRank);
-				} else if (cartCoord[0] == 0) {
-					sendCellParametersRight(particleEnergies[t], outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-					                        additionalBinNumber, cartComm, rank, rightRank);
-				} else if (cartCoord[0] == cartDim[0] - 1) {
-					receiveCellParametersLeft(tempCellParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-					                          additionalBinNumber, cartComm, rank, leftRank);
-				}
-
-				sumCellTempParametersX(particleEnergies[t]);
+				sumCellParametersGeneralX(particleEnergies[t], inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
 
 			}
 		}
 		//MPI_Barrier(cartComm);
 
 
-		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendCellParametersToLeftReceiveFromRight(chargeDensity, outBufferLeft, tempCellParameterRight, inBufferRight,
-			                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-			                                         rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-			                           additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			sendCellParametersLeft(chargeDensity, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber,
-			                       cartComm, rank, leftRank);
-		}
+		sumCellParametersGeneralX(chargeDensity, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
 
-		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendCellParametersToRightReceiveFromLeft(chargeDensity, outBufferRight, tempCellParameterLeft, inBufferLeft,
-			                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-			                                         rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			sendCellParametersRight(chargeDensity, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber,
-			                        cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveCellParametersLeft(tempCellParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                          additionalBinNumber, cartComm, rank, leftRank);
-		}
-
-		sumCellTempParametersX(chargeDensity);
+		sumCellParametersGeneralX(chargeDensityMinus, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
 
 		//MPI_Barrier(cartComm);
 
@@ -1399,6 +1332,10 @@ void Simulation::sumCellParametersX() {
 						chargeDensity[xnumberAdded - 2 - additionalBinNumber][j][k] += chargeDensity[xnumberAdded - 1 -
 							additionalBinNumber + i][j][k];
 						chargeDensity[xnumberAdded - 1 - additionalBinNumber + i][j][k] = 0;
+
+						chargeDensityMinus[xnumberAdded - 2 - additionalBinNumber][j][k] += chargeDensityMinus[xnumberAdded - 1 -
+							additionalBinNumber + i][j][k];
+						chargeDensityMinus[xnumberAdded - 1 - additionalBinNumber + i][j][k] = 0;
 						for (int t = 0; t < typesNumber; ++t) {
 							particleConcentrations[t][xnumberAdded - 2 - additionalBinNumber][j][k] += particleConcentrations[t][xnumberAdded
 								- 1 - additionalBinNumber + i][j][k];
@@ -1432,6 +1369,8 @@ void Simulation::sumCellParametersX() {
 						}
 						chargeDensity[xnumberAdded - 1 - i][j][k] += chargeDensity[2 * additionalBinNumber + 1 - i][j][k];
 						chargeDensity[2 * additionalBinNumber + 1 - i][j][k] = chargeDensity[xnumberAdded - 1 - i][j][k];
+						chargeDensityMinus[xnumberAdded - 1 - i][j][k] += chargeDensityMinus[2 * additionalBinNumber + 1 - i][j][k];
+						chargeDensityMinus[2 * additionalBinNumber + 1 - i][j][k] = chargeDensityMinus[xnumberAdded - 1 - i][j][k];
 					}
 				}
 			}
@@ -1443,6 +1382,9 @@ void Simulation::sumCellParametersX() {
 						chargeDensity[xnumberAdded - 2 - additionalBinNumber][j][k] += chargeDensity[xnumberAdded - 1 -
 							additionalBinNumber + i][j][k];
 						chargeDensity[xnumberAdded - 1 - additionalBinNumber + i][j][k] = 0;
+						chargeDensityMinus[xnumberAdded - 2 - additionalBinNumber][j][k] += chargeDensityMinus[xnumberAdded - 1 -
+							additionalBinNumber + i][j][k];
+						chargeDensityMinus[xnumberAdded - 1 - additionalBinNumber + i][j][k] = 0;
 						for (int t = 0; t < typesNumber; ++t) {
 							particleConcentrations[t][xnumberAdded - 2 - additionalBinNumber][j][k] += particleConcentrations[t][xnumberAdded
 								- 1 - additionalBinNumber + i][j][k];
@@ -1462,6 +1404,8 @@ void Simulation::sumCellParametersX() {
 						for (int i = 0; i <= additionalBinNumber; ++i) {
 							chargeDensity[1 + additionalBinNumber][j][k] += chargeDensity[additionalBinNumber - i][j][k];
 							chargeDensity[xnumberAdded - 1 - additionalBinNumber + i][j][k] = 0;
+							chargeDensityMinus[1 + additionalBinNumber][j][k] += chargeDensityMinus[additionalBinNumber - i][j][k];
+							chargeDensityMinus[xnumberAdded - 1 - additionalBinNumber + i][j][k] = 0;
 							for (int t = 0; t < typesNumber; ++t) {
 								particleConcentrations[t][xnumberAdded - 2 - additionalBinNumber][j][k] += particleConcentrations[t][
 									xnumberAdded - 1 - additionalBinNumber + i][j][k];
@@ -1489,54 +1433,19 @@ void Simulation::sumCellParametersY() {
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
 
-				sendCellParametersToBackReceiveFromFront(particleConcentrations[t], outBufferBack, tempCellParameterFront,
-				                                         inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-				                                         additionalBinNumber, cartComm, rank, backRank, frontRank);
-				sendCellParametersToFrontReceiveFromBack(particleConcentrations[t], outBufferFront, tempCellParameterBack,
-				                                         inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
-				                                         additionalBinNumber, cartComm, rank, backRank, frontRank);
-
-				/*sendCellParametersBack(particleConcentrations[t], outBufferBack, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, backRank);
-				receiveCellParametersFront(tempCellParameterFront, inBufferFront, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, frontRank);
-				sendCellParametersFront(particleConcentrations[t], outBufferFront, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, frontRank);
-				receiveCellParametersBack(tempCellParameterBack, inBufferBack, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, backRank);*/
-
-				sumCellTempParametersY(particleConcentrations[t]);
+				sumCellParametersGeneralY(particleConcentrations[t], inBufferBack, outBufferBack, inBufferFront, outBufferFront);
 			}
 		}
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
 
-				sendCellParametersToBackReceiveFromFront(particleEnergies[t], outBufferBack, tempCellParameterFront, inBufferFront,
-				                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-				                                         rank, backRank, frontRank);
-				sendCellParametersToFrontReceiveFromBack(particleEnergies[t], outBufferFront, tempCellParameterBack, inBufferBack,
-				                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-				                                         rank, backRank, frontRank);
-
-				/*sendCellParametersBack(particleConcentrations[t], outBufferBack, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, backRank);
-				receiveCellParametersFront(tempCellParameterFront, inBufferFront, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, frontRank);
-				sendCellParametersFront(particleConcentrations[t], outBufferFront, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, frontRank);
-				receiveCellParametersBack(tempCellParameterBack, inBufferBack, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, backRank);*/
-
-				sumCellTempParametersY(particleEnergies[t]);
+				sumCellParametersGeneralY(particleEnergies[t], inBufferBack, outBufferBack, inBufferFront, outBufferFront);
 			}
 		}
 
-		sendCellParametersToBackReceiveFromFront(chargeDensity, outBufferBack, tempCellParameterFront, inBufferFront,
-		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-		                                         rank, backRank, frontRank);
-		sendCellParametersToFrontReceiveFromBack(chargeDensity, outBufferFront, tempCellParameterBack, inBufferBack,
-		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-		                                         rank, backRank, frontRank);
-
-		/*sendCellParametersBack(chargeDensity, outBufferBack, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, backRank);
-		receiveCellParametersFront(tempCellParameterFront, inBufferFront, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, frontRank);
-		sendCellParametersFront(chargeDensity, outBufferFront, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, frontRank);
-		receiveCellParametersBack(tempCellParameterBack, inBufferBack, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, backRank);*/
-
-		sumCellTempParametersY(chargeDensity);
+		sumCellParametersGeneralY(chargeDensity, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+		sumCellParametersGeneralY(chargeDensityMinus, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
 
 		delete[] inBufferFront;
 		delete[] outBufferFront;
@@ -1546,23 +1455,30 @@ void Simulation::sumCellParametersY() {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int k = 0; k < znumberAdded; ++k) {
 				for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
-					chargeDensity[i][ynumberAdded - 1 - j][k] += chargeDensity[i][1 + 2 * additionalBinNumber - j][k];
-					chargeDensity[i][1 + 2 * additionalBinNumber - j][k] = chargeDensity[i][ynumberAdded - 1 - j][k];
-					for (int t = 0; t < typesNumber; ++t) {
-						if (types[t].particlesPerBin > 0) {
-							particleConcentrations[t][i][ynumberAdded - 1 - j][k] += particleConcentrations[t][i][1 + 2 * additionalBinNumber
-								- j][k];
-							particleConcentrations[t][i][1 + 2 * additionalBinNumber - j][k] = particleConcentrations[t][i][ynumberAdded - 1
-								- j][k];
+					if (boundaryConditionTypeY == PERIODIC) {
+						chargeDensity[i][ynumberAdded - 1 - j][k] += chargeDensity[i][1 + 2 * additionalBinNumber - j][k];
+						chargeDensity[i][1 + 2 * additionalBinNumber - j][k] = chargeDensity[i][ynumberAdded - 1 - j][k];
+						chargeDensityMinus[i][ynumberAdded - 1 - j][k] += chargeDensityMinus[i][1 + 2 * additionalBinNumber - j][k];
+						chargeDensityMinus[i][1 + 2 * additionalBinNumber - j][k] = chargeDensityMinus[i][ynumberAdded - 1 - j][k];
+						for (int t = 0; t < typesNumber; ++t) {
+							if (types[t].particlesPerBin > 0) {
+								particleConcentrations[t][i][ynumberAdded - 1 - j][k] += particleConcentrations[t][i][1 + 2 * additionalBinNumber
+									- j][k];
+								particleConcentrations[t][i][1 + 2 * additionalBinNumber - j][k] = particleConcentrations[t][i][ynumberAdded - 1
+									- j][k];
 
-							particleEnergies[t][i][ynumberAdded - 1 - j][k] += particleEnergies[t][i][1 + 2 * additionalBinNumber - j][k];
-							particleEnergies[t][i][1 + 2 * additionalBinNumber - j][k] = particleEnergies[t][i][ynumberAdded - 1 - j][k];
+								particleEnergies[t][i][ynumberAdded - 1 - j][k] += particleEnergies[t][i][1 + 2 * additionalBinNumber - j][k];
+								particleEnergies[t][i][1 + 2 * additionalBinNumber - j][k] = particleEnergies[t][i][ynumberAdded - 1 - j][k];
+							}
 						}
+					} else {
+						//todo
 					}
 				}
 				if (ynumberGeneral == 1) {
 					for (int j = 0; j < ynumberAdded; ++j) {
 						chargeDensity[i][j][k] = chargeDensity[i][1 + additionalBinNumber][k];
+						chargeDensityMinus[i][j][k] = chargeDensityMinus[i][1 + additionalBinNumber][k];
 						for (int t = 0; t < typesNumber; ++t) {
 							if (types[t].particlesPerBin > 0) {
 								particleConcentrations[t][i][j][k] = particleConcentrations[t][i][1 + additionalBinNumber][k];
@@ -1585,53 +1501,18 @@ void Simulation::sumCellParametersZ() {
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sendCellParametersToBottomReceiveFromTop(particleConcentrations[t], outBufferBottom, tempCellParameterTop,
-				                                         inBufferTop, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber,
-				                                         cartComm, rank, bottomRank, topRank);
-				sendCellParametersToTopReceiveFromBottom(particleConcentrations[t], outBufferTop, tempCellParameterBottom,
-				                                         inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-				                                         additionalBinNumber, cartComm, rank, bottomRank, topRank);
-
-				/*sendCellParametersBottom(particleConcentrations[t], outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, bottomRank);
-				receiveCellParametersTop(tempCellParameterTop, inBufferTop, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, topRank);
-				sendCellParametersTop(particleConcentrations[t], outBufferTop, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, topRank);
-				receiveCellParametersBottom(tempCellParameterBottom, inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, bottomRank);*/
-
-				sumCellTempParametersZ(particleConcentrations[t]);
+				sumCellParametersGeneralZ(particleConcentrations[t], inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
 			}
 		}
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sendCellParametersToBottomReceiveFromTop(particleEnergies[t], outBufferBottom, tempCellParameterTop, inBufferTop,
-				                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-				                                         rank, bottomRank, topRank);
-				sendCellParametersToTopReceiveFromBottom(particleEnergies[t], outBufferTop, tempCellParameterBottom, inBufferBottom,
-				                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-				                                         rank, bottomRank, topRank);
-
-				/*sendCellParametersBottom(particleConcentrations[t], outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, bottomRank);
-				receiveCellParametersTop(tempCellParameterTop, inBufferTop, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, topRank);
-				sendCellParametersTop(particleConcentrations[t], outBufferTop, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, topRank);
-				receiveCellParametersBottom(tempCellParameterBottom, inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, bottomRank);*/
-
-				sumCellTempParametersZ(particleEnergies[t]);
+				sumCellParametersGeneralZ(particleConcentrations[t], inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
 			}
 		}
 
-		sendCellParametersToBottomReceiveFromTop(chargeDensity, outBufferBottom, tempCellParameterTop, inBufferTop,
-		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-		                                         rank, bottomRank, topRank);
-		sendCellParametersToTopReceiveFromBottom(chargeDensity, outBufferTop, tempCellParameterBottom, inBufferBottom,
-		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-		                                         rank, bottomRank, topRank);
-
-		/*sendCellParametersBottom(chargeDensity, outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, bottomRank);
-		receiveCellParametersTop(tempCellParameterTop, inBufferTop, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, topRank);
-		sendCellParametersTop(chargeDensity, outBufferTop, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, topRank);
-		receiveCellParametersBottom(tempCellParameterBottom, inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, bottomRank);*/
-
-		sumCellTempParametersZ(chargeDensity);
+		sumCellParametersGeneralZ(chargeDensity, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		sumCellParametersGeneralZ(chargeDensityMinus, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
 
 		delete[] inBufferTop;
 		delete[] outBufferTop;
@@ -1640,23 +1521,29 @@ void Simulation::sumCellParametersZ() {
 	} else {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
-					chargeDensity[i][j][znumberAdded - 1 - k] += chargeDensity[i][j][1 + 2 * additionalBinNumber - k];
-					chargeDensity[i][j][1 + 2 * additionalBinNumber - k] = chargeDensity[i][j][znumberAdded - 1 - k];
-					for (int t = 0; t < typesNumber; ++t) {
-						particleConcentrations[t][i][j][znumberAdded - 1 - k] += particleConcentrations[t][i][j][1 + 2 *
-							additionalBinNumber - k];
-						particleConcentrations[t][i][j][1 + 2 * additionalBinNumber - k] = particleConcentrations[t][i][j][znumberAdded -
-							1 - k];
+				if (boundaryConditionTypeZ == PERIODIC) {
+					for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
+						chargeDensity[i][j][znumberAdded - 1 - k] += chargeDensity[i][j][1 + 2 * additionalBinNumber - k];
+						chargeDensity[i][j][1 + 2 * additionalBinNumber - k] = chargeDensity[i][j][znumberAdded - 1 - k];
+						chargeDensityMinus[i][j][znumberAdded - 1 - k] += chargeDensityMinus[i][j][1 + 2 * additionalBinNumber - k];
+						chargeDensityMinus[i][j][1 + 2 * additionalBinNumber - k] = chargeDensityMinus[i][j][znumberAdded - 1 - k];
+						for (int t = 0; t < typesNumber; ++t) {
+							particleConcentrations[t][i][j][znumberAdded - 1 - k] += particleConcentrations[t][i][j][1 + 2 *
+								additionalBinNumber - k];
+							particleConcentrations[t][i][j][1 + 2 * additionalBinNumber - k] = particleConcentrations[t][i][j][znumberAdded -
+								1 - k];
 
-						particleEnergies[t][i][j][znumberAdded - 1 - k] += particleEnergies[t][i][j][1 + 2 * additionalBinNumber - k];
-						particleEnergies[t][i][j][1 + 2 * additionalBinNumber - k] = particleEnergies[t][i][j][znumberAdded - 1 - k];
+							particleEnergies[t][i][j][znumberAdded - 1 - k] += particleEnergies[t][i][j][1 + 2 * additionalBinNumber - k];
+							particleEnergies[t][i][j][1 + 2 * additionalBinNumber - k] = particleEnergies[t][i][j][znumberAdded - 1 - k];
+						}
 					}
-
+				} else {
+					//todo
 				}
 				if (znumberGeneral == 1) {
 					for (int k = 0; k < znumberAdded; ++k) {
 						chargeDensity[i][j][k] = chargeDensity[i][j][1 + additionalBinNumber];
+						chargeDensityMinus[i][j][k] = chargeDensityMinus[i][j][1 + additionalBinNumber];
 						for (int t = 0; t < typesNumber; ++t) {
 							if (types[t].particlesPerBin > 0) {
 								particleConcentrations[t][i][j][k] = particleConcentrations[t][i][j][1 + additionalBinNumber];
@@ -1693,22 +1580,42 @@ void Simulation::sumCellTempParametersX(double*** array) {
 }
 
 void Simulation::sumCellTempParametersY(double*** array) {
-	for (int i = 0; i < xnumberAdded; ++i) {
-		for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
-			for (int k = 0; k < znumberAdded; ++k) {
-				array[i][j][k] += tempCellParameterFront[i][j][k];
-				array[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k] += tempCellParameterBack[i][j][k];
+	if (cartCoord[1] > 0 || boundaryConditionTypeY == PERIODIC) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					array[i][j][k] += tempCellParameterFront[i][j][k];
+				}
+			}
+		}
+	}
+	if (cartCoord[1] < cartDim[1] - 1 || boundaryConditionTypeY == PERIODIC) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					array[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k] += tempCellParameterBack[i][j][k];
+				}
 			}
 		}
 	}
 }
 
 void Simulation::sumCellTempParametersZ(double*** array) {
-	for (int i = 0; i < xnumberAdded; ++i) {
-		for (int j = 0; j < ynumberAdded; ++j) {
-			for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
-				array[i][j][k] += tempCellParameterBottom[i][j][k];
-				array[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k] += tempCellParameterTop[i][j][k];
+	if (cartCoord[2] > 0 || boundaryConditionTypeZ == PERIODIC) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
+					array[i][j][k] += tempCellParameterBottom[i][j][k];
+				}
+			}
+		}
+	}
+	if (cartCoord[2] < cartDim[2] - 1 || boundaryConditionTypeZ == PERIODIC) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
+					array[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k] += tempCellParameterTop[i][j][k];
+				}
 			}
 		}
 	}

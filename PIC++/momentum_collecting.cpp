@@ -325,21 +325,20 @@ void Simulation::updateElectroMagneticParameters() {
 												int yindex = particle->correlationMapNode.yindex[tempJ];
 												int zindex = particle->correlationMapNode.zindex[tempK];
 
-												double correlation = particle->correlationMapNode.xcorrelation[tempI] * particle->correlationMapNode.
-												                                                                                  ycorrelation[tempJ] *
-													particle->correlationMapNode.zcorrelation[tempK];
+												double tempCorrelation1 = particle->correlationMapNode.xcorrelation[tempI] * particle->correlationMapNode.
+												                                                                                  ycorrelation[tempJ] *particle->correlationMapNode.zcorrelation[tempK];
 
-												for (int i = 0; i < splineOrder + 2; ++i) {
-													for (int j = 0; j < splineOrder + 2; ++j) {
-														for (int k = 0; k < splineOrder + 2; ++k) {
-															double tempCorrelation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.
-															                                                                                  ycorrelation[j] *
-																particle->correlationMapNode.zcorrelation[k];
-															double doubleCorrelation = correlation * tempCorrelation / volumeE();
-															for (int curI = 0; curI < 3; ++curI) {
-																for (int curJ = 0; curJ < 3; ++ curJ) {
-																	massMatrix[xindex][yindex][zindex].matrix[splineOrder + 1 - tempI + i][splineOrder + 1 - tempJ + j][
-																			splineOrder + 1 - tempK + k].matrix[curI][curJ] += particle->rotationTensor.matrix[curI][curJ] *
+												for (int tempI1 = 0; tempI1 < splineOrder + 2; ++tempI1) {
+													for (int tempJ1 = 0; tempJ1 < splineOrder + 2; ++tempJ1) {
+														for (int tempK1 = 0; tempK1 < splineOrder + 2; ++tempK1) {
+															tempCorrelation = particle->correlationMapNode.xcorrelation[tempI1] * particle->correlationMapNode.
+															                                                                                  ycorrelation[tempJ1] *
+																particle->correlationMapNode.zcorrelation[tempK1];
+															double doubleCorrelation = tempCorrelation1 * tempCorrelation / volumeE();
+															for (int l = 0; l < 3; ++l) {
+																for (int m = 0; m < 3; ++ m) {
+																	massMatrix[xindex][yindex][zindex].matrix[splineOrder + 1 - tempI + tempI1][splineOrder + 1 - tempJ + tempJ1][
+																			splineOrder + 1 - tempK + tempK1].matrix[l][m] += particle->rotationTensor.matrix[l][m] *
 																		particleOmega * doubleCorrelation;
 																}
 															}
@@ -784,25 +783,6 @@ void Simulation::updateDensityParameters() {
 		}
 	}
 
-	for (int i = 0; i < xnumberAdded; ++i) {
-		for (int j = 0; j < ynumberAdded; ++j) {
-			for (int k = 0; k < znumberAdded; ++k) {
-				chargeDensity[i][j][k] += chargeDensityMinus[i][j][k];
-			}
-		}
-	}
-
-	//zero density!!!
-	/*for (int i = 0; i < xnumberAdded + 1; ++i) {
-		for (int j = 0; j < ynumberAdded; ++j) {
-			for (int k = 0; k < znumberAdded; ++k) {
-				chargeDensity[i][j][k] = 0;
-				chargeDensityMinus[i][j][k] = 0;
-			}
-		}
-	}
-	*/
-	//////
 	MPI_Barrier(cartComm);
 	if ((verbosity > 0)) {
 		printf("sum densityParameters\n");
@@ -854,6 +834,27 @@ void Simulation::updateDensityParameters() {
 	if ((rank == 0) && (verbosity > 1)) {
 		printf("finish sum cell vector parameters z\n");
 	}
+
+
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				chargeDensity[i][j][k] += chargeDensityMinus[i][j][k];
+			}
+		}
+	}
+
+	//zero density!!!
+	/*for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				chargeDensity[i][j][k] = 0;
+				chargeDensityMinus[i][j][k] = 0;
+			}
+		}
+	}
+	*/
+	//////
 
 	if ((verbosity > 0)) {
 		printf("evaluating velocity\n");
