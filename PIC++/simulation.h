@@ -1098,6 +1098,9 @@ public:
 	void sumCellVectorTempParametersX(Vector3d*** array);
 	void sumCellVectorTempParametersY(Vector3d*** array);
 	void sumCellVectorTempParametersZ(Vector3d*** array);
+	void sumCellMatrixParameterGeneralX(Matrix3d*** array, double* inBufferRight, double* outBufferRight, double* inBufferLeft, double* outBufferLeft);
+	void sumCellMatrixParameterGeneralY(Matrix3d*** array, double* inBufferBack, double* outBufferBack, double* inBufferFront, double* outBufferFront);
+	void sumCellMatrixParameterGeneralZ(Matrix3d*** array, double* inBufferTop, double* outBufferTop, double* inBufferBottom, double* outBufferBottom);
 	void sumCellTempParametersX(double*** array);
 	void sumCellTempParametersY(double*** array);
 	void sumCellTempParametersZ(double*** array);
