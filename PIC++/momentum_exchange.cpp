@@ -1086,6 +1086,90 @@ void Simulation::sumTempNodeParametersZ(double*** array) {
 	}
 }
 
+void Simulation::sumCellParametersGeneralX(double*** array, double* inBufferRight, double* outBufferRight, double* inBufferLeft, double* outBufferLeft) {
+	if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		sendCellParametersToLeftReceiveFromRight(array, outBufferLeft, tempCellParameterRight, inBufferRight,
+		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
+		                                         rank, leftRank, rightRank);
+	} else if (cartCoord[0] == 0) {
+		receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
+		                           additionalBinNumber, cartComm, rank, rightRank);
+	} else if (cartCoord[0] == cartDim[0] - 1) {
+		sendCellParametersLeft(array, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
+		                       additionalBinNumber, cartComm, rank, leftRank);
+	}
+
+	if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		sendCellParametersToRightReceiveFromLeft(array, outBufferRight, tempCellParameterLeft, inBufferLeft,
+		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
+		                                         rank, leftRank, rightRank);
+	} else if (cartCoord[0] == 0) {
+		sendCellParametersRight(array, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
+		                        additionalBinNumber, cartComm, rank, rightRank);
+	} else if (cartCoord[0] == cartDim[0] - 1) {
+		receiveCellParametersLeft(tempCellParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
+		                          additionalBinNumber, cartComm, rank, leftRank);
+	}
+
+	sumCellTempParametersX(array);
+}
+
+void Simulation::sumCellParametersGeneralY(double*** array, double* inBufferBack, double* outBufferBack, double* inBufferFront, double* outBufferFront) {
+	if (boundaryConditionTypeY == PERIODIC || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
+		sendCellParametersToFrontReceiveFromBack(array, outBufferFront, tempCellParameterBack, inBufferBack,
+		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
+		                                         rank, frontRank, backRank);
+	} else if (cartCoord[1] == 0) {
+		receiveCellParametersBack(tempCellParameterBack, inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
+		                           additionalBinNumber, cartComm, rank, backRank);
+	} else if (cartCoord[1] == cartDim[1] - 1) {
+		sendCellParametersFront(array, outBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+		                       additionalBinNumber, cartComm, rank, frontRank);
+	}
+
+	if (boundaryConditionTypeY == PERIODIC || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
+		sendCellParametersToBackReceiveFromFront(array, outBufferBack, tempCellParameterFront, inBufferFront,
+		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
+		                                         rank, frontRank, backRank);
+	} else if (cartCoord[1] == 0) {
+		sendCellParametersBack(array, outBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+		                        additionalBinNumber, cartComm, rank, backRank);
+	} else if (cartCoord[1] == cartDim[1] - 1) {
+		receiveCellParametersFront(tempCellParameterFront, inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+		                          additionalBinNumber, cartComm, rank, frontRank);
+	}
+
+	sumCellTempParametersY(array);
+}
+
+void Simulation::sumCellParametersGeneralZ(double*** array, double* inBufferTop, double* outBufferTop, double* inBufferBottom, double* outBufferBottom) {
+	if (boundaryConditionTypeZ == PERIODIC || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
+		sendCellParametersToBottomReceiveFromTop(array, outBufferBottom, tempCellParameterTop, inBufferTop,
+		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
+		                                         rank, bottomRank, topRank);
+	} else if (cartCoord[2] == 0) {
+		receiveCellParametersTop(tempCellParameterTop, inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
+		                           additionalBinNumber, cartComm, rank, topRank);
+	} else if (cartCoord[2] == cartDim[2] - 1) {
+		sendCellParametersBottom(array, outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+		                       additionalBinNumber, cartComm, rank, bottomRank);
+	}
+
+	if (boundaryConditionTypeZ == PERIODIC || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
+		sendCellParametersToTopReceiveFromBottom(array, outBufferTop, tempCellParameterBottom, inBufferBottom,
+		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
+		                                         rank, bottomRank, topRank);
+	} else if (cartCoord[2] == 0) {
+		sendCellParametersTop(array, outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+		                        additionalBinNumber, cartComm, rank, topRank);
+	} else if (cartCoord[2] == cartDim[2] - 1) {
+		receiveCellParametersBottom(tempCellParameterBottom, inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+		                          additionalBinNumber, cartComm, rank, bottomRank);
+	}
+
+	sumCellTempParametersZ(array);
+}
+
 void Simulation::sumChargeDensityHatX() {
 	if (cartDim[0] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum charge density hat rank = %d\n", rank);
@@ -1097,59 +1181,11 @@ void Simulation::sumChargeDensityHatX() {
 		//MPI_Barrier(cartComm);
 		if ((rank == 0) && (verbosity > 2)) printf("sending left sum charge density hat x rank = %d\n", rank);
 
-		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendCellParametersToLeftReceiveFromRight(chargeDensityHat, outBufferLeft, tempCellParameterRight, inBufferRight,
-			                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-			                                         rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-			                           additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			sendCellParametersLeft(chargeDensityHat, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                       additionalBinNumber, cartComm, rank, leftRank);
-		}
-
-		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendCellParametersToRightReceiveFromLeft(chargeDensityHat, outBufferRight, tempCellParameterLeft, inBufferLeft,
-			                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-			                                         rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			sendCellParametersRight(chargeDensityHat, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                        additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveCellParametersLeft(tempCellParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                          additionalBinNumber, cartComm, rank, leftRank);
-		}
-
-		sumCellTempParametersX(chargeDensityHat);
+		sumCellParametersGeneralX(chargeDensityHat, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
 		/////
-		if ((rank == 0) && (verbosity > 2)) printf("sending left sum charge density minus x rank = %d\n", rank);
-
-		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendCellParametersToLeftReceiveFromRight(chargeDensityMinus, outBufferLeft, tempCellParameterRight, inBufferRight,
-			                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-			                                         rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			receiveCellParametersRight(tempCellParameterRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-			                           additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			sendCellParametersLeft(chargeDensityMinus, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                       additionalBinNumber, cartComm, rank, leftRank);
-		}
-
-		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendCellParametersToRightReceiveFromLeft(chargeDensityMinus, outBufferRight, tempCellParameterLeft, inBufferLeft,
-			                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-			                                         rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			sendCellParametersRight(chargeDensityMinus, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                        additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveCellParametersLeft(tempCellParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                          additionalBinNumber, cartComm, rank, leftRank);
-		}
-
-		sumCellTempParametersX(chargeDensityMinus);
+		
+		sumCellParametersGeneralX(chargeDensityMinus, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum charge density hat x rank = %d\n", rank);
@@ -1181,25 +1217,10 @@ void Simulation::sumChargeDensityHatY() {
 		double* inBufferFront = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
 		double* outBufferFront = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
 
-		sendCellParametersToFrontReceiveFromBack(chargeDensityHat, outBufferFront, tempCellParameterBack, inBufferBack,
-		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-		                                         rank, frontRank, backRank);
-		sendCellParametersToBackReceiveFromFront(chargeDensityHat, outBufferBack, tempCellParameterFront, inBufferFront,
-		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-		                                         rank, frontRank, backRank);
+		sumCellParametersGeneralY(chargeDensityHat, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
 
+		sumCellParametersGeneralY(chargeDensityMinus, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
 
-		sumCellTempParametersY(chargeDensityHat);
-		////
-		sendCellParametersToFrontReceiveFromBack(chargeDensityMinus, outBufferFront, tempCellParameterBack, inBufferBack,
-		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-		                                         rank, frontRank, backRank);
-		sendCellParametersToBackReceiveFromFront(chargeDensityMinus, outBufferBack, tempCellParameterFront, inBufferFront,
-		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-		                                         rank, frontRank, backRank);
-
-
-		sumCellTempParametersY(chargeDensityMinus);
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum charge density hat y rank = %d\n", rank);
@@ -1210,12 +1231,14 @@ void Simulation::sumChargeDensityHatY() {
 	} else {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int k = 0; k < znumberAdded; ++k) {
-				for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
-					chargeDensityHat[i][ynumberAdded - 1 - j][k] += chargeDensityHat[i][1 + 2 * additionalBinNumber - j][k];
-					chargeDensityHat[i][1 + 2 * additionalBinNumber - j][k] = chargeDensityHat[i][ynumberAdded - 1 - j][k];
+				if(boundaryConditionTypeY == PERIODIC){
+					for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
+						chargeDensityHat[i][ynumberAdded - 1 - j][k] += chargeDensityHat[i][1 + 2 * additionalBinNumber - j][k];
+						chargeDensityHat[i][1 + 2 * additionalBinNumber - j][k] = chargeDensityHat[i][ynumberAdded - 1 - j][k];
 
-					chargeDensityMinus[i][ynumberAdded - 1 - j][k] += chargeDensityMinus[i][1 + 2 * additionalBinNumber - j][k];
-					chargeDensityMinus[i][1 + 2 * additionalBinNumber - j][k] = chargeDensityMinus[i][ynumberAdded - 1 - j][k];
+						chargeDensityMinus[i][ynumberAdded - 1 - j][k] += chargeDensityMinus[i][1 + 2 * additionalBinNumber - j][k];
+						chargeDensityMinus[i][1 + 2 * additionalBinNumber - j][k] = chargeDensityMinus[i][ynumberAdded - 1 - j][k];
+					}
 				}
 				if (ynumberGeneral == 1) {
 					for (int j = 0; j < ynumberAdded; ++j) {
@@ -1235,23 +1258,9 @@ void Simulation::sumChargeDensityHatZ() {
 		double* inBufferBottom = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * ynumberAdded];
 		double* outBufferBottom = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * ynumberAdded];
 
-		sendCellParametersToBottomReceiveFromTop(chargeDensityHat, outBufferBottom, tempCellParameterTop, inBufferTop,
-		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-		                                         rank, bottomRank, topRank);
-		sendCellParametersToTopReceiveFromBottom(chargeDensityHat, outBufferTop, tempCellParameterBottom, inBufferBottom,
-		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-		                                         rank, bottomRank, topRank);
+		sumCellParametersGeneralZ(chargeDensityHat, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
 
-		sumCellTempParametersZ(chargeDensityHat);
-		/////
-		sendCellParametersToBottomReceiveFromTop(chargeDensityMinus, outBufferBottom, tempCellParameterTop, inBufferTop,
-		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-		                                         rank, bottomRank, topRank);
-		sendCellParametersToTopReceiveFromBottom(chargeDensityMinus, outBufferTop, tempCellParameterBottom, inBufferBottom,
-		                                         xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
-		                                         rank, bottomRank, topRank);
-
-		sumCellTempParametersZ(chargeDensityMinus);
+		sumCellParametersGeneralZ(chargeDensityMinus, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum charge density hat z rank = %d\n", rank);
@@ -1262,11 +1271,13 @@ void Simulation::sumChargeDensityHatZ() {
 	} else {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
-					chargeDensityHat[i][j][znumberAdded - 1 - k] += chargeDensityHat[i][j][1 + 2 * additionalBinNumber - k];
-					chargeDensityHat[i][j][1 + 2 * additionalBinNumber - k] = chargeDensityHat[i][j][znumberAdded - 1 - k];
-					chargeDensityMinus[i][j][znumberAdded - 1 - k] += chargeDensityMinus[i][j][1 + 2 * additionalBinNumber - k];
-					chargeDensityMinus[i][j][1 + 2 * additionalBinNumber - k] = chargeDensityMinus[i][j][znumberAdded - 1 - k];
+				if(boundaryConditionTypeZ == PERIODIC){
+					for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
+						chargeDensityHat[i][j][znumberAdded - 1 - k] += chargeDensityHat[i][j][1 + 2 * additionalBinNumber - k];
+						chargeDensityHat[i][j][1 + 2 * additionalBinNumber - k] = chargeDensityHat[i][j][znumberAdded - 1 - k];
+						chargeDensityMinus[i][j][znumberAdded - 1 - k] += chargeDensityMinus[i][j][1 + 2 * additionalBinNumber - k];
+						chargeDensityMinus[i][j][1 + 2 * additionalBinNumber - k] = chargeDensityMinus[i][j][znumberAdded - 1 - k];
+					}
 				}
 				if (znumberGeneral == 1) {
 					for (int k = 0; k < znumberAdded; ++k) {
