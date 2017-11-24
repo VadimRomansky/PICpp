@@ -1118,6 +1118,12 @@ public:
 	void sumTempNodeMassMatrixParametersX(MassMatrix*** array);
 	void sumTempNodeMassMatrixParametersY(MassMatrix*** array);
 	void sumTempNodeMassMatrixParametersZ(MassMatrix*** array);
+	void sumNodeVectorParametersGeneralX(Vector3d*** vector, double* inBufferRight, double* outBufferRight,
+	                                     double* inBufferLeft, double* outBufferLeft);
+	void sumNodeVectorParametersGeneralY(Vector3d*** vector, double* inBufferBack, double* outBufferBack,
+	                                     double* inBufferFront, double* outBufferFront);
+	void sumNodeVectorParametersGeneralZ(Vector3d*** vector, double* inBufferTop, double* outBufferTop,
+	                                     double* inBufferBottom, double* outBufferBottom);
 };
 
 #endif

@@ -107,10 +107,10 @@ void Simulation::sumNodeMassMatrixParametersY() {
 			                                                   additionalBinNumber, cartComm, rank, frontRank, backRank);
 		} else if (cartCoord[1] == 0) {
 			receiveNodeMassMatrixParametersBack(tempNodeMassMatrixParameterBack, inBufferBack, xnumberAdded, ynumberAdded,
-			                                     znumberAdded, additionalBinNumber, cartComm, rank, backRank);
+			                                    znumberAdded, additionalBinNumber, cartComm, rank, backRank);
 		} else if (cartCoord[1] == cartDim[1] - 1) {
 			sendNodeMassMatrixParametersFront(massMatrix, outBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-			                                 additionalBinNumber, cartComm, rank, frontRank);
+			                                  additionalBinNumber, cartComm, rank, frontRank);
 		}
 
 		//MPI_Barrier(cartComm);
@@ -121,10 +121,10 @@ void Simulation::sumNodeMassMatrixParametersY() {
 			                                                   additionalBinNumber, cartComm, rank, frontRank, backRank);
 		} else if (cartCoord[1] == 0) {
 			sendNodeMassMatrixParametersBack(massMatrix, outBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
-			                                  additionalBinNumber, cartComm, rank, backRank);
+			                                 additionalBinNumber, cartComm, rank, backRank);
 		} else if (cartCoord[1] == cartDim[1] - 1) {
 			receiveNodeMassMatrixParametersFront(tempNodeMassMatrixParameterFront, inBufferFront, xnumberAdded, ynumberAdded,
-			                                    znumberAdded, additionalBinNumber, cartComm, rank, frontRank);
+			                                     znumberAdded, additionalBinNumber, cartComm, rank, frontRank);
 		}
 
 		sumTempNodeMassMatrixParametersY(massMatrix);
@@ -137,19 +137,20 @@ void Simulation::sumNodeMassMatrixParametersY() {
 		delete[] outBufferBack;
 		delete[] outBufferFront;
 	} else {
-		if(boundaryConditionTypeY == PERIODIC){
-		for (int i = 0; i <= xnumberAdded; ++i) {
-			for (int k = 0; k <= znumberAdded; ++k) {
-				for (int j = 0; j <= 2 * additionalBinNumber + 2; ++j) {
-					for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
-						for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
-							for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
-								for (int l = 0; l < 3; ++l) {
-									for (int m = 0; m < 3; ++m) {
-										massMatrix[i][ynumberAdded - j][k].matrix[tempI][tempJ][tempK].matrix[l][m] += massMatrix[i][2 + 2 *
-											additionalBinNumber - j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
-										massMatrix[i][2 + 2 * additionalBinNumber - j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = massMatrix[i][
-											ynumberAdded - j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
+		if (boundaryConditionTypeY == PERIODIC) {
+			for (int i = 0; i <= xnumberAdded; ++i) {
+				for (int k = 0; k <= znumberAdded; ++k) {
+					for (int j = 0; j <= 2 * additionalBinNumber + 2; ++j) {
+						for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+							for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+								for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
+									for (int l = 0; l < 3; ++l) {
+										for (int m = 0; m < 3; ++m) {
+											massMatrix[i][ynumberAdded - j][k].matrix[tempI][tempJ][tempK].matrix[l][m] += massMatrix[i][2 + 2 *
+												additionalBinNumber - j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
+											massMatrix[i][2 + 2 * additionalBinNumber - j][k].matrix[tempI][tempJ][tempK].matrix[l][m] = massMatrix[i][
+												ynumberAdded - j][k].matrix[tempI][tempJ][tempK].matrix[l][m];
+										}
 									}
 								}
 							}
@@ -157,7 +158,6 @@ void Simulation::sumNodeMassMatrixParametersY() {
 					}
 				}
 			}
-		}
 		}
 
 		if (ynumberGeneral == 1) {
@@ -199,10 +199,10 @@ void Simulation::sumNodeMassMatrixParametersZ() {
 			                                                   additionalBinNumber, cartComm, rank, bottomRank, topRank);
 		} else if (cartCoord[2] == 0) {
 			receiveNodeMassMatrixParametersTop(tempNodeMassMatrixParameterTop, inBufferTop, xnumberAdded, ynumberAdded,
-			                                     znumberAdded, additionalBinNumber, cartComm, rank, topRank);
+			                                   znumberAdded, additionalBinNumber, cartComm, rank, topRank);
 		} else if (cartCoord[2] == cartDim[2] - 1) {
 			sendNodeMassMatrixParametersBottom(massMatrix, outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-			                                 additionalBinNumber, cartComm, rank, bottomRank);
+			                                   additionalBinNumber, cartComm, rank, bottomRank);
 		}
 
 		//MPI_Barrier(cartComm);
@@ -213,10 +213,10 @@ void Simulation::sumNodeMassMatrixParametersZ() {
 			                                                   additionalBinNumber, cartComm, rank, bottomRank, topRank);
 		} else if (cartCoord[2] == 0) {
 			sendNodeMassMatrixParametersTop(massMatrix, outBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
-			                                  additionalBinNumber, cartComm, rank, topRank);
+			                                additionalBinNumber, cartComm, rank, topRank);
 		} else if (cartCoord[2] == cartDim[2] - 1) {
 			receiveNodeMassMatrixParametersBottom(tempNodeMassMatrixParameterBottom, inBufferBottom, xnumberAdded, ynumberAdded,
-			                                    znumberAdded, additionalBinNumber, cartComm, rank, bottomRank);
+			                                      znumberAdded, additionalBinNumber, cartComm, rank, bottomRank);
 		}
 
 		sumTempNodeMassMatrixParametersZ(massMatrix);
@@ -231,19 +231,21 @@ void Simulation::sumNodeMassMatrixParametersZ() {
 		delete[] outBufferTop;
 
 	} else {
-		if(boundaryConditionTypeZ == PERIODIC){
-		for (int i = 0; i <= xnumberAdded; ++i) {
-			for (int j = 0; j <= ynumberAdded; ++j) {
-				for (int k = 0; k <= 2 * additionalBinNumber + 2; ++k) {
-					for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
-						for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
-							for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
-								for (int l = 0; l < 3; ++l) {
-									for (int m = 0; m < 3; ++m) {
-										massMatrix[i][j][znumberAdded - k].matrix[tempI][tempJ][tempK].matrix[l][m] += massMatrix[i][j][2 + 2 *
-											additionalBinNumber - k].matrix[tempI][tempJ][tempK].matrix[l][m];
-										massMatrix[i][j][2 + 2 * additionalBinNumber - k].matrix[tempI][tempJ][tempK].matrix[l][m] = massMatrix[i][j][
-											znumberAdded - k].matrix[tempI][tempJ][tempK].matrix[l][m];
+		if (boundaryConditionTypeZ == PERIODIC) {
+			for (int i = 0; i <= xnumberAdded; ++i) {
+				for (int j = 0; j <= ynumberAdded; ++j) {
+					for (int k = 0; k <= 2 * additionalBinNumber + 2; ++k) {
+						for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+							for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+								for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
+									for (int l = 0; l < 3; ++l) {
+										for (int m = 0; m < 3; ++m) {
+											massMatrix[i][j][znumberAdded - k].matrix[tempI][tempJ][tempK].matrix[l][m] += massMatrix[i][j][2 + 2 *
+												additionalBinNumber - k].matrix[tempI][tempJ][tempK].matrix[l][m];
+											massMatrix[i][j][2 + 2 * additionalBinNumber - k].matrix[tempI][tempJ][tempK].matrix[l][m] = massMatrix[i][j]
+											[
+												znumberAdded - k].matrix[tempI][tempJ][tempK].matrix[l][m];
+										}
 									}
 								}
 							}
@@ -251,7 +253,6 @@ void Simulation::sumNodeMassMatrixParametersZ() {
 					}
 				}
 			}
-		}
 		}
 		if (znumberGeneral == 1) {
 			for (int i = 0; i <= xnumberAdded; ++i) {
@@ -407,6 +408,107 @@ void Simulation::sumTempNodeMassMatrixParametersZ(MassMatrix*** array) {
 }
 
 
+void Simulation::sumNodeVectorParametersGeneralX(Vector3d*** vector, double* inBufferRight, double* outBufferRight,
+                                                 double* inBufferLeft, double* outBufferLeft) {
+	if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
+	if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		sendNodeVectorParametersToLeftReceiveFromRight(vector, outBufferLeft, tempNodeVectorParameterRight,
+		                                               inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
+		                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
+	} else if (cartCoord[0] == 0) {
+		receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded,
+		                                 znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
+	} else if (cartCoord[0] == cartDim[0] - 1) {
+		sendNodeVectorParametersLeft(vector, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
+		                             additionalBinNumber, cartComm, rank, leftRank);
+	}
+
+	//MPI_Barrier(cartComm);
+
+	if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+		sendNodeVectorParametersToRightReceiveFromLeft(vector, outBufferRight, tempNodeVectorParameterLeft,
+		                                               inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
+		                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
+	} else if (cartCoord[0] == 0) {
+		sendNodeVectorParametersRight(vector, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
+		                              additionalBinNumber, cartComm, rank, rightRank);
+	} else if (cartCoord[0] == cartDim[0] - 1) {
+		receiveNodeVectorParametersLeft(tempNodeVectorParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
+		                                additionalBinNumber, cartComm, rank, leftRank);
+	}
+
+
+	sumTempNodeVectorParametersX(vector);
+}
+
+void Simulation::sumNodeVectorParametersGeneralY(Vector3d*** vector, double* inBufferBack, double* outBufferBack,
+                                                 double* inBufferFront, double* outBufferFront) {
+	if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
+	if ((boundaryConditionTypeY == PERIODIC) || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
+		sendNodeVectorParametersToFrontReceiveFromBack(vector, outBufferFront, tempNodeVectorParameterBack,
+		                                               inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
+		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
+	} else if (cartCoord[1] == 0) {
+		receiveNodeVectorParametersBack(tempNodeVectorParameterBack, inBufferBack, xnumberAdded, ynumberAdded,
+		                                znumberAdded, additionalBinNumber, cartComm, rank, backRank);
+	} else if (cartCoord[1] == cartDim[1] - 1) {
+		sendNodeVectorParametersFront(vector, outBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+		                              additionalBinNumber, cartComm, rank, frontRank);
+	}
+
+	//MPI_Barrier(cartComm);
+
+	if ((boundaryConditionTypeY == PERIODIC) || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
+		sendNodeVectorParametersToBackReceiveFromFront(vector, outBufferBack, tempNodeVectorParameterFront,
+		                                               inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
+	} else if (cartCoord[1] == 0) {
+		sendNodeVectorParametersBack(vector, outBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
+		                             additionalBinNumber, cartComm, rank, backRank);
+	} else if (cartCoord[1] == cartDim[1] - 1) {
+		receiveNodeVectorParametersFront(tempNodeVectorParameterFront, inBufferFront, xnumberAdded, ynumberAdded,
+		                                 znumberAdded,
+		                                 additionalBinNumber, cartComm, rank, frontRank);
+	}
+
+
+	sumTempNodeVectorParametersY(vector);
+}
+
+void Simulation::sumNodeVectorParametersGeneralZ(Vector3d*** vector, double* inBufferTop, double* outBufferTop,
+                                                 double* inBufferBottom, double* outBufferBottom) {
+	if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
+	if ((boundaryConditionTypeZ == PERIODIC) || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
+		sendNodeVectorParametersToBottomReceiveFromTop(vector, outBufferBottom, tempNodeVectorParameterTop,
+		                                               inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
+		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
+	} else if (cartCoord[2] == 0) {
+		receiveNodeVectorParametersTop(tempNodeVectorParameterTop, inBufferTop, xnumberAdded, ynumberAdded,
+		                               znumberAdded, additionalBinNumber, cartComm, rank, topRank);
+	} else if (cartCoord[2] == cartDim[2] - 1) {
+		sendNodeVectorParametersBottom(vector, outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+		                               additionalBinNumber, cartComm, rank, bottomRank);
+	}
+
+	//MPI_Barrier(cartComm);
+
+	if ((boundaryConditionTypeZ == PERIODIC) || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
+		sendNodeVectorParametersToTopReceiveFromBottom(vector, outBufferTop, tempNodeVectorParameterBottom,
+		                                               inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
+	} else if (cartCoord[2] == 0) {
+		sendNodeVectorParametersTop(vector, outBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
+		                            additionalBinNumber, cartComm, rank, topRank);
+	} else if (cartCoord[2] == cartDim[2] - 1) {
+		receiveNodeVectorParametersBottom(tempNodeVectorParameterBottom, inBufferBottom, xnumberAdded, ynumberAdded,
+		                                  znumberAdded,
+		                                  additionalBinNumber, cartComm, rank, bottomRank);
+	}
+
+
+	sumTempNodeVectorParametersZ(vector);
+}
+
 void Simulation::sumNodeVectorParametersX() {
 	if (cartDim[0] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum node vector parameters x\n");
@@ -416,129 +518,16 @@ void Simulation::sumNodeVectorParametersX() {
 		double* outBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
 
 		//MPI_Barrier(cartComm);
-		if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
-		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeVectorParametersToLeftReceiveFromRight(electricFlux, outBufferLeft, tempNodeVectorParameterRight,
-			                                               inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-			                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded,
-			                                 znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			sendNodeVectorParametersLeft(electricFlux, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                             additionalBinNumber, cartComm, rank, leftRank);
-		}
-
-		//MPI_Barrier(cartComm);
-
-		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeVectorParametersToRightReceiveFromLeft(electricFlux, outBufferRight, tempNodeVectorParameterLeft,
-			                                               inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			sendNodeVectorParametersRight(electricFlux, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-			                              additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveNodeVectorParametersLeft(tempNodeVectorParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                                additionalBinNumber, cartComm, rank, leftRank);
-		}
-
-
-		sumTempNodeVectorParametersX(electricFlux);
+		sumNodeVectorParametersGeneralX(electricFlux, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
 		//////
 		//MPI_Barrier(cartComm);
-		if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
-		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeVectorParametersToLeftReceiveFromRight(electricFluxMinus, outBufferLeft, tempNodeVectorParameterRight,
-			                                               inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-			                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded,
-			                                 znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			sendNodeVectorParametersLeft(electricFluxMinus, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                             additionalBinNumber, cartComm, rank, leftRank);
-		}
+		sumNodeVectorParametersGeneralX(electricFluxMinus, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
 
 		//MPI_Barrier(cartComm);
-
-		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeVectorParametersToRightReceiveFromLeft(electricFluxMinus, outBufferRight, tempNodeVectorParameterLeft,
-			                                               inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			sendNodeVectorParametersRight(electricFluxMinus, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-			                              additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveNodeVectorParametersLeft(tempNodeVectorParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                                additionalBinNumber, cartComm, rank, leftRank);
-		}
-
-
-		sumTempNodeVectorParametersX(electricFluxMinus);
+		sumNodeVectorParametersGeneralX(divPressureTensor, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
 
 		//MPI_Barrier(cartComm);
-		//printf("send divPressureTensor\n");
-		if ((verbosity > 2)) printf("sending left div pressure tensor sum node vector parameters x rank = %d\n", rank);
-
-		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeVectorParametersToLeftReceiveFromRight(divPressureTensor, outBufferLeft, tempNodeVectorParameterRight,
-			                                               inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-			                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded,
-			                                 znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			sendNodeVectorParametersLeft(divPressureTensor, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                             additionalBinNumber, cartComm, rank, leftRank);
-		}
-
-		//MPI_Barrier(cartComm);
-
-		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeVectorParametersToRightReceiveFromLeft(divPressureTensor, outBufferRight, tempNodeVectorParameterLeft,
-			                                               inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			sendNodeVectorParametersRight(divPressureTensor, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-			                              additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveNodeVectorParametersLeft(tempNodeVectorParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                                additionalBinNumber, cartComm, rank, leftRank);
-		}
-
-		sumTempNodeVectorParametersX(divPressureTensor);
-		//MPI_Barrier(cartComm);
-		//printf("send divPressureTensor\n");
-		if ((verbosity > 2)) printf("sending left div pressure tensor sum node vector parameters x rank = %d\n", rank);
-
-		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeVectorParametersToLeftReceiveFromRight(divPressureTensorMinus, outBufferLeft, tempNodeVectorParameterRight,
-			                                               inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-			                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			receiveNodeVectorParametersRight(tempNodeVectorParameterRight, inBufferRight, xnumberAdded, ynumberAdded,
-			                                 znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			sendNodeVectorParametersLeft(divPressureTensorMinus, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                             additionalBinNumber, cartComm, rank, leftRank);
-		}
-
-		//MPI_Barrier(cartComm);
-
-		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeVectorParametersToRightReceiveFromLeft(divPressureTensorMinus, outBufferRight, tempNodeVectorParameterLeft,
-			                                               inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
-		} else if (cartCoord[0] == 0) {
-			sendNodeVectorParametersRight(divPressureTensorMinus, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
-			                              additionalBinNumber, cartComm, rank, rightRank);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveNodeVectorParametersLeft(tempNodeVectorParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
-			                                additionalBinNumber, cartComm, rank, leftRank);
-		}
-
-		sumTempNodeVectorParametersX(divPressureTensorMinus);
+		sumNodeVectorParametersGeneralX(divPressureTensorMinus, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum node vector parameters x rank = %d\n", rank);
@@ -547,15 +536,17 @@ void Simulation::sumNodeVectorParametersX() {
 		delete[] outBufferLeft;
 		delete[] outBufferRight;
 
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].x, "electricFlux[i][j][k].x = NaN");
-					if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].y, "electricFlux[i][j][k].y = NaN");
-					if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].z, "electricFlux[i][j][k].z = NaN");
-					alertLargeModlue(electricFlux[i][j][k].x, 1E100, "electric Flux x is too large\n");
-					alertLargeModlue(electricFlux[i][j][k].y, 1E100, "electric Flux y is too large\n");
-					alertLargeModlue(electricFlux[i][j][k].z, 1E100, "electric Flux z is too large\n");
+		if (debugMode) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					for (int k = 0; k < znumberAdded + 1; ++k) {
+						if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].x, "electricFlux[i][j][k].x = NaN");
+						if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].y, "electricFlux[i][j][k].y = NaN");
+						if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].z, "electricFlux[i][j][k].z = NaN");
+						alertLargeModlue(electricFlux[i][j][k].x, 1E100, "electric Flux x is too large\n");
+						alertLargeModlue(electricFlux[i][j][k].y, 1E100, "electric Flux y is too large\n");
+						alertLargeModlue(electricFlux[i][j][k].z, 1E100, "electric Flux z is too large\n");
+					}
 				}
 			}
 		}
@@ -594,78 +585,54 @@ void Simulation::sumNodeVectorParametersY() {
 		double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
 		double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
 
-		if ((verbosity > 2)) printf("sending left flux sum node vector parameters y rank = %d\n", rank);
-
-		sendNodeVectorParametersToFrontReceiveFromBack(electricFlux, outBufferFront, tempNodeVectorParameterBack,
-		                                               inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
-		sendNodeVectorParametersToBackReceiveFromFront(electricFlux, outBufferBack, tempNodeVectorParameterFront,
-		                                               inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
-
-		sumTempNodeVectorParametersY(electricFlux);
-
-		sendNodeVectorParametersToFrontReceiveFromBack(electricFluxMinus, outBufferFront, tempNodeVectorParameterBack,
-		                                               inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
-		sendNodeVectorParametersToBackReceiveFromFront(electricFluxMinus, outBufferBack, tempNodeVectorParameterFront,
-		                                               inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
-
-		sumTempNodeVectorParametersY(electricFluxMinus);
-
-		sendNodeVectorParametersToFrontReceiveFromBack(divPressureTensor, outBufferFront, tempNodeVectorParameterBack,
-		                                               inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
-		sendNodeVectorParametersToBackReceiveFromFront(divPressureTensor, outBufferBack, tempNodeVectorParameterFront,
-		                                               inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
-
-		sumTempNodeVectorParametersY(divPressureTensor);
-
-		sendNodeVectorParametersToFrontReceiveFromBack(divPressureTensorMinus, outBufferFront, tempNodeVectorParameterBack,
-		                                               inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
-		sendNodeVectorParametersToBackReceiveFromFront(divPressureTensorMinus, outBufferBack, tempNodeVectorParameterFront,
-		                                               inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
-
-		sumTempNodeVectorParametersY(divPressureTensorMinus);
 		//MPI_Barrier(cartComm);
-		if ((verbosity > 2)) printf("deleting buffer in sum node vector parameters y rank = %d\n", rank);
+		sumNodeVectorParametersGeneralY(electricFlux, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+		//////
+		//MPI_Barrier(cartComm);
+		sumNodeVectorParametersGeneralY(electricFluxMinus, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+
+		//MPI_Barrier(cartComm);
+		sumNodeVectorParametersGeneralY(divPressureTensor, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+
+		//MPI_Barrier(cartComm);
+		sumNodeVectorParametersGeneralY(divPressureTensorMinus, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
 
 		delete[] inBufferFront;
 		delete[] inBufferBack;
 		delete[] outBufferBack;
 		delete[] outBufferFront;
 
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].x, "electricFlux[i][j][k].x = NaN");
-					if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].y, "electricFlux[i][j][k].y = NaN");
-					if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].z, "electricFlux[i][j][k].z = NaN");
-					alertLargeModlue(electricFlux[i][j][k].x, 1E100, "electric Flux x is too large\n");
-					alertLargeModlue(electricFlux[i][j][k].y, 1E100, "electric Flux y is too large\n");
-					alertLargeModlue(electricFlux[i][j][k].z, 1E100, "electric Flux z is too large\n");
+		if (debugMode) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					for (int k = 0; k < znumberAdded + 1; ++k) {
+						if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].x, "electricFlux[i][j][k].x = NaN");
+						if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].y, "electricFlux[i][j][k].y = NaN");
+						if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].z, "electricFlux[i][j][k].z = NaN");
+						//alertLargeModlue(electricFlux[i][j][k].x, 1E100, "electric Flux x is too large\n");
+						//alertLargeModlue(electricFlux[i][j][k].y, 1E100, "electric Flux y is too large\n");
+						//alertLargeModlue(electricFlux[i][j][k].z, 1E100, "electric Flux z is too large\n");
+					}
 				}
 			}
 		}
 	} else {
-		for (int i = 0; i <= xnumberAdded; ++i) {
-			for (int k = 0; k <= znumberAdded; ++k) {
-				for (int j = 0; j <= 2 * additionalBinNumber + 2; ++j) {
-					electricFlux[i][ynumberAdded - j][k] += electricFlux[i][2 + 2 * additionalBinNumber - j][k];
-					electricFlux[i][2 + 2 * additionalBinNumber - j][k] = electricFlux[i][ynumberAdded - j][k];
+		if (boundaryConditionTypeY == PERIODIC) {
+			for (int i = 0; i <= xnumberAdded; ++i) {
+				for (int k = 0; k <= znumberAdded; ++k) {
+					for (int j = 0; j <= 2 * additionalBinNumber + 2; ++j) {
+						electricFlux[i][ynumberAdded - j][k] += electricFlux[i][2 + 2 * additionalBinNumber - j][k];
+						electricFlux[i][2 + 2 * additionalBinNumber - j][k] = electricFlux[i][ynumberAdded - j][k];
 
-					electricFluxMinus[i][ynumberAdded - j][k] += electricFluxMinus[i][2 + 2 * additionalBinNumber - j][k];
-					electricFluxMinus[i][2 + 2 * additionalBinNumber - j][k] = electricFluxMinus[i][ynumberAdded - j][k];
+						electricFluxMinus[i][ynumberAdded - j][k] += electricFluxMinus[i][2 + 2 * additionalBinNumber - j][k];
+						electricFluxMinus[i][2 + 2 * additionalBinNumber - j][k] = electricFluxMinus[i][ynumberAdded - j][k];
 
-					divPressureTensor[i][ynumberAdded - j][k] += divPressureTensor[i][2 + 2 * additionalBinNumber - j][k];
-					divPressureTensor[i][2 + 2 * additionalBinNumber - j][k] = divPressureTensor[i][ynumberAdded - j][k];
+						divPressureTensor[i][ynumberAdded - j][k] += divPressureTensor[i][2 + 2 * additionalBinNumber - j][k];
+						divPressureTensor[i][2 + 2 * additionalBinNumber - j][k] = divPressureTensor[i][ynumberAdded - j][k];
 
-					divPressureTensorMinus[i][ynumberAdded - j][k] += divPressureTensorMinus[i][2 + 2 * additionalBinNumber - j][k];
-					divPressureTensorMinus[i][2 + 2 * additionalBinNumber - j][k] = divPressureTensorMinus[i][ynumberAdded - j][k];
+						divPressureTensorMinus[i][ynumberAdded - j][k] += divPressureTensorMinus[i][2 + 2 * additionalBinNumber - j][k];
+						divPressureTensorMinus[i][2 + 2 * additionalBinNumber - j][k] = divPressureTensorMinus[i][ynumberAdded - j][k];
+					}
 				}
 			}
 		}
@@ -692,81 +659,57 @@ void Simulation::sumNodeVectorParametersZ() {
 		double* inBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
 		double* outBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
 
-		if ((verbosity > 2)) printf("sending left flux sum node vector parameters z rank = %d\n", rank);
-
-		sendNodeVectorParametersToBottomReceiveFromTop(electricFlux, outBufferBottom, tempNodeVectorParameterTop, inBufferTop,
-		                                               xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber,
-		                                               cartComm, rank, bottomRank, topRank);
-		sendNodeVectorParametersToTopReceiveFromBottom(electricFlux, outBufferTop, tempNodeVectorParameterBottom,
-		                                               inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
-
-		sumTempNodeVectorParametersZ(electricFlux);
-
-		sendNodeVectorParametersToBottomReceiveFromTop(electricFluxMinus, outBufferBottom, tempNodeVectorParameterTop,
-		                                               inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
-		sendNodeVectorParametersToTopReceiveFromBottom(electricFluxMinus, outBufferTop, tempNodeVectorParameterBottom,
-		                                               inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
-
-		sumTempNodeVectorParametersZ(electricFluxMinus);
-
-		sendNodeVectorParametersToBottomReceiveFromTop(divPressureTensor, outBufferBottom, tempNodeVectorParameterTop,
-		                                               inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
-		sendNodeVectorParametersToTopReceiveFromBottom(divPressureTensor, outBufferTop, tempNodeVectorParameterBottom,
-		                                               inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
-
-		sumTempNodeVectorParametersZ(divPressureTensor);
-
-		sendNodeVectorParametersToBottomReceiveFromTop(divPressureTensorMinus, outBufferBottom, tempNodeVectorParameterTop,
-		                                               inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
-		sendNodeVectorParametersToTopReceiveFromBottom(divPressureTensorMinus, outBufferTop, tempNodeVectorParameterBottom,
-		                                               inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
-
-		sumTempNodeVectorParametersZ(divPressureTensorMinus);
 		//MPI_Barrier(cartComm);
-		if ((verbosity > 2)) printf("deleting buffer in sum node vector parameters z rank = %d\n", rank);
+		sumNodeVectorParametersGeneralZ(electricFlux, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		//////
+		//MPI_Barrier(cartComm);
+		sumNodeVectorParametersGeneralZ(electricFluxMinus, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+
+		//MPI_Barrier(cartComm);
+		sumNodeVectorParametersGeneralZ(divPressureTensor, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+
+		//MPI_Barrier(cartComm);
+		sumNodeVectorParametersGeneralZ(divPressureTensorMinus, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
 
 		delete[] inBufferTop;
 		delete[] inBufferBottom;
 		delete[] outBufferBottom;
 		delete[] outBufferTop;
 
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].x, "electricFlux[i][j][k].x = NaN");
-					if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].y, "electricFlux[i][j][k].y = NaN");
-					if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].z, "electricFlux[i][j][k].z = NaN");
-					alertLargeModlue(electricFlux[i][j][k].x, 1E100, "electric Flux x is too large\n");
-					alertLargeModlue(electricFlux[i][j][k].y, 1E100, "electric Flux y is too large\n");
-					alertLargeModlue(electricFlux[i][j][k].z, 1E100, "electric Flux z is too large\n");
+		if (debugMode) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					for (int k = 0; k < znumberAdded + 1; ++k) {
+						if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].x, "electricFlux[i][j][k].x = NaN");
+						if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].y, "electricFlux[i][j][k].y = NaN");
+						if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].z, "electricFlux[i][j][k].z = NaN");
+						//alertLargeModlue(electricFlux[i][j][k].x, 1E100, "electric Flux x is too large\n");
+						//alertLargeModlue(electricFlux[i][j][k].y, 1E100, "electric Flux y is too large\n");
+						//alertLargeModlue(electricFlux[i][j][k].z, 1E100, "electric Flux z is too large\n");
+					}
 				}
 			}
 		}
 	} else {
-		for (int i = 0; i <= xnumberAdded; ++i) {
-			for (int j = 0; j <= ynumberAdded; ++j) {
-				for (int k = 0; k <= 2 * additionalBinNumber + 2; ++k) {
-					for (int l = 0; l < 3; ++l) {
-						electricFlux[i][j][znumberAdded - k][l] += electricFlux[i][j][2 + 2 * additionalBinNumber - k][l];
-						electricFlux[i][j][2 + 2 * additionalBinNumber - k][l] = electricFlux[i][j][znumberAdded - k][l];
+		if (boundaryConditionTypeZ == PERIODIC) {
+			for (int i = 0; i <= xnumberAdded; ++i) {
+				for (int j = 0; j <= ynumberAdded; ++j) {
+					for (int k = 0; k <= 2 * additionalBinNumber + 2; ++k) {
+						for (int l = 0; l < 3; ++l) {
+							electricFlux[i][j][znumberAdded - k][l] += electricFlux[i][j][2 + 2 * additionalBinNumber - k][l];
+							electricFlux[i][j][2 + 2 * additionalBinNumber - k][l] = electricFlux[i][j][znumberAdded - k][l];
 
-						electricFluxMinus[i][j][znumberAdded - k][l] += electricFluxMinus[i][j][2 + 2 * additionalBinNumber - k][l];
-						electricFluxMinus[i][j][2 + 2 * additionalBinNumber - k][l] = electricFluxMinus[i][j][znumberAdded - k][l];
+							electricFluxMinus[i][j][znumberAdded - k][l] += electricFluxMinus[i][j][2 + 2 * additionalBinNumber - k][l];
+							electricFluxMinus[i][j][2 + 2 * additionalBinNumber - k][l] = electricFluxMinus[i][j][znumberAdded - k][l];
 
-						divPressureTensor[i][j][znumberAdded - k][l] += divPressureTensor[i][j][2 + 2 * additionalBinNumber - k][l];
-						divPressureTensor[i][j][2 + 2 * additionalBinNumber - k][l] = divPressureTensor[i][j][znumberAdded - k][l];
+							divPressureTensor[i][j][znumberAdded - k][l] += divPressureTensor[i][j][2 + 2 * additionalBinNumber - k][l];
+							divPressureTensor[i][j][2 + 2 * additionalBinNumber - k][l] = divPressureTensor[i][j][znumberAdded - k][l];
 
-						divPressureTensorMinus[i][j][znumberAdded - k][l] += divPressureTensorMinus[i][j][2 + 2 * additionalBinNumber - k]
-							[l];
-						divPressureTensorMinus[i][j][2 + 2 * additionalBinNumber - k][l] = divPressureTensorMinus[i][j][znumberAdded - k][
-							l];
+							divPressureTensorMinus[i][j][znumberAdded - k][l] += divPressureTensorMinus[i][j][2 + 2 * additionalBinNumber - k
+							][l];
+							divPressureTensorMinus[i][j][2 + 2 * additionalBinNumber - k][l] = divPressureTensorMinus[i][j][znumberAdded - k]
+								[l];
+						}
 					}
 				}
 			}
@@ -809,22 +752,42 @@ void Simulation::sumTempNodeVectorParametersX(Vector3d*** array) {
 }
 
 void Simulation::sumTempNodeVectorParametersY(Vector3d*** array) {
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		for (int k = 0; k < znumberAdded + 1; ++k) {
-			for (int j = 0; j < 2 * additionalBinNumber + 3; ++j) {
-				array[i][j][k] += tempNodeVectorParameterFront[i][j][k];
-				array[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k] += tempNodeVectorParameterBack[i][j][k];
+	if (cartCoord[1] > 0 || boundaryConditionTypeY == PERIODIC) {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				for (int j = 0; j < 2 * additionalBinNumber + 3; ++j) {
+					array[i][j][k] += tempNodeVectorParameterFront[i][j][k];
+				}
+			}
+		}
+	}
+	if (cartCoord[1] < cartDim[1] - 1 || boundaryConditionTypeY == PERIODIC) {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				for (int j = 0; j < 2 * additionalBinNumber + 3; ++j) {
+					array[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k] += tempNodeVectorParameterBack[i][j][k];
+				}
 			}
 		}
 	}
 }
 
 void Simulation::sumTempNodeVectorParametersZ(Vector3d*** array) {
-	for (int j = 0; j < ynumberAdded + 1; ++j) {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int k = 0; k < 2 * additionalBinNumber + 3; ++k) {
-				array[i][j][k] += tempNodeVectorParameterBottom[i][j][k];
-				array[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k] += tempNodeVectorParameterTop[i][j][k];
+	if (cartCoord[2] > 0 || boundaryConditionTypeZ == PERIODIC) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < 2 * additionalBinNumber + 3; ++k) {
+					array[i][j][k] += tempNodeVectorParameterBottom[i][j][k];
+				}
+			}
+		}
+	}
+	if (cartCoord[2] < cartDim[2] - 1 || boundaryConditionTypeZ == PERIODIC) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < 2 * additionalBinNumber + 3; ++k) {
+					array[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k] += tempNodeVectorParameterTop[i][j][k];
+				}
 			}
 		}
 	}
