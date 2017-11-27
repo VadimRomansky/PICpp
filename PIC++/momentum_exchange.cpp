@@ -1952,7 +1952,8 @@ void Simulation::sumCellVectorTempParametersZ(Vector3d*** array) {
 	}
 }
 
-void Simulation::sumCellMatrixParameterGeneralX(Matrix3d*** array, double* inBufferRight, double* outBufferRight, double* inBufferLeft, double* outBufferLeft) {
+void Simulation::sumCellMatrixParameterGeneralX(Matrix3d*** array, double* inBufferRight, double* outBufferRight, double* inBufferLeft,
+                                                double* outBufferLeft) {
 	if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 		sendCellMatrixParametersToLeftReceiveFromRight(array, outBufferLeft, tempCellMatrixParameterRight,
 		                                               inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
@@ -1981,17 +1982,18 @@ void Simulation::sumCellMatrixParameterGeneralX(Matrix3d*** array, double* inBuf
 	sumCellTempMatrixParametersX(array);
 }
 
-void Simulation::sumCellMatrixParameterGeneralY(Matrix3d*** array, double* inBufferBack, double* outBufferBack, double* inBufferFront, double* outBufferFront) {
+void Simulation::sumCellMatrixParameterGeneralY(Matrix3d*** array, double* inBufferBack, double* outBufferBack, double* inBufferFront,
+                                                double* outBufferFront) {
 	if ((boundaryConditionTypeY == PERIODIC) || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
 		sendCellMatrixParametersToFrontReceiveFromBack(array, outBufferFront, tempCellMatrixParameterBack,
 		                                               inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
 		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
 	} else if (cartCoord[1] == 0) {
 		receiveCellMatrixParametersBack(tempCellMatrixParameterBack, inBufferBack, xnumberAdded, ynumberAdded,
-		                                 znumberAdded, additionalBinNumber, cartComm, rank, backRank);
+		                                znumberAdded, additionalBinNumber, cartComm, rank, backRank);
 	} else if (cartCoord[1] == cartDim[1] - 1) {
 		sendCellMatrixParametersFront(array, outBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-		                             additionalBinNumber, cartComm, rank, frontRank);
+		                              additionalBinNumber, cartComm, rank, frontRank);
 	}
 
 	if ((verbosity > 2)) printf("sending right pressure tensor sum cell matrix parameters rank = %d\n", rank);
@@ -2001,26 +2003,27 @@ void Simulation::sumCellMatrixParameterGeneralY(Matrix3d*** array, double* inBuf
 		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
 	} else if (cartCoord[1] == 0) {
 		sendCellMatrixParametersBack(array, outBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
-		                              additionalBinNumber, cartComm, rank, backRank);
+		                             additionalBinNumber, cartComm, rank, backRank);
 	} else if (cartCoord[1] == cartDim[1] - 1) {
 		receiveCellMatrixParametersFront(tempCellMatrixParameterFront, inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-		                                additionalBinNumber, cartComm, rank, frontRank);
+		                                 additionalBinNumber, cartComm, rank, frontRank);
 	}
 
 	sumCellTempMatrixParametersY(array);
 }
 
-void Simulation::sumCellMatrixParameterGeneralZ(Matrix3d*** array, double* inBufferTop, double* outBufferTop, double* inBufferBottom, double* outBufferBottom) {
+void Simulation::sumCellMatrixParameterGeneralZ(Matrix3d*** array, double* inBufferTop, double* outBufferTop, double* inBufferBottom,
+                                                double* outBufferBottom) {
 	if ((boundaryConditionTypeZ == PERIODIC) || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
 		sendCellMatrixParametersToBottomReceiveFromTop(array, outBufferBottom, tempCellMatrixParameterTop,
 		                                               inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
 		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
 	} else if (cartCoord[2] == 0) {
 		receiveCellMatrixParametersTop(tempCellMatrixParameterTop, inBufferTop, xnumberAdded, ynumberAdded,
-		                                 znumberAdded, additionalBinNumber, cartComm, rank, topRank);
+		                               znumberAdded, additionalBinNumber, cartComm, rank, topRank);
 	} else if (cartCoord[2] == cartDim[2] - 1) {
 		sendCellMatrixParametersBottom(array, outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-		                             additionalBinNumber, cartComm, rank, bottomRank);
+		                               additionalBinNumber, cartComm, rank, bottomRank);
 	}
 
 	if ((verbosity > 2)) printf("sending right pressure tensor sum cell matrix parameters rank = %d\n", rank);
@@ -2030,10 +2033,10 @@ void Simulation::sumCellMatrixParameterGeneralZ(Matrix3d*** array, double* inBuf
 		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
 	} else if (cartCoord[2] == 0) {
 		sendCellMatrixParametersTop(array, outBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
-		                              additionalBinNumber, cartComm, rank, topRank);
+		                            additionalBinNumber, cartComm, rank, topRank);
 	} else if (cartCoord[2] == cartDim[2] - 1) {
 		receiveCellMatrixParametersBottom(tempCellMatrixParameterBottom, inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-		                                additionalBinNumber, cartComm, rank, bottomRank);
+		                                  additionalBinNumber, cartComm, rank, bottomRank);
 	}
 
 	sumCellTempMatrixParametersZ(array);
@@ -2080,14 +2083,7 @@ void Simulation::sumCellMatrixParametersY() {
 		double* inBufferBack = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * znumberAdded];
 		double* outBufferBack = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * znumberAdded];
 
-		sendCellMatrixParametersToBackReceiveFromFront(pressureTensor, outBufferBack, tempCellMatrixParameterFront,
-		                                               inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
-		sendCellMatrixParametersToFrontReceiveFromBack(pressureTensor, outBufferFront, tempCellMatrixParameterBack,
-		                                               inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
-
-		sumCellTempMatrixParametersY(pressureTensor);
+		sumCellMatrixParameterGeneralY(pressureTensor, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum cell matrix parameters rank = %d\n", rank);
 		delete[] inBufferFront;
@@ -2095,14 +2091,18 @@ void Simulation::sumCellMatrixParametersY() {
 		delete[] inBufferBack;
 		delete[] outBufferBack;
 	} else {
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int k = 0; k < znumberAdded; ++k) {
-				for (int j = 0; j < additionalBinNumber + 2; ++j) {
-					pressureTensor[i][ynumberAdded - 1 - j][k] = pressureTensor[i][ynumberAdded - 1 - j][k] + pressureTensor[i][
-						additionalBinNumber + 1 - j][k];
-					pressureTensor[i][additionalBinNumber + 1 - j][k] = pressureTensor[i][ynumberAdded - 1 - j][k];
+		if (boundaryConditionTypeY == PERIODIC) {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					for (int j = 0; j < additionalBinNumber + 2; ++j) {
+						pressureTensor[i][ynumberAdded - 1 - j][k] = pressureTensor[i][ynumberAdded - 1 - j][k] + pressureTensor[i][
+							additionalBinNumber + 1 - j][k];
+						pressureTensor[i][additionalBinNumber + 1 - j][k] = pressureTensor[i][ynumberAdded - 1 - j][k];
+					}
 				}
 			}
+		} else {
+			//todo
 		}
 		if (ynumberGeneral == 1) {
 			for (int i = 0; i < xnumberAdded; ++i) {
@@ -2124,14 +2124,7 @@ void Simulation::sumCellMatrixParametersZ() {
 		double* inBufferTop = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * ynumberAdded];
 		double* outBufferTop = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * ynumberAdded];
 
-		sendCellMatrixParametersToTopReceiveFromBottom(pressureTensor, outBufferTop, tempCellMatrixParameterBottom,
-		                                               inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
-		sendCellMatrixParametersToBottomReceiveFromTop(pressureTensor, outBufferBottom, tempCellMatrixParameterTop,
-		                                               inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
-		                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
-
-		sumCellTempMatrixParametersZ(pressureTensor);
+		sumCellMatrixParameterGeneralZ(pressureTensor, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum cell matrix parameters rank = %d\n", rank);
 		delete[] inBufferBottom;
@@ -2139,14 +2132,18 @@ void Simulation::sumCellMatrixParametersZ() {
 		delete[] inBufferTop;
 		delete[] outBufferTop;
 	} else {
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int k = 0; k < additionalBinNumber + 2; ++k) {
-					pressureTensor[i][j][znumberAdded - 1 - k] = pressureTensor[i][j][znumberAdded - 1 - k] + pressureTensor[i][j][
-						additionalBinNumber + 1 - k];
-					pressureTensor[i][j][additionalBinNumber + 1 - k] = pressureTensor[i][j][znumberAdded - 1 - k];
+		if (boundaryConditionTypeZ == PERIODIC) {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k < additionalBinNumber + 2; ++k) {
+						pressureTensor[i][j][znumberAdded - 1 - k] = pressureTensor[i][j][znumberAdded - 1 - k] + pressureTensor[i][j][
+							additionalBinNumber + 1 - k];
+						pressureTensor[i][j][additionalBinNumber + 1 - k] = pressureTensor[i][j][znumberAdded - 1 - k];
+					}
 				}
 			}
+		} else {
+			//todo
 		}
 		if (znumberGeneral == 1) {
 			for (int i = 0; i < xnumberAdded; ++i) {
@@ -2184,22 +2181,42 @@ void Simulation::sumCellTempMatrixParametersX(Matrix3d*** array) {
 }
 
 void Simulation::sumCellTempMatrixParametersY(Matrix3d*** array) {
-	for (int i = 0; i < xnumberAdded; ++i) {
-		for (int k = 0; k < znumberAdded; ++k) {
-			for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
-				array[i][j][k] += tempCellMatrixParameterFront[i][j][k];
-				array[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k] += tempCellMatrixParameterBack[i][j][k];
+	if (cartCoord[1] > 0 || boundaryConditionTypeY == PERIODIC) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
+					array[i][j][k] += tempCellMatrixParameterFront[i][j][k];
+				}
+			}
+		}
+	}
+	if (cartCoord[1] < cartDim[1] - 1 || boundaryConditionTypeY == PERIODIC) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				for (int j = 0; j < 2 * additionalBinNumber + 2; ++j) {
+					array[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k] += tempCellMatrixParameterBack[i][j][k];
+				}
 			}
 		}
 	}
 }
 
 void Simulation::sumCellTempMatrixParametersZ(Matrix3d*** array) {
-	for (int i = 0; i < xnumberAdded; ++i) {
-		for (int j = 0; j < ynumberAdded; ++j) {
-			for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
-				array[i][j][k] += tempCellMatrixParameterBottom[i][j][k];
-				array[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k] += tempCellMatrixParameterTop[i][j][k];
+	if (cartCoord[2] > 0 || boundaryConditionTypeZ == PERIODIC) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
+					array[i][j][k] += tempCellMatrixParameterBottom[i][j][k];
+				}
+			}
+		}
+	}
+	if (cartCoord[2] < cartDim[2] - 1 || boundaryConditionTypeZ == PERIODIC) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < 2 * additionalBinNumber + 2; ++k) {
+					array[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k] += tempCellMatrixParameterTop[i][j][k];
+				}
 			}
 		}
 	}

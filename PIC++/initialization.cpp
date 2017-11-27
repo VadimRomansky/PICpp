@@ -1534,9 +1534,9 @@ void Simulation::initialize() {
 	if (rank == 0) printf("initialization\n");
 	fflush(stdout);
 
-	boundaryConditionTypeX == PERIODIC;
-	boundaryConditionTypeY == PERIODIC;
-	boundaryConditionTypeZ == PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
+	boundaryConditionTypeY = PERIODIC;
+	boundaryConditionTypeZ = PERIODIC;
 	//if (rank == 0) printLog("initialization\n");
 
 
@@ -5693,18 +5693,18 @@ void Simulation::createArrays() {
 	fflush(stdout);
 	//if(rank == 0) printLog("creating maxwell equation matrix arrays\n");
 
-	maxwellEquationMatrix = new std::vector<MatrixElement> ***[xnumberAdded];
+	maxwellEquationMatrix = new std::vector < MatrixElement > ***[xnumberAdded];
 	maxwellEquationRightPart = new double ***[xnumberAdded];
 	for (int i = 0; i < xnumberAdded; ++i) {
-		maxwellEquationMatrix[i] = new std::vector<MatrixElement> **[ynumberAdded];
+		maxwellEquationMatrix[i] = new std::vector < MatrixElement > **[ynumberAdded];
 		maxwellEquationRightPart[i] = new double **[ynumberAdded];
 		for (int j = 0; j < ynumberAdded; ++j) {
-			maxwellEquationMatrix[i][j] = new std::vector<MatrixElement> *[znumberAdded];
+			maxwellEquationMatrix[i][j] = new std::vector < MatrixElement > *[znumberAdded];
 			maxwellEquationRightPart[i][j] = new double *[znumberAdded];
 			for (int k = 0; k < znumberAdded; ++k) {
 				//if(rank == 0) printf("%d %d %d\n", i, j, k);
 				//if(rank == 0) fflush((stdout));
-				maxwellEquationMatrix[i][j][k] = new std::vector<MatrixElement>[maxwellEquationMatrixSize];
+				maxwellEquationMatrix[i][j][k] = new std::vector < MatrixElement >[maxwellEquationMatrixSize];
 				maxwellEquationRightPart[i][j][k] = new double[maxwellEquationMatrixSize];
 			}
 		}
@@ -5714,7 +5714,7 @@ void Simulation::createArrays() {
 	if (rank == 0) fflush(stdout);
 	//if(rank == 0) printLog("creating arrays for divergence\n");
 
-	divergenceCleanUpMatrix = new std::vector<MatrixElement> ***[xnumberAdded + 1];
+	divergenceCleanUpMatrix = new std::vector < MatrixElement > ***[xnumberAdded + 1];
 	divergenceCleanUpRightPart = new double ***[xnumberAdded + 1];
 
 	divergenceCleaningField = new double ***[xnumberAdded + 1];
@@ -5723,13 +5723,13 @@ void Simulation::createArrays() {
 	divergenceCleaningPotentialFourier = new double **[xnumberAdded];
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		divergenceCleanUpMatrix[i] = new std::vector<MatrixElement> **[ynumberAdded + 1];
+		divergenceCleanUpMatrix[i] = new std::vector < MatrixElement > **[ynumberAdded + 1];
 		divergenceCleanUpRightPart[i] = new double **[ynumberAdded + 1];
 		divergenceCleaningField[i] = new double **[ynumberAdded + 1];
 		divergenceCleaningPotential[i] = new double **[ynumberAdded + 1];
 		tempDivergenceCleaningPotential[i] = new double **[ynumberAdded + 1];
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			divergenceCleanUpMatrix[i][j] = new std::vector<MatrixElement> *[znumberAdded + 1];
+			divergenceCleanUpMatrix[i][j] = new std::vector < MatrixElement > *[znumberAdded + 1];
 			divergenceCleanUpRightPart[i][j] = new double *[znumberAdded + 1];
 			divergenceCleaningField[i][j] = new double *[znumberAdded + 1];
 			divergenceCleaningPotential[i][j] = new double *[znumberAdded + 1];
@@ -5739,7 +5739,7 @@ void Simulation::createArrays() {
 				//if(rank == 0) fflush((stdout));
 				divergenceCleaningField[i][j][k] = new double[3];
 				divergenceCleanUpRightPart[i][j][k] = new double[3];
-				divergenceCleanUpMatrix[i][j][k] = new std::vector<MatrixElement>[3];
+				divergenceCleanUpMatrix[i][j][k] = new std::vector < MatrixElement >[3];
 				divergenceCleaningPotential[i][j][k] = new double[1];
 				tempDivergenceCleaningPotential[i][j][k] = new double[1];
 				divergenceCleaningPotential[i][j][k][0] = 0;
@@ -5840,7 +5840,7 @@ void Simulation::createArrays() {
 	fflush(stdout);
 	//if(rank == 0) printLog("creating arrays for parameters\n");
 
-	mostAcceleratedParticlesNumbers = new std::list<std::pair<int, double>>[typesNumber];
+	mostAcceleratedParticlesNumbers = new std::list < std::pair < int, double > >[typesNumber];
 
 	particleConcentrations = new double ***[typesNumber];
 	particleEnergies = new double ***[typesNumber];
@@ -7657,8 +7657,8 @@ void Simulation::createParticles() {
 }
 
 void Simulation::moveToPreserveChargeLocal() {
-	Particle* electron = nullptr;
-	Particle* notElectron = nullptr;
+	Particle* electron = NULL;
+	Particle* notElectron = NULL;
 	Particle* particle;
 	int electronCount = 0;
 	int notElectronCount = 0;
@@ -7677,8 +7677,8 @@ void Simulation::moveToPreserveChargeLocal() {
 			}
 
 			while (necessaryElectrons > 0) {
-				electron = nullptr;
-				while (electron == nullptr) {
+				electron = NULL;
+				while (electron == NULL) {
 					if (electronCount >= particles.size()) {
 						errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 						printf("error in preserving charge\n");
@@ -7763,7 +7763,7 @@ Particle* Simulation::getFirstProton() {
 			return particle;
 		}
 	}
-	return nullptr;
+	return NULL;
 }
 
 Particle* Simulation::getFirstElectron() {
@@ -7773,7 +7773,7 @@ Particle* Simulation::getFirstElectron() {
 			return particle;
 		}
 	}
-	return nullptr;
+	return NULL;
 }
 
 Particle* Simulation::getLastProton() {
@@ -7783,7 +7783,7 @@ Particle* Simulation::getLastProton() {
 			return particle;
 		}
 	}
-	return nullptr;
+	return NULL;
 }
 
 Particle* Simulation::getLastElectron() {
@@ -7793,7 +7793,7 @@ Particle* Simulation::getLastElectron() {
 			return particle;
 		}
 	}
-	return nullptr;
+	return NULL;
 }
 
 Particle* Simulation::getProton(int n) {
@@ -7814,7 +7814,7 @@ Particle* Simulation::getProton(int n) {
 	fclose(errorLogFile);
 	MPI_Finalize();
 	exit(0);
-	return nullptr;
+	return NULL;
 }
 
 Particle* Simulation::getElectron(int n) {
@@ -7835,7 +7835,7 @@ Particle* Simulation::getElectron(int n) {
 	fclose(errorLogFile);
 	MPI_Finalize();
 	exit(0);
-	return nullptr;
+	return NULL;
 }
 
 int Simulation::getParticleNumber(int n, const ParticleTypes& type) {

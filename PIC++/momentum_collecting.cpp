@@ -326,13 +326,15 @@ void Simulation::updateElectroMagneticParameters() {
 												int zindex = particle->correlationMapNode.zindex[tempK];
 
 												double tempCorrelation1 = particle->correlationMapNode.xcorrelation[tempI] * particle->correlationMapNode.
-												                                                                                  ycorrelation[tempJ] *particle->correlationMapNode.zcorrelation[tempK];
+												                                                                                       ycorrelation[tempJ] * particle->correlationMapNode.
+												                                                                                                                       zcorrelation[tempK
+												];
 
 												for (int tempI1 = 0; tempI1 < splineOrder + 2; ++tempI1) {
 													for (int tempJ1 = 0; tempJ1 < splineOrder + 2; ++tempJ1) {
 														for (int tempK1 = 0; tempK1 < splineOrder + 2; ++tempK1) {
 															tempCorrelation = particle->correlationMapNode.xcorrelation[tempI1] * particle->correlationMapNode.
-															                                                                                  ycorrelation[tempJ1] *
+															                                                                                ycorrelation[tempJ1] *
 																particle->correlationMapNode.zcorrelation[tempK1];
 															double doubleCorrelation = tempCorrelation1 * tempCorrelation / volumeE();
 															for (int l = 0; l < 3; ++l) {

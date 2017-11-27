@@ -156,7 +156,7 @@ void Simulation::eraseEscapedPaticles() {
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	std::vector<Particle*> tempParticles;
+	std::vector < Particle* > tempParticles;
 	if (particles.size() > 0) {
 		tempParticles.reserve(particles.size());
 		for (int i = 0; i < particles.size(); ++i) {

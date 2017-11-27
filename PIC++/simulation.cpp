@@ -294,7 +294,7 @@ void Simulation::simulate() {
 				//updateMaxEderivativePoint();
 			}
 			//if(currentIteration > 150){
-			filterFields(10);
+			//filterFields(10);
 			//}
 			//filterFieldsLocal(5);
 		}
@@ -770,28 +770,28 @@ void Simulation::collectMostAcceleratedParticles() {
 		int t = getTypeNumber(particle);
 		double momentum = particle->getMomentum().norm();
 		if (mostAcceleratedParticlesNumbers[t].size() == 0) {
-			mostAcceleratedParticlesNumbers[t].push_back(std::pair<int, double>(particle->number, momentum));
+			mostAcceleratedParticlesNumbers[t].push_back(std::pair < int, double >(particle->number, momentum));
 		} else {
-			std::list<std::pair<int, double>>::iterator it = mostAcceleratedParticlesNumbers[t].begin();
-			std::pair<int, double> pair = *it;
+			std::list < std::pair < int, double > >::iterator it = mostAcceleratedParticlesNumbers[t].begin();
+			std::pair < int, double > pair = *it;
 			if (momentum > pair.second) {
 				bool added = false;
 				for (it = mostAcceleratedParticlesNumbers[t].begin(); it != mostAcceleratedParticlesNumbers[t].end(); ++it) {
 					pair = *it;
 					if (momentum < pair.second) {
-						mostAcceleratedParticlesNumbers[t].insert(it, std::pair<int, double>(particle->number, momentum));
+						mostAcceleratedParticlesNumbers[t].insert(it, std::pair < int, double >(particle->number, momentum));
 						added = true;
 						break;
 					}
 				}
 				if (!added) {
-					mostAcceleratedParticlesNumbers[t].push_back(std::pair<int, double>(particle->number, momentum));
+					mostAcceleratedParticlesNumbers[t].push_back(std::pair < int, double >(particle->number, momentum));
 				}
 				if (mostAcceleratedParticlesNumbers[t].size() > mostFastParticlesNumber) {
 					mostAcceleratedParticlesNumbers[t].pop_front();
 				}
 			} else if (mostAcceleratedParticlesNumbers[t].size() < mostFastParticlesNumber) {
-				mostAcceleratedParticlesNumbers[t].push_front(std::pair<int, double>(particle->number, momentum));
+				mostAcceleratedParticlesNumbers[t].push_front(std::pair < int, double >(particle->number, momentum));
 			}
 		}
 	}
@@ -799,7 +799,7 @@ void Simulation::collectMostAcceleratedParticles() {
 	for (int t = 0; t < typesNumber; ++t) {
 		if (types[t].particlesPerBin > 0) {
 			while (mostAcceleratedParticlesNumbers[t].size() < mostFastParticlesNumber) {
-				mostAcceleratedParticlesNumbers[t].push_front(std::pair<int, double>(-1, 0));
+				mostAcceleratedParticlesNumbers[t].push_front(std::pair < int, double >(-1, 0));
 			}
 		}
 	}
@@ -810,9 +810,9 @@ void Simulation::collectMostAcceleratedParticles() {
 			int tempAcceleratedNumbers[mostFastParticlesNumber];
 			double tempAcceleratedMomentum[mostFastParticlesNumber];
 
-			std::list<std::pair<int, double>>::iterator it = mostAcceleratedParticlesNumbers[t].begin();
+			std::list < std::pair < int, double > >::iterator it = mostAcceleratedParticlesNumbers[t].begin();
 			for (int i = 0; i < mostFastParticlesNumber; ++i) {
-				std::pair<int, double> pair = *it;
+				std::pair < int, double > pair = *it;
 				tempAcceleratedNumbers[i] = pair.first;
 				tempAcceleratedMomentum[i] = pair.second;
 				++it;
@@ -837,28 +837,28 @@ void Simulation::collectMostAcceleratedParticles() {
 						int curNumber = inAcceleratedNumbers[j];
 						int momentum = inAcceleratedMomentum[j];
 						if (mostAcceleratedParticlesNumbers[t].size() == 0) {
-							mostAcceleratedParticlesNumbers[t].push_back(std::pair<int, double>(curNumber, momentum));
+							mostAcceleratedParticlesNumbers[t].push_back(std::pair < int, double >(curNumber, momentum));
 						} else {
 							it = mostAcceleratedParticlesNumbers[t].begin();
-							std::pair<int, double> pair = *it;
+							std::pair < int, double > pair = *it;
 							if (momentum > pair.second) {
 								bool added = false;
 								for (it = mostAcceleratedParticlesNumbers[t].begin(); it != mostAcceleratedParticlesNumbers[t].end(); ++it) {
 									pair = *it;
 									if (momentum < pair.second) {
-										mostAcceleratedParticlesNumbers[t].insert(it, std::pair<int, double>(curNumber, momentum));
+										mostAcceleratedParticlesNumbers[t].insert(it, std::pair < int, double >(curNumber, momentum));
 										added = true;
 										break;
 									}
 								}
 								if (!added) {
-									mostAcceleratedParticlesNumbers[t].push_back(std::pair<int, double>(curNumber, momentum));
+									mostAcceleratedParticlesNumbers[t].push_back(std::pair < int, double >(curNumber, momentum));
 								}
 								if (mostAcceleratedParticlesNumbers[t].size() > mostFastParticlesNumber) {
 									mostAcceleratedParticlesNumbers[t].pop_front();
 								}
 							} else if (mostAcceleratedParticlesNumbers[t].size() < mostFastParticlesNumber) {
-								mostAcceleratedParticlesNumbers[t].push_front(std::pair<int, double>(curNumber, momentum));
+								mostAcceleratedParticlesNumbers[t].push_front(std::pair < int, double >(curNumber, momentum));
 							}
 						}
 					}
@@ -867,7 +867,7 @@ void Simulation::collectMostAcceleratedParticles() {
 
 			it = mostAcceleratedParticlesNumbers[t].begin();
 			for (int i = 0; i < mostFastParticlesNumber; ++i) {
-				std::pair<int, double> pair = *it;
+				std::pair < int, double > pair = *it;
 				tempAcceleratedNumbers[i] = pair.first;
 				tempAcceleratedMomentum[i] = pair.second;
 				++it;
@@ -880,7 +880,7 @@ void Simulation::collectMostAcceleratedParticles() {
 
 			for (int i = 0; i < mostFastParticlesNumber; ++i) {
 				mostAcceleratedParticlesNumbers[t].push_back(
-					std::pair<int, double>(tempAcceleratedNumbers[i], tempAcceleratedMomentum[i]));
+					std::pair < int, double >(tempAcceleratedNumbers[i], tempAcceleratedMomentum[i]));
 			}
 		}
 	}

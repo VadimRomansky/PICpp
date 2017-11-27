@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
 
 	if (rank == 0) printf("random initialize\n");
 
-	srand(time(nullptr) + rank);
+	srand(time(NULL) + rank);
 	//srand(initialRandom);
 	//srand(initialRandom + rank);
 

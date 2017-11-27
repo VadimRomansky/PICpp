@@ -440,7 +440,7 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 	}
 }
 
-void Simulation::checkEquationMatrix(std::vector<MatrixElement>**** matrix, int lnumber) {
+void Simulation::checkEquationMatrix(std::vector < MatrixElement >**** matrix, int lnumber) {
 	//#pragma omp parallel for
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {

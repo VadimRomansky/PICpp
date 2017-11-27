@@ -856,8 +856,9 @@ void Simulation::filterFieldsLocal(int cutWaveNumber) {
 void Simulation::filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber) {
 	if ((rank == 0) && (verbosity > 1)) printf("fourier field general\n");
 	MPI_Barrier(cartComm);
-	if ((rank == 0) && (verbosity > 1)) printf("xnumberAdded = %d ynumberAdded = %d znumberAdded = %d\n", xnumberAdded,
-	                                           ynumberAdded, znumberAdded);
+	if ((rank == 0) && (verbosity > 1))
+		printf("xnumberAdded = %d ynumberAdded = %d znumberAdded = %d\n", xnumberAdded,
+		       ynumberAdded, znumberAdded);
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {

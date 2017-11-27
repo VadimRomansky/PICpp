@@ -594,7 +594,7 @@ int** readTrackedParticlesNumbers(const char* particlesFile, int& number) {
 	}
 	rewind(inputFile);
 	if (number == 0) {
-		return nullptr;
+		return NULL;
 	}
 	int** particlesNumbers = new int*[number];
 	for (int i = 0; i < number; ++i) {

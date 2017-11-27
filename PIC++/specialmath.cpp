@@ -38,7 +38,7 @@ double evaluateError(double** hessenbergMatrix, double* vector, double beta, int
 	return sqrt(norm);
 }
 
-double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Vector3d*** vector, int xnumberAdded,
+double**** multiplySpecialMatrixVector(std::vector < MatrixElement >**** matrix, Vector3d*** vector, int xnumberAdded,
                                        int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber,
                                        bool periodicX, bool
                                        periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm,
@@ -93,7 +93,7 @@ double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, Ve
 	return result;
 }
 
-double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, double**** vector, int xnumberAdded,
+double**** multiplySpecialMatrixVector(std::vector < MatrixElement >**** matrix, double**** vector, int xnumberAdded,
                                        int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber,
                                        bool periodicX, bool
                                        periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm,
@@ -148,7 +148,7 @@ double**** multiplySpecialMatrixVector(std::vector<MatrixElement>**** matrix, do
 	return result;
 }
 
-void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, Vector3d*** vector,
+void multiplySpecialMatrixVector(double**** result, std::vector < MatrixElement >**** matrix, Vector3d*** vector,
                                  int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
                                  int lnumber, bool periodicX, bool
                                  periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord,
@@ -192,7 +192,7 @@ void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**
 	}
 }
 
-void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**** matrix, double**** vector,
+void multiplySpecialMatrixVector(double**** result, std::vector < MatrixElement >**** matrix, double**** vector,
                                  int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
                                  int lnumber, bool periodicX, bool
                                  periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord,
@@ -237,7 +237,7 @@ void multiplySpecialMatrixVector(double**** result, std::vector<MatrixElement>**
 	}
 }
 
-void arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessenbergMatrix, int n,
+void arnoldiIterations(std::vector < MatrixElement >**** matrix, double** outHessenbergMatrix, int n,
                        LargeVectorBasis* gmresBasis, double** prevHessenbergMatrix, int xnumberAdded, int ynumberAdded,
                        int znumberAdded, int additionalBinNumber, int lnumber, bool periodicX, bool periodicY,
                        bool periodicZ, int rank, int nprocs, double* leftOutGmresBuffer, double* rightOutGmresBuffer,
@@ -410,7 +410,7 @@ void arnoldiIterations(std::vector<MatrixElement>**** matrix, double** outHessen
 	                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
 }
 
-void generalizedMinimalResidualMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outvector,
+void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, double**** rightPart, double**** outvector,
                                       int xnumberAdded, int ynumberAdded, int znumberAdded, int lnumber,
                                       int xnumberGeneral,
                                       int znumberGeneral, int ynumberGeneral, int additionalBinNumber, double precision,
@@ -967,7 +967,7 @@ double normDifferenceLargeVectors(double**** a, double**** b, int xnumberAdded, 
 	return tempDiff[0];
 }
 
-void transposeSpecialMatrix(std::vector<MatrixElement>**** result, std::vector<MatrixElement>**** matrix, int xnumber,
+void transposeSpecialMatrix(std::vector < MatrixElement >**** result, std::vector < MatrixElement >**** matrix, int xnumber,
                             int ynumber, int znumber, int lnumber) {
 	for (int i = 0; i < xnumber; ++i) {
 		for (int j = 0; j < ynumber; ++j) {
@@ -1495,7 +1495,7 @@ void sortInputFastFourierZ(Complex*** a, int xnumber, int ynumber, int znumber) 
 	delete[] tempA;
 }
 
-void conjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector,
+void conjugateGradientMethod(std::vector < MatrixElement >**** matrix, double**** rightPart, double**** outVector,
                              int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber,
                              double precision, int maxIteration, bool periodicX, bool
                              periodicY, bool periodicZ, int verbosity, MPI_Comm& cartComm, int* cartCoord,
@@ -1633,7 +1633,7 @@ void conjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** r
 	delete[] tempVector;
 }
 
-void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector,
+void biconjugateGradientMethod(std::vector < MatrixElement >**** matrix, double**** rightPart, double**** outVector,
                                int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
                                int lnumber, double precision, int maxIteration, bool periodicX, bool
                                periodicY, bool periodicZ, int verbosity, MPI_Comm& cartComm, int* cartCoord,
@@ -1650,7 +1650,7 @@ void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double****
 	double**** s = new double***[xnumberAdded + 1];
 	double**** tempVector = new double***[xnumberAdded + 1];
 	double**** tempVector2 = new double***[xnumberAdded + 1];
-	std::vector<MatrixElement>**** transposedMatrix = new std::vector<MatrixElement>***[xnumberAdded + 1];
+	std::vector < MatrixElement >**** transposedMatrix = new std::vector < MatrixElement >***[xnumberAdded + 1];
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		residual[i] = new double**[ynumberAdded];
@@ -1660,7 +1660,7 @@ void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double****
 		s[i] = new double**[ynumberAdded];
 		tempVector[i] = new double**[ynumberAdded];
 		tempVector2[i] = new double**[ynumberAdded];
-		transposedMatrix[i] = new std::vector<MatrixElement>**[ynumberAdded];
+		transposedMatrix[i] = new std::vector < MatrixElement >**[ynumberAdded];
 		for (int j = 0; j < ynumberAdded; ++j) {
 			residual[i][j] = new double*[znumberAdded];
 			prevResidual[i][j] = new double*[znumberAdded];
@@ -1669,7 +1669,7 @@ void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double****
 			s[i][j] = new double*[znumberAdded];
 			tempVector[i][j] = new double*[znumberAdded];
 			tempVector2[i][j] = new double*[znumberAdded];
-			transposedMatrix[i][j] = new std::vector<MatrixElement>*[znumberAdded];
+			transposedMatrix[i][j] = new std::vector < MatrixElement >*[znumberAdded];
 			for (int k = 0; k < znumberAdded; ++k) {
 				residual[i][j][k] = new double[lnumber];
 				prevResidual[i][j][k] = new double[lnumber];
@@ -1678,7 +1678,7 @@ void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double****
 				s[i][j][k] = new double[lnumber];
 				tempVector[i][j][k] = new double[lnumber];
 				tempVector2[i][j][k] = new double[lnumber];
-				transposedMatrix[i][j][k] = new std::vector<MatrixElement>[lnumber];
+				transposedMatrix[i][j][k] = new std::vector < MatrixElement >[lnumber];
 				for (int l = 0; l < lnumber; ++l) {
 					outVector[i][j][k][l] = 0;
 					prevResidual[i][j][k][l] = rightPart[i][j][k][l];
@@ -1798,7 +1798,7 @@ void biconjugateGradientMethod(std::vector<MatrixElement>**** matrix, double****
 	delete[] transposedMatrix;
 }
 
-void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, double**** rightPart,
+void biconjugateStabilizedGradientMethod(std::vector < MatrixElement >**** matrix, double**** rightPart,
                                          double**** outVector, int xnumberAdded, int ynumberAdded, int znumberAdded,
                                          int additionalBinNumber,
                                          int lnumber, int xnumberGeneral, int ynumberGeneral, int znumberGeneral,
@@ -2050,7 +2050,7 @@ void biconjugateStabilizedGradientMethod(std::vector<MatrixElement>**** matrix, 
 	}
 }
 
-void gaussSeidelMethod(std::vector<MatrixElement>**** matrix, double**** rightPart, double**** outVector,
+void gaussSeidelMethod(std::vector < MatrixElement >**** matrix, double**** rightPart, double**** outVector,
                        int xnumberAdded,
                        int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, int xnumberGeneral,
                        int znumberGeneral, int ynumberGeneral, double precision, int maxIteration, bool periodicX,
@@ -2097,8 +2097,9 @@ void gaussSeidelMethod(std::vector<MatrixElement>**** matrix, double**** rightPa
 	int curIteration = 0;
 	while (curIteration < maxIteration) {
 		if ((rank == 0) && (verbocity > 1)) printf("Gauss-Seidel iteration %d\n", curIteration);
-		if (rank > 0) receiveLargeVectorFromLeft(rightPart, leftInBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
-		                                         additionalBinNumber, cartComm);
+		if (rank > 0)
+			receiveLargeVectorFromLeft(rightPart, leftInBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
+			                           additionalBinNumber, cartComm);
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {

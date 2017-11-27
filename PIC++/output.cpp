@@ -18,7 +18,7 @@
 #include "memory_util.h"
 #include "paths.h"
 
-void outputDistribution(const char* outFileName, std::vector<Particle *>& particles, int particleType,
+void outputDistribution(const char* outFileName, std::vector < Particle * >& particles, int particleType,
                         double gyroradius,
                         double plasma_period, int verbosity) {
 	int rank;
@@ -157,7 +157,7 @@ void outputDistribution(const char* outFileName, std::vector<Particle *>& partic
 	}
 }
 
-void outputDistributionShiftedSystem(const char* outFileName, std::vector<Particle *>& particles, Vector3d& shiftV,
+void outputDistributionShiftedSystem(const char* outFileName, std::vector < Particle * >& particles, Vector3d& shiftV,
                                      double& speed_of_light_normalized, int particleType, double gyroradius,
                                      double plasma_period, int verbosity) {
 	int rank;
@@ -455,7 +455,7 @@ void outputTrajectory(const char* outFileName, Particle* particle, double time, 
 }
 
 void outputParticlesTrajectories(const char* outFileName, const char* electronOutFileName,
-                                 std::vector<Particle*> particles, int** numbers, int size, double time,
+                                 std::vector < Particle* > particles, int** numbers, int size, double time,
                                  double plasma_period, double scaleFactor, Simulation* simulation) {
 	int rank;
 	int nprocs;
@@ -2913,9 +2913,9 @@ void outputAcceleratedParticlesNumbers(const char* outFileName, Simulation* simu
 
 		for (int t = 0; t < simulation->typesNumber; ++t) {
 			if (simulation->types[t].particlesPerBin > 0) {
-				std::list<std::pair<int, double>>::iterator it = simulation->mostAcceleratedParticlesNumbers[t].begin();
+				std::list < std::pair < int, double > >::iterator it = simulation->mostAcceleratedParticlesNumbers[t].begin();
 				for (int i = 0; i < mostFastParticlesNumber; ++i) {
-					std::pair<int, double> pair = *it;
+					std::pair < int, double > pair = *it;
 					++it;
 					fprintf(outFile, "%d %15.10g %d\n", pair.first, pair.second, t);
 				}
