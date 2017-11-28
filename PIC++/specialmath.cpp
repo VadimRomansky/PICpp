@@ -275,37 +275,7 @@ void arnoldiIterations(std::vector < MatrixElement >**** matrix, double** outHes
 
 	MPI_Barrier(cartComm);
 
-	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-		sendLargeVectorToLeftReceiveFromRight(gmresBasis->array[n - 1], leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded,
-		                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
-	} else if (cartCoord[0] == 0) {
-		receiveLargeVectorFromRight(gmresBasis->array[n - 1], rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded,
-		                            lnumber, additionalBinNumber, cartComm);
-	} else if (cartCoord[0] == cartDim[0] - 1) {
-		sendLargeVectorToLeft(gmresBasis->array[n - 1], leftOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
-		                      additionalBinNumber, cartComm);
-	}
-
-	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-		sendLargeVectorToRightReceiveFromLeft(gmresBasis->array[n - 1], rightOutGmresBuffer, leftInGmresBuffer, xnumberAdded,
-		                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
-	} else if (cartCoord[0] == 0) {
-		sendLargeVectorToRight(gmresBasis->array[n - 1], rightOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded,
-		                       lnumber, additionalBinNumber, cartComm);
-	} else if (cartCoord[0] == cartDim[0] - 1) {
-		receiveLargeVectorFromLeft(gmresBasis->array[n - 1], leftInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded,
-		                           lnumber, additionalBinNumber, cartComm);
-	}
-
-	sendLargeVectorToFrontReceiveFromBack(gmresBasis->array[n - 1], frontOutGmresBuffer, backInGmresBuffer, xnumberAdded,
-	                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
-	sendLargeVectorToBackReceiveFromFront(gmresBasis->array[n - 1], backOutGmresBuffer, frontInGmresBuffer, xnumberAdded,
-	                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
-
-	sendLargeVectorToBottomReceiveFromTop(gmresBasis->array[n - 1], bottomOutGmresBuffer, topInGmresBuffer, xnumberAdded,
-	                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
-	sendLargeVectorToTopReceiveFromBottom(gmresBasis->array[n - 1], topOutGmresBuffer, bottomInGmresBuffer, xnumberAdded,
-	                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	exchangeLargeVector(gmresBasis->array[n-1], xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
 
 
 	for (int m = 0; m < n - 1; ++m) {
@@ -377,37 +347,7 @@ void arnoldiIterations(std::vector < MatrixElement >**** matrix, double** outHes
 		}
 	}
 
-	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-		sendLargeVectorToLeftReceiveFromRight(gmresBasis->array[n - 1], leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded,
-		                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
-	} else if (cartCoord[0] == 0) {
-		receiveLargeVectorFromRight(gmresBasis->array[n - 1], rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded,
-		                            lnumber, additionalBinNumber, cartComm);
-	} else if (cartCoord[0] == cartDim[0] - 1) {
-		sendLargeVectorToLeft(gmresBasis->array[n - 1], leftOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
-		                      additionalBinNumber, cartComm);
-	}
-
-	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-		sendLargeVectorToRightReceiveFromLeft(gmresBasis->array[n - 1], rightOutGmresBuffer, leftInGmresBuffer, xnumberAdded,
-		                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
-	} else if (cartCoord[0] == 0) {
-		sendLargeVectorToRight(gmresBasis->array[n - 1], rightOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded,
-		                       lnumber, additionalBinNumber, cartComm);
-	} else if (cartCoord[0] == cartDim[0] - 1) {
-		receiveLargeVectorFromLeft(gmresBasis->array[n - 1], leftInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded,
-		                           lnumber, additionalBinNumber, cartComm);
-	}
-
-	sendLargeVectorToFrontReceiveFromBack(gmresBasis->array[n - 1], frontOutGmresBuffer, backInGmresBuffer, xnumberAdded,
-	                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
-	sendLargeVectorToBackReceiveFromFront(gmresBasis->array[n - 1], backOutGmresBuffer, frontInGmresBuffer, xnumberAdded,
-	                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
-
-	sendLargeVectorToBottomReceiveFromTop(gmresBasis->array[n - 1], bottomOutGmresBuffer, topInGmresBuffer, xnumberAdded,
-	                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
-	sendLargeVectorToTopReceiveFromBottom(gmresBasis->array[n - 1], topOutGmresBuffer, bottomInGmresBuffer, xnumberAdded,
-	                                      ynumberAdded, znumberAdded, lnumber, additionalBinNumber, cartComm);
+	exchangeLargeVector(gmresBasis->array[n-1], xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
 }
 
 void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, double**** rightPart, double**** outvector,
@@ -692,7 +632,9 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 
 	MPI_Barrier(cartComm);
 
-	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+	exchangeLargeVector(outvector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
+
+	/*if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 		sendLargeVectorToLeftReceiveFromRight(outvector, leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded, ynumberAdded,
 		                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
 	} else if (cartCoord[0] == 0) {
@@ -722,7 +664,7 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 	sendLargeVectorToBottomReceiveFromTop(outvector, bottomOutGmresBuffer, topInGmresBuffer, xnumberAdded, ynumberAdded,
 	                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
 	sendLargeVectorToTopReceiveFromBottom(outvector, topOutGmresBuffer, bottomInGmresBuffer, xnumberAdded, ynumberAdded,
-	                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
+	                                      znumberAdded, lnumber, additionalBinNumber, cartComm);*/
 
 	//printf("rank = %d outvector[0][0][0][1] = %g\n", rank, outvector[0][0][0][1]);
 	//printf("rank = %d outvector[1][0][0][1] = %g\n", rank, outvector[1][0][0][1]);
@@ -871,37 +813,7 @@ void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAd
 				}
 			}
 		}
-		if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendLargeVectorToLeftReceiveFromRight(tempVector, leftOutBuffer, rightInBuffer, xnumberAdded, ynumberAdded,
-			                                      znumberAdded, 3, additionalBinNumber, cartComm);
-		} else if (cartCoord[0] == 0) {
-			receiveLargeVectorFromRight(tempVector, rightInBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3,
-			                            additionalBinNumber, cartComm);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			sendLargeVectorToLeft(tempVector, leftOutBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber,
-			                      cartComm);
-		}
-
-		if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendLargeVectorToRightReceiveFromLeft(tempVector, rightOutBuffer, leftInBuffer, xnumberAdded, ynumberAdded,
-			                                      znumberAdded, 3, additionalBinNumber, cartComm);
-		} else if (cartCoord[0] == 0) {
-			sendLargeVectorToRight(tempVector, rightOutBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber,
-			                       cartComm);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveLargeVectorFromLeft(tempVector, leftInBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3,
-			                           additionalBinNumber, cartComm);
-		}
-
-		sendLargeVectorToFrontReceiveFromBack(tempVector, frontOutBuffer, backInBuffer, xnumberAdded, ynumberAdded,
-		                                      znumberAdded, 3, additionalBinNumber, cartComm);
-		sendLargeVectorToBackReceiveFromFront(tempVector, backOutBuffer, frontInBuffer, xnumberAdded, ynumberAdded,
-		                                      znumberAdded, 3, additionalBinNumber, cartComm);
-
-		sendLargeVectorToBottomReceiveFromTop(tempVector, bottomOutBuffer, topInBuffer, xnumberAdded, ynumberAdded,
-		                                      znumberAdded, 3, additionalBinNumber, cartComm);
-		sendLargeVectorToTopReceiveFromBottom(tempVector, topOutBuffer, bottomInBuffer, xnumberAdded, ynumberAdded,
-		                                      znumberAdded, 3, additionalBinNumber, cartComm);
+		exchangeLargeVector(tempVector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
 
 		relativeError = normDifferenceLargeVectors(tempVector, outVector, xnumberAdded, ynumberAdded, znumberAdded,
 		                                           additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank,
@@ -2119,37 +2031,7 @@ void gaussSeidelMethod(std::vector < MatrixElement >**** matrix, double**** righ
 				}
 			}
 		}
-		if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendLargeVectorToLeftReceiveFromRight(outVector, leftOutBuffer, rightInBuffer, xnumberAdded, ynumberAdded,
-			                                      znumberAdded, 3, additionalBinNumber, cartComm);
-		} else if (cartCoord[0] == 0) {
-			receiveLargeVectorFromRight(outVector, rightInBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3,
-			                            additionalBinNumber, cartComm);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			sendLargeVectorToLeft(outVector, leftOutBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber,
-			                      cartComm);
-		}
-
-		if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendLargeVectorToRightReceiveFromLeft(outVector, rightOutBuffer, leftInBuffer, xnumberAdded, ynumberAdded,
-			                                      znumberAdded, 3, additionalBinNumber, cartComm);
-		} else if (cartCoord[0] == 0) {
-			sendLargeVectorToRight(outVector, rightOutBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber,
-			                       cartComm);
-		} else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveLargeVectorFromLeft(outVector, leftInBuffer, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber,
-			                           cartComm);
-		}
-
-		sendLargeVectorToFrontReceiveFromBack(outVector, frontOutBuffer, backInBuffer, xnumberAdded, ynumberAdded,
-		                                      znumberAdded, 3, additionalBinNumber, cartComm);
-		sendLargeVectorToBackReceiveFromFront(outVector, backOutBuffer, frontInBuffer, xnumberAdded, ynumberAdded,
-		                                      znumberAdded, 3, additionalBinNumber, cartComm);
-
-		sendLargeVectorToBottomReceiveFromTop(outVector, bottomOutBuffer, topInBuffer, xnumberAdded, ynumberAdded,
-		                                      znumberAdded, 3, additionalBinNumber, cartComm);
-		sendLargeVectorToTopReceiveFromBottom(outVector, topOutBuffer, bottomInBuffer, xnumberAdded, ynumberAdded,
-		                                      znumberAdded, 3, additionalBinNumber, cartComm);
+		exchangeLargeVector(outVector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
 
 		curIteration++;
 	}

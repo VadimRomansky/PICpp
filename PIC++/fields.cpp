@@ -72,7 +72,9 @@ void Simulation::evaluateElectricField() {
 
 			MPI_Barrier(cartComm);
 
-			if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
+			exchangeLargeVector(gmresOutput, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, frontOutGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
+
+			/*if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 				sendLargeVectorToLeftReceiveFromRight(gmresOutput, leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded,
 				                                      ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 			} else if (cartCoord[0] == 0) {
@@ -102,7 +104,7 @@ void Simulation::evaluateElectricField() {
 			sendLargeVectorToBottomReceiveFromTop(gmresOutput, bottomOutGmresBuffer, topInGmresBuffer, xnumberAdded,
 			                                      ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
 			sendLargeVectorToTopReceiveFromBottom(gmresOutput, topOutGmresBuffer, bottomInGmresBuffer, xnumberAdded,
-			                                      ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);
+			                                      ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);*/
 
 			MPI_Barrier(cartComm);
 
