@@ -183,7 +183,7 @@ void Simulation::exchangeGeneralEfieldY(Vector3d*** field) {
 		///to left
 		int bcount = 0;
 		int number = (2 + additionalBinNumber) * 3 * (xnumberAdded + 1) * (znumberAdded + 1);
-		for(int i = 0; i < znumberAdded + 1; ++i){
+		for(int i = 0; i < xnumberAdded + 1; ++i){
 		for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					for (int l = 0; l < 3; ++l) {
@@ -835,7 +835,7 @@ void Simulation::exchangeGeneralBfieldZ(Vector3d*** field) {
 		bcount = 0;
 		if ((cartCoord[2] < cartDim[2] - 1) || (boundaryConditionTypeZ == PERIODIC)) {
 			if (verbosity > 2) printf("receive general field rigth from %d to %d\n", rightRank, rank);
-			for (int i = 0; i <= xnumberAdded; ++i) {
+			for (int i = 0; i < xnumberAdded; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k <= additionalBinNumber; ++k) {
 						for (int l = 0; l < 3; ++l) {

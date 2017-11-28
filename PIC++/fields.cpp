@@ -72,7 +72,7 @@ void Simulation::evaluateElectricField() {
 
 			MPI_Barrier(cartComm);
 
-			exchangeLargeVector(gmresOutput, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, frontOutGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
+			exchangeLargeVector(gmresOutput, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backOutGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
 
 			/*if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 				sendLargeVectorToLeftReceiveFromRight(gmresOutput, leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded,

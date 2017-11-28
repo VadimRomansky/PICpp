@@ -633,7 +633,7 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 	MPI_Barrier(cartComm);
 
 	exchangeLargeVector(outvector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
-
+	MPI_Barrier(cartComm);
 	/*if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
 		sendLargeVectorToLeftReceiveFromRight(outvector, leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded, ynumberAdded,
 		                                      znumberAdded, lnumber, additionalBinNumber, cartComm);

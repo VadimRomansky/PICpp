@@ -20,8 +20,8 @@ b = fix(Nt/2);
 c = fix(Nt)-1;
 %c = 0;
 
-N1 = 100;
-N2 = fix(Nx/2);
+N1 = 1;
+N2 = fix(Nx)-1;
 
 Ex(1:N2-N1+1, 1:Ny) = 0;
 Ey(1:N2-N1+1, 1:Ny) = 0;

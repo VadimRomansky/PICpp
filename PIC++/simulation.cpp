@@ -28,7 +28,7 @@ void Simulation::simulate() {
 		createFiles();
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
-		//initializeAlfvenWaveX(1, 0.01);
+		initializeAlfvenWaveX(1, 0.01);
 		//initializeAlfvenWaveY(1, 0.01);
 		//initializeAlfvenWaveZ(1, 0.01);
 		//initializeRotatedAlfvenWave(1, 1, 0, 0.01);
@@ -36,7 +36,7 @@ void Simulation::simulate() {
 		//initializeAnisotropicSilicon();
 		//initializeWeibel();
 		//initializeRingWeibel();
-		initializeFluxFromRight();
+		//initializeFluxFromRight();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();
 		//initializeSimpleElectroMagneticWaveY();
@@ -85,7 +85,7 @@ void Simulation::simulate() {
 			//cleanupDivergenceBuneman();
 			//cleanUpDivergenceBunemanMagnetic();
 		} else {
-			cleanupDivergence(newEfield, chargeDensity);
+			//cleanupDivergence(newEfield, chargeDensity);
 			//cleanupDivergenceMagnetic();
 		}
 	}
@@ -274,7 +274,7 @@ void Simulation::simulate() {
 				//cleanupDivergenceBuneman();
 				//cleanupDivergenceBunemanMagnetic();
 			} else {
-				cleanupDivergence(newEfield, chargeDensity);
+				//cleanupDivergence(newEfield, chargeDensity);
 				//cleanupDivergenceMagnetic();
 			}
 		}

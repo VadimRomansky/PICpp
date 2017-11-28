@@ -1507,7 +1507,7 @@ void Simulation::sumCellParametersZ() {
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sumCellParametersGeneralZ(particleConcentrations[t], inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+				sumCellParametersGeneralZ(particleEnergies[t], inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
 			}
 		}
 
