@@ -1588,6 +1588,15 @@ void sendCellParametersToTopReceiveFromBottom(double*** array, double* outBuffer
 	int number = (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded;
 	MPI_Sendrecv(outBuffer, number, MPI_DOUBLE, topRank, MPI_CELL_PARAMETERS_RIGHT, inBuffer, number, MPI_DOUBLE,
 	             bottomRank, MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
+	bcount = 0;
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < 2 + 2 * additionalNumber; ++k) {
+				tempArray[i][j][k] = inBuffer[bcount];
+				bcount++;
+			}
+		}
+	}
 }
 
 void sendCellParametersBottom(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
@@ -1596,7 +1605,7 @@ void sendCellParametersBottom(double*** array, double* outBuffer, int xnumberAdd
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
-	if (cartDim[2] > 1) {
+	//if (cartDim[2] > 1) {
 		int bcount = 0;
 
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -1610,7 +1619,7 @@ void sendCellParametersBottom(double*** array, double* outBuffer, int xnumberAdd
 
 		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded, MPI_DOUBLE, bottomRank,
 		         MPI_CELL_PARAMETERS_LEFT, cartComm);
-	}
+	//}
 }
 
 void receiveCellParametersTop(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
@@ -1620,7 +1629,7 @@ void receiveCellParametersTop(double*** tempArray, double* inBuffer, int xnumber
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
-	if (cartDim[2] > 1) {
+	//if (cartDim[2] > 1) {
 		MPI_Status status;
 		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded, MPI_DOUBLE, topRank,
 		         MPI_CELL_PARAMETERS_LEFT, cartComm, &status);
@@ -1635,7 +1644,7 @@ void receiveCellParametersTop(double*** tempArray, double* inBuffer, int xnumber
 				}
 			}
 		}
-	}
+	//}
 }
 
 void sendCellParametersTop(double*** array, double* outBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded,
@@ -1644,7 +1653,7 @@ void sendCellParametersTop(double*** array, double* outBuffer, int xnumberAdded,
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
-	if (cartDim[2] > 1) {
+	//if (cartDim[2] > 1) {
 		int bcount = 0;
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -1657,7 +1666,7 @@ void sendCellParametersTop(double*** array, double* outBuffer, int xnumberAdded,
 
 		MPI_Send(outBuffer, (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded, MPI_DOUBLE, topRank,
 		         MPI_CELL_PARAMETERS_RIGHT, cartComm);
-	}
+	//}
 }
 
 void receiveCellParametersBottom(double*** tempArray, double* inBuffer, int xnumberAdded, int ynumberAdded,
@@ -1667,7 +1676,7 @@ void receiveCellParametersBottom(double*** tempArray, double* inBuffer, int xnum
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 
-	if (cartDim[2] > 1) {
+	//if (cartDim[2] > 1) {
 		MPI_Status status;
 		MPI_Recv(inBuffer, (2 + 2 * additionalNumber) * ynumberAdded * xnumberAdded, MPI_DOUBLE, bottomRank,
 		         MPI_CELL_PARAMETERS_RIGHT, cartComm, &status);
@@ -1681,7 +1690,7 @@ void receiveCellParametersBottom(double*** tempArray, double* inBuffer, int xnum
 				}
 			}
 		}
-	}
+	//}
 }
 
 void sendCellVectorParametersToLeftReceiveFromRight(Vector3d*** array, double* outBuffer, Vector3d*** tempArray,

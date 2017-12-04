@@ -14,8 +14,8 @@ Nt(2) = fix(size(distribution_protons2,1)/Np) - 1;
 
 factor1 = 1;
 factor2 = 0.716;
-%Nt(1)=3;
-%Nt(2)=5;
+Nt(1)=60;
+Nt(2)=60;
 
 Fp(1:Np, 1:2) = 0;
 Fe(1:Np, 1:2) = 0;
@@ -35,14 +35,14 @@ for i=1:Np,
    Pp(i,1) = distribution_protons1(i + Nt(1)*Np,1);
    Pp(i,2) = distribution_protons2(i + Nt(2)*Np,1);
    
-   Fp(i,1) = distribution_protons1(i + Nt(1)*Np, 2)*Pp(i,1)*Pp(i,1);
-   Fp(i,2) = distribution_protons2(i + Nt(2)*Np, 2)*Pp(i,2)*Pp(i,2);
+   Fp(i,1) = factor1*distribution_protons1(i + Nt(1)*Np, 2)*Pp(i,1)*Pp(i,1);
+   Fp(i,2) = factor2*distribution_protons2(i + Nt(2)*Np, 2)*Pp(i,2)*Pp(i,2);
    
    Pe(i,1) = distribution_electrons1(i + Nt(1)*Np,1);
    Pe(i,2) = distribution_electrons2(i + Nt(2)*Np,1);
    
-   Fe(i,1) = distribution_electrons1(i + Nt(1)*Np, 2)*Pe(i,1)*Pe(i,1);
-   Fe(i,2) = distribution_electrons2(i + Nt(2)*Np, 2)*Pe(i,2)*Pe(i,2);
+   Fe(i,1) = factor1*distribution_electrons1(i + Nt(1)*Np, 2)*Pe(i,1)*Pe(i,1);
+   Fe(i,2) = factor2*distribution_electrons2(i + Nt(2)*Np, 2)*Pe(i,2)*Pe(i,2);
 end;
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 

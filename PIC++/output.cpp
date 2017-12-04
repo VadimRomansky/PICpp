@@ -461,7 +461,7 @@ void outputParticlesTrajectories(const char* outFileName, const char* electronOu
 	int nprocs;
 	MPI_Comm_rank(simulation->cartComm, &rank);
 	MPI_Comm_size(simulation->cartComm, &nprocs);
-	FILE* outFile;
+	FILE* outFile = NULL;
 	//FILE* electronOutFile;
 	if (rank == 0) {
 		outFile = fopen(outFileName, "a");
@@ -619,7 +619,7 @@ void outputGridX(const char* outFileName, double* grid, int number, int addition
 		maxI = number;
 	}
 
-	FILE* outFile;
+	FILE* outFile = NULL;
 
 	if (rank == 0) {
 		outFile = fopen(outFileName, "w");
@@ -653,7 +653,7 @@ void outputGridY(const char* outFileName, double* grid, int number, int addition
 		maxJ = number;
 	}
 
-	FILE* outFile;
+	FILE* outFile = NULL;
 
 	if (rank == 0) {
 		outFile = fopen(outFileName, "w");
@@ -687,7 +687,7 @@ void outputGridZ(const char* outFileName, double* grid, int number, int addition
 		maxK = number;
 	}
 
-	FILE* outFile;
+	FILE* outFile = NULL;
 
 	if (rank == 0) {
 		outFile = fopen(outFileName, "w");
@@ -723,7 +723,7 @@ void outputGridReducedX(const char* outFileName, double* grid, int number, int a
 		maxI = number;
 	}
 
-	FILE* outFile;
+	FILE* outFile = NULL;
 
 	if (rank == 0) {
 		outFile = fopen(outFileName, "w");
@@ -764,7 +764,7 @@ void outputGridReducedY(const char* outFileName, double* grid, int number, int a
 		maxI = number;
 	}
 
-	FILE* outFile;
+	FILE* outFile = NULL;
 
 	if (rank == 0) {
 		outFile = fopen(outFileName, "w");
@@ -805,7 +805,7 @@ void outputGridReducedZ(const char* outFileName, double* grid, int number, int a
 		maxI = number;
 	}
 
-	FILE* outFile;
+	FILE* outFile = NULL;
 
 	if (rank == 0) {
 		outFile = fopen(outFileName, "w");
@@ -835,7 +835,7 @@ void outputFieldsCrossectionYZ(const char* outEfileName, const char* outBfileNam
                                double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim,
                                int xindex) {
 	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
-	FILE* outFile;
+	FILE* outFile = NULL;
 	if (cartDim[1] == 1 && cartDim[2] == 1) {
 		outFile = fopen(outEfileName, "a");
 	}
@@ -946,7 +946,7 @@ void outputFieldsCrossectionXY(const char* outEfileName, const char* outBfileNam
                                double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim,
                                int zindex) {
 	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 3 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -1046,7 +1046,7 @@ void outputFieldsCrossectionXZ(const char* outEfileName, const char* outBfileNam
                                double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim,
                                int yindex) {
 	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 3 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -1143,7 +1143,7 @@ void outputFieldsLineX(const char* outEfileName, const char* outBfileName, Vecto
                        int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period,
                        double gyroradius, MPI_Comm& subCommX, int* cartCoord, int* cartDim, int yindex, int zindex) {
 	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 3 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -1190,7 +1190,7 @@ void outputFieldsLineY(const char* outEfileName, const char* outBfileName, Vecto
                        int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period,
                        double gyroradius, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, int zindex) {
 	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
 		int minJ = 3 + 2 * additionalBinNumber;
 		if (cartCoord[1] == 0) {
@@ -1239,7 +1239,7 @@ void outputFieldsLineZ(const char* outEfileName, const char* outBfileName, Vecto
                        int ynumberAdded, int znumberAdded, int additionalBinNumber, double plasma_period,
                        double gyroradius, MPI_Comm& subCommZ, int* cartCoord, int* cartDim, int xindex, int yindex) {
 	double scale = 1.0 / (plasma_period * sqrt(gyroradius));
-	FILE* outFile;
+	FILE* outFile = NULL;
 
 	for (int cartK = 0; cartK < cartDim[2]; ++cartK) {
 		int minK = 3 + 2 * additionalBinNumber;
@@ -1302,7 +1302,7 @@ void outputFields(const char* outEfileName, const char* outBfileName, Vector3d**
 	dims2[2] = 1;
 	MPI_Comm subCommY;
 	MPI_Cart_sub(cartComm, dims2, &subCommY);
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 3 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -1527,7 +1527,7 @@ void outputConcentrationsCrossectionXY(const char* outFileName, double**** parti
 			maxI = xnumberAdded - 1;
 		}
 		MPI_Barrier(cartComm);
-		FILE* outFile;
+		FILE* outFile = NULL;
 		if (cartCoord[0] == cartI) {
 			if (cartDim[1] == 1) {
 				outFile = fopen(outFileName, "a");
@@ -1576,7 +1576,7 @@ void outputConcentrationsCrossectionXZ(const char* outFileName, double**** parti
                                        int typesNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm,
                                        MPI_Comm& subCommY, int* cartCoord, int* cartDim, int yindex) {
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
-		FILE* outFile;
+		FILE* outFile = NULL;
 		int minI = 2 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
 			minI = 0;
@@ -1634,7 +1634,7 @@ void outputConcentrationsCrossectionYZ(const char* outFileName, double**** parti
                                        int typesNumber, double plasma_period, double gyroradius, MPI_Comm& cartComm,
                                        MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex) {
 
-	FILE* outFile;
+	FILE* outFile = NULL;
 	if (cartDim[1] == 1 && cartDim[2] == 1) {
 		outFile = fopen(outFileName, "a");
 	}
@@ -1697,7 +1697,7 @@ void outputConcentrationsLineX(const char* outFileName, double**** particleConce
                                int additionalBinNumber,
                                int typesNumber, double plasma_period, double gyroradius, MPI_Comm& subCommX,
                                int* cartCoord, int* cartDim, int yindex, int zindex) {
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 2 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -1729,7 +1729,7 @@ void outputConcentrationsLineY(const char* outFileName, double**** particleConce
                                int additionalBinNumber,
                                int typesNumber, double plasma_period, double gyroradius, MPI_Comm& subCommY,
                                int* cartCoord, int* cartDim, int xindex, int zindex) {
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
 		int minJ = 2 + 2 * additionalBinNumber;
 		if (cartCoord[1] == 0) {
@@ -1760,7 +1760,7 @@ void outputConcentrationsLineZ(const char* outFileName, double**** particleConce
                                int additionalBinNumber,
                                int typesNumber, double plasma_period, double gyroradius, MPI_Comm& subCommZ,
                                int* cartCoord, int* cartDim, int xindex, int yindex) {
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartK = 0; cartK < cartDim[2]; ++cartK) {
 		int minK = 2 + 2 * additionalBinNumber;
 		if (cartCoord[2] == 0) {
@@ -1803,7 +1803,7 @@ void outputConcentrations(const char* outFileName, double**** particleConcentrat
 	dims2[2] = 1;
 	MPI_Comm subCommY;
 	MPI_Cart_sub(cartComm, dims2, &subCommY);
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 2 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -1891,7 +1891,7 @@ void outputVelocityCrossectionXY(const char* outFileName, Vector3d**** velocity,
 			maxI = xnumberAdded - 1;
 		}
 		MPI_Barrier(cartComm);
-		FILE* outFile;
+		FILE* outFile = NULL;
 		if (cartCoord[0] == cartI) {
 			if (cartDim[1] == 1) {
 				outFile = fopen(outFileName, "a");
@@ -1939,7 +1939,7 @@ void outputVelocityCrossectionXZ(const char* outFileName, Vector3d**** velocity,
                                  double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY,
                                  int* cartCoord, int* cartDim, int yindex) {
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
-		FILE* outFile;
+		FILE* outFile = NULL;
 		int minI = 2 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
 			minI = 0;
@@ -1995,7 +1995,7 @@ void outputVelocityCrossectionYZ(const char* outFileName, Vector3d**** velocity,
                                  int typesNumber,
                                  double plasma_period, double gyroradius, MPI_Comm& cartComm, MPI_Comm& subCommY,
                                  int* cartCoord, int* cartDim, int xindex) {
-	FILE* outFile;
+	FILE* outFile = NULL;
 	if (cartDim[1] == 1 && cartDim[2] == 1) {
 		outFile = fopen(outFileName, "a");
 	}
@@ -2057,7 +2057,7 @@ void outputVelocityLineX(const char* outFileName, Vector3d**** velocity, Particl
                          int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int typesNumber,
                          double plasma_period, double gyroradius, MPI_Comm& subCommX, int* cartCoord, int* cartDim,
                          int yindex, int zindex) {
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 2 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -2088,7 +2088,7 @@ void outputVelocityLineY(const char* outFileName, Vector3d**** velocity, Particl
                          int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int typesNumber,
                          double plasma_period, double gyroradius, MPI_Comm& subCommY, int* cartCoord, int* cartDim,
                          int xindex, int zindex) {
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
 		int minJ = 2 + 2 * additionalBinNumber;
 		if (cartCoord[1] == 0) {
@@ -2119,7 +2119,7 @@ void outputVelocityLineZ(const char* outFileName, Vector3d**** velocity, Particl
                          int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int typesNumber,
                          double plasma_period, double gyroradius, MPI_Comm& subCommZ, int* cartCoord, int* cartDim,
                          int xindex, int yindex) {
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartK = 0; cartK < cartDim[2]; ++cartK) {
 		int minK = 2 + 2 * additionalBinNumber;
 		if (cartCoord[2] == 0) {
@@ -2161,7 +2161,7 @@ void outputVelocity(const char* outFileName, Vector3d**** velocity, ParticleType
 	dims2[2] = 1;
 	MPI_Comm subCommY;
 	MPI_Cart_sub(cartComm, dims2, &subCommY);
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 2 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -2250,7 +2250,7 @@ void outputFlux(const char* outFileName, Vector3d*** electricFlux, Vector3d*** e
 	dims2[2] = 1;
 	MPI_Comm subCommY;
 	MPI_Cart_sub(cartComm, dims2, &subCommY);
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 3 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -2348,7 +2348,7 @@ void outputVectorNodeArray(const char* outFileName, Vector3d*** vector3d, int xn
 	dims2[2] = 1;
 	MPI_Comm subCommY;
 	MPI_Cart_sub(cartComm, dims2, &subCommY);
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 3 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -2471,7 +2471,7 @@ void outputVectorCellArray(const char* outFileName, Vector3d*** vector3d, int xn
 	dims2[2] = 1;
 	MPI_Comm subCommY;
 	MPI_Cart_sub(cartComm, dims2, &subCommY);
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 2 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -2555,7 +2555,7 @@ void outputVectorCellArray(const char* outFileName, double**** vector3d, int xnu
 	dims2[2] = 1;
 	MPI_Comm subCommY;
 	MPI_Cart_sub(cartComm, dims2, &subCommY);
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 2 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -2639,7 +2639,7 @@ void outputMatrixArray(const char* outFileName, Matrix3d*** matrix3d, int xnumbe
 	dims2[2] = 1;
 	MPI_Comm subCommY;
 	MPI_Cart_sub(cartComm, dims2, &subCommY);
-	FILE* outFile;
+	FILE* outFile = NULL;
 	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
 		int minI = 2 + 2 * additionalBinNumber;
 		if (cartCoord[0] == 0) {
@@ -2772,7 +2772,7 @@ void outputDivergenceError(const char* outFileName, Simulation* simulation, doub
 	dims2[2] = 1;
 	MPI_Comm subCommY;
 	MPI_Cart_sub(simulation->cartComm, dims2, &subCommY);
-	FILE* outFile;
+	FILE* outFile = NULL;
 	double scale = (sqrt(cube(gyroradius))) * plasma_period;
 	for (int cartI = 0; cartI < simulation->cartDim[0]; ++cartI) {
 		int minI = 2 + 2 * additionalBinNumber;
@@ -2863,7 +2863,7 @@ void outputParticles(const char* outFileName, Simulation* simulation, ParticleTy
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-	FILE* outFile;
+	FILE* outFile = NULL;
 
 	if (rank == 0) {
 		outFile = fopen(outFileName, "w");
@@ -2906,7 +2906,7 @@ void outputAcceleratedParticlesNumbers(const char* outFileName, Simulation* simu
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-	FILE* outFile;
+	FILE* outFile = NULL;
 
 	if (rank == 0) {
 		outFile = fopen(outFileName, "w");
@@ -3056,7 +3056,7 @@ void outputBackupParticles(const char* outFileName, Simulation* simulation) {
 	for (int curRank = 0; curRank < size; ++curRank) {
 		MPI_Barrier(MPI_COMM_WORLD);
 		if (rank == curRank) {
-			FILE* outFile;
+			FILE* outFile = NULL;
 			if (rank == 0) {
 				outFile = fopen(outFileName, "w");
 			} else {
