@@ -23,39 +23,39 @@ void Simulation::smoothCellParameter(double*** array) {
 		minI = 2 + additionalBinNumber;
 	}*/
 	int maxI = xnumberAdded - additionalBinNumber;
-
+	double smoothingmatrix[3][3][3];
+	createSmoothingMatrix(smoothingmatrix);
 
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
 			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
-				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 1
-				) {
-					tempCellParameter[i][j][k] = array[i][j][k] * (1 - smoothingParameter);
+				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 1) {
+					tempCellParameter[i][j][k] = 0;
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 							for (int tempK = -1; tempK <= 1; ++tempK) {
-								tempCellParameter[i][j][k] += smoothingParameter * array[i + tempI][j + tempJ][k + tempK] / 27.0;
+								tempCellParameter[i][j][k] += array[i + tempI][j + tempJ][k + tempK] *smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 							}
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
-					tempCellParameter[i][j][k] = array[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-					for (int tempI = 0; tempI <= 1; ++tempI) {
+					tempCellParameter[i][j][k] = array[i][j][k];
+					/*for (int tempI = 0; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 							for (int tempK = -1; tempK <= 1; ++tempK) {
 								tempCellParameter[i][j][k] += smoothingParameter * array[i + tempI][j + tempJ][k + tempK] / 27.0;
 							}
 						}
-					}
+					}*/
 				} else if (i == xnumberAdded - additionalBinNumber - 1) {
-					tempCellParameter[i][j][k] = array[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-					for (int tempI = -1; tempI <= 0; ++tempI) {
+					tempCellParameter[i][j][k] = array[i][j][k];
+					/*for (int tempI = -1; tempI <= 0; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 							for (int tempK = -1; tempK <= 1; ++tempK) {
 								tempCellParameter[i][j][k] += smoothingParameter * array[i + tempI][j + tempJ][k + tempK] / 27.0;
 							}
 						}
-					}
+					}*/
 				}
 			}
 		}
@@ -78,62 +78,86 @@ void Simulation::smoothChargeDensityHat() {
 	smoothCellParameter(chargeDensityHat);
 }
 
-void Simulation::smoothEfieldGeneral(Vector3d*** E) {
+void Simulation::createSmoothingMatrix(double smoothingmatrix[3][3][3]) {
+	for(int i = 0; i < 3; ++i) {
+		double factorX = smoothingParameter/2;
+		if(i == 1) {
+			factorX = 1 - smoothingParameter;
+		}
+		for(int j = 0; j < 3; ++j) {
+			double factorY = smoothingParameter/2;
+			if(j == 1) {
+				factorY = 1 - smoothingParameter;
+			}
+			for(int k = 0; k < 3; ++k) {
+				double factorZ = smoothingParameter/2;
+				if(k == 1) {
+					factorZ = 1 - smoothingParameter;
+				}
+				smoothingmatrix[i][j][k] = factorX*factorY*factorZ;
+			}
+		}
+	}
+}
+
+void Simulation::smoothVectorNodeParameter(Vector3d*** E) {
 	int minI = 1 + additionalBinNumber;
 	/*if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 		minI = 2 + additionalBinNumber;
 	}*/
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
 
+	double smoothingmatrix[3][3][3];
+	createSmoothingMatrix(smoothingmatrix);
 
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
 			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
 				if (i > 1 + additionalBinNumber && i < xnumberAdded - 1 - additionalBinNumber) {
-					tempNodeVectorParameter[i][j][k] = E[i][j][k] * (1 - smoothingParameter);
+					tempNodeVectorParameter[i][j][k] = Vector3d(0, 0, 0);
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 							for (int tempK = -1; tempK <= 1; ++tempK) {
-								tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+								tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1+tempI][1+tempJ][1+tempK];
 							}
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
-						tempNodeVectorParameter[i][j][k] = E[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = 0; tempI <= 1; ++tempI) {
+						tempNodeVectorParameter[i][j][k] = E[i][j][k];
+						/*for (int tempI = 0; tempI <= 1; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 								for (int tempK = -1; tempK <= 1; ++tempK) {
 									tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
 								}
 							}
-						}
+						}*/
 					} else {
-						tempNodeVectorParameter[i][j][k] = E[i][j][k] * (1 - smoothingParameter);
+						tempNodeVectorParameter[i][j][k] = Vector3d(0, 0, 0);
 						for (int tempI = -1; tempI <= 1; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+									tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1+tempI][1+tempJ][1+tempK];
 								}
 							}
 						}
 					}
 				} else if (i == xnumberAdded - 1 - additionalBinNumber) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
-						tempNodeVectorParameter[i][j][k] = E[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = -1; tempI <= 0; ++tempI) {
+						tempNodeVectorParameter[i][j][k] = E[i][j][k];
+						/*for (int tempI = -1; tempI <= 0; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 								for (int tempK = -1; tempK <= 1; ++tempK) {
 									tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
 								}
 							}
-						}
+						}*/
 					} else {
-						tempNodeVectorParameter[i][j][k] = E[i][j][k] * (1 - smoothingParameter);
+						tempNodeVectorParameter[i][j][k] = Vector3d(0, 0, 0);
 						for (int tempI = -1; tempI <= 1; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+									tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1+tempI][1+tempJ][1+tempK];
 								}
 							}
 						}
@@ -158,7 +182,7 @@ void Simulation::smoothTempEfield() {
 		procTime = clock();
 	}
 
-	smoothEfieldGeneral(tempEfield);
+	smoothVectorNodeParameter(tempEfield);
 
 	exchangeGeneralEfield(tempEfield);
 	MPI_Barrier(cartComm);
@@ -174,7 +198,7 @@ void Simulation::smoothNewEfield() {
 		procTime = clock();
 	}
 
-	smoothEfieldGeneral(newEfield);
+	smoothVectorNodeParameter(newEfield);
 
 	exchangeGeneralEfield(newEfield);
 	MPI_Barrier(cartComm);
@@ -184,63 +208,79 @@ void Simulation::smoothNewEfield() {
 	}
 }
 
-void Simulation::smoothBfieldGeneral(Vector3d*** B) {
+void Simulation::smoothFlux() {
+	double procTime = 0;
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
+
+	smoothVectorNodeParameter(electricFlux);
+
+	exchangeGeneralEfield(electricFlux);
+	MPI_Barrier(cartComm);
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("smoothing new Efield time = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}
+}
+
+void Simulation::smoothVectorCellParameter(Vector3d*** B) {
 	int minI = 1 + additionalBinNumber;
 	/*if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 		minI = 2 + additionalBinNumber;
 	}*/
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
-
+	double smoothingmatrix[3][3][3];
+	createSmoothingMatrix(smoothingmatrix);
 
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
 			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
-				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 2
-				) {
-					tempCellVectorParameter[i][j][k] = B[i][j][k] * (1 - smoothingParameter);
+				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 2) {
+					tempCellVectorParameter[i][j][k] = Vector3d(0, 0, 0);
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 							for (int tempK = -1; tempK <= 1; ++tempK) {
-								tempCellVectorParameter[i][j][k] += B[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+								tempCellVectorParameter[i][j][k] += B[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 							}
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
-						tempCellVectorParameter[i][j][k] = B[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = 0; tempI <= 1; ++tempI) {
+						tempCellVectorParameter[i][j][k] = B[i][j][k];
+						/*for (int tempI = 0; tempI <= 1; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 								for (int tempK = -1; tempK <= 1; ++tempK) {
 									tempCellVectorParameter[i][j][k] += B[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
 								}
 							}
-						}
+						}*/
 					} else {
-						tempCellVectorParameter[i][j][k] = B[i][j][k] * (1 - smoothingParameter);
+						tempCellVectorParameter[i][j][k] = Vector3d(0, 0, 0);
 						for (int tempI = -1; tempI <= 1; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempCellVectorParameter[i][j][k] += B[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+									tempCellVectorParameter[i][j][k] += B[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
 					}
 				} else if (i == xnumberAdded - additionalBinNumber - 2) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
-						tempCellVectorParameter[i][j][k] = B[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = -1; tempI <= 0; ++tempI) {
+						tempCellVectorParameter[i][j][k] = B[i][j][k];
+						/*for (int tempI = -1; tempI <= 0; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 								for (int tempK = -1; tempK <= 1; ++tempK) {
 									tempCellVectorParameter[i][j][k] += B[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
 								}
 							}
-						}
+						}*/
 					} else {
-						tempCellVectorParameter[i][j][k] = B[i][j][k] * (1 - smoothingParameter);
+						tempCellVectorParameter[i][j][k] = Vector3d(0, 0, 0);
 						for (int tempI = -1; tempI <= 1; ++tempI) {
 							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
 								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempCellVectorParameter[i][j][k] += B[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+									tempCellVectorParameter[i][j][k] += B[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
@@ -260,12 +300,12 @@ void Simulation::smoothBfieldGeneral(Vector3d*** B) {
 }
 
 void Simulation::smoothBfield() {
-	smoothBfieldGeneral(Bfield);
+	smoothVectorCellParameter(Bfield);
 	exchangeGeneralBfield(Bfield);
 }
 
 void Simulation::smoothNewBfield() {
-	smoothBfieldGeneral(newBfield);
+	smoothVectorCellParameter(newBfield);
 	exchangeGeneralBfield(newBfield);
 }
 

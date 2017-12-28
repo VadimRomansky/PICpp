@@ -13,9 +13,9 @@ Nt(1) = fix(size(distribution_protons1,1)/Np) - 1;
 Nt(2) = fix(size(distribution_protons2,1)/Np) - 1;
 
 factor1 = 1;
-factor2 = 0.716;
-Nt(1)=60;
-Nt(2)=60;
+factor2 = 1;
+%Nt(1)=60;
+%Nt(2)=60;
 
 Fp(1:Np, 1:2) = 0;
 Fe(1:Np, 1:2) = 0;

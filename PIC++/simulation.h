@@ -765,13 +765,16 @@ public:
 	void createInternalEquation(int i, int j, int k);
 	bool isInResistiveLayer(int i, int j, int k);
 
+	void createSmoothingMatrix(double smoothingmatrix[3][3][3]);
+
 	void smoothChargeDensityHat();
-	void smoothEfieldGeneral(Vector3d*** E);
+	void smoothVectorNodeParameter(Vector3d*** E);
 	void smoothCellParameter(double*** array);
 	void smoothChargeDensity();
 	void smoothTempEfield();
 	void smoothNewEfield();
-	void smoothBfieldGeneral(Vector3d*** B);
+	void smoothFlux();
+	void smoothVectorCellParameter(Vector3d*** B);
 	void smoothBfield();
 	void smoothNewBfield();
 

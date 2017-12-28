@@ -28,7 +28,7 @@ void Simulation::simulate() {
 		createFiles();
 		//initializeTwoStream();
 		//initializeExternalFluxInstability();
-		initializeAlfvenWaveX(1, 0.01);
+		//initializeAlfvenWaveX(1, 0.01);
 		//initializeAlfvenWaveY(1, 0.01);
 		//initializeAlfvenWaveZ(1, 0.01);
 		//initializeRotatedAlfvenWave(1, 1, 0, 0.01);
@@ -36,7 +36,7 @@ void Simulation::simulate() {
 		//initializeAnisotropicSilicon();
 		//initializeWeibel();
 		//initializeRingWeibel();
-		//initializeFluxFromRight();
+		initializeFluxFromRight();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();
 		//initializeSimpleElectroMagneticWaveY();
@@ -130,7 +130,10 @@ void Simulation::simulate() {
 		evaluateParticlesRotationTensor();
 
 		updateElectroMagneticParameters();
-		//smoothChargeDensityHat();
+		for(int n = 0; n < smoothingCount; ++n){
+			//smoothChargeDensityHat();
+			//smoothFlux();
+		}
 
 		evaluateElectricField();
 		exchangeEfield();
@@ -266,8 +269,10 @@ void Simulation::simulate() {
 			//smoothBunemanEfieldGeneral(bunemanNewEx, bunemanNewEy, bunemanNewEz);
 			//smoothBunemanBfieldGeneral(bunemanNewBx, bunemanNewBy, bunemanNewBz);
 		} else {
-			//smoothNewEfield();
-			//smoothNewBfield();
+			for(int n = 0; n < smoothingCount; ++n){
+				smoothNewEfield();
+				smoothNewBfield();
+			}
 		}
 		if (currentIteration % divergenceCleanUpParameter == 0) {
 			if (solverType == BUNEMAN) {
@@ -448,9 +453,9 @@ void Simulation::output() {
 	//}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing fields\n");
-	outputFields((outputDir + "Efield.dat").c_str(), (outputDir + "Bfield.dat").c_str(), Efield, Bfield, xnumberAdded,
+	/*outputFields((outputDir + "Efield.dat").c_str(), (outputDir + "Bfield.dat").c_str(), Efield, Bfield, xnumberAdded,
 	             ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartComm, cartCoord,
-	             cartDim);
+	             cartDim);*/
 	/*outputFieldsReduced((outputDir + "EfieldReduced.dat").c_str(), (outputDir + "BfieldReduced.dat").c_str(), Efield, Bfield, xnumberAdded,
 	                    ynumberAdded, znumberAdded, additionalBinNumber, reduceStepX, reduceStepY, reduceStepZ, plasma_period, scaleFactor);*/
 	/*for(int curI = 0; curI < cartDim[0]; ++curI){
@@ -558,9 +563,9 @@ void Simulation::output() {
 
 
 	//if ((rank == 0) && (verbosity > 1)) printf("outputing concentrations\n");
-	outputConcentrations((outputDir + "concentrations.dat").c_str(), particleConcentrations, chargeDensity,
+	/*outputConcentrations((outputDir + "concentrations.dat").c_str(), particleConcentrations, chargeDensity,
 	                     chargeDensityHat, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, typesNumber,
-	                     plasma_period, scaleFactor, cartComm, cartCoord, cartDim);
+	                     plasma_period, scaleFactor, cartComm, cartCoord, cartDim);*/
 
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output crossection concentrations x\n");
@@ -630,9 +635,9 @@ void Simulation::output() {
 	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing velocity\n");
-	outputVelocity((outputDir + "velocity.dat").c_str(),
+	/*outputVelocity((outputDir + "velocity.dat").c_str(),
 	               particleBulkVelocities, types, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber,
-	               typesNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim);
+	               typesNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim);*/
 
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output crossection velocity x\n");
@@ -696,25 +701,25 @@ void Simulation::output() {
 	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing flux\n");
-	outputFlux((outputDir + "flux.dat").c_str(), electricFlux, externalElectricFlux, xnumberAdded, ynumberAdded,
-	           znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim);
+	/*outputFlux((outputDir + "flux.dat").c_str(), electricFlux, externalElectricFlux, xnumberAdded, ynumberAdded,
+	           znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim);*/
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing divergence\n");
-	outputDivergenceError((outputDir + "divergence_error.dat").c_str(), this, plasma_period, scaleFactor);
+	//outputDivergenceError((outputDir + "divergence_error.dat").c_str(), this, plasma_period, scaleFactor);
 
 	double rotBscale = 1.0 / (plasma_period * plasma_period * sqrt(scaleFactor));
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing rotB\n");
-	outputVectorNodeArray((outputDir + "rotBFile.dat").c_str(), rotB, xnumberAdded, ynumberAdded, znumberAdded,
-	                      additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);
+	/*outputVectorNodeArray((outputDir + "rotBFile.dat").c_str(), rotB, xnumberAdded, ynumberAdded, znumberAdded,
+	                      additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);*/
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing Ederivative\n");
-	outputVectorNodeArray((outputDir + "EderivativeFile.dat").c_str(), Ederivative, xnumberAdded, ynumberAdded,
-	                      znumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);
+	/*outputVectorNodeArray((outputDir + "EderivativeFile.dat").c_str(), Ederivative, xnumberAdded, ynumberAdded,
+	                      znumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);*/
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing rotE\n");
-	outputVectorCellArray((outputDir + "rotEFile.dat").c_str(), rotE, xnumberAdded, ynumberAdded, znumberAdded,
-	                      additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);
+	/*outputVectorCellArray((outputDir + "rotEFile.dat").c_str(), rotE, xnumberAdded, ynumberAdded, znumberAdded,
+	                      additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);*/
 
 	/*if (rank == 0) printf("outputing dielectricTensor\n");
 	outputMatrixArray((outputDir + "dielectricTensorFile.dat").c_str(), dielectricTensor, xnumber + 1, ynumber + 1,
