@@ -23,7 +23,7 @@ load distribution_electrons9.dat;
 
 Np = 500;
 
-Nt(1:10) = 11;
+Nt(1:11) = 0;
 
 %Nt(1) = fix(size(distribution_protons0,1)/Np) - 1;
 Nt(2) = fix(size(distribution_protons1,1)/Np) - 1;
@@ -36,7 +36,6 @@ Nt(8) = fix(size(distribution_protons7,1)/Np) - 1;
 Nt(9) = fix(size(distribution_protons8,1)/Np) - 1;
 Nt(10) = fix(size(distribution_protons9,1)/Np) - 1;
 
-%Nt(2) = 28;
 Nt(4) = 24;
 Nt(5) = 8;
 Nt(6) = 9;
@@ -72,7 +71,7 @@ beta = sqrt(1 - 1/(gamma*gamma));
 v = beta*cv;
 
 %Color = {'r','green','blue','black','yellow','cyan','magenta','purple','grey'};
-Color = {[.7,.3,.3],'red','green','blue','black','magenta','cyan','yellow',[.5,.5,.5],[.3,.7,.3],[1.0,.5,0],[.75,0.0,.7]};
+Color = {[.7,.3,.3],'red','green','blue','black','cyan','magenta','yellow',[.5,.5,.5],[.3,.7,.3],[1.0,.5,0],[.75,0.0,.7]};
 
 for i=1:Np,
    %Pp(i,1) = distribution_protons0(i + c*Np,1);
@@ -120,11 +119,14 @@ for i=1:Np,
    Fe(i,10) = distribution_electrons9(i + Nt(10)*Np, 2)*Pe(i,10)*Pe(i,10);
 end;
 
-upstreamPp(1) = 0.99*beta*gamma*mp*cv;
-upstreamPe(1) = 0.99*beta*gamma*me*cv;
+weightP = 0.1;
+weightE = 0.1;
+
+upstreamPp(1) = 0.9*beta*gamma*mp*cv;
+upstreamPe(1) = 0.9*beta*gamma*me*cv;
 for i=1:Np,
-    upstreamPp(i) = upstreamPp(1) + (i-1)*0.02*beta*gamma*mp*cv/Np;
-    upstreamPe(i) = upstreamPe(1) + (i-1)*0.02*beta*gamma*me*cv/Np;
+    upstreamPp(i) = upstreamPp(1) + (i-1)*0.2*beta*gamma*mp*cv/Np;
+    upstreamPe(i) = upstreamPe(1) + (i-1)*0.2*beta*gamma*me*cv/Np;
     downstreamPp(i) = Pp(i,2);
     downstreamPe(i) = Pe(i,2);
 end;
@@ -134,15 +136,15 @@ denomE = (2*pi*me*kBoltzman*T)^-1.5;
 
 for i=1:Np,
     p = upstreamPp(i);
-    upstreamFp(i) = (denomP*pi*2*kBoltzman*T/(beta*gamma*cv))*p*(exp(-(p-beta*gamma*mp*cv)^2/(2*mp*kBoltzman*T))-exp(-(p+beta*gamma*mp*cv)^2/(2*mp*kBoltzman*T)))*p^2;
+    upstreamFp(i) = weightP*(denomP*pi*2*kBoltzman*T/(beta*gamma*cv))*p*(exp(-(p-beta*gamma*mp*cv)^2/(2*mp*kBoltzman*T))-exp(-(p+beta*gamma*mp*cv)^2/(2*mp*kBoltzman*T)))*p^2;
     p = upstreamPe(i);
-    upstreamFe(i) = (denomE*pi*2*kBoltzman*T/(beta*gamma*cv))*p*(exp(-(p-beta*gamma*me*cv)^2/(2*me*kBoltzman*T))-exp(-(p+beta*gamma*me*cv)^2/(2*me*kBoltzman*T)))*p^2;
+    upstreamFe(i) = weightE*(denomE*pi*2*kBoltzman*T/(beta*gamma*cv))*p*(exp(-(p-beta*gamma*me*cv)^2/(2*me*kBoltzman*T))-exp(-(p+beta*gamma*me*cv)^2/(2*me*kBoltzman*T)))*p^2;
 end;
 
 %besselKp = 3.669760648*10^-9460;
 %besselKe = 3.142420932*10^-517;
-Tp = 10^12;
-Te = 10^12;
+Tp = 0.3*10^13;
+Te = 0.3*10^12;
 besselKp = besselk(2, (mp*cv^2)/(kBoltzman*Tp));
 besselKe = besselk(2, (me*cv^2)/(kBoltzman*Te));
 denomP2 = 1/(4*pi*(mp^3)*(cv^3)*(kBoltzman*Tp/(mp*cv^2))*besselKp);
@@ -153,9 +155,9 @@ for i=1:Np,
     p = downstreamPp(i);
     a = sqrt(1+(p/(mp*cv))^2)*mp*cv^2/(kBoltzman*Tp);
     b = exp(-a);
-    downstreamFp(i) = denomP2*exp(-sqrt(1+(p/(mp*cv))^2)*mp*cv^2/(kBoltzman*Tp))*p^4;
+    downstreamFp(i) = (1-weightP)*denomP2*exp(-sqrt(1+(p/(mp*cv))^2)*mp*cv^2/(kBoltzman*Tp))*p^4;
     p = downstreamPe(i);
-    downstreamFe(i) = denomE2*exp(-sqrt(1+(p/(me*cv))^2)*me*cv^2/(kBoltzman*Te))*p^4;
+    downstreamFe(i) = (1-weightE)*denomE2*exp(-sqrt(1+(p/(me*cv))^2)*me*cv^2/(kBoltzman*Te))*p^4;
 end;
 
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
