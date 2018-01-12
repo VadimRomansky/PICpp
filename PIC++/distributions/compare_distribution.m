@@ -23,7 +23,10 @@ load distribution_electrons9.dat;
 
 Np = 500;
 
-Nt(1:10) = 11;
+Nt(1:10) = 0;
+sumP(1:10) = 0;
+sumE(1:10) = 0;
+
 
 %Nt(1) = fix(size(distribution_protons0,1)/Np) - 1;
 Nt(2) = fix(size(distribution_protons1,1)/Np) - 1;
@@ -36,7 +39,6 @@ Nt(8) = fix(size(distribution_protons7,1)/Np) - 1;
 Nt(9) = fix(size(distribution_protons8,1)/Np) - 1;
 Nt(10) = fix(size(distribution_protons9,1)/Np) - 1;
 
-%Nt(2) = 28;
 Nt(4) = 24;
 Nt(5) = 8;
 Nt(6) = 9;
@@ -47,16 +49,37 @@ Nt(10) = 24;
 Fp(1:Np, 1:10) = 0;
 Fe(1:Np, 1:10) = 0;
 
-
 Pp(1:Np, 1:10) = 0;
 Pe(1:Np, 1:10) = 0;
 
-me = 0.91*10^-25;
-mp = 1.6*10^-24;
-v=2.998*10^10;
+upstreamFp(1:Np) = 0;
+upstreamFe(1:Np) = 0;
+upstreamPp(1:Np) = 0;
+upstreamPe(1:Np) = 0;
+
+downstreamFp(1:Np) = 0;
+downstreamFe(1:Np) = 0;
+downstreamPp(1:Np) = 0;
+downstreamPe(1:Np) = 0;
+
+sumUpstreamP = 0;
+sumUpstreamE = 0;
+sumDownstreamP = 0;
+sumDownstreamE = 0;
+
+me = 0.910938356*10^-25;
+mp = 1.672621*10^-24;
+cv = 2.99792458*10^10;
+kBoltzman = 1.38064852*10^-16;
+T=5*10^8;
+
+gamma = 1.5;
+
+beta = sqrt(1 - 1/(gamma*gamma));
+v = beta*cv;
 
 %Color = {'r','green','blue','black','yellow','cyan','magenta','purple','grey'};
-Color = {[.7,.3,.3],'red','green','blue','black','yellow','cyan','magenta',[.5,.5,.5],[.3,.7,.3]};
+Color = {[.7,.3,.3],'red','green','blue','black','yellow',[.5,.5,.5],'cyan',[.3,.7,.3], 'magenta',[1.0,.5,0],[.75,0.0,.7]};
 
 for i=1:Np,
    %Pp(i,1) = distribution_protons0(i + c*Np,1);
@@ -103,24 +126,97 @@ for i=1:Np,
    Fe(i,9) = distribution_electrons8(i + Nt(9)*Np, 2)*Pe(i,9)*Pe(i,9);
    Fe(i,10) = distribution_electrons9(i + Nt(10)*Np, 2)*Pe(i,10)*Pe(i,10);
 end;
+for i=1:Np-1,
+    for j=1:10,
+        p = Pp(i,j);
+        sumP(j) = sumP(j) + Fp(i,j)*p^-2*(Pp(i+1,j) - Pp(i,j));
+        p = Pe(i,j);
+        sumE(j) = sumE(j) + Fe(i,j)*p^-2*(Pe(i+1,j) - Pe(i,j));
+    end;
+end;
+
+weightP = 0.1;
+weightE = 0.1;
+
+upstreamPp(1) = 0.9*beta*gamma*mp*cv;
+upstreamPe(1) = 0.9*beta*gamma*me*cv;
+for i=1:Np,
+    upstreamPp(i) = upstreamPp(1) + (i-1)*0.2*beta*gamma*mp*cv/Np;
+    upstreamPe(i) = upstreamPe(1) + (i-1)*0.2*beta*gamma*me*cv/Np;
+    downstreamPp(i) = Pp(i,2);
+    downstreamPe(i) = Pe(i,2);
+end;
+
+denomP = (2*pi*mp*kBoltzman*T)^-1.5;
+denomE = (2*pi*me*kBoltzman*T)^-1.5;
+
+for i=1:Np,
+    p = upstreamPp(i) + 0.015*beta*gamma*mp*cv;
+    upstreamFp(i) = weightP*(denomP*pi*2*kBoltzman*T/(beta*gamma*cv))*p*(exp(-(p-beta*gamma*mp*cv)^2/(2*mp*kBoltzman*T))-exp(-(p+beta*gamma*mp*cv)^2/(2*mp*kBoltzman*T)))*p^2;
+    p = upstreamPe(i);
+    upstreamFe(i) = weightE*(denomE*pi*2*kBoltzman*T/(beta*gamma*cv))*p*(exp(-(p-beta*gamma*me*cv)^2/(2*me*kBoltzman*T))-exp(-(p+beta*gamma*me*cv)^2/(2*me*kBoltzman*T)))*p^2;
+end;
+
+%besselKp = 3.669760648*10^-9460;
+%besselKe = 3.142420932*10^-517;
+Tp = 2.5*10^12;
+Te = 0.5*10^12;
+ae = kBoltzman*Te/(me*cv*cv);
+ap = kBoltzman*Tp/(mp*cv*cv);
+besselKp = besselk(2, (mp*cv^2)/(kBoltzman*Tp));
+besselKe = besselk(2, (me*cv^2)/(kBoltzman*Te));
+denomP2 = 1/((mp^3)*(cv^3)*(kBoltzman*Tp/(mp*cv^2))*besselKp);
+denomE2 = 1/((me^3)*(cv^3)*(kBoltzman*Te/(me*cv^2))*besselKe);
+%denomP2 = 1/(4*pi*mp^3*cv^3*(kBoltzman*T/(mp*cv^2))*besselKp);
+%denomE2 = 1/(4*pi*me^3*cv^3*(kBoltzman*T/(me*cv^2))*besselKe);
+for i=1:Np,
+    p = downstreamPp(i);
+    a = sqrt(1+(p/(mp*cv))^2)*mp*cv^2/(kBoltzman*Tp);
+    b = exp(-a);
+    downstreamFp(i) = (1-weightP)*denomP2*exp(-sqrt(1+(p/(mp*cv))^2)*mp*cv^2/(kBoltzman*Tp))*p^4;
+    p = downstreamPe(i);
+    downstreamFe(i) = (1-weightE)*denomE2*exp(-sqrt(1+(p/(me*cv))^2)*me*cv^2/(kBoltzman*Te))*p^4;
+end;
+
+for i=1:Np-1,
+        p = upstreamPp(i);
+        sumUpstreamP = sumUpstreamP + upstreamFp(i)*p^-2*(upstreamPp(i+1) - upstreamPp(i));
+        p = upstreamPe(i);
+        sumUpstreamE = sumUpstreamE + upstreamFe(i)*p^-2*(upstreamPe(i+1) - upstreamPe(i));
+        p = downstreamPp(i);
+        sumDownstreamP = sumDownstreamP + downstreamFp(i)*p^-2*(downstreamPp(i+1) - downstreamPp(i));
+        p = downstreamPe(i);
+        sumDownstreamE = sumDownstreamE + downstreamFe(i)*p^-2*(downstreamPe(i+1) - downstreamPe(i));
+end;
+
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
 figure(1);
 hold on;
 for j=2:10,
-    plot (Pp(1:Np,j)/(mp*v),Fp(1:Np,j),'color',Color{j});
+    if((j ~= 7) && (j ~= 9))
+        plot (Pp(1:Np,j)/(mp*cv),Fp(1:Np,j),'color',Color{j});
+    end;
 end;
+plot(upstreamPp(1:Np)/(mp*cv), upstreamFp(1:Np),'color', Color{11});
+plot(downstreamPp(1:Np)/(mp*cv), downstreamFp(1:Np),'color', Color{12});
 xlabel ('p/{m_p c}');
 ylabel ('F_p(p) p^4');
-legend('{\theta} = 10','{\theta} = 20','{\theta} = 30','{\theta} = 40','{\theta} = 50','{\theta} = 60','{\theta} = 70','{\theta} = 80','{\theta} = 90','Location','southeast');
+%legend('{\theta} = 10','{\theta} = 20','{\theta} = 30','{\theta} = 40','{\theta} = 50','{\theta} = 60','{\theta} = 70','{\theta} = 80','{\theta} = 90', 'maxwell','maxwell-juttner','Location','southeast');
+legend('{\theta} = 10^{\circ}','{\theta} = 20^{\circ}','{\theta} = 30^{\circ}','{\theta} = 40^{\circ}','{\theta} = 50^{\circ}','{\theta} = 70^{\circ}','{\theta} = 90^{\circ}', 'maxwell','maxwell-juttner','Location','southeast');
 grid ;
 
 figure(2);
 hold on;
 for j=2:10,
-    plot (Pe(1:Np,j)/(mp*v),Fe(1:Np,j),'color',Color{j});
+    if((j ~= 7) && (j ~= 9))
+        plot (Pe(1:Np,j)/(mp*cv),Fe(1:Np,j),'color',Color{j});
+    end;
 end;
+plot(upstreamPe(1:Np)/(mp*cv), upstreamFe(1:Np),'color', Color{11});
+plot(downstreamPe(1:Np)/(mp*cv), downstreamFe(1:Np),'color', Color{12});
 xlabel ('p/{m_p c}');
 ylabel ('F_e(p) p^4');
-legend('{\theta} = 10','{\theta} = 20','{\theta} = 30','{\theta} = 40','{\theta} = 50','{\theta} = 60','{\theta} = 70','{\theta} = 80','{\theta} = 90','Location','southeast');
+%legend('{\theta} = 10','{\theta} = 20','{\theta} = 30','{\theta} = 40','{\theta} = 50','{\theta} = 60','{\theta} = 70','{\theta} = 80','{\theta} = 90','maxwell', 'maxwell-juttner','Location','southeast');
+legend('{\theta} = 10^{\circ}','{\theta} = 20^{\circ}','{\theta} = 30^{\circ}','{\theta} = 40^{\circ}','{\theta} = 50^{\circ}','{\theta} = 70^{\circ}','{\theta} = 90^{\circ}', 'maxwell','maxwell-juttner','Location','southeast');
 grid ;

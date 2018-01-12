@@ -174,6 +174,10 @@ void Simulation::simulate() {
 			printf("exchanging field time = %g sec\n", procTime / CLOCKS_PER_SEC);
 		}
 
+		for(int n = 0; n < smoothingCount; ++n){
+			smoothTempEfield();
+		}
+
 
 		moveParticles();
 
