@@ -4504,7 +4504,7 @@ void Simulation::initializeLangmuirWave() {
 
 void Simulation::initializeFluxFromRight() {
 	boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
-	//boundaryConditionTypeX = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	createParticles();
 	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized * speed_of_light_correction);
 	//initializeAlfvenWaveY(10, 1.0E-4);
