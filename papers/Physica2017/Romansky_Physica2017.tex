@@ -11,7 +11,6 @@
 
 %----------------------------------------------------- 
 %\usepackage{soul,ulem,color,xspace,bm}
-% Andrei's commands
 % Suggest to remove
 %\newcommand{\asrm}[1]{{\color{magenta}\sout{#1}}}
 % Suggest to insert
@@ -57,7 +56,7 @@ the shortwave harmonics Fourier filtering is applied
 to suppress the numerical Cherenkov instability and improve energy conservation.
 
 In the modeling setup the homogeneous plasma flows into the simulation box through its right boundary
-and collides with the reflecting superconducting wall at the left boundary thus launching a shock wave. This  is a common way to initialize a shock, because an initialization using the Rankine-Hugoniot conditions does not take into account the microscopic distribution, and a shock, created in such a way, would probably fall apart into several discontinuities.
+and collides with the reflecting superconducting wall at the left boundary thus launching a shock wave. This  is a common way to initialize a shock (e. g. \cite{Sironi2011}, \cite{Iwamoto2017}), because an initialization using the Rankine-Hugoniot conditions does not take into account the microscopic distribution, and a shock, created in such a way, would probably fall apart into several discontinuities.
 
 \begin{figure}[h!]
 	\centering
@@ -80,7 +79,7 @@ One can see in Figures \ref{protons} and \ref{electrons} the particle spectra fo
 
 Also, one can see that for the angles less then the critical one, concentrations of accelerated particles are higher and extend to higher enegies for larger $\theta$. The spectrum of non-thermal component is about 10 times higher for the protons than for the electrons at the same energy. It is consistent with other PIC simulations of the shock waves {\cite{Sironi2011}}.
 
-These results show some interesting effects for angles close to the critical value (black and yellow lines)- the electrons are still accelerating while the protons are not. It can be interpreted as electrons accelerate in the short-wavelength turbulence of the shock precursor. Due to the small gyroradii of the electrons in initial flow, the short-wavelength turbulence scatter them more efficiently than protons. However, further research is necessary to study this phenomenon in detail.
+These results show some interesting effects for angles close to the critical value (black and yellow solid lines)- the electrons are still accelerating while the protons are not. It can be interpreted as electrons accelerate in the short-wavelength turbulence of the shock precursor. Due to the small gyroradii of the electrons in initial flow, the short-wavelength turbulence scatter them more efficiently than protons. However, further research is necessary to study this phenomenon in detail.
 
 
 \section{Conclusions}
@@ -102,5 +101,6 @@ The numerical results presented here were obtained using computational resources
 	\bibitem{Ellison2013} Ellison D C, Warren D C and Bykov A M 2013 \textit{ApJ} \textbf{776} Issue 1, 46
 	\bibitem{Pelletier2017} Pelletier G, Bykov A M, Ellison D C and Lemoine M 2017 \textit{Space Science Reviews} \textbf{207} Issue 1-4, pp. 319-360
 	\bibitem{Sironi2011} Sironi L and Spitkovsky A 2011 \textit{ApJ} \textbf{741} Issue 1, 39
+	\bibitem{Iwamoto2017} Iwamoto M, Amano T, Hoshino M and Matsumoto Y 2017 \textit{ApJ} \textbf{840} Issue 1 article id. 52, 14 pp.
 \end{thebibliography}
 \end{document}

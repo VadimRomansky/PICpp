@@ -26,10 +26,10 @@
 //const char* const backupDirectory = "/home/uikam/romansky/PIC3d3/backup/";
 
 //for MPI on Ubuntu
-//const char* const outputDirectory = "/home/vadim/PICpp/PIC++/output/";
-//const char* const reducedOutputDirectory = "/home/vadim/PICpp/PIC++/reduced_output/";
-//const char* const inputDirectory = "/home/vadim/PICpp/PIC++/input/";
-//const char* const backupDirectory = "/home/vadim/PICpp/PIC++/backup/";
+const char* const outputDirectory = "/home/vadim/PICpp/PIC++/output/";
+const char* const reducedOutputDirectory = "/home/vadim/PICpp/PIC++/reduced_output/";
+const char* const inputDirectory = "/home/vadim/PICpp/PIC++/input/";
+const char* const backupDirectory = "/home/vadim/PICpp/PIC++/backup/";
  
 //for windows 32
 //const char* const outputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/v4/PIC++/output/";
@@ -38,10 +38,10 @@
 //const char* const backupDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/v4/PIC++/backup/";
 
 //for windows 64 home
-const char* const outputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/output/";
-const char* const reducedOutputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/reduced_output/";
-const char* const inputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/input/";
-const char* const backupDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/backup/";
+//const char* const outputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/output/";
+//const char* const reducedOutputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/reduced_output/";
+//const char* const inputDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/input/";
+//const char* const backupDirectory = "C:/users/Vadik/Documents/Visual Studio 2010/Projects/PICpp/PIC++/backup/";
 
 //for windows 64
 //const char* const outputDirectory = "C:/users/Vadim/Documents/Visual Studio 2010/Projects/PICpp/PIC++/output/";

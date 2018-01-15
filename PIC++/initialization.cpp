@@ -360,6 +360,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		deltaX2 /= scaleFactor * scaleFactor;
 		deltaY2 /= scaleFactor * scaleFactor;
 		deltaZ2 /= scaleFactor * scaleFactor;
+        cellVolume /= scaleFactor * scaleFactor * scaleFactor;
 
 		leftX /= scaleFactor;
 		rightX /= scaleFactor;
