@@ -178,7 +178,8 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber) {
 				double kz = (k + firstAbsoluteZindex) * 2 * pi / zsizeGeneral;
 				double kw = sqrt(kx * kx + ky * ky + kz * kz);
 				if (kw > 2 * pi / (cutWaveNumber * deltaX)) {
-					fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+					//fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+					fourierScalarMirrorOutput[i][j][k] = fourierScalarMirrorOutput[i][j][k]*(-1.0);
 				}
 			}
 		}
@@ -219,7 +220,8 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber) {
 				double kz = (k + firstAbsoluteZindex) * 2 * pi / zsizeGeneral;
 				double kw = sqrt(kx * kx + ky * ky + kz * kz);
 				if (kw > 2 * pi / (cutWaveNumber * deltaX)) {
-					fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+					//fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+					fourierScalarMirrorOutput[i][j][k] = fourierScalarMirrorOutput[i][j][k]*(-1.0);
 				}
 			}
 		}
@@ -262,7 +264,8 @@ void Simulation::filterFieldGeneral(Vector3d*** field, int cutWaveNumber) {
 				double kz = (k + firstAbsoluteZindex) * 2 * pi / zsizeGeneral;
 				double kw = sqrt(kx * kx + ky * ky + kz * kz);
 				if (kw > 2 * pi / (cutWaveNumber * deltaX)) {
-					fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+					//fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
+					fourierScalarMirrorOutput[i][j][k] = fourierScalarMirrorOutput[i][j][k]*(-1.0);
 				}
 			}
 		}

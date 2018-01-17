@@ -175,7 +175,7 @@ void Simulation::simulate() {
 		}
 
 		for(int n = 0; n < smoothingCount; ++n){
-			smoothTempEfield();
+			//smoothTempEfield();
 		}
 
 
@@ -274,8 +274,8 @@ void Simulation::simulate() {
 			//smoothBunemanBfieldGeneral(bunemanNewBx, bunemanNewBy, bunemanNewBz);
 		} else {
 			for(int n = 0; n < smoothingCount; ++n){
-				smoothNewEfield();
-				smoothNewBfield();
+				//smoothNewEfield();
+				//smoothNewBfield();
 			}
 		}
 		if (currentIteration % divergenceCleanUpParameter == 0) {
@@ -283,7 +283,7 @@ void Simulation::simulate() {
 				//cleanupDivergenceBuneman();
 				//cleanupDivergenceBunemanMagnetic();
 			} else {
-				cleanupDivergence(newEfield, chargeDensity);
+				//cleanupDivergence(newEfield, chargeDensity);
 				//cleanupDivergenceMagnetic();
 			}
 		}
