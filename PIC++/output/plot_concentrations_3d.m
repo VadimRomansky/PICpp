@@ -62,22 +62,12 @@ for t = 1:Ntypes,
     end;
 end;
 
-figure(Ntypes + 1);
-[X, Y] = meshgrid(middleY, middleX);
-surf(X, Y, charge_density);
+figure(1);
+[X, Y] = meshgrid(1:Ny, 1:Nx);
+surf(X, Y, Bx);
 shading interp;
-title ('charge density');
+title ('Bx');
 xlabel ('y');
 ylabel ('x');
-zlabel ('n cm^-3');
-grid ;
-
-figure(Ntypes + 2);
-[X, Y] = meshgrid(middleY, middleX);
-surf(X, Y, charge_density_hat);
-shading interp;
-title ('charge density hat');
-xlabel ('y');
-ylabel ('x');
-zlabel ('n cm^-3');
+zlabel ('Bx');
 grid ;
