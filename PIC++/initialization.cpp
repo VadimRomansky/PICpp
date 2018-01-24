@@ -334,8 +334,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		//}
 		scaleFactor = speed_of_light * plasma_period;
 
-		//plasma_period = 1.0;
-		//scaleFactor = 1.0;
+		plasma_period = 1.0;
+		scaleFactor = 1.0;
 
 		//scaleFactor = xsize;
 		//scaleFactor = xsizeGeneral;
