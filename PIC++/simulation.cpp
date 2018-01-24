@@ -85,7 +85,7 @@ void Simulation::simulate() {
 			//cleanupDivergenceBuneman();
 			//cleanUpDivergenceBunemanMagnetic();
 		} else {
-			//cleanupDivergence(newEfield, chargeDensity);
+			cleanupDivergence(newEfield, chargeDensity);
 			//cleanupDivergenceMagnetic();
 		}
 	}
@@ -283,7 +283,7 @@ void Simulation::simulate() {
 				//cleanupDivergenceBuneman();
 				//cleanupDivergenceBunemanMagnetic();
 			} else {
-				//cleanupDivergence(newEfield, chargeDensity);
+				cleanupDivergence(newEfield, chargeDensity);
 				//cleanupDivergenceMagnetic();
 			}
 		}

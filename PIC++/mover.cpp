@@ -733,7 +733,7 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d& velocity
                                                  Vector3d& BField) {
 	Matrix3d result = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-	double G = ((beta * (EField.scalarMult(velocity)) / speed_of_light_normalized_sqr) + gamma);
+	double G = ((beta * (EField.scalarMult(velocity)) / (speed_of_light_normalized_sqr * speed_of_light_correction_sqr)) + gamma);
 	beta = beta / G;
 	double beta2c = beta * beta / (speed_of_light_normalized_sqr * speed_of_light_correction_sqr);
 	double denominator = G * (1 + beta2c * BField.scalarMult(BField));
