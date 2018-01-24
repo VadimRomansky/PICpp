@@ -3154,7 +3154,7 @@ void outputGeneralInitialParameters(const char* outFileName, const char* outFile
 
 		double omegaPlasmaElectron = sqrt(
 			4 * pi * simulation->electron_charge_normalized * simulation->electron_charge_normalized * simulation->types[0].
-			concentration / (simulation->types[0].mass * (gamma * gamma * gamma))) / simulation->plasma_period;
+			concentration / (simulation->types[0].mass * (gamma))) / simulation->plasma_period;
 		fprintf(outFileWithText, "20 plasma electron frequency relativistic = %g\n", omegaPlasmaElectron);
 		fprintf(outFile, "%g\n", omegaPlasmaElectron);
 		double omega2 = 0;
@@ -3162,7 +3162,7 @@ void outputGeneralInitialParameters(const char* outFileName, const char* outFile
 			omega2 += 4 * pi * simulation->types[i].charge * simulation->types[i].charge * simulation->types[i].concentration /
 				simulation->types[i].mass;
 		}
-		double omegaPlasma = sqrt(omega2 / (gamma * gamma * gamma)) / simulation->plasma_period;
+		double omegaPlasma = sqrt(omega2 / (gamma)) / simulation->plasma_period;
 		fprintf(outFileWithText, "21 plasma frequency relativistic = %g\n", omegaPlasma);
 		fprintf(outFile, "%g\n", omegaPlasma);
 
