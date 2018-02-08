@@ -51,6 +51,7 @@ for t = 1:Ntypes,
             end;
         end;
         figure(t);
+        colormap Jet;
         [X, Y] = meshgrid(middleY, middleX);
         surf(X, Y, cons);
         shading interp;
@@ -63,6 +64,7 @@ for t = 1:Ntypes,
 end;
 
 figure(1);
+colormap Jet;
 [X, Y] = meshgrid(1:Ny, 1:Nx);
 surf(X, Y, Bx);
 shading interp;

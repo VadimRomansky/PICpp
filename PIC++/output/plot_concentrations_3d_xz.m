@@ -51,6 +51,7 @@ for t = 1:Ntypes,
             end;
         end;
         figure(t);
+        colormap Jet;
         [X, Z] = meshgrid(middleZ, middleX);
         surf(X, Z, cons);
         shading interp;
@@ -63,6 +64,7 @@ for t = 1:Ntypes,
 end;
 
 figure(Ntypes + 1);
+colormap Jet;
 [X, Z] = meshgrid(middleZ, middleX);
 surf(X, Z, charge_density);
 shading interp;
@@ -73,6 +75,7 @@ zlabel ('n cm^-3');
 grid ;
 
 figure(Ntypes + 2);
+colormap Jet;
 [X, Z] = meshgrid(middleZ, middleX);
 surf(X, Z, charge_density_hat);
 shading interp;
