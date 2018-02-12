@@ -274,8 +274,8 @@ void Simulation::simulate() {
 			//smoothBunemanBfieldGeneral(bunemanNewBx, bunemanNewBy, bunemanNewBz);
 		} else {
 			for(int n = 0; n < smoothingCount; ++n){
-				smoothNewEfield();
-				smoothNewBfield();
+				//smoothNewEfield();
+				//smoothNewBfield();
 			}
 		}
 		if (currentIteration % divergenceCleanUpParameter == 0) {
@@ -303,7 +303,7 @@ void Simulation::simulate() {
 				//updateMaxEderivativePoint();
 			}
 			//if(currentIteration > 150){
-			//filterFields(10);
+			filterFields(10);
 			//}
 			//filterFieldsLocal(5);
 		}

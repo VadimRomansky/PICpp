@@ -4505,7 +4505,7 @@ void Simulation::initializeLangmuirWave() {
 
 void Simulation::initializeFluxFromRight() {
 	boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
-	boundaryConditionTypeX = PERIODIC;
+	//boundaryConditionTypeX = PERIODIC;
 	boundaryConditionTypeY = PERIODIC;
 	boundaryConditionTypeZ = PERIODIC;
 	createParticles();
@@ -4589,12 +4589,29 @@ void Simulation::initializeFluxFromRight() {
 		}
 	}
 
+	double gamma = 1.0/sqrt(1 - V0.scalarMult(V0)/speed_of_light_normalized_sqr);
+	double p0 = massProton*V0.norm();
+	double protonGyroRadius = p0*speed_of_light_normalized/(fabs(electron_charge_normalized)*B0.norm());
+	int countGyroRadius = xsizeGeneral/protonGyroRadius;
+	double deltaK = 2*pi/xsizeGeneral;
+	double minK = deltaK;
+	double maxK = 2*pi/deltaX;
+	int maxCount = min2(2*countGyroRadius, xnumberGeneral);
+	int minCount = max2(1, countGyroRadius/2);
+	int count = maxCount - minCount + 1;
+
+	initializeRandomModes(count, minCount, 0.5);
+
 	double magneticEnergy = B0.scalarMult(B0) / (8 * pi);
 	double kineticEnergy = density * V0.scalarMult(V0) / 2;
 
 	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	if (rank == 0) fprintf(informationFile, "magneticEnergy/kineticEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
 	if (rank == 0) printf("magneticEnergy/kinetikEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
+	if (rank == 0) printf("protonGyroRadius = %15.10g\n", protonGyroRadius);
+	if (rank == 0) printf("countGyroRadius = %d\n", countGyroRadius);
+	if (rank == 0) printf("minCount = %d\n", minCount);
+	if (rank == 0) printf("maxCount = %d\n", maxCount);
 	fflush(stdout);
 	if (rank == 0) fclose(informationFile);
 
@@ -4991,6 +5008,81 @@ void Simulation::initializeKolmogorovSpectrum(int first, int last, double turbul
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					Bfield[i][j][k].y += Bamplitude * sin(kw * middleXgrid[i] + phases[2 * harmCounter]);
+					Bfield[i][j][k].z += Bamplitude * cos(kw * middleXgrid[i] + phases[2 * harmCounter + 1]);
+					newBfield[i][j][k] = Bfield[i][j][k];
+				}
+			}
+		}
+	}
+
+	delete[] phases;
+}
+
+
+void Simulation::initializeRandomModes(int number, int minNumber, double energyFraction) {
+	//use if defined shockWavePoint
+
+	double deltaK = 2*pi/xsizeGeneral;
+	double minK = minNumber*deltaK;
+	double maxK = minK*number;
+
+	double constFieldFraction = sqrt(1.0 - energyFraction);
+
+
+	double energy = energyFraction * B0.scalarMult(B0);
+	double amplitude = sqrt(2*energy/number);
+
+	double* phases = new double[2 * number];
+
+	if (rank == 0) {
+		for (int i = 0; i < 2*number; ++i) {
+			phases[i] = 2 * pi * uniformDistribution();
+		}
+	}
+
+
+	MPI_Barrier(cartComm);
+	MPI_Bcast(phases, number, MPI_DOUBLE, 0, cartComm);
+	MPI_Barrier(cartComm);
+	
+	B0 = B0*constFieldFraction;
+	E0 = E0*constFieldFraction;
+
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				Bfield[i][j][k] = B0;
+				newBfield[i][j][k] = Bfield[i][j][k];
+			}
+		}
+	}
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					Efield[i][j][k] = E0;
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
+							Efield[i][j][k].y = 0;
+							Efield[i][j][k].z = 0;
+						}
+					}
+					tempEfield[i][j][k] = Efield[i][j][k];
+					newEfield[i][j][k] = Efield[i][j][k];
+					explicitEfield[i][j][k] = Efield[i][j][k];
+				}
+			}
+		}
+
+	for (int harmCounter = 1; harmCounter <= number; ++harmCounter) {
+		double kw = minK + harmCounter*deltaK;
+		double Bamplitude = amplitude;
+		///double phiY = 2 * pi * uniformDistribution();
+		//double phiZ = 2 * pi * uniformDistribution();
+
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					//Bfield[i][j][k].y += Bamplitude * sin(kw * middleXgrid[i] + phases[2 * harmCounter]);
 					Bfield[i][j][k].z += Bamplitude * cos(kw * middleXgrid[i] + phases[2 * harmCounter + 1]);
 					newBfield[i][j][k] = Bfield[i][j][k];
 				}
