@@ -4607,11 +4607,11 @@ void Simulation::initializeFluxFromRight() {
 
 	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	if (rank == 0) fprintf(informationFile, "magneticEnergy/kineticEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
-	if (rank == 0) printf("magneticEnergy/kinetikEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
-	if (rank == 0) printf("protonGyroRadius = %15.10g\n", protonGyroRadius);
-	if (rank == 0) printf("countGyroRadius = %d\n", countGyroRadius);
-	if (rank == 0) printf("minCount = %d\n", minCount);
-	if (rank == 0) printf("maxCount = %d\n", maxCount);
+	if (rank == 0) fprintf(informationFile, "magneticEnergy/kinetikEnergy = %15.10g\n", magneticEnergy / kineticEnergy);
+	if (rank == 0) fprintf(informationFile, "protonGyroRadius = %15.10g\n", protonGyroRadius);
+	if (rank == 0) fprintf(informationFile, "countGyroRadius = %d\n", countGyroRadius);
+	if (rank == 0) fprintf(informationFile, "minCount = %d\n", minCount);
+	if (rank == 0) fprintf(informationFile, "maxCount = %d\n", maxCount);
 	fflush(stdout);
 	if (rank == 0) fclose(informationFile);
 
@@ -5056,22 +5056,6 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 			}
 		}
 	}
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					Efield[i][j][k] = E0;
-					if (boundaryConditionTypeX != PERIODIC) {
-						if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
-							Efield[i][j][k].y = 0;
-							Efield[i][j][k].z = 0;
-						}
-					}
-					tempEfield[i][j][k] = Efield[i][j][k];
-					newEfield[i][j][k] = Efield[i][j][k];
-					explicitEfield[i][j][k] = Efield[i][j][k];
-				}
-			}
-		}
 
 	for (int harmCounter = 1; harmCounter <= number; ++harmCounter) {
 		double kw = minK + harmCounter*deltaK;
@@ -5089,6 +5073,27 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 			}
 		}
 	}
+
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					Efield[i][j][k] = E0;
+					if(i > 0 && i < xnumberAdded && j < ynumberAdded && k < znumberAdded) {
+						Vector3d B = (Bfield[i-1][j][k] + Bfield[i][j][k])*0.5;
+						Efield[i][j][k] = V0.vectorMult(B)/(speed_of_light_normalized * speed_of_light_correction*(-1.0));
+					}
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
+							Efield[i][j][k].y = 0;
+							Efield[i][j][k].z = 0;
+						}
+					}
+					tempEfield[i][j][k] = Efield[i][j][k];
+					newEfield[i][j][k] = Efield[i][j][k];
+					explicitEfield[i][j][k] = Efield[i][j][k];
+				}
+			}
+		}
 
 	delete[] phases;
 }
