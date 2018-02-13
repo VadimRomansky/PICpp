@@ -9,6 +9,7 @@
 #include "list"
 #include "largeVectorBasis.h"
 #include "massMatrix.h"
+#include "boundaryFieldEvaluator.h"
 
 class MatrixElement;
 class Complex;
@@ -195,6 +196,9 @@ public:
 	Vector3d leftEfield;
 	Vector3d rightBfield;
 	Vector3d leftBfield;
+
+	BoundaryFieldEvaluator* leftBoundaryFieldEvaluator;
+	BoundaryFieldEvaluator* rightBoundaryFieldEvaluator;
 
 	double omegaPlasmaProton;
 	double omegaPlasmaElectron;

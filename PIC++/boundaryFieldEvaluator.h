@@ -2,25 +2,36 @@
 #define boundaryFieldEvaluator
 #include "vector3d.h"
 
-class BaseBoundaryFieldEvaluator {
+class Simulation;
+
+class BoundaryFieldEvaluator {
 public:
-	BaseBoundaryFieldEvaluator();
-	~BaseBoundaryFieldEvaluator();
-	virtual Vector3d evaluateEfield(double& t) = 0;
-	virtual Vector3d evaluateBfield(double& t) = 0;
+	BoundaryFieldEvaluator();
+	~BoundaryFieldEvaluator();
+	virtual Vector3d evaluateEfield(double t, int j, int k) = 0;
+	virtual Vector3d evaluateBfield(double t, int j, int k) = 0;
 };
 
-class ConstantBoundaryFieldEvaluator : BaseBoundaryFieldEvaluator{
+/*Vector3d BoundaryFieldEvaluator::evaluateEfield(double& t, int j, int k) {
+	return Vector3d(0, 0, 0);
+}
+
+Vector3d BoundaryFieldEvaluator::evaluateBfield(double& t, int j, int k) {
+	return Vector3d(0, 0, 0);
+}*/
+
+
+class ConstantBoundaryFieldEvaluator : public BoundaryFieldEvaluator{
 	Vector3d E;
 	Vector3d B;
 public:
 	ConstantBoundaryFieldEvaluator(Vector3d& E0, Vector3d& B0);
 
-	virtual Vector3d evaluateEfield(double& t);
-	virtual Vector3d evaluateBfield(double& t);
+	virtual Vector3d evaluateEfield(double t, int j, int k);
+	virtual Vector3d evaluateBfield(double t, int j, int k);
 };
 
-class StripeBoundaryFieldEvaluator : BaseBoundaryFieldEvaluator{
+class StripeBoundaryFieldEvaluator : BoundaryFieldEvaluator{
 	Vector3d E;
 	Vector3d B;
 	double lambda;
@@ -31,8 +42,27 @@ class StripeBoundaryFieldEvaluator : BaseBoundaryFieldEvaluator{
 public:
 	StripeBoundaryFieldEvaluator(Vector3d& E0, Vector3d& B0, double l, double u, double shift);
 
-	virtual Vector3d evaluateEfield(double& t);
-	virtual Vector3d evaluateBfield(double& t);
+	virtual Vector3d evaluateEfield(double t, int j, int k);
+	virtual Vector3d evaluateBfield(double t, int j, int k);
+};
+
+class TurbulenceBoundaryFieldEvaluator : public  BoundaryFieldEvaluator {
+	Vector3d E0;
+	Vector3d B0;
+	Vector3d V0;
+	double x;
+	double speed_of_light_normalized;
+	int number;
+	double* amplitude;
+	double* phase;
+	double* omega;
+	double* kw;
+public:
+	TurbulenceBoundaryFieldEvaluator(Vector3d& E0, Vector3d& B0, Vector3d& V0, int number, double* amplitude, double* phase, double* kv, double* omega, double xv, double c);
+	~TurbulenceBoundaryFieldEvaluator();
+
+	virtual Vector3d evaluateEfield(double t, int j, int k);
+	virtual Vector3d evaluateBfield(double t, int j, int k);
 };
 
 #endif

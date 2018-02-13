@@ -1,8 +1,8 @@
 ﻿0                        input type CGS or Lapenta
-500 1 1                 grid numbers
-5E10 1E8 1E8         gridsizes
+1000 1 1                 grid numbers
+1E11 1E8 1E8         gridsizes
 5E8                    temperature
--2.924E10 0 0                  velocity
+-2.224E10 0 0                  velocity
 0 0 0                  elecctricField
 0.86605E-4 0 0.5E-4    magneticField
 20000000             max iterations

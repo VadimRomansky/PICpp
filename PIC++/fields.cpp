@@ -608,7 +608,7 @@ void Simulation::createSuperConductorLeftEquation(int i, int j, int k) {
 }
 
 void Simulation::createFreeRightEquation(int i, int j, int k) {
-	Vector3d rightPart = E0;
+	Vector3d rightPart = rightBoundaryFieldEvaluator->evaluateEfield(time + theta*deltaT, j, k);
 
 	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(1.0, i, j, k, 0));
 	maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(1.0, i, j, k, 1));
@@ -2583,7 +2583,7 @@ void Simulation::evaluateMagneticField() {
 					}
 					if ((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1) && (i >= xnumberAdded - 1 -
 						additionalBinNumber)) {
-						newBfield[i][j][k] = B0;
+						newBfield[i][j][k] = rightBoundaryFieldEvaluator->evaluateBfield(time+deltaT, j, k);
 					}
 				}
 			}

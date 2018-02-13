@@ -11,7 +11,7 @@ Nt(1:2) = 11;
 
 Nt(1) = fix(size(distribution_protons1,1)/Np) - 1;
 Nt(2) = fix(size(distribution_protons2,1)/Np) - 1;
-
+Nt(2) = Nt(1);
 factor1 = 1;
 factor2 = 1;
 %Nt(1)=60;

@@ -1698,6 +1698,9 @@ void Simulation::initialize() {
 		}
 	}
 
+	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
+	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
+
 	if (verbosity > 2) printf("creating particle types rank = %d\n", rank);
 
 	createParticleTypes(concentrations, particlesPerBin);
@@ -4510,6 +4513,7 @@ void Simulation::initializeFluxFromRight() {
 	boundaryConditionTypeZ = PERIODIC;
 	createParticles();
 	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized * speed_of_light_correction);
+	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
 	//initializeAlfvenWaveY(10, 1.0E-4);
 	if (solverType == BUNEMAN) {
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -4830,6 +4834,9 @@ void Simulation::initializeShockWave() {
 	exchangeGeneralBfield(Bfield);
 	exchangeGeneralBfield(newBfield);
 
+	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(Efield[xnumberAdded - additionalBinNumber][1+additionalBinNumber][1+additionalBinNumber], Bfield[xnumberAdded = additionalBinNumber][1+additionalBinNumber][1+additionalBinNumber]);
+	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(Efield[1+additionalBinNumber][1+additionalBinNumber][1+additionalBinNumber], Bfield[1+additionalBinNumber][1+additionalBinNumber][1+additionalBinNumber]);
+
 	if (rank == 0) printf("creating particles\n");
 
 	int n = 0;
@@ -4986,6 +4993,9 @@ void Simulation::initializeKolmogorovSpectrum(int first, int last, double turbul
 	double amplitude = sqrt(1.5 * energy * k0 / (power(minK, -2.0 / 3.0) - power(maxK, -2.0 / 3.0)));
 
 	double* phases = new double[2 * (last - first + 1)];
+	double* amplitudes = new double[2*(last - first + 1)];
+	double* knumbers = new double[(last - first + 1)];
+	double* omega = new double[(last - first + 1)];
 
 	if (rank == 0) {
 		for (int i = 0; i < 2 * (last - first + 1); ++i) {
@@ -5000,9 +5010,14 @@ void Simulation::initializeKolmogorovSpectrum(int first, int last, double turbul
 
 	for (int harmCounter = first; harmCounter <= last; ++harmCounter) {
 		double kw = 2 * pi * harmCounter / length;
+		int l = harmCounter - first;
 		double Bamplitude = amplitude * power(kw, -5.0 / 6.0);
 		///double phiY = 2 * pi * uniformDistribution();
 		//double phiZ = 2 * pi * uniformDistribution();
+		knumbers[l] = kw;
+		omega[l] = 0;
+		amplitudes[2*l] = Bamplitude;
+		amplitudes[2*l+1] = Bamplitude;
 
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -5015,7 +5030,13 @@ void Simulation::initializeKolmogorovSpectrum(int first, int last, double turbul
 		}
 	}
 
+	rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, last-first+1, amplitudes, phases, knumbers, omega, xgrid[xnumberAdded - additionalBinNumber], speed_of_light_normalized);
+	leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, last-first+1, amplitudes, phases, knumbers, omega, xgrid[1 + additionalBinNumber], speed_of_light_normalized);
+
 	delete[] phases;
+	delete[] amplitudes;
+	delete[] knumbers;
+	delete[] omega;
 }
 
 
@@ -5033,6 +5054,9 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 	double amplitude = sqrt(2*energy/number);
 
 	double* phases = new double[2 * number];
+	double* amplitudes = new double[2*number];
+	double* knumbers = new double[number];
+	double* omega = new double[number];
 
 	if (rank == 0) {
 		for (int i = 0; i < 2*number; ++i) {
@@ -5059,7 +5083,12 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 
 	for (int harmCounter = 1; harmCounter <= number; ++harmCounter) {
 		double kw = minK + harmCounter*deltaK;
+		int l = harmCounter - 1;
+		knumbers[l] = kw;
+		omega[l] = 0;
 		double Bamplitude = amplitude;
+		amplitudes[2*l] = 0;
+		amplitudes[2*l + 1] = amplitude;
 		///double phiY = 2 * pi * uniformDistribution();
 		//double phiZ = 2 * pi * uniformDistribution();
 
@@ -5095,7 +5124,13 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 			}
 		}
 
+	rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, xgrid[xnumberAdded - additionalBinNumber], speed_of_light_normalized);
+	leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, xgrid[1 + additionalBinNumber], speed_of_light_normalized);
+
 	delete[] phases;
+	delete[] amplitudes;
+	delete[] knumbers;
+	delete[] omega;
 }
 
 void Simulation::initializeTwoStream() {
@@ -5578,7 +5613,7 @@ void Simulation::initializeRingWeibel() {
 void Simulation::initializeHomogenouseFlow() {
 	boundaryConditionTypeX = FREE_BOTH;
 	boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
-	//boundaryConditionTypeX = PERIODIC;
+	boundaryConditionTypeX = PERIODIC;
 	createParticles();
 	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized);
 	//initializeAlfvenWaveY(10, 1.0E-4);
