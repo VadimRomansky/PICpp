@@ -413,10 +413,13 @@ void Simulation::cleanupDivergence1d(Vector3d*** field, double*** density) {
 
 		}
 	}
-
-	if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
-		newEfield[xnumber][0][0] = E0;
-		newEfield[xnumber + 1][0][0] = E0;
+	for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
+				newEfield[xnumber][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time+deltaT, j, k);
+				newEfield[xnumber + 1][j][k] = newEfield[xnumber][j][k];
+			}
+		}
 	}
 
 }

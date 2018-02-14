@@ -179,7 +179,7 @@ void Simulation::evaluateElectricField() {
 			if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-						tempEfield[xnumberAdded][j][k] = E0;
+						tempEfield[xnumberAdded][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time+theta*deltaT, j,k);
 					}
 				}
 			}
@@ -204,7 +204,7 @@ void Simulation::evaluateElectricField() {
 			if (cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-						newEfield[xnumberAdded][j][k] = E0;
+						newEfield[xnumberAdded][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time+deltaT, j,k);;
 					}
 				}
 			}
@@ -329,7 +329,9 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 									createFakeEquation(i, j, k);
 								}
 							} else if (i == 1 + additionalBinNumber) {
-								if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
+								if(boundaryConditionTypeX == FREE_BOTH){
+									createFreeLeftEquation(i, j, k);
+								} else if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 									createSuperConductorLeftEquation(i, j, k);
 								} else {
 									createInternalEquation(i, j, k);
@@ -386,7 +388,9 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 								createFakeEquation(i, j, k);
 							}
 						} else if (i == 1 + additionalBinNumber) {
-							if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
+							if (boundaryConditionTypeX == FREE_BOTH) {
+								createFreeLeftEquation(i, j, k);
+							} else if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 								createSuperConductorLeftEquation(i, j, k);
 							} else {
 								createInternalEquation(i, j, k);
@@ -624,7 +628,7 @@ void Simulation::createFreeRightEquation(int i, int j, int k) {
 }
 
 void Simulation::createFreeLeftEquation(int i, int j, int k) {
-	Vector3d rightPart = Efield[i][j][k];
+	Vector3d rightPart = leftBoundaryFieldEvaluator->evaluateEfield(time + theta*deltaT, j, k);
 
 	maxwellEquationMatrix[i][j][k][0].push_back(MatrixElement(1.0, i, j, k, 0));
 	maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(1.0, i, j, k, 1));
@@ -2593,7 +2597,11 @@ void Simulation::evaluateMagneticField() {
 			for (int i = 0; i <= additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-						newBfield[i][j][k] = newBfield[additionalBinNumber + 1][j][k];
+						if(boundaryConditionTypeX == FREE_BOTH) {
+							newBfield[i][j][k] = leftBoundaryFieldEvaluator->evaluateBfield(time + deltaT, j, k);
+						} else {
+							newBfield[i][j][k] = newBfield[additionalBinNumber + 1][j][k];
+						}
 					}
 				}
 			}
@@ -2615,7 +2623,7 @@ void Simulation::evaluateMagneticField() {
 }
 
 bool Simulation::isInResistiveLayer(int i, int j, int k) {
-	//return false;
+	return false;
 	if (boundaryConditionTypeX == PERIODIC) {
 		return false;
 	}

@@ -90,7 +90,7 @@ Vector3d TurbulenceBoundaryFieldEvaluator::evaluateBfield(double t, int j, int k
 
 Vector3d TurbulenceBoundaryFieldEvaluator::evaluateEfield(double t, int j, int k) {
 	Vector3d result = E0;
-	Vector3d B = evaluateBfield(t, j, k);
+	Vector3d B = evaluateBfield(t, j, k) - B0;
 	result = result - V0.vectorMult(B)/(speed_of_light_normalized*speed_of_light_correction);
 	return result;
 }

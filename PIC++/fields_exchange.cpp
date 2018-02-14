@@ -82,7 +82,7 @@ void Simulation::exchangeGeneralEfieldX(Vector3d*** field) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[1 + additionalBinNumber][j][k];
 						} else if (boundaryConditionTypeX == FREE_BOTH) {
-							field[i][j][k] = field[additionalBinNumber][j][k];
+							field[i][j][k] = leftBoundaryFieldEvaluator->evaluateEfield(time + deltaT, j, k);
 						}
 					}
 				}
@@ -93,7 +93,7 @@ void Simulation::exchangeGeneralEfieldX(Vector3d*** field) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
-						field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
+						field[xnumberAdded - 1 - i][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time + deltaT, j, k);;
 					}
 				}
 			}
@@ -167,9 +167,8 @@ void Simulation::exchangeGeneralEfieldX(Vector3d*** field) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[1 + additionalBinNumber][j][k];
 						} else if (boundaryConditionTypeX == FREE_BOTH) {
-							field[i][j][k] = field[additionalBinNumber][j][k];
+							field[i][j][k] = leftBoundaryFieldEvaluator->evaluateEfield(time + deltaT, j, k);
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -578,7 +577,7 @@ void Simulation::exchangeGeneralBfieldX(Vector3d*** field) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[additionalBinNumber + 1][j][k];
 						} else if (boundaryConditionTypeX == FREE_BOTH) {
-							field[i][j][k] = field[additionalBinNumber + 1][j][k];
+							field[i][j][k] = leftBoundaryFieldEvaluator->evaluateBfield(time + deltaT, j, k);
 						}
 					}
 				}
@@ -612,9 +611,9 @@ void Simulation::exchangeGeneralBfieldX(Vector3d*** field) {
 					//field[0][j][k] = field[2][j][k];
 					for (int i = 0; i <= additionalBinNumber; ++i) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
-							field[i][j][k] = Vector3d(0, 0, 0);
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
 							field[i][j][k] = field[additionalBinNumber + 1][j][k];
+						} else if (boundaryConditionTypeX == FREE_BOTH) {
+							field[i][j][k] = leftBoundaryFieldEvaluator->evaluateBfield(time + deltaT, j, k);
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}

@@ -5061,6 +5061,7 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 	if (rank == 0) {
 		for (int i = 0; i < 2*number; ++i) {
 			phases[i] = 2 * pi * uniformDistribution();
+			//phases[i] = 0;
 		}
 	}
 
@@ -5081,9 +5082,8 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 		}
 	}
 
-	for (int harmCounter = 1; harmCounter <= number; ++harmCounter) {
-		double kw = minK + harmCounter*deltaK;
-		int l = harmCounter - 1;
+	for (int l = 0; l < number; ++l) {
+		double kw = minK + l*deltaK;
 		knumbers[l] = kw;
 		omega[l] = 0;
 		double Bamplitude = amplitude;
@@ -5096,7 +5096,7 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					//Bfield[i][j][k].y += Bamplitude * sin(kw * middleXgrid[i] + phases[2 * harmCounter]);
-					Bfield[i][j][k].z += Bamplitude * cos(kw * middleXgrid[i] + phases[2 * harmCounter + 1]);
+					Bfield[i][j][k].z += Bamplitude * sin(kw * middleXgrid[i] + phases[2 * l + 1]);
 					newBfield[i][j][k] = Bfield[i][j][k];
 				}
 			}
@@ -5124,7 +5124,7 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 			}
 		}
 
-	rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, xgrid[xnumberAdded - additionalBinNumber], speed_of_light_normalized);
+	rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, middleXgrid[xnumberAdded - additionalBinNumber], speed_of_light_normalized);
 	leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, xgrid[1 + additionalBinNumber], speed_of_light_normalized);
 
 	delete[] phases;
