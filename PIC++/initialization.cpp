@@ -4594,7 +4594,7 @@ void Simulation::initializeFluxFromRight() {
 	}
 
 	double gamma = 1.0/sqrt(1 - V0.scalarMult(V0)/speed_of_light_normalized_sqr);
-	double p0 = massProton*V0.norm();
+	double p0 = gamma*massProton*V0.norm();
 	double protonGyroRadius = p0*speed_of_light_normalized/(fabs(electron_charge_normalized)*B0.norm());
 	int countGyroRadius = xsizeGeneral/protonGyroRadius;
 	double deltaK = 2*pi/xsizeGeneral;
@@ -5124,8 +5124,10 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 			}
 		}
 
-	rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, middleXgrid[xnumberAdded - additionalBinNumber], speed_of_light_normalized);
-	leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, xgrid[1 + additionalBinNumber], speed_of_light_normalized);
+	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
+	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
+	//rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, middleXgrid[xnumberAdded - additionalBinNumber], speed_of_light_normalized);
+	//leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, xgrid[1 + additionalBinNumber], speed_of_light_normalized);
 
 	delete[] phases;
 	delete[] amplitudes;
