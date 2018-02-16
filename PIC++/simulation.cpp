@@ -131,8 +131,8 @@ void Simulation::simulate() {
 
 		updateElectroMagneticParameters();
 		for(int n = 0; n < smoothingCount; ++n){
-			//smoothChargeDensityHat();
-			//smoothFlux();
+			smoothChargeDensityHat();
+			smoothFlux();
 		}
 
 		evaluateElectricField();
@@ -274,8 +274,8 @@ void Simulation::simulate() {
 			//smoothBunemanBfieldGeneral(bunemanNewBx, bunemanNewBy, bunemanNewBz);
 		} else {
 			for(int n = 0; n < smoothingCount; ++n){
-				smoothNewEfield();
-				smoothNewBfield();
+				//smoothNewEfield();
+				//smoothNewBfield();
 			}
 		}
 		if (currentIteration % divergenceCleanUpParameter == 0) {
