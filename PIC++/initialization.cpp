@@ -4604,7 +4604,7 @@ void Simulation::initializeFluxFromRight() {
 	int minCount = max2(1, countGyroRadius/2);
 	int count = maxCount - minCount + 1;
 
-	initializeRandomModes(count, minCount, 0.5);
+	//initializeRandomModes(count, minCount, 0.5);
 
 	double magneticEnergy = B0.scalarMult(B0) / (8 * pi);
 	double kineticEnergy = density * V0.scalarMult(V0) / 2;
