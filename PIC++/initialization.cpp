@@ -5124,10 +5124,10 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 			}
 		}
 
-	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
-	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
-	//rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, middleXgrid[xnumberAdded - additionalBinNumber], speed_of_light_normalized);
-	//leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, xgrid[1 + additionalBinNumber], speed_of_light_normalized);
+	//rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
+	//leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
+	rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, middleXgrid[xnumberAdded - additionalBinNumber], speed_of_light_normalized);
+	leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, xgrid[1 + additionalBinNumber], speed_of_light_normalized);
 
 	delete[] phases;
 	delete[] amplitudes;

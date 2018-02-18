@@ -253,6 +253,7 @@ void Simulation::simulate() {
 		}
 
 		updateDensityParameters();
+		//smoothChargeDensity();
 		if ((rank == 0) && (verbosity > 0)) {
 			printf("finish update density parameters\n");
 		}
@@ -274,8 +275,8 @@ void Simulation::simulate() {
 			//smoothBunemanBfieldGeneral(bunemanNewBx, bunemanNewBy, bunemanNewBz);
 		} else {
 			for(int n = 0; n < smoothingCount; ++n){
-				//smoothNewEfield();
-				//smoothNewBfield();
+				smoothNewEfield();
+				smoothNewBfield();
 			}
 		}
 		if (currentIteration % divergenceCleanUpParameter == 0) {
