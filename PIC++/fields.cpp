@@ -231,7 +231,7 @@ void Simulation::evaluateElectricField() {
 			}
 		}
 	}
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("evaluating electric field time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -294,7 +294,7 @@ void Simulation::updateFields() {
 		updateEfield();
 		updateBfield();
 	}
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating fields time = %g sec\n", procTime / CLOCKS_PER_SEC);

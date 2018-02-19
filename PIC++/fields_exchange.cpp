@@ -19,9 +19,18 @@
 #include "paths.h"
 
 void Simulation::exchangeEfield() {
+	double procTime = 0;
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
 	exchangeGeneralEfield(Efield);
 	exchangeGeneralEfield(tempEfield);
 	exchangeGeneralEfield(newEfield);
+	//MPI_Barrier(cartComm);
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("exchange all E fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}
 }
 
 void Simulation::exchangeGeneralEfield(Vector3d*** field) {
@@ -62,7 +71,7 @@ void Simulation::exchangeGeneralEfieldX(Vector3d*** field) {
 		bcount = 0;
 		if ((cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			if (verbosity > 2) printf("receive general field rigth from %d to %d\n", rightRank, rank);
-			for (int i = 0; i < 2 + additionalBinNumber; ++i)
+			for (int i = 0; i < 2 + additionalBinNumber; ++i){
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
 						for (int l = 0; l < 3; ++l) {
@@ -71,6 +80,7 @@ void Simulation::exchangeGeneralEfieldX(Vector3d*** field) {
 						}
 					}
 				}
+			}
 		}
 
 		if ((cartCoord[0] == 0) && (boundaryConditionTypeX != PERIODIC)) {
@@ -482,9 +492,18 @@ void Simulation::exchangeGeneralEfieldZ(Vector3d*** field) {
 }
 
 void Simulation::exchangeGeneralBfield(Vector3d*** field) {
+	/*double procTime = 0;
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}*/
 	exchangeGeneralBfieldX(field);
 	exchangeGeneralBfieldY(field);
 	exchangeGeneralBfieldZ(field);
+	/*MPI_Barrier(cartComm);
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("exchange b field time = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}*/
 }
 
 void Simulation::exchangeGeneralBfieldX(Vector3d*** field) {

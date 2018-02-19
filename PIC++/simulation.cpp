@@ -121,6 +121,7 @@ void Simulation::simulate() {
 		}
 
 		double iterationTime = 0;
+		MPI_Barrier(cartComm);
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			iterationTime = clock();
 		}
@@ -130,9 +131,17 @@ void Simulation::simulate() {
 		evaluateParticlesRotationTensor();
 
 		updateElectroMagneticParameters();
+		double procTime = 0;
+		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+			procTime = clock();
+		}
 		for(int n = 0; n < smoothingCount; ++n){
 			smoothChargeDensityHat();
 			smoothFlux();
+		}
+		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+			procTime = clock() - procTime;
+			printf("smoothing chatge density and flux = %g sec\n", procTime / CLOCKS_PER_SEC);
 		}
 
 		evaluateElectricField();
@@ -161,17 +170,17 @@ void Simulation::simulate() {
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
 			exchangeBunemanBfield(bunemanNewBx, bunemanNewBy, bunemanNewBz);
 		}
-		double procTime = 0;
+		procTime = 0;
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			procTime = clock();
 		}
 		exchangeGeneralBfield(newBfield);
 		exchangeGeneralEfield(tempEfield);
 		exchangeGeneralEfield(newEfield);
-		MPI_Barrier(cartComm);
+		//MPI_Barrier(cartComm);
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
-			printf("exchanging field time = %g sec\n", procTime / CLOCKS_PER_SEC);
+			printf("exchanging all B field time = %g sec\n", procTime / CLOCKS_PER_SEC);
 		}
 
 		for(int n = 0; n < smoothingCount; ++n){
@@ -189,7 +198,7 @@ void Simulation::simulate() {
 		//MPI_Barrier(cartComm);
 		if ((rank == 0) && (verbosity > 1)) printLog("start exchange particles\n");
 		if ((rank == 0) && (verbosity > 1)) printf("start exchange particles\n");
-		MPI_Barrier(cartComm);
+		//MPI_Barrier(cartComm);
 		updateTheoreticalEnergy();
 		exchangeParticles();
 
@@ -236,7 +245,7 @@ void Simulation::simulate() {
 		if (preserveChargeGlobal && (boundaryConditionTypeX != PERIODIC)) {
 			addToPreserveChargeGlobal();
 		}
-		MPI_Barrier(cartComm);
+		//MPI_Barrier(cartComm);
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
 			printf("injecting and preserving time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -246,7 +255,7 @@ void Simulation::simulate() {
 			procTime = clock();
 		}
 		updateParticleCorrelationMaps();
-		MPI_Barrier(cartComm);
+		//MPI_Barrier(cartComm);
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
 			printf("updating correlation maps = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -264,12 +273,15 @@ void Simulation::simulate() {
 		if ((rank == 0) && (verbosity > 0)) {
 			printf("finish exchange new efield\n");
 		}
-		MPI_Barrier(cartComm);
+		//MPI_Barrier(cartComm);
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
 			printf("exchanging fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
 		}
 
+		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+			procTime = clock();
+		}
 		if (solverType == BUNEMAN) {
 			//smoothBunemanEfieldGeneral(bunemanNewEx, bunemanNewEy, bunemanNewEz);
 			//smoothBunemanBfieldGeneral(bunemanNewBx, bunemanNewBy, bunemanNewBz);
@@ -278,6 +290,11 @@ void Simulation::simulate() {
 				smoothNewEfield();
 				smoothNewBfield();
 			}
+		}
+		//MPI_Barrier(cartComm);
+		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+			procTime = clock() - procTime;
+			printf("smoothing fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
 		}
 		if (currentIteration % divergenceCleanUpParameter == 0) {
 			if (solverType == BUNEMAN) {
@@ -289,16 +306,36 @@ void Simulation::simulate() {
 			}
 		}
 
+		/*if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+			procTime = clock();
+		}
 		updateMaxEderivativePoint();
+		MPI_Barrier(cartComm);
+		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+			procTime = clock() - procTime;
+			printf("updating max e derivative point = %g sec\n", procTime / CLOCKS_PER_SEC);
+		}
+
 		MPI_Barrier(cartComm);
 		if ((rank == 0) && (verbosity > 0)) {
 			printf("finish updating derEx point\n");
+		}*/
+
+		/*if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+			procTime = clock();
 		}
 		updateMaxConcentrationDerivativePoint();
 		MPI_Barrier(cartComm);
+		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+			procTime = clock() - procTime;
+			printf("updating max concentration derivative point = %g sec\n", procTime / CLOCKS_PER_SEC);
+		}
+
+		MPI_Barrier(cartComm);
 		if ((rank == 0) && (verbosity > 0)) {
 			printf("finish updating shock wave point\n");
-		}
+		}*/
+
 		if (currentIteration % filteringParameter == 0) {
 			if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 				//updateMaxEderivativePoint();
@@ -334,7 +371,7 @@ void Simulation::simulate() {
 		if ((rank == 0) && (verbosity > 0)) {
 			printf("finish exchange fields\n");
 		}
-		MPI_Barrier(cartComm);
+		//MPI_Barrier(cartComm);
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
 			printf("exchanging fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -364,7 +401,7 @@ void Simulation::simulate() {
 		}*/
 
 		time += deltaT;
-
+		MPI_Barrier(cartComm);
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			iterationTime = clock() - iterationTime;
 			printf("iteration except outputing time = %g sec\n", iterationTime / CLOCKS_PER_SEC);
@@ -1129,7 +1166,7 @@ void Simulation::updateDeltaT() {
 		MPI_Barrier(cartComm);
 	}
 	if ((rank == 0) && (verbosity > 0)) printLog("end updating time step\n");
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating deltaT = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -1237,6 +1274,10 @@ void Simulation::checkParticleInBox(Particle& particle) {
 }
 
 void Simulation::updateTheoreticalEnergy() {
+	double procTime = 0;
+		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+			procTime = clock();
+		}
 	int minI = 1 + additionalBinNumber;
 	if (cartCoord[0] == 0 && boundaryConditionTypeX != PERIODIC) {
 		minI = 0;
@@ -1324,6 +1365,11 @@ void Simulation::updateTheoreticalEnergy() {
 	}
 	//}
 	//}
+	//MPI_Barrier(cartComm);
+		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+			procTime = clock() - procTime;
+			printf("ipdate theoretical energy time = %g sec\n", procTime / CLOCKS_PER_SEC);
+		}
 }
 
 void Simulation::updateEnergy() {
@@ -1676,7 +1722,7 @@ void Simulation::updateParameters() {
 		maxBfield = Vector3d(temp[0], temp[1], temp[2]);
 		maxEfield = Vector3d(temp[3], temp[4], temp[5]);
 	}
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
@@ -1750,7 +1796,7 @@ void Simulation::updateAnisotropy() {
 	delete[] normalV2;
 	delete[] inBuffer;
 	delete[] outBuffer;
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating anisotropy time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -1821,7 +1867,7 @@ void Simulation::updateShockWaveX() {
 
 	shockWaveX = tempShockWavex[0];
 
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating shock wave = %g sec\n", procTime / CLOCKS_PER_SEC);

@@ -132,7 +132,7 @@ void Simulation::filterFields(int cutWaveNumber) {
 	exchangeGeneralEfield(newEfield);
 	exchangeGeneralBfield(newBfield);
 
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("filtering time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -832,7 +832,7 @@ void Simulation::filterFieldGeneralRightMirror(Vector3d*** field, int cutWaveNum
 ///////local/////////
 
 void Simulation::filterFieldsLocal(int cutWaveNumber) {
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	double procTime = 0;
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
@@ -849,7 +849,7 @@ void Simulation::filterFieldsLocal(int cutWaveNumber) {
 	exchangeGeneralEfield(newEfield);
 	exchangeGeneralBfield(newBfield);
 
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("filtering time = %g sec\n", procTime / CLOCKS_PER_SEC);

@@ -102,9 +102,9 @@ void Simulation::createSmoothingMatrix(double smoothingmatrix[3][3][3]) {
 
 void Simulation::smoothVectorNodeParameter(Vector3d*** E) {
 	int minI = 1 + additionalBinNumber;
-	/*if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
+	if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 		minI = 2 + additionalBinNumber;
-	}*/
+	}
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
 
 	double smoothingmatrix[3][3][3];
@@ -185,7 +185,7 @@ void Simulation::smoothTempEfield() {
 	smoothVectorNodeParameter(tempEfield);
 
 	exchangeGeneralEfield(tempEfield);
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("smoothing new Efield time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -193,35 +193,35 @@ void Simulation::smoothTempEfield() {
 }
 
 void Simulation::smoothNewEfield() {
-	double procTime = 0;
+	/*double procTime = 0;
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
-	}
+	}*/
 
 	smoothVectorNodeParameter(newEfield);
 
 	exchangeGeneralEfield(newEfield);
-	MPI_Barrier(cartComm);
+	/*MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("smoothing new Efield time = %g sec\n", procTime / CLOCKS_PER_SEC);
-	}
+	}*/
 }
 
 void Simulation::smoothFlux() {
-	double procTime = 0;
+	/*double procTime = 0;
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
-	}
+	}*/
 
 	smoothVectorNodeParameter(electricFlux);
 
 	exchangeGeneralEfield(electricFlux);
-	MPI_Barrier(cartComm);
+	/*MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("smoothing new Efield time = %g sec\n", procTime / CLOCKS_PER_SEC);
-	}
+	}*/
 }
 
 void Simulation::smoothVectorCellParameter(Vector3d*** B) {
