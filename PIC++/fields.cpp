@@ -70,7 +70,7 @@ void Simulation::evaluateElectricField() {
 			//biconjugateStabilizedGradientMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, maxwellEquationMatrixSize, maxErrorLevel, maxGMRESIterations, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateMaxwell, firstResidualBiconjugateMaxwell, vBiconjugateMaxwell, pBiconjugateMaxwell, sBiconjugateMaxwell, tBiconjugateMaxwell, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
 
 
-			MPI_Barrier(cartComm);
+			//MPI_Barrier(cartComm);
 
 			exchangeLargeVector(gmresOutput, xnumberAdded, ynumberAdded, znumberAdded, 3, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backOutGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
 
@@ -106,7 +106,7 @@ void Simulation::evaluateElectricField() {
 			sendLargeVectorToTopReceiveFromBottom(gmresOutput, topOutGmresBuffer, bottomInGmresBuffer, xnumberAdded,
 			                                      ynumberAdded, znumberAdded, 3, additionalBinNumber, cartComm);*/
 
-			MPI_Barrier(cartComm);
+			//MPI_Barrier(cartComm);
 
 			double omega2 = 0;
 			for (int i = 0; i < typesNumber; ++i) {
@@ -2615,7 +2615,7 @@ void Simulation::evaluateMagneticField() {
 			}
 		}*/
 	}
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("evaluating magnetic field time = %g sec\n", procTime / CLOCKS_PER_SEC);

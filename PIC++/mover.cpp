@@ -44,7 +44,7 @@ void Simulation::moveParticles() {
 	//}
 	if ((rank == 0) && (verbosity > 0)) printf("end moving particles\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("end moving particles\n");
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("moving particles time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -144,7 +144,7 @@ void Simulation::removeEscapedParticles() {
 	}
 	escapedParticlesTop.clear();
 
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("removing escaped particles time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -171,7 +171,7 @@ void Simulation::eraseEscapedPaticles() {
 	particles.clear();
 	particles = tempParticles;
 	tempParticles.clear();
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("erasing escaped particles time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -722,7 +722,7 @@ void Simulation::evaluateParticlesRotationTensor() {
 		particle->rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
 
 	}
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("evaluating ParticlesRotationTensor time = %g sec\n", procTime / CLOCKS_PER_SEC);

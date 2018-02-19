@@ -468,7 +468,7 @@ void Simulation::updateElectroMagneticParameters() {
 
 		if (rank == 0 && (verbosity > 0)) printf("start exchange parameters\n");
 		if ((verbosity > 1)) printf("sum charge density hat\n");
-		MPI_Barrier(cartComm);
+		//MPI_Barrier(cartComm);
 		sumChargeDensityHatX();
 		sumChargeDensityHatY();
 		sumChargeDensityHatZ();
@@ -593,7 +593,7 @@ void Simulation::updateElectroMagneticParameters() {
 		    fprintf(tempDensityFile, "%28.22g\n", chargeDensityHat[i][0][0]);
 		}
 		fclose(tempDensityFile);*/
-		MPI_Barrier(cartComm);
+		//MPI_Barrier(cartComm);
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
 			printf("updating electromagnetic parameters time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -655,7 +655,7 @@ void Simulation::updateElectroMagneticParameters() {
 		}
 	}
 	if ((verbosity > 1)) printf("finish updating electromagnetic parameters\n");
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("exchanging electromagnetic parameters time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -785,7 +785,7 @@ void Simulation::updateDensityParameters() {
 		}
 	}
 
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if ((verbosity > 0)) {
 		printf("sum densityParameters\n");
 	}
@@ -794,7 +794,7 @@ void Simulation::updateDensityParameters() {
 		printf("sum cell parameters x\n");
 	}
 	sumCellParametersX();
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if ((rank == 0) && (verbosity > 0)) {
 		printf("finish sum cell parameters x\n");
 	}
@@ -802,7 +802,7 @@ void Simulation::updateDensityParameters() {
 		printf("sum cell parameters y\n");
 	}
 	sumCellParametersY();
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if ((rank == 0) && (verbosity > 0)) {
 		printf("finish sum cell parameters y\n");
 	}
@@ -810,7 +810,7 @@ void Simulation::updateDensityParameters() {
 		printf("sum cell parameters z\n");
 	}
 	sumCellParametersZ();
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if ((rank == 0) && (verbosity > 0)) {
 		printf("finish sum cell parameters z\n");
 	}
@@ -818,7 +818,7 @@ void Simulation::updateDensityParameters() {
 		printf("sum cell  xector parameters x\n");
 	}
 	sumCellVectorParametersX();
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if ((rank == 0) && (verbosity > 1)) {
 		printf("finish sum cell vector parameters x\n");
 	}
@@ -886,7 +886,7 @@ void Simulation::updateDensityParameters() {
 	if ((verbosity > 2)) {
 		printf("finish update density parameters\n");
 	}
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating density parameters time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -1040,7 +1040,6 @@ void Simulation::updateBunemanFlux() {
 	//MPI_Barrier(cartComm);
 	if ((rank == 0) && (verbosity > 0)) printf("updating buneman flux\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("updating buneman flux\n");
-
 	int particlePartsCount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
