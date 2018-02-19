@@ -108,6 +108,9 @@
     <ClCompile Include="fields_filtering.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="creating_arrays.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h">
@@ -174,6 +177,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="paths.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="creating_arrays.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

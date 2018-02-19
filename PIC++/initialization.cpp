@@ -22,6 +22,7 @@
 #include "input.h"
 #include "complex.h"
 #include "paths.h"
+#include "creating_arrays.h"
 
 Simulation::Simulation() {
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -5685,16 +5686,7 @@ void Simulation::createArrays() {
 	if (rank == 0) printf("creating gmresOutput arrays\n");
 	if (rank == 0) fflush(stdout);
 
-	gmresOutput = new double ***[xnumberAdded];
-	for (int i = 0; i < xnumberAdded; ++i) {
-		gmresOutput[i] = new double **[ynumberAdded];
-		for (int j = 0; j < ynumberAdded; ++j) {
-			gmresOutput[i][j] = new double *[znumberAdded];
-			for (int k = 0; k < znumberAdded; ++k) {
-				gmresOutput[i][j][k] = new double[maxwellEquationMatrixSize];
-			}
-		}
-	}
+	gmresOutput = create4array(xnumberAdded, ynumberAdded, znumberAdded, maxwellEquationMatrixSize);
 
 	gmresMaxwellBasis = new LargeVectorBasis(20, xnumberAdded, ynumberAdded, znumberAdded, 3);
 	gmresCleanupBasis = new LargeVectorBasis(20, xnumberAdded, ynumberAdded, znumberAdded, 1);
@@ -5703,94 +5695,34 @@ void Simulation::createArrays() {
 	if (rank == 0) fflush(stdout);
 	// if(rank == 0) printLog("creating fields arrays\n");
 
-	Efield = new Vector3d **[xnumberAdded + 1];
-	newEfield = new Vector3d **[xnumberAdded + 1];
-	tempEfield = new Vector3d **[xnumberAdded + 1];
-	explicitEfield = new Vector3d **[xnumberAdded + 1];
-	tempNodeParameter = new double**[xnumberAdded + 1];
-	tempNodeVectorParameter = new Vector3d**[xnumberAdded + 1];
-	tempNodeMatrixParameter = new Matrix3d**[xnumberAdded + 1];
-	rotB = new Vector3d **[xnumberAdded + 1];
-	Ederivative = new Vector3d **[xnumberAdded + 1];
-	Bfield = new Vector3d **[xnumberAdded];
-	newBfield = new Vector3d **[xnumberAdded];
-	rotE = new Vector3d **[xnumberAdded];
-	Bderivative = new Vector3d **[xnumberAdded];
-	tempCellParameter = new double**[xnumberAdded];
-	tempCellVectorParameter = new Vector3d**[xnumberAdded];
-	tempCellMatrixParameter = new Matrix3d**[xnumberAdded];
+	Efield = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	newEfield = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	tempEfield = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	explicitEfield = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	tempNodeParameter = create3array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	tempNodeVectorParameter = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	tempNodeMatrixParameter = create3matrixArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	rotB = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	Ederivative = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+
+	Bfield = create3vectorArray(xnumberAdded, ynumberAdded, znumberAdded);
+	newBfield = create3vectorArray(xnumberAdded, ynumberAdded, znumberAdded);
+	rotE = create3vectorArray(xnumberAdded, ynumberAdded, znumberAdded);
+	Bderivative = create3vectorArray(xnumberAdded, ynumberAdded, znumberAdded);
+	tempCellParameter = create3array(xnumberAdded, ynumberAdded, znumberAdded);
+	tempCellVectorParameter = create3vectorArray(xnumberAdded, ynumberAdded, znumberAdded);
+	tempCellMatrixParameter = create3matrixArray(xnumberAdded, ynumberAdded, znumberAdded);
 
 	massMatrix = new MassMatrix**[xnumberAdded + 1];
 	tempMassMatrix = new MassMatrix**[xnumberAdded + 1];
 
-	for (int i = 0; i < xnumberAdded; ++i) {
-		Bfield[i] = new Vector3d *[ynumberAdded];
-		newBfield[i] = new Vector3d *[ynumberAdded];
-		rotE[i] = new Vector3d *[ynumberAdded];
-		Bderivative[i] = new Vector3d *[ynumberAdded];
-		tempCellParameter[i] = new double*[ynumberAdded];
-		tempCellVectorParameter[i] = new Vector3d*[ynumberAdded];
-		tempCellMatrixParameter[i] = new Matrix3d*[ynumberAdded];
-		for (int j = 0; j < ynumberAdded; ++j) {
-			//if(rank == 0) printf("%d %d\n", i, j);
-			//if(rank == 0) fflush((stdout));
-			Bfield[i][j] = new Vector3d[znumberAdded];
-			newBfield[i][j] = new Vector3d[znumberAdded];
-			tempCellParameter[i][j] = new double[znumberAdded];
-			tempCellVectorParameter[i][j] = new Vector3d[znumberAdded];
-			tempCellMatrixParameter[i][j] = new Matrix3d[znumberAdded];
-			rotE[i][j] = new Vector3d[znumberAdded];
-			Bderivative[i][j] = new Vector3d[znumberAdded];
-			for (int k = 0; k < znumberAdded; ++k) {
-				Bfield[i][j][k] = Vector3d(0, 0, 0);
-				newBfield[i][j][k] = Vector3d(0, 0, 0);
-				tempCellParameter[i][j][k] = 0;
-				tempCellVectorParameter[i][j][k] = Vector3d(0, 0, 0);
-				tempCellMatrixParameter[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				rotE[i][j][k] = Vector3d(0, 0, 0);
-				Bderivative[i][j][k] = Vector3d(0, 0, 0);
-			}
-		}
-	}
-
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		Efield[i] = new Vector3d *[ynumberAdded + 1];
-		newEfield[i] = new Vector3d *[ynumberAdded + 1];
-		tempEfield[i] = new Vector3d *[ynumberAdded + 1];
-		tempNodeParameter[i] = new double*[ynumberAdded + 1];
-		tempNodeVectorParameter[i] = new Vector3d*[ynumberAdded + 1];
-		tempNodeMatrixParameter[i] = new Matrix3d*[ynumberAdded + 1];
-		explicitEfield[i] = new Vector3d *[ynumberAdded + 1];
-		rotB[i] = new Vector3d *[ynumberAdded + 1];
-		Ederivative[i] = new Vector3d *[ynumberAdded + 1];
 		massMatrix[i] = new MassMatrix*[ynumberAdded + 1];
 		tempMassMatrix[i] = new MassMatrix*[ynumberAdded + 1];
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			//if(rank == 0) printf("%d %d\n", i, j);
-			//if(rank == 0) fflush((stdout));
-			Efield[i][j] = new Vector3d[znumberAdded + 1];
-			newEfield[i][j] = new Vector3d[znumberAdded + 1];
-			tempEfield[i][j] = new Vector3d[znumberAdded + 1];
-			tempNodeParameter[i][j] = new double[znumberAdded + 1];
-			tempNodeVectorParameter[i][j] = new Vector3d[znumberAdded + 1];
-			tempNodeMatrixParameter[i][j] = new Matrix3d[znumberAdded + 1];
-			explicitEfield[i][j] = new Vector3d[znumberAdded + 1];
-			rotB[i][j] = new Vector3d[znumberAdded + 1];
-			Ederivative[i][j] = new Vector3d[znumberAdded + 1];
-
 			massMatrix[i][j] = new MassMatrix[znumberAdded + 1];
 			tempMassMatrix[i][j] = new MassMatrix[znumberAdded + 1];
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				Efield[i][j][k] = Vector3d(0, 0, 0);
-				newEfield[i][j][k] = Vector3d(0, 0, 0);
-				tempEfield[i][j][k] = Vector3d(0, 0, 0);
-				tempNodeParameter[i][j][k] = 0;
-				tempNodeVectorParameter[i][j][k] = Vector3d(0, 0, 0);
-				tempNodeMatrixParameter[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				explicitEfield[i][j][k] = Vector3d(0, 0, 0);
-				rotB[i][j][k] = Vector3d(0, 0, 0);
-				Ederivative[i][j][k] = Vector3d(0, 0, 0);
-
 				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
 					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
 						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
@@ -5800,7 +5732,6 @@ void Simulation::createArrays() {
 									tempMassMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[curI][curJ] = 0;
 								}
 							}
-
 							massMatrix[i][j][k].xindex[tempI] = i + tempI - splineOrder - 1;
 							massMatrix[i][j][k].yindex[tempJ] = j + tempJ - splineOrder - 1;
 							massMatrix[i][j][k].zindex[tempK] = k + tempK - splineOrder - 1;
@@ -5852,49 +5783,19 @@ void Simulation::createArrays() {
 	//if(rank == 0) printLog("creating arrays for divergence\n");
 
 	divergenceCleanUpMatrix = new std::vector < MatrixElement > ***[xnumberAdded + 1];
-	divergenceCleanUpRightPart = new double ***[xnumberAdded + 1];
 
-	divergenceCleaningField = new double ***[xnumberAdded + 1];
-	divergenceCleaningPotential = new double ***[xnumberAdded + 1];
-	tempDivergenceCleaningPotential = new double ***[xnumberAdded + 1];
-	divergenceCleaningPotentialFourier = new double **[xnumberAdded];
+	divergenceCleanUpRightPart = create4array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1, 3);
+	divergenceCleaningField = create4array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1, 3);
+	divergenceCleaningPotential = create4array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1, 1);
+	tempDivergenceCleaningPotential = create4array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1, 1);
+	divergenceCleaningPotentialFourier = create3array(xnumberAdded, ynumberAdded, znumberAdded);
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		divergenceCleanUpMatrix[i] = new std::vector < MatrixElement > **[ynumberAdded + 1];
-		divergenceCleanUpRightPart[i] = new double **[ynumberAdded + 1];
-		divergenceCleaningField[i] = new double **[ynumberAdded + 1];
-		divergenceCleaningPotential[i] = new double **[ynumberAdded + 1];
-		tempDivergenceCleaningPotential[i] = new double **[ynumberAdded + 1];
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			divergenceCleanUpMatrix[i][j] = new std::vector < MatrixElement > *[znumberAdded + 1];
-			divergenceCleanUpRightPart[i][j] = new double *[znumberAdded + 1];
-			divergenceCleaningField[i][j] = new double *[znumberAdded + 1];
-			divergenceCleaningPotential[i][j] = new double *[znumberAdded + 1];
-			tempDivergenceCleaningPotential[i][j] = new double *[znumberAdded + 1];
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				//if(rank == 0) printf("%d %d %d\n", i, j, k);
-				//if(rank == 0) fflush((stdout));
-				divergenceCleaningField[i][j][k] = new double[3];
-				divergenceCleanUpRightPart[i][j][k] = new double[3];
 				divergenceCleanUpMatrix[i][j][k] = new std::vector < MatrixElement >[3];
-				divergenceCleaningPotential[i][j][k] = new double[1];
-				tempDivergenceCleaningPotential[i][j][k] = new double[1];
-				divergenceCleaningPotential[i][j][k][0] = 0;
-				tempDivergenceCleaningPotential[i][j][k][0] = 0;
-				for (int l = 0; l < 3; ++l) {
-					divergenceCleaningField[i][j][k][l] = 0;
-					divergenceCleanUpRightPart[i][j][k][l] = 0;
-				}
-			}
-		}
-	}
-
-	for (int i = 0; i < xnumberAdded; ++i) {
-		divergenceCleaningPotentialFourier[i] = new double *[ynumberAdded];
-		for (int j = 0; j < ynumberAdded; ++j) {
-			divergenceCleaningPotentialFourier[i][j] = new double[znumberAdded];
-			for (int k = 0; k < znumberAdded; ++k) {
-				divergenceCleaningPotentialFourier[i][j][k] = 0;
 			}
 		}
 	}
@@ -5983,89 +5884,27 @@ void Simulation::createArrays() {
 	particleEnergies = new double ***[typesNumber];
 	particleBulkVelocities = new Vector3d ***[typesNumber];
 	for (int t = 0; t < typesNumber; ++t) {
-		particleConcentrations[t] = new double **[xnumberAdded];
-		particleEnergies[t] = new double **[xnumberAdded];
-		particleBulkVelocities[t] = new Vector3d **[xnumberAdded];
-		for (int i = 0; i < xnumberAdded; ++i) {
-			particleConcentrations[t][i] = new double *[ynumberAdded];
-			particleEnergies[t][i] = new double *[ynumberAdded];
-			particleBulkVelocities[t][i] = new Vector3d *[ynumberAdded];
-			for (int j = 0; j < ynumberAdded; ++j) {
-				particleConcentrations[t][i][j] = new double[znumberAdded];
-				particleEnergies[t][i][j] = new double[znumberAdded];
-				particleBulkVelocities[t][i][j] = new Vector3d[znumberAdded];
-				for (int k = 0; k < znumberAdded; ++k) {
-					particleConcentrations[t][i][j][k] = 0;
-					particleEnergies[t][i][j][k] = 0;
-					particleBulkVelocities[t][i][j][k] = Vector3d(0, 0, 0);
-				}
-			}
-		}
+		particleConcentrations[t] = create3array(xnumberAdded, ynumberAdded, znumberAdded);
+		particleEnergies[t] = create3array(xnumberAdded, ynumberAdded, znumberAdded);
+		particleBulkVelocities[t] = create3vectorArray(xnumberAdded, ynumberAdded, znumberAdded);
 	}
 
-	chargeDensity = new double **[xnumberAdded];
-	chargeDensityMinus = new double **[xnumberAdded];
-	chargeDensityHat = new double **[xnumberAdded];
-	pressureTensor = new Matrix3d **[xnumberAdded];
+	chargeDensity = create3array(xnumberAdded, ynumberAdded, znumberAdded);
+	chargeDensityMinus = create3array(xnumberAdded, ynumberAdded, znumberAdded);
+	chargeDensityHat = create3array(xnumberAdded, ynumberAdded, znumberAdded);
+	pressureTensor = create3matrixArray(xnumberAdded, ynumberAdded, znumberAdded);
 
-	for (int i = 0; i < xnumberAdded; ++i) {
-		chargeDensity[i] = new double *[ynumberAdded];
-		chargeDensityMinus[i] = new double *[ynumberAdded];
-		chargeDensityHat[i] = new double *[ynumberAdded];
-		pressureTensor[i] = new Matrix3d *[ynumberAdded];
-		for (int j = 0; j < ynumberAdded; ++j) {
-			chargeDensity[i][j] = new double[znumberAdded];
-			chargeDensityMinus[i][j] = new double[znumberAdded];
-			chargeDensityHat[i][j] = new double[znumberAdded];
-			pressureTensor[i][j] = new Matrix3d[znumberAdded];
-			for (int k = 0; k < znumberAdded; ++k) {
-				//if(rank == 0) printf("%d %d %d\n", i, j, k);
-				//if(rank == 0) fflush((stdout));
-				chargeDensity[i][j][k] = 0;
-				chargeDensityMinus[i][j][k] = 0;
-				chargeDensityHat[i][j][k] = 0;
-				pressureTensor[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-			}
-		}
-	}
 
 	if (rank == 0) printf("creating arrays for fluxes\n");
 	fflush(stdout);
 	//if(rank == 0) printLog("creating arrays for fluxes\n");
 
-	electricFlux = new Vector3d **[xnumberAdded + 1];
-	electricFluxMinus = new Vector3d **[xnumberAdded + 1];
-	dielectricTensor = new Matrix3d **[xnumberAdded + 1];
-	externalElectricFlux = new Vector3d **[xnumberAdded + 1];
-	divPressureTensor = new Vector3d **[xnumberAdded + 1];
-	divPressureTensorMinus = new Vector3d **[xnumberAdded + 1];
-
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		electricFlux[i] = new Vector3d *[ynumberAdded + 1];
-		electricFluxMinus[i] = new Vector3d *[ynumberAdded + 1];
-		dielectricTensor[i] = new Matrix3d *[ynumberAdded + 1];
-		externalElectricFlux[i] = new Vector3d *[ynumberAdded + 1];
-		divPressureTensor[i] = new Vector3d *[ynumberAdded + 1];
-		divPressureTensorMinus[i] = new Vector3d *[ynumberAdded + 1];
-		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			electricFlux[i][j] = new Vector3d[znumberAdded + 1];
-			electricFluxMinus[i][j] = new Vector3d[znumberAdded + 1];
-			dielectricTensor[i][j] = new Matrix3d[znumberAdded + 1];
-			externalElectricFlux[i][j] = new Vector3d[znumberAdded + 1];
-			divPressureTensor[i][j] = new Vector3d[znumberAdded + 1];
-			divPressureTensorMinus[i][j] = new Vector3d[znumberAdded + 1];
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				//if(rank == 0) printf("%d %d %d\n", i, j, k);
-				//if(rank == 0) fflush((stdout));
-				electricFlux[i][j][k] = Vector3d(0, 0, 0);
-				electricFluxMinus[i][j][k] = Vector3d(0, 0, 0);
-				externalElectricFlux[i][j][k] = Vector3d(0, 0, 0);
-				divPressureTensor[i][j][k] = Vector3d(0, 0, 0);
-				divPressureTensorMinus[i][j][k] = Vector3d(0, 0, 0);
-				dielectricTensor[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-			}
-		}
-	}
+	electricFlux = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	electricFluxMinus = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	dielectricTensor = create3matrixArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	externalElectricFlux = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	divPressureTensor = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	divPressureTensorMinus = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 
 	if (rank == 0) printf("creating arrays for buffers\n");
 	fflush(stdout);
@@ -6254,74 +6093,31 @@ void Simulation::createArrays() {
 	bottomOutDivergenceBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
 	bottomInDivergenceBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
 
-	tempCellParameterLeft = new double **[2 + 2 * additionalBinNumber];
-	tempCellParameterRight = new double **[2 + 2 * additionalBinNumber];
-	tempNodeParameterLeft = new double **[3 + 2 * additionalBinNumber];
-	tempNodeParameterRight = new double **[3 + 2 * additionalBinNumber];
+	tempCellParameterLeft = create3array(2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
+	tempCellParameterRight = create3array(2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
+	tempNodeParameterLeft = create3array(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+	tempNodeParameterRight = create3array(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 
-	tempCellVectorParameterLeft = new Vector3d **[2 + 2 * additionalBinNumber];
-	tempCellVectorParameterRight = new Vector3d **[2 + 2 * additionalBinNumber];
-	tempNodeVectorParameterLeft = new Vector3d **[3 + 2 * additionalBinNumber];
-	tempNodeVectorParameterRight = new Vector3d **[3 + 2 * additionalBinNumber];
+	tempCellVectorParameterLeft = create3vectorArray(2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
+	tempCellVectorParameterRight = create3vectorArray(2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
+	tempNodeVectorParameterLeft = create3vectorArray(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+	tempNodeVectorParameterRight = create3vectorArray(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 
-	tempCellMatrixParameterLeft = new Matrix3d **[2 + 2 * additionalBinNumber];
-	tempCellMatrixParameterRight = new Matrix3d **[2 + 2 * additionalBinNumber];
-	tempNodeMatrixParameterLeft = new Matrix3d **[3 + 2 * additionalBinNumber];
-	tempNodeMatrixParameterRight = new Matrix3d **[3 + 2 * additionalBinNumber];
+	tempCellMatrixParameterLeft = create3matrixArray(2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
+	tempCellMatrixParameterRight = create3matrixArray(2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
+	tempNodeMatrixParameterLeft = create3matrixArray(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+	tempNodeMatrixParameterRight = create3matrixArray(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 
 	tempNodeMassMatrixParameterLeft = new MassMatrix **[3 + 2 * additionalBinNumber];
 	tempNodeMassMatrixParameterRight = new MassMatrix **[3 + 2 * additionalBinNumber];
 
-	for (int i = 0; i < 2 + 2 * additionalBinNumber; ++i) {
-		tempCellParameterLeft[i] = new double *[ynumberAdded];
-		tempCellParameterRight[i] = new double *[ynumberAdded];
-		tempCellVectorParameterLeft[i] = new Vector3d *[ynumberAdded];
-		tempCellVectorParameterRight[i] = new Vector3d *[ynumberAdded];
-		tempCellMatrixParameterLeft[i] = new Matrix3d *[ynumberAdded];
-		tempCellMatrixParameterRight[i] = new Matrix3d *[ynumberAdded];
-		for (int j = 0; j < ynumberAdded; ++j) {
-			tempCellParameterLeft[i][j] = new double[znumberAdded];
-			tempCellParameterRight[i][j] = new double[znumberAdded];
-			tempCellVectorParameterLeft[i][j] = new Vector3d[znumberAdded];
-			tempCellVectorParameterRight[i][j] = new Vector3d[znumberAdded];
-			tempCellMatrixParameterLeft[i][j] = new Matrix3d[znumberAdded];
-			tempCellMatrixParameterRight[i][j] = new Matrix3d[znumberAdded];
-			for (int k = 0; k < znumberAdded; ++k) {
-				tempCellParameterLeft[i][j][k] = 0;
-				tempCellParameterRight[i][j][k] = 0;
-				tempCellVectorParameterLeft[i][j][k] = Vector3d(0, 0, 0);
-				tempCellVectorParameterRight[i][j][k] = Vector3d(0, 0, 0);
-				tempCellMatrixParameterLeft[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				tempCellMatrixParameterRight[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-			}
-		}
-	}
-
 	for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
-		tempNodeParameterLeft[i] = new double *[ynumberAdded + 1];
-		tempNodeParameterRight[i] = new double *[ynumberAdded + 1];
-		tempNodeVectorParameterLeft[i] = new Vector3d *[ynumberAdded + 1];
-		tempNodeVectorParameterRight[i] = new Vector3d *[ynumberAdded + 1];
-		tempNodeMatrixParameterLeft[i] = new Matrix3d *[ynumberAdded + 1];
-		tempNodeMatrixParameterRight[i] = new Matrix3d *[ynumberAdded + 1];
 		tempNodeMassMatrixParameterLeft[i] = new MassMatrix *[ynumberAdded + 1];
 		tempNodeMassMatrixParameterRight[i] = new MassMatrix *[ynumberAdded + 1];
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			tempNodeParameterLeft[i][j] = new double[znumberAdded + 1];
-			tempNodeParameterRight[i][j] = new double[znumberAdded + 1];
-			tempNodeVectorParameterLeft[i][j] = new Vector3d[znumberAdded + 1];
-			tempNodeVectorParameterRight[i][j] = new Vector3d[znumberAdded + 1];
-			tempNodeMatrixParameterLeft[i][j] = new Matrix3d[znumberAdded + 1];
-			tempNodeMatrixParameterRight[i][j] = new Matrix3d[znumberAdded + 1];
 			tempNodeMassMatrixParameterLeft[i][j] = new MassMatrix[znumberAdded + 1];
 			tempNodeMassMatrixParameterRight[i][j] = new MassMatrix[znumberAdded + 1];
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				tempNodeParameterLeft[i][j][k] = 0;
-				tempNodeParameterRight[i][j][k] = 0;
-				tempNodeVectorParameterLeft[i][j][k] = Vector3d(0, 0, 0);
-				tempNodeVectorParameterRight[i][j][k] = Vector3d(0, 0, 0);
-				tempNodeMatrixParameterLeft[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				tempNodeMatrixParameterRight[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
 					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
 						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
@@ -6334,74 +6130,31 @@ void Simulation::createArrays() {
 		}
 	}
 
-	tempCellParameterFront = new double **[xnumberAdded];
-	tempCellParameterBack = new double **[xnumberAdded];
-	tempNodeParameterFront = new double **[xnumberAdded + 1];
-	tempNodeParameterBack = new double **[xnumberAdded + 1];
+	tempCellParameterFront = create3array(xnumberAdded, 2 + 2*additionalBinNumber, znumberAdded);
+	tempCellParameterBack = create3array(xnumberAdded, 2 + 2*additionalBinNumber, znumberAdded);
+	tempNodeParameterFront = create3array(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded + 1);
+	tempNodeParameterBack = create3array(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded + 1);
 
-	tempCellVectorParameterFront = new Vector3d **[xnumberAdded];
-	tempCellVectorParameterBack = new Vector3d **[xnumberAdded];
-	tempNodeVectorParameterFront = new Vector3d **[xnumberAdded + 1];
-	tempNodeVectorParameterBack = new Vector3d **[xnumberAdded + 1];
+	tempCellVectorParameterFront = create3vectorArray(xnumberAdded, 2 + 2*additionalBinNumber, znumberAdded);
+	tempCellVectorParameterBack = create3vectorArray(xnumberAdded, 2 + 2*additionalBinNumber, znumberAdded);
+	tempNodeVectorParameterFront = create3vectorArray(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded + 1);
+	tempNodeVectorParameterBack = create3vectorArray(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded + 1);
 
-	tempCellMatrixParameterFront = new Matrix3d **[xnumberAdded];
-	tempCellMatrixParameterBack = new Matrix3d **[xnumberAdded];
-	tempNodeMatrixParameterFront = new Matrix3d **[xnumberAdded + 1];
-	tempNodeMatrixParameterBack = new Matrix3d **[xnumberAdded + 1];
+	tempCellMatrixParameterFront = create3matrixArray(xnumberAdded, 2 + 2*additionalBinNumber, znumberAdded);
+	tempCellMatrixParameterBack = create3matrixArray(xnumberAdded, 2 + 2*additionalBinNumber, znumberAdded);
+	tempNodeMatrixParameterFront = create3matrixArray(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded + 1);
+	tempNodeMatrixParameterBack = create3matrixArray(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded + 1);
 
 	tempNodeMassMatrixParameterFront = new MassMatrix **[xnumberAdded + 1];
 	tempNodeMassMatrixParameterBack = new MassMatrix **[xnumberAdded + 1];
 
-	for (int i = 0; i < xnumberAdded; ++i) {
-		tempCellParameterFront[i] = new double *[2 + 2 * additionalBinNumber];
-		tempCellParameterBack[i] = new double *[2 + 2 * additionalBinNumber];
-		tempCellVectorParameterFront[i] = new Vector3d *[2 + 2 * additionalBinNumber];
-		tempCellVectorParameterBack[i] = new Vector3d *[2 + 2 * additionalBinNumber];
-		tempCellMatrixParameterFront[i] = new Matrix3d *[2 + 2 * additionalBinNumber];
-		tempCellMatrixParameterBack[i] = new Matrix3d *[2 + 2 * additionalBinNumber];
-		for (int j = 0; j < 2 + 2 * additionalBinNumber; ++j) {
-			tempCellParameterFront[i][j] = new double[znumberAdded];
-			tempCellParameterBack[i][j] = new double[znumberAdded];
-			tempCellVectorParameterFront[i][j] = new Vector3d[znumberAdded];
-			tempCellVectorParameterBack[i][j] = new Vector3d[znumberAdded];
-			tempCellMatrixParameterFront[i][j] = new Matrix3d[znumberAdded];
-			tempCellMatrixParameterBack[i][j] = new Matrix3d[znumberAdded];
-			for (int k = 0; k < znumberAdded; ++k) {
-				tempCellParameterFront[i][j][k] = 0;
-				tempCellParameterBack[i][j][k] = 0;
-				tempCellVectorParameterFront[i][j][k] = Vector3d(0, 0, 0);
-				tempCellVectorParameterBack[i][j][k] = Vector3d(0, 0, 0);
-				tempCellMatrixParameterFront[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				tempCellMatrixParameterBack[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-			}
-		}
-	}
-
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		tempNodeParameterFront[i] = new double *[3 + 2 * additionalBinNumber];
-		tempNodeParameterBack[i] = new double *[3 + 2 * additionalBinNumber];
-		tempNodeVectorParameterFront[i] = new Vector3d *[3 + 2 * additionalBinNumber];
-		tempNodeVectorParameterBack[i] = new Vector3d *[3 + 2 * additionalBinNumber];
-		tempNodeMatrixParameterFront[i] = new Matrix3d *[3 + 2 * additionalBinNumber];
-		tempNodeMatrixParameterBack[i] = new Matrix3d *[3 + 2 * additionalBinNumber];
 		tempNodeMassMatrixParameterFront[i] = new MassMatrix *[3 + 2 * additionalBinNumber];
 		tempNodeMassMatrixParameterBack[i] = new MassMatrix *[3 + 2 * additionalBinNumber];
 		for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
-			tempNodeParameterFront[i][j] = new double[znumberAdded + 1];
-			tempNodeParameterBack[i][j] = new double[znumberAdded + 1];
-			tempNodeVectorParameterFront[i][j] = new Vector3d[znumberAdded + 1];
-			tempNodeVectorParameterBack[i][j] = new Vector3d[znumberAdded + 1];
-			tempNodeMatrixParameterFront[i][j] = new Matrix3d[znumberAdded + 1];
-			tempNodeMatrixParameterBack[i][j] = new Matrix3d[znumberAdded + 1];
 			tempNodeMassMatrixParameterFront[i][j] = new MassMatrix[znumberAdded + 1];
 			tempNodeMassMatrixParameterBack[i][j] = new MassMatrix[znumberAdded + 1];
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				tempNodeParameterFront[i][j][k] = 0;
-				tempNodeParameterBack[i][j][k] = 0;
-				tempNodeVectorParameterFront[i][j][k] = Vector3d(0, 0, 0);
-				tempNodeVectorParameterBack[i][j][k] = Vector3d(0, 0, 0);
-				tempNodeMatrixParameterFront[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				tempNodeMatrixParameterBack[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
 					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
 						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
@@ -6414,73 +6167,31 @@ void Simulation::createArrays() {
 		}
 	}
 
-	tempCellParameterBottom = new double **[xnumberAdded];
-	tempCellParameterTop = new double **[xnumberAdded];
-	tempNodeParameterBottom = new double **[xnumberAdded + 1];
-	tempNodeParameterTop = new double **[xnumberAdded + 1];
+	tempCellParameterBottom = create3array(xnumberAdded, ynumberAdded, 2 + 2*additionalBinNumber);
+	tempCellParameterTop = create3array(xnumberAdded, ynumberAdded, 2 + 2*additionalBinNumber);
+	tempNodeParameterBottom = create3array(xnumberAdded + 1, ynumberAdded + 1, 3 + 2*additionalBinNumber);
+	tempNodeParameterTop = create3array(xnumberAdded + 1, ynumberAdded + 1, 3 + 2*additionalBinNumber);
 
-	tempCellVectorParameterBottom = new Vector3d **[xnumberAdded];
-	tempCellVectorParameterTop = new Vector3d **[xnumberAdded];
-	tempNodeVectorParameterBottom = new Vector3d **[xnumberAdded + 1];
-	tempNodeVectorParameterTop = new Vector3d **[xnumberAdded + 1];
+	tempCellVectorParameterBottom = create3vectorArray(xnumberAdded, ynumberAdded, 2 + 2*additionalBinNumber);
+	tempCellVectorParameterTop = create3vectorArray(xnumberAdded, ynumberAdded, 2 + 2*additionalBinNumber);
+	tempNodeVectorParameterBottom = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2*additionalBinNumber);
+	tempNodeVectorParameterTop = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2*additionalBinNumber);
 
-	tempCellMatrixParameterBottom = new Matrix3d **[xnumberAdded];
-	tempCellMatrixParameterTop = new Matrix3d **[xnumberAdded];
-	tempNodeMatrixParameterBottom = new Matrix3d **[xnumberAdded + 1];
-	tempNodeMatrixParameterTop = new Matrix3d **[xnumberAdded + 1];
+	tempCellMatrixParameterBottom = create3matrixArray(xnumberAdded, ynumberAdded, 2 + 2*additionalBinNumber);
+	tempCellMatrixParameterTop = create3matrixArray(xnumberAdded, ynumberAdded, 2 + 2*additionalBinNumber);
+	tempNodeMatrixParameterBottom = create3matrixArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2*additionalBinNumber);
+	tempNodeMatrixParameterTop = create3matrixArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2*additionalBinNumber);
+
 	tempNodeMassMatrixParameterBottom = new MassMatrix **[xnumberAdded + 1];
 	tempNodeMassMatrixParameterTop = new MassMatrix **[xnumberAdded + 1];
 
-	for (int i = 0; i < xnumberAdded; ++i) {
-		tempCellParameterBottom[i] = new double *[ynumberAdded];
-		tempCellParameterTop[i] = new double *[ynumberAdded];
-		tempCellVectorParameterBottom[i] = new Vector3d *[ynumberAdded];
-		tempCellVectorParameterTop[i] = new Vector3d *[ynumberAdded];
-		tempCellMatrixParameterBottom[i] = new Matrix3d *[ynumberAdded];
-		tempCellMatrixParameterTop[i] = new Matrix3d *[ynumberAdded];
-		for (int j = 0; j < ynumberAdded; ++j) {
-			tempCellParameterBottom[i][j] = new double[2 + 2 * additionalBinNumber];
-			tempCellParameterTop[i][j] = new double[2 + 2 * additionalBinNumber];
-			tempCellVectorParameterBottom[i][j] = new Vector3d[2 + 2 * additionalBinNumber];
-			tempCellVectorParameterTop[i][j] = new Vector3d[2 + 2 * additionalBinNumber];
-			tempCellMatrixParameterBottom[i][j] = new Matrix3d[2 + 2 * additionalBinNumber];
-			tempCellMatrixParameterTop[i][j] = new Matrix3d[2 + 2 * additionalBinNumber];
-			for (int k = 0; k < 2 + 2 * additionalBinNumber; ++k) {
-				tempCellParameterBottom[i][j][k] = 0;
-				tempCellParameterTop[i][j][k] = 0;
-				tempCellVectorParameterBottom[i][j][k] = Vector3d(0, 0, 0);
-				tempCellVectorParameterTop[i][j][k] = Vector3d(0, 0, 0);
-				tempCellMatrixParameterBottom[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				tempCellMatrixParameterTop[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-			}
-		}
-	}
-
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		tempNodeParameterBottom[i] = new double *[ynumberAdded + 1];
-		tempNodeParameterTop[i] = new double *[ynumberAdded + 1];
-		tempNodeVectorParameterBottom[i] = new Vector3d *[ynumberAdded + 1];
-		tempNodeVectorParameterTop[i] = new Vector3d *[ynumberAdded + 1];
-		tempNodeMatrixParameterBottom[i] = new Matrix3d *[ynumberAdded + 1];
-		tempNodeMatrixParameterTop[i] = new Matrix3d *[ynumberAdded + 1];
 		tempNodeMassMatrixParameterBottom[i] = new MassMatrix *[ynumberAdded + 1];
 		tempNodeMassMatrixParameterTop[i] = new MassMatrix *[ynumberAdded + 1];
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			tempNodeParameterBottom[i][j] = new double[3 + 2 * additionalBinNumber];
-			tempNodeParameterTop[i][j] = new double[3 + 2 * additionalBinNumber];
-			tempNodeVectorParameterBottom[i][j] = new Vector3d[3 + 2 * additionalBinNumber];
-			tempNodeVectorParameterTop[i][j] = new Vector3d[3 + 2 * additionalBinNumber];
-			tempNodeMatrixParameterBottom[i][j] = new Matrix3d[3 + 2 * additionalBinNumber];
-			tempNodeMatrixParameterTop[i][j] = new Matrix3d[3 + 2 * additionalBinNumber];
 			tempNodeMassMatrixParameterBottom[i][j] = new MassMatrix[3 + 2 * additionalBinNumber];
 			tempNodeMassMatrixParameterTop[i][j] = new MassMatrix[3 + 2 * additionalBinNumber];
 			for (int k = 0; k < 3 + 2 * additionalBinNumber; ++k) {
-				tempNodeParameterBottom[i][j][k] = 0;
-				tempNodeParameterTop[i][j][k] = 0;
-				tempNodeVectorParameterBottom[i][j][k] = Vector3d(0, 0, 0);
-				tempNodeVectorParameterTop[i][j][k] = Vector3d(0, 0, 0);
-				tempNodeMatrixParameterBottom[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-				tempNodeMatrixParameterTop[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
 					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
 						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
@@ -6493,392 +6204,89 @@ void Simulation::createArrays() {
 		}
 	}
 
-	residualBiconjugateDivE = new double***[xnumberAdded];
-	firstResidualBiconjugateDivE = new double***[xnumberAdded];
-	pBiconjugateDivE = new double***[xnumberAdded];
-	vBiconjugateDivE = new double***[xnumberAdded];
-	sBiconjugateDivE = new double***[xnumberAdded];
-	tBiconjugateDivE = new double***[xnumberAdded];
+	residualBiconjugateDivE = create4array(xnumberAdded, ynumberAdded, znumberAdded, 1);
+	firstResidualBiconjugateDivE = create4array(xnumberAdded, ynumberAdded, znumberAdded, 1);
+	pBiconjugateDivE = create4array(xnumberAdded, ynumberAdded, znumberAdded, 1);
+	vBiconjugateDivE = create4array(xnumberAdded, ynumberAdded, znumberAdded, 1);
+	sBiconjugateDivE = create4array(xnumberAdded, ynumberAdded, znumberAdded, 1);
+	tBiconjugateDivE = create4array(xnumberAdded, ynumberAdded, znumberAdded, 1);
 
-	int lnumber = 1;
-	for (int i = 0; i < xnumberAdded; ++i) {
-		residualBiconjugateDivE[i] = new double**[ynumberAdded];
-		firstResidualBiconjugateDivE[i] = new double**[ynumberAdded];
-		vBiconjugateDivE[i] = new double**[ynumberAdded];
-		pBiconjugateDivE[i] = new double**[ynumberAdded];
-		sBiconjugateDivE[i] = new double**[ynumberAdded];
-		tBiconjugateDivE[i] = new double**[ynumberAdded];
-		for (int j = 0; j < ynumberAdded; ++j) {
-			residualBiconjugateDivE[i][j] = new double*[znumberAdded];
-			firstResidualBiconjugateDivE[i][j] = new double*[znumberAdded];
-			vBiconjugateDivE[i][j] = new double*[znumberAdded];
-			pBiconjugateDivE[i][j] = new double*[znumberAdded];
-			sBiconjugateDivE[i][j] = new double*[znumberAdded];
-			tBiconjugateDivE[i][j] = new double*[znumberAdded];
-			for (int k = 0; k < znumberAdded; ++k) {
-				residualBiconjugateDivE[i][j][k] = new double[lnumber];
-				firstResidualBiconjugateDivE[i][j][k] = new double[lnumber];
-				vBiconjugateDivE[i][j][k] = new double[lnumber];
-				pBiconjugateDivE[i][j][k] = new double[lnumber];
-				sBiconjugateDivE[i][j][k] = new double[lnumber];
-				tBiconjugateDivE[i][j][k] = new double[lnumber];
-				for (int l = 0; l < lnumber; ++l) {
-					firstResidualBiconjugateDivE[i][j][k][l] = 0;
-					residualBiconjugateDivE[i][j][k][l] = 0;
-					vBiconjugateDivE[i][j][k][l] = 0;
-					pBiconjugateDivE[i][j][k][l] = 0;
-					sBiconjugateDivE[i][j][k][l] = 0;
-					tBiconjugateDivE[i][j][k][l] = 0;
-				}
-			}
-		}
-	}
 
-	residualBiconjugateMaxwell = new double***[xnumberAdded];
-	firstResidualBiconjugateMaxwell = new double***[xnumberAdded];
-	pBiconjugateMaxwell = new double***[xnumberAdded];
-	vBiconjugateMaxwell = new double***[xnumberAdded];
-	sBiconjugateMaxwell = new double***[xnumberAdded];
-	tBiconjugateMaxwell = new double***[xnumberAdded];
-
-	lnumber = 3;
-	for (int i = 0; i < xnumberAdded; ++i) {
-		residualBiconjugateMaxwell[i] = new double**[ynumberAdded];
-		firstResidualBiconjugateMaxwell[i] = new double**[ynumberAdded];
-		vBiconjugateMaxwell[i] = new double**[ynumberAdded];
-		pBiconjugateMaxwell[i] = new double**[ynumberAdded];
-		sBiconjugateMaxwell[i] = new double**[ynumberAdded];
-		tBiconjugateMaxwell[i] = new double**[ynumberAdded];
-		for (int j = 0; j < ynumberAdded; ++j) {
-			residualBiconjugateMaxwell[i][j] = new double*[znumberAdded];
-			firstResidualBiconjugateMaxwell[i][j] = new double*[znumberAdded];
-			vBiconjugateMaxwell[i][j] = new double*[znumberAdded];
-			pBiconjugateMaxwell[i][j] = new double*[znumberAdded];
-			sBiconjugateMaxwell[i][j] = new double*[znumberAdded];
-			tBiconjugateMaxwell[i][j] = new double*[znumberAdded];
-			for (int k = 0; k < znumberAdded; ++k) {
-				residualBiconjugateMaxwell[i][j][k] = new double[lnumber];
-				firstResidualBiconjugateMaxwell[i][j][k] = new double[lnumber];
-				vBiconjugateMaxwell[i][j][k] = new double[lnumber];
-				pBiconjugateMaxwell[i][j][k] = new double[lnumber];
-				sBiconjugateMaxwell[i][j][k] = new double[lnumber];
-				tBiconjugateMaxwell[i][j][k] = new double[lnumber];
-				for (int l = 0; l < lnumber; ++l) {
-					firstResidualBiconjugateMaxwell[i][j][k][l] = 0;
-					residualBiconjugateMaxwell[i][j][k][l] = 0;
-					vBiconjugateMaxwell[i][j][k][l] = 0;
-					pBiconjugateMaxwell[i][j][k][l] = 0;
-					sBiconjugateMaxwell[i][j][k][l] = 0;
-					tBiconjugateMaxwell[i][j][k][l] = 0;
-				}
-			}
-		}
-	}
+	residualBiconjugateMaxwell = create4array(xnumberAdded, ynumberAdded, znumberAdded, 3);
+	firstResidualBiconjugateMaxwell = create4array(xnumberAdded, ynumberAdded, znumberAdded, 3);
+	pBiconjugateMaxwell = create4array(xnumberAdded, ynumberAdded, znumberAdded, 3);
+	vBiconjugateMaxwell = create4array(xnumberAdded, ynumberAdded, znumberAdded, 3);
+	sBiconjugateMaxwell = create4array(xnumberAdded, ynumberAdded, znumberAdded, 3);
+	tBiconjugateMaxwell = create4array(xnumberAdded, ynumberAdded, znumberAdded, 3);
 
 	///buneman
 	if (solverType == BUNEMAN) {
-		bunemanJx = new double**[xnumberAdded];
-		bunemanEx = new double**[xnumberAdded];
-		bunemanNewEx = new double**[xnumberAdded];
-		tempBunemanExParameter = new double**[xnumberAdded];
-		bunemanDivCleaningEx = new double**[xnumberAdded];
-		for (int i = 0; i < xnumberAdded; ++i) {
-			bunemanJx[i] = new double*[ynumberAdded + 1];
-			bunemanEx[i] = new double*[ynumberAdded + 1];
-			bunemanNewEx[i] = new double*[ynumberAdded + 1];
-			tempBunemanExParameter[i] = new double*[ynumberAdded + 1];
-			bunemanDivCleaningEx[i] = new double*[ynumberAdded + 1];
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				bunemanJx[i][j] = new double[znumberAdded + 1];
-				bunemanEx[i][j] = new double[znumberAdded + 1];
-				bunemanNewEx[i][j] = new double[znumberAdded + 1];
-				tempBunemanExParameter[i][j] = new double[znumberAdded + 1];
-				bunemanDivCleaningEx[i][j] = new double[znumberAdded + 1];
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					bunemanJx[i][j][k] = 0;
-					bunemanEx[i][j][k] = 0;
-					bunemanNewEx[i][j][k] = 0;
-					tempBunemanExParameter[i][j][k] = 0;
-					bunemanDivCleaningEx[i][j][k] = 0;
-				}
-			}
-		}
+		bunemanJx = create3array(xnumberAdded, ynumberAdded + 1, znumberAdded + 1);
+		bunemanEx = create3array(xnumberAdded, ynumberAdded + 1, znumberAdded + 1);
+		bunemanNewEx = create3array(xnumberAdded, ynumberAdded + 1, znumberAdded + 1);
+		tempBunemanExParameter = create3array(xnumberAdded, ynumberAdded + 1, znumberAdded + 1);
+		bunemanDivCleaningEx = create3array(xnumberAdded, ynumberAdded + 1, znumberAdded + 1);
 
-		bunemanJy = new double**[xnumberAdded + 1];
-		bunemanEy = new double**[xnumberAdded + 1];
-		bunemanNewEy = new double**[xnumberAdded + 1];
-		tempBunemanEyParameter = new double**[xnumberAdded + 1];
-		bunemanDivCleaningEy = new double**[xnumberAdded + 1];
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			bunemanJy[i] = new double*[ynumberAdded];
-			bunemanEy[i] = new double*[ynumberAdded];
-			bunemanNewEy[i] = new double*[ynumberAdded];
-			tempBunemanEyParameter[i] = new double*[ynumberAdded];
-			bunemanDivCleaningEy[i] = new double*[ynumberAdded];
-			for (int j = 0; j < ynumberAdded; ++j) {
-				bunemanJy[i][j] = new double[znumberAdded + 1];
-				bunemanEy[i][j] = new double[znumberAdded + 1];
-				bunemanNewEy[i][j] = new double[znumberAdded + 1];
-				tempBunemanEyParameter[i][j] = new double[znumberAdded + 1];
-				bunemanDivCleaningEy[i][j] = new double[znumberAdded + 1];
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					bunemanJy[i][j][k] = 0;
-					bunemanEy[i][j][k] = 0;
-					bunemanNewEy[i][j][k] = 0;
-					tempBunemanEyParameter[i][j][k] = 0;
-					bunemanDivCleaningEy[i][j][k] = 0;
-				}
-			}
-		}
+		bunemanJy = create3array(xnumberAdded + 1, ynumberAdded, znumberAdded + 1);
+		bunemanEy = create3array(xnumberAdded + 1, ynumberAdded, znumberAdded + 1);
+		bunemanNewEy = create3array(xnumberAdded + 1, ynumberAdded, znumberAdded + 1);
+		tempBunemanEyParameter = create3array(xnumberAdded + 1, ynumberAdded, znumberAdded + 1);
+		bunemanDivCleaningEy = create3array(xnumberAdded + 1, ynumberAdded, znumberAdded + 1);
 
-		bunemanJz = new double**[xnumberAdded + 1];
-		bunemanEz = new double**[xnumberAdded + 1];
-		bunemanNewEz = new double**[xnumberAdded + 1];
-		tempBunemanEzParameter = new double**[xnumberAdded + 1];
-		bunemanDivCleaningEz = new double**[xnumberAdded + 1];
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			bunemanJz[i] = new double*[ynumberAdded + 1];
-			bunemanEz[i] = new double*[ynumberAdded + 1];
-			bunemanNewEz[i] = new double*[ynumberAdded + 1];
-			tempBunemanEzParameter[i] = new double*[ynumberAdded + 1];
-			bunemanDivCleaningEz[i] = new double*[ynumberAdded + 1];
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				bunemanJz[i][j] = new double[znumberAdded];
-				bunemanEz[i][j] = new double[znumberAdded];
-				bunemanNewEz[i][j] = new double[znumberAdded];
-				tempBunemanEzParameter[i][j] = new double[znumberAdded];
-				bunemanDivCleaningEz[i][j] = new double[znumberAdded];
-				for (int k = 0; k < znumberAdded; ++k) {
-					bunemanJz[i][j][k] = 0;
-					bunemanEz[i][j][k] = 0;
-					bunemanNewEz[i][j][k] = 0;
-					tempBunemanEzParameter[i][j][k] = 0;
-					bunemanDivCleaningEz[i][j][k] = 0;
-				}
-			}
-		}
+		bunemanJz = create3array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded);
+		bunemanEz = create3array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded);
+		bunemanNewEz = create3array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded);
+		tempBunemanEzParameter = create3array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded);
+		bunemanDivCleaningEz = create3array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded);
 
-		bunemanBx = new double**[xnumberAdded + 1];
-		bunemanNewBx = new double**[xnumberAdded + 1];
-		tempBunemanBxParameter = new double**[xnumberAdded + 1];
-		bunemanDivCleaningBx = new double**[xnumberAdded + 1];
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			bunemanBx[i] = new double*[ynumberAdded];
-			bunemanNewBx[i] = new double*[ynumberAdded];
-			tempBunemanBxParameter[i] = new double*[ynumberAdded];
-			bunemanDivCleaningBx[i] = new double*[ynumberAdded];
-			for (int j = 0; j < ynumberAdded; ++j) {
-				bunemanBx[i][j] = new double[znumberAdded];
-				bunemanNewBx[i][j] = new double[znumberAdded];
-				tempBunemanBxParameter[i][j] = new double[znumberAdded];
-				bunemanDivCleaningBx[i][j] = new double[znumberAdded];
-				for (int k = 0; k < znumberAdded; ++k) {
-					bunemanBx[i][j][k] = 0;
-					bunemanNewBx[i][j][k] = 0;
-					tempBunemanBxParameter[i][j][k] = 0;
-					bunemanDivCleaningBx[i][j][k] = 0;
-				}
-			}
-		}
+		bunemanBx = create3array(xnumberAdded + 1, ynumberAdded, znumberAdded);
+		bunemanNewBx = create3array(xnumberAdded + 1, ynumberAdded, znumberAdded);
+		tempBunemanBxParameter = create3array(xnumberAdded + 1, ynumberAdded, znumberAdded);
+		bunemanDivCleaningBx = create3array(xnumberAdded + 1, ynumberAdded, znumberAdded);
 
-		bunemanBy = new double**[xnumberAdded];
-		bunemanNewBy = new double**[xnumberAdded];
-		tempBunemanByParameter = new double**[xnumberAdded];
-		bunemanDivCleaningBy = new double**[xnumberAdded];
-		for (int i = 0; i < xnumberAdded; ++i) {
-			bunemanBy[i] = new double*[ynumberAdded + 1];
-			bunemanNewBy[i] = new double*[ynumberAdded + 1];
-			tempBunemanByParameter[i] = new double*[ynumberAdded + 1];
-			bunemanDivCleaningBy[i] = new double*[ynumber + 1];
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				bunemanBy[i][j] = new double[znumberAdded];
-				bunemanNewBy[i][j] = new double[znumberAdded];
-				tempBunemanByParameter[i][j] = new double[znumberAdded];
-				bunemanDivCleaningBy[i][j] = new double[znumberAdded];
-				for (int k = 0; k < znumberAdded; ++k) {
-					bunemanBy[i][j][k] = 0;
-					bunemanNewBy[i][j][k] = 0;
-					tempBunemanByParameter[i][j][k] = 0;
-					bunemanDivCleaningBy[i][j][k] = 0;
-				}
-			}
-		}
+		bunemanBy = create3array(xnumberAdded, ynumberAdded + 1, znumberAdded);
+		bunemanNewBy = create3array(xnumberAdded, ynumberAdded + 1, znumberAdded);
+		tempBunemanByParameter = create3array(xnumberAdded, ynumberAdded + 1, znumberAdded);
+		bunemanDivCleaningBy = create3array(xnumberAdded, ynumberAdded + 1, znumberAdded);
 
-		bunemanBz = new double**[xnumberAdded];
-		bunemanNewBz = new double**[xnumberAdded];
-		tempBunemanBzParameter = new double**[xnumberAdded];
-		bunemanDivCleaningBz = new double**[xnumberAdded];
-		for (int i = 0; i < xnumberAdded; ++i) {
-			bunemanBz[i] = new double*[ynumberAdded];
-			bunemanNewBz[i] = new double*[ynumberAdded];
-			tempBunemanBzParameter[i] = new double*[ynumberAdded];
-			bunemanDivCleaningBz[i] = new double*[ynumberAdded];
-			for (int j = 0; j < ynumberAdded; ++j) {
-				bunemanBz[i][j] = new double[znumberAdded + 1];
-				bunemanNewBz[i][j] = new double[znumberAdded + 1];
-				tempBunemanBzParameter[i][j] = new double[znumberAdded + 1];
-				bunemanDivCleaningBz[i][j] = new double[znumberAdded + 1];
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					bunemanBz[i][j][k] = 0;
-					bunemanNewBz[i][j][k] = 0;
-					tempBunemanBzParameter[i][j][k] = 0;
-					bunemanDivCleaningBz[i][j][k] = 0;
-				}
-			}
-		}
+		bunemanBz = create3array(xnumberAdded, ynumberAdded, znumberAdded + 1);
+		bunemanNewBz = create3array(xnumberAdded, ynumberAdded, znumberAdded + 1);
+		tempBunemanBzParameter = create3array(xnumberAdded, ynumberAdded, znumberAdded + 1);
+		bunemanDivCleaningBz = create3array(xnumberAdded, ynumberAdded, znumberAdded + 1);
+		
 
-		bunemanChargeDensity = new double** [xnumberAdded + 1];
-		bunemanDivergenceCleaningPotential = new double*** [xnumberAdded + 1];
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			bunemanChargeDensity[i] = new double* [ynumberAdded + 1];
-			bunemanDivergenceCleaningPotential[i] = new double** [ynumberAdded + 1];
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				bunemanChargeDensity[i][j] = new double [znumberAdded + 1];
-				bunemanDivergenceCleaningPotential[i][j] = new double* [znumberAdded + 1];
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					bunemanChargeDensity[i][j][k] = 0;
-					bunemanDivergenceCleaningPotential[i][j][k] = new double[1];
-					bunemanDivergenceCleaningPotential[i][j][k][0] = 0;
-				}
-			}
-		}
-		////temp buneman j
+		bunemanChargeDensity = create3array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		bunemanDivergenceCleaningPotential = create4array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1, 1);
 
 		/// left right
-		tempBunemanJxLeft = new double **[2 + 2 * additionalBinNumber];
-		tempBunemanJxRight = new double **[2 + 2 * additionalBinNumber];
-		for (int i = 0; i < 2 + 2 * additionalBinNumber; ++i) {
-			tempBunemanJxLeft[i] = new double*[ynumberAdded + 1];
-			tempBunemanJxRight[i] = new double*[ynumberAdded + 1];
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				tempBunemanJxLeft[i][j] = new double[znumberAdded + 1];
-				tempBunemanJxRight[i][j] = new double[znumberAdded + 1];
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					tempBunemanJxLeft[i][j][k] = 0;
-					tempBunemanJxRight[i][j][k] = 0;
-				}
-			}
-		}
-		tempBunemanJyLeft = new double **[3 + 2 * additionalBinNumber];
-		tempBunemanJyRight = new double **[3 + 2 * additionalBinNumber];
-		for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
-			tempBunemanJyLeft[i] = new double*[ynumberAdded];
-			tempBunemanJyRight[i] = new double*[ynumberAdded];
-			for (int j = 0; j < ynumberAdded; ++j) {
-				tempBunemanJyLeft[i][j] = new double[znumberAdded + 1];
-				tempBunemanJyRight[i][j] = new double[znumberAdded + 1];
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					tempBunemanJyLeft[i][j][k] = 0;
-					tempBunemanJyRight[i][j][k] = 0;
-				}
-			}
-		}
-		tempBunemanJzLeft = new double **[3 + 2 * additionalBinNumber];
-		tempBunemanJzRight = new double **[3 + 2 * additionalBinNumber];
-		for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
-			tempBunemanJzLeft[i] = new double*[ynumberAdded + 1];
-			tempBunemanJzRight[i] = new double*[ynumberAdded + 1];
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				tempBunemanJzLeft[i][j] = new double[znumberAdded];
-				tempBunemanJzRight[i][j] = new double[znumberAdded];
-				for (int k = 0; k < znumberAdded; ++k) {
-					tempBunemanJzLeft[i][j][k] = 0;
-					tempBunemanJzRight[i][j][k] = 0;
-				}
-			}
-		}
+		tempBunemanJxLeft = create3array(2 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		tempBunemanJxRight = create3array(2 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		
+		tempBunemanJyLeft = create3array(3 + 2*additionalBinNumber, ynumberAdded, znumberAdded + 1);
+		tempBunemanJyRight = create3array(3 + 2*additionalBinNumber, ynumberAdded, znumberAdded + 1);
+		
+		tempBunemanJzLeft = create3array(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded);
+		tempBunemanJzRight = create3array(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded);
 
 		///front back
-		tempBunemanJxFront = new double **[xnumberAdded];
-		tempBunemanJxBack = new double **[xnumberAdded];
-		for (int i = 0; i < xnumberAdded; ++i) {
-			tempBunemanJxFront[i] = new double*[3 + 2 * additionalBinNumber];
-			tempBunemanJxBack[i] = new double*[3 + 2 * additionalBinNumber];
-			for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
-				tempBunemanJxFront[i][j] = new double[znumberAdded + 1];
-				tempBunemanJxBack[i][j] = new double[znumberAdded + 1];
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					tempBunemanJxFront[i][j][k] = 0;
-					tempBunemanJxBack[i][j][k] = 0;
-				}
-			}
-		}
+		tempBunemanJxFront = create3array(xnumberAdded, 3 + 2*additionalBinNumber, znumberAdded + 1);
+		tempBunemanJxBack = create3array(xnumberAdded, 3 + 2*additionalBinNumber, znumberAdded + 1);
 
-		tempBunemanJyFront = new double **[xnumberAdded + 1];
-		tempBunemanJyBack = new double **[xnumberAdded + 1];
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			tempBunemanJyFront[i] = new double*[2 + 2 * additionalBinNumber];
-			tempBunemanJyBack[i] = new double*[2 + 2 * additionalBinNumber];
-			for (int j = 0; j < 2 + 2 * additionalBinNumber; ++j) {
-				tempBunemanJyFront[i][j] = new double[znumberAdded + 1];
-				tempBunemanJyBack[i][j] = new double[znumberAdded + 1];
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					tempBunemanJyFront[i][j][k] = 0;
-					tempBunemanJyBack[i][j][k] = 0;
-				}
-			}
-		}
+		tempBunemanJyFront = create3array(xnumberAdded + 1, 2 + 2*additionalBinNumber, znumberAdded + 1);
+		tempBunemanJyBack = create3array(xnumberAdded + 1, 2 + 2*additionalBinNumber, znumberAdded + 1);
 
-		tempBunemanJzFront = new double **[xnumberAdded + 1];
-		tempBunemanJzBack = new double **[xnumberAdded + 1];
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			tempBunemanJzFront[i] = new double*[3 + 2 * additionalBinNumber];
-			tempBunemanJzBack[i] = new double*[3 + 2 * additionalBinNumber];
-			for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
-				tempBunemanJzFront[i][j] = new double[znumberAdded];
-				tempBunemanJzBack[i][j] = new double[znumberAdded];
-				for (int k = 0; k < znumberAdded; ++k) {
-					tempBunemanJzFront[i][j][k] = 0;
-					tempBunemanJzBack[i][j][k] = 0;
-				}
-			}
-		}
+		tempBunemanJzFront = create3array(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded);
+		tempBunemanJzBack = create3array(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded);
 		// bottom top
 
-		tempBunemanJxBottom = new double **[xnumberAdded];
-		tempBunemanJxTop = new double **[xnumberAdded];
-		for (int i = 0; i < xnumberAdded; ++i) {
-			tempBunemanJxBottom[i] = new double*[ynumberAdded + 1];
-			tempBunemanJxTop[i] = new double*[ynumberAdded + 1];
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				tempBunemanJxBottom[i][j] = new double[3 + 2 * additionalBinNumber];
-				tempBunemanJxTop[i][j] = new double[3 + 2 * additionalBinNumber];
-				for (int k = 0; k < 3 + 2 * additionalBinNumber; ++k) {
-					tempBunemanJxBottom[i][j][k] = 0;
-					tempBunemanJxTop[i][j][k] = 0;
-				}
-			}
-		}
+		tempBunemanJxBottom = create3array(xnumberAdded, ynumberAdded + 1, 3 + 2*additionalBinNumber);
+		tempBunemanJxTop = create3array(xnumberAdded, ynumberAdded + 1, 3 + 2*additionalBinNumber);
 
-		tempBunemanJyBottom = new double **[xnumberAdded + 1];
-		tempBunemanJyTop = new double **[xnumberAdded + 1];
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			tempBunemanJyBottom[i] = new double*[ynumberAdded];
-			tempBunemanJyTop[i] = new double*[ynumberAdded];
-			for (int j = 0; j < ynumberAdded; ++j) {
-				tempBunemanJyBottom[i][j] = new double[3 + 2 * additionalBinNumber];
-				tempBunemanJyTop[i][j] = new double[3 + 2 * additionalBinNumber];
-				for (int k = 0; k < 3 + 2 * additionalBinNumber; ++k) {
-					tempBunemanJyBottom[i][j][k] = 0;
-					tempBunemanJyTop[i][j][k] = 0;
-				}
-			}
-		}
+		tempBunemanJyBottom = create3array(xnumberAdded + 1, ynumberAdded, 3 + 2*additionalBinNumber);
+		tempBunemanJyTop = create3array(xnumberAdded + 1, ynumberAdded, 3 + 2*additionalBinNumber);
 
-		tempBunemanJzBottom = new double **[xnumberAdded + 1];
-		tempBunemanJzTop = new double **[xnumberAdded + 1];
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			tempBunemanJzBottom[i] = new double*[ynumberAdded + 1];
-			tempBunemanJzTop[i] = new double*[ynumberAdded + 1];
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				tempBunemanJzBottom[i][j] = new double[2 + 2 * additionalBinNumber];
-				tempBunemanJzTop[i][j] = new double[2 + 2 * additionalBinNumber];
-				for (int k = 0; k < 2 + 2 * additionalBinNumber; ++k) {
-					tempBunemanJzBottom[i][j][k] = 0;
-					tempBunemanJzTop[i][j][k] = 0;
-				}
-			}
-		}
+		tempBunemanJzBottom = create3array(xnumberAdded + 1, ynumberAdded + 1, 2 + 2*additionalBinNumber);
+		tempBunemanJzTop = create3array(xnumberAdded + 1, ynumberAdded + 1, 2 + 2*additionalBinNumber);
 	}
 
 	arrayCreated = true;
