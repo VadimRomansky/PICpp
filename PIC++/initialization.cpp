@@ -766,72 +766,34 @@ Simulation::~Simulation() {
 
 		delete[] rightMeanElevel;
 
+		delete3vectorArray(Efield, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(newEfield, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(tempEfield, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(explicitEfield, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(rotB, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(Ederivative, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3array(tempNodeParameter, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(tempNodeVectorParameter, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3matrixArray(tempNodeMatrixParameter, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				delete[] massMatrix[i][j];
 				delete[] tempMassMatrix[i][j];
-
-				delete[] Efield[i][j];
-				delete[] newEfield[i][j];
-				delete[] tempEfield[i][j];
-				delete[] explicitEfield[i][j];
-				delete[] rotB[i][j];
-				delete[] Ederivative[i][j];
-				delete[] tempNodeParameter[i][j];
-				delete[] tempNodeVectorParameter[i][j];
-				delete[] tempNodeMatrixParameter[i][j];
 			}
 			delete[] massMatrix[i];
 			delete[] tempMassMatrix[i];
-
-			delete[] Efield[i];
-			delete[] newEfield[i];
-			delete[] tempEfield[i];
-			delete[] explicitEfield[i];
-			delete[] rotB[i];
-			delete[] Ederivative[i];
-			delete[] tempNodeParameter[i];
-			delete[] tempNodeVectorParameter[i];
-			delete[] tempNodeMatrixParameter[i];
-		}
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				delete[] electricFlux[i][j];
-				delete[] electricFluxMinus[i][j];
-				delete[] externalElectricFlux[i][j];
-				delete[] divPressureTensor[i][j];
-				delete[] divPressureTensorMinus[i][j];
-				delete[] dielectricTensor[i][j];
-			}
-
-			delete[] electricFlux[i];
-			delete[] electricFluxMinus[i];
-			delete[] externalElectricFlux[i];
-			delete[] divPressureTensor[i];
-			delete[] divPressureTensorMinus[i];
-			delete[] dielectricTensor[i];
 		}
 
 		delete[] massMatrix;
 		delete[] tempMassMatrix;
 
-		delete[] Efield;
-		delete[] newEfield;
-		delete[] tempEfield;
-		delete[] explicitEfield;
-		delete[] rotB;
-		delete[] Ederivative;
-
-		delete[] tempNodeParameter;
-		delete[] tempNodeVectorParameter;
-		delete[] tempNodeMatrixParameter;
-
-		delete[] electricFlux;
-		delete[] electricFluxMinus;
-		delete[] externalElectricFlux;
-		delete[] divPressureTensor;
-		delete[] divPressureTensorMinus;
-		delete[] dielectricTensor;
+		delete3vectorArray(electricFlux, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(electricFluxMinus, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(externalElectricFlux, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(divPressureTensor, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(divPressureTensorMinus, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		delete3matrixArray(dielectricTensor, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			delete[] leftElevel[j];
@@ -841,63 +803,25 @@ Simulation::~Simulation() {
 		delete[] rightElevel;
 
 		for (int t = 0; t < typesNumber; ++t) {
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int j = 0; j < ynumberAdded; ++j) {
-					delete[] particleConcentrations[t][i][j];
-					delete[] particleEnergies[t][i][j];
-					delete[] particleBulkVelocities[t][i][j];
-				}
-				delete[] particleConcentrations[t][i];
-				delete[] particleEnergies[t][i];
-				delete[] particleBulkVelocities[t][i];
-			}
-			delete[] particleConcentrations[t];
-			delete[] particleEnergies[t];
-			delete[] particleBulkVelocities[t];
+			delete3array(particleConcentrations[t], xnumberAdded, ynumberAdded, znumberAdded);
+			delete3array(particleEnergies[t], xnumberAdded, ynumberAdded, znumberAdded);
+			delete3vectorArray(particleBulkVelocities[t], xnumberAdded, ynumberAdded, znumberAdded);
 		}
 		delete[] particleConcentrations;
 		delete[] particleEnergies;
 		delete[] particleBulkVelocities;
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				delete[] Bfield[i][j];
-				delete[] newBfield[i][j];
-				delete[] chargeDensity[i][j];
-				delete[] chargeDensityMinus[i][j];
-				delete[] pressureTensor[i][j];
-				delete[] chargeDensityHat[i][j];
-				delete[] tempCellParameter[i][j];
-				delete[] tempCellVectorParameter[i][j];
-				delete[] tempCellMatrixParameter[i][j];
-				delete[] rotE[i][j];
-				delete[] Bderivative[i][j];
-			}
-			delete[] Bfield[i];
-			delete[] newBfield[i];
-			delete[] chargeDensity[i];
-			delete[] chargeDensityMinus[i];
-			delete[] pressureTensor[i];
-			delete[] chargeDensityHat[i];
-			delete[] tempCellParameter[i];
-			delete[] tempCellVectorParameter[i];
-			delete[] tempCellMatrixParameter[i];
-			delete[] rotE[i];
-			delete[] Bderivative[i];
-		}
-
-		delete[] Bfield;
-		delete[] newBfield;
-
-		delete[] chargeDensity;
-		delete[] chargeDensityMinus;
-		delete[] pressureTensor;
-		delete[] chargeDensityHat;
-		delete[] tempCellParameter;
-		delete[] tempCellVectorParameter;
-		delete[] tempCellMatrixParameter;
-		delete[] rotE;
-		delete[] Bderivative;
+		delete3vectorArray(Bfield, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3vectorArray(newBfield, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3array(chargeDensity, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3array(chargeDensityMinus, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3matrixArray(pressureTensor, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3array(chargeDensityHat, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3array(tempCellParameter, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3vectorArray(tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3matrixArray(tempCellMatrixParameter, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3vectorArray(rotE, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3vectorArray(Bderivative, xnumberAdded, ynumberAdded, znumberAdded);
 
 		delete[] xgrid;
 		delete[] middleXgrid;
@@ -1095,423 +1019,127 @@ Simulation::~Simulation() {
 		particles.clear();
 		tempParticles.clear();
 
-		for (int i = 0; i < 2 + 2 * additionalBinNumber; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				delete[] tempCellParameterLeft[i][j];
-				delete[] tempCellParameterRight[i][j];
-				delete[] tempCellVectorParameterLeft[i][j];
-				delete[] tempCellVectorParameterRight[i][j];
-				delete[] tempCellMatrixParameterLeft[i][j];
-				delete[] tempCellMatrixParameterRight[i][j];
-			}
-			delete[] tempCellParameterLeft[i];
-			delete[] tempCellParameterRight[i];
-			delete[] tempCellVectorParameterLeft[i];
-			delete[] tempCellVectorParameterRight[i];
-			delete[] tempCellMatrixParameterLeft[i];
-			delete[] tempCellMatrixParameterRight[i];
-		}
-		delete[] tempCellParameterLeft;
-		delete[] tempCellParameterRight;
-		delete[] tempCellVectorParameterLeft;
-		delete[] tempCellVectorParameterRight;
-		delete[] tempCellMatrixParameterLeft;
-		delete[] tempCellMatrixParameterRight;
+		delete3array(tempCellParameterLeft, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
+		delete3array(tempCellParameterRight, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
+		delete3vectorArray(tempCellVectorParameterLeft, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
+		delete3vectorArray(tempCellVectorParameterRight, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
+		delete3matrixArray(tempCellMatrixParameterLeft, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
+		delete3matrixArray(tempCellMatrixParameterRight, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
 
-		for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				delete[] tempNodeParameterLeft[i][j];
-				delete[] tempNodeParameterRight[i][j];
-				delete[] tempNodeVectorParameterLeft[i][j];
-				delete[] tempNodeVectorParameterRight[i][j];
-				delete[] tempNodeMatrixParameterLeft[i][j];
-				delete[] tempNodeMatrixParameterRight[i][j];
-			}
-			delete[] tempNodeParameterLeft[i];
-			delete[] tempNodeParameterRight[i];
-			delete[] tempNodeVectorParameterLeft[i];
-			delete[] tempNodeVectorParameterRight[i];
-			delete[] tempNodeMatrixParameterLeft[i];
-			delete[] tempNodeMatrixParameterRight[i];
-		}
-		delete[] tempNodeParameterLeft;
-		delete[] tempNodeParameterRight;
-		delete[] tempNodeVectorParameterLeft;
-		delete[] tempNodeVectorParameterRight;
-		delete[] tempNodeMatrixParameterLeft;
-		delete[] tempNodeMatrixParameterRight;
+		delete3array(tempNodeParameterLeft, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		delete3array(tempNodeParameterRight, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(tempNodeVectorParameterLeft, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(tempNodeVectorParameterRight, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		delete3matrixArray(tempNodeMatrixParameterLeft, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		delete3matrixArray(tempNodeMatrixParameterRight, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < 2 + 2 * additionalBinNumber; ++j) {
-				delete[] tempCellParameterFront[i][j];
-				delete[] tempCellParameterBack[i][j];
-				delete[] tempCellVectorParameterFront[i][j];
-				delete[] tempCellVectorParameterBack[i][j];
-				delete[] tempCellMatrixParameterFront[i][j];
-				delete[] tempCellMatrixParameterBack[i][j];
-			}
-			delete[] tempCellParameterFront[i];
-			delete[] tempCellParameterBack[i];
-			delete[] tempCellVectorParameterFront[i];
-			delete[] tempCellVectorParameterBack[i];
-			delete[] tempCellMatrixParameterFront[i];
-			delete[] tempCellMatrixParameterBack[i];
-		}
-		delete[] tempCellParameterFront;
-		delete[] tempCellParameterBack;
-		delete[] tempCellVectorParameterFront;
-		delete[] tempCellVectorParameterBack;
-		delete[] tempCellMatrixParameterFront;
-		delete[] tempCellMatrixParameterBack;
+		delete3array(tempCellParameterFront, xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
+		delete3array(tempCellParameterBack, xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
+		delete3vectorArray(tempCellVectorParameterFront, xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
+		delete3vectorArray(tempCellVectorParameterBack, xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
+		delete3matrixArray(tempCellMatrixParameterFront, xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
+		delete3matrixArray(tempCellMatrixParameterBack, xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
 
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
-				delete[] tempNodeParameterFront[i][j];
-				delete[] tempNodeParameterBack[i][j];
-				delete[] tempNodeVectorParameterFront[i][j];
-				delete[] tempNodeVectorParameterBack[i][j];
-				delete[] tempNodeMatrixParameterFront[i][j];
-				delete[] tempNodeMatrixParameterBack[i][j];
-			}
-			delete[] tempNodeParameterFront[i];
-			delete[] tempNodeParameterBack[i];
-			delete[] tempNodeVectorParameterFront[i];
-			delete[] tempNodeVectorParameterBack[i];
-			delete[] tempNodeMatrixParameterFront[i];
-			delete[] tempNodeMatrixParameterBack[i];
-		}
-		delete[] tempNodeParameterFront;
-		delete[] tempNodeParameterBack;
-		delete[] tempNodeVectorParameterFront;
-		delete[] tempNodeVectorParameterBack;
-		delete[] tempNodeMatrixParameterFront;
-		delete[] tempNodeMatrixParameterBack;
+		delete3array(tempNodeParameterFront, xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
+		delete3array(tempNodeParameterBack, xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
+		delete3vectorArray(tempNodeVectorParameterFront, xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
+		delete3vectorArray(tempNodeVectorParameterBack, xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
+		delete3matrixArray(tempNodeMatrixParameterFront, xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
+		delete3matrixArray(tempNodeMatrixParameterBack, xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				delete[] tempCellParameterBottom[i][j];
-				delete[] tempCellParameterTop[i][j];
-				delete[] tempCellVectorParameterBottom[i][j];
-				delete[] tempCellVectorParameterTop[i][j];
-				delete[] tempCellMatrixParameterBottom[i][j];
-				delete[] tempCellMatrixParameterTop[i][j];
-			}
-			delete[] tempCellParameterBottom[i];
-			delete[] tempCellParameterTop[i];
-			delete[] tempCellVectorParameterBottom[i];
-			delete[] tempCellVectorParameterTop[i];
-			delete[] tempCellMatrixParameterBottom[i];
-			delete[] tempCellMatrixParameterTop[i];
-		}
-		delete[] tempCellParameterBottom;
-		delete[] tempCellParameterTop;
-		delete[] tempCellVectorParameterBottom;
-		delete[] tempCellVectorParameterTop;
-		delete[] tempCellMatrixParameterBottom;
-		delete[] tempCellMatrixParameterTop;
+		delete3array(tempCellParameterBottom, xnumberAdded, ynumberAdded, 2 + 2 * additionalBinNumber);
+		delete3array(tempCellParameterTop, xnumberAdded, ynumberAdded, 2 + 2 * additionalBinNumber);
+		delete3vectorArray(tempCellVectorParameterBottom, xnumberAdded, ynumberAdded, 2 + 2 * additionalBinNumber);
+		delete3vectorArray(tempCellVectorParameterTop, xnumberAdded, ynumberAdded, 2 + 2 * additionalBinNumber);
+		delete3matrixArray(tempCellMatrixParameterBottom, xnumberAdded, ynumberAdded, 2 + 2 * additionalBinNumber);
+		delete3matrixArray(tempCellMatrixParameterTop, xnumberAdded, ynumberAdded, 2 + 2 * additionalBinNumber);
 
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				delete[] tempNodeParameterBottom[i][j];
-				delete[] tempNodeParameterTop[i][j];
-				delete[] tempNodeVectorParameterBottom[i][j];
-				delete[] tempNodeVectorParameterTop[i][j];
-				delete[] tempNodeMatrixParameterBottom[i][j];
-				delete[] tempNodeMatrixParameterTop[i][j];
-			}
-			delete[] tempNodeParameterBottom[i];
-			delete[] tempNodeParameterTop[i];
-			delete[] tempNodeVectorParameterBottom[i];
-			delete[] tempNodeVectorParameterTop[i];
-			delete[] tempNodeMatrixParameterBottom[i];
-			delete[] tempNodeMatrixParameterTop[i];
-		}
-		delete[] tempNodeParameterBottom;
-		delete[] tempNodeParameterTop;
-		delete[] tempNodeVectorParameterBottom;
-		delete[] tempNodeVectorParameterTop;
-		delete[] tempNodeMatrixParameterBottom;
-		delete[] tempNodeMatrixParameterTop;
+		delete3array(tempNodeParameterBottom, xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
+		delete3array(tempNodeParameterTop, xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
+		delete3vectorArray(tempNodeVectorParameterBottom, xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
+		delete3vectorArray(tempNodeVectorParameterTop, xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
+		delete3matrixArray(tempNodeMatrixParameterBottom, xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
+		delete3matrixArray(tempNodeMatrixParameterTop, xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					delete[] residualBiconjugateDivE[i][j][k];
-					delete[] firstResidualBiconjugateDivE[i][j][k];
-					delete[] vBiconjugateDivE[i][j][k];
-					delete[] pBiconjugateDivE[i][j][k];
-					delete[] sBiconjugateDivE[i][j][k];
-					delete[] tBiconjugateDivE[i][j][k];
-				}
-				delete[] residualBiconjugateDivE[i][j];
-				delete[] firstResidualBiconjugateDivE[i][j];
-				delete[] vBiconjugateDivE[i][j];
-				delete[] pBiconjugateDivE[i][j];
-				delete[] sBiconjugateDivE[i][j];
-				delete[] tBiconjugateDivE[i][j];
-			}
-			delete[] residualBiconjugateDivE[i];
-			delete[] firstResidualBiconjugateDivE[i];
-			delete[] vBiconjugateDivE[i];
-			delete[] pBiconjugateDivE[i];
-			delete[] sBiconjugateDivE[i];
-			delete[] tBiconjugateDivE[i];
-		}
-		delete[] residualBiconjugateDivE;
-		delete[] firstResidualBiconjugateDivE;
-		delete[] vBiconjugateDivE;
-		delete[] pBiconjugateDivE;
-		delete[] sBiconjugateDivE;
-		delete[] tBiconjugateDivE;
+		delete4array(residualBiconjugateDivE, xnumberAdded, ynumberAdded, znumberAdded, 1);
+		delete4array(firstResidualBiconjugateDivE, xnumberAdded, ynumberAdded, znumberAdded, 1);
+		delete4array(vBiconjugateDivE, xnumberAdded, ynumberAdded, znumberAdded, 1);
+		delete4array(pBiconjugateDivE, xnumberAdded, ynumberAdded, znumberAdded, 1);
+		delete4array(sBiconjugateDivE, xnumberAdded, ynumberAdded, znumberAdded, 1);
+		delete4array(tBiconjugateDivE, xnumberAdded, ynumberAdded, znumberAdded, 1);
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					delete[] residualBiconjugateMaxwell[i][j][k];
-					delete[] firstResidualBiconjugateMaxwell[i][j][k];
-					delete[] vBiconjugateMaxwell[i][j][k];
-					delete[] pBiconjugateMaxwell[i][j][k];
-					delete[] sBiconjugateMaxwell[i][j][k];
-					delete[] tBiconjugateMaxwell[i][j][k];
-				}
-				delete[] residualBiconjugateMaxwell[i][j];
-				delete[] firstResidualBiconjugateMaxwell[i][j];
-				delete[] vBiconjugateMaxwell[i][j];
-				delete[] pBiconjugateMaxwell[i][j];
-				delete[] sBiconjugateMaxwell[i][j];
-				delete[] tBiconjugateMaxwell[i][j];
-			}
-			delete[] residualBiconjugateMaxwell[i];
-			delete[] firstResidualBiconjugateMaxwell[i];
-			delete[] vBiconjugateMaxwell[i];
-			delete[] pBiconjugateMaxwell[i];
-			delete[] sBiconjugateMaxwell[i];
-			delete[] tBiconjugateMaxwell[i];
-		}
-		delete[] residualBiconjugateMaxwell;
-		delete[] firstResidualBiconjugateMaxwell;
-		delete[] vBiconjugateMaxwell;
-		delete[] pBiconjugateMaxwell;
-		delete[] sBiconjugateMaxwell;
-		delete[] tBiconjugateMaxwell;
+		delete4array(residualBiconjugateMaxwell, xnumberAdded, ynumberAdded, znumberAdded, 3);
+		delete4array(firstResidualBiconjugateMaxwell, xnumberAdded, ynumberAdded, znumberAdded, 3);
+		delete4array(vBiconjugateMaxwell, xnumberAdded, ynumberAdded, znumberAdded, 3);
+		delete4array(pBiconjugateMaxwell, xnumberAdded, ynumberAdded, znumberAdded, 3);
+		delete4array(sBiconjugateMaxwell, xnumberAdded, ynumberAdded, znumberAdded, 3);
+		delete4array(tBiconjugateMaxwell, xnumberAdded, ynumberAdded, znumberAdded, 3);
 
 		if (solverType == BUNEMAN) {
 
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int j = 0; j < ynumberAdded + 1; ++j) {
-					delete[] bunemanJx[i][j];
-					delete[] bunemanEx[i][j];
-					delete[] bunemanNewEx[i][j];
-					delete[] tempBunemanExParameter[i][j];
-					delete[] bunemanDivCleaningEx[i][j];
-				}
-				delete[] bunemanJx[i];
-				delete[] bunemanEx[i];
-				delete[] bunemanNewEx[i];
-				delete[] tempBunemanExParameter[i];
-				delete[] bunemanDivCleaningEx[i];
-			}
-			delete[] bunemanJx;
-			delete[] bunemanEx;
-			delete[] bunemanNewEx;
-			delete[] tempBunemanExParameter;
-			delete[] bunemanDivCleaningEx;
+			delete3array(bunemanJx, xnumberAdded, ynumberAdded + 1, znumberAdded + 1);
+			delete3array(bunemanEx, xnumberAdded, ynumberAdded + 1, znumberAdded + 1);
+			delete3array(bunemanNewEx, xnumberAdded, ynumberAdded + 1, znumberAdded + 1);
+			delete3array(tempBunemanExParameter, xnumberAdded, ynumberAdded + 1, znumberAdded + 1);
+			delete3array(bunemanDivCleaningEx, xnumberAdded, ynumberAdded + 1, znumberAdded + 1);
 
-			for (int i = 0; i < xnumberAdded + 1; ++i) {
-				for (int j = 0; j < ynumberAdded; ++j) {
-					delete[] bunemanJy[i][j];
-					delete[] bunemanEy[i][j];
-					delete[] bunemanNewEy[i][j];
-					delete[] tempBunemanEyParameter[i][j];
-					delete[] bunemanDivCleaningEy[i][j];
-				}
-				delete[] bunemanJy[i];
-				delete[] bunemanEy[i];
-				delete[] bunemanNewEy[i];
-				delete[] tempBunemanEyParameter[i];
-				delete[] bunemanDivCleaningEy[i];
-			}
-			delete[] bunemanJy;
-			delete[] bunemanEy;
-			delete[] bunemanNewEy;
-			delete[] tempBunemanEyParameter;
-			delete[] bunemanDivCleaningEy;
+			delete3array(bunemanJy, xnumberAdded + 1, ynumberAdded, znumberAdded + 1);
+			delete3array(bunemanEy, xnumberAdded + 1, ynumberAdded, znumberAdded + 1);
+			delete3array(bunemanNewEy, xnumberAdded + 1, ynumberAdded, znumberAdded + 1);
+			delete3array(tempBunemanEyParameter, xnumberAdded + 1, ynumberAdded, znumberAdded + 1);
+			delete3array(bunemanDivCleaningEy, xnumberAdded + 1, ynumberAdded, znumberAdded + 1);
 
-			for (int i = 0; i < xnumberAdded + 1; ++i) {
-				for (int j = 0; j < ynumberAdded + 1; ++j) {
-					delete[] bunemanJz[i][j];
-					delete[] bunemanEz[i][j];
-					delete[] bunemanNewEz[i][j];
-					delete[] tempBunemanEzParameter[i][j];
-					delete[] bunemanDivCleaningEz[i][j];
-				}
-				delete[] bunemanJz[i];
-				delete[] bunemanEz[i];
-				delete[] bunemanNewEz[i];
-				delete[] tempBunemanEzParameter[i];
-				delete[] bunemanDivCleaningEz[i];
-			}
-			delete[] bunemanJz;
-			delete[] bunemanEz;
-			delete[] bunemanNewEz;
-			delete[] tempBunemanEzParameter;
-			delete[] bunemanDivCleaningEz;
+			delete3array(bunemanJz, xnumberAdded + 1, ynumberAdded + 1, znumberAdded);
+			delete3array(bunemanEz, xnumberAdded + 1, ynumberAdded + 1, znumberAdded);
+			delete3array(bunemanNewEz, xnumberAdded + 1, ynumberAdded + 1, znumberAdded);
+			delete3array(tempBunemanEzParameter, xnumberAdded + 1, ynumberAdded + 1, znumberAdded);
+			delete3array(bunemanDivCleaningEz, xnumberAdded + 1, ynumberAdded + 1, znumberAdded);
 
-			for (int i = 0; i < xnumberAdded + 1; ++i) {
-				for (int j = 0; j < ynumberAdded; ++j) {
-					delete[] bunemanBx[i][j];
-					delete[] bunemanNewBx[i][j];
-					delete[] tempBunemanBxParameter[i][j];
-					delete[] bunemanDivCleaningBx[i][j];
-				}
-				delete[] bunemanBx[i];
-				delete[] bunemanNewBx[i];
-				delete[] tempBunemanBxParameter[i];
-				delete[] bunemanDivCleaningBx[i];
-			}
-			delete[] bunemanBx;
-			delete[] bunemanNewBx;
-			delete[] tempBunemanBxParameter;
-			delete[] bunemanDivCleaningBx;
+			delete3array(bunemanBx, xnumberAdded + 1, ynumberAdded, znumberAdded;
+			delete3array(bunemanNewBx, xnumberAdded + 1, ynumberAdded, znumberAdded);
+			delete3array(tempBunemanBxParameter, xnumberAdded + 1, ynumberAdded, znumberAdded);
+			delete3array(bunemanDivCleaningBx, xnumberAdded + 1, ynumberAdded, znumberAdded);
 
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int j = 0; j < ynumberAdded + 1; ++j) {
-					delete[] bunemanBy[i][j];
-					delete[] bunemanNewBy[i][j];
-					delete[] tempBunemanByParameter[i][j];
-					delete[] bunemanDivCleaningBy[i][j];
-				}
-				delete[] bunemanBy[i];
-				delete[] bunemanNewBy[i];
-				delete[] tempBunemanByParameter[i];
-				delete[] bunemanDivCleaningBy[i];
-			}
-			delete[] bunemanBy;
-			delete[] bunemanNewBy;
-			delete[] tempBunemanByParameter;
-			delete[] bunemanDivCleaningBy;
+			delete3array(bunemanBy, xnumberAdded, ynumberAdded + 1, znumberAdded);
+			delete3array(bunemanNewBy, xnumberAdded, ynumberAdded + 1, znumberAdded);
+			delete3array(tempBunemanByParameter, xnumberAdded, ynumberAdded + 1, znumberAdded);
+			delete3array(bunemanDivCleaningBy, xnumberAdded, ynumberAdded + 1, znumberAdded);
 
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int j = 0; j < ynumberAdded; ++j) {
-					delete[] bunemanBz[i][j];
-					delete[] bunemanNewBz[i][j];
-					delete[] tempBunemanBzParameter[i][j];
-					delete[] bunemanDivCleaningBz[i][j];
-				}
-				delete[] bunemanBz[i];
-				delete[] bunemanNewBz[i];
-				delete[] tempBunemanBzParameter[i];
-				delete[] bunemanDivCleaningBz[i];
-			}
-			delete[] bunemanBz;
-			delete[] bunemanNewBz;
-			delete[] tempBunemanBzParameter;
-			delete[] bunemanDivCleaningBz;
+			delete3array(bunemanBz, xnumberAdded, ynumberAdded, znumberAdded + 1);
+			delete3array(bunemanNewBz, xnumberAdded, ynumberAdded, znumberAdded + 1);
+			delete3array(tempBunemanBzParameter, xnumberAdded, ynumberAdded, znumberAdded + 1);
+			delete3array(bunemanDivCleaningBz, xnumberAdded, ynumberAdded, znumberAdded + 1);
 
 			//// temp buneman j
 			// left right
-			for (int i = 0; i < 2 + 2 * additionalBinNumber; ++i) {
-				for (int j = 0; j < ynumberAdded + 1; ++j) {
-					delete[] tempBunemanJxLeft[i][j];
-					delete[] tempBunemanJxRight[i][j];
-				}
-				delete[] tempBunemanJxLeft[i];
-				delete[] tempBunemanJxRight[i];
-			}
-			delete[] tempBunemanJxLeft;
-			delete[] tempBunemanJxRight;
+			delete3array(tempBunemanJxLeft, 2 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+			delete3array(tempBunemanJxRight, 2 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 
+			delete3array(tempBunemanJyLeft, 3 + 2*additionalBinNumber, ynumberAdded, znumberAdded + 1);
+			delete3array(tempBunemanJyRight, 3 + 2*additionalBinNumber, ynumberAdded, znumberAdded + 1);
 
-			for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
-				for (int j = 0; j < ynumberAdded; ++j) {
-					delete[] tempBunemanJyLeft[i][j];
-					delete[] tempBunemanJyRight[i][j];
-				}
-				delete[] tempBunemanJyLeft[i];
-				delete[] tempBunemanJyRight[i];
-			}
-			delete[] tempBunemanJyLeft;
-			delete[] tempBunemanJyRight;
-
-			for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
-				for (int j = 0; j < ynumberAdded + 1; ++j) {
-					delete[] tempBunemanJzLeft[i][j];
-					delete[] tempBunemanJzRight[i][j];
-				}
-				delete[] tempBunemanJzLeft[i];
-				delete[] tempBunemanJzRight[i];
-			}
-			delete[] tempBunemanJzLeft;
-			delete[] tempBunemanJzRight;
+			delete3array(tempBunemanJzLeft, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded);
+			delete3array(tempBunemanJzRight, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded);
 
 			///front back
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
-					delete[] tempBunemanJxFront[i][j];
-					delete[] tempBunemanJxBack[i][j];
-				}
-				delete[] tempBunemanJxFront[i];
-				delete[] tempBunemanJxBack[i];
-			}
-			delete[] tempBunemanJxFront;
-			delete[] tempBunemanJxBack;
-
-			for (int i = 0; i < xnumberAdded + 1; ++i) {
-				for (int j = 0; j < 2 + 2 * additionalBinNumber; ++j) {
-					delete[] tempBunemanJyFront[i][j];
-					delete[] tempBunemanJyBack[i][j];
-				}
-				delete[] tempBunemanJyFront[i];
-				delete[] tempBunemanJyBack[i];
-			}
-			delete[] tempBunemanJyFront;
-			delete[] tempBunemanJyBack;
-
-			for (int i = 0; i < xnumberAdded + 1; ++i) {
-				for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
-					delete[] tempBunemanJzFront[i][j];
-					delete[] tempBunemanJzBack[i][j];
-				}
-				delete[] tempBunemanJzFront[i];
-				delete[] tempBunemanJzBack[i];
-			}
-			delete[] tempBunemanJzFront;
-			delete[] tempBunemanJzBack;
+			delete3array(tempBunemanJxFront, xnumberAdded, 3 + 2*additionalBinNumber, znumberAdded + 1);
+			delete3array(tempBunemanJxBack, xnumberAdded, 3 + 2*additionalBinNumber, znumberAdded + 1);
+			
+			delete3array(tempBunemanJyFront, xnumberAdded + 1, 2 + 2*additionalBinNumber, znumberAdded + 1);
+			delete3array(tempBunemanJyBack, xnumberAdded + 1, 2 + 2*additionalBinNumber, znumberAdded + 1);
+	
+			delete3array(tempBunemanJzFront, xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded);
+			delete3array(tempBunemanJzBack, xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded);
+			
 			// bottom top
+			delete3array(tempBunemanJxBottom, xnumberAdded, ynumberAdded + 1, 3 + 2*additionalBinNumber);
+			delete3array(tempBunemanJxTop, xnumberAdded, ynumberAdded + 1, 3 + 2*additionalBinNumber);
 
+			delete3array(tempBunemanJyBottom, xnumberAdded + 1, ynumberAdded, 3 + 2*additionalBinNumber);
+			delete3array(tempBunemanJyTop, xnumberAdded + 1, ynumberAdded, 3 + 2*additionalBinNumber);
 
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int j = 0; j < ynumberAdded + 1; ++j) {
-					delete[] tempBunemanJxBottom[i][j];
-					delete[] tempBunemanJxTop[i][j];
-				}
-				delete[] tempBunemanJxBottom[i];
-				delete[] tempBunemanJxTop[i];
-			}
-			delete[] tempBunemanJxBottom;
-			delete[] tempBunemanJxTop;
-
-			for (int i = 0; i < xnumberAdded + 1; ++i) {
-				for (int j = 0; j < ynumberAdded; ++j) {
-					delete[] tempBunemanJyBottom[i][j];
-					delete[] tempBunemanJyTop[i][j];
-				}
-				delete[] tempBunemanJyBottom[i];
-				delete[] tempBunemanJyTop[i];
-			}
-			delete[] tempBunemanJyBottom;
-			delete[] tempBunemanJyTop;
-
-			for (int i = 0; i < xnumberAdded + 1; ++i) {
-				for (int j = 0; j < ynumberAdded + 1; ++j) {
-					delete[] tempBunemanJzBottom[i][j];
-					delete[] tempBunemanJzTop[i][j];
-				}
-				delete[] tempBunemanJzBottom[i];
-				delete[] tempBunemanJzTop[i];
-			}
-			delete[] tempBunemanJzBottom;
-			delete[] tempBunemanJzTop;
+			delete3array(tempBunemanJzBottom, xnumberAdded + 1, ynumberAdded + 1, 2 + 2*additionalBinNumber);
+			delete3array(tempBunemanJzTop, xnumberAdded + 1, ynumberAdded + 1, 2 + 2*additionalBinNumber);
 		}
 	}
 }
