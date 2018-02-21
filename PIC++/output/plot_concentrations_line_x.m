@@ -13,7 +13,7 @@ Nz = size(Zfile, 1)-1;
 N = Nx;
 
 Nt = size(concentrationsX, 1)/N;
-%Nt = 23;
+%Nt = 7;
 Ntypes = size(particleTypes, 1);
 
 a = 0;

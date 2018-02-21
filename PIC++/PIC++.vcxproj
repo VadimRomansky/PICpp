@@ -184,6 +184,7 @@
     <ClCompile Include="input.cpp" />
     <ClCompile Include="largeVectorBasis.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="massMatrix.cpp" />
     <ClCompile Include="matrix3d.cpp" />
     <ClCompile Include="matrixelement.cpp" />
     <ClCompile Include="memory_util.cpp" />

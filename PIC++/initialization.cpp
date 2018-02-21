@@ -712,53 +712,19 @@ Simulation::~Simulation() {
 		}
 		delete[] divergenceCleaningPotentialFourier;
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				delete[] fourierInput[i][j];
-				delete[] fourierImage[i][j];
-				delete[] fourierOutput[i][j];
-			}
-			delete[] fourierInput[i];
-			delete[] fourierImage[i];
-			delete[] fourierOutput[i];
-		}
-		delete[] fourierInput;
-		delete[] fourierImage;
-		delete[] fourierOutput;
+		delete3complexArray(fourierInput, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierImage, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierOutput, xnumberAdded, ynumberAdded, znumberAdded);
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				delete[] fourierScalarInput[i][j];
-				delete[] fourierScalarOutput[i][j];
-				delete[] fourierScalarTempOutput[i][j];
-				delete[] fourierScalarTempOutput1[i][j];
-			}
-			delete[] fourierScalarInput[i];
-			delete[] fourierScalarOutput[i];
-			delete[] fourierScalarTempOutput[i];
-			delete[] fourierScalarTempOutput1[i];
-		}
-		delete[] fourierScalarInput;
-		delete[] fourierScalarOutput;
-		delete[] fourierScalarTempOutput;
-		delete[] fourierScalarTempOutput1;
+		delete3complexArray(fourierScalarInput, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierScalarOutput, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierScalarTempOutput, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierScalarTempOutput1, xnumberAdded, ynumberAdded, znumberAdded);
 
-		for (int i = 0; i < 2 * xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				delete[] fourierScalarMirrorInput[i][j];
-				delete[] fourierScalarMirrorOutput[i][j];
-				delete[] fourierScalarMirrorTempOutput[i][j];
-				delete[] fourierScalarMirrorTempOutput1[i][j];
-			}
-			delete[] fourierScalarMirrorInput[i];
-			delete[] fourierScalarMirrorOutput[i];
-			delete[] fourierScalarMirrorTempOutput[i];
-			delete[] fourierScalarMirrorTempOutput1[i];
-		}
-		delete[] fourierScalarMirrorInput;
-		delete[] fourierScalarMirrorOutput;
-		delete[] fourierScalarMirrorTempOutput;
-		delete[] fourierScalarMirrorTempOutput1;
+		delete3complexArray(fourierScalarMirrorInput, 2*xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierScalarMirrorOutput, 2*xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierScalarMirrorTempOutput, 2*xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierScalarMirrorTempOutput1, 2*xnumberAdded, ynumberAdded, znumberAdded);
 
 		delete[] localFactorX;
 		delete[] localFactorY;
@@ -1095,7 +1061,7 @@ Simulation::~Simulation() {
 			delete3array(tempBunemanEzParameter, xnumberAdded + 1, ynumberAdded + 1, znumberAdded);
 			delete3array(bunemanDivCleaningEz, xnumberAdded + 1, ynumberAdded + 1, znumberAdded);
 
-			delete3array(bunemanBx, xnumberAdded + 1, ynumberAdded, znumberAdded;
+			delete3array(bunemanBx, xnumberAdded + 1, ynumberAdded, znumberAdded);
 			delete3array(bunemanNewBx, xnumberAdded + 1, ynumberAdded, znumberAdded);
 			delete3array(tempBunemanBxParameter, xnumberAdded + 1, ynumberAdded, znumberAdded);
 			delete3array(bunemanDivCleaningBx, xnumberAdded + 1, ynumberAdded, znumberAdded);
@@ -5428,70 +5394,19 @@ void Simulation::createArrays() {
 		}
 	}
 
-	fourierInput = new Complex**[xnumberAdded];
-	fourierImage = new Complex**[xnumberAdded];
-	fourierOutput = new Complex**[xnumberAdded];
-	for (int i = 0; i < xnumberAdded; ++i) {
-		fourierInput[i] = new Complex*[ynumberAdded];
-		fourierImage[i] = new Complex*[ynumberAdded];
-		fourierOutput[i] = new Complex*[ynumberAdded];
-		for (int j = 0; j < ynumberAdded; ++j) {
-			fourierInput[i][j] = new Complex[znumberAdded];
-			fourierImage[i][j] = new Complex[znumberAdded];
-			fourierOutput[i][j] = new Complex[znumberAdded];
-			for (int k = 0; k < znumberAdded; ++k) {
-				fourierInput[i][j][k] = Complex(0, 0);
-				fourierImage[i][j][k] = Complex(0, 0);
-				fourierOutput[i][j][k] = Complex(0, 0);
-			}
-		}
-	}
+	fourierInput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	fourierImage = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	fourierOutput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
 
-	fourierScalarInput = new Complex**[xnumberAdded];
-	fourierScalarOutput = new Complex**[xnumberAdded];
-	fourierScalarTempOutput = new Complex**[xnumberAdded];
-	fourierScalarTempOutput1 = new Complex**[xnumberAdded];
-	for (int i = 0; i < xnumberAdded; ++i) {
-		fourierScalarInput[i] = new Complex*[ynumberAdded];
-		fourierScalarOutput[i] = new Complex*[ynumberAdded];
-		fourierScalarTempOutput[i] = new Complex*[ynumberAdded];
-		fourierScalarTempOutput1[i] = new Complex*[ynumberAdded];
-		for (int j = 0; j < ynumberAdded; ++j) {
-			fourierScalarInput[i][j] = new Complex[znumberAdded];
-			fourierScalarOutput[i][j] = new Complex[znumberAdded];
-			fourierScalarTempOutput[i][j] = new Complex[znumberAdded];
-			fourierScalarTempOutput1[i][j] = new Complex[znumberAdded];
-			for (int k = 0; k < znumberAdded; ++k) {
-				fourierScalarInput[i][j][k] = Complex(0, 0);
-				fourierScalarOutput[i][j][k] = Complex(0, 0);
-				fourierScalarTempOutput[i][j][k] = Complex(0, 0);
-				fourierScalarTempOutput1[i][j][k] = Complex(0, 0);
-			}
-		}
-	}
+	fourierScalarInput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	fourierScalarOutput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	fourierScalarTempOutput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	fourierScalarTempOutput1 = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
 
-	fourierScalarMirrorInput = new Complex**[2 * xnumberAdded];
-	fourierScalarMirrorOutput = new Complex**[2 * xnumberAdded];
-	fourierScalarMirrorTempOutput = new Complex**[2 * xnumberAdded];
-	fourierScalarMirrorTempOutput1 = new Complex**[2 * xnumberAdded];
-	for (int i = 0; i < 2 * xnumberAdded; ++i) {
-		fourierScalarMirrorInput[i] = new Complex*[ynumberAdded];
-		fourierScalarMirrorOutput[i] = new Complex*[ynumberAdded];
-		fourierScalarMirrorTempOutput[i] = new Complex*[ynumberAdded];
-		fourierScalarMirrorTempOutput1[i] = new Complex*[ynumberAdded];
-		for (int j = 0; j < ynumberAdded; ++j) {
-			fourierScalarMirrorInput[i][j] = new Complex[znumberAdded];
-			fourierScalarMirrorOutput[i][j] = new Complex[znumberAdded];
-			fourierScalarMirrorTempOutput[i][j] = new Complex[znumberAdded];
-			fourierScalarMirrorTempOutput1[i][j] = new Complex[znumberAdded];
-			for (int k = 0; k < znumberAdded; ++k) {
-				fourierScalarMirrorInput[i][j][k] = Complex(0, 0);
-				fourierScalarMirrorOutput[i][j][k] = Complex(0, 0);
-				fourierScalarMirrorTempOutput[i][j][k] = Complex(0, 0);
-				fourierScalarMirrorTempOutput1[i][j][k] = Complex(0, 0);
-			}
-		}
-	}
+	fourierScalarMirrorInput = create3complexArray(2*xnumberAdded, ynumberAdded, znumberAdded);
+	fourierScalarMirrorOutput = create3complexArray(2*xnumberAdded, ynumberAdded, znumberAdded);
+	fourierScalarMirrorTempOutput = create3complexArray(2*xnumberAdded, ynumberAdded, znumberAdded);
+	fourierScalarMirrorTempOutput1 = create3complexArray(2*xnumberAdded, ynumberAdded, znumberAdded);
 
 	localFactorX = new Complex[2 * (xnumberAdded + 1)];
 	localFactorY = new Complex[ynumberAdded + 1];

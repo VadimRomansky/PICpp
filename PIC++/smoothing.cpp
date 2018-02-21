@@ -29,7 +29,7 @@ void Simulation::smoothCellParameter(double*** array) {
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
 			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
-				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 1) {
+				if (boundaryConditionTypeX == PERIODIC || ((i > 1 + additionalBinNumber) && (i < xnumberAdded - additionalBinNumber - 1))) {
 					tempCellParameter[i][j][k] = 0;
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
@@ -85,14 +85,18 @@ void Simulation::createSmoothingMatrix(double smoothingmatrix[3][3][3]) {
 			factorX = 1 - smoothingParameter;
 		}
 		for(int j = 0; j < 3; ++j) {
-			double factorY = smoothingParameter/2;
+			//double factorY = smoothingParameter/2;
+			double factorY = 0;
 			if(j == 1) {
-				factorY = 1 - smoothingParameter;
+				//factorY = 1 - smoothingParameter;
+				factorY = 1;
 			}
 			for(int k = 0; k < 3; ++k) {
-				double factorZ = smoothingParameter/2;
+				//double factorZ = smoothingParameter/2;
+				double factorZ = 0;
 				if(k == 1) {
-					factorZ = 1 - smoothingParameter;
+					//factorZ = 1 - smoothingParameter;
+					factorZ = 1;
 				}
 				smoothingmatrix[i][j][k] = factorX*factorY*factorZ;
 			}

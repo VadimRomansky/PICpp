@@ -111,6 +111,9 @@
     <ClCompile Include="creating_arrays.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="massMatrix.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h">
