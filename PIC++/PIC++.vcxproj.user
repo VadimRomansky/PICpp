@@ -9,8 +9,8 @@
     <DebuggerFlavor>MpiClusterDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <MpiDebuggerSchedulerNode>localhost/1</MpiDebuggerSchedulerNode>
-    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <MpiDebuggerSchedulerNode>localhost/2</MpiDebuggerSchedulerNode>
+    <DebuggerFlavor>MpiClusterDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <MpiDebuggerSchedulerNode>localhost/1</MpiDebuggerSchedulerNode>

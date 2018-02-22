@@ -996,7 +996,7 @@ void Simulation::exchangeGeneralScalarCellFieldX(double**** field) {
 			for (int i = 0; i <= additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-						field[xnumberAdded - 1 - additionalBinNumber + i][j][k][0] = rightInVectorCellBuffer[bcount];
+						field[xnumberAdded - 1 - additionalBinNumber + i][j][k][0] = rightInCellBuffer[bcount];
 						bcount++;
 					}
 				}
@@ -1122,7 +1122,7 @@ void Simulation::exchangeGeneralScalarCellFieldY(double**** field) {
 			for (int i = 0; i < xnumberAdded; ++i) {
 				for (int j = 0; j <= additionalBinNumber; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-						field[i][ynumberAdded - 1 - additionalBinNumber + j][k][0] = backInVectorCellBuffer[bcount];
+						field[i][ynumberAdded - 1 - additionalBinNumber + j][k][0] = backInCellBuffer[bcount];
 						bcount++;
 					}
 				}
@@ -1254,7 +1254,7 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double**** field) {
 			for (int i = 0; i < xnumberAdded; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k <= additionalBinNumber; ++k) {
-						field[i][j][znumberAdded - 1 - additionalBinNumber + k][0] = topInVectorCellBuffer[bcount];
+						field[i][j][znumberAdded - 1 - additionalBinNumber + k][0] = topInCellBuffer[bcount];
 						bcount++;
 					}
 				}
@@ -1321,6 +1321,404 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double**** field) {
 		}
 	}
 }
+
+///////////
+void Simulation::exchangeGeneralScalarCellField(double*** field) {
+	exchangeGeneralScalarCellFieldX(field);
+	exchangeGeneralScalarCellFieldY(field);
+	exchangeGeneralScalarCellFieldZ(field);
+}
+
+void Simulation::exchangeGeneralScalarCellFieldX(double*** field) {
+	if (cartDim[0] > 1) {
+		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
+		int bcount = 0;
+
+		for (int i = 0; i <= additionalBinNumber; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					rightOutCellBuffer[bcount] = field[xnumberAdded - additionalBinNumber - 2 - i][j][k];
+					leftOutCellBuffer[bcount] = field[1 + additionalBinNumber + i][j][k];
+					bcount++;
+				}
+			}
+		}
+		int number = (1 + additionalBinNumber) * (ynumberAdded) * (znumberAdded);
+		if ((cartCoord[0] < cartDim[0] - 1 && cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
+			if (verbosity > 2)
+				printf(
+					"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+					rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			MPI_Status status;
+			MPI_Sendrecv(rightOutCellBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, leftInCellBuffer, number,
+			             MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, cartComm, &status);
+			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
+		} else if (cartCoord[0] == 0) {
+			MPI_Send(rightOutCellBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_RIGHT, cartComm);
+		} else if (cartCoord[0] == cartDim[0] - 1) {
+			MPI_Status status;
+			MPI_Recv(leftInCellBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		}
+		//MPI_Barrier(cartComm);
+		bcount = 0;
+		if ((cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
+			if (verbosity > 2) printf("receive general field left from %d to %d\n", leftRank, rank);
+			for (int i = 0; i <= additionalBinNumber; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						field[additionalBinNumber - i][j][k] = leftInCellBuffer[bcount];
+						bcount++;
+					}
+				}
+			}
+		}
+
+		MPI_Barrier(cartComm);
+
+		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
+			MPI_Status status;
+			MPI_Sendrecv(leftOutCellBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInCellBuffer, number, MPI_DOUBLE,
+			             rightRank, MPI_BFIELD_LEFT, cartComm, &status);
+			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
+		} else if (cartCoord[0] == 0) {
+			MPI_Status status;
+			MPI_Recv(rightInCellBuffer, number, MPI_DOUBLE, rightRank, MPI_BFIELD_LEFT, cartComm, &status);
+		} else if (cartCoord[0] == cartDim[0] - 1) {
+			MPI_Send(leftOutCellBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, cartComm);
+		}
+		//MPI_Barrier(cartComm);
+		bcount = 0;
+		if ((cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
+			if (verbosity > 2) printf("receive general field rigth from %d to %d\n", rightRank, rank);
+			for (int i = 0; i <= additionalBinNumber; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						field[xnumberAdded - 1 - additionalBinNumber + i][j][k] = rightInCellBuffer[bcount];
+						bcount++;
+					}
+				}
+			}
+		}
+
+		if ((cartCoord[0] == 0) && (boundaryConditionTypeX != PERIODIC)) {
+			for (int i = 0; i <= additionalBinNumber; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						//field[0][j][k] = field[2][j][k];
+						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
+							//field[i][j][k] = Vector3d(0, 0, 0);
+							field[i][j][k] = field[additionalBinNumber + 1][j][k];
+						} else if (boundaryConditionTypeX == FREE_BOTH) {
+							field[i][j][k] = field[additionalBinNumber + 1][j][k];
+						}
+					}
+				}
+			}
+		}
+
+		if ((cartCoord[0] == cartDim[0] - 1) && (boundaryConditionTypeX != PERIODIC)) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					for (int i = 0; i <= additionalBinNumber; ++i) {
+						field[xnumberAdded - 2 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
+					}
+				}
+			}
+		}
+
+		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
+	} else {
+		if (boundaryConditionTypeX == PERIODIC) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					for (int i = 0; i <= additionalBinNumber; ++i) {
+						field[xnumberAdded - 1 - additionalBinNumber + i][j][k] = field[1 + additionalBinNumber + i][j][k];
+						field[i][j][k] = field[xnumberAdded - 2 - 2 * additionalBinNumber + i][j][k];
+					}
+				}
+			}
+		} else {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					//field[0][j][k] = field[2][j][k];
+					for (int i = 0; i <= additionalBinNumber; ++i) {
+						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
+							field[i][j][k] = 0;
+						} else if (boundaryConditionTypeX == FREE_BOTH) {
+							field[i][j][k] = field[additionalBinNumber + 1][j][k];
+						}
+						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
+					}
+				}
+			}
+		}
+	}
+}
+
+void Simulation::exchangeGeneralScalarCellFieldY(double*** field) {
+	if (cartDim[1] > 1) {
+		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
+		int bcount = 0;
+
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j <= additionalBinNumber; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					backOutCellBuffer[bcount] = field[i][ynumberAdded - additionalBinNumber - 2 - j][k];
+					frontOutCellBuffer[bcount] = field[i][1 + additionalBinNumber + i][k];
+					bcount++;
+				}
+			}
+		}
+		int number = (1 + additionalBinNumber) * (xnumberAdded) * (znumberAdded);
+		if ((cartCoord[1] < cartDim[1] - 1 && cartCoord[1] > 0) || (boundaryConditionTypeY == PERIODIC)) {
+			if (verbosity > 2)
+				printf(
+					"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+					rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			MPI_Status status;
+			MPI_Sendrecv(backOutCellBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_RIGHT, frontInCellBuffer, number,
+			             MPI_DOUBLE, frontRank, MPI_BFIELD_RIGHT, cartComm, &status);
+			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
+		} else if (cartCoord[1] == 0) {
+			MPI_Send(backOutCellBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_RIGHT, cartComm);
+		} else if (cartCoord[1] == cartDim[1] - 1) {
+			MPI_Status status;
+			MPI_Recv(frontInCellBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		}
+		//MPI_Barrier(cartComm);
+		bcount = 0;
+		if ((cartCoord[1] > 0) || (boundaryConditionTypeY == PERIODIC)) {
+			if (verbosity > 2) printf("receive general field left from %d to %d\n", leftRank, rank);
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j <= additionalBinNumber; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						field[i][additionalBinNumber - j][k] = frontInCellBuffer[bcount];
+						bcount++;
+					}
+				}
+			}
+		}
+
+		MPI_Barrier(cartComm);
+
+		if ((cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1) || (boundaryConditionTypeY == PERIODIC)) {
+			MPI_Status status;
+			MPI_Sendrecv(frontOutCellBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInCellBuffer, number, MPI_DOUBLE,
+			             backRank, MPI_BFIELD_LEFT, cartComm, &status);
+			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
+		} else if (cartCoord[1] == 0) {
+			MPI_Status status;
+			MPI_Recv(backInCellBuffer, number, MPI_DOUBLE, backRank, MPI_BFIELD_LEFT, cartComm, &status);
+		} else if (cartCoord[1] == cartDim[1] - 1) {
+			MPI_Send(frontOutCellBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, cartComm);
+		}
+		//MPI_Barrier(cartComm);
+		bcount = 0;
+		if ((cartCoord[1] < cartDim[1] - 1) || (boundaryConditionTypeY == PERIODIC)) {
+			if (verbosity > 2) printf("receive general field rigth from %d to %d\n", rightRank, rank);
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j <= additionalBinNumber; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						field[i][ynumberAdded - 1 - additionalBinNumber + j][k] = backInCellBuffer[bcount];
+						bcount++;
+					}
+				}
+			}
+		}
+
+		if ((cartCoord[1] == 0) && (boundaryConditionTypeY != PERIODIC)) {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j <= additionalBinNumber; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						//field[0][j][k] = field[2][j][k];
+						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
+							//field[i][j][k] = Vector3d(0, 0, 0);
+							field[i][j][k] = field[i][additionalBinNumber + 1][k];
+						} else if (boundaryConditionTypeY == FREE_BOTH) {
+							field[i][j][k] = field[i][additionalBinNumber + 1][k];
+						}
+					}
+				}
+			}
+		}
+
+		if ((cartCoord[1] == cartDim[1] - 1) && (boundaryConditionTypeY != PERIODIC)) {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					for (int j = 0; j <= additionalBinNumber; ++j) {
+						field[i][ynumberAdded - 2 - j][k] = field[i][ynumberAdded - 2 - additionalBinNumber][k];
+					}
+				}
+			}
+		}
+
+		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
+	} else {
+		if (boundaryConditionTypeY == PERIODIC) {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					if (ynumberGeneral == 1) {
+						for (int j = 0; j < ynumberAdded; ++j) {
+							field[i][j][k] = field[i][1 + additionalBinNumber][k];
+						}
+					} else {
+						for (int j = 0; j <= additionalBinNumber; ++j) {
+							field[i][ynumberAdded - 1 - additionalBinNumber + j][k] = field[i][1 + additionalBinNumber + j][k];
+							field[i][j][k] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+						}
+					}
+				}
+			}
+		} else {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					//field[0][j][k] = field[2][j][k];
+					for (int j = 0; j <= additionalBinNumber; ++j) {
+						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
+							field[i][j][k] = 0;
+						} else if (boundaryConditionTypeY == FREE_BOTH) {
+							field[i][j][k] = field[i][additionalBinNumber + 1][k];
+						}
+						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
+					}
+				}
+			}
+		}
+	}
+}
+
+void Simulation::exchangeGeneralScalarCellFieldZ(double*** field) {
+	if (cartDim[2] > 1) {
+		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
+		int bcount = 0;
+
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k <= additionalBinNumber; ++k) {
+					topOutCellBuffer[bcount] = field[i][j][znumberAdded - additionalBinNumber - 2 - k];
+					bottomOutCellBuffer[bcount] = field[i][j][1 + additionalBinNumber + k];
+					bcount++;
+				}
+			}
+		}
+		int number = (1 + additionalBinNumber) * (ynumberAdded) * (xnumberAdded);
+		if ((cartCoord[2] < cartDim[2] - 1 && cartCoord[2] > 0) || (boundaryConditionTypeZ == PERIODIC)) {
+			if (verbosity > 2)
+				printf(
+					"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+					rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			MPI_Status status;
+			MPI_Sendrecv(topOutCellBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_RIGHT, bottomInCellBuffer, number,
+			             MPI_DOUBLE, bottomRank, MPI_BFIELD_RIGHT, cartComm, &status);
+			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
+		} else if (cartCoord[2] == 0) {
+			MPI_Send(topOutCellBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_RIGHT, cartComm);
+		} else if (cartCoord[2] == cartDim[2] - 1) {
+			MPI_Status status;
+			MPI_Recv(bottomInCellBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_RIGHT, cartComm, &status);
+		}
+		//MPI_Barrier(cartComm);
+		bcount = 0;
+		if ((cartCoord[2] > 0) || (boundaryConditionTypeZ == PERIODIC)) {
+			if (verbosity > 2) printf("receive general field left from %d to %d\n", leftRank, rank);
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k <= additionalBinNumber; ++k) {
+						field[i][j][additionalBinNumber - k] = bottomInCellBuffer[bcount];
+						bcount++;
+					}
+				}
+			}
+		}
+
+		MPI_Barrier(cartComm);
+
+		if ((cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1) || (boundaryConditionTypeZ == PERIODIC)) {
+			MPI_Status status;
+			MPI_Sendrecv(bottomOutCellBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInCellBuffer, number, MPI_DOUBLE,
+			             topRank, MPI_BFIELD_LEFT, cartComm, &status);
+			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
+		} else if (cartCoord[2] == 0) {
+			MPI_Status status;
+			MPI_Recv(topInCellBuffer, number, MPI_DOUBLE, topRank, MPI_BFIELD_LEFT, cartComm, &status);
+		} else if (cartCoord[2] == cartDim[2] - 1) {
+			MPI_Send(bottomOutCellBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, cartComm);
+		}
+		//MPI_Barrier(cartComm);
+		bcount = 0;
+		if ((cartCoord[2] < cartDim[2] - 1) || (boundaryConditionTypeZ == PERIODIC)) {
+			if (verbosity > 2) printf("receive general field rigth from %d to %d\n", rightRank, rank);
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k <= additionalBinNumber; ++k) {
+						field[i][j][znumberAdded - 1 - additionalBinNumber + k] = topInCellBuffer[bcount];
+						bcount++;
+					}
+				}
+			}
+		}
+
+		if ((cartCoord[2] == 0) && (boundaryConditionTypeZ != PERIODIC)) {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k <= additionalBinNumber; ++k) {
+						//field[0][j][k] = field[2][j][k];
+						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
+							//field[i][j][k] = Vector3d(0, 0, 0);
+							field[i][j][k] = field[i][j][additionalBinNumber + 1];
+						} else if (boundaryConditionTypeZ == FREE_BOTH) {
+							field[i][j][k] = field[i][j][additionalBinNumber + 1];
+						}
+					}
+				}
+			}
+		}
+
+		if ((cartCoord[2] == cartDim[2] - 1) && (boundaryConditionTypeZ != PERIODIC)) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int i = 0; i < xnumberAdded; ++i) {
+					for (int k = 0; k <= additionalBinNumber; ++k) {
+						field[i][j][znumberAdded - 2 - k] = field[i][j][znumberAdded - 2 - additionalBinNumber];
+					}
+				}
+			}
+		}
+
+		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
+	} else {
+		if (boundaryConditionTypeZ == PERIODIC) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int i = 0; i < xnumberAdded; ++i) {
+					if (znumberGeneral == 1) {
+						for (int k = 0; k < znumberAdded; ++k) {
+							field[i][j][k] = field[i][j][1 + additionalBinNumber];
+						}
+					} else {
+						for (int k = 0; k <= additionalBinNumber; ++k) {
+							field[i][j][znumberAdded - 1 - additionalBinNumber + k] = field[i][j][1 + additionalBinNumber + k];
+							field[i][j][k] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+						}
+					}
+				}
+			}
+		} else {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int i = 0; i < xnumberAdded; ++i) {
+					//field[0][j][k] = field[2][j][k];
+					for (int k = 0; k <= additionalBinNumber; ++k) {
+						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
+							field[i][j][k] = 0;
+						} else if (boundaryConditionTypeZ == FREE_BOTH) {
+							field[i][j][k] = field[i][j][additionalBinNumber + 1];
+						}
+						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
+					}
+				}
+			}
+		}
+	}
+}
+///////////
 
 void Simulation::exchangeGeneralScalarNodeField(double**** field) {
 	exchangeGeneralScalarNodeFieldX(field);

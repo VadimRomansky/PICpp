@@ -839,6 +839,11 @@ public:
 	void exchangeGeneralScalarCellFieldY(double**** field);
 	void exchangeGeneralScalarCellFieldZ(double**** field);
 
+	void exchangeGeneralScalarCellField(double*** field);
+	void exchangeGeneralScalarCellFieldX(double*** field);
+	void exchangeGeneralScalarCellFieldY(double*** field);
+	void exchangeGeneralScalarCellFieldZ(double*** field);
+
 	void exchangeGeneralScalarNodeField(double**** field);
 	void exchangeGeneralScalarNodeFieldX(double**** field);
 	void exchangeGeneralScalarNodeFieldY(double**** field);
@@ -1087,8 +1092,11 @@ public:
 	void sumNodeParametersY();
 	void sumNodeParametersZ();
 	void sumNodeVectorParametersX();
+	void sumNodeVectorParameterX(Vector3d*** array);
 	void sumNodeVectorParametersY();
+	void sumNodeVectorParameterY(Vector3d*** array);
 	void sumNodeVectorParametersZ();
+	void sumNodeVectorParameterZ(Vector3d*** array);
 	void sumNodeMatrixParametersX();
 	void sumNodeMatrixParametersY();
 	void sumNodeMatrixParametersZ();

@@ -72,10 +72,12 @@ void Simulation::smoothCellParameter(double*** array) {
 
 void Simulation::smoothChargeDensity() {
 	smoothCellParameter(chargeDensity);
+	exchangeGeneralScalarCellField(chargeDensity);
 }
 
 void Simulation::smoothChargeDensityHat() {
 	smoothCellParameter(chargeDensityHat);
+	exchangeGeneralScalarCellField(chargeDensityHat);
 }
 
 void Simulation::createSmoothingMatrix(double smoothingmatrix[3][3][3]) {

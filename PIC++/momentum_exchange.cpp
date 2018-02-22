@@ -509,6 +509,38 @@ void Simulation::sumNodeVectorParametersGeneralZ(Vector3d*** vector, double* inB
 	sumTempNodeVectorParametersZ(vector);
 }
 
+
+void Simulation::sumNodeVectorParameterX(Vector3d*** array) {
+	if(cartDim[0] > 1) {
+		if ((verbosity > 2)) printf("crating buffer in sum node vector parameter x\n");
+		double* inBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
+		double* outBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
+		double* inBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
+		double* outBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
+
+		//MPI_Barrier(cartComm);
+		sumNodeVectorParametersGeneralX(array, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		
+		delete[] inBufferLeft;
+		delete[] inBufferRight;
+		delete[] outBufferLeft;
+		delete[] outBufferRight;
+	} else {
+		if (boundaryConditionTypeX == PERIODIC) {
+			for (int j = 0; j <= ynumberAdded; ++j) {
+				for (int k = 0; k <= znumberAdded; ++k) {
+					for (int i = 0; i <= 2 * additionalBinNumber + 2; ++i) {
+						for (int l = 0; l < 3; ++l) {
+							array[xnumberAdded - i][j][k][l] += array[2 + 2 * additionalBinNumber - i][j][k][l];
+							array[2 + 2 * additionalBinNumber - i][j][k][l] = array[xnumberAdded - i][j][k][l];
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 void Simulation::sumNodeVectorParametersX() {
 	if (cartDim[0] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum node vector parameters x\n");
@@ -568,6 +600,43 @@ void Simulation::sumNodeVectorParametersX() {
 							divPressureTensorMinus[xnumberAdded - i][j][k][l] += divPressureTensorMinus[2 + 2 * additionalBinNumber - i][j][k][l];
 							divPressureTensorMinus[2 + 2 * additionalBinNumber - i][j][k][l] = divPressureTensorMinus[xnumberAdded - i][j][k][l];
 						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void Simulation::sumNodeVectorParameterY(Vector3d*** array) {
+	if (cartDim[1] > 1) {
+		double* inBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
+		double* outBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
+		double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
+		double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
+
+		sumNodeVectorParametersGeneralY(array, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+
+		delete[] inBufferFront;
+		delete[] inBufferBack;
+		delete[] outBufferBack;
+		delete[] outBufferFront;
+	} else {
+		if (boundaryConditionTypeY == PERIODIC) {
+			for (int i = 0; i <= xnumberAdded; ++i) {
+				for (int k = 0; k <= znumberAdded; ++k) {
+					for (int j = 0; j <= 2 * additionalBinNumber + 2; ++j) {
+						array[i][ynumberAdded - j][k] += array[i][2 + 2 * additionalBinNumber - j][k];
+						array[i][2 + 2 * additionalBinNumber - j][k] = array[i][ynumberAdded - j][k];
+					}
+				}
+			}
+		}
+
+		if (ynumberGeneral == 1) {
+			for (int i = 0; i <= xnumberAdded; ++i) {
+				for (int k = 0; k <= znumberAdded; ++k) {
+					for (int j = 0; j <= ynumberAdded; ++j) {
+						array[i][j][k] = array[i][1 + additionalBinNumber][k];
 					}
 				}
 			}
@@ -648,6 +717,45 @@ void Simulation::sumNodeVectorParametersY() {
 			}
 		}
 	}
+}
+
+void Simulation::sumNodeVectorParameterZ(Vector3d*** array) {
+	if (cartDim[2] > 1) {
+		double* inBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
+		double* outBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
+		double* inBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
+		double* outBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
+
+		sumNodeVectorParametersGeneralZ(array, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+
+		delete[] inBufferTop;
+		delete[] inBufferBottom;
+		delete[] outBufferBottom;
+		delete[] outBufferTop;
+	} else {
+		if (boundaryConditionTypeZ == PERIODIC) {
+			for (int i = 0; i <= xnumberAdded; ++i) {
+				for (int j = 0; j <= ynumberAdded; ++j) {
+					for (int k = 0; k <= 2 * additionalBinNumber + 2; ++k) {
+						for (int l = 0; l < 3; ++l) {
+							array[i][j][znumberAdded - k][l] += array[i][j][2 + 2 * additionalBinNumber - k][l];
+							array[i][j][2 + 2 * additionalBinNumber - k][l] = array[i][j][znumberAdded - k][l];
+						}
+					}
+				}
+			}
+		}
+		if (znumberGeneral == 1) {
+			for (int i = 0; i <= xnumberAdded; ++i) {
+				for (int k = 0; k <= znumberAdded; ++k) {
+					for (int j = 0; j <= ynumberAdded; ++j) {
+						array[i][j][k] = array[i][j][1 + additionalBinNumber];
+					}
+				}
+			}
+		}
+	}
+
 }
 
 void Simulation::sumNodeVectorParametersZ() {
