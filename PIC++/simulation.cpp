@@ -36,7 +36,8 @@ void Simulation::simulate() {
 		//initializeAnisotropicSilicon();
 		//initializeWeibel();
 		//initializeRingWeibel();
-		initializeFluxFromRight();
+		//initializeFluxFromRight();
+		initializeHarris();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();
 		//initializeSimpleElectroMagneticWaveY();
@@ -185,6 +186,13 @@ void Simulation::simulate() {
 
 		for(int n = 0; n < smoothingCount; ++n){
 			//smoothTempEfield();
+		}
+		if (solverType == BUNEMAN) {
+			//cleanupDivergenceBuneman();
+			//cleanupDivergenceBunemanMagnetic();
+		} else {
+			cleanupDivergence(tempEfield, chargeDensityHat);
+			//cleanupDivergenceMagnetic();
 		}
 
 

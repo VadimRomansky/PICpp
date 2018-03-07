@@ -36,7 +36,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 	}
 
 	//substractMeanChargeDensity();
-	//return;
+	return;
 
 	bool fourier = false;
 

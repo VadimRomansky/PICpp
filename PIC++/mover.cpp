@@ -192,6 +192,7 @@ void Simulation::moveParticle(Particle* particle) {
 	} else {
 		E = correlationTempEfield(particle);
 		//E = correlationNewEfield(particle);
+		//E = correlationEfield(particle);
 		//B = correlationBfield(particle)*(1-theta) + correlationNewBfield(particle)*theta;
 		B = correlationBfield(particle);
 	}

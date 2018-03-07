@@ -206,6 +206,13 @@ Matrix3d* Matrix3d::createBasisByOneVector(const Vector3d& v) {
 	if ((v.z * v.z + v.y * v.y + v.x * v.x) < epsilon) {
 		return new Matrix3d(1, 0, 0, 0, 1, 0, 0, 0, 1);
 	}
+	if(v.y * v.y + v.x * v.x < epsilon) {
+		if(v.z > 0) {
+			return new Matrix3d(1, 0, 0, 0, 1, 0, 0, 0, 1);
+		} else {
+			return new Matrix3d(-1, 0, 0, 0, -1, 0, 0, 0, -1);
+		}
+	}
 	double cosTheta = v.z / sqrt(v.z * v.z + v.y * v.y + v.x * v.x);
 	double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 	double cosPhi = v.x / sqrt(v.x * v.x + v.y * v.y);

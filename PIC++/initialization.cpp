@@ -4225,6 +4225,115 @@ void Simulation::initializeFluxFromRight() {
 	MPI_Barrier(cartComm);
 }
 
+void Simulation::initializeHarris() {
+	boundaryConditionTypeX = FREE_BOTH;
+	//boundaryConditionTypeX = PERIODIC;
+	boundaryConditionTypeY = PERIODIC;
+	boundaryConditionTypeZ = PERIODIC;
+	
+	E0 = Vector3d(0, 0, 0);
+	double harrisWidth = 10*deltaX;
+	createParticlesHarris(harrisWidth);
+
+	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
+	Vector3d leftB = B0*(-1);
+	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, leftB);
+
+	if (solverType == BUNEMAN) {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanEx[i][j][k] = E0.x;
+					bunemanNewEx[i][j][k] = bunemanEx[i][j][k];
+				}
+			}
+		}
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanEy[i][j][k] = E0.y;
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i < 1 + additionalBinNumber) {
+							bunemanEy[i][j][k] = 0;
+						}
+					}
+					bunemanNewEy[i][j][k] = bunemanEy[i][j][k];
+				}
+			}
+		}
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					bunemanEz[i][j][k] = E0.z;
+					if (boundaryConditionTypeX != PERIODIC) {
+						if (cartCoord[0] == 0 && i < 1 + additionalBinNumber) {
+							bunemanEz[i][j][k] = 0;
+						}
+					}
+					bunemanNewEz[i][j][k] = bunemanEz[i][j][k];
+				}
+			}
+		}
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					bunemanBx[i][j][k] = B0.x;
+					bunemanNewBx[i][j][k] = bunemanBx[i][j][k];
+				}
+			}
+		}
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					bunemanBy[i][j][k] = B0.y;
+					bunemanNewBy[i][j][k] = bunemanBy[i][j][k];
+				}
+			}
+		}
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanBz[i][j][k] = B0.z;
+					bunemanNewBz[i][j][k] = bunemanBz[i][j][k];
+				}
+			}
+		}
+	} else {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					Efield[i][j][k] = E0;
+					tempEfield[i][j][k] = Efield[i][j][k];
+					newEfield[i][j][k] = Efield[i][j][k];
+					explicitEfield[i][j][k] = Efield[i][j][k];
+				}
+			}
+		}
+
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					Bfield[i][j][k] = B0*tanh((xgrid[i] - 1.5*xsizeGeneral)/harrisWidth);
+					newBfield[i][j][k] = Bfield[i][j][k];
+				}
+			}
+		}
+	}
+
+	fflush(stdout);
+	if (rank == 0) fclose(informationFile);
+
+	checkDebyeParameter();
+
+	MPI_Barrier(cartComm);
+	if (rank == 0) {
+		incrementFile = fopen((outputDir + "increment.dat").c_str(), "w");
+		fprintf(incrementFile, "%g %g %g %g\n", 0.0, 0.0, 1.0, 1.0);
+		fclose(incrementFile);
+	}
+	MPI_Barrier(cartComm);
+}
+
 void Simulation::fieldsLorentzTransitionX(const double& v) {
 	double gamma = 1.0 / sqrt(1 - v * v / speed_of_light_normalized_sqr);
 	for (int i = 0; i < xnumberAdded; ++i) {
@@ -6717,6 +6826,91 @@ void Simulation::createParticles() {
 						if (V0.norm() > 0) {
 							particle->addVelocity(V0, speed_of_light_normalized);
 						}
+						Vector3d momentum = particle->getMomentum();
+						particle->initialMomentum = momentum;
+						particle->prevMomentum = momentum;
+						particles.push_back(particle);
+						particlesNumber++;
+						if (particlesNumber % 1000 == 0) {
+							if ((rank == 0) && (verbosity > 0))printf("create particle number %d\n", particlesNumber);
+						}
+						alertNaNOrInfinity(particle->coordinates.x, "particle.x = NaN in createParticles\n");
+						alertNaNOrInfinity(particle->coordinates.y, "particle.y = NaN in createParticles\n");
+						alertNaNOrInfinity(particle->coordinates.z, "particle.z = NaN in createParticles\n");
+					}
+				}
+			}
+		}
+	}
+
+
+	synchronizeParticleNumber();
+
+	//printf("rank = %d p0 = %d p1 = %d p2 = %d e0 = %d e1 = %d e2 = %d Np = %d\n", rank, protonNumber, protonNumber1, protonNumber2, electronNumber, electronNumber1, electronNumber2, particlesNumber);
+
+	/*if (preserveChargeLocal) {
+		moveToPreserveChargeLocal();
+	}*/
+}
+
+void Simulation::createParticlesHarris(double harrisWidth) {
+	evaluateParticleTypesAlpha();
+	double concentration = types[0].concentration;
+	types[1].particesDeltaX = types[0].particesDeltaX;
+	types[1].particlesPerBin = types[0].particlesPerBin;
+	types[0].concentration = concentration;
+	types[1].concentration = concentration;
+	for (int i = 2; i < typesNumber; ++i) {
+		types[i].particlesPerBin = 0;
+		types[i].concentration = 0;
+		types[i].particesDeltaX = xsize;
+	}
+
+	double temperature = B0.scalarMult(B0)/(16*pi*concentration*kBoltzman_normalized);
+	if (rank == 0) printf("creating particles\n");
+	fflush(stdout);
+	if (rank == 0) printLog("creating particles\n");
+	int n = 0;
+	//for (int i = 0; i < xnumber; ++i) {
+	for (int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i) {
+		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
+			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+				//int maxParticlesPerBin = types[0].particlesPerBin;
+				double x = xgrid[i] + 0.0001 * deltaX;
+				double y = ygrid[j] + 0.0001 * deltaY;
+				double z = zgrid[k] + 0.0001 * deltaZ;
+				//for (int l = 0; l < maxParticlesPerBin; ++l) {
+				for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
+					double localConcentration = concentration/sqr(cosh((middleXgrid[i] - xsizeGeneral*1.5)/harrisWidth));
+					double weight = (localConcentration / types[typeCounter].particlesPerBin) * volumeB(
+					);
+					double deltaXParticles = types[typeCounter].particesDeltaX;
+					double deltaYParticles = types[typeCounter].particesDeltaY;
+					double deltaZParticles = types[typeCounter].particesDeltaZ;
+					//if (l < types[typeCounter].particlesPerBin) {
+					for (int l = 0; l < types[typeCounter].particlesPerBin; ++l) {
+						ParticleTypes type = types[typeCounter].type;
+						Particle* particle = createParticle(n, i, j, k, weight, type, types[typeCounter],
+						                                    temperature,
+						                                    temperature,
+						                                    temperature);
+						n++;
+						particle->coordinates.x = x + deltaXParticles * l;
+						particle->coordinates.y = y + deltaYParticles * l;
+						particle->coordinates.z = z + deltaZParticles * l;
+						//particle->coordinates.x = middleXgrid[i];
+						//particle->coordinates.y = middleYgrid[j];
+						//particle->coordinates.z = middleZgrid[k];
+
+						//particle->coordinates.x = xgrid[i] + uniformDistribution()*deltaX;
+						//particle->coordinates.y = ygrid[j] + uniformDistribution()*deltaY;
+						//particle->coordinates.z = zgrid[k] + uniformDistribution()*deltaZ;
+						particle->initialCoordinates = particle->coordinates;
+
+						Vector3d localV = Vector3d(0, 0, 1)*B0.norm()*speed_of_light_normalized/(8*pi*concentration*harrisWidth*types[typeCounter].charge);
+						
+						particle->addVelocity(localV, speed_of_light_normalized);
+						
 						Vector3d momentum = particle->getMomentum();
 						particle->initialMomentum = momentum;
 						particle->prevMomentum = momentum;

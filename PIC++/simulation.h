@@ -725,6 +725,7 @@ public:
 	void initializeKolmogorovSpectrum(int start, int end, double turbulenceFraction);
 	void initializeRandomModes(int number, int minNumber, double energyFraction);
 	void initializeFake();
+	void initializeHarris();
 	void initializeTestOneParticle();
 	void synchronizeParticleNumber();
 	void createArrays();
@@ -975,6 +976,7 @@ public:
 	//Vector3d evaluateDivPressureTensor(int i, int j, int k);
 	Vector3d evaluateGradDensity(int i, int j, int k);
 	void createParticles();
+	void createParticlesHarris(double harrisWidth);
 	void moveToPreserveChargeLocal();
 	void addToPreserveChargeGlobal();
 	Particle* getFirstProton();
