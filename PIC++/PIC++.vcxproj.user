@@ -2,18 +2,18 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <MpiDebuggerSchedulerNode>localhost/1</MpiDebuggerSchedulerNode>
-    <DebuggerFlavor>MpiClusterDebugger</DebuggerFlavor>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <MpiDebuggerSchedulerNode>localhost/1</MpiDebuggerSchedulerNode>
     <DebuggerFlavor>MpiClusterDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <MpiDebuggerSchedulerNode>localhost/1</MpiDebuggerSchedulerNode>
+    <MpiDebuggerSchedulerNode>localhost/2</MpiDebuggerSchedulerNode>
     <DebuggerFlavor>MpiClusterDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <MpiDebuggerSchedulerNode>localhost/1</MpiDebuggerSchedulerNode>
+    <MpiDebuggerSchedulerNode>localhost/2</MpiDebuggerSchedulerNode>
     <DebuggerFlavor>MpiClusterDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

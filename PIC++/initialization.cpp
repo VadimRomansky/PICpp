@@ -4235,6 +4235,8 @@ void Simulation::initializeHarris() {
 	double harrisWidth = 10*deltaX;
 	createParticlesHarris(harrisWidth);
 
+	if(verbosity > 2) printf("initialize harris boundary evaluator rank = %d\n", rank);
+
 	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
 	Vector3d leftB = B0*(-1);
 	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, leftB);
@@ -4299,6 +4301,7 @@ void Simulation::initializeHarris() {
 			}
 		}
 	} else {
+		if(verbosity > 2) printf("initialize harris E field rank = %d\n", rank);
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -4309,6 +4312,8 @@ void Simulation::initializeHarris() {
 				}
 			}
 		}
+
+		if(verbosity > 2) printf("initialize harris B field rank = %d\n", rank);
 
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -4321,6 +4326,8 @@ void Simulation::initializeHarris() {
 	}
 
 	fflush(stdout);
+
+	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	if (rank == 0) fclose(informationFile);
 
 	checkDebyeParameter();
@@ -6868,6 +6875,7 @@ void Simulation::createParticlesHarris(double harrisWidth) {
 
 	double temperature = B0.scalarMult(B0)/(16*pi*concentration*kBoltzman_normalized);
 	if (rank == 0) printf("creating particles\n");
+	if(verbosity > 2) printf("creating particles rank = %d\n", rank);
 	fflush(stdout);
 	if (rank == 0) printLog("creating particles\n");
 	int n = 0;
@@ -6930,7 +6938,7 @@ void Simulation::createParticlesHarris(double harrisWidth) {
 
 
 	synchronizeParticleNumber();
-
+	if(verbosity > 2) printf("finish creating particles rank = %d\n", rank);
 	//printf("rank = %d p0 = %d p1 = %d p2 = %d e0 = %d e1 = %d e2 = %d Np = %d\n", rank, protonNumber, protonNumber1, protonNumber2, electronNumber, electronNumber1, electronNumber2, particlesNumber);
 
 	/*if (preserveChargeLocal) {

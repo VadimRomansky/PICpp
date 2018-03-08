@@ -1,6 +1,6 @@
 ﻿0                     input type CGS or Lapenta
-100 100 1               grid numbers
-5E9 5E9 5E7         gridsizes
+20 20 1               grid numbers
+1E9 1E9 5E7         gridsizes
 5E8                   temperature
 0 0 0                 velocity
 0 0 0                 elecctricField
@@ -11,8 +11,8 @@
 1                     prefered time step
 0.910938291E-25       electron mass
 8                     particle types number
-1E-3 50               electrons concentration and particles per bin
-1E-3 50               protons concentration and particles per bin
+1E-3 10               electrons concentration and particles per bin
+1E-3 10               protons concentration and particles per bin
 0 0                   positrons concentration and particles per bin
 0 0                   alpha per concentration and particles bin
 0 0                   deuterium concentration and particles per bin
