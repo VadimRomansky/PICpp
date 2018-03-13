@@ -39,6 +39,7 @@ void Simulation::updateElectroMagneticParameters() {
 					divPressureTensor[i][j][k] = Vector3d(0, 0, 0);
 					divPressureTensorMinus[i][j][k] = Vector3d(0, 0, 0);
 
+					if(solverType == IMPLICIT_EC){
 					for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
 						for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
 							for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
@@ -50,6 +51,7 @@ void Simulation::updateElectroMagneticParameters() {
 								}
 							}
 						}
+					}
 					}
 				}
 			}
@@ -85,19 +87,19 @@ void Simulation::updateElectroMagneticParameters() {
 			double particleOmega = particle->weight * theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge /
 				particle->mass;
 
-			double shiftX = velocity.x * deltaT * 0.1;
-			if (fabs(shiftX) < particle->dx * 0.01) {
-				shiftX = particle->dx * 0.01;
+			double shiftX = velocity.x * deltaT * 0.5;
+			if (fabs(shiftX) < particle->dx * 0.1) {
+				shiftX = particle->dx * 0.1;
 			}
 
-			double shiftY = velocity.y * deltaT * 0.1;
-			if (fabs(shiftY) < particle->dy * 0.01) {
-				shiftY = particle->dy * 0.01;
+			double shiftY = velocity.y * deltaT * 0.5;
+			if (fabs(shiftY) < particle->dy * 0.1) {
+				shiftY = particle->dy * 0.1;
 			}
 
-			double shiftZ = velocity.z * deltaT * 0.1;
-			if (fabs(shiftZ) < particle->dz * 0.01) {
-				shiftZ = particle->dz * 0.01;
+			double shiftZ = velocity.z * deltaT * 0.5;
+			if (fabs(shiftZ) < particle->dz * 0.1) {
+				shiftZ = particle->dz * 0.1;
 			}
 
 			if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
@@ -111,8 +113,8 @@ void Simulation::updateElectroMagneticParameters() {
 					tempParticleShiftX.coordinates.x = particle->coordinates.x + shiftX;
 				}
 				updateCorrelationMapsX(tempParticleShiftX);
-				Vector3d oldE = correlationEfield(tempParticleShiftX);
-				Vector3d oldB = correlationBfield(tempParticleShiftX);
+				//Vector3d oldE = correlationEfield(tempParticleShiftX);
+				//Vector3d oldB = correlationBfield(tempParticleShiftX);
 				//tempParticleShiftX.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
 				//tempRotatedVelocityShiftX = tempParticleShiftX.rotationTensor * (velocity * gamma);
 				if (ynumberGeneral > 1) {
@@ -435,6 +437,10 @@ void Simulation::updateElectroMagneticParameters() {
 
 		for (int pcount = 0; pcount < particles.size(); ++pcount) {
 			Particle* particle = particles[pcount];
+			Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+			double gamma = particle->gammaFactor(speed_of_light_normalized);
+			Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
+
 			for (int i = 0; i < crossBinNumberX; ++i) {
 				for (int j = 0; j < crossBinNumberY; ++j) {
 					for (int k = 0; k < crossBinNumberZ; ++k) {
@@ -453,12 +459,22 @@ void Simulation::updateElectroMagneticParameters() {
 							} else {
 								chargeDensityMinus[1 + 2 * additionalBinNumber - curI][curJ][curK] += particleCharge * correlation;
 							}
+							for(int l = 0; l < 3; ++l) {
+								for(int m = 0; m < 3; ++m) {
+									pressureTensor[1 + 2 * additionalBinNumber - curI][j][k].matrix[l][m] += particleCharge*correlation*rotatedVelocity[l]*rotatedVelocity[m];
+								}
+							}
 						} else {
 
 							if (particleCharge > 0) {
 								chargeDensityHat[curI][curJ][curK] += particleCharge * correlation;
 							} else {
 								chargeDensityMinus[curI][curJ][curK] += particleCharge * correlation;
+							}
+							for(int l = 0; l < 3; ++l) {
+								for(int m = 0; m < 3; ++m) {
+									pressureTensor[curI][j][k].matrix[l][m] += particleCharge*correlation*rotatedVelocity[l]*rotatedVelocity[m];
+								}
 							}
 						}
 					}
@@ -511,7 +527,9 @@ void Simulation::updateElectroMagneticParameters() {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-						//electricFlux[i][j][k] = electricFlux[i][j][k] - divPressureTensor[i][j][k] * eta * deltaT;
+						//todo
+						divPressureTensor[i][j][k] = evaluateDivPressureTensor(i, j, k);
+						electricFlux[i][j][k] = electricFlux[i][j][k] - divPressureTensor[i][j][k] * eta * deltaT;
 						//alertNaNOrInfinity(electricFlux[i][j][k].x, "electricFlux[i][j][k].x = NaN");
 						//alertNaNOrInfinity(electricFlux[i][j][k].y, "electricFlux[i][j][k].y = NaN");
 						//alertNaNOrInfinity(electricFlux[i][j][k].z, "electricFlux[i][j][k].z = NaN");

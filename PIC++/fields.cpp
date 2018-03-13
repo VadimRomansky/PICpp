@@ -2995,6 +2995,73 @@ double Simulation::evaluateDivFlux(int i, int j, int k) {
 		((rightFluxZ - leftFluxZ) / deltaZ);
 }
 
+Vector3d Simulation::evaluateDivPressureTensor(int i, int j, int k) {
+	if(i == 0 || i == xnumberAdded) {
+		return Vector3d(0, 0, 0);
+	}
+	if(j == 0 || j == ynumberAdded) {
+		return Vector3d(0, 0, 0);
+	}
+	if(k == 0 || k == znumberAdded) {
+		return Vector3d(0, 0, 0);
+	}
+
+	double rightAxx = (pressureTensor[i][j][k].matrix[0][0] + pressureTensor[i][j-1][k].matrix[0][0] + pressureTensor[i][j][k-1].matrix[0][0] + pressureTensor[i][j-1][k-1].matrix[0][0])*0.25;
+	double leftAxx = (pressureTensor[i-1][j][k].matrix[0][0] + pressureTensor[i-1][j-1][k].matrix[0][0] + pressureTensor[i-1][j][k-1].matrix[0][0] + pressureTensor[i-1][j-1][k-1].matrix[0][0])*0.25;
+
+	double rightAxy = (pressureTensor[i][j][k].matrix[0][1] + pressureTensor[i][j-1][k].matrix[0][1] + pressureTensor[i][j][k-1].matrix[0][1] + pressureTensor[i][j-1][k-1].matrix[0][1])*0.25;
+	double leftAxy = (pressureTensor[i-1][j][k].matrix[0][1] + pressureTensor[i-1][j-1][k].matrix[0][1] + pressureTensor[i-1][j][k-1].matrix[0][1] + pressureTensor[i-1][j-1][k-1].matrix[0][1])*0.25;
+
+	double rightAxz = (pressureTensor[i][j][k].matrix[0][2] + pressureTensor[i][j-1][k].matrix[0][2] + pressureTensor[i][j][k-1].matrix[0][2] + pressureTensor[i][j-1][k-1].matrix[0][2])*0.25;
+	double leftAxz = (pressureTensor[i-1][j][k].matrix[0][2] + pressureTensor[i-1][j-1][k].matrix[0][2] + pressureTensor[i-1][j][k-1].matrix[0][2] + pressureTensor[i-1][j-1][k-1].matrix[0][2])*0.25;
+
+	double backAyx = 0;
+	double frontAyx = 0;
+
+	double backAyy = 0;
+	double frontAyy = 0;
+
+	double backAyz = 0;
+	double frontAyz = 0;
+
+	if (ynumberGeneral > 1) {
+		backAyx = (pressureTensor[i][j][k].matrix[1][0] + pressureTensor[i-1][j][k].matrix[1][0] + pressureTensor[i][j][k-1].matrix[1][0] + pressureTensor[i-1][j][k-1].matrix[1][0])*0.25;
+		frontAyx = (pressureTensor[i][j-1][k].matrix[1][0] + pressureTensor[i-1][j-1][k].matrix[1][0] + pressureTensor[i][j-1][k-1].matrix[1][0] + pressureTensor[i-1][j-1][k-1].matrix[1][0])*0.25;
+
+		backAyy = (pressureTensor[i][j][k].matrix[1][1] + pressureTensor[i-1][j][k].matrix[1][1] + pressureTensor[i][j][k-1].matrix[1][1] + pressureTensor[i-1][j][k-1].matrix[1][1])*0.25;
+		frontAyy = (pressureTensor[i][j-1][k].matrix[1][1] + pressureTensor[i-1][j-1][k].matrix[1][1] + pressureTensor[i][j-1][k-1].matrix[1][1] + pressureTensor[i-1][j-1][k-1].matrix[1][1])*0.25;
+
+		backAyz = (pressureTensor[i][j][k].matrix[1][2] + pressureTensor[i-1][j][k].matrix[1][2] + pressureTensor[i][j][k-1].matrix[1][2] + pressureTensor[i-1][j][k-1].matrix[1][2])*0.25;
+		frontAyz = (pressureTensor[i][j-1][k].matrix[1][2] + pressureTensor[i-1][j-1][k].matrix[1][2] + pressureTensor[i][j-1][k-1].matrix[1][2] + pressureTensor[i-1][j-1][k-1].matrix[1][2])*0.25;
+	}
+
+	double topAzx = 0;
+	double bottomAzx = 0;
+
+	double topAzy = 0;
+	double bottomAzy = 0;
+
+	double topAzz = 0;
+	double bottomAzz = 0;
+	
+	if(znumberGeneral > 1) {
+		topAzx = (pressureTensor[i][j][k].matrix[2][0] + pressureTensor[i][j-1][k].matrix[2][0] + pressureTensor[i-1][j][k].matrix[2][0] + pressureTensor[i-1][j-1][k].matrix[2][0])*0.25;
+		bottomAzx = (pressureTensor[i][j][k-1].matrix[2][0] + pressureTensor[i][j-1][k-1].matrix[2][0] + pressureTensor[i-1][j][k-1].matrix[2][0] + pressureTensor[i-1][j-1][k-1].matrix[2][0])*0.25;
+
+		topAzy = (pressureTensor[i][j][k].matrix[2][1] + pressureTensor[i][j-1][k].matrix[2][1] + pressureTensor[i-1][j][k].matrix[2][1] + pressureTensor[i-1][j-1][k].matrix[2][1])*0.25;
+		bottomAzy = (pressureTensor[i][j][k-1].matrix[2][1] + pressureTensor[i][j-1][k-1].matrix[2][1] + pressureTensor[i-1][j][k-1].matrix[2][1] + pressureTensor[i-1][j-1][k-1].matrix[2][1])*0.25;
+
+		topAzz = (pressureTensor[i][j][k].matrix[2][2] + pressureTensor[i][j-1][k].matrix[2][2] + pressureTensor[i-1][j][k].matrix[2][2] + pressureTensor[i-1][j-1][k].matrix[2][2])*0.25;
+		bottomAzz = (pressureTensor[i][j][k-1].matrix[2][2] + pressureTensor[i][j-1][k-1].matrix[2][2] + pressureTensor[i-1][j][k-1].matrix[2][2] + pressureTensor[i-1][j-1][k-1].matrix[2][2])*0.25;
+	}
+
+	double divX = ((rightAxx - leftAxx)/deltaX) + ((backAyx - frontAyx)/deltaY) + ((topAzx - bottomAzx)/deltaZ);
+	double divY = ((rightAxy - leftAxy)/deltaX) + ((backAyy - frontAyy)/deltaY) + ((topAzy - bottomAzy)/deltaZ);
+	double divZ = ((rightAxz - leftAxz)/deltaX) + ((backAyz - frontAyz)/deltaY) + ((topAzz - bottomAzz)/deltaZ);
+
+	return Vector3d(divX, divY, divZ);
+}
+
 Vector3d Simulation::getElectricFlux(int i, int j, int k) {
 	return electricFlux[i][j][k];
 }

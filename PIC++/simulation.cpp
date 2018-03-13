@@ -127,7 +127,7 @@ void Simulation::simulate() {
 			iterationTime = clock();
 		}
 
-		updateDeltaT();
+		//updateDeltaT();
 
 		evaluateParticlesRotationTensor();
 

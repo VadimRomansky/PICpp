@@ -907,6 +907,7 @@ public:
 	double evaluateDivTempE(int i, int j, int k);
 	double evaluateDivNewE(int i, int j, int k);
 	double evaluateDivFlux(int i, int j, int k);
+	Vector3d evaluateDivPressureTensor(int i, int j, int k);
 	double evaluateDivB(int i, int j, int k);
 	double evaluateDivNewB(int i, int j, int k);
 	double evaluateDivBgeneral(Vector3d*** B, int i, int j, int k);
