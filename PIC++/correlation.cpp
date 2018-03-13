@@ -373,6 +373,7 @@ double Simulation::correlationBspline(const double& x, const double& dx, const d
 		} else {
 			correlation = 0;
 		}
+		break;
 	case 0:
 		if (x < leftx + dx) {
 			correlation = 0.5 * (x + dx - leftx) / dx;

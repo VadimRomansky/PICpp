@@ -274,13 +274,17 @@ void Simulation::moveParticle(Particle* particle) {
 
 	//double error = (prevVelocity - newVelocity).norm();
 	double error = (prevMomentum - newMomentum).norm();
+	Vector3d prevCoordinates = particle->coordinates;
+	Vector3d newCoordinates = particle->coordinates;
+	double coordinatesError = deltaX;
 	//error = 0;
 
 
-	while (error > particleVelocityErrorLevel * momentumNorm && i < particleIterations) {
+	while (error > particleVelocityErrorLevel * momentumNorm && coordinatesError > particleCoordinatesErrorLevel*deltaX && i < particleIterations) {
 		++i;
-		prevVelocity = newVelocity;
+		//prevVelocity = newVelocity;
 		prevMomentum = newMomentum;
+		prevCoordinates = newCoordinates;
 
 		tempParticle = *particle;
 		Vector3d rotatedE = particle->rotationTensor * E;
@@ -290,6 +294,8 @@ void Simulation::moveParticle(Particle* particle) {
 		tempParticle.coordinates.x += (middleVelocity.x * etaDeltaT);
 		tempParticle.coordinates.y += (middleVelocity.y * etaDeltaT);
 		tempParticle.coordinates.z += (middleVelocity.z * etaDeltaT);
+
+		newCoordinates = tempParticle.coordinates;
 
 		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT)
 			&& (cartCoord[0] == 0)) {
@@ -325,10 +331,11 @@ void Simulation::moveParticle(Particle* particle) {
 		tempParticle.addMomentum(
 			(E + (middleVelocity.vectorMult(B) / (speed_of_light_normalized * speed_of_light_correction))) * (particle->charge *
 				deltaT));
-		newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
+		//newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
 		newMomentum = tempParticle.getMomentum();
 		//error = (prevVelocity - newVelocity).norm();
 		error = (prevMomentum - newMomentum).norm();
+		coordinatesError = (prevCoordinates - newCoordinates).norm();
 	}
 
 	particle->copyMomentum(tempParticle);
