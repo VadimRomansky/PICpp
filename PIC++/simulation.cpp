@@ -755,7 +755,7 @@ void Simulation::output() {
 	           znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim);*/
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing divergence\n");
-	//outputDivergenceError((outputDir + "divergence_error.dat").c_str(), this, plasma_period, scaleFactor);
+	outputDivergenceError((outputDir + "divergence_error.dat").c_str(), this, plasma_period, scaleFactor);
 
 	double rotBscale = 1.0 / (plasma_period * plasma_period * sqrt(scaleFactor));
 

@@ -39,7 +39,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 	//return;
 
 	bool fourier = false;
-	bool iterative = true;
+	bool iterative = false;
 
 	if (!fourier) {
 		if(iterative) {
@@ -210,7 +210,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 			}
 		}
 		//exchangeLargeVector(divergenceCleaningPotential, xnumberAdded, ynumberAdded, znumberAdded, 1, additionalBinNumber, boundaryConditionTypeX == PERIODIC, cartComm, cartCoord, cartDim, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer);
-		biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential,
+		/*biconjugateStabilizedGradientMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential,
 		                                    xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, xnumberGeneral,
 		                                    ynumberGeneral, znumberGeneral, maxCleanupErrorLevel,
 		                                    maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC,
@@ -232,9 +232,9 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 					}
 				}
 			}
-		}
-		//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded,
-		//znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
+		}*/
+		generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded,
+		znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC, boundaryConditionTypeZ == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
 		}
 	} else {
 		//test
@@ -671,7 +671,7 @@ void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k, Ve
 	divergenceCleanUpRightPart[i][j][k][0] = -cleanUpRightPart(i, j, k, field, density);
 	//divergenceCleanUpRightPart[i][j][k][0] = -cleanUpRightPart(i, j, k)*deltaX2;
 
-	bool _27points = false;
+	bool _27points = true;
 
 	if ((ynumberGeneral > 1) && (znumberGeneral > 1)) {
 		if (! _27points) {

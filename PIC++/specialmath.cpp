@@ -799,6 +799,15 @@ void simpleIterationSolver(double**** outVector, double**** tempVector, int xnum
 	double relativeError = 1;
 	int iterationCount = 0;
 	double norm = rightPartEvaluator->rightPartInitialNorm();
+	rightPartEvaluator->getError(outVector, tempVector);
+	exchangeLargeVector(tempVector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
+	double errorNorm = sqrt(scalarMultiplyLargeVectors(tempVector, tempVector, xnumberAdded, ynumberAdded, znumberAdded,
+	                                         additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs,
+	                                         cartComm, cartCoord, cartDim));
+	relativeError = errorNorm/norm;
+	if(norm <= 0) {
+		relativeError = 0;
+	}
 	while (iterationCount < maxIteration && relativeError > maxErrorLevel) {
 		iterationCount++;
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -823,7 +832,7 @@ void simpleIterationSolver(double**** outVector, double**** tempVector, int xnum
 		}
 		rightPartEvaluator->getError(outVector, tempVector);
 		exchangeLargeVector(tempVector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
-		double errorNorm = sqrt(scalarMultiplyLargeVectors(tempVector, tempVector, xnumberAdded, ynumberAdded, znumberAdded,
+		errorNorm = sqrt(scalarMultiplyLargeVectors(tempVector, tempVector, xnumberAdded, ynumberAdded, znumberAdded,
 	                                         additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs,
 	                                         cartComm, cartCoord, cartDim));
 		relativeError = errorNorm/norm;
