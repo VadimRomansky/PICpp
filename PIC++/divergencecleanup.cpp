@@ -36,11 +36,59 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 	}
 
 	//substractMeanChargeDensity();
-	return;
+	//return;
 
 	bool fourier = false;
+	bool iterative = true;
 
 	if (!fourier) {
+		if(iterative) {
+			double**** tempVector1 = new double***[xnumberAdded];
+			double**** tempVector = new double***[xnumberAdded];
+			for (int i = 0; i < xnumberAdded; ++i) {
+				tempVector1[i] = new double**[ynumberAdded];
+				tempVector[i] = new double**[ynumberAdded];
+				for (int j = 0; j < ynumberAdded; ++j) {
+					tempVector1[i][j] = new double* [znumberAdded];
+					tempVector[i][j] = new double* [znumberAdded];
+					for (int k = 0; k < znumberAdded; ++k) {
+						tempVector1[i][j][k] = new double[1];
+						tempVector[i][j][k] = new double[1];
+						for (int l = 0; l < 1; ++l) {
+							tempVector1[i][j][k][l] = 0;
+							tempVector[i][j][k][l] = 0;
+						}
+					}
+				}
+			}
+
+			RightPartIterativeEvaluator* rightPartEvaluator = new PoissonRightPartEvaluator(chargeDensity, tempVector1, deltaX, deltaY, deltaZ, xnumberAdded, ynumberAdded, znumberAdded, boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC, boundaryConditionTypeZ == PERIODIC, rank, nprocs, cartComm, cartCoord, cartDim);
+
+			simpleIterationSolver(divergenceCleaningPotential, tempVector, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, 1, rank, nprocs, xnumberGeneral,
+	                      ynumberGeneral, znumberGeneral, maxErrorLevel, maxSimpleIterationSolverIterations,
+	                      boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC,
+	                      boundaryConditionTypeZ == PERIODIC, verbosity, leftOutGmresBuffer, rightOutGmresBuffer,
+	                      leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer,
+	                      frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer,
+	                      bottomInGmresBuffer, topInGmresBuffer, rightPartEvaluator, cartComm, cartCoord, cartDim);
+
+			delete rightPartEvaluator;
+
+			for (int i = 0; i < xnumberAdded; ++i) {;
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						delete[] tempVector1[i][j][k];
+						delete[] tempVector[i][j][k];
+					}
+					delete[] tempVector1[i][j];
+					delete[] tempVector[i][j];
+				}
+				delete[] tempVector1[i];
+				delete[] tempVector[i];
+			}
+			delete[] tempVector1;
+			delete[] tempVector;
+		} else {
 		double foolRightPart = 0;
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -187,7 +235,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 		}
 		//generalizedMinimalResidualMethod(divergenceCleanUpMatrix, divergenceCleanUpRightPart, divergenceCleaningPotential, xnumberAdded, ynumberAdded,
 		//znumberAdded, 1, xnumberGeneral, znumberGeneral, ynumberGeneral, additionalBinNumber, maxErrorLevel, maxDivergenceCleanupIterations, boundaryConditionTypeX == PERIODIC, verbosity, leftOutDivergenceBuffer, rightOutDivergenceBuffer, leftInDivergenceBuffer, rightInDivergenceBuffer, frontOutDivergenceBuffer, backOutDivergenceBuffer, frontInDivergenceBuffer, backInDivergenceBuffer, bottomOutDivergenceBuffer, topOutDivergenceBuffer, bottomInDivergenceBuffer, topInDivergenceBuffer, gmresCleanupBasis, cartComm, cartCoord, cartDim);
-
+		}
 	} else {
 		//test
 		/*for(int i = 0; i < xnumberAdded; ++i) {

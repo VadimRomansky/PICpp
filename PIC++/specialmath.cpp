@@ -773,16 +773,16 @@ double scalarMultiplyLargeVectors(Vector3d*** a, Vector3d*** b, int xnumberAdded
 	return globalResult[0];
 }
 
-void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAdded, int znumberAdded,
+void simpleIterationSolver(double**** outVector, double**** tempVector, int xnumberAdded, int ynumberAdded, int znumberAdded,
                            int additionalBinNumber, int lnumber, int rank, int nprocs, int xnumberGeneral,
                            int znumberGeneral, int ynumberGeneral, double precision, int maxIteration, bool periodicX,
                            bool
                            periodicY, bool periodicZ, int verbocity, double* leftOutBuffer, double* rightOutBuffer,
                            double* leftInBuffer, double* rightInBuffer, double* frontOutBuffer, double* backOutBuffer,
                            double* frontInBuffer, double* backInBuffer, double* bottomOutBuffer, double* topOutBuffer,
-                           double* bottomInBuffer, double* topInBuffer, BaseRightPartEvaluator& rightPartEvaluator,
+                           double* bottomInBuffer, double* topInBuffer, RightPartIterativeEvaluator* rightPartEvaluator,
                            MPI_Comm& cartComm, int* cartCoord, int* cartDim) {
-	double**** tempVector = new double***[xnumberAdded + 1];
+	/*double**** tempVector = new double***[xnumberAdded + 1];
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		tempVector[i] = new double**[ynumberAdded];
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -794,32 +794,25 @@ void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAd
 				}
 			}
 		}
-	}
-	double maxErrorLevel = precision / (xnumberGeneral * ynumberAdded * znumberAdded * lnumber);
+	}*/
+	double maxErrorLevel = precision / (xnumberGeneral * ynumberGeneral * znumberGeneral* lnumber);
 	double relativeError = 1;
 	int iterationCount = 0;
-	double norm = scalarMultiplyLargeVectors(outVector, outVector, xnumberAdded, ynumberAdded, znumberAdded,
-	                                         additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs,
-	                                         cartComm, cartCoord, cartDim);
+	double norm = rightPartEvaluator->rightPartInitialNorm();
 	while (iterationCount < maxIteration && relativeError > maxErrorLevel) {
 		iterationCount++;
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int l = 0; l < lnumber; ++l) {
-						tempVector[i][j][k][l] = rightPartEvaluator.rightPart(outVector, i, j, k, l);
+						tempVector[i][j][k][l] = rightPartEvaluator->rightPart(outVector, i, j, k, l);
 						alertNaNOrInfinity(tempVector[i][j][k][l], "tempvector = NaN in simpleIterationSolver\n");
 					}
 				}
 			}
 		}
 		exchangeLargeVector(tempVector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
-
-		relativeError = normDifferenceLargeVectors(tempVector, outVector, xnumberAdded, ynumberAdded, znumberAdded,
-		                                           additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank,
-		                                           nprocs, cartComm, cartCoord, cartDim) / norm;
-		double weight = 0.2;
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int l = 0; l < lnumber; ++l) {
@@ -828,9 +821,15 @@ void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAd
 				}
 			}
 		}
+		rightPartEvaluator->getError(outVector, tempVector);
+		exchangeLargeVector(tempVector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutBuffer, rightOutBuffer, leftInBuffer, rightInBuffer, frontOutBuffer, backOutBuffer, frontInBuffer, backInBuffer, bottomOutBuffer, topOutBuffer, bottomInBuffer, topInBuffer);
+		double errorNorm = sqrt(scalarMultiplyLargeVectors(tempVector, tempVector, xnumberAdded, ynumberAdded, znumberAdded,
+	                                         additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs,
+	                                         cartComm, cartCoord, cartDim));
+		relativeError = errorNorm/norm;
 	}
 
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
+	/*for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
 				delete[] tempVector[i][j][k];
@@ -839,7 +838,7 @@ void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAd
 		}
 		delete[] tempVector[i];
 	}
-	delete[] tempVector;
+	delete[] tempVector;*/
 }
 
 double normDifferenceLargeVectors(double**** a, double**** b, int xnumberAdded, int ynumberAdded, int znumberAdded,

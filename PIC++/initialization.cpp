@@ -4466,14 +4466,19 @@ void Simulation::initializeShockWave() {
 	int lnumber = 3 * typesNumber + 3;
 
 	double**** outVector = new double***[xnumberAdded];
+	double**** tempVector = new double***[xnumberAdded];
 	for (int i = 0; i < xnumberAdded; ++i) {
 		outVector[i] = new double**[ynumberAdded];
+		tempVector[i] = new double**[ynumberAdded];
 		for (int j = 0; j < ynumberAdded; ++j) {
 			outVector[i][j] = new double* [znumberAdded];
+			tempVector[i][j] = new double* [znumberAdded];
 			for (int k = 0; k < znumberAdded; ++k) {
 				outVector[i][j][k] = new double[lnumber];
+				tempVector[i][j][k] = new double[lnumber];
 				for (int l = 0; l < lnumber; ++l) {
 					outVector[i][j][k][l] = 0;
+					tempVector[i][j][k][l] = 0;
 				}
 			}
 		}
@@ -4486,9 +4491,9 @@ void Simulation::initializeShockWave() {
 	double bnorm = B0.norm();
 	double alfvenV = B0.norm() / sqrt(4 * pi * density);
 
-	InitializeShockRightPartEvaluator evaluator = InitializeShockRightPartEvaluator(
+	RightPartIterativeEvaluator* evaluator = new InitializeShockRightPartEvaluator(
 		downstreamVelocity, V0, downstreamB, B0, E0, deltaX, speed_of_light_normalized, bnorm, alfvenV, types, typesNumber,
-		xnumberAdded, 1, 1, lnumber);
+		xnumberAdded, 1, 1, lnumber, rank, nprocs, cartComm, cartCoord, cartDim);
 
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -4510,13 +4515,14 @@ void Simulation::initializeShockWave() {
 		}
 	}
 
-	simpleIterationSolver(outVector, xnumberAdded, 1, 1, additionalBinNumber, lnumber, rank, nprocs, xnumberGeneral,
+	simpleIterationSolver(outVector, tempVector, xnumberAdded, 1, 1, additionalBinNumber, lnumber, rank, nprocs, xnumberGeneral,
 	                      ynumberGeneral, znumberGeneral, maxErrorLevel, maxSimpleIterationSolverIterations,
 	                      boundaryConditionTypeX == PERIODIC, boundaryConditionTypeY == PERIODIC,
 	                      boundaryConditionTypeZ == PERIODIC, verbosity, leftOutGmresBuffer, rightOutGmresBuffer,
 	                      leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer,
 	                      frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer,
 	                      bottomInGmresBuffer, topInGmresBuffer, evaluator, cartComm, cartCoord, cartDim);
+
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -4642,6 +4648,21 @@ void Simulation::initializeShockWave() {
 
 	synchronizeParticleNumber();
 
+	delete evaluator;
+	for (int i = 0; i < xnumberAdded; ++i) {;
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				delete[] outVector[i][j][k];
+				delete[] tempVector[i][j][k];
+			}
+			delete[] outVector[i][j];
+			delete[] tempVector[i][j];
+		}
+		delete[] outVector[i];
+		delete[] tempVector[i];
+	}
+	delete[] outVector;
+	delete[] tempVector;
 }
 
 void Simulation::solveRankineHugoniot(double upstreamDensity, Vector3d upstreamVelocity, double upstreamPressure,

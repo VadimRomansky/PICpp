@@ -6,17 +6,22 @@
 //#include "memory_debug.h"
 #include "rightPartEvaluator.h"
 #include "paths.h"
+#include "specialmath.h"
+#include "mpi_util.h"
 
-BaseRightPartEvaluator::BaseRightPartEvaluator(int xn, int yn, int zn, int ln) {
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-	xnumber = xn;
-	ynumber = yn;
-	znumber = zn;
+RightPartIterativeEvaluator::RightPartIterativeEvaluator(int xn, int yn, int zn, int ln, int rankv, int nprocsv, MPI_Comm& cartCommv, int* cartCoordv, int* cartDimv) {
+	rank = rankv;
+	nprocs = nprocsv;
+	xnumberAdded = xn;
+	ynumberAdded = yn;
+	znumberAdded = zn;
 	lnumber = ln;
+	cartComm = cartCommv;
+	cartCoord = cartCoordv;
+	cartDim = cartDimv;
 }
 
-double BaseRightPartEvaluator::rightPart(double**** vector, int i, int j, int k, int l) {
+double RightPartIterativeEvaluator::rightPart(double**** vector, int i, int j, int k, int l) {
 	std::string outputDir = outputDirectory;
 	FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 	fprintf(errorLogFile, "Using base class for rightPartEvaluator is restricted\n");
@@ -27,12 +32,25 @@ double BaseRightPartEvaluator::rightPart(double**** vector, int i, int j, int k,
 	exit(0);
 }
 
+void RightPartIterativeEvaluator::getError(double**** vector, double**** errorVector) {
+	for(int i = 0; i < xnumberAdded; ++i) {
+		for(int j = 0; j < ynumberAdded; ++j) {
+			for(int k = 0; k < znumberAdded; ++k) {
+				for(int l = 0; l < lnumber; ++l){
+					errorVector[i][j][k][l] = rightPart(vector, i, j, k, l) - vector[i][j][k][l];
+				}
+			}
+		}
+	}
+	
+}
+
 InitializeShockRightPartEvaluator::InitializeShockRightPartEvaluator(Vector3d v1, Vector3d v2, Vector3d B1, Vector3d B2,
                                                                      Vector3d E1, double dx, double cvalue,
                                                                      double fNorm, double vNorm,
                                                                      ParticleTypeContainer* types, int tn, int xn,
-                                                                     int yn, int zn, int ln) : BaseRightPartEvaluator(
-	xn, yn, zn, ln) {
+                                                                     int yn, int zn, int ln, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim) : RightPartIterativeEvaluator(
+	xn, yn, zn, ln, rank, nprocs, cartComm, cartCoord, cartDim) {
 	downstreamV = v1;
 	upstreamV = v2;
 	downstreamB = B1;
@@ -141,7 +159,7 @@ double InitializeShockRightPartEvaluator::rightPart(double**** vector, int i, in
 		}
 		return 0;
 	}
-	if (i == xnumber) {
+	if (i == xnumberAdded) {
 		if (rank == nprocs - 1) {
 			if (l < 3 * typesNumber) {
 				if (l % 3 == 0) {
@@ -179,4 +197,60 @@ double InitializeShockRightPartEvaluator::rightPart(double**** vector, int i, in
 	}
 	return evaluateBz(vector, i);
 }
+
+//todo
+double InitializeShockRightPartEvaluator::rightPartInitialNorm() {
+	return 1.0;
+}
+
+
+PoissonRightPartEvaluator::PoissonRightPartEvaluator(double*** densityv, double**** tempLargeVector, double dx, double dy, double dz, int xn, int yn, int zn, bool periodicXv, bool periodicYv, bool periodicZv, int rankv, int nprocsv,
+	                                         MPI_Comm& cartCommv, int* cartCoordv, int* cartDimv): RightPartIterativeEvaluator(xn, yn, zn, 1, rankv, nprocsv, cartCommv, cartCoordv, cartDimv) {
+
+	deltaX = dx;
+	deltaY = dy;
+	deltaZ = dz;
+
+	xnumberAdded = xn;
+	ynumberAdded = yn;
+	znumberAdded = zn;
+
+	density = tempLargeVector;
+
+	double factor = deltaX*deltaX*deltaY*deltaY*deltaZ*deltaZ/(2*(deltaX*deltaX*deltaY*deltaY + deltaY*deltaY*deltaZ*deltaZ + deltaZ*deltaZ*deltaX*deltaX));
+	for(int i = 0; i < xnumberAdded; ++i) {
+		for(int j = 0; j < ynumberAdded; ++j) {
+			for(int k = 0; k < znumberAdded; ++k) {
+				density[i][j][k][0] = densityv[i][j][k]*factor;
+			}
+		}
+	}
+}
+
+double PoissonRightPartEvaluator::rightPart(double**** vector, int i, int j, int k, int l) {
+	double denom = 2*(deltaX*deltaX*deltaY*deltaY + deltaY*deltaY*deltaZ*deltaZ + deltaZ*deltaZ*deltaX*deltaX);
+	double factorx = deltaY*deltaY*deltaZ*deltaZ/denom;
+	double factory = deltaX*deltaX*deltaZ*deltaZ/denom;
+	double factorz = deltaY*deltaY*deltaX*deltaX/denom;
+
+	if(i < 1 + additionalBinNumber || i >= xnumberAdded - 1 - additionalBinNumber || j < 1 + additionalBinNumber || j >= ynumberAdded - 1 - additionalBinNumber || k < 1 + additionalBinNumber || k >= znumberAdded - 1 - additionalBinNumber) {
+		return 0;
+	}
+
+	double result = factorx*(vector[i-1][j][k][l] + vector[i+1][j][k][l]) +
+		factory*(vector[i][j-1][k][l] + vector[i][j+1][k][l]) +
+		factorz*(vector[i][j][k-1][l] + vector[i][j][k+1][l]) -
+		density[i][j][k][l];
+
+	return result;
+}
+
+double PoissonRightPartEvaluator::rightPartInitialNorm() {
+	double density_norm = scalarMultiplyLargeVectors(density, density, xnumberAdded, ynumberAdded, znumberAdded,
+	                                         additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs,
+	                                         cartComm, cartCoord, cartDim);
+	return sqrt(density_norm);
+}
+
+
 

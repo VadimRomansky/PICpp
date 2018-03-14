@@ -31,9 +31,9 @@ double scalarMultiplyLargeVectors(double ****a, double ****b, int xnumberAdded, 
                                   int lnumber, bool periodicX, bool periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim);
 double scalarMultiplyLargeVectors(Vector3d ***a, Vector3d ***b, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber,
                                   int lnumber, bool periodicX, bool periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim);
-void simpleIterationSolver(double**** outVector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, int rank, int nprocs,
+void simpleIterationSolver(double**** outVector, double**** tempVector, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, int rank, int nprocs,
                            int xnumberGeneral, int znumberGeneral, int ynumberGeneral, double precision,
-                           int maxIteration, bool periodicX, bool periodicY, bool periodicZ, int verbocity, double* leftOutBuffer, double* rightOutBuffer, double* leftInBuffer, double* rightInBuffer, double* frontOutBuffer, double* backOutBuffer, double* frontInBuffer, double* backInBuffer, double* bottomOutBuffer, double* topOutBuffer, double* bottomInBuffer, double* topInBuffer, BaseRightPartEvaluator& rightPartEvaluator, MPI_Comm& cartComm, int* cartCoord, int* cartDim);
+                           int maxIteration, bool periodicX, bool periodicY, bool periodicZ, int verbocity, double* leftOutBuffer, double* rightOutBuffer, double* leftInBuffer, double* rightInBuffer, double* frontOutBuffer, double* backOutBuffer, double* frontInBuffer, double* backInBuffer, double* bottomOutBuffer, double* topOutBuffer, double* bottomInBuffer, double* topInBuffer, RightPartIterativeEvaluator* rightPartEvaluator, MPI_Comm& cartComm, int* cartCoord, int* cartDim);
 double normDifferenceLargeVectors(double**** a, double**** b, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalBinNumber, int lnumber, bool periodicX, bool
                                   periodicY, bool periodicZ, int rank, int nprocs, MPI_Comm& cartComm, int* cartCoord, int* cartDim);
 

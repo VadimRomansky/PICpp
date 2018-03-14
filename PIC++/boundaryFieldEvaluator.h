@@ -7,7 +7,7 @@ class Simulation;
 class BoundaryFieldEvaluator {
 public:
 	BoundaryFieldEvaluator();
-	~BoundaryFieldEvaluator();
+	virtual ~BoundaryFieldEvaluator();
 	virtual Vector3d evaluateEfield(double t, int j, int k) = 0;
 	virtual Vector3d evaluateBfield(double t, int j, int k) = 0;
 };
