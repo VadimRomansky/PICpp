@@ -64,92 +64,14 @@ void Simulation::updateElectroMagneticParameters() {
 		for (int pcount = 0; pcount < particles.size(); ++pcount) {
 			Particle* particle = particles[pcount];
 
-			//Particle tempParticleShiftX = *particle;
-			//Particle tempParticleShiftY = *particle;
-			//Particle tempParticleShiftZ = *particle;
-			//Vector3d tempRotatedVelocityShiftX = Vector3d(0, 0, 0);
-			//Vector3d tempRotatedVelocityShiftY = Vector3d(0, 0, 0);
-			//Vector3d tempRotatedVelocityShiftZ = Vector3d(0, 0, 0);
-
 			Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
 			double gamma = particle->gammaFactor(speed_of_light_normalized);
-			//double beta = 0.5 * particle->charge * deltaT / particle->mass;
-			//Vector3d particleE = correlationEfield(particle);
-			//Vector3d particleB = correlationBfield(particle);
-			//todo
+
 			Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
-			//Vector3d Eperp = particleE - velocity * (velocity.scalarMult(particleE) / (velocity.scalarMult(velocity)));
-			//Vector3d electricVelocityShift = (Eperp * (2 * eta * beta / gamma));
-			//Vector3d tempE = velocity.vectorMult(particleB) / speed_of_light_normalized;
-			//Vector3d magneticVelocityShift = (velocity.vectorMult(particleB) * (beta / (gamma * speed_of_light_normalized)));
-			//rotatedVelocity += electricVelocityShift;
-			//Matrix3d tensor = rotatedVelocity.selfTensorMult();
+			
 			double particleOmega = particle->weight * theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge /
 				particle->mass;
 
-			/*double shiftX = velocity.x * deltaT * 0.5;
-			if (fabs(shiftX) < particle->dx * 0.1) {
-				shiftX = particle->dx * 0.1;
-			}
-
-			double shiftY = velocity.y * deltaT * 0.5;
-			if (fabs(shiftY) < particle->dy * 0.1) {
-				shiftY = particle->dy * 0.1;
-			}
-
-			double shiftZ = velocity.z * deltaT * 0.5;
-			if (fabs(shiftZ) < particle->dz * 0.1) {
-				shiftZ = particle->dz * 0.1;
-			}*/
-
-			if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
-				/*tempParticleShiftX.coordinates.x = particle->coordinates.x + shiftX;
-				if (tempParticleShiftX.coordinates.x < xgrid[1 + additionalBinNumber]) {
-					shiftX = - shiftX;
-					tempParticleShiftX.coordinates.x = particle->coordinates.x + shiftX;
-				}
-				if (tempParticleShiftX.coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
-					shiftX = - shiftX;
-					tempParticleShiftX.coordinates.x = particle->coordinates.x + shiftX;
-				}
-				updateCorrelationMapsX(tempParticleShiftX);
-				//Vector3d oldE = correlationEfield(tempParticleShiftX);
-				//Vector3d oldB = correlationBfield(tempParticleShiftX);
-				//tempParticleShiftX.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
-				//tempRotatedVelocityShiftX = tempParticleShiftX.rotationTensor * (velocity * gamma);
-				if (ynumberGeneral > 1) {
-					tempParticleShiftY.coordinates.y = particle->coordinates.y + shiftY;
-					if (tempParticleShiftY.coordinates.y < ygrid[1 + additionalBinNumber]) {
-						shiftY = - shiftY;
-						tempParticleShiftY.coordinates.y = particle->coordinates.y + shiftY;
-					}
-					if (tempParticleShiftY.coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
-						shiftY = - shiftY;
-						tempParticleShiftY.coordinates.y = particle->coordinates.y + shiftY;
-					}
-					updateCorrelationMapsY(tempParticleShiftY);
-					//oldE = correlationEfield(tempParticleShiftY);
-					//oldB = correlationBfield(tempParticleShiftY);
-					//tempParticleShiftY.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
-					//tempRotatedVelocityShiftY = tempParticleShiftY.rotationTensor * (velocity * gamma);
-				}
-				if (znumberGeneral > 1) {
-					tempParticleShiftZ.coordinates.z = particle->coordinates.z + shiftZ;
-					if (tempParticleShiftZ.coordinates.z < zgrid[1 + additionalBinNumber]) {
-						shiftZ = - shiftZ;
-						tempParticleShiftZ.coordinates.z = particle->coordinates.z + shiftZ;
-					}
-					if (tempParticleShiftZ.coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
-						shiftZ = - shiftZ;
-						tempParticleShiftZ.coordinates.z = particle->coordinates.z + shiftZ;
-					}
-					updateCorrelationMapsZ(tempParticleShiftZ);
-					//oldE = correlationEfield(tempParticleShiftZ);
-					//oldB = correlationBfield(tempParticleShiftZ);
-					//tempParticleShiftZ.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
-					//tempRotatedVelocityShiftZ = tempParticleShiftZ.rotationTensor * (velocity * gamma);
-				}*/
-			}
 
 			for (int i = 0; i < crossBinNumberX; ++i) {
 				for (int j = 0; j < crossBinNumberY; ++j) {
@@ -163,160 +85,25 @@ void Simulation::updateElectroMagneticParameters() {
 						double particleCharge = particle->charge * particle->weight;
 						if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
 							Particle tempParticle = *particle;
-							//updateCorrelationMaps(tempParticle);
-							//Vector3d oldE = correlationEfield(tempParticleShiftX);
-							//Vector3d oldB = correlationBfield(tempParticleShiftX);
 							tempParticle.reflectMomentumX();
-							//tempParticleShiftX.reflectMomentumX();
-							//tempParticleShiftY.reflectMomentumX();
-							//tempParticleShiftZ.reflectMomentumX();
-							velocity.x = -velocity.x;
+							Vector3d tempVelocity = velocity;
+							tempVelocity.x = -tempVelocity.x;
 							//tempParticle.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
-							rotatedVelocity = tempParticle.rotationTensor * (velocity * gamma);
-							//tensor = rotatedVelocity.selfTensorMult();
-							//rotatedVelocity += electricVelocityShift;
-							//double tempCorrelation = correlationWithEbin(tempParticleShiftX, curI, curJ, curK) / volumeE();
+							Vector3d tempRotatedVelocity = tempParticle.rotationTensor * (tempVelocity * gamma);
 							if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
-								/*tempParticleShiftX.coordinates.x = particle->coordinates.x + shiftX;
-								if (tempParticleShiftX.coordinates.x < xgrid[1 + additionalBinNumber]) {
-									shiftX = - shiftX;
-									tempParticleShiftX.coordinates.x = particle->coordinates.x + shiftX;
-								}
-								if (tempParticleShiftX.coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
-									shiftX = - shiftX;
-									tempParticleShiftX.coordinates.x = particle->coordinates.x + shiftX;
-								}
-								updateCorrelationMapsX(tempParticleShiftX);
-								//oldE = correlationEfield(tempParticleShiftX);
-								//oldB = correlationBfield(tempParticleShiftX);
-								//tempParticleShiftX.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
-								//tempRotatedVelocityShiftX = tempParticleShiftX.rotationTensor * (velocity * gamma)  - oldE*(2*eta*beta/gamma);
-								if (ynumberGeneral > 1) {
-									tempParticleShiftY.coordinates.y = particle->coordinates.y + shiftY;
-									if (tempParticleShiftY.coordinates.y < ygrid[1 + additionalBinNumber]) {
-										shiftY = - shiftY;
-										tempParticleShiftY.coordinates.y = particle->coordinates.y + shiftY;
-									}
-									if (tempParticleShiftY.coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
-										shiftY = - shiftY;
-										tempParticleShiftY.coordinates.y = particle->coordinates.y + shiftY;
-									}
-									updateCorrelationMapsY(tempParticleShiftY);
-									//oldE = correlationEfield(tempParticleShiftY);
-									//oldB = correlationBfield(tempParticleShiftY);
-									//tempParticleShiftY.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
-									//tempRotatedVelocityShiftY = tempParticleShiftY.rotationTensor * (velocity * gamma)  - oldE*(2*eta*beta/gamma);
-								}
-								if (znumberGeneral > 1) {
-									tempParticleShiftZ.coordinates.z = particle->coordinates.z + shiftZ;
-									if (tempParticleShiftZ.coordinates.z < zgrid[1 + additionalBinNumber]) {
-										shiftZ = - shiftZ;
-										tempParticleShiftZ.coordinates.z = particle->coordinates.z + shiftZ;
-									}
-									if (tempParticleShiftZ.coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
-										shiftZ = - shiftZ;
-										tempParticleShiftZ.coordinates.z = particle->coordinates.z + shiftZ;
-									}
-									updateCorrelationMapsZ(tempParticleShiftZ);
-									//oldE = correlationEfield(tempParticleShiftZ);
-									//oldB = correlationBfield(tempParticleShiftZ);
-									//tempParticleShiftZ.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
-									//tempRotatedVelocityShiftZ = tempParticleShiftZ.rotationTensor * (velocity * gamma)  - oldE*(2*eta*beta/gamma);
-								}
-								double tensorDer00X = tensor.matrix[0][0] * (tempCorrelation - correlation) / shiftX;
-								double tensorDer01X = tensor.matrix[0][1] * (tempCorrelation - correlation) / shiftX;
-								double tensorDer02X = tensor.matrix[0][2] * (tempCorrelation - correlation) / shiftX;
-
-								double tensorDer10Y = 0;
-								double tensorDer11Y = 0;
-								double tensorDer12Y = 0;
-
-								double tensorDer20Z = 0;
-								double tensorDer21Z = 0;
-								double tensorDer22Z = 0;
-
-
-								if (ynumberGeneral > 1) {
-									tempCorrelation = correlationWithEbin(tempParticleShiftY, curI, curJ, curK) / volumeE();
-
-									tensorDer10Y = tensor.matrix[1][0] * (tempCorrelation - correlation) / shiftY;
-									tensorDer11Y = tensor.matrix[1][1] * (tempCorrelation - correlation) / shiftY;
-									tensorDer12Y = tensor.matrix[1][2] * (tempCorrelation - correlation) / shiftY;
-								}
-
-								if (znumberGeneral > 1) {
-									tempCorrelation = correlationWithEbin(tempParticleShiftZ, curI, curJ, curK) / volumeE();
-
-									tensorDer20Z = tensor.matrix[2][0] * (tempCorrelation - correlation) / shiftZ;
-									tensorDer21Z = tensor.matrix[2][1] * (tempCorrelation - correlation) / shiftZ;
-									tensorDer22Z = tensor.matrix[2][2] * (tempCorrelation - correlation) / shiftZ;
-								}
 								if (particleCharge > 0) {
-									electricFlux[2 + 2 * additionalBinNumber - curI][curJ][curK] += rotatedVelocity * (particleCharge * correlation
-									);
-									//electricFlux[2 + 2 * additionalBinNumber - curI][curJ][curK] += velocity * (particleCharge * correlation);
-									divPressureTensor[2 + 2 * additionalBinNumber - curI][curJ][curK].x += (tensorDer00X + tensorDer10Y +
-										tensorDer20Z) * particleCharge;
-									divPressureTensor[2 + 2 * additionalBinNumber - curI][curJ][curK].y += (tensorDer01X + tensorDer11Y +
-										tensorDer21Z) * particleCharge;
-									divPressureTensor[2 + 2 * additionalBinNumber - curI][curJ][curK].z += (tensorDer02X + tensorDer12Y +
-										tensorDer22Z) * particleCharge;
+									electricFlux[2 + 2 * additionalBinNumber - curI][curJ][curK] += tempRotatedVelocity * (particleCharge * correlation);																
 								} else {
-									electricFluxMinus[2 + 2 * additionalBinNumber - curI][curJ][curK] += rotatedVelocity * (particleCharge *
-										correlation);
-									divPressureTensorMinus[2 + 2 * additionalBinNumber - curI][curJ][curK].x += (tensorDer00X + tensorDer10Y +
-										tensorDer20Z) * particleCharge;
-									divPressureTensorMinus[2 + 2 * additionalBinNumber - curI][curJ][curK].y += (tensorDer01X + tensorDer11Y +
-										tensorDer21Z) * particleCharge;
-									divPressureTensorMinus[2 + 2 * additionalBinNumber - curI][curJ][curK].z += (tensorDer02X + tensorDer12Y +
-										tensorDer22Z) * particleCharge;
-									//electricFluxMinus[2 + 2 * additionalBinNumber - curI][curJ][curK] += velocity * (particleCharge * correlation);						
-								}
-								dielectricTensor[2 + 2 * additionalBinNumber - curI][curJ][curK] = dielectricTensor[2 + 2 * additionalBinNumber
-									- curI][curJ][curK] - particle->rotationTensor * (particleOmega * correlation);*/
-
+									electricFluxMinus[2 + 2 * additionalBinNumber - curI][curJ][curK] += tempRotatedVelocity * (particleCharge *correlation);														
+								}								
 							} else {
 								if (particleCharge > 0) {
-									electricFlux[2 + 2 * additionalBinNumber - curI][curJ][curK] += velocity * particleCharge * correlation;
+									electricFlux[2 + 2 * additionalBinNumber - curI][curJ][curK] += tempVelocity * particleCharge * correlation;
 								} else {
-									electricFluxMinus[2 + 2 * additionalBinNumber - curI][curJ][curK] += velocity * particleCharge * correlation;
+									electricFluxMinus[2 + 2 * additionalBinNumber - curI][curJ][curK] += tempVelocity * particleCharge * correlation;
 								}
 							}
 						} else {
-							/*double tempCorrelation = correlationWithEbin(tempParticleShiftX, curI, curJ, curK) / volumeE();
-
-							//double tensorDer00X = 0;
-							//double tensorDer01X = 0;
-							//double tensorDer02X = 0;
-							double correlationDerX = (tempCorrelation - correlation) / shiftX;
-							double tensorDer00X = tensor.matrix[0][0] * correlationDerX;
-							double tensorDer01X = tensor.matrix[0][1] * correlationDerX;
-							double tensorDer02X = tensor.matrix[0][2] * correlationDerX;
-
-							double tensorDer10Y = 0;
-							double tensorDer11Y = 0;
-							double tensorDer12Y = 0;
-
-							double tensorDer20Z = 0;
-							double tensorDer21Z = 0;
-							double tensorDer22Z = 0;
-
-
-							if (ynumberGeneral > 1) {
-								tempCorrelation = correlationWithEbin(tempParticleShiftY, curI, curJ, curK) / volumeE();
-								double correlationDerY = (tempCorrelation - correlation) / shiftY;
-								tensorDer10Y = tensor.matrix[1][0] * correlationDerY;
-								tensorDer11Y = tensor.matrix[1][1] * correlationDerY;
-								tensorDer12Y = tensor.matrix[1][2] * correlationDerY;
-							}
-
-							if (znumberGeneral > 1) {
-								tempCorrelation = correlationWithEbin(tempParticleShiftZ, curI, curJ, curK) / volumeE();
-								double correlationDerZ = (tempCorrelation - correlation) / shiftZ;
-								tensorDer20Z = tensor.matrix[2][0] * correlationDerZ;
-								tensorDer21Z = tensor.matrix[2][1] * correlationDerZ;
-								tensorDer22Z = tensor.matrix[2][2] * correlationDerZ;
-							}*/
 
 							if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
 								if (solverType == IMPLICIT_EC) {
@@ -328,22 +115,18 @@ void Simulation::updateElectroMagneticParameters() {
 												int zindex = particle->correlationMapNode.zindex[tempK];
 
 												double tempCorrelation1 = particle->correlationMapNode.xcorrelation[tempI] * particle->correlationMapNode.
-												                                                                                       ycorrelation[tempJ] * particle->correlationMapNode.
-												                                                                                                                       zcorrelation[tempK
-												];
+												                              ycorrelation[tempJ] * particle->correlationMapNode.zcorrelation[tempK];
 
 												for (int tempI1 = 0; tempI1 < splineOrder + 2; ++tempI1) {
 													for (int tempJ1 = 0; tempJ1 < splineOrder + 2; ++tempJ1) {
 														for (int tempK1 = 0; tempK1 < splineOrder + 2; ++tempK1) {
 															double tempCorrelation2 = particle->correlationMapNode.xcorrelation[tempI1] * particle->correlationMapNode.
-															                                                                                ycorrelation[tempJ1] *
-																particle->correlationMapNode.zcorrelation[tempK1];
+															                              ycorrelation[tempJ1]*particle->correlationMapNode.zcorrelation[tempK1];
 															double doubleCorrelation = tempCorrelation1 * tempCorrelation2 / volumeE();
 															for (int l = 0; l < 3; ++l) {
 																for (int m = 0; m < 3; ++ m) {
 																	massMatrix[xindex][yindex][zindex].matrix[splineOrder + 1 - tempI + tempI1][splineOrder + 1 - tempJ + tempJ1][
-																			splineOrder + 1 - tempK + tempK1].matrix[l][m] += particle->rotationTensor.matrix[l][m] *
-																		particleOmega * doubleCorrelation;
+																			splineOrder + 1 - tempK + tempK1].matrix[l][m] += particle->rotationTensor.matrix[l][m] *particleOmega * doubleCorrelation;
 																}
 															}
 														}
@@ -356,16 +139,8 @@ void Simulation::updateElectroMagneticParameters() {
 
 								if (particleCharge > 0) {
 									electricFlux[curI][curJ][curK] += rotatedVelocity * (particleCharge * correlation);
-									//electricFlux[curI][curJ][curK] += velocity * (particleCharge * correlation);
-									//divPressureTensor[curI][curJ][curK].x += (tensorDer00X + tensorDer10Y + tensorDer20Z) * particleCharge;
-									//divPressureTensor[curI][curJ][curK].y += (tensorDer01X + tensorDer11Y + tensorDer21Z) * particleCharge;
-									//divPressureTensor[curI][curJ][curK].z += (tensorDer02X + tensorDer12Y + tensorDer22Z) * particleCharge;
 								} else {
 									electricFluxMinus[curI][curJ][curK] += rotatedVelocity * (particleCharge * correlation);
-									//electricFluxMinus[curI][curJ][curK] += velocity * (particleCharge * correlation);
-									//divPressureTensor[curI][curJ][curK].x += (tensorDer00X + tensorDer10Y + tensorDer20Z) * particleCharge;
-									//divPressureTensor[curI][curJ][curK].y += (tensorDer01X + tensorDer11Y + tensorDer21Z) * particleCharge;
-									//divPressureTensor[curI][curJ][curK].z += (tensorDer02X + tensorDer12Y + tensorDer22Z) * particleCharge;
 								}
 								dielectricTensor[curI][curJ][curK] = dielectricTensor[curI][curJ][curK] - particle->rotationTensor * (
 									particleOmega * correlation);
@@ -383,15 +158,6 @@ void Simulation::updateElectroMagneticParameters() {
 				}
 			}
 		}
-
-		/*for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					electricFlux[i][j][k] += electricFluxMinus[i][j][k];
-					divPressureTensor[i][j][k] += divPressureTensorMinus[i][j][k];
-				}
-			}
-		}*/
 
 		//for debug onle
 		/*for (int i = 0; i < xnumberAdded + 1; ++i) {
@@ -419,9 +185,6 @@ void Simulation::updateElectroMagneticParameters() {
 			}
 		}
 
-
-		//MPI_Barrier(cartComm);
-		//fprintf(outputEverythingFile, "electricFlux %d after boundaries = %28.22g %28.22g %28.22g\n", debugPoint, electricFlux[debugPoint][0][0].x, electricFlux[debugPoint][0][0].y, electricFlux[debugPoint][0][0].z);
 		if ((verbosity > 1)) printf("updating electricDensityHat and pressure tensor\n");
 
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -462,7 +225,6 @@ void Simulation::updateElectroMagneticParameters() {
 							}
 							for(int l = 0; l < 3; ++l) {
 								for(int m = 0; m < 3; ++m) {
-									//pressureTensor[1 + 2 * additionalBinNumber - curI][j][k].matrix[l][m] += particleCharge*correlation*rotatedVelocity[l]*rotatedVelocity[m];
 									pressureTensor[1 + 2 * additionalBinNumber - curI][j][k].matrix[l][m] += particleCharge*correlation*tensor.matrix[l][m];
 								}
 							}
@@ -475,7 +237,6 @@ void Simulation::updateElectroMagneticParameters() {
 							}
 							for(int l = 0; l < 3; ++l) {
 								for(int m = 0; m < 3; ++m) {
-									//pressureTensor[curI][j][k].matrix[l][m] += particleCharge*correlation*rotatedVelocity[l]*rotatedVelocity[m];
 									pressureTensor[curI][j][k].matrix[l][m] += particleCharge*correlation*tensor.matrix[l][m];
 								}
 							}
@@ -536,9 +297,6 @@ void Simulation::updateElectroMagneticParameters() {
 						//alertNaNOrInfinity(electricFlux[i][j][k].x, "electricFlux[i][j][k].x = NaN");
 						//alertNaNOrInfinity(electricFlux[i][j][k].y, "electricFlux[i][j][k].y = NaN");
 						//alertNaNOrInfinity(electricFlux[i][j][k].z, "electricFlux[i][j][k].z = NaN");
-						//alertLargeModlue(electricFlux[i][j][k].x, 1E100, "electric Flux x is too large\n");
-						//alertLargeModlue(electricFlux[i][j][k].y, 1E100, "electric Flux y is too large\n");
-						//alertLargeModlue(electricFlux[i][j][k].z, 1E100, "electric Flux z is too large\n");
 					}
 				}
 			}

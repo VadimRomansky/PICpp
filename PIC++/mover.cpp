@@ -253,9 +253,6 @@ void Simulation::moveParticle(Particle* particle) {
 	int i = 0;
 	Vector3d velocityHat = (particle->rotationTensor * particle->gammaFactor(
 		speed_of_light_normalized) * velocity);
-	//Vector3d Eperp = E - velocity * (velocity.scalarMult(E) / (velocity.scalarMult(velocity)));
-	//Vector3d electricVelocityShift = (Eperp * (2 * eta * beta / gamma));
-	//velocityHat += electricVelocityShift;
 
 	if (velocityHat.norm() > speed_of_light_normalized) {
 		//printf("velocity Hat norm > c\n");
