@@ -619,10 +619,10 @@ void Simulation::evaluateDivergenceCleaningField() {
 
 void Simulation::createDivergenceCleanupInternalEquation(int i, int j, int k, Vector3d*** field, double*** density) {
 	if (cartCoord[0] == 0 && cartCoord[1] == 0 & cartCoord[2] == 0) {
-		if (i == 1 + additionalBinNumber && j == 1 + additionalBinNumber && k == 1 + additionalBinNumber) {
+		/*if (i == 1 + additionalBinNumber && j == 1 + additionalBinNumber && k == 1 + additionalBinNumber) {
 			createDivergenceFixEquation(i, j, k, density);
 			return;
-		}
+		}*/
 
 		/*if(i == xnumberAdded/2 && j == ynumberAdded/2 && k == znumberAdded/2){
 			createDivergenceZeroEquation(i, j, k);

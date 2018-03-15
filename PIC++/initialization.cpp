@@ -353,7 +353,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 			concentrations[i] = concentrations[i] * cube(scaleFactor);
 		}
 
-		printf("scaleFactor = %lf\n", scaleFactor);
+		//printf("scaleFactor = %lf\n", scaleFactor);
 
 		deltaX /= scaleFactor;
 		deltaY /= scaleFactor;
@@ -576,7 +576,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		rescaleConstants();
 
 
-		printf("scaleFactor = %lf\n", scaleFactor);
+		//printf("scaleFactor = %lf\n", scaleFactor);
 
 		if (rank == 0) printf("xsize/scaleFactor = %lf\n", xsize);
 		//fflush(stdout);

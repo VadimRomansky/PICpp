@@ -253,8 +253,8 @@ void Simulation::moveParticle(Particle* particle) {
 	int i = 0;
 	Vector3d velocityHat = (particle->rotationTensor * particle->gammaFactor(
 		speed_of_light_normalized) * velocity);
-	Vector3d Eperp = E - velocity * (velocity.scalarMult(E) / (velocity.scalarMult(velocity)));
-	Vector3d electricVelocityShift = (Eperp * (2 * eta * beta / gamma));
+	//Vector3d Eperp = E - velocity * (velocity.scalarMult(E) / (velocity.scalarMult(velocity)));
+	//Vector3d electricVelocityShift = (Eperp * (2 * eta * beta / gamma));
 	//velocityHat += electricVelocityShift;
 
 	if (velocityHat.norm() > speed_of_light_normalized) {
@@ -262,10 +262,10 @@ void Simulation::moveParticle(Particle* particle) {
 		//MPI_Finalize();
 		//exit(0);
 	}
-	double a = tempParticle.gammaFactor(speed_of_light_normalized);
+	//double a = tempParticle.gammaFactor(speed_of_light_normalized);
 	double etaDeltaT = eta * deltaT;
 	double restEtaDeltaT = (1.0 - eta) * deltaT;
-	double velocityNorm = velocity.norm();
+	//double velocityNorm = velocity.norm();
 
 	Vector3d prevMomentum = particle->getMomentum();
 	Vector3d momentum = tempParticle.getMomentum();
@@ -345,10 +345,10 @@ void Simulation::moveParticle(Particle* particle) {
 	particle->coordinates.y += middleVelocity.y * deltaT;
 	particle->coordinates.z += middleVelocity.z * deltaT;
 
-	double newGamma = particle->gammaFactor(speed_of_light_normalized);
+	//double newGamma = particle->gammaFactor(speed_of_light_normalized);
 
-	double deltaGammaTheor = particle->charge * deltaT * E.scalarMult(middleVelocity) / (particle->mass *
-		speed_of_light_normalized_sqr);
+	//double deltaGammaTheor = particle->charge * deltaT * E.scalarMult(middleVelocity) / (particle->mass *
+	//	speed_of_light_normalized_sqr);
 
 	/*if(i >= particleIterations){
 		printf("i >= particle iterations\n");
@@ -356,10 +356,10 @@ void Simulation::moveParticle(Particle* particle) {
 		printf("relative error = %g\n", error/momentumNorm);
 	}*/
 
-	if (fabs(newGamma - oldGamma) > 0.2) {
-		printf("delta gamma > 0.2\n");
-		printf("oldGamma = %g newGamma = %g delta gamma = %g\n", oldGamma, newGamma, newGamma - oldGamma);
-		printf("theoretical delta gamma = %g\n", deltaGammaTheor);
+	//if (fabs(newGamma - oldGamma) > 0.2) {
+	//	printf("delta gamma > 0.2\n");
+	//	printf("oldGamma = %g newGamma = %g delta gamma = %g\n", oldGamma, newGamma, newGamma - oldGamma);
+	//	printf("theoretical delta gamma = %g\n", deltaGammaTheor);
 		/*printf("particle iterations = %d\n", i);
 		printf("cartx = %d carty = %d cartz = %d\n", cartCoord[0], cartCoord[1], cartCoord[2]);
 		printf("particle number = %d\n", particle->number);
@@ -374,7 +374,7 @@ void Simulation::moveParticle(Particle* particle) {
 				printf("alpha[%d][%d] = %g\n", i, j, particle->rotationTensor.matrix[i][j]);
 			}
 		}*/
-	}
+	//}
 
 	//correctParticlePosition(particle);
 	/*if(particle->coordinates.x > xgrid[xnumberAdded - additionalBinNumber]){

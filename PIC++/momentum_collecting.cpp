@@ -64,30 +64,30 @@ void Simulation::updateElectroMagneticParameters() {
 		for (int pcount = 0; pcount < particles.size(); ++pcount) {
 			Particle* particle = particles[pcount];
 
-			Particle tempParticleShiftX = *particle;
-			Particle tempParticleShiftY = *particle;
-			Particle tempParticleShiftZ = *particle;
-			Vector3d tempRotatedVelocityShiftX = Vector3d(0, 0, 0);
-			Vector3d tempRotatedVelocityShiftY = Vector3d(0, 0, 0);
-			Vector3d tempRotatedVelocityShiftZ = Vector3d(0, 0, 0);
+			//Particle tempParticleShiftX = *particle;
+			//Particle tempParticleShiftY = *particle;
+			//Particle tempParticleShiftZ = *particle;
+			//Vector3d tempRotatedVelocityShiftX = Vector3d(0, 0, 0);
+			//Vector3d tempRotatedVelocityShiftY = Vector3d(0, 0, 0);
+			//Vector3d tempRotatedVelocityShiftZ = Vector3d(0, 0, 0);
 
 			Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
 			double gamma = particle->gammaFactor(speed_of_light_normalized);
-			double beta = 0.5 * particle->charge * deltaT / particle->mass;
-			Vector3d particleE = correlationEfield(particle);
-			Vector3d particleB = correlationBfield(particle);
+			//double beta = 0.5 * particle->charge * deltaT / particle->mass;
+			//Vector3d particleE = correlationEfield(particle);
+			//Vector3d particleB = correlationBfield(particle);
 			//todo
 			Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
-			Vector3d Eperp = particleE - velocity * (velocity.scalarMult(particleE) / (velocity.scalarMult(velocity)));
-			Vector3d electricVelocityShift = (Eperp * (2 * eta * beta / gamma));
-			Vector3d tempE = velocity.vectorMult(particleB) / speed_of_light_normalized;
-			Vector3d magneticVelocityShift = (velocity.vectorMult(particleB) * (beta / (gamma * speed_of_light_normalized)));
+			//Vector3d Eperp = particleE - velocity * (velocity.scalarMult(particleE) / (velocity.scalarMult(velocity)));
+			//Vector3d electricVelocityShift = (Eperp * (2 * eta * beta / gamma));
+			//Vector3d tempE = velocity.vectorMult(particleB) / speed_of_light_normalized;
+			//Vector3d magneticVelocityShift = (velocity.vectorMult(particleB) * (beta / (gamma * speed_of_light_normalized)));
 			//rotatedVelocity += electricVelocityShift;
-			Matrix3d tensor = rotatedVelocity.selfTensorMult();
+			//Matrix3d tensor = rotatedVelocity.selfTensorMult();
 			double particleOmega = particle->weight * theta * deltaT * deltaT * 2 * pi * particle->charge * particle->charge /
 				particle->mass;
 
-			double shiftX = velocity.x * deltaT * 0.5;
+			/*double shiftX = velocity.x * deltaT * 0.5;
 			if (fabs(shiftX) < particle->dx * 0.1) {
 				shiftX = particle->dx * 0.1;
 			}
@@ -100,7 +100,7 @@ void Simulation::updateElectroMagneticParameters() {
 			double shiftZ = velocity.z * deltaT * 0.5;
 			if (fabs(shiftZ) < particle->dz * 0.1) {
 				shiftZ = particle->dz * 0.1;
-			}
+			}*/
 
 			if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
 				/*tempParticleShiftX.coordinates.x = particle->coordinates.x + shiftX;
@@ -173,9 +173,9 @@ void Simulation::updateElectroMagneticParameters() {
 							velocity.x = -velocity.x;
 							//tempParticle.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
 							rotatedVelocity = tempParticle.rotationTensor * (velocity * gamma);
-							tensor = rotatedVelocity.selfTensorMult();
+							//tensor = rotatedVelocity.selfTensorMult();
 							//rotatedVelocity += electricVelocityShift;
-							double tempCorrelation = correlationWithEbin(tempParticleShiftX, curI, curJ, curK) / volumeE();
+							//double tempCorrelation = correlationWithEbin(tempParticleShiftX, curI, curJ, curK) / volumeE();
 							if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
 								/*tempParticleShiftX.coordinates.x = particle->coordinates.x + shiftX;
 								if (tempParticleShiftX.coordinates.x < xgrid[1 + additionalBinNumber]) {
@@ -440,6 +440,7 @@ void Simulation::updateElectroMagneticParameters() {
 			Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
 			double gamma = particle->gammaFactor(speed_of_light_normalized);
 			Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
+			Matrix3d tensor = rotatedVelocity.selfTensorMult();
 
 			for (int i = 0; i < crossBinNumberX; ++i) {
 				for (int j = 0; j < crossBinNumberY; ++j) {
@@ -461,7 +462,8 @@ void Simulation::updateElectroMagneticParameters() {
 							}
 							for(int l = 0; l < 3; ++l) {
 								for(int m = 0; m < 3; ++m) {
-									pressureTensor[1 + 2 * additionalBinNumber - curI][j][k].matrix[l][m] += particleCharge*correlation*rotatedVelocity[l]*rotatedVelocity[m];
+									//pressureTensor[1 + 2 * additionalBinNumber - curI][j][k].matrix[l][m] += particleCharge*correlation*rotatedVelocity[l]*rotatedVelocity[m];
+									pressureTensor[1 + 2 * additionalBinNumber - curI][j][k].matrix[l][m] += particleCharge*correlation*tensor.matrix[l][m];
 								}
 							}
 						} else {
@@ -473,7 +475,8 @@ void Simulation::updateElectroMagneticParameters() {
 							}
 							for(int l = 0; l < 3; ++l) {
 								for(int m = 0; m < 3; ++m) {
-									pressureTensor[curI][j][k].matrix[l][m] += particleCharge*correlation*rotatedVelocity[l]*rotatedVelocity[m];
+									//pressureTensor[curI][j][k].matrix[l][m] += particleCharge*correlation*rotatedVelocity[l]*rotatedVelocity[m];
+									pressureTensor[curI][j][k].matrix[l][m] += particleCharge*correlation*tensor.matrix[l][m];
 								}
 							}
 						}
@@ -620,24 +623,8 @@ void Simulation::updateElectroMagneticParameters() {
 			procTime = clock();
 		}
 		//MPI_Barrier(cartComm);
-		/*if (rank == 0 && (verbosity > 0)) printf("start exchange parameters\n");
-		if ((verbosity > 1)) printf("sum charge density hat\n");
-		//MPI_Barrier(cartComm);
-		sumChargeDensityHatX();
-		sumChargeDensityHatY();
-		sumChargeDensityHatZ();
-		if ((verbosity > 1)) printf("sumcell matrix parameters\n");
-		//MPI_Barrier(cartComm);
-		sumCellMatrixParametersX();
-		sumCellMatrixParametersY();
-		sumCellMatrixParametersZ();
-		if ((verbosity > 1)) printf("sum node vector parameters\n");
-		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersX();
-		sumNodeVectorParametersY();
-		sumNodeVectorParametersZ();*/
 
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
+		/*for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].x, "electricFlux[i][j][k].x = NaN");
@@ -648,7 +635,7 @@ void Simulation::updateElectroMagneticParameters() {
 					alertLargeModlue(electricFlux[i][j][k].z, 1E100, "electric Flux z is too large\n");
 				}
 			}
-		}
+		}*/
 
 		if ((verbosity > 1)) printf("sum node matrix parameters\n");
 		//MPI_Barrier(cartComm);
@@ -656,9 +643,9 @@ void Simulation::updateElectroMagneticParameters() {
 		sumNodeMatrixParametersY();
 		sumNodeMatrixParametersZ();
 		if ((verbosity > 1)) printf("update external flux\n");
-		updateExternalFlux();
+		//updateExternalFlux();
 
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
+		/*for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					electricFlux[i][j][k] = electricFlux[i][j][k] + externalElectricFlux[i][j][k];
@@ -670,7 +657,7 @@ void Simulation::updateElectroMagneticParameters() {
 					if (debugMode) alertNaNOrInfinity(electricFlux[i][j][k].z, "electricFlux[i][j][k].z = NaN");
 				}
 			}
-		}
+		}*/
 	}
 	if ((verbosity > 1)) printf("finish updating electromagnetic parameters\n");
 	//MPI_Barrier(cartComm);

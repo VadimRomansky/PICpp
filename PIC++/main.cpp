@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 			fflush(stdout);
 		}
 	}
-	printf("additionalBinNumber = %d\n", additionalBinNumber);
+	//printf("additionalBinNumber = %d\n", additionalBinNumber);
 	MPI_Barrier(MPI_COMM_WORLD);
 
 	if (rank == 0) printf("start\n");
