@@ -335,8 +335,8 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		//}
 		scaleFactor = speed_of_light * plasma_period;
 
-		plasma_period = 1.0;
-		scaleFactor = 1.0;
+		//plasma_period = 1.0;
+		//scaleFactor = 1.0;
 
 		//scaleFactor = xsize;
 		//scaleFactor = xsizeGeneral;
@@ -4107,7 +4107,8 @@ void Simulation::initializeFluxFromRight() {
 	boundaryConditionTypeY = PERIODIC;
 	boundaryConditionTypeZ = PERIODIC;
 	createParticles();
-	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized * speed_of_light_correction);
+	//E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized * speed_of_light_correction);
+	E0 = E0 - V0.vectorMult(B0) / (speed_of_light_normalized);
 	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
 	//initializeAlfvenWaveY(10, 1.0E-4);
 	if (solverType == BUNEMAN) {

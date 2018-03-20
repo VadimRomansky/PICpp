@@ -270,7 +270,11 @@ void Simulation::simulate() {
 		}
 
 		updateDensityParameters();
-		//smoothChargeDensity();
+
+		for(int n = 0; n < smoothingCount; ++n){
+			smoothChargeDensity();
+		}
+
 		if ((rank == 0) && (verbosity > 0)) {
 			printf("finish update density parameters\n");
 		}
@@ -313,6 +317,16 @@ void Simulation::simulate() {
 				//cleanupDivergenceMagnetic();
 			}
 		}
+
+		/*if (solverType == BUNEMAN) {
+			//smoothBunemanEfieldGeneral(bunemanNewEx, bunemanNewEy, bunemanNewEz);
+			//smoothBunemanBfieldGeneral(bunemanNewBx, bunemanNewBy, bunemanNewBz);
+		} else {
+			for(int n = 0; n < smoothingCount; ++n){
+				smoothNewEfield();
+				smoothNewBfield();
+			}
+		}*/
 
 		/*if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			procTime = clock();

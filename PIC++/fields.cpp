@@ -2623,7 +2623,7 @@ void Simulation::evaluateMagneticField() {
 }
 
 bool Simulation::isInResistiveLayer(int i, int j, int k) {
-	return false;
+	//return false;
 	if (boundaryConditionTypeX == PERIODIC) {
 		return false;
 	}
@@ -2687,6 +2687,16 @@ Vector3d Simulation::evaluateRotB(int i, int j, int k) {
 	]) / 4.0;
 	BleftZ = (Bfield[curI][curJ][prevK] + Bfield[prevI][curJ][prevK] + Bfield[curI][prevJ][prevK] + Bfield[prevI][prevJ][
 		prevK]) / 4.0;
+
+	if (ynumberGeneral == 1) {
+		BrightY = Vector3d(0, 0, 0);
+		BleftY = Vector3d(0, 0, 0);
+	}
+
+	if (znumberGeneral == 1) {
+		BrightZ = Vector3d(0, 0, 0);
+		BleftZ = Vector3d(0, 0, 0);
+	}
 
 	double x = 0;
 	double y = 0;

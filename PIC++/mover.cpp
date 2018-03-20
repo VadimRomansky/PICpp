@@ -223,9 +223,8 @@ void Simulation::moveParticle(Particle* particle) {
 		return;
 	}
 	//
-	tempParticle.addMomentum(
-		(E + (velocity.vectorMult(B) / (speed_of_light_normalized * speed_of_light_correction))) * particle->charge * deltaT);
-	alertNaNOrInfinity(E.x, "E.x = Nan in move particle\n");
+	//tempParticle.addMomentum((E + (velocity.vectorMult(B) / (speed_of_light_normalized * speed_of_light_correction))) * particle->charge * deltaT);
+	tempParticle.addMomentum((E + (velocity.vectorMult(B) / (speed_of_light_normalized))) * particle->charge * deltaT);
 
 	newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
 
@@ -294,8 +293,7 @@ void Simulation::moveParticle(Particle* particle) {
 
 		newCoordinates = tempParticle.coordinates;
 
-		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT)
-			&& (cartCoord[0] == 0)) {
+		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 				middleVelocity.x * restEtaDeltaT);
 			particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * restEtaDeltaT;
@@ -325,9 +323,8 @@ void Simulation::moveParticle(Particle* particle) {
 		//E = E0;
 		//B = B0;
 
-		tempParticle.addMomentum(
-			(E + (middleVelocity.vectorMult(B) / (speed_of_light_normalized * speed_of_light_correction))) * (particle->charge *
-				deltaT));
+		//tempParticle.addMomentum((E + (middleVelocity.vectorMult(B) / (speed_of_light_normalized * speed_of_light_correction))) * (particle->charge *deltaT));
+		tempParticle.addMomentum((E + (middleVelocity.vectorMult(B) / (speed_of_light_normalized))) * (particle->charge *deltaT));
 		//newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
 		newMomentum = tempParticle.getMomentum();
 		//error = (prevVelocity - newVelocity).norm();
@@ -342,10 +339,10 @@ void Simulation::moveParticle(Particle* particle) {
 	particle->coordinates.y += middleVelocity.y * deltaT;
 	particle->coordinates.z += middleVelocity.z * deltaT;
 
-	//double newGamma = particle->gammaFactor(speed_of_light_normalized);
+	double newGamma = particle->gammaFactor(speed_of_light_normalized);
 
-	//double deltaGammaTheor = particle->charge * deltaT * E.scalarMult(middleVelocity) / (particle->mass *
-	//	speed_of_light_normalized_sqr);
+	double deltaGammaTheor = particle->charge * deltaT * E.scalarMult(middleVelocity) / (particle->mass *
+		speed_of_light_normalized_sqr);
 
 	/*if(i >= particleIterations){
 		printf("i >= particle iterations\n");
@@ -353,10 +350,10 @@ void Simulation::moveParticle(Particle* particle) {
 		printf("relative error = %g\n", error/momentumNorm);
 	}*/
 
-	//if (fabs(newGamma - oldGamma) > 0.2) {
-	//	printf("delta gamma > 0.2\n");
-	//	printf("oldGamma = %g newGamma = %g delta gamma = %g\n", oldGamma, newGamma, newGamma - oldGamma);
-	//	printf("theoretical delta gamma = %g\n", deltaGammaTheor);
+	if (fabs(newGamma - oldGamma) > 0.2) {
+		printf("delta gamma > 0.2\n");
+		printf("oldGamma = %g newGamma = %g delta gamma = %g\n", oldGamma, newGamma, newGamma - oldGamma);
+		printf("theoretical delta gamma = %g\n", deltaGammaTheor);
 		/*printf("particle iterations = %d\n", i);
 		printf("cartx = %d carty = %d cartz = %d\n", cartCoord[0], cartCoord[1], cartCoord[2]);
 		printf("particle number = %d\n", particle->number);
@@ -371,7 +368,7 @@ void Simulation::moveParticle(Particle* particle) {
 				printf("alpha[%d][%d] = %g\n", i, j, particle->rotationTensor.matrix[i][j]);
 			}
 		}*/
-	//}
+	}
 
 	//correctParticlePosition(particle);
 	/*if(particle->coordinates.x > xgrid[xnumberAdded - additionalBinNumber]){
@@ -738,9 +735,11 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d& velocity
                                                  Vector3d& BField) {
 	Matrix3d result = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-	double G = ((beta * (EField.scalarMult(velocity)) / (speed_of_light_normalized_sqr * speed_of_light_correction_sqr)) + gamma);
+	//double G = ((beta * (EField.scalarMult(velocity)) / (speed_of_light_normalized_sqr * speed_of_light_correction_sqr)) + gamma);
+	double G = ((beta * (EField.scalarMult(velocity)) / (speed_of_light_normalized_sqr)) + gamma);
 	beta = beta / G;
-	double beta2c = beta * beta / (speed_of_light_normalized_sqr * speed_of_light_correction_sqr);
+	//double beta2c = beta * beta / (speed_of_light_normalized_sqr * speed_of_light_correction_sqr);
+	double beta2c = beta * beta / (speed_of_light_normalized_sqr);
 	double denominator = G * (1 + beta2c * BField.scalarMult(BField));
 
 	for (int i = 0; i < 3; i++) {
