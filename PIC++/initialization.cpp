@@ -573,7 +573,41 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 		scaleFactor = scaleFactorV;
 
 
+		//todo?
+
 		rescaleConstants();
+
+		/*E0 = E0 * (plasma_period * sqrt(scaleFactor));
+		B0 = B0 * (plasma_period * sqrt(scaleFactor));
+		V0 = V0 * plasma_period / scaleFactor;
+
+		density = density * cube(scaleFactor);
+		for (int i = 0; i < typesNumber; ++i) {
+			concentrations[i] = concentrations[i] * cube(scaleFactor);
+		}
+
+		//printf("scaleFactor = %lf\n", scaleFactor);
+
+		deltaX /= scaleFactor;
+		deltaY /= scaleFactor;
+		deltaZ /= scaleFactor;
+		deltaX2 /= scaleFactor * scaleFactor;
+		deltaY2 /= scaleFactor * scaleFactor;
+		deltaZ2 /= scaleFactor * scaleFactor;
+        cellVolume /= scaleFactor * scaleFactor * scaleFactor;
+
+		leftX /= scaleFactor;
+		rightX /= scaleFactor;
+		xsize /= scaleFactor;
+		xsizeGeneral /= scaleFactor;
+		leftY /= scaleFactor;
+		rightY /= scaleFactor;
+		ysize /= scaleFactor;
+		ysizeGeneral /= scaleFactor;
+		leftZ /= scaleFactor;
+		rightZ /= scaleFactor;
+		zsize /= scaleFactor;
+		zsizeGeneral /= scaleFactor;*/
 
 
 		//printf("scaleFactor = %lf\n", scaleFactor);

@@ -343,6 +343,14 @@ void Simulation::moveParticle(Particle* particle) {
 
 	double deltaGammaTheor = particle->charge * deltaT * E.scalarMult(middleVelocity) / (particle->mass *
 		speed_of_light_normalized_sqr);
+	double theorNewGamma = oldGamma + deltaGammaTheor;
+	if(theorNewGamma - 1 > relativisticPrecision){
+		double newTheorMomentumNorm = particle->mass*speed_of_light_normalized*sqrt(theorNewGamma*theorNewGamma - 1.0);
+		Vector3d p = particle->getMomentum();
+		double newMomentumNorm = p.norm();
+		p = p*(newTheorMomentumNorm/newMomentumNorm);
+		particle->setMomentum(p);
+	}
 
 	/*if(i >= particleIterations){
 		printf("i >= particle iterations\n");
@@ -634,10 +642,10 @@ void Simulation::moveParticleBoris(Particle* particle) {
 
 	Vector3d p1 = particle->getMomentum() + E1 * beta;
 	double tempGamma = sqrt(1.0 + (p1.scalarMult(p1) / (particle->mass * particle->mass * speed_of_light_normalized_sqr)));
-	double omega = particle->charge * Bnorm / (particle->mass * speed_of_light * tempGamma);
+	double omega = particle->charge * Bnorm / (particle->mass * speed_of_light_normalized * tempGamma);
 	double a1 = tan(omega * deltaT / 2.0) / Bnorm;
 	if (Bnorm <= 0) {
-		a1 = particle->charge / (2.0 * particle->mass * speed_of_light * tempGamma);
+		a1 = particle->charge / (2.0 * particle->mass * speed_of_light_normalized * tempGamma);
 	}
 	//double a1 = particle->charge/(2.0*particle->mass*speed_of_light*tempGamma);
 	double a2 = 2 * a1 / (1 + a1 * a1 * Bnorm2);
