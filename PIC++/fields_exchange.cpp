@@ -2033,6 +2033,396 @@ void Simulation::exchangeGeneralScalarNodeFieldZ(double**** field) {
 	}
 }
 
+/////////////
+
+void Simulation::exchangeGeneralMatrixNodeField(Matrix3d*** field) {
+	exchangeGeneralMatrixNodeFieldX(field);
+	exchangeGeneralMatrixNodeFieldY(field);
+	exchangeGeneralMatrixNodeFieldZ(field);
+}
+
+void Simulation::exchangeGeneralMatrixNodeFieldX(Matrix3d*** field) {
+	if (cartDim[0] > 1) {
+		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
+		int bcount = 0;
+
+		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for(int l = 0; l < 3; ++l) {
+						for(int m = 0; m < 3; ++m){
+							rightOutMatrixNodeBuffer[bcount] = field[xnumberAdded - additionalBinNumber - 1 - i][j][k].matrix[l][m];
+							bcount++;
+						}
+					}
+				}
+			}
+		}
+		int number = (2 + additionalBinNumber) * 9 * (ynumberAdded + 1) * (znumberAdded + 1);
+		//int numberLeft = (1 + additionalBinNumber) * 3 * (ynumberAdded + 1) * (znumberAdded + 1);
+		if ((cartCoord[0] < cartDim[0] - 1 && cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
+			if (verbosity > 2)
+				printf(
+					"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+					rank, rightRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+			MPI_Status status;
+			MPI_Sendrecv(rightOutMatrixNodeBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, leftInMatrixNodeBuffer, number,
+			             MPI_DOUBLE, leftRank, MPI_EFIELD_RIGHT, cartComm, &status);
+			if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, rightRank);
+		} else if (cartCoord[0] == 0) {
+			MPI_Send(rightOutMatrixNodeBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_RIGHT, cartComm);
+		} else if (cartCoord[0] == cartDim[0] - 1) {
+			MPI_Status status;
+			MPI_Recv(leftInMatrixNodeBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		}
+		//MPI_Barrier(cartComm);
+		bcount = 0;
+		if ((cartCoord[0] > 0) || (boundaryConditionTypeX == PERIODIC)) {
+			if (verbosity > 2) printf("receive general field left from %d to %d\n", leftRank, rank);
+			for (int i = 0; i < 2 + additionalBinNumber; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					for (int k = 0; k < znumberAdded + 1; ++k) {
+						for(int l = 0; l < 3; ++l){
+							for(int m = 0; m < 3; ++l){
+								field[additionalBinNumber + 1 - i][j][k].matrix[l][m] = leftInMatrixNodeBuffer[bcount];
+								bcount++;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		MPI_Barrier(cartComm);
+		bcount = 0;
+		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for(int l = 0; l < 3; ++l) {
+						for(int m = 0; m < 3; ++m){
+							leftOutMatrixNodeBuffer[bcount] = field[1 + additionalBinNumber + i][j][k].matrix[l][m];
+							bcount++;
+						}
+					}
+				}
+			}
+		}
+
+		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
+			MPI_Status status;
+			MPI_Sendrecv(leftOutMatrixNodeBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInMatrixNodeBuffer, number, MPI_DOUBLE,
+			             rightRank, MPI_EFIELD_LEFT, cartComm, &status);
+			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
+		} else if (cartCoord[0] == 0) {
+			MPI_Status status;
+			MPI_Recv(rightInMatrixNodeBuffer, number, MPI_DOUBLE, rightRank, MPI_EFIELD_LEFT, cartComm, &status);
+		} else if (cartCoord[0] == cartDim[0] - 1) {
+			MPI_Send(leftOutMatrixNodeBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, cartComm);
+		}
+		//MPI_Barrier(cartComm);
+		bcount = 0;
+		if ((cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
+			if (verbosity > 2) printf("receive general field rigth from %d to %d\n", rightRank, rank);
+			for (int i = 0; i < 2 + additionalBinNumber; ++i)
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					for (int k = 0; k < znumberAdded + 1; ++k) {
+						for(int l = 0; l < 3; ++l){
+							for(int m = 0; m < 3; ++m){
+								field[xnumberAdded - additionalBinNumber - 1 + i][j][k].matrix[l][m] = rightInMatrixNodeBuffer[bcount];
+								bcount++;
+							}
+						}
+					}
+				}
+		}
+
+		if ((cartCoord[0] == 0) && (boundaryConditionTypeX != PERIODIC)) {
+			for (int i = 0; i <= additionalBinNumber; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					for (int k = 0; k < znumberAdded + 1; ++k) {
+						for(int l = 0; l < 3; ++l) {
+							for(int m = 0; m < 3; ++m){
+						
+								//field[0][j][k] = field[2][j][k];
+								if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
+									//field[i][j][k] = Vector3d(0, 0, 0);
+									field[i][j][k].matrix[l][m] = field[1 + additionalBinNumber][j][k].matrix[l][m];
+								} else if (boundaryConditionTypeX == FREE_BOTH) {
+									field[i][j][k].matrix[l][m] = field[additionalBinNumber][j][k].matrix[l][m];
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if ((cartCoord[0] == cartDim[0] - 1) && (boundaryConditionTypeX != PERIODIC)) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for (int i = 0; i <= additionalBinNumber; ++i) {
+						for(int l = 0; l < 3; ++l) {
+							for(int m = 0; m < 3; ++m){
+								field[xnumberAdded - 1 - i][j][k].matrix[l][m] = field[xnumberAdded - 1 - additionalBinNumber][j][k].matrix[l][m];
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
+	} else {
+		if (boundaryConditionTypeX == PERIODIC) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for(int l = 0; l < 3; ++l) {
+						for(int m = 0; m < 3; ++m){
+							for (int i = 0; i <= additionalBinNumber; ++i) {
+								field[xnumberAdded - additionalBinNumber + i][j][k].matrix[l][m] = field[2 + additionalBinNumber + i][j][k].matrix[l][m];
+								field[i][j][k].matrix[l][m] = field[xnumberAdded - 2 - 2 * additionalBinNumber + i][j][k].matrix[l][m];
+							}
+							field[xnumberAdded - additionalBinNumber - 1][j][k].matrix[l][m] = field[1 + additionalBinNumber][j][k].matrix[l][m];
+						}
+					}
+				}
+			}
+		} else {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					//field[0][j][k] = field[2][j][k];
+					for (int i = 0; i <= additionalBinNumber; ++i) {
+						for(int l = 0; l < 3; ++l) {
+							for(int m = 0; m < 3; ++m){
+							if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
+								//field[i][j][k] = Vector3d(0, 0, 0);
+								field[i][j][k].matrix[l][m] = field[1 + additionalBinNumber][j][k].matrix[l][m];
+							} else if (boundaryConditionTypeX == FREE_BOTH) {
+								field[i][j][k].matrix[l][m] = field[additionalBinNumber][j][k].matrix[l][m];
+							}
+							//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void Simulation::exchangeGeneralMatrixNodeFieldY(Matrix3d*** field) {
+	if (cartDim[1] > 1) {
+		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
+		int bcount = 0;
+
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for(int l = 0; l < 3; ++l) {
+						for(int m = 0; m < 3; ++m){
+							backOutMatrixNodeBuffer[bcount] = field[i][ynumberAdded - additionalBinNumber - 1 - j][k].matrix[l][m];
+							bcount++;
+						}
+					}
+				}
+			}
+		}
+
+		if (verbosity > 2)
+			printf(
+				"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+				rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		MPI_Status status;
+		int number = (2 + additionalBinNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1);
+		MPI_Sendrecv(backOutMatrixNodeBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInMatrixNodeBuffer, number, MPI_DOUBLE,
+		             frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
+
+		//MPI_Barrier(cartComm);
+		bcount = 0;
+
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for(int l = 0; l < 3; ++l) {
+						for(int m = 0; m < 3; ++m){
+							field[i][additionalBinNumber + 1 - j][k].matrix[l][m] = frontInMatrixNodeBuffer[bcount];
+							bcount++;
+						}
+					}
+				}
+			}
+		}
+
+
+		MPI_Barrier(cartComm);
+
+		bcount = 0;
+
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for(int l = 0; l < 3; ++l) {
+						for(int m = 0; m < 3; ++m){
+							frontOutMatrixNodeBuffer[bcount] = field[i][1 + additionalBinNumber + j][k].matrix[l][m];
+							bcount++;
+						}
+					}
+				}
+			}
+		}
+
+		MPI_Sendrecv(frontOutMatrixNodeBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInMatrixNodeBuffer, number, MPI_DOUBLE,
+		             backRank, MPI_EFIELD_LEFT, cartComm, &status);
+		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
+
+		bcount = 0;
+
+		if (verbosity > 2) printf("receive general field rigth from %d to %d\n", backRank, rank);
+		for (int i = 0; i < xnumberAdded + 1; ++i)
+			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for(int l = 0; l < 3; ++l) {
+						for(int m = 0; m < 3; ++m){	
+							field[i][ynumberAdded - additionalBinNumber - 1 + j][k].matrix[l][m] = backInMatrixNodeBuffer[bcount];
+							bcount++;
+						}
+					}
+				}
+			}
+
+		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
+	} else {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				for(int l = 0; l < 3; ++l) {
+					for(int m = 0; m < 3; ++m){
+						if (ynumberGeneral == 1) {
+							for (int j = 0; j < ynumberAdded + 1; ++j) {
+								field[i][j][k].matrix[l][m] = field[i][1 + additionalBinNumber][k].matrix[l][m];
+							}
+						} else {
+							for (int j = 0; j <= additionalBinNumber; ++j) {
+								field[i][ynumberAdded - additionalBinNumber + j][k].matrix[l][m] = field[i][2 + additionalBinNumber + j][k].matrix[l][m];
+								field[i][j][k].matrix[l][m] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k].matrix[l][m];
+							}
+							field[i][ynumberAdded - additionalBinNumber - 1][k].matrix[l][m] = field[i][1 + additionalBinNumber][k].matrix[l][m];
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void Simulation::exchangeGeneralMatrixNodeFieldZ(Matrix3d*** field) {
+	if (cartDim[2] > 1) {
+		if (verbosity > 2) printf("start sending general field rank = %d\n", rank);
+		int bcount = 0;
+
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
+					for(int l = 0; l < 3; ++l) {
+						for(int m = 0; m < 3; ++m){				
+							topOutMatrixNodeBuffer[bcount] = field[i][j][znumberAdded - additionalBinNumber - 1 - k].matrix[l][m];
+							bcount++;
+						}
+					}
+				}
+			}
+		}
+
+		if (verbosity > 2)
+			printf(
+				"before send general field right from %d to %d additionalBinNumber = %d, xnumber = %d, ynumber = %d, znumber = %d\n",
+				rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
+		MPI_Status status;
+		int number = (2 + additionalBinNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1);
+		MPI_Sendrecv(topOutMatrixNodeBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInMatrixNodeBuffer, number, MPI_DOUBLE,
+		             bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
+		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
+
+		//MPI_Barrier(cartComm);
+		bcount = 0;
+		if (verbosity > 2) printf("receive general field left from %d to %d\n", bottomRank, rank);
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
+					for(int l = 0; l < 3; ++l) {
+						for(int m = 0; m < 3; ++m){
+							field[i][j][additionalBinNumber + 1 - k].matrix[l][m] = bottomInMatrixNodeBuffer[bcount];
+							bcount++;
+						}
+					}
+				}
+			}
+		}
+
+
+		MPI_Barrier(cartComm);
+
+		bcount = 0;
+
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
+					for(int l = 0; l < 3; ++l) {
+						for(int m = 0; m < 3; ++m){					
+							bottomOutMatrixNodeBuffer[bcount] = field[i][j][1 + additionalBinNumber + k].matrix[l][m];
+							bcount++;
+						}
+					}
+				}
+			}
+		}
+
+
+		MPI_Sendrecv(bottomOutMatrixNodeBuffer, number, MPI_DOUBLE, bottomRank, MPI_EFIELD_LEFT, topInMatrixNodeBuffer, number,
+		             MPI_DOUBLE, topRank, MPI_EFIELD_LEFT, cartComm, &status);
+		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, bottomRank);
+
+		//MPI_Barrier(cartComm);
+		bcount = 0;
+		if (verbosity > 2) printf("receive general field rigth from %d to %d\n", topRank, rank);
+		for (int i = 0; i < xnumberAdded + 1; ++i)
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
+					for(int l = 0; l < 3; ++l) {
+						for(int m = 0; m < 3; ++m){
+							field[i][j][znumberAdded - additionalBinNumber - 1 + k].matrix[l][m] = topInMatrixNodeBuffer[bcount];
+							bcount++;
+						}
+					}
+				}
+			}
+
+		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
+	} else {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for(int l = 0; l < 3; ++l) {
+					for(int m = 0; m < 3; ++m){
+						if (znumberGeneral == 1) {
+							for (int k = 0; k < znumberAdded + 1; ++k) {
+								field[i][j][k].matrix[l][m] = field[i][j][1 + additionalBinNumber].matrix[l][m];
+							}
+						} else {
+							for (int k = 0; k <= additionalBinNumber; ++k) {
+								field[i][j][znumberAdded - additionalBinNumber + k].matrix[l][m] = field[i][j][2 + additionalBinNumber + k].matrix[l][m];
+								field[i][j][k].matrix[l][m] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k].matrix[l][m];
+							}
+							field[i][j][znumberAdded - additionalBinNumber - 1].matrix[l][m] = field[i][j][1 + additionalBinNumber].matrix[l][m];
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+//////////////
+
 void Simulation::exchangeBunemanEfield(double*** fieldX, double*** fieldY, double*** fieldZ) {
 	exchangeBunemanExAlongX(fieldX);
 	exchangeBunemanExAlongY(fieldX);

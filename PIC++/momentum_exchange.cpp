@@ -513,18 +513,19 @@ void Simulation::sumNodeVectorParametersGeneralZ(Vector3d*** vector, double* inB
 void Simulation::sumNodeVectorParameterX(Vector3d*** array) {
 	if(cartDim[0] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum node vector parameter x\n");
-		double* inBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
-		double* outBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
-		double* inBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
-		double* outBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* inBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
+		///double* outBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* inBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* outBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralX(array, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		//sumNodeVectorParametersGeneralX(array, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		sumNodeVectorParametersGeneralX(array, rightInVectorNodeBufferMasha, rightOutVectorNodeBufferMasha, leftInVectorNodeBufferMasha, leftOutVectorNodeBufferMasha);
 		
-		delete[] inBufferLeft;
-		delete[] inBufferRight;
-		delete[] outBufferLeft;
-		delete[] outBufferRight;
+		//delete[] inBufferLeft;
+		//delete[] inBufferRight;
+		//delete[] outBufferLeft;
+		//delete[] outBufferRight;
 	} else {
 		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j <= ynumberAdded; ++j) {
@@ -544,29 +545,30 @@ void Simulation::sumNodeVectorParameterX(Vector3d*** array) {
 void Simulation::sumNodeVectorParametersX() {
 	if (cartDim[0] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum node vector parameters x\n");
-		double* inBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
-		double* outBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
-		double* inBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
-		double* outBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* inBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* outBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* inBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* outBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 3];
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralX(electricFlux, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		//sumNodeVectorParametersGeneralX(electricFlux, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		sumNodeVectorParametersGeneralX(electricFlux, rightInVectorNodeBufferMasha, rightOutVectorNodeBufferMasha, leftInVectorNodeBufferMasha, leftOutVectorNodeBufferMasha);
 		//////
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralX(electricFluxMinus, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		sumNodeVectorParametersGeneralX(electricFluxMinus, rightInVectorNodeBufferMasha, rightOutVectorNodeBufferMasha, leftInVectorNodeBufferMasha, leftOutVectorNodeBufferMasha);
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralX(divPressureTensor, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		sumNodeVectorParametersGeneralX(divPressureTensor, rightInVectorNodeBufferMasha, rightOutVectorNodeBufferMasha, leftInVectorNodeBufferMasha, leftOutVectorNodeBufferMasha);
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralX(divPressureTensorMinus, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		sumNodeVectorParametersGeneralX(divPressureTensorMinus, rightInVectorNodeBufferMasha, rightOutVectorNodeBufferMasha, leftInVectorNodeBufferMasha, leftOutVectorNodeBufferMasha);
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum node vector parameters x rank = %d\n", rank);
-		delete[] inBufferLeft;
-		delete[] inBufferRight;
-		delete[] outBufferLeft;
-		delete[] outBufferRight;
+		//delete[] inBufferLeft;
+		//delete[] inBufferRight;
+		//delete[] outBufferLeft;
+		//delete[] outBufferRight;
 
 		if (debugMode) {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
@@ -609,17 +611,17 @@ void Simulation::sumNodeVectorParametersX() {
 
 void Simulation::sumNodeVectorParameterY(Vector3d*** array) {
 	if (cartDim[1] > 1) {
-		double* inBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
-		double* outBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
-		double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
-		double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* inBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* outBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
 
-		sumNodeVectorParametersGeneralY(array, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+		sumNodeVectorParametersGeneralY(array, backInVectorNodeBufferMasha, backOutVectorNodeBufferMasha, frontInVectorNodeBufferMasha, frontOutVectorNodeBufferMasha);
 
-		delete[] inBufferFront;
-		delete[] inBufferBack;
-		delete[] outBufferBack;
-		delete[] outBufferFront;
+		//delete[] inBufferFront;
+		//delete[] inBufferBack;
+		//delete[] outBufferBack;
+		//delete[] outBufferFront;
 	} else {
 		if (boundaryConditionTypeY == PERIODIC) {
 			for (int i = 0; i <= xnumberAdded; ++i) {
@@ -647,27 +649,27 @@ void Simulation::sumNodeVectorParameterY(Vector3d*** array) {
 
 void Simulation::sumNodeVectorParametersY() {
 	if (cartDim[1] > 1) {
-		double* inBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
-		double* outBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
-		double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
-		double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* inBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* outBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
+		//double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 3];
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralY(electricFlux, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+		sumNodeVectorParametersGeneralY(electricFlux, backInVectorNodeBufferMasha, backOutVectorNodeBufferMasha, frontInVectorNodeBufferMasha, frontOutVectorNodeBufferMasha);
 		//////
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralY(electricFluxMinus, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+		sumNodeVectorParametersGeneralY(electricFluxMinus, backInVectorNodeBufferMasha, backOutVectorNodeBufferMasha, frontInVectorNodeBufferMasha, frontOutVectorNodeBufferMasha);
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralY(divPressureTensor, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+		sumNodeVectorParametersGeneralY(divPressureTensor, backInVectorNodeBufferMasha, backOutVectorNodeBufferMasha, frontInVectorNodeBufferMasha, frontOutVectorNodeBufferMasha);
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralY(divPressureTensorMinus, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+		sumNodeVectorParametersGeneralY(divPressureTensorMinus, backInVectorNodeBufferMasha, backOutVectorNodeBufferMasha, frontInVectorNodeBufferMasha, frontOutVectorNodeBufferMasha);
 
-		delete[] inBufferFront;
-		delete[] inBufferBack;
-		delete[] outBufferBack;
-		delete[] outBufferFront;
+		//delete[] inBufferFront;
+		//delete[] inBufferBack;
+		//delete[] outBufferBack;
+		//delete[] outBufferFront;
 
 		if (debugMode) {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
@@ -721,17 +723,18 @@ void Simulation::sumNodeVectorParametersY() {
 
 void Simulation::sumNodeVectorParameterZ(Vector3d*** array) {
 	if (cartDim[2] > 1) {
-		double* inBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
-		double* outBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
-		double* inBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
-		double* outBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
+		//double* inBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
+		//double* outBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
+		//double* inBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
+		//double* outBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
 
-		sumNodeVectorParametersGeneralZ(array, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		//sumNodeVectorParametersGeneralZ(array, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		sumNodeVectorParametersGeneralZ(array, topInVectorNodeBufferMasha, topOutVectorNodeBufferMasha, bottomInVectorNodeBufferMasha, bottomOutVectorNodeBufferMasha);
 
-		delete[] inBufferTop;
-		delete[] inBufferBottom;
-		delete[] outBufferBottom;
-		delete[] outBufferTop;
+		//delete[] inBufferTop;
+		//delete[] inBufferBottom;
+		//delete[] outBufferBottom;
+		//delete[] outBufferTop;
 	} else {
 		if (boundaryConditionTypeZ == PERIODIC) {
 			for (int i = 0; i <= xnumberAdded; ++i) {
@@ -760,27 +763,27 @@ void Simulation::sumNodeVectorParameterZ(Vector3d*** array) {
 
 void Simulation::sumNodeVectorParametersZ() {
 	if (cartDim[2] > 1) {
-		double* inBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
-		double* outBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
-		double* inBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
-		double* outBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
+		//double* inBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
+		//double* outBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
+		//double* inBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
+		//double* outBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded + 1) * 3];
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralZ(electricFlux, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		sumNodeVectorParametersGeneralZ(electricFlux, topInVectorNodeBufferMasha, topOutVectorNodeBufferMasha, bottomInVectorNodeBufferMasha, bottomOutVectorNodeBufferMasha);
 		//////
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralZ(electricFluxMinus, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		sumNodeVectorParametersGeneralZ(electricFluxMinus, topInVectorNodeBufferMasha, topOutVectorNodeBufferMasha, bottomInVectorNodeBufferMasha, bottomOutVectorNodeBufferMasha);
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralZ(divPressureTensor, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		sumNodeVectorParametersGeneralZ(divPressureTensor, topInVectorNodeBufferMasha, topOutVectorNodeBufferMasha, bottomInVectorNodeBufferMasha, bottomOutVectorNodeBufferMasha);
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralZ(divPressureTensorMinus, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		sumNodeVectorParametersGeneralZ(divPressureTensorMinus, topInVectorNodeBufferMasha, topOutVectorNodeBufferMasha, bottomInVectorNodeBufferMasha, bottomOutVectorNodeBufferMasha);
 
-		delete[] inBufferTop;
-		delete[] inBufferBottom;
-		delete[] outBufferBottom;
-		delete[] outBufferTop;
+		//delete[] inBufferTop;
+		//delete[] inBufferBottom;
+		//delete[] outBufferBottom;
+		//delete[] outBufferTop;
 
 		if (debugMode) {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
@@ -900,44 +903,44 @@ void Simulation::sumTempNodeVectorParametersZ(Vector3d*** array) {
 void Simulation::sumNodeMatrixParametersX() {
 	if (cartDim[0] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum node matrix parameters x rank = %d\n", rank);
-		double* inBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 9];
-		double* outBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 9];
-		double* inBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 9];
-		double* outBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 9];
+		//double* inBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 9];
+		//double* outBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 9];
+		//double* inBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 9];
+		//double* outBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1) * 9];
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("send left dielectric tensor sum node matrix parameters x rank = %d\n", rank);
 		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeMatrixParametersToLeftReceiveFromRight(dielectricTensor, outBufferLeft, tempNodeMatrixParameterRight,
-			                                               inBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersToLeftReceiveFromRight(dielectricTensor, leftOutMatrixNodeBufferMasha, tempNodeMatrixParameterRight,
+			                                               rightInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if (cartCoord[0] == 0) {
-			receiveNodeMatrixParametersRight(tempNodeMatrixParameterRight, inBufferRight, xnumberAdded, ynumberAdded,
+			receiveNodeMatrixParametersRight(tempNodeMatrixParameterRight, rightInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded,
 			                                 znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
 		} else if (cartCoord[0] == cartDim[0] - 1) {
-			sendNodeMatrixParametersLeft(dielectricTensor, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersLeft(dielectricTensor, leftOutMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                             additionalBinNumber, cartComm, rank, leftRank);
 		}
 
 		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeMatrixParametersToRightReceiveFromLeft(dielectricTensor, outBufferRight, tempNodeMatrixParameterLeft,
-			                                               inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersToRightReceiveFromLeft(dielectricTensor, rightOutMatrixNodeBufferMasha, tempNodeMatrixParameterLeft,
+			                                               leftInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if (cartCoord[0] == 0) {
-			sendNodeMatrixParametersRight(dielectricTensor, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersRight(dielectricTensor, rightOutMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                              additionalBinNumber, cartComm, rank, rightRank);
 		} else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveNodeMatrixParametersLeft(tempNodeMatrixParameterLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded,
+			receiveNodeMatrixParametersLeft(tempNodeMatrixParameterLeft, leftInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                                additionalBinNumber, cartComm, rank, leftRank);
 		}
 
 		sumTempNodeMatrixParametersX(dielectricTensor);
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum node matrix parameters x rank = %d\n", rank);
-		delete[] inBufferLeft;
-		delete[] inBufferRight;
-		delete[] outBufferLeft;
-		delete[] outBufferRight;
+		//delete[] inBufferLeft;
+		//delete[] inBufferRight;
+		//delete[] outBufferLeft;
+		//delete[] outBufferRight;
 	} else {
 		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j <= ynumberAdded; ++j) {
@@ -961,32 +964,32 @@ void Simulation::sumNodeMatrixParametersX() {
 void Simulation::sumNodeMatrixParametersY() {
 	if (cartDim[1] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum node matrix parameters y rank = %d\n", rank);
-		double* inBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 9];
-		double* outBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 9];
-		double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 9];
-		double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 9];
+		//double* inBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 9];
+		//double* outBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 9];
+		//double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 9];
+		//double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1) * 9];
 
 		if ((boundaryConditionTypeY == PERIODIC) || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
-			sendNodeMatrixParametersToFrontReceiveFromBack(dielectricTensor, outBufferFront, tempNodeMatrixParameterBack,
-			                                               inBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersToFrontReceiveFromBack(dielectricTensor, frontOutMatrixNodeBufferMasha, tempNodeMatrixParameterBack,
+			                                               backInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
 		} else if (cartCoord[1] == 0) {
-			receiveNodeMatrixParametersBack(tempNodeMatrixParameterBack, inBufferBack, xnumberAdded, ynumberAdded,
+			receiveNodeMatrixParametersBack(tempNodeMatrixParameterBack, backInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded,
 			                                znumberAdded, additionalBinNumber, cartComm, rank, backRank);
 		} else if (cartCoord[1] == cartDim[1] - 1) {
-			sendNodeMatrixParametersFront(dielectricTensor, outBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersFront(dielectricTensor, frontOutMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                              additionalBinNumber, cartComm, rank, frontRank);
 		}
 
 		if ((boundaryConditionTypeY == PERIODIC) || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
-			sendNodeMatrixParametersToBackReceiveFromFront(dielectricTensor, outBufferBack, tempNodeMatrixParameterFront,
-			                                               inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersToBackReceiveFromFront(dielectricTensor, backOutMatrixNodeBufferMasha, tempNodeMatrixParameterFront,
+			                                               frontInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
 		} else if (cartCoord[1] == 0) {
-			sendNodeMatrixParametersBack(dielectricTensor, outBufferBack, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersBack(dielectricTensor, backOutMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                             additionalBinNumber, cartComm, rank, backRank);
 		} else if (cartCoord[1] == cartDim[1] - 1) {
-			receiveNodeMatrixParametersFront(tempNodeMatrixParameterFront, inBufferFront, xnumberAdded, ynumberAdded, znumberAdded,
+			receiveNodeMatrixParametersFront(tempNodeMatrixParameterFront, frontInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                                 additionalBinNumber, cartComm, rank, frontRank);
 		}
 
@@ -994,10 +997,10 @@ void Simulation::sumNodeMatrixParametersY() {
 		sumTempNodeMatrixParametersY(dielectricTensor);
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum node matrix parameters y rank = %d\n", rank);
-		delete[] inBufferFront;
-		delete[] inBufferBack;
-		delete[] outBufferFront;
-		delete[] outBufferBack;
+		//delete[] inBufferFront;
+		//delete[] inBufferBack;
+		//delete[] outBufferFront;
+		//delete[] outBufferBack;
 	} else {
 		if (boundaryConditionTypeY == PERIODIC) {
 			for (int i = 0; i <= xnumberAdded; ++i) {
@@ -1025,42 +1028,42 @@ void Simulation::sumNodeMatrixParametersY() {
 void Simulation::sumNodeMatrixParametersZ() {
 	if (cartDim[2] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum node matrix parameters z rank = %d\n", rank);
-		double* inBufferBottom = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1) * 9];
-		double* outBufferBottom = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1) * 9];
-		double* inBufferTop = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1) * 9];
-		double* outBufferTop = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1) * 9];
+		//double* inBufferBottom = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1) * 9];
+		//double* outBufferBottom = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1) * 9];
+		//double* inBufferTop = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1) * 9];
+		//double* outBufferTop = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1) * 9];
 
 		if ((boundaryConditionTypeZ == PERIODIC) || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
-			sendNodeMatrixParametersToBottomReceiveFromTop(dielectricTensor, outBufferBottom, tempNodeMatrixParameterTop,
-			                                               inBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersToBottomReceiveFromTop(dielectricTensor, bottomOutMatrixNodeBufferMasha, tempNodeMatrixParameterTop,
+			                                               topInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
 		} else if (cartCoord[2] == 0) {
-			receiveNodeMatrixParametersTop(tempNodeMatrixParameterTop, inBufferTop, xnumberAdded, ynumberAdded,
+			receiveNodeMatrixParametersTop(tempNodeMatrixParameterTop, topInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded,
 			                               znumberAdded, additionalBinNumber, cartComm, rank, topRank);
 		} else if (cartCoord[2] == cartDim[2] - 1) {
-			sendNodeMatrixParametersBottom(dielectricTensor, outBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersBottom(dielectricTensor, bottomOutMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                               additionalBinNumber, cartComm, rank, bottomRank);
 		}
 
 		if ((boundaryConditionTypeZ == PERIODIC) || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
-			sendNodeMatrixParametersToTopReceiveFromBottom(dielectricTensor, outBufferTop, tempNodeMatrixParameterBottom,
-			                                               inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersToTopReceiveFromBottom(dielectricTensor, topOutMatrixNodeBufferMasha, tempNodeMatrixParameterBottom,
+			                                               bottomInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
 		} else if (cartCoord[2] == 0) {
-			sendNodeMatrixParametersTop(dielectricTensor, outBufferTop, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersTop(dielectricTensor, topOutMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                            additionalBinNumber, cartComm, rank, topRank);
 		} else if (cartCoord[2] == cartDim[2] - 1) {
-			receiveNodeMatrixParametersBottom(tempNodeMatrixParameterBottom, inBufferBottom, xnumberAdded, ynumberAdded, znumberAdded,
+			receiveNodeMatrixParametersBottom(tempNodeMatrixParameterBottom, bottomInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
 			                                  additionalBinNumber, cartComm, rank, bottomRank);
 		}
 
 		sumTempNodeMatrixParametersZ(dielectricTensor);
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum node matrix parameters z rank = %d\n", rank);
-		delete[] inBufferBottom;
-		delete[] inBufferTop;
-		delete[] outBufferBottom;
-		delete[] outBufferTop;
+		//delete[] inBufferBottom;
+		//delete[] inBufferTop;
+		//delete[] outBufferBottom;
+		//delete[] outBufferTop;
 	} else {
 		if (boundaryConditionTypeZ == PERIODIC) {
 			for (int i = 0; i <= xnumberAdded; ++i) {
@@ -1284,26 +1287,26 @@ void Simulation::sumCellParametersGeneralZ(double*** array, double* inBufferTop,
 void Simulation::sumChargeDensityHatX() {
 	if (cartDim[0] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum charge density hat rank = %d\n", rank);
-		double* inBufferRight = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
-		double* outBufferRight = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
-		double* inBufferLeft = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
-		double* outBufferLeft = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
+		//double* inBufferRight = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
+		//double* outBufferRight = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
+		//double* inBufferLeft = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
+		//double* outBufferLeft = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
 		MPI_Barrier(cartComm);
 		//MPI_Barrier(cartComm);
 		if ((rank == 0) && (verbosity > 2)) printf("sending left sum charge density hat x rank = %d\n", rank);
 
-		sumCellParametersGeneralX(chargeDensityHat, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		sumCellParametersGeneralX(chargeDensityHat, rightInCellBufferMasha, rightOutCellBufferMasha, leftInCellBufferMasha, leftOutCellBufferMasha);
 		/////
 
-		sumCellParametersGeneralX(chargeDensityMinus, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		sumCellParametersGeneralX(chargeDensityMinus, rightInCellBufferMasha, rightOutCellBufferMasha, leftInCellBufferMasha, leftOutCellBufferMasha);
 
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum charge density hat x rank = %d\n", rank);
-		delete[] inBufferRight;
-		delete[] outBufferRight;
-		delete[] inBufferLeft;
-		delete[] outBufferLeft;
+		//delete[] inBufferRight;
+		//delete[] outBufferRight;
+		//delete[] inBufferLeft;
+		//delete[] outBufferLeft;
 	} else {
 		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -1323,22 +1326,22 @@ void Simulation::sumChargeDensityHatX() {
 
 void Simulation::sumChargeDensityHatY() {
 	if (cartDim[1] > 1) {
-		double* inBufferBack = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
-		double* outBufferBack = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
-		double* inBufferFront = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
-		double* outBufferFront = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
+		//double* inBufferBack = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
+		//double* outBufferBack = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
+		//double* inBufferFront = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
+		//double* outBufferFront = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
 
-		sumCellParametersGeneralY(chargeDensityHat, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+		sumCellParametersGeneralY(chargeDensityHat, backInCellBufferMasha, backOutCellBufferMasha, frontInCellBufferMasha, frontOutCellBufferMasha);
 
-		sumCellParametersGeneralY(chargeDensityMinus, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+		sumCellParametersGeneralY(chargeDensityMinus, backInCellBufferMasha, backOutCellBufferMasha, frontInCellBufferMasha, frontOutCellBufferMasha);
 
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum charge density hat y rank = %d\n", rank);
-		delete[] inBufferFront;
-		delete[] outBufferFront;
-		delete[] inBufferBack;
-		delete[] outBufferBack;
+		//delete[] inBufferFront;
+		//delete[] outBufferFront;
+		//delete[] inBufferBack;
+		//delete[] outBufferBack;
 	} else {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int k = 0; k < znumberAdded; ++k) {
@@ -1364,21 +1367,21 @@ void Simulation::sumChargeDensityHatY() {
 
 void Simulation::sumChargeDensityHatZ() {
 	if (cartDim[2] > 1) {
-		double* inBufferTop = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * ynumberAdded];
-		double* outBufferTop = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * ynumberAdded];
-		double* inBufferBottom = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * ynumberAdded];
-		double* outBufferBottom = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * ynumberAdded];
+		//double* inBufferTop = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * ynumberAdded];
+		//double* outBufferTop = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * ynumberAdded];
+		//double* inBufferBottom = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * ynumberAdded];
+		//double* outBufferBottom = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * ynumberAdded];
 
-		sumCellParametersGeneralZ(chargeDensityHat, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		sumCellParametersGeneralZ(chargeDensityHat, topInCellBufferMasha, topOutCellBufferMasha, bottomInCellBufferMasha, bottomOutCellBufferMasha);
 
-		sumCellParametersGeneralZ(chargeDensityMinus, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		sumCellParametersGeneralZ(chargeDensityMinus, topInCellBufferMasha, topOutCellBufferMasha, bottomInCellBufferMasha, bottomOutCellBufferMasha);
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum charge density hat z rank = %d\n", rank);
-		delete[] inBufferBottom;
-		delete[] outBufferBottom;
-		delete[] inBufferTop;
-		delete[] outBufferTop;
+		//delete[] inBufferBottom;
+		//delete[] outBufferBottom;
+		//delete[] inBufferTop;
+		//delete[] outBufferTop;
 	} else {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int i = 0; i < xnumberAdded; ++i) {
@@ -1403,15 +1406,15 @@ void Simulation::sumChargeDensityHatZ() {
 
 void Simulation::sumCellParametersX() {
 	if (cartDim[0] > 1) {
-		double* inBufferRight = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
-		double* outBufferRight = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
-		double* inBufferLeft = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
-		double* outBufferLeft = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
+		//double* inBufferRight = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
+		//double* outBufferRight = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
+		//double* inBufferLeft = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
+		//double* outBufferLeft = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * znumberAdded];
 
 		for (int t = 0; t < typesNumber; ++t) {
 			//MPI_Barrier(cartComm);
 			if (types[t].particlesPerBin > 0) {
-				sumCellParametersGeneralX(particleConcentrations[t], inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+				sumCellParametersGeneralX(particleConcentrations[t], rightInCellBufferMasha, rightOutCellBufferMasha, leftInCellBufferMasha, leftOutCellBufferMasha);
 
 			}
 		}
@@ -1419,16 +1422,16 @@ void Simulation::sumCellParametersX() {
 		for (int t = 0; t < typesNumber; ++t) {
 			//MPI_Barrier(cartComm);
 			if (types[t].particlesPerBin > 0) {
-				sumCellParametersGeneralX(particleEnergies[t], inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+				sumCellParametersGeneralX(particleEnergies[t], rightInCellBufferMasha, rightOutCellBufferMasha, leftInCellBufferMasha, leftOutCellBufferMasha);
 
 			}
 		}
 		//MPI_Barrier(cartComm);
 
 
-		sumCellParametersGeneralX(chargeDensity, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		sumCellParametersGeneralX(chargeDensity, rightInCellBufferMasha, rightOutCellBufferMasha, leftInCellBufferMasha, leftOutCellBufferMasha);
 
-		sumCellParametersGeneralX(chargeDensityMinus, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		sumCellParametersGeneralX(chargeDensityMinus, rightInCellBufferMasha, rightOutCellBufferMasha, leftInCellBufferMasha, leftOutCellBufferMasha);
 
 		//MPI_Barrier(cartComm);
 
@@ -1457,10 +1460,10 @@ void Simulation::sumCellParametersX() {
 			}
 		}
 
-		delete[] inBufferRight;
-		delete[] outBufferRight;
-		delete[] inBufferLeft;
-		delete[] outBufferLeft;
+		//delete[] inBufferRight;
+		//delete[] outBufferRight;
+		//delete[] inBufferLeft;
+		//delete[] outBufferLeft;
 	} else {
 		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -1533,32 +1536,32 @@ void Simulation::sumCellParametersX() {
 
 void Simulation::sumCellParametersY() {
 	if (cartDim[1] > 1) {
-		double* inBufferFront = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
-		double* outBufferFront = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
-		double* inBufferBack = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
-		double* outBufferBack = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
+		//double* inBufferFront = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
+		//double* outBufferFront = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
+		//double* inBufferBack = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
+		//double* outBufferBack = new double[(2 + 2 * additionalBinNumber) * xnumberAdded * znumberAdded];
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
 
-				sumCellParametersGeneralY(particleConcentrations[t], inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+				sumCellParametersGeneralY(particleConcentrations[t], backInCellBufferMasha, backOutCellBufferMasha, frontInCellBufferMasha, frontOutCellBufferMasha);
 			}
 		}
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
 
-				sumCellParametersGeneralY(particleEnergies[t], inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+				sumCellParametersGeneralY(particleEnergies[t], backInCellBufferMasha, backOutCellBufferMasha, frontInCellBufferMasha, frontOutCellBufferMasha);
 			}
 		}
 
-		sumCellParametersGeneralY(chargeDensity, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
-		sumCellParametersGeneralY(chargeDensityMinus, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+		sumCellParametersGeneralY(chargeDensity, backInCellBufferMasha, backOutCellBufferMasha, frontInCellBufferMasha, frontOutCellBufferMasha);
+		sumCellParametersGeneralY(chargeDensityMinus, backInCellBufferMasha, backOutCellBufferMasha, frontInCellBufferMasha, frontOutCellBufferMasha);
 
-		delete[] inBufferFront;
-		delete[] outBufferFront;
-		delete[] inBufferBack;
-		delete[] outBufferBack;
+		//delete[] inBufferFront;
+		//delete[] outBufferFront;
+		//delete[] inBufferBack;
+		//delete[] outBufferBack;
 	} else {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int k = 0; k < znumberAdded; ++k) {
@@ -1602,30 +1605,30 @@ void Simulation::sumCellParametersY() {
 
 void Simulation::sumCellParametersZ() {
 	if (cartDim[2] > 1) {
-		double* inBufferTop = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * xnumberAdded];
-		double* outBufferTop = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * xnumberAdded];
-		double* inBufferBottom = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * xnumberAdded];
-		double* outBufferBottom = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * xnumberAdded];
+		//double* inBufferTop = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * xnumberAdded];
+		//double* outBufferTop = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * xnumberAdded];
+		//double* inBufferBottom = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * xnumberAdded];
+		//double* outBufferBottom = new double[(2 + 2 * additionalBinNumber) * ynumberAdded * xnumberAdded];
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sumCellParametersGeneralZ(particleConcentrations[t], inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+				sumCellParametersGeneralZ(particleConcentrations[t], topInCellBufferMasha, topOutCellBufferMasha, bottomInCellBufferMasha, bottomOutCellBufferMasha);
 			}
 		}
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sumCellParametersGeneralZ(particleEnergies[t], inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+				sumCellParametersGeneralZ(particleEnergies[t], topInCellBufferMasha, topOutCellBufferMasha, bottomInCellBufferMasha, bottomOutCellBufferMasha);
 			}
 		}
 
-		sumCellParametersGeneralZ(chargeDensity, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
-		sumCellParametersGeneralZ(chargeDensityMinus, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		sumCellParametersGeneralZ(chargeDensity, topInCellBufferMasha, topOutCellBufferMasha, bottomInCellBufferMasha, bottomOutCellBufferMasha);
+		sumCellParametersGeneralZ(chargeDensityMinus, topInCellBufferMasha, topOutCellBufferMasha, bottomInCellBufferMasha, bottomOutCellBufferMasha);
 
-		delete[] inBufferTop;
-		delete[] outBufferTop;
-		delete[] inBufferBottom;
-		delete[] outBufferBottom;
+		//delete[] inBufferTop;
+		//delete[] outBufferTop;
+		//delete[] inBufferBottom;
+		//delete[] outBufferBottom;
 	} else {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int i = 0; i < xnumberAdded; ++i) {
@@ -1824,15 +1827,15 @@ void Simulation::sumCellVectorParametersGeneralZ(Vector3d*** array, double* inBu
 
 void Simulation::sumCellVectorParametersX() {
 	if (cartDim[0] > 1) {
-		double* inBufferRight = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * znumberAdded];
-		double* outBufferRight = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * znumberAdded];
-		double* inBufferLeft = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * znumberAdded];
-		double* outBufferLeft = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * znumberAdded];
+		//double* inBufferRight = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * znumberAdded];
+		//double* outBufferRight = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * znumberAdded];
+		//double* inBufferLeft = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * znumberAdded];
+		//double* outBufferLeft = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * znumberAdded];
 
 		for (int t = 0; t < typesNumber; ++t) {
 			//MPI_Barrier(cartComm);
 			if (types[t].particlesPerBin > 0) {
-				sumCellVectorParametersGeneralX(particleBulkVelocities[t], inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+				sumCellVectorParametersGeneralX(particleBulkVelocities[t], rightInVectorCellBufferMasha, rightOutVectorCellBufferMasha, leftInVectorCellBufferMasha, leftOutVectorCellBufferMasha);
 			}
 		}
 
@@ -1851,10 +1854,10 @@ void Simulation::sumCellVectorParametersX() {
 			}
 		}
 
-		delete[] inBufferRight;
-		delete[] outBufferRight;
-		delete[] inBufferLeft;
-		delete[] outBufferLeft;
+		//delete[] inBufferRight;
+		//delete[] outBufferRight;
+		//delete[] inBufferLeft;
+		//delete[] outBufferLeft;
 
 	} else {
 		if (boundaryConditionTypeX == PERIODIC) {
@@ -1903,22 +1906,22 @@ void Simulation::sumCellVectorParametersX() {
 
 void Simulation::sumCellVectorParametersY() {
 	if (cartDim[1] > 1) {
-		double* inBufferFront = new double[(2 + 2 * additionalBinNumber) * 3 * xnumberAdded * znumberAdded];
-		double* outBufferFront = new double[(2 + 2 * additionalBinNumber) * 3 * xnumberAdded * znumberAdded];
-		double* inBufferBack = new double[(2 + 2 * additionalBinNumber) * 3 * xnumberAdded * znumberAdded];
-		double* outBufferBack = new double[(2 + 2 * additionalBinNumber) * 3 * xnumberAdded * znumberAdded];
+		//double* inBufferFront = new double[(2 + 2 * additionalBinNumber) * 3 * xnumberAdded * znumberAdded];
+		//double* outBufferFront = new double[(2 + 2 * additionalBinNumber) * 3 * xnumberAdded * znumberAdded];
+		//double* inBufferBack = new double[(2 + 2 * additionalBinNumber) * 3 * xnumberAdded * znumberAdded];
+		//double* outBufferBack = new double[(2 + 2 * additionalBinNumber) * 3 * xnumberAdded * znumberAdded];
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sumCellVectorParametersGeneralY(particleBulkVelocities[t], inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+				sumCellVectorParametersGeneralY(particleBulkVelocities[t], backInVectorCellBufferMasha, backOutVectorCellBufferMasha, frontInVectorCellBufferMasha, frontOutVectorCellBufferMasha);
 			}
 		}
 
 
-		delete[] inBufferFront;
-		delete[] outBufferFront;
-		delete[] inBufferBack;
-		delete[] outBufferBack;
+		//delete[] inBufferFront;
+		//delete[] outBufferFront;
+		//delete[] inBufferBack;
+		//delete[] outBufferBack;
 	} else {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int k = 0; k < znumberAdded; ++k) {
@@ -1952,21 +1955,21 @@ void Simulation::sumCellVectorParametersY() {
 
 void Simulation::sumCellVectorParametersZ() {
 	if (cartDim[2] > 1) {
-		double* inBufferTop = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * xnumberAdded];
-		double* outBufferTop = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * xnumberAdded];
-		double* inBufferBottom = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * xnumberAdded];
-		double* outBufferBottom = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * xnumberAdded];
+		//double* inBufferTop = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * xnumberAdded];
+		//double* outBufferTop = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * xnumberAdded];
+		//double* inBufferBottom = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * xnumberAdded];
+		//double* outBufferBottom = new double[(2 + 2 * additionalBinNumber) * 3 * ynumberAdded * xnumberAdded];
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sumCellVectorParametersGeneralZ(particleBulkVelocities[t], inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+				sumCellVectorParametersGeneralZ(particleBulkVelocities[t], topInVectorCellBufferMasha, topOutVectorCellBufferMasha, bottomInVectorCellBufferMasha, bottomOutVectorCellBufferMasha);
 			}
 		}
 
-		delete[] inBufferTop;
-		delete[] outBufferTop;
-		delete[] inBufferBottom;
-		delete[] outBufferBottom;
+		//delete[] inBufferTop;
+		//delete[] outBufferTop;
+		//delete[] inBufferBottom;
+		//delete[] outBufferBottom;
 	} else {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -2153,21 +2156,21 @@ void Simulation::sumCellMatrixParameterGeneralZ(Matrix3d*** array, double* inBuf
 void Simulation::sumCellMatrixParametersX() {
 	if (cartDim[0] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum cell matrix parameters rank = %d\n", rank);
-		double* inBufferRight = new double[(2 + 2 * additionalBinNumber) * 9 * ynumberAdded * znumberAdded];
-		double* outBufferRight = new double[(2 + 2 * additionalBinNumber) * 9 * ynumberAdded * znumberAdded];
-		double* inBufferLeft = new double[(2 + 2 * additionalBinNumber) * 9 * ynumberAdded * znumberAdded];
-		double* outBufferLeft = new double[(2 + 2 * additionalBinNumber) * 9 * ynumberAdded * znumberAdded];
+		//double* inBufferRight = new double[(2 + 2 * additionalBinNumber) * 9 * ynumberAdded * znumberAdded];
+		//double* outBufferRight = new double[(2 + 2 * additionalBinNumber) * 9 * ynumberAdded * znumberAdded];
+		//double* inBufferLeft = new double[(2 + 2 * additionalBinNumber) * 9 * ynumberAdded * znumberAdded];
+		//double* outBufferLeft = new double[(2 + 2 * additionalBinNumber) * 9 * ynumberAdded * znumberAdded];
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("sending left  pressure tensor sum cell matrix parameters rank = %d\n", rank);
 
-		sumCellMatrixParameterGeneralX(pressureTensor, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
+		sumCellMatrixParameterGeneralX(pressureTensor, rightInMatrixCellBufferMasha, rightOutMatrixCellBufferMasha, leftInMatrixCellBufferMasha, leftOutMatrixCellBufferMasha);
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum cell matrix parameters rank = %d\n", rank);
-		delete[] inBufferRight;
-		delete[] outBufferRight;
-		delete[] inBufferLeft;
-		delete[] outBufferLeft;
+		//delete[] inBufferRight;
+		//delete[] outBufferRight;
+		//delete[] inBufferLeft;
+		//delete[] outBufferLeft;
 	} else {
 		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -2186,18 +2189,18 @@ void Simulation::sumCellMatrixParametersX() {
 void Simulation::sumCellMatrixParametersY() {
 	if (cartDim[1] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum cell matrix parameters rank = %d\n", rank);
-		double* inBufferFront = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * znumberAdded];
-		double* outBufferFront = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * znumberAdded];
-		double* inBufferBack = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * znumberAdded];
-		double* outBufferBack = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * znumberAdded];
+		//double* inBufferFront = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * znumberAdded];
+		//double* outBufferFront = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * znumberAdded];
+		//double* inBufferBack = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * znumberAdded];
+		//double* outBufferBack = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * znumberAdded];
 
-		sumCellMatrixParameterGeneralY(pressureTensor, inBufferBack, outBufferBack, inBufferFront, outBufferFront);
+		sumCellMatrixParameterGeneralY(pressureTensor, backInMatrixCellBufferMasha, backOutMatrixCellBufferMasha, frontInMatrixCellBufferMasha, frontOutMatrixCellBufferMasha);
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum cell matrix parameters rank = %d\n", rank);
-		delete[] inBufferFront;
-		delete[] outBufferFront;
-		delete[] inBufferBack;
-		delete[] outBufferBack;
+		//delete[] inBufferFront;
+		//delete[] outBufferFront;
+		//delete[] inBufferBack;
+		//delete[] outBufferBack;
 	} else {
 		if (boundaryConditionTypeY == PERIODIC) {
 			for (int i = 0; i < xnumberAdded; ++i) {
@@ -2227,18 +2230,19 @@ void Simulation::sumCellMatrixParametersY() {
 void Simulation::sumCellMatrixParametersZ() {
 	if (cartDim[2] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum cell matrix parameters rank = %d\n", rank);
-		double* inBufferBottom = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * ynumberAdded];
-		double* outBufferBottom = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * ynumberAdded];
-		double* inBufferTop = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * ynumberAdded];
-		double* outBufferTop = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * ynumberAdded];
+		//double* inBufferBottom = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * ynumberAdded];
+		//double* outBufferBottom = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * ynumberAdded];
+		//double* inBufferTop = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * ynumberAdded];
+		//double* outBufferTop = new double[(2 + 2 * additionalBinNumber) * 9 * xnumberAdded * ynumberAdded];
 
-		sumCellMatrixParameterGeneralZ(pressureTensor, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		//sumCellMatrixParameterGeneralZ(pressureTensor, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
+		sumCellMatrixParameterGeneralZ(pressureTensor, topInMatrixCellBufferMasha, topOutMatrixCellBufferMasha, bottomInMatrixCellBufferMasha, bottomOutMatrixCellBufferMasha);
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum cell matrix parameters rank = %d\n", rank);
-		delete[] inBufferBottom;
-		delete[] outBufferBottom;
-		delete[] inBufferTop;
-		delete[] outBufferTop;
+		//delete[] inBufferBottom;
+		//delete[] outBufferBottom;
+		//delete[] inBufferTop;
+		//delete[] outBufferTop;
 	} else {
 		if (boundaryConditionTypeZ == PERIODIC) {
 			for (int i = 0; i < xnumberAdded; ++i) {

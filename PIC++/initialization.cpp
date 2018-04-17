@@ -840,6 +840,11 @@ Simulation::~Simulation() {
 		delete[] leftOutVectorNodeBuffer;
 		delete[] leftInVectorNodeBuffer;
 
+		delete[] rightOutMatrixNodeBuffer;
+		delete[] rightInMatrixNodeBuffer;
+		delete[] leftOutMatrixNodeBuffer;
+		delete[] leftInMatrixNodeBuffer;
+
 		delete[] rightOutVectorCellBuffer;
 		delete[] rightInVectorCellBuffer;
 		delete[] leftOutVectorCellBuffer;
@@ -859,6 +864,11 @@ Simulation::~Simulation() {
 		delete[] backInVectorNodeBuffer;
 		delete[] frontOutVectorNodeBuffer;
 		delete[] frontInVectorNodeBuffer;
+
+		delete[] backOutMatrixNodeBuffer;
+		delete[] backInMatrixNodeBuffer;
+		delete[] frontOutMatrixNodeBuffer;
+		delete[] frontInMatrixNodeBuffer;
 
 		delete[] backOutVectorCellBuffer;
 		delete[] backInVectorCellBuffer;
@@ -880,6 +890,11 @@ Simulation::~Simulation() {
 		delete[] bottomOutVectorNodeBuffer;
 		delete[] bottomInVectorNodeBuffer;
 
+		delete[] topOutMatrixNodeBuffer;
+		delete[] topInMatrixNodeBuffer;
+		delete[] bottomOutMatrixNodeBuffer;
+		delete[] bottomInMatrixNodeBuffer;
+
 		delete[] topOutVectorCellBuffer;
 		delete[] topInVectorCellBuffer;
 		delete[] bottomOutVectorCellBuffer;
@@ -889,6 +904,83 @@ Simulation::~Simulation() {
 		delete[] topInCellBuffer;
 		delete[] bottomOutCellBuffer;
 		delete[] bottomInCellBuffer;
+
+		/// Masha's buffers
+
+		delete[] rightOutNodeBufferMasha;
+		delete[] rightInNodeBufferMasha;
+		delete[] leftOutNodeBufferMasha;
+		delete[] leftInNodeBufferMasha;
+
+		delete[] rightOutVectorNodeBufferMasha;
+		delete[] rightInVectorNodeBufferMasha;
+		delete[] leftOutVectorNodeBufferMasha;
+		delete[] leftInVectorNodeBufferMasha;
+
+		delete[] rightOutMatrixNodeBufferMasha;
+		delete[] rightInMatrixNodeBufferMasha;
+		delete[] leftOutMatrixNodeBufferMasha;
+		delete[] leftInMatrixNodeBufferMasha;
+
+		delete[] rightOutVectorCellBufferMasha;
+		delete[] rightInVectorCellBufferMasha;
+		delete[] leftOutVectorCellBufferMasha;
+		delete[] leftInVectorCellBufferMasha;
+
+		delete[] rightOutCellBufferMasha;
+		delete[] rightInCellBufferMasha;
+		delete[] leftOutCellBufferMasha;
+		delete[] leftInCellBufferMasha;
+
+		delete[] backOutNodeBufferMasha;
+		delete[] backInNodeBufferMasha;
+		delete[] frontOutNodeBufferMasha;
+		delete[] frontInNodeBufferMasha;
+
+		delete[] backOutVectorNodeBufferMasha;
+		delete[] backInVectorNodeBufferMasha;
+		delete[] frontOutVectorNodeBufferMasha;
+		delete[] frontInVectorNodeBufferMasha;
+
+		delete[] backOutMatrixNodeBufferMasha;
+		delete[] backInMatrixNodeBufferMasha;
+		delete[] frontOutMatrixNodeBufferMasha;
+		delete[] frontInMatrixNodeBufferMasha;
+
+		delete[] backOutVectorCellBufferMasha;
+		delete[] backInVectorCellBufferMasha;
+		delete[] frontOutVectorCellBufferMasha;
+		delete[] frontInVectorCellBufferMasha;
+
+		delete[] backOutCellBufferMasha;
+		delete[] backInCellBufferMasha;
+		delete[] frontOutCellBufferMasha;
+		delete[] frontInCellBufferMasha;
+
+		delete[] topOutNodeBufferMasha;
+		delete[] topInNodeBufferMasha;
+		delete[] bottomOutNodeBufferMasha;
+		delete[] bottomInNodeBufferMasha;
+
+		delete[] topOutVectorNodeBufferMasha;
+		delete[] topInVectorNodeBufferMasha;
+		delete[] bottomOutVectorNodeBufferMasha;
+		delete[] bottomInVectorNodeBufferMasha;
+
+		delete[] topOutMatrixNodeBufferMasha;
+		delete[] topInMatrixNodeBufferMasha;
+		delete[] bottomOutMatrixNodeBufferMasha;
+		delete[] bottomInMatrixNodeBufferMasha;
+
+		delete[] topOutVectorCellBufferMasha;
+		delete[] topInVectorCellBufferMasha;
+		delete[] bottomOutVectorCellBufferMasha;
+		delete[] bottomInVectorCellBufferMasha;
+
+		delete[] topOutCellBufferMasha;
+		delete[] topInCellBufferMasha;
+		delete[] bottomOutCellBufferMasha;
+		delete[] bottomInCellBufferMasha;
 
 		////buneman E
 		delete[] leftOutBunemanExBuffer;
@@ -5640,6 +5732,11 @@ void Simulation::createArrays() {
 	leftInVectorCellBuffer = new double[(ynumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
 	rightInVectorCellBuffer = new double[(ynumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
 
+	rightOutMatrixNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (2 + additionalBinNumber)];
+	leftOutMatrixNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (2 + additionalBinNumber)];
+	leftInMatrixNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (2 + additionalBinNumber)];
+	rightInMatrixNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (2 + additionalBinNumber)];
+
 	rightOutCellBuffer = new double[(ynumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
 	leftOutCellBuffer = new double[(ynumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
 	leftInCellBuffer = new double[(ynumberAdded) * (znumberAdded) * (1 + additionalBinNumber)];
@@ -5654,6 +5751,11 @@ void Simulation::createArrays() {
 	frontOutNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
 	backInNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
 	frontInNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+
+	backOutMatrixNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (2 + additionalBinNumber)];
+	frontOutMatrixNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (2 + additionalBinNumber)];
+	backInMatrixNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (2 + additionalBinNumber)];
+	frontInMatrixNodeBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (2 + additionalBinNumber)];
 
 	backOutVectorCellBuffer = new double[(xnumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
 	frontOutVectorCellBuffer = new double[(xnumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
@@ -5675,6 +5777,11 @@ void Simulation::createArrays() {
 	topInVectorNodeBuffer = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (2 + additionalBinNumber)];
 	bottomInVectorNodeBuffer = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (2 + additionalBinNumber)];
 
+	topOutMatrixNodeBuffer = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (2 + additionalBinNumber)];
+	bottomOutMatrixNodeBuffer = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (2 + additionalBinNumber)];
+	topInMatrixNodeBuffer = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (2 + additionalBinNumber)];
+	bottomInMatrixNodeBuffer = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (2 + additionalBinNumber)];
+
 	topOutVectorCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * 3 * (1 + additionalBinNumber)];
 	bottomOutVectorCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * 3 * (1 + additionalBinNumber)];
 	topInVectorCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * 3 * (1 + additionalBinNumber)];
@@ -5684,6 +5791,97 @@ void Simulation::createArrays() {
 	bottomOutCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
 	topInCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
 	bottomInCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
+
+	////// Masha's buffers
+	rightOutNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
+	leftOutNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
+	leftInNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
+	rightInNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
+
+	rightOutVectorNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+	leftOutVectorNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+	leftInVectorNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+	rightInVectorNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+
+	rightOutMatrixNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+	leftOutMatrixNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+	leftInMatrixNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+	rightInMatrixNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+
+	rightOutCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
+	leftOutCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
+	leftInCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
+	rightInCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
+
+	rightOutVectorCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+	leftOutVectorCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+	leftInVectorCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+	rightInVectorCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+
+	rightOutMatrixCellBufferMasha = new double[ynumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
+	leftOutMatrixCellBufferMasha = new double[ynumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
+	leftInMatrixCellBufferMasha = new double[ynumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
+	rightInMatrixCellBufferMasha = new double[ynumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
+
+	backOutVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+	frontOutVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+	backInVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+	frontInVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+
+	backOutNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
+	frontOutNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
+	backInNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
+	frontInNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
+
+	backOutMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+	frontOutMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+	backInMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+	frontInMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+
+	backOutVectorCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+	frontOutVectorCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+	backInVectorCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+	frontInVectorCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+
+	backOutCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
+	frontOutCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
+	backInCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
+	frontInCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
+
+	backOutMatrixCellBufferMasha = new double[xnumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
+	frontOutMatrixCellBufferMasha = new double[xnumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
+	backInMatrixCellBufferMasha = new double[xnumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
+	frontInMatrixCellBufferMasha = new double[xnumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
+
+	topOutNodeBufferMasha = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (3 + 2*additionalBinNumber)];
+	bottomOutNodeBufferMasha = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (3 + 2*additionalBinNumber)];
+	topInNodeBufferMasha = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (3 + 2*additionalBinNumber)];
+	bottomInNodeBufferMasha = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (3 + 2*additionalBinNumber)];
+
+	topOutVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+	bottomOutVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+	topInVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+	bottomInVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+
+	topOutMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+	bottomOutMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+	topInMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+	bottomInMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+
+	topOutVectorCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+	bottomOutVectorCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+	topInVectorCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+	bottomInVectorCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+
+	topOutCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * (2 + 2*additionalBinNumber)];
+	bottomOutCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * (2 + 2*additionalBinNumber)];
+	topInCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * (2 + 2*additionalBinNumber)];
+	bottomInCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * (2 + 2*additionalBinNumber)];
+
+	topOutMatrixCellBufferMasha = new double[xnumberAdded  * ynumberAdded * 9 * (2 + 2*additionalBinNumber)];
+	bottomOutMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2*additionalBinNumber)];
+	topInMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2*additionalBinNumber)];
+	bottomInMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2*additionalBinNumber)];
 
 	////buneman E
 	leftOutBunemanExBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];

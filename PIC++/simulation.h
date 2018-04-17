@@ -346,6 +346,21 @@ public:
 	double* bottomInVectorNodeBuffer;
 	double* topInVectorNodeBuffer;
 
+	double* leftOutMatrixNodeBuffer;
+	double* rightOutMatrixNodeBuffer;
+	double* leftInMatrixNodeBuffer;
+	double* rightInMatrixNodeBuffer;
+
+	double* frontOutMatrixNodeBuffer;
+	double* backOutMatrixNodeBuffer;
+	double* frontInMatrixNodeBuffer;
+	double* backInMatrixNodeBuffer;
+
+	double* bottomOutMatrixNodeBuffer;
+	double* topOutMatrixNodeBuffer;
+	double* bottomInMatrixNodeBuffer;
+	double* topInMatrixNodeBuffer;
+
 	double* leftOutCellBuffer;
 	double* rightOutCellBuffer;
 	double* leftInCellBuffer;
@@ -376,6 +391,100 @@ public:
 	double* topOutVectorCellBuffer;
 	double* bottomInVectorCellBuffer;
 	double* topInVectorCellBuffer;
+
+	//////Masha's buffers/////
+
+	double* leftOutNodeBufferMasha;
+	double* rightOutNodeBufferMasha;
+	double* leftInNodeBufferMasha;
+	double* rightInNodeBufferMasha;
+
+	double* frontOutNodeBufferMasha;
+	double* backOutNodeBufferMasha;
+	double* frontInNodeBufferMasha;
+	double* backInNodeBufferMasha;
+
+	double* bottomOutNodeBufferMasha;
+	double* topOutNodeBufferMasha;
+	double* bottomInNodeBufferMasha;
+	double* topInNodeBufferMasha;
+
+	double* leftOutVectorNodeBufferMasha;
+	double* rightOutVectorNodeBufferMasha;
+	double* leftInVectorNodeBufferMasha;
+	double* rightInVectorNodeBufferMasha;
+
+	double* frontOutVectorNodeBufferMasha;
+	double* backOutVectorNodeBufferMasha;
+	double* frontInVectorNodeBufferMasha;
+	double* backInVectorNodeBufferMasha;
+
+	double* bottomOutVectorNodeBufferMasha;
+	double* topOutVectorNodeBufferMasha;
+	double* bottomInVectorNodeBufferMasha;
+	double* topInVectorNodeBufferMasha;
+
+	double* leftOutMatrixNodeBufferMasha;
+	double* rightOutMatrixNodeBufferMasha;
+	double* leftInMatrixNodeBufferMasha;
+	double* rightInMatrixNodeBufferMasha;
+
+	double* frontOutMatrixNodeBufferMasha;
+	double* backOutMatrixNodeBufferMasha;
+	double* frontInMatrixNodeBufferMasha;
+	double* backInMatrixNodeBufferMasha;
+
+	double* bottomOutMatrixNodeBufferMasha;
+	double* topOutMatrixNodeBufferMasha;
+	double* bottomInMatrixNodeBufferMasha;
+	double* topInMatrixNodeBufferMasha;
+
+	double* leftOutCellBufferMasha;
+	double* rightOutCellBufferMasha;
+	double* leftInCellBufferMasha;
+	double* rightInCellBufferMasha;
+
+	double* frontOutCellBufferMasha;
+	double* backOutCellBufferMasha;
+	double* frontInCellBufferMasha;
+	double* backInCellBufferMasha;
+
+	double* bottomOutCellBufferMasha;
+	double* topOutCellBufferMasha;
+	double* bottomInCellBufferMasha;
+	double* topInCellBufferMasha;
+	
+
+	double* leftOutVectorCellBufferMasha;
+	double* rightOutVectorCellBufferMasha;
+	double* leftInVectorCellBufferMasha;
+	double* rightInVectorCellBufferMasha;
+
+	double* frontOutVectorCellBufferMasha;
+	double* backOutVectorCellBufferMasha;
+	double* frontInVectorCellBufferMasha;
+	double* backInVectorCellBufferMasha;
+
+	double* bottomOutVectorCellBufferMasha;
+	double* topOutVectorCellBufferMasha;
+	double* bottomInVectorCellBufferMasha;
+	double* topInVectorCellBufferMasha;
+
+	double* leftOutMatrixCellBufferMasha;
+	double* rightOutMatrixCellBufferMasha;
+	double* leftInMatrixCellBufferMasha;
+	double* rightInMatrixCellBufferMasha;
+
+	double* frontOutMatrixCellBufferMasha;
+	double* backOutMatrixCellBufferMasha;
+	double* frontInMatrixCellBufferMasha;
+	double* backInMatrixCellBufferMasha;
+
+	double* bottomOutMatrixCellBufferMasha;
+	double* topOutMatrixCellBufferMasha;
+	double* bottomInMatrixCellBufferMasha;
+	double* topInMatrixCellBufferMasha;
+	////////////////////////
 
 	double* leftOutGmresBuffer;
 	double* rightOutGmresBuffer;
@@ -775,6 +884,7 @@ public:
 
 	void smoothChargeDensityHat();
 	void smoothVectorNodeParameter(Vector3d*** E);
+	void smoothMatrixNodeParameter(Matrix3d*** E);
 	void smoothCellParameter(double*** array);
 	void smoothChargeDensity();
 	void smoothTempEfield();
@@ -849,6 +959,11 @@ public:
 	void exchangeGeneralScalarNodeFieldX(double**** field);
 	void exchangeGeneralScalarNodeFieldY(double**** field);
 	void exchangeGeneralScalarNodeFieldZ(double**** field);
+
+	void exchangeGeneralMatrixNodeField(Matrix3d*** field);
+	void exchangeGeneralMatrixNodeFieldX(Matrix3d*** field);
+	void exchangeGeneralMatrixNodeFieldY(Matrix3d*** field);
+	void exchangeGeneralMatrixNodeFieldZ(Matrix3d*** field);
 
 	void exchangeBunemanEfield(double*** fieldX, double*** fieldY, double*** fieldZ);
 

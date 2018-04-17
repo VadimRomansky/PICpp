@@ -139,6 +139,7 @@ void Simulation::simulate() {
 		for(int n = 0; n < smoothingCount; ++n){
 			smoothChargeDensityHat();
 			smoothFlux();
+			smoothMatrixNodeParameter(dielectricTensor);
 		}
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;
@@ -298,10 +299,10 @@ void Simulation::simulate() {
 			//smoothBunemanEfieldGeneral(bunemanNewEx, bunemanNewEy, bunemanNewEz);
 			//smoothBunemanBfieldGeneral(bunemanNewBx, bunemanNewBy, bunemanNewBz);
 		} else {
-			for(int n = 0; n < smoothingCount; ++n){
+			/*for(int n = 0; n < smoothingCount; ++n){
 				smoothNewEfield();
 				smoothNewBfield();
-			}
+			}*/
 		}
 		//MPI_Barrier(cartComm);
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {

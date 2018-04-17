@@ -182,6 +182,86 @@ void Simulation::smoothVectorNodeParameter(Vector3d*** E) {
 	}
 }
 
+void Simulation::smoothMatrixNodeParameter(Matrix3d*** E) {
+	int minI = 1 + additionalBinNumber;
+	if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
+		minI = 2 + additionalBinNumber;
+	}
+	int maxI = xnumberAdded - 1 - additionalBinNumber;
+
+	double smoothingmatrix[3][3][3];
+	createSmoothingMatrix(smoothingmatrix);
+
+	for (int i = minI; i <= maxI; ++i) {
+		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
+			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+				if (i > 1 + additionalBinNumber && i < xnumberAdded - 1 - additionalBinNumber) {
+					tempNodeMatrixParameter[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+					for (int tempI = -1; tempI <= 1; ++tempI) {
+						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
+							for (int tempK = -1; tempK <= 1; ++tempK) {
+								tempNodeMatrixParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1+tempI][1+tempJ][1+tempK];
+							}
+						}
+					}
+				} else if (i == 1 + additionalBinNumber) {
+					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
+						tempNodeMatrixParameter[i][j][k] = E[i][j][k];
+						/*for (int tempI = 0; tempI <= 1; ++tempI) {
+							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
+								for (int tempK = -1; tempK <= 1; ++tempK) {
+									tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+								}
+							}
+						}*/
+					} else {
+						tempNodeMatrixParameter[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+						for (int tempI = -1; tempI <= 1; ++tempI) {
+							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
+								for (int tempK = -1; tempK <= 1; ++tempK) {
+									tempNodeMatrixParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1+tempI][1+tempJ][1+tempK];
+								}
+							}
+						}
+					}
+				} else if (i == xnumberAdded - 1 - additionalBinNumber) {
+					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
+						tempNodeMatrixParameter[i][j][k] = E[i][j][k];
+						/*for (int tempI = -1; tempI <= 0; ++tempI) {
+							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
+								for (int tempK = -1; tempK <= 1; ++tempK) {
+									tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+								}
+							}
+						}*/
+					} else {
+						tempNodeMatrixParameter[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+						for (int tempI = -1; tempI <= 1; ++tempI) {
+							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
+								for (int tempK = -1; tempK <= 1; ++tempK) {
+									tempNodeMatrixParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1+tempI][1+tempJ][1+tempK];
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for (int i = minI; i <= maxI; ++i) {
+		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
+			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+				for(int l = 0; l < 3; ++l) {
+					for(int m = 0; m < 3; ++m){			
+						E[i][j][k].matrix[l][m] = tempNodeMatrixParameter[i][j][k].matrix[l][m];
+					}
+				}
+			}
+		}
+	}
+}
+
 void Simulation::smoothTempEfield() {
 	double procTime = 0;
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
