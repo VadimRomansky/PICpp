@@ -4228,8 +4228,8 @@ void Simulation::initializeLangmuirWave() {
 }
 
 void Simulation::initializeFluxFromRight() {
-	boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
-	//boundaryConditionTypeX = PERIODIC;
+	//boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
+	boundaryConditionTypeX = PERIODIC;
 	boundaryConditionTypeY = PERIODIC;
 	boundaryConditionTypeZ = PERIODIC;
 	createParticles();

@@ -156,21 +156,21 @@ void Simulation::eraseEscapedPaticles() {
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	std::vector < Particle* > tempParticles;
+	std::vector < Particle* > tempParticles1;
 	if (particles.size() > 0) {
-		tempParticles.reserve(particles.size());
+		tempParticles1.reserve(particles.size());
 		for (int i = 0; i < particles.size(); ++i) {
 			Particle* particle = particles[i];
 			if (particle->escaped) {
 				chargeBalance -= particle->chargeCount;
 			} else {
-				tempParticles.push_back(particle);
+				tempParticles1.push_back(particle);
 			}
 		}
 	}
 	particles.clear();
-	particles = tempParticles;
-	tempParticles.clear();
+	particles = tempParticles1;
+	tempParticles1.clear();
 	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
@@ -1022,7 +1022,6 @@ void Simulation::exchangeParticles() {
 	tempParticles.clear();
 
 	MPI_Barrier(cartComm);
-	tempParticles.clear();
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("exchange particles time = %g sec\n", procTime / CLOCKS_PER_SEC);
