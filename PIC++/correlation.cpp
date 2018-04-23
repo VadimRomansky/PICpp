@@ -347,8 +347,6 @@ double Simulation::correlationWithEbin(Particle& particle, int i, int j, int k) 
 }
 
 double Simulation::correlationBspline(const double& x, const double& dx, const double& leftx, const double& rightx) {
-	double dx2 = dx * dx;
-	double dx3 = dx * dx * dx;
 	if (rightx < leftx) {
 		printf("rightx < leftx\n");
 		fflush(stdout);
@@ -388,11 +386,12 @@ double Simulation::correlationBspline(const double& x, const double& dx, const d
 		break;
 	case 1:
 		if (x < leftx) {
-			correlation = 0.5 * sqr(x + dx - leftx) / dx2;
+			correlation = 0.5 * sqr(x + dx - leftx) / (dx*dx);
 		} else if (x > rightx) {
-			correlation = 0.5 * sqr(rightx - (x - dx)) / dx2;
+
+			correlation = 0.5 * sqr(rightx - (x - dx)) / (dx*dx);
 		} else {
-			correlation = 1 - 0.5 * (sqr(x + dx - rightx) + sqr(leftx - (x - dx))) / dx2;
+			correlation = 1 - 0.5 * (sqr(x + dx - rightx) + sqr(leftx - (x - dx))) / (dx*dx);
 		}
 		if (correlation < 0 && correlation > -1E-14) {
 			correlation = 0;

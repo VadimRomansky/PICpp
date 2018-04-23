@@ -252,6 +252,9 @@ void Simulation::moveParticle(Particle* particle) {
 	int i = 0;
 	Vector3d velocityHat = (particle->rotationTensor * particle->gammaFactor(
 		speed_of_light_normalized) * velocity);
+	double velocityNorm = velocity.norm();
+	double velocityHatNorm = velocityHat.norm();
+	velocityHat = velocityHat*(velocityNorm/velocityHatNorm);
 
 	if (velocityHat.norm() > speed_of_light_normalized) {
 		//printf("velocity Hat norm > c\n");
@@ -284,6 +287,11 @@ void Simulation::moveParticle(Particle* particle) {
 
 		tempParticle = *particle;
 		Vector3d rotatedE = particle->rotationTensor * E;
+
+		double Enorm = E.norm();
+		double rotatedEnorm = rotatedE.norm();
+
+		rotatedE = rotatedE*(Enorm/rotatedEnorm);
 
 		middleVelocity = velocityHat + rotatedE * beta;
 
