@@ -1108,8 +1108,19 @@ Simulation::~Simulation() {
 			Particle* particle = particles[i];
 			delete particle;
 		}
+		for(int i = 0; i < reservedParticles.size(); ++i) {
+			Particle* particle = reservedParticles[i];
+			delete particle;
+		}
 		particles.clear();
 		tempParticles.clear();
+		reservedParticles.clear();
+		escapedParticlesLeft.clear();
+		escapedParticlesRight.clear();
+		escapedParticlesBack.clear();
+		escapedParticlesFront.clear();
+		escapedParticlesBottom.clear();
+		escapedParticlesTop.clear();
 
 		delete3array(tempCellParameterLeft, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
 		delete3array(tempCellParameterRight, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);

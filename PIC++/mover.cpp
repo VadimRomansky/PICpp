@@ -99,7 +99,8 @@ void Simulation::removeEscapedParticles() {
 	if ((cartDim[0] > 1) || (boundaryConditionTypeX == FREE_BOTH)) {
 		for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
 			Particle* particle = escapedParticlesLeft[i];
-			delete particle;
+			reservedParticles.push_back(particle);
+			//delete particle;
 		}
 	}
 	escapedParticlesLeft.clear();
@@ -107,7 +108,8 @@ void Simulation::removeEscapedParticles() {
 	if ((cartDim[0] > 1) || (boundaryConditionTypeX != PERIODIC)) {
 		for (int i = 0; i < escapedParticlesRight.size(); ++i) {
 			Particle* particle = escapedParticlesRight[i];
-			delete particle;
+			reservedParticles.push_back(particle);
+			//delete particle;
 		}
 	}
 	escapedParticlesRight.clear();
@@ -115,7 +117,8 @@ void Simulation::removeEscapedParticles() {
 	if (cartDim[1] > 1) {
 		for (int i = 0; i < escapedParticlesFront.size(); ++i) {
 			Particle* particle = escapedParticlesFront[i];
-			delete particle;
+			reservedParticles.push_back(particle);
+			//delete particle;
 		}
 	}
 	escapedParticlesFront.clear();
@@ -123,7 +126,8 @@ void Simulation::removeEscapedParticles() {
 	if (cartDim[1] > 1) {
 		for (int i = 0; i < escapedParticlesBack.size(); ++i) {
 			Particle* particle = escapedParticlesBack[i];
-			delete particle;
+			reservedParticles.push_back(particle);
+			//delete particle;
 		}
 	}
 	escapedParticlesBack.clear();
@@ -131,7 +135,8 @@ void Simulation::removeEscapedParticles() {
 	if (cartDim[2] > 1) {
 		for (int i = 0; i < escapedParticlesBottom.size(); ++i) {
 			Particle* particle = escapedParticlesBottom[i];
-			delete particle;
+			reservedParticles.push_back(particle);
+			//delete particle;
 		}
 	}
 	escapedParticlesBottom.clear();
@@ -139,7 +144,8 @@ void Simulation::removeEscapedParticles() {
 	if (cartDim[2] > 1) {
 		for (int i = 0; i < escapedParticlesTop.size(); ++i) {
 			Particle* particle = escapedParticlesTop[i];
-			delete particle;
+			reservedParticles.push_back(particle);
+			//delete particle;
 		}
 	}
 	escapedParticlesTop.clear();
@@ -887,30 +893,34 @@ void Simulation::exchangeParticles() {
 			}
 		}
 		if (verbosity > 2) printf("send particles left rank = %d\n", rank);
-		sendLeftReceiveRightParticles(escapedParticlesLeft, tempParticles, types, typesNumber,
-		                              boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank);
+		sendLeftReceiveRightParticles(escapedParticlesLeft, tempParticles, reservedParticles, types,
+		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank);
 		MPI_Barrier(cartComm);
 		if (verbosity > 2) printf("send particles right rank = %d\n", rank);
-		sendRightReceiveLeftParticles(escapedParticlesRight, tempParticles, types, typesNumber,
-		                              boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank);
+		sendRightReceiveLeftParticles(escapedParticlesRight, tempParticles, reservedParticles, types,
+		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
 		Particle* particle = tempParticles[pcount];
 		if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
 			escapedParticlesFront.push_back(particle);
+			reservedParticles.push_back(particle);
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 		} else if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
 			escapedParticlesBack.push_back(particle);
+			reservedParticles.push_back(particle);
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 		} else if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
 			escapedParticlesBottom.push_back(particle);
+			reservedParticles.push_back(particle);
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 		} else if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
 			escapedParticlesTop.push_back(particle);
+			reservedParticles.push_back(particle);
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 		} else {
@@ -953,22 +963,24 @@ void Simulation::exchangeParticles() {
 			}
 		}
 		if (verbosity > 2) printf("send particles front rank = %d\n", rank);
-		sendFrontReceiveBackParticles(escapedParticlesFront, tempParticles, types, typesNumber,
-		                              boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
+		sendFrontReceiveBackParticles(escapedParticlesFront, tempParticles, reservedParticles, types,
+		                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
 		MPI_Barrier(cartComm);
 		if (verbosity > 2) printf("send particles back rank = %d\n", rank);
-		sendBackReceiveFrontParticles(escapedParticlesBack, tempParticles, types, typesNumber,
-		                              boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
+		sendBackReceiveFrontParticles(escapedParticlesBack, tempParticles, reservedParticles, types,
+		                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
 		Particle* particle = tempParticles[pcount];
 		if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
 			escapedParticlesBottom.push_back(particle);
+			reservedParticles.push_back(particle);
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 		} else if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
 			escapedParticlesTop.push_back(particle);
+			reservedParticles.push_back(particle);
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 		} else {
@@ -1012,12 +1024,12 @@ void Simulation::exchangeParticles() {
 			}
 		}
 		if (verbosity > 2) printf("send particles bottom rank = %d\n", rank);
-		sendBottomReceiveTopParticles(escapedParticlesBottom, tempParticles, types, typesNumber,
-		                              boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
+		sendBottomReceiveTopParticles(escapedParticlesBottom, tempParticles, reservedParticles, types,
+		                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
 		MPI_Barrier(cartComm);
 		if (verbosity > 2) printf("send particles top rank = %d\n", rank);
-		sendTopReceiveBottomParticles(escapedParticlesTop, tempParticles, types, typesNumber,
-		                              boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
+		sendTopReceiveBottomParticles(escapedParticlesTop, tempParticles, reservedParticles, types,
+		                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {

@@ -619,6 +619,8 @@ public:
 	std::vector<Particle*> escapedParticlesTop;
 	std::vector<Particle*> escapedParticlesBottom;
 
+	std::vector<Particle*> reservedParticles;
+
 	std::list<std::pair<int, double> >* mostAcceleratedParticlesNumbers;
 
 	int trackedParticlesNumber;
