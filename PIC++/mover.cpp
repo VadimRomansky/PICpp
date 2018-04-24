@@ -210,6 +210,7 @@ void Simulation::moveParticle(Particle* particle) {
 	double beta = 0.5 * particle->charge * deltaT / particle->mass;
 
 	int particleIterations = 50 * gamma;
+	particleIterations = 3;
 
 
 	Particle tempParticle = *particle;
@@ -254,7 +255,7 @@ void Simulation::moveParticle(Particle* particle) {
 		speed_of_light_normalized) * velocity);
 	double velocityNorm = velocity.norm();
 	double velocityHatNorm = velocityHat.norm();
-	velocityHat = velocityHat*(velocityNorm/velocityHatNorm);
+	//velocityHat = velocityHat*(velocityNorm/velocityHatNorm);
 
 	if (velocityHat.norm() > speed_of_light_normalized) {
 		//printf("velocity Hat norm > c\n");
@@ -291,7 +292,7 @@ void Simulation::moveParticle(Particle* particle) {
 		double Enorm = E.norm();
 		double rotatedEnorm = rotatedE.norm();
 
-		rotatedE = rotatedE*(Enorm/rotatedEnorm);
+		//rotatedE = rotatedE*(Enorm/rotatedEnorm);
 
 		middleVelocity = velocityHat + rotatedE * beta;
 
@@ -352,13 +353,13 @@ void Simulation::moveParticle(Particle* particle) {
 	double deltaGammaTheor = particle->charge * deltaT * E.scalarMult(middleVelocity) / (particle->mass *
 		speed_of_light_normalized_sqr);
 	double theorNewGamma = oldGamma + deltaGammaTheor;
-	if(theorNewGamma - 1 > relativisticPrecision){
+	//if(theorNewGamma - 1 > relativisticPrecision){
 		double newTheorMomentumNorm = particle->mass*speed_of_light_normalized*sqrt(theorNewGamma*theorNewGamma - 1.0);
 		Vector3d p = particle->getMomentum();
 		double newMomentumNorm = p.norm();
 		p = p*(newTheorMomentumNorm/newMomentumNorm);
 		particle->setMomentum(p);
-	}
+	//}
 
 	/*if(i >= particleIterations){
 		printf("i >= particle iterations\n");
