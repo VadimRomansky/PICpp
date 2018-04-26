@@ -1,6 +1,7 @@
 #ifndef _SIMULATION_H_
 #define _SIMULATION_H_
 
+#include <mpi.h>
 #include <string>
 #include "stdlib.h"
 #include "constants.h"
