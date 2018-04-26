@@ -162,6 +162,533 @@ void Simulation::setSpaceForProc() {
 	constMeanElevelPoint = 0;
 }
 
+Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double Vx,
+                   double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z, double initialElectronConcentrationV, 
+                   int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesPerBinV,
+                   double *concentrationsV, int inputType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, MPI_Comm& comm){
+
+	nprocs = nprocsV;
+	cartComm = comm;
+	int periods[MPI_dim];
+	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
+	MPI_Comm_rank(cartComm, &rank);
+	int tempCoord[3];
+	for (int i = 0; i < 3; ++i) {
+		tempCoord[i] = cartCoord[i];
+	}
+	tempCoord[0] -= 1;
+	if (tempCoord[0] < 0) {
+		tempCoord[0] = cartDim[0] - 1;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &leftRank);
+	tempCoord[0] = cartCoord[0] + 1;
+	if (tempCoord[0] >= cartDim[0]) {
+		tempCoord[0] = 0;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &rightRank);
+	tempCoord[0] = cartCoord[0];
+	tempCoord[1] -= 1;
+	if (tempCoord[1] < 0) {
+		tempCoord[1] = cartDim[1] - 1;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &frontRank);
+	tempCoord[1] = cartCoord[1] + 1;
+	if (tempCoord[1] >= cartDim[1]) {
+		tempCoord[1] = 0;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &backRank);
+	tempCoord[1] = cartCoord[1];
+	tempCoord[2] -= 1;
+	if (tempCoord[2] < 0) {
+		tempCoord[2] = cartDim[2] - 1;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &bottomRank);
+	tempCoord[2] = cartCoord[2] + 1;
+	if (tempCoord[2] >= cartDim[2]) {
+		tempCoord[2] = 0;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &topRank);
+
+	arrayCreated = false;
+	timing = true;
+	outputDir = std::string(outputDirectory);
+	inputDir = std::string(inputDirectory);
+	reducedOutputDir = std::string(reducedOutputDirectory);
+	if (inputType == 0) {
+		inputType = CGS;
+	} else if (inputType == 1) {
+		inputType = Theoretical;
+	} else {
+		printf("input type must be 1 or 0\n");
+		fflush(stdout);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "input type must be 1 or 0\n");
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+	debugMode = false;
+	newlyStarted = true;
+	preserveChargeGlobal = true;
+	solverType = IMPLICIT; //не явный
+	//solverType = IMPLICIT_EC; //не явный с сохранением энергии
+	//solverType = EXPLICIT; //явный
+	//solverType = BUNEMAN;
+	boundaryConditionTypeX = PERIODIC;
+	boundaryConditionTypeY = PERIODIC;
+	boundaryConditionTypeZ = PERIODIC;
+	//boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
+	maxwellEquationMatrixSize = 3;
+	verbosity = verbosityV;
+
+	typesNumber = typesNumberV;
+	if (typesNumber != 8) {
+		printf(
+			"PIC++ support only 8 types of ions, typesNumber must be = 8. if you need less, ypu can initialize them with 0 concentration\n");
+		fflush(stdout);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile,
+		        "PIC++ support only 8 types of ions, typesNumber must be = 8. if you need less, ypu can initialize them with 0 concentration\n");
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+	concentrations = concentrationsV;
+	particlesPerBin = particlesPerBinV;
+
+	currentIteration = 0;
+	time = 0;
+	particlesNumber = 0;
+
+	particleEnergy = 0;
+	electricFieldEnergy = 0;
+	magneticFieldEnergy = 0;
+	chargeBalance = 0;
+
+	globalMomentum = Vector3d(0, 0, 0);
+
+
+	theta = initialTheta;
+	//eta = theta;
+	eta = 0.5;
+	//eta = 1.0;
+
+	xnumberGeneral = xn;
+	ynumberGeneral = yn;
+	znumberGeneral = zn;
+
+	ynumber = yn;
+	znumber = zn;
+
+	deltaX = dxv;
+	deltaY = deltaX;
+	deltaZ = deltaX;
+
+	xsizeGeneral = xn*deltaX;
+	ysizeGeneral = yn*deltaX;
+	zsizeGeneral = zn*deltaX;
+
+	setSpaceForProc();
+
+	temperature = temp;
+
+	maxIteration = maxIterations;
+	maxTime = maxTimeV;
+
+	extJ = 0;
+
+	initialElectronConcentration = initialElectronConcentrationV;
+	V0 = Vector3d(Vx, Vy, Vz);
+	if(V0.norm() > 1.0) {
+		printf("v > c in initialization\n");
+		MPI_Finalize();
+		exit(0);
+	}
+	double gamma0 = 1.0/sqrt(1 - V0.scalarMult(V0));
+	electronMassInput = massElectronInputV*massProtonReal;
+	preferedDeltaT = preferedTimeStepV;
+
+	writeParameter = writeIterationV;
+	writeGeneralParameter = writeGeneralV;
+	writeTrajectoryNumber = writeTrajectoryV;
+	writeParticleNumber = writeParticleV;
+	smoothingCount = smoothingCountV;
+	smoothingParameter = smoothingParameterV;
+
+	massElectron = electronMassInput;
+	massProton = massProtonReal;
+	massElectron = electronMassInput;
+	massAlpha = massAlphaReal;
+	massDeuterium = massDeuteriumReal;
+	massHelium3 = massHelium3Real;
+	massOxygen = massOxygenReal;
+	massSilicon = massSiliconReal;
+
+	density = 0;
+
+	double masses[8];
+	masses[0] = massElectron;
+	masses[1] = massProton;
+	masses[2] = massElectron;
+	masses[3] = massAlpha;
+	masses[4] = massDeuterium;
+	masses[5] = massHelium3;
+	masses[6] = massOxygen;
+	masses[7] = massSilicon;
+	for(int i = 0; i < typesNumber; ++i) {
+		density += concentrations[i]*masses[i];
+	}
+
+	initialMagnetization = sigmav;
+	double Bnorm = sqrt(4*pi*initialMagnetization*density*speed_of_light*speed_of_light*gamma0);
+	Btheta = Bthetav;
+	Bphi = Bphiv;
+
+	B0 = Vector3d(Bnorm*cos(Btheta*pi/180), Bnorm*sin(Btheta*pi/180)*cos(Bphi*pi/180), Bnorm*sin(Btheta*pi/180)*sin(Bphi*pi/180));
+	E0 = Vector3d(E0x, E0y, E0z);
+
+	omegaPlasmaElectron = sqrt(4*pi*electron_charge*electron_charge*initialElectronConcentration/(massElectron*gamma0));
+
+	plasma_period = 1.0/omegaPlasmaElectron;
+	scaleFactor = speed_of_light*plasma_period;
+
+
+	if (inputType == CGS) {
+		E0 = E0 * (plasma_period * sqrt(scaleFactor));
+		B0 = B0 * (plasma_period * sqrt(scaleFactor));
+
+		rescaleConstants();
+
+		density = density * cube(scaleFactor);
+		for (int i = 0; i < typesNumber; ++i) {
+			concentrations[i] = concentrations[i] * cube(scaleFactor);
+		}
+
+		deltaX /= scaleFactor;
+		deltaY /= scaleFactor;
+		deltaZ /= scaleFactor;
+		deltaX2 /= scaleFactor * scaleFactor;
+		deltaY2 /= scaleFactor * scaleFactor;
+		deltaZ2 /= scaleFactor * scaleFactor;
+        cellVolume /= scaleFactor * scaleFactor * scaleFactor;
+
+		leftX /= scaleFactor;
+		rightX /= scaleFactor;
+		xsize /= scaleFactor;
+		xsizeGeneral /= scaleFactor;
+		leftY /= scaleFactor;
+		rightY /= scaleFactor;
+		ysize /= scaleFactor;
+		ysizeGeneral /= scaleFactor;
+		leftZ /= scaleFactor;
+		rightZ /= scaleFactor;
+		zsize /= scaleFactor;
+		zsizeGeneral /= scaleFactor;
+		if (rank == 0) printf("xsize/scaleFactor = %lf\n", xsize);
+		//fflush(stdout);
+	} else {
+		B0 = B0 * (plasma_period * sqrt(scaleFactor));
+
+		rescaleConstants();
+
+		density = density * cube(scaleFactor);
+		for (int i = 0; i < typesNumber; ++i) {
+			concentrations[i] = concentrations[i] * cube(scaleFactor);
+		}
+	}
+
+	resistiveLayerWidth = defaulResistiveLayerWidth;
+	fakeCondactivity = 2 * speed_of_light_normalized / (deltaX * (resistiveLayerWidth + 1));
+
+	maxEfield = Vector3d(0, 0, 0);
+	maxBfield = Vector3d(0, 0, 0);
+	shockWavePoint = 0;
+
+	Kronecker = Matrix3d(1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0);
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			for (int k = 0; k < 3; ++k) {
+				LeviCivita[i][j][k] = 0;
+			}
+		}
+	}
+	LeviCivita[0][1][2] = 1.0;
+	LeviCivita[0][2][1] = -1.0;
+	LeviCivita[1][0][2] = -1.0;
+	LeviCivita[1][2][0] = 1.0;
+	LeviCivita[2][0][1] = 1.0;
+	LeviCivita[2][1][0] = -1.0;
+	shockWaveX = -1.0;
+	derExPoint = 0;
+	constMeanElevelPoint = 0;
+	derConcentrationPoint = 0;
+	//if(rank == 0) printf("end constructor\n");
+	//fflush(stdout);
+}
+
+Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double Vx,
+                   double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z, double initialElectronConcentrationV, 
+                   int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesPerBinV,
+                   double *concentrationsV, int inputType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, double plasma_periodv, double scaleFactorv, SolverType solverTypev, MPI_Comm& comm){
+
+	nprocs = nprocsV;
+	cartComm = comm;
+	int periods[MPI_dim];
+	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
+	MPI_Comm_rank(cartComm, &rank);
+	int tempCoord[3];
+	for (int i = 0; i < 3; ++i) {
+		tempCoord[i] = cartCoord[i];
+	}
+	tempCoord[0] -= 1;
+	if (tempCoord[0] < 0) {
+		tempCoord[0] = cartDim[0] - 1;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &leftRank);
+	tempCoord[0] = cartCoord[0] + 1;
+	if (tempCoord[0] >= cartDim[0]) {
+		tempCoord[0] = 0;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &rightRank);
+	tempCoord[0] = cartCoord[0];
+	tempCoord[1] -= 1;
+	if (tempCoord[1] < 0) {
+		tempCoord[1] = cartDim[1] - 1;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &frontRank);
+	tempCoord[1] = cartCoord[1] + 1;
+	if (tempCoord[1] >= cartDim[1]) {
+		tempCoord[1] = 0;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &backRank);
+	tempCoord[1] = cartCoord[1];
+	tempCoord[2] -= 1;
+	if (tempCoord[2] < 0) {
+		tempCoord[2] = cartDim[2] - 1;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &bottomRank);
+	tempCoord[2] = cartCoord[2] + 1;
+	if (tempCoord[2] >= cartDim[2]) {
+		tempCoord[2] = 0;
+	}
+	MPI_Cart_rank(cartComm, tempCoord, &topRank);
+
+	arrayCreated = false;
+	timing = true;
+	outputDir = std::string(outputDirectory);
+	inputDir = std::string(inputDirectory);
+	reducedOutputDir = std::string(reducedOutputDirectory);
+	if (inputType == 0) {
+		inputType = CGS;
+	} else if (inputType == 1) {
+		inputType = Theoretical;
+	} else {
+		printf("input type must be 1 or 0\n");
+		fflush(stdout);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile, "input type must be 1 or 0\n");
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+	debugMode = false;
+	newlyStarted = true;
+	preserveChargeGlobal = true;
+	solverType = solverTypev;
+	boundaryConditionTypeX = PERIODIC;
+	boundaryConditionTypeY = PERIODIC;
+	boundaryConditionTypeZ = PERIODIC;
+	//boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
+	maxwellEquationMatrixSize = 3;
+	verbosity = verbosityV;
+
+	typesNumber = typesNumberV;
+	if (typesNumber != 8) {
+		printf(
+			"PIC++ support only 8 types of ions, typesNumber must be = 8. if you need less, ypu can initialize them with 0 concentration\n");
+		fflush(stdout);
+		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
+		fprintf(errorLogFile,
+		        "PIC++ support only 8 types of ions, typesNumber must be = 8. if you need less, ypu can initialize them with 0 concentration\n");
+		fclose(errorLogFile);
+		MPI_Finalize();
+		exit(0);
+	}
+	concentrations = concentrationsV;
+	particlesPerBin = particlesPerBinV;
+
+	currentIteration = 0;
+	time = 0;
+	particlesNumber = 0;
+
+	particleEnergy = 0;
+	electricFieldEnergy = 0;
+	magneticFieldEnergy = 0;
+	chargeBalance = 0;
+
+	globalMomentum = Vector3d(0, 0, 0);
+
+
+	theta = initialTheta;
+	//eta = theta;
+	eta = 0.5;
+	//eta = 1.0;
+
+	xnumberGeneral = xn;
+	ynumberGeneral = yn;
+	znumberGeneral = zn;
+
+	ynumber = yn;
+	znumber = zn;
+
+	deltaX = dxv;
+	deltaY = deltaX;
+	deltaZ = deltaX;
+
+	xsizeGeneral = xn*deltaX;
+	ysizeGeneral = yn*deltaX;
+	zsizeGeneral = zn*deltaX;
+
+	setSpaceForProc();
+
+	temperature = temp;
+
+	maxIteration = maxIterations;
+	maxTime = maxTimeV;
+
+	extJ = 0;
+
+	initialElectronConcentration = initialElectronConcentrationV;
+	V0 = Vector3d(Vx, Vy, Vz);
+	if(V0.norm() > 1.0) {
+		printf("v > c in initialization\n");
+		MPI_Finalize();
+		exit(0);
+	}
+	double gamma0 = 1.0/sqrt(1 - V0.scalarMult(V0));
+	electronMassInput = massElectronInputV*massProtonReal;
+	preferedDeltaT = preferedTimeStepV;
+
+	writeParameter = writeIterationV;
+	writeGeneralParameter = writeGeneralV;
+	writeTrajectoryNumber = writeTrajectoryV;
+	writeParticleNumber = writeParticleV;
+	smoothingCount = smoothingCountV;
+	smoothingParameter = smoothingParameterV;
+
+	massElectron = electronMassInput;
+	massProton = massProtonReal;
+	massElectron = electronMassInput;
+	massAlpha = massAlphaReal;
+	massDeuterium = massDeuteriumReal;
+	massHelium3 = massHelium3Real;
+	massOxygen = massOxygenReal;
+	massSilicon = massSiliconReal;
+
+	density = 0;
+
+	double masses[8];
+	masses[0] = massElectron;
+	masses[1] = massProton;
+	masses[2] = massElectron;
+	masses[3] = massAlpha;
+	masses[4] = massDeuterium;
+	masses[5] = massHelium3;
+	masses[6] = massOxygen;
+	masses[7] = massSilicon;
+	for(int i = 0; i < typesNumber; ++i) {
+		density += concentrations[i]*masses[i];
+	}
+
+	initialMagnetization = sigmav;
+	double Bnorm = sqrt(4*pi*initialMagnetization*density*speed_of_light*speed_of_light*gamma0);
+	Btheta = Bthetav;
+	Bphi = Bphiv;
+
+	B0 = Vector3d(Bnorm*cos(Btheta*pi/180), Bnorm*sin(Btheta*pi/180)*cos(Bphi*pi/180), Bnorm*sin(Btheta*pi/180)*sin(Bphi*pi/180));
+	E0 = Vector3d(E0x, E0y, E0z);
+
+	omegaPlasmaElectron = sqrt(4*pi*electron_charge*electron_charge*initialElectronConcentration/(massElectron*gamma0));
+
+	plasma_period = plasma_periodv;
+	scaleFactor = scaleFactorv;
+
+
+	if (inputType == CGS) {
+		E0 = E0 * (plasma_period * sqrt(scaleFactor));
+		B0 = B0 * (plasma_period * sqrt(scaleFactor));
+
+		rescaleConstants();
+
+		density = density * cube(scaleFactor);
+		for (int i = 0; i < typesNumber; ++i) {
+			concentrations[i] = concentrations[i] * cube(scaleFactor);
+		}
+
+		deltaX /= scaleFactor;
+		deltaY /= scaleFactor;
+		deltaZ /= scaleFactor;
+		deltaX2 /= scaleFactor * scaleFactor;
+		deltaY2 /= scaleFactor * scaleFactor;
+		deltaZ2 /= scaleFactor * scaleFactor;
+        cellVolume /= scaleFactor * scaleFactor * scaleFactor;
+
+		leftX /= scaleFactor;
+		rightX /= scaleFactor;
+		xsize /= scaleFactor;
+		xsizeGeneral /= scaleFactor;
+		leftY /= scaleFactor;
+		rightY /= scaleFactor;
+		ysize /= scaleFactor;
+		ysizeGeneral /= scaleFactor;
+		leftZ /= scaleFactor;
+		rightZ /= scaleFactor;
+		zsize /= scaleFactor;
+		zsizeGeneral /= scaleFactor;
+		if (rank == 0) printf("xsize/scaleFactor = %lf\n", xsize);
+		//fflush(stdout);
+	} else {
+		B0 = B0 * (plasma_period * sqrt(scaleFactor));
+
+		rescaleConstants();
+
+		density = density * cube(scaleFactor);
+		for (int i = 0; i < typesNumber; ++i) {
+			concentrations[i] = concentrations[i] * cube(scaleFactor);
+		}
+	}
+
+	resistiveLayerWidth = defaulResistiveLayerWidth;
+	fakeCondactivity = 2 * speed_of_light_normalized / (deltaX * (resistiveLayerWidth + 1));
+
+	maxEfield = Vector3d(0, 0, 0);
+	maxBfield = Vector3d(0, 0, 0);
+	shockWavePoint = 0;
+
+	Kronecker = Matrix3d(1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0);
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			for (int k = 0; k < 3; ++k) {
+				LeviCivita[i][j][k] = 0;
+			}
+		}
+	}
+	LeviCivita[0][1][2] = 1.0;
+	LeviCivita[0][2][1] = -1.0;
+	LeviCivita[1][0][2] = -1.0;
+	LeviCivita[1][2][0] = 1.0;
+	LeviCivita[2][0][1] = 1.0;
+	LeviCivita[2][1][0] = -1.0;
+	shockWaveX = -1.0;
+	derExPoint = 0;
+	constMeanElevelPoint = 0;
+	derConcentrationPoint = 0;
+	//if(rank == 0) printf("end constructor\n");
+	//fflush(stdout);
+}
+
 Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                        double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                        int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
@@ -295,6 +822,9 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 
 	B0 = Vector3d(Bx, By, Bz);
 	E0 = Vector3d(Ex, Ey, Ez);
+	double Bzy = sqrt(Bz*Bz + By*By);
+	Btheta = atan2(Bzy, Bx);
+	Bphi = atan2(Bz, By);
 
 	electronMassInput = massElectronInputV;
 	preferedDeltaT = preferedTimeStepV;

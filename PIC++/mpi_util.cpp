@@ -13,8 +13,8 @@
 #include "paths.h"
 
 void sendInput(Simulation& simulation, int nprocs) {
-	int integerData[15];
-	double doubleData[26];
+	int integerData[20];
+	double doubleData[29];
 
 	if (simulation.rank == 0) {
 		integerData[0] = simulation.xnumberGeneral;
@@ -31,6 +31,11 @@ void sendInput(Simulation& simulation, int nprocs) {
 		integerData[11] = simulation.particlesPerBin[7];
 		integerData[12] = simulation.inputType;
 		integerData[13] = simulation.verbosity;
+		integerData[14] = simulation.writeParameter;
+		integerData[15] = simulation.writeGeneralParameter;
+		integerData[16] = simulation.writeTrajectoryNumber;
+		integerData[17] = simulation.writeParticleNumber;
+		integerData[18] = simulation.smoothingCount;
 		int solverType = -1;
 		if (simulation.solverType == IMPLICIT) {
 			solverType = 0;
@@ -41,34 +46,37 @@ void sendInput(Simulation& simulation, int nprocs) {
 		} else if (simulation.solverType == IMPLICIT_EC) {
 			solverType = 3;
 		}
-		integerData[14] = solverType;
+		integerData[19] = solverType;
 
 		doubleData[0] = simulation.xsizeGeneral;
 		doubleData[1] = simulation.ysizeGeneral;
 		doubleData[2] = simulation.zsizeGeneral;
-		doubleData[3] = simulation.temperature;
-		doubleData[4] = simulation.concentrations[0];
-		doubleData[5] = simulation.concentrations[1];
-		doubleData[6] = simulation.concentrations[2];
-		doubleData[7] = simulation.concentrations[3];
-		doubleData[8] = simulation.concentrations[4];
-		doubleData[9] = simulation.concentrations[5];
-		doubleData[10] = simulation.concentrations[6];
-		doubleData[11] = simulation.concentrations[7];
-		doubleData[12] = simulation.V0.x;
-		doubleData[13] = simulation.V0.y;
-		doubleData[14] = simulation.V0.z;
-		doubleData[15] = simulation.E0.x;
-		doubleData[16] = simulation.E0.y;
-		doubleData[17] = simulation.E0.z;
-		doubleData[18] = simulation.B0.x;
-		doubleData[19] = simulation.B0.y;
-		doubleData[20] = simulation.B0.z;
-		doubleData[21] = simulation.maxTime;
-		doubleData[22] = simulation.preferedDeltaT;
-		doubleData[23] = simulation.electronMassInput;
-		doubleData[24] = simulation.plasma_period;
-		doubleData[25] = simulation.scaleFactor;
+		doubleData[3] = simulation.deltaX;
+		doubleData[4] = simulation.temperature;
+		doubleData[5] = simulation.concentrations[0];
+		doubleData[6] = simulation.concentrations[1];
+		doubleData[7] = simulation.concentrations[2];
+		doubleData[8] = simulation.concentrations[3];
+		doubleData[9] = simulation.concentrations[4];
+		doubleData[10] = simulation.concentrations[5];
+		doubleData[11] = simulation.concentrations[6];
+		doubleData[12] = simulation.concentrations[7];
+		doubleData[13] = simulation.V0.x;
+		doubleData[14] = simulation.V0.y;
+		doubleData[15] = simulation.V0.z;
+		doubleData[16] = simulation.initialMagnetization;
+		doubleData[17] = simulation.Btheta;
+		doubleData[18] = simulation.Bphi;
+		doubleData[19] = simulation.E0.x;
+		doubleData[20] = simulation.E0.y;
+		doubleData[21] = simulation.E0.z;
+		doubleData[22] = simulation.initialElectronConcentration;
+		doubleData[23] = simulation.maxTime;
+		doubleData[24] = simulation.smoothingParameter;
+		doubleData[25] = simulation.preferedDeltaT;
+		doubleData[26] = simulation.electronMassInput;
+		doubleData[27] = simulation.plasma_period;
+		doubleData[28] = simulation.scaleFactor;
 
 		for (int i = 1; i < nprocs; ++i) {
 			// printf("sending input to %d\n", i);
@@ -83,13 +91,14 @@ void sendInput(Simulation& simulation, int nprocs) {
 }
 
 Simulation recieveInput(MPI_Comm cartComm) {
-	int integerData[15];
-	double doubleData[26];
+	int integerData[20];
+	double doubleData[29];
 
 	int rank;
 	MPI_Comm_rank(cartComm, &rank);
 	int nprocs;
 	MPI_Comm_size(cartComm, &nprocs);
+	int typesNumber = 8;
 
 	if (rank != 0) {
 		//printf("receiving\n");
@@ -114,7 +123,12 @@ Simulation recieveInput(MPI_Comm cartComm) {
 		particlesPerBin[7] = integerData[11];
 		int inputType = integerData[12];
 		int verbosity = integerData[13];
-		int solverType = integerData[14];
+		int writeParameter = integerData[14];
+		int writeGeneralParameter = integerData[15];
+		int writeTrajectoryNumber = integerData[16];
+		int writeParticleNumber = integerData[17];
+		int smoothingCount = integerData[18];
+		int solverType = integerData[19];
 		SolverType solverTypev;
 		if (solverType == 0) {
 			solverTypev = IMPLICIT;
@@ -132,32 +146,35 @@ Simulation recieveInput(MPI_Comm cartComm) {
 		double xsize = doubleData[0];
 		double ysize = doubleData[1];
 		double zsize = doubleData[2];
-		double temperature = doubleData[3];
-		concentrations[0] = doubleData[4];
-		concentrations[1] = doubleData[5];
-		concentrations[2] = doubleData[6];
-		concentrations[3] = doubleData[7];
-		concentrations[4] = doubleData[8];
-		concentrations[5] = doubleData[9];
-		concentrations[6] = doubleData[10];
-		concentrations[7] = doubleData[11];
-		double V0x = doubleData[12];
-		double V0y = doubleData[13];
-		double V0z = doubleData[14];
-		double E0x = doubleData[15];
-		double E0y = doubleData[16];
-		double E0z = doubleData[17];
-		double B0x = doubleData[18];
-		double B0y = doubleData[19];
-		double B0z = doubleData[20];
-		double maxTime = doubleData[21];
-		double preferedDeltaT = doubleData[22];
-		double electronMassInput = doubleData[23];
-		double plasmaPeriod = doubleData[24];
-		double scaleFactor = doubleData[25];
-		return Simulation(xnumber, ynumber, znumber, xsize, ysize, zsize, temperature, V0x, V0y, V0z, E0x, E0y, E0z,
-		                  B0x, B0y, B0z, maxIteration, maxTime, 8, particlesPerBin, concentrations, inputType, nprocs,
-		                  verbosity, preferedDeltaT, electronMassInput, plasmaPeriod, scaleFactor, solverTypev, cartComm);
+		double deltaX = doubleData[3];
+		double temperature = doubleData[4];
+		concentrations[0] = doubleData[5];
+		concentrations[1] = doubleData[6];
+		concentrations[2] = doubleData[7];
+		concentrations[3] = doubleData[8];
+		concentrations[4] = doubleData[9];
+		concentrations[5] = doubleData[10];
+		concentrations[6] = doubleData[11];
+		concentrations[7] = doubleData[12];
+		double V0x = doubleData[13];
+		double V0y = doubleData[14];
+		double V0z = doubleData[15];
+		double initialMagnetization = doubleData[16];
+		double Btheta = doubleData[17];
+		double Bphi = doubleData[18];
+		double E0x = doubleData[19];
+		double E0y = doubleData[20];
+		double E0z = doubleData[21];
+		double initialElectronConcentration = doubleData[22];
+		double maxTime = doubleData[23];
+		double smoothingParameter = doubleData[24];
+		double preferedDeltaT = doubleData[25];
+		double electronMassInput = doubleData[26];
+		double plasma_period = doubleData[27];
+		double scaleFactor = doubleData[28];
+		return Simulation(xnumber, ynumber, znumber, deltaX, temperature, V0x, V0y, V0z, initialMagnetization, Btheta, Bphi, E0x, E0y, E0z, initialElectronConcentration,
+	                  maxIteration, maxTime, writeParameter, writeGeneralParameter, writeTrajectoryNumber, writeParticleNumber, smoothingCount, smoothingParameter, typesNumber, particlesPerBin, concentrations, inputType, nprocs, verbosity,
+	                  preferedDeltaT, electronMassInput, plasma_period, scaleFactor, solverTypev, cartComm);
 	}
 	printf("recieve input only with not 0 rank!\n");
 	MPI_Finalize();

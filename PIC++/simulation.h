@@ -81,9 +81,18 @@ public:
 	double massAlpha;
 	double massDeuterium;
 	double massHelium3;
+	double massOxygen;
+	double massSilicon;
 
 	double* concentrations;
 	int* particlesPerBin;
+
+	int innputType;
+	double initialMagnetization;
+	double initialElectronConcentration;
+
+	double Btheta;
+	double Bphi;
 
 	double density;
 	double temperature;
@@ -101,6 +110,12 @@ public:
 	double maxTime;
 	int currentIteration;
 	int maxIteration;
+	int writeParameter;
+	int writeGeneralParameter;
+	int writeTrajectoryNumber;
+	int writeParticleNumber;
+	double smoothingParameter;
+	int smoothingCount;
 	double xsizeGeneral;
 	double ysizeGeneral;
 	double zsizeGeneral;
@@ -186,7 +201,6 @@ public:
 	Vector3d maxEfield;
 	Vector3d maxBfield;
 	double meanSquaredEfield[3];
-
 
 	Vector3d V0;
 
@@ -798,6 +812,15 @@ public:
 	//Simulation();
 	Simulation();
 	void setSpaceForProc();
+	Simulation(int xn, int yn, int zn, double dxv, double temp, double Vx,
+                   double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z, double electronInitConc, 
+                   int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesperBin,
+                   double *concentrations, int inputType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, MPI_Comm& comm);
+	Simulation(int xn, int yn, int zn, double dxv, double temp, double Vx,
+                   double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z, double electronInitConc, 
+                   int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesperBin,
+                   double *concentrations, int inputType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, double plasmaPeriodV,
+                   double scaleFactorV, SolverType solverTypev, MPI_Comm& comm);
 	Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                    double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                    int maxIterations, double maxTimeV, int typesNumberV, int *particlesperBin,

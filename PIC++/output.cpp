@@ -2882,7 +2882,7 @@ void outputParticles(const char* outFileName, Simulation* simulation, ParticleTy
 				Vector3d momentum = particle->getMomentum();
 				double p = momentum.norm() * simulation->scaleFactor / simulation->plasma_period;
 				if (particle->type == type) {
-					if (typeCount % writeParticleNumber == 0) {
+					if (typeCount % simulation->writeParticleNumber == 0) {
 						fprintf(outFile, "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d\n",
 						        particle->coordinates.x * simulation->scaleFactor,
 						        momentum.x * simulation->scaleFactor / simulation->plasma_period,
@@ -3154,7 +3154,7 @@ void outputGeneralInitialParameters(const char* outFileName, const char* outFile
 
 		double omegaPlasmaElectron = sqrt(
 			4 * pi * simulation->electron_charge_normalized * simulation->electron_charge_normalized * simulation->types[0].
-			concentration / (simulation->types[0].mass * (gamma))) / simulation->plasma_period;
+			concentration / (simulation->types[0].mass * (gamma)))/simulation->plasma_period;
 		fprintf(outFileWithText, "20 plasma electron frequency relativistic = %g\n", omegaPlasmaElectron);
 		fprintf(outFile, "%g\n", omegaPlasmaElectron);
 		double omega2 = 0;

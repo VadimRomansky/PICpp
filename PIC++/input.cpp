@@ -23,7 +23,7 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
-	inputType = 0;
+
 	int xnumber;
 	fscanf(inputFile, "%d", &xnumber);
 
@@ -65,34 +65,12 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 		fscanf(inputFile, "%c", &ch);
 	}
 
-	double xsize;
-	fscanf(inputFile, "%lf", &xsize);
-	if (xsize < 0) {
+	double dx;
+	fscanf(inputFile, "%lf", &dx);
+	if (dx < 0) {
 		printf("xsize must be > 0\n");
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "xsize must be > 0\n");
-		fclose(errorLogFile);
-		MPI_Finalize();
-		exit(0);
-	}
-
-	double ysize;
-	fscanf(inputFile, "%lf", &ysize);
-	if (ysize < 0) {
-		printf("ysize must be > 0\n");
-		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		fprintf(errorLogFile, "ysize must be > 0\n");
-		fclose(errorLogFile);
-		MPI_Finalize();
-		exit(0);
-	}
-
-	double zsize;
-	fscanf(inputFile, "%lf", &zsize);
-	if (zsize < 0) {
-		printf("zsize must be > 0\n");
-		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		fprintf(errorLogFile, "zsize must be > 0\n");
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -134,28 +112,40 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 		fscanf(inputFile, "%c", &ch);
 	}
 
-	double Ex;
-	fscanf(inputFile, "%lf", &Ex);
-
-	double Ey;
-	fscanf(inputFile, "%lf", &Ey);
-
-	double Ez;
-	fscanf(inputFile, "%lf", &Ez);
+	double sigma;
+	fscanf(inputFile, "%lf", &sigma);
 
 	ch = ' ';
 	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
 
-	double Bx;
-	fscanf(inputFile, "%lf", &Bx);
+	double Btheta;
+	fscanf(inputFile, "%lf", &Btheta);
 
-	double By;
-	fscanf(inputFile, "%lf", &By);
+	ch = ' ';
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
 
-	double Bz;
-	fscanf(inputFile, "%lf", &Bz);
+	double Bphi;
+	fscanf(inputFile, "%lf", &Bphi);
+
+	ch = ' ';
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
+	double Ex, Ey, Ez;
+	fscanf(inputFile, "%lf %lf % lf", &Ex, &Ey, &Ez);
+
+	ch = ' ';
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
+	double initialElectronConcentration;
+	fscanf(inputFile, "%lf", &initialElectronConcentration);
 
 	ch = ' ';
 	while (ch != '\n') {
@@ -196,6 +186,14 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 		fscanf(inputFile, "%c", &ch);
 	}
 
+	double preferedTimeStep;
+	fscanf(inputFile, "%lf", &preferedTimeStep);
+
+	ch = ' ';
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
 	int verbocity;
 	fscanf(inputFile, "%d", &verbocity);
 
@@ -213,19 +211,50 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 		fscanf(inputFile, "%c", &ch);
 	}
 
-	double preferedTimeStep;
-	fscanf(inputFile, "%lf", &preferedTimeStep);
+	int writeIterationParameter;
+	ch = ' ';
+	fscanf(inputFile, "%d", &writeIterationParameter);
 
-	if (verbocity < 0) {
-		printf("verbocity must be > 0\n");
-		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		fprintf(errorLogFile, "verbocity mast be > 0\n");
-		fclose(errorLogFile);
-		MPI_Finalize();
-		exit(0);
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
 	}
 
+	int writeGeneralParameter;
 	ch = ' ';
+	fscanf(inputFile, "%d", &writeGeneralParameter);
+
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
+	int writeTrajectoryParameter;
+	ch = ' ';
+	fscanf(inputFile, "%d", &writeTrajectoryParameter);
+
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
+	int writeParticleStep;
+	ch = ' ';
+	fscanf(inputFile, "%d", &writeParticleStep);
+
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
+	int smoothingCount;
+	ch = ' ';
+	fscanf(inputFile, "%d", &smoothingCount);
+
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+
+	double smoothingParameter;
+	ch = ' ';
+	fscanf(inputFile, "%lf", &smoothingParameter);
+
 	while (ch != '\n') {
 		fscanf(inputFile, "%c", &ch);
 	}
@@ -269,9 +298,9 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 
 	for (int i = 0; i < typesNumber; ++i) {
 		int particlePerBin;
-		double concentration;
-		fscanf(inputFile, "%lf %d", &concentration, &particlePerBin);
-		concentrations[i] = concentration;
+		double typeConcentration;
+		fscanf(inputFile, "%lf %d", &typeConcentration, &particlePerBin);
+		concentrations[i] = typeConcentration*initialElectronConcentration;
 		particlesPerBin[i] = particlePerBin;
 
 		if (particlesPerBin[i] < 0) {
@@ -295,8 +324,8 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 
 
 	printf("finish read input\n");
-	return Simulation(xnumber, ynumber, znumber, xsize, ysize, zsize, temperature, Vx, Vy, Vz, Ex, Ey, Ez, Bx, By, Bz,
-	                  maxIterations, maxTime, typesNumber, particlesPerBin, concentrations, inputType, nprocs, verbocity,
+	return Simulation(xnumber, ynumber, znumber, dx, temperature, Vx, Vy, Vz, sigma, Btheta, Bphi, Ex, Ey, Ez, initialElectronConcentration,
+	                  maxIterations, maxTime, writeIterationParameter, writeGeneralParameter, writeTrajectoryParameter, writeParticleStep, smoothingCount, smoothingParameter, typesNumber, particlesPerBin, concentrations, inputType, nprocs, verbocity,
 	                  preferedTimeStep, massElectronInput, comm);
 }
 
