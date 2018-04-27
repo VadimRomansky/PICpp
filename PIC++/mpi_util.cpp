@@ -13,8 +13,10 @@
 #include "paths.h"
 
 void sendInput(Simulation& simulation, int nprocs) {
-	int integerData[20];
-	double doubleData[29];
+	const int integerDataNumber = 20;
+	const int doubleDataNumber = 29;
+	int integerData[integerDataNumber];
+	double doubleData[doubleDataNumber];
 
 	if (simulation.rank == 0) {
 		integerData[0] = simulation.xnumberGeneral;
@@ -29,7 +31,13 @@ void sendInput(Simulation& simulation, int nprocs) {
 		integerData[9] = simulation.particlesPerBin[5];
 		integerData[10] = simulation.particlesPerBin[6];
 		integerData[11] = simulation.particlesPerBin[7];
-		integerData[12] = simulation.inputType;
+		int inputType = -1;
+		if(simulation.inputType == CGS) {
+			inputType = 0;
+		} else if(simulation.inputType == Theoretical) {
+			inputType = 1;
+		}
+		integerData[12] = inputType;
 		integerData[13] = simulation.verbosity;
 		integerData[14] = simulation.writeParameter;
 		integerData[15] = simulation.writeGeneralParameter;
@@ -80,8 +88,8 @@ void sendInput(Simulation& simulation, int nprocs) {
 
 		for (int i = 1; i < nprocs; ++i) {
 			// printf("sending input to %d\n", i);
-			MPI_Send(integerData, 15, MPI_INT, i, MPI_INPUT_INTEGER_TAG, simulation.cartComm);
-			MPI_Send(doubleData, 26, MPI_DOUBLE, i, MPI_INPUT_DOUBLE_TAG, simulation.cartComm);
+			MPI_Send(integerData, integerDataNumber, MPI_INT, i, MPI_INPUT_INTEGER_TAG, simulation.cartComm);
+			MPI_Send(doubleData, doubleDataNumber, MPI_DOUBLE, i, MPI_INPUT_DOUBLE_TAG, simulation.cartComm);
 		}
 	} else {
 		printf("send input only with 0 rank!\n");
@@ -91,8 +99,10 @@ void sendInput(Simulation& simulation, int nprocs) {
 }
 
 Simulation recieveInput(MPI_Comm cartComm) {
-	int integerData[20];
-	double doubleData[29];
+	const int integerDataNumber = 20;
+	const int doubleDataNumber = 29;
+	int integerData[integerDataNumber];
+	double doubleData[doubleDataNumber];
 
 	int rank;
 	MPI_Comm_rank(cartComm, &rank);
@@ -103,8 +113,8 @@ Simulation recieveInput(MPI_Comm cartComm) {
 	if (rank != 0) {
 		//printf("receiving\n");
 		MPI_Status status;
-		MPI_Recv(integerData, 15, MPI_INT, 0, MPI_INPUT_INTEGER_TAG, cartComm, &status);
-		MPI_Recv(doubleData, 26, MPI_DOUBLE, 0, MPI_INPUT_DOUBLE_TAG, cartComm, &status);
+		MPI_Recv(integerData, integerDataNumber, MPI_INT, 0, MPI_INPUT_INTEGER_TAG, cartComm, &status);
+		MPI_Recv(doubleData, doubleDataNumber, MPI_DOUBLE, 0, MPI_INPUT_DOUBLE_TAG, cartComm, &status);
 
 		int* particlesPerBin = new int[8];
 		double* concentrations = new double[8];

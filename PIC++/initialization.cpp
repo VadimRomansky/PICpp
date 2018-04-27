@@ -165,7 +165,7 @@ void Simulation::setSpaceForProc() {
 Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double Vx,
                    double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z, double initialElectronConcentrationV, 
                    int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesPerBinV,
-                   double *concentrationsV, int inputType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, MPI_Comm& comm){
+                   double *concentrationsV, int inputTypeV, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, MPI_Comm& comm){
 
 	nprocs = nprocsV;
 	cartComm = comm;
@@ -214,9 +214,9 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	outputDir = std::string(outputDirectory);
 	inputDir = std::string(inputDirectory);
 	reducedOutputDir = std::string(reducedOutputDirectory);
-	if (inputType == 0) {
+	if (inputTypeV == 0) {
 		inputType = CGS;
-	} else if (inputType == 1) {
+	} else if (inputTypeV == 1) {
 		inputType = Theoretical;
 	} else {
 		printf("input type must be 1 or 0\n");
@@ -305,7 +305,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 		exit(0);
 	}
 	double gamma0 = 1.0/sqrt(1 - V0.scalarMult(V0));
-	electronMassInput = massElectronInputV*massProtonReal;
+	electronMassInput = massElectronInputV;
 	preferedDeltaT = preferedTimeStepV;
 
 	writeParameter = writeIterationV;
@@ -315,9 +315,9 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	smoothingCount = smoothingCountV;
 	smoothingParameter = smoothingParameterV;
 
-	massElectron = electronMassInput;
+	massElectron = electronMassInput*massProtonReal;
 	massProton = massProtonReal;
-	massElectron = electronMassInput;
+	massElectron = electronMassInput*massProtonReal;
 	massAlpha = massAlphaReal;
 	massDeuterium = massDeuteriumReal;
 	massHelium3 = massHelium3Real;
@@ -430,7 +430,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double Vx,
                    double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z, double initialElectronConcentrationV, 
                    int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesPerBinV,
-                   double *concentrationsV, int inputType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, double plasma_periodv, double scaleFactorv, SolverType solverTypev, MPI_Comm& comm){
+                   double *concentrationsV, int inputTypeV, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, double plasma_periodv, double scaleFactorv, SolverType solverTypev, MPI_Comm& comm){
 
 	nprocs = nprocsV;
 	cartComm = comm;
@@ -479,9 +479,9 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	outputDir = std::string(outputDirectory);
 	inputDir = std::string(inputDirectory);
 	reducedOutputDir = std::string(reducedOutputDirectory);
-	if (inputType == 0) {
+	if (inputTypeV == 0) {
 		inputType = CGS;
-	} else if (inputType == 1) {
+	} else if (inputTypeV == 1) {
 		inputType = Theoretical;
 	} else {
 		printf("input type must be 1 or 0\n");
@@ -567,7 +567,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 		exit(0);
 	}
 	double gamma0 = 1.0/sqrt(1 - V0.scalarMult(V0));
-	electronMassInput = massElectronInputV*massProtonReal;
+	electronMassInput = massElectronInputV;
 	preferedDeltaT = preferedTimeStepV;
 
 	writeParameter = writeIterationV;
@@ -577,9 +577,9 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	smoothingCount = smoothingCountV;
 	smoothingParameter = smoothingParameterV;
 
-	massElectron = electronMassInput;
+	massElectron = electronMassInput*massProtonReal;
 	massProton = massProtonReal;
-	massElectron = electronMassInput;
+	massElectron = electronMassInput*massProtonReal;
 	massAlpha = massAlphaReal;
 	massDeuterium = massDeuteriumReal;
 	massHelium3 = massHelium3Real;
@@ -833,7 +833,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	if (inputType == CGS) {
 		massProton = massProtonReal;
 		//massElectron = massElectronFactor * massElectronReal;
-		massElectron = electronMassInput;
+		massElectron = electronMassInput*massProtonReal;
 		massAlpha = massAlphaReal;
 		massDeuterium = massDeuteriumReal;
 		massHelium3 = massHelium3Real;
@@ -1092,7 +1092,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	if (inputType == CGS) {
 		massProton = massProtonReal;
 		//massElectron = massElectronFactor * massElectronReal;
-		massElectron = electronMassInput;
+		massElectron = electronMassInput*massProtonReal;
 		massAlpha = massAlphaReal;
 		massDeuterium = massDeuteriumReal;
 		massHelium3 = massHelium3Real;
