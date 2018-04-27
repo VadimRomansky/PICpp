@@ -570,7 +570,7 @@ void Simulation::sumNodeVectorParametersX() {
 		//delete[] outBufferLeft;
 		//delete[] outBufferRight;
 
-		if (debugMode) {
+		/*if (debugMode) {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -583,7 +583,7 @@ void Simulation::sumNodeVectorParametersX() {
 					}
 				}
 			}
-		}
+		}*/
 	} else {
 		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j <= ynumberAdded; ++j) {
@@ -671,7 +671,7 @@ void Simulation::sumNodeVectorParametersY() {
 		//delete[] outBufferBack;
 		//delete[] outBufferFront;
 
-		if (debugMode) {
+		/*if (debugMode) {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -684,7 +684,7 @@ void Simulation::sumNodeVectorParametersY() {
 					}
 				}
 			}
-		}
+		}*/
 	} else {
 		if (boundaryConditionTypeY == PERIODIC) {
 			for (int i = 0; i <= xnumberAdded; ++i) {
@@ -785,7 +785,7 @@ void Simulation::sumNodeVectorParametersZ() {
 		//delete[] outBufferBottom;
 		//delete[] outBufferTop;
 
-		if (debugMode) {
+		/*if (debugMode) {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -798,7 +798,7 @@ void Simulation::sumNodeVectorParametersZ() {
 					}
 				}
 			}
-		}
+		}*/
 	} else {
 		if (boundaryConditionTypeZ == PERIODIC) {
 			for (int i = 0; i <= xnumberAdded; ++i) {

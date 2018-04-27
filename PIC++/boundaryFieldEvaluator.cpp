@@ -95,6 +95,29 @@ Vector3d TurbulenceBoundaryFieldEvaluator::evaluateEfield(double t, int j, int k
 	return result;
 }
 
+RandomTurbulenceBoundaryFieldEvaluator::RandomTurbulenceBoundaryFieldEvaluator(int randomSeedV, int minLengthXV, int maxLengthXV, int minLengthYV, int maxLengthYV, int minLengthZV, int maxLengthZV, Simulation* simuationV, Vector3d V0) {
+	randomSeed = randomSeedV;
+	minLengthX = minLengthXV;
+	maxLengthX = maxLengthXV;
+	minLengthY = minLengthYV;
+	maxLengthY = maxLengthYV;
+	minLengthZ = minLengthZV;
+	maxLengthZ = maxLengthZV;
+	simulation = simuationV;
+	V = V0;
+}
+
+Vector3d RandomTurbulenceBoundaryFieldEvaluator::evaluateBfield(double t, int j, int k) {
+
+}
+
+Vector3d RandomTurbulenceBoundaryFieldEvaluator::evaluateEfield(double t, int j, int k) {
+	
+}
+
+
+
+
 
 
 

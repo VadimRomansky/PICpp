@@ -618,9 +618,9 @@ void Simulation::createFreeRightEquation(int i, int j, int k) {
 	maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(1.0, i, j, k, 1));
 	maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(1.0, i, j, k, 2));
 
-	alertNaNOrInfinity(rightPart.x, "right part x = NaN in create free right");
-	alertNaNOrInfinity(rightPart.y, "right part y = NaN");
-	alertNaNOrInfinity(rightPart.z, "right part z = NaN");
+	//alertNaNOrInfinity(rightPart.x, "right part x = NaN in create free right");
+	//alertNaNOrInfinity(rightPart.y, "right part y = NaN");
+	//alertNaNOrInfinity(rightPart.z, "right part z = NaN");
 
 	maxwellEquationRightPart[i][j][k][0] = rightPart.x;
 	maxwellEquationRightPart[i][j][k][1] = rightPart.y;
@@ -634,9 +634,9 @@ void Simulation::createFreeLeftEquation(int i, int j, int k) {
 	maxwellEquationMatrix[i][j][k][1].push_back(MatrixElement(1.0, i, j, k, 1));
 	maxwellEquationMatrix[i][j][k][2].push_back(MatrixElement(1.0, i, j, k, 2));
 
-	alertNaNOrInfinity(rightPart.x, "right part x = NaN in create free right");
-	alertNaNOrInfinity(rightPart.y, "right part y = NaN");
-	alertNaNOrInfinity(rightPart.z, "right part z = NaN");
+	//alertNaNOrInfinity(rightPart.x, "right part x = NaN in create free right");
+	//alertNaNOrInfinity(rightPart.y, "right part y = NaN");
+	//alertNaNOrInfinity(rightPart.z, "right part z = NaN");
 
 	maxwellEquationRightPart[i][j][k][0] = rightPart.x;
 	maxwellEquationRightPart[i][j][k][1] = rightPart.y;
@@ -2546,9 +2546,9 @@ void Simulation::createInternalEquation(int i, int j, int k) {
 		exit(0);
 	}
 
-	alertNaNOrInfinity(rightPart.x, "right part x = NaN in create internal");
-	alertNaNOrInfinity(rightPart.y, "right part y = NaN");
-	alertNaNOrInfinity(rightPart.z, "right part z = NaN");
+	//alertNaNOrInfinity(rightPart.x, "right part x = NaN in create internal");
+	//alertNaNOrInfinity(rightPart.y, "right part y = NaN");
+	//alertNaNOrInfinity(rightPart.z, "right part z = NaN");
 
 	//alertNaNOrInfinity(rightPart2.x, "right part 2 x = NaN");
 	//alertNaNOrInfinity(rightPart2.y, "right part 2 y = NaN");

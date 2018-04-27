@@ -205,7 +205,7 @@ double Particle::momentumAbs() const {
 Vector3d Particle::getVelocity(const double& c) {
 	if (!velocityCashed) {
 		double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
-		alertNaNOrInfinity(p2, "p2 = NaN in particle::getVelocity\n");
+		//alertNaNOrInfinity(p2, "p2 = NaN in particle::getVelocity\n");
 		double c2 = c * c;
 		double mc2 = mass * c2;
 		if (p2 < relativisticPrecision * mass * mass * c2) {
@@ -348,7 +348,7 @@ double Particle::gammaFactor(const double& c) {
 		double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
 		double mc2 = mass * c * c;
 		gamma = sqrt(p2 * c * c + mc2 * mc2) / mc2;
-		alertNaNOrInfinity(gamma, "gamma = NaN");
+		//alertNaNOrInfinity(gamma, "gamma = NaN");
 		gammaCashed = true;
 	}
 	return gamma;

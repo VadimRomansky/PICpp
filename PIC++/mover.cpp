@@ -496,7 +496,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 
 
 	tempParticle.addMomentum((E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT / N);
-	alertNaNOrInfinity(E.x, "E.x = Nan in move particle\n");
+	//alertNaNOrInfinity(E.x, "E.x = Nan in move particle\n");
 
 	newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
 
@@ -779,7 +779,7 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(double beta, Vector3d& velocity
 			//}
 
 			result.matrix[i][j] /= denominator;
-			if (debugMode) alertNaNOrInfinity(result.matrix[i][j], "rotation tensor = NaN");
+			//if (debugMode) alertNaNOrInfinity(result.matrix[i][j], "rotation tensor = NaN");
 		}
 	}
 

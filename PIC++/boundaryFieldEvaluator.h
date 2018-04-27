@@ -65,4 +65,17 @@ public:
 	virtual Vector3d evaluateBfield(double t, int j, int k);
 };
 
+class RandomTurbulenceBoundaryFieldEvaluator : public BoundaryFieldEvaluator {
+	int randomSeed;
+	int minLengthX, maxLengthX;
+	int minLengthY, maxLengthY;
+	int minLengthZ, maxLengthZ;
+	Simulation* simulation;
+	Vector3d V;
+public:
+	RandomTurbulenceBoundaryFieldEvaluator(int randomSeedV, int minLengthXV, int maxLengthXV, int minLengthYV, int maxLengthYV, int minLengthZV, int maxLengthZV, Simulation* simuationV, Vector3d V);
+	virtual Vector3d evaluateEfield(double t, int j, int k);
+	virtual Vector3d evaluateBfield(double t, int j, int k);
+};
+
 #endif

@@ -789,7 +789,7 @@ void Simulation::updateExternalFlux() {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				externalElectricFlux[i][j][k] = Vector3d(0, 0, 1.0) * extJ * cos(kw * xgrid[i] - omega * time);
-				alertNaNOrInfinity(externalElectricFlux[i][j][k].x, "externalFlux.x = NaN\n");
+				//alertNaNOrInfinity(externalElectricFlux[i][j][k].x, "externalFlux.x = NaN\n");
 			}
 		}
 	}
