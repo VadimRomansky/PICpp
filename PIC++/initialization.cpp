@@ -336,7 +336,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	masses[6] = massOxygen;
 	masses[7] = massSilicon;
 	for(int i = 0; i < typesNumber; ++i) {
-		density += concentrations[i]*masses[i];
+		density += initialElectronConcentration*concentrations[i]*masses[i];
 	}
 
 	initialMagnetization = sigmav;
@@ -359,10 +359,11 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 
 		rescaleConstants();
 
+		initialElectronConcentration *= cube(scaleFactor);
 		density = density * cube(scaleFactor);
-		for (int i = 0; i < typesNumber; ++i) {
+		/*for (int i = 0; i < typesNumber; ++i) {
 			concentrations[i] = concentrations[i] * cube(scaleFactor);
-		}
+		}*/
 
 		deltaX /= scaleFactor;
 		deltaY /= scaleFactor;
@@ -390,11 +391,11 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 		B0 = B0 * (plasma_period * sqrt(scaleFactor));
 
 		rescaleConstants();
-
+		initialElectronConcentration *= cube(scaleFactor);
 		density = density * cube(scaleFactor);
-		for (int i = 0; i < typesNumber; ++i) {
+		/*for (int i = 0; i < typesNumber; ++i) {
 			concentrations[i] = concentrations[i] * cube(scaleFactor);
-		}
+		}*/
 	}
 
 	resistiveLayerWidth = defaulResistiveLayerWidth;
@@ -431,7 +432,10 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
                    double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z, double initialElectronConcentrationV, 
                    int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesPerBinV,
                    double *concentrationsV, int inputTypeV, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, double plasma_periodv, double scaleFactorv, SolverType solverTypev, MPI_Comm& comm){
-
+	//TODO 
+		dxv *= scaleFactorv;
+		initialElectronConcentrationV /= cube(scaleFactorv);
+	///
 	nprocs = nprocsV;
 	cartComm = comm;
 	int periods[MPI_dim];
@@ -598,7 +602,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	masses[6] = massOxygen;
 	masses[7] = massSilicon;
 	for(int i = 0; i < typesNumber; ++i) {
-		density += concentrations[i]*masses[i];
+		density += initialElectronConcentration*concentrations[i]*masses[i];
 	}
 
 	initialMagnetization = sigmav;
@@ -620,11 +624,11 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 		B0 = B0 * (plasma_period * sqrt(scaleFactor));
 
 		rescaleConstants();
-
+		initialElectronConcentration *= cube(scaleFactor);
 		density = density * cube(scaleFactor);
-		for (int i = 0; i < typesNumber; ++i) {
+		/*for (int i = 0; i < typesNumber; ++i) {
 			concentrations[i] = concentrations[i] * cube(scaleFactor);
-		}
+		}*/
 
 		deltaX /= scaleFactor;
 		deltaY /= scaleFactor;
@@ -654,9 +658,10 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 		rescaleConstants();
 
 		density = density * cube(scaleFactor);
-		for (int i = 0; i < typesNumber; ++i) {
+		initialElectronConcentration *= cube(scaleFactor);
+		/*for (int i = 0; i < typesNumber; ++i) {
 			concentrations[i] = concentrations[i] * cube(scaleFactor);
-		}
+		}*/
 	}
 
 	resistiveLayerWidth = defaulResistiveLayerWidth;
@@ -6647,7 +6652,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = -1;
 	type.charge = -electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[0];
-	type.concentration = concentrations[0];
+	type.concentration = concentrations[0]*initialElectronConcentration;
 	type.typeName = "electron";
 
 	types[0] = type;
@@ -6658,7 +6663,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 1;
 	type.charge = electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[1];
-	type.concentration = concentrations[1];
+	type.concentration = concentrations[1]*initialElectronConcentration;
 	type.typeName = "proton";
 
 	types[1] = type;
@@ -6669,7 +6674,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 1;
 	type.charge = electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[2];
-	type.concentration = concentrations[2];
+	type.concentration = concentrations[2]*initialElectronConcentration;
 	type.typeName = "positron";
 
 	types[2] = type;
@@ -6680,7 +6685,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 2;
 	type.charge = 2 * electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[3];
-	type.concentration = concentrations[3];
+	type.concentration = concentrations[3]*initialElectronConcentration;
 	type.typeName = "alpha";
 
 	types[3] = type;
@@ -6691,7 +6696,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 1;
 	type.charge = electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[4];
-	type.concentration = concentrations[4];
+	type.concentration = concentrations[4]*initialElectronConcentration;
 	type.typeName = "deuterium";
 
 	types[4] = type;
@@ -6702,7 +6707,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 2;
 	type.charge = 2 * electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[5];
-	type.concentration = concentrations[5];
+	type.concentration = concentrations[5]*initialElectronConcentration;
 	type.typeName = "helium3";
 
 	types[5] = type;
@@ -6713,7 +6718,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 3;
 	type.charge = 3 * electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[6];
-	type.concentration = concentrations[6];
+	type.concentration = concentrations[6]*initialElectronConcentration;
 	type.typeName = "oxygen_plus_3";
 
 	types[6] = type;
@@ -6724,7 +6729,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 1;
 	type.charge = electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[7];
-	type.concentration = concentrations[7];
+	type.concentration = concentrations[7]*initialElectronConcentration;
 	type.typeName = "silicon_plus_1";
 
 	types[7] = type;
