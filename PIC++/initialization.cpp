@@ -285,8 +285,8 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	deltaZ = deltaX;
 
 	xsizeGeneral = xn*deltaX;
-	ysizeGeneral = yn*deltaX;
-	zsizeGeneral = zn*deltaX;
+	ysizeGeneral = yn*deltaY;
+	zsizeGeneral = zn*deltaZ;
 
 	setSpaceForProc();
 
@@ -351,7 +351,6 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 
 	plasma_period = 1.0/omegaPlasmaElectron;
 	scaleFactor = speed_of_light*plasma_period;
-
 
 	if (inputType == CGS) {
 		E0 = E0 * (plasma_period * sqrt(scaleFactor));
@@ -433,8 +432,10 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
                    int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesPerBinV,
                    double *concentrationsV, int inputTypeV, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, double plasma_periodv, double scaleFactorv, SolverType solverTypev, MPI_Comm& comm){
 	//TODO 
+	if(inputTypeV == 0){
 		dxv *= scaleFactorv;
-		initialElectronConcentrationV /= cube(scaleFactorv);
+	}
+	initialElectronConcentrationV /= cube(scaleFactorv);
 	///
 	nprocs = nprocsV;
 	cartComm = comm;
@@ -694,7 +695,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	//fflush(stdout);
 }
 
-Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
+/*Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                        double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                        int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
                        double* concentrationsV, int inType, int nprocsV, int verbosityV, double preferedTimeStepV,
@@ -959,9 +960,9 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	derConcentrationPoint = 0;
 	//if(rank == 0) printf("end constructor\n");
 	//fflush(stdout);
-}
+}*/
 
-Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
+/*Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                        double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                        int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
                        double* concentrationsV, int inType, int nprocsV, int verbosityV, double preferedTimeStepV,
@@ -1112,37 +1113,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 
 		rescaleConstants();
 
-		/*E0 = E0 * (plasma_period * sqrt(scaleFactor));
-		B0 = B0 * (plasma_period * sqrt(scaleFactor));
-		V0 = V0 * plasma_period / scaleFactor;
-
-		density = density * cube(scaleFactor);
-		for (int i = 0; i < typesNumber; ++i) {
-			concentrations[i] = concentrations[i] * cube(scaleFactor);
-		}
-
-		//printf("scaleFactor = %lf\n", scaleFactor);
-
-		deltaX /= scaleFactor;
-		deltaY /= scaleFactor;
-		deltaZ /= scaleFactor;
-		deltaX2 /= scaleFactor * scaleFactor;
-		deltaY2 /= scaleFactor * scaleFactor;
-		deltaZ2 /= scaleFactor * scaleFactor;
-        cellVolume /= scaleFactor * scaleFactor * scaleFactor;
-
-		leftX /= scaleFactor;
-		rightX /= scaleFactor;
-		xsize /= scaleFactor;
-		xsizeGeneral /= scaleFactor;
-		leftY /= scaleFactor;
-		rightY /= scaleFactor;
-		ysize /= scaleFactor;
-		ysizeGeneral /= scaleFactor;
-		leftZ /= scaleFactor;
-		rightZ /= scaleFactor;
-		zsize /= scaleFactor;
-		zsizeGeneral /= scaleFactor;*/
+		
 
 
 		//printf("scaleFactor = %lf\n", scaleFactor);
@@ -1197,7 +1168,7 @@ Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, dou
 	derExPoint = 0;
 	constMeanElevelPoint = 0;
 	derConcentrationPoint = 0;
-}
+}*/
 
 Simulation::~Simulation() {
 	if (arrayCreated) {

@@ -821,7 +821,7 @@ public:
                    int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesperBin,
                    double *concentrations, int inputType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, double plasmaPeriodV,
                    double scaleFactorV, SolverType solverTypev, MPI_Comm& comm);
-	Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
+	/*Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
                    double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                    int maxIterations, double maxTimeV, int typesNumberV, int *particlesperBin,
                    double *concentrations, int inputType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, MPI_Comm& comm);
@@ -829,7 +829,7 @@ public:
                    double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                    int maxIterations, double maxTimeV, int typesNumberV, int *particlesperBin,
                    double *concentrations, int inputType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, double plasmaPeriodV,
-                   double scaleFactorV, SolverType solverTypev,  MPI_Comm& comm);
+                   double scaleFactorV, SolverType solverTypev,  MPI_Comm& comm);*/
 	~Simulation();
 
 	void initialize();
