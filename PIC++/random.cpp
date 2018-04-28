@@ -13,7 +13,7 @@
 #include "paths.h"
 
 double uniformDistribution() {
-	return (rand() % randomSeed + 0.5) / randomSeed;
+	return (rand() % randomParameter + 0.5) / randomParameter;
 }
 
 double normalDistribution() {

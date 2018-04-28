@@ -3455,3 +3455,19 @@ double Simulation::averageConcentrationYZ(double*** concentration, int i) {
 
 	return result;
 }
+
+double Simulation::evaluateTurbulenceFieldAmplitude(double kx, double ky, double kz) {
+	if(ynumberGeneral == 1 && znumberGeneral == 1) {
+		double kw = kx;
+		return turbulenceAmplitude/power(kw, 5.0/6.0);
+	} else if(znumberGeneral == 1) {
+		double kw = sqrt(kx*kx + ky*ky);
+		return turbulenceAmplitude/power(kw, 8.0/6.0);
+	} else if(ynumberGeneral == 1) {
+		double kw = sqrt(kx*kx + kz*kz);
+		return turbulenceAmplitude/power(kw, 8.0/6.0);
+	} else {
+		double kw = sqrt(kx*kx + ky*ky + kz*kz);
+		return turbulenceAmplitude/power(kw, 11.0/6.0);
+	}
+}

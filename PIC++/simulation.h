@@ -220,6 +220,15 @@ public:
 	double omegaGyroProton;
 	double omegaGyroElectron;
 
+	//for turbulence
+	double turbulenceAmplitude;
+	double turbulenceFraction;
+	int turbulenceRandomSeed;
+
+	int minTurbulenceLengthX, maxTurbulenceLengthX;
+	int minTurbulenceLengthY, maxTurbulenceLengthY;
+	int minTurbulenceLengthZ, maxTurbulenceLengthZ;
+
 	//for debug alven wave only/////
 	double omega;
 	double VyamplitudeProton;
@@ -857,7 +866,7 @@ public:
 	void initializeWeibel();
 	void initializeRingWeibel();
 	void initializeHomogenouseFlow();
-	void initializeKolmogorovSpectrum(int start, int end, double turbulenceFraction);
+	void initializeKolmogorovSpectrum();
 	void initializeRandomModes(int number, int minNumber, double energyFraction);
 	void initializeFake();
 	void initializeHarris();
@@ -1073,6 +1082,8 @@ public:
 	Vector3d getBunemanMagneticField(int i, int j, int k);
 
 	Vector3d getBunemanFlux(int i, int j, int k);
+
+	double evaluateTurbulenceFieldAmplitude(double kx, double ky, double kz);
 
 	void evaluateBunemanElectricField();
 	void evaluateBunemanElectricFieldX();

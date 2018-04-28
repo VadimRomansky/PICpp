@@ -5,7 +5,7 @@
 #include "stdio.h"
 
 const int initialRandom = 0;
-const int randomSeed = 4096;
+const int randomParameter = 4096;
 
 //const int MPI_nx = 1;
 //const int MPI_ny = 1;

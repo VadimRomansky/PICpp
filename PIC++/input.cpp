@@ -137,7 +137,7 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 	}
 
 	double Ex, Ey, Ez;
-	fscanf(inputFile, "%lf %lf % lf", &Ex, &Ey, &Ez);
+	fscanf(inputFile, "%lf %lf %lf", &Ex, &Ey, &Ez);
 
 	ch = ' ';
 	while (ch != '\n') {

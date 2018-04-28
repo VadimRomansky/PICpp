@@ -163,9 +163,12 @@ void Simulation::setSpaceForProc() {
 }
 
 Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double Vx,
-                   double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z, double initialElectronConcentrationV, 
-                   int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesPerBinV,
-                   double *concentrationsV, int inputTypeV, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, MPI_Comm& comm){
+                       double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z,
+                       double initialElectronConcentrationV,
+                       int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV,
+                       int smoothingCountV, double smoothingParameterV, int typesNumberV, int* particlesPerBinV,
+                       double* concentrationsV, int inputTypeV, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV,
+                       MPI_Comm& comm) {
 
 	nprocs = nprocsV;
 	cartComm = comm;
@@ -284,9 +287,9 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	deltaY = deltaX;
 	deltaZ = deltaX;
 
-	xsizeGeneral = xn*deltaX;
-	ysizeGeneral = yn*deltaY;
-	zsizeGeneral = zn*deltaZ;
+	xsizeGeneral = xn * deltaX;
+	ysizeGeneral = yn * deltaY;
+	zsizeGeneral = zn * deltaZ;
 
 	setSpaceForProc();
 
@@ -299,12 +302,12 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 
 	initialElectronConcentration = initialElectronConcentrationV;
 	V0 = Vector3d(Vx, Vy, Vz);
-	if(V0.norm() > 1.0) {
+	if (V0.norm() > 1.0) {
 		printf("v > c in initialization\n");
 		MPI_Finalize();
 		exit(0);
 	}
-	double gamma0 = 1.0/sqrt(1 - V0.scalarMult(V0));
+	double gamma0 = 1.0 / sqrt(1 - V0.scalarMult(V0));
 	electronMassInput = massElectronInputV;
 	preferedDeltaT = preferedTimeStepV;
 
@@ -315,9 +318,9 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	smoothingCount = smoothingCountV;
 	smoothingParameter = smoothingParameterV;
 
-	massElectron = electronMassInput*massProtonReal;
+	massElectron = electronMassInput * massProtonReal;
 	massProton = massProtonReal;
-	massElectron = electronMassInput*massProtonReal;
+	massElectron = electronMassInput * massProtonReal;
 	massAlpha = massAlphaReal;
 	massDeuterium = massDeuteriumReal;
 	massHelium3 = massHelium3Real;
@@ -335,22 +338,23 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	masses[5] = massHelium3;
 	masses[6] = massOxygen;
 	masses[7] = massSilicon;
-	for(int i = 0; i < typesNumber; ++i) {
-		density += initialElectronConcentration*concentrations[i]*masses[i];
+	for (int i = 0; i < typesNumber; ++i) {
+		density += initialElectronConcentration * concentrations[i] * masses[i];
 	}
 
 	initialMagnetization = sigmav;
-	double Bnorm = sqrt(4*pi*initialMagnetization*density*speed_of_light*speed_of_light*gamma0);
+	double Bnorm = sqrt(4 * pi * initialMagnetization * density * speed_of_light * speed_of_light * gamma0);
 	Btheta = Bthetav;
 	Bphi = Bphiv;
 
-	B0 = Vector3d(Bnorm*cos(Btheta*pi/180), Bnorm*sin(Btheta*pi/180)*cos(Bphi*pi/180), Bnorm*sin(Btheta*pi/180)*sin(Bphi*pi/180));
+	B0 = Vector3d(Bnorm * cos(Btheta * pi / 180), Bnorm * sin(Btheta * pi / 180) * cos(Bphi * pi / 180),
+	              Bnorm * sin(Btheta * pi / 180) * sin(Bphi * pi / 180));
 	E0 = Vector3d(E0x, E0y, E0z);
 
-	omegaPlasmaElectron = sqrt(4*pi*electron_charge*electron_charge*initialElectronConcentration/(massElectron*gamma0));
+	omegaPlasmaElectron = sqrt(4 * pi * electron_charge * electron_charge * initialElectronConcentration / (massElectron * gamma0));
 
-	plasma_period = 1.0/omegaPlasmaElectron;
-	scaleFactor = speed_of_light*plasma_period;
+	plasma_period = 1.0 / omegaPlasmaElectron;
+	scaleFactor = speed_of_light * plasma_period;
 
 	if (inputType == CGS) {
 		E0 = E0 * (plasma_period * sqrt(scaleFactor));
@@ -370,7 +374,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 		deltaX2 /= scaleFactor * scaleFactor;
 		deltaY2 /= scaleFactor * scaleFactor;
 		deltaZ2 /= scaleFactor * scaleFactor;
-        cellVolume /= scaleFactor * scaleFactor * scaleFactor;
+		cellVolume /= scaleFactor * scaleFactor * scaleFactor;
 
 		leftX /= scaleFactor;
 		rightX /= scaleFactor;
@@ -428,11 +432,14 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 }
 
 Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double Vx,
-                   double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z, double initialElectronConcentrationV, 
-                   int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesPerBinV,
-                   double *concentrationsV, int inputTypeV, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, double plasma_periodv, double scaleFactorv, SolverType solverTypev, MPI_Comm& comm){
+                       double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z,
+                       double initialElectronConcentrationV,
+                       int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV,
+                       int smoothingCountV, double smoothingParameterV, int typesNumberV, int* particlesPerBinV,
+                       double* concentrationsV, int inputTypeV, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV,
+                       double plasma_periodv, double scaleFactorv, SolverType solverTypev, MPI_Comm& comm) {
 	//TODO 
-	if(inputTypeV == 0){
+	if (inputTypeV == 0) {
 		dxv *= scaleFactorv;
 	}
 	initialElectronConcentrationV /= cube(scaleFactorv);
@@ -551,9 +558,9 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	deltaY = deltaX;
 	deltaZ = deltaX;
 
-	xsizeGeneral = xn*deltaX;
-	ysizeGeneral = yn*deltaX;
-	zsizeGeneral = zn*deltaX;
+	xsizeGeneral = xn * deltaX;
+	ysizeGeneral = yn * deltaX;
+	zsizeGeneral = zn * deltaX;
 
 	setSpaceForProc();
 
@@ -566,12 +573,12 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 
 	initialElectronConcentration = initialElectronConcentrationV;
 	V0 = Vector3d(Vx, Vy, Vz);
-	if(V0.norm() > 1.0) {
+	if (V0.norm() > 1.0) {
 		printf("v > c in initialization\n");
 		MPI_Finalize();
 		exit(0);
 	}
-	double gamma0 = 1.0/sqrt(1 - V0.scalarMult(V0));
+	double gamma0 = 1.0 / sqrt(1 - V0.scalarMult(V0));
 	electronMassInput = massElectronInputV;
 	preferedDeltaT = preferedTimeStepV;
 
@@ -582,9 +589,9 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	smoothingCount = smoothingCountV;
 	smoothingParameter = smoothingParameterV;
 
-	massElectron = electronMassInput*massProtonReal;
+	massElectron = electronMassInput * massProtonReal;
 	massProton = massProtonReal;
-	massElectron = electronMassInput*massProtonReal;
+	massElectron = electronMassInput * massProtonReal;
 	massAlpha = massAlphaReal;
 	massDeuterium = massDeuteriumReal;
 	massHelium3 = massHelium3Real;
@@ -602,19 +609,20 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	masses[5] = massHelium3;
 	masses[6] = massOxygen;
 	masses[7] = massSilicon;
-	for(int i = 0; i < typesNumber; ++i) {
-		density += initialElectronConcentration*concentrations[i]*masses[i];
+	for (int i = 0; i < typesNumber; ++i) {
+		density += initialElectronConcentration * concentrations[i] * masses[i];
 	}
 
 	initialMagnetization = sigmav;
-	double Bnorm = sqrt(4*pi*initialMagnetization*density*speed_of_light*speed_of_light*gamma0);
+	double Bnorm = sqrt(4 * pi * initialMagnetization * density * speed_of_light * speed_of_light * gamma0);
 	Btheta = Bthetav;
 	Bphi = Bphiv;
 
-	B0 = Vector3d(Bnorm*cos(Btheta*pi/180), Bnorm*sin(Btheta*pi/180)*cos(Bphi*pi/180), Bnorm*sin(Btheta*pi/180)*sin(Bphi*pi/180));
+	B0 = Vector3d(Bnorm * cos(Btheta * pi / 180), Bnorm * sin(Btheta * pi / 180) * cos(Bphi * pi / 180),
+	              Bnorm * sin(Btheta * pi / 180) * sin(Bphi * pi / 180));
 	E0 = Vector3d(E0x, E0y, E0z);
 
-	omegaPlasmaElectron = sqrt(4*pi*electron_charge*electron_charge*initialElectronConcentration/(massElectron*gamma0));
+	omegaPlasmaElectron = sqrt(4 * pi * electron_charge * electron_charge * initialElectronConcentration / (massElectron * gamma0));
 
 	plasma_period = plasma_periodv;
 	scaleFactor = scaleFactorv;
@@ -637,7 +645,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 		deltaX2 /= scaleFactor * scaleFactor;
 		deltaY2 /= scaleFactor * scaleFactor;
 		deltaZ2 /= scaleFactor * scaleFactor;
-        cellVolume /= scaleFactor * scaleFactor * scaleFactor;
+		cellVolume /= scaleFactor * scaleFactor * scaleFactor;
 
 		leftX /= scaleFactor;
 		rightX /= scaleFactor;
@@ -1261,10 +1269,10 @@ Simulation::~Simulation() {
 		delete3complexArray(fourierScalarTempOutput, xnumberAdded, ynumberAdded, znumberAdded);
 		delete3complexArray(fourierScalarTempOutput1, xnumberAdded, ynumberAdded, znumberAdded);
 
-		delete3complexArray(fourierScalarMirrorInput, 2*xnumberAdded, ynumberAdded, znumberAdded);
-		delete3complexArray(fourierScalarMirrorOutput, 2*xnumberAdded, ynumberAdded, znumberAdded);
-		delete3complexArray(fourierScalarMirrorTempOutput, 2*xnumberAdded, ynumberAdded, znumberAdded);
-		delete3complexArray(fourierScalarMirrorTempOutput1, 2*xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierScalarMirrorInput, 2 * xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierScalarMirrorOutput, 2 * xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierScalarMirrorTempOutput, 2 * xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierScalarMirrorTempOutput1, 2 * xnumberAdded, ynumberAdded, znumberAdded);
 
 		delete[] localFactorX;
 		delete[] localFactorY;
@@ -1614,7 +1622,7 @@ Simulation::~Simulation() {
 			Particle* particle = particles[i];
 			delete particle;
 		}
-		for(int i = 0; i < reservedParticles.size(); ++i) {
+		for (int i = 0; i < reservedParticles.size(); ++i) {
 			Particle* particle = reservedParticles[i];
 			delete particle;
 		}
@@ -1628,19 +1636,19 @@ Simulation::~Simulation() {
 		escapedParticlesBottom.clear();
 		escapedParticlesTop.clear();
 
-		delete3array(tempCellParameterLeft, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
-		delete3array(tempCellParameterRight, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
-		delete3vectorArray(tempCellVectorParameterLeft, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
-		delete3vectorArray(tempCellVectorParameterRight, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
-		delete3matrixArray(tempCellMatrixParameterLeft, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
-		delete3matrixArray(tempCellMatrixParameterRight, 2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
+		delete3array(tempCellParameterLeft, 2 + 2 * additionalBinNumber, ynumberAdded, znumberAdded);
+		delete3array(tempCellParameterRight, 2 + 2 * additionalBinNumber, ynumberAdded, znumberAdded);
+		delete3vectorArray(tempCellVectorParameterLeft, 2 + 2 * additionalBinNumber, ynumberAdded, znumberAdded);
+		delete3vectorArray(tempCellVectorParameterRight, 2 + 2 * additionalBinNumber, ynumberAdded, znumberAdded);
+		delete3matrixArray(tempCellMatrixParameterLeft, 2 + 2 * additionalBinNumber, ynumberAdded, znumberAdded);
+		delete3matrixArray(tempCellMatrixParameterRight, 2 + 2 * additionalBinNumber, ynumberAdded, znumberAdded);
 
-		delete3array(tempNodeParameterLeft, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
-		delete3array(tempNodeParameterRight, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
-		delete3vectorArray(tempNodeVectorParameterLeft, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
-		delete3vectorArray(tempNodeVectorParameterRight, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
-		delete3matrixArray(tempNodeMatrixParameterLeft, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
-		delete3matrixArray(tempNodeMatrixParameterRight, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		delete3array(tempNodeParameterLeft, 3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		delete3array(tempNodeParameterRight, 3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(tempNodeVectorParameterLeft, 3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		delete3vectorArray(tempNodeVectorParameterRight, 3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		delete3matrixArray(tempNodeMatrixParameterLeft, 3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		delete3matrixArray(tempNodeMatrixParameterRight, 3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 
 		delete3array(tempCellParameterFront, xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
 		delete3array(tempCellParameterBack, xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
@@ -1721,34 +1729,34 @@ Simulation::~Simulation() {
 
 			//// temp buneman j
 			// left right
-			delete3array(tempBunemanJxLeft, 2 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
-			delete3array(tempBunemanJxRight, 2 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+			delete3array(tempBunemanJxLeft, 2 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+			delete3array(tempBunemanJxRight, 2 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 
-			delete3array(tempBunemanJyLeft, 3 + 2*additionalBinNumber, ynumberAdded, znumberAdded + 1);
-			delete3array(tempBunemanJyRight, 3 + 2*additionalBinNumber, ynumberAdded, znumberAdded + 1);
+			delete3array(tempBunemanJyLeft, 3 + 2 * additionalBinNumber, ynumberAdded, znumberAdded + 1);
+			delete3array(tempBunemanJyRight, 3 + 2 * additionalBinNumber, ynumberAdded, znumberAdded + 1);
 
-			delete3array(tempBunemanJzLeft, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded);
-			delete3array(tempBunemanJzRight, 3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded);
+			delete3array(tempBunemanJzLeft, 3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded);
+			delete3array(tempBunemanJzRight, 3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded);
 
 			///front back
-			delete3array(tempBunemanJxFront, xnumberAdded, 3 + 2*additionalBinNumber, znumberAdded + 1);
-			delete3array(tempBunemanJxBack, xnumberAdded, 3 + 2*additionalBinNumber, znumberAdded + 1);
-			
-			delete3array(tempBunemanJyFront, xnumberAdded + 1, 2 + 2*additionalBinNumber, znumberAdded + 1);
-			delete3array(tempBunemanJyBack, xnumberAdded + 1, 2 + 2*additionalBinNumber, znumberAdded + 1);
-	
-			delete3array(tempBunemanJzFront, xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded);
-			delete3array(tempBunemanJzBack, xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded);
-			
+			delete3array(tempBunemanJxFront, xnumberAdded, 3 + 2 * additionalBinNumber, znumberAdded + 1);
+			delete3array(tempBunemanJxBack, xnumberAdded, 3 + 2 * additionalBinNumber, znumberAdded + 1);
+
+			delete3array(tempBunemanJyFront, xnumberAdded + 1, 2 + 2 * additionalBinNumber, znumberAdded + 1);
+			delete3array(tempBunemanJyBack, xnumberAdded + 1, 2 + 2 * additionalBinNumber, znumberAdded + 1);
+
+			delete3array(tempBunemanJzFront, xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded);
+			delete3array(tempBunemanJzBack, xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded);
+
 			// bottom top
-			delete3array(tempBunemanJxBottom, xnumberAdded, ynumberAdded + 1, 3 + 2*additionalBinNumber);
-			delete3array(tempBunemanJxTop, xnumberAdded, ynumberAdded + 1, 3 + 2*additionalBinNumber);
+			delete3array(tempBunemanJxBottom, xnumberAdded, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
+			delete3array(tempBunemanJxTop, xnumberAdded, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
 
-			delete3array(tempBunemanJyBottom, xnumberAdded + 1, ynumberAdded, 3 + 2*additionalBinNumber);
-			delete3array(tempBunemanJyTop, xnumberAdded + 1, ynumberAdded, 3 + 2*additionalBinNumber);
+			delete3array(tempBunemanJyBottom, xnumberAdded + 1, ynumberAdded, 3 + 2 * additionalBinNumber);
+			delete3array(tempBunemanJyTop, xnumberAdded + 1, ynumberAdded, 3 + 2 * additionalBinNumber);
 
-			delete3array(tempBunemanJzBottom, xnumberAdded + 1, ynumberAdded + 1, 2 + 2*additionalBinNumber);
-			delete3array(tempBunemanJzTop, xnumberAdded + 1, ynumberAdded + 1, 2 + 2*additionalBinNumber);
+			delete3array(tempBunemanJzBottom, xnumberAdded + 1, ynumberAdded + 1, 2 + 2 * additionalBinNumber);
+			delete3array(tempBunemanJzTop, xnumberAdded + 1, ynumberAdded + 1, 2 + 2 * additionalBinNumber);
 		}
 	}
 }
@@ -4832,15 +4840,18 @@ void Simulation::initializeFluxFromRight() {
 		}
 	}
 
-	double gamma = 1.0/sqrt(1 - V0.scalarMult(V0)/speed_of_light_normalized_sqr);
-	double p0 = gamma*massProton*V0.norm();
-	double protonGyroRadius = p0*speed_of_light_normalized/(fabs(electron_charge_normalized)*B0.norm());
-	int countGyroRadius = xsizeGeneral/protonGyroRadius;
-	double deltaK = 2*pi/xsizeGeneral;
+	//turbulence
+	initializeKolmogorovSpectrum();
+
+	double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
+	double p0 = gamma * massProton * V0.norm();
+	double protonGyroRadius = p0 * speed_of_light_normalized / (fabs(electron_charge_normalized) * B0.norm());
+	int countGyroRadius = xsizeGeneral / protonGyroRadius;
+	double deltaK = 2 * pi / xsizeGeneral;
 	double minK = deltaK;
-	double maxK = 2*pi/deltaX;
-	int maxCount = min2(2*countGyroRadius, xnumberGeneral);
-	int minCount = max2(1, countGyroRadius/2);
+	double maxK = 2 * pi / deltaX;
+	int maxCount = min2(2 * countGyroRadius, xnumberGeneral);
+	int minCount = max2(1, countGyroRadius / 2);
 	int count = maxCount - minCount + 1;
 
 	//initializeRandomModes(count, minCount, 0.5);
@@ -5080,8 +5091,11 @@ void Simulation::initializeShockWave() {
 	exchangeGeneralBfield(Bfield);
 	exchangeGeneralBfield(newBfield);
 
-	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(Efield[xnumberAdded - additionalBinNumber][1+additionalBinNumber][1+additionalBinNumber], Bfield[xnumberAdded = additionalBinNumber][1+additionalBinNumber][1+additionalBinNumber]);
-	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(Efield[1+additionalBinNumber][1+additionalBinNumber][1+additionalBinNumber], Bfield[1+additionalBinNumber][1+additionalBinNumber][1+additionalBinNumber]);
+	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(
+		Efield[xnumberAdded - additionalBinNumber][1 + additionalBinNumber][1 + additionalBinNumber],
+		Bfield[xnumberAdded = additionalBinNumber][1 + additionalBinNumber][1 + additionalBinNumber]);
+	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(Efield[1 + additionalBinNumber][1 + additionalBinNumber][1 + additionalBinNumber],
+	                                                                Bfield[1 + additionalBinNumber][1 + additionalBinNumber][1 + additionalBinNumber]);
 
 	if (rank == 0) printf("creating particles\n");
 
@@ -5178,7 +5192,7 @@ void Simulation::initializeShockWave() {
 	synchronizeParticleNumber();
 
 	delete evaluator;
-	for (int i = 0; i < xnumberAdded; ++i) {;
+	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
 				delete[] outVector[i][j][k];
@@ -5238,89 +5252,144 @@ double Simulation::evaluatePressureByTemperature(double& temperature) {
 	return pressure;
 }
 
-void Simulation::initializeKolmogorovSpectrum(int first, int last, double turbulenceFraction) {
-	//use if defined shockWavePoint
-	double length = xsizeGeneral;
+void Simulation::initializeKolmogorovSpectrum() {
+	turbulenceRandomSeed = rand();
+	int temp[1];
+	temp[0] = turbulenceRandomSeed;
+	MPI_Bcast(temp, 1, MPI_INT, 0, cartComm);
+	turbulenceRandomSeed = temp[0];
+	srand(turbulenceRandomSeed);
 
-	if (last > xnumberGeneral - 1) {
-		last = xnumberGeneral - 1;
+	minTurbulenceLengthX = 10;
+	maxTurbulenceLengthX = 50;
+	minTurbulenceLengthY = 10;
+	maxTurbulenceLengthY = 50;
+	minTurbulenceLengthZ = 10;
+	maxTurbulenceLengthZ = 50;
+
+	int maxKxnumber = maxTurbulenceLengthX / minTurbulenceLengthX;
+	int maxKynumber = maxTurbulenceLengthY / minTurbulenceLengthY;
+	int maxKznumber = maxTurbulenceLengthZ / minTurbulenceLengthZ;
+
+	double turbulenceEnergy = 0;
+	turbulenceFraction = 1.0;
+
+	if (ynumberGeneral == 1) {
+		maxKynumber = 1;
+	}
+	if (znumberGeneral == 1) {
+		maxKznumber = 1;
 	}
 
-	double minK = 2 * pi * first / length;
-	double maxK = 2 * pi * last / length;
-	double k0 = 2 * pi / length;
-
-	double energy = turbulenceFraction * B0.scalarMult(B0);
-	double amplitude = sqrt(1.5 * energy * k0 / (power(minK, -2.0 / 3.0) - power(maxK, -2.0 / 3.0)));
-
-	double* phases = new double[2 * (last - first + 1)];
-	double* amplitudes = new double[2*(last - first + 1)];
-	double* knumbers = new double[(last - first + 1)];
-	double* omega = new double[(last - first + 1)];
-
-	if (rank == 0) {
-		for (int i = 0; i < 2 * (last - first + 1); ++i) {
-			phases[i] = 2 * pi * uniformDistribution();
-		}
-	}
-
-
-	MPI_Barrier(cartComm);
-	MPI_Bcast(phases, 2 * (last - first + 1), MPI_DOUBLE, 0, cartComm);
-	MPI_Barrier(cartComm);
-
-	for (int harmCounter = first; harmCounter <= last; ++harmCounter) {
-		double kw = 2 * pi * harmCounter / length;
-		int l = harmCounter - first;
-		double Bamplitude = amplitude * power(kw, -5.0 / 6.0);
-		///double phiY = 2 * pi * uniformDistribution();
-		//double phiZ = 2 * pi * uniformDistribution();
-		knumbers[l] = kw;
-		omega[l] = 0;
-		amplitudes[2*l] = Bamplitude;
-		amplitudes[2*l+1] = Bamplitude;
-
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					Bfield[i][j][k].y += Bamplitude * sin(kw * middleXgrid[i] + phases[2 * harmCounter]);
-					Bfield[i][j][k].z += Bamplitude * cos(kw * middleXgrid[i] + phases[2 * harmCounter + 1]);
-					newBfield[i][j][k] = Bfield[i][j][k];
+	turbulenceAmplitude = 1.0;
+	turbulenceEnergy = 0;
+	for (int ki = 0; ki < maxKxnumber; ki++) {
+		for (int kj = 0; kj < maxKynumber; ++kj) {
+			for (int kk = 0; kk < maxKznumber; ++kk) {
+				if (ki + kj + kk > 0) {
+					double kx = 2 * pi * ki / (deltaX * maxTurbulenceLengthX);
+					double ky = 2 * pi * kj / (deltaY * maxTurbulenceLengthY);
+					double kz = 2 * pi * kk / (deltaZ * maxTurbulenceLengthZ);
+					double B = evaluateTurbulenceFieldAmplitude(kx, ky, kz);
+					turbulenceEnergy += B * B;
 				}
 			}
 		}
 	}
 
-	rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, last-first+1, amplitudes, phases, knumbers, omega, xgrid[xnumberAdded - additionalBinNumber], speed_of_light_normalized);
-	leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, last-first+1, amplitudes, phases, knumbers, omega, xgrid[1 + additionalBinNumber], speed_of_light_normalized);
+	turbulenceAmplitude = sqrt(B0.scalarMult(B0) * turbulenceFraction / turbulenceEnergy);
 
-	delete[] phases;
-	delete[] amplitudes;
-	delete[] knumbers;
-	delete[] omega;
+	for (int ki = 0; ki < maxKxnumber; ki++) {
+		for (int kj = 0; kj < maxKynumber; ++kj) {
+			for (int kk = 0; kk < maxKznumber; ++kk) {
+				if (ki + kj + kk > 0) {
+					double kx = 2 * pi * ki / (deltaX * maxTurbulenceLengthX);
+					double ky = 2 * pi * kj / (deltaY * maxTurbulenceLengthY);
+					double kz = 2 * pi * kk / (deltaZ * maxTurbulenceLengthZ);
+					double phase1 = 2 * pi * uniformDistribution();
+					double phase2 = 2 * pi * uniformDistribution();
+
+					double kw = sqrt(kx * kx + ky * ky + kz * kz);
+					double kyz = sqrt(ky * ky + kz * kz);
+					double cosTheta = kx / kw;
+					double sinTheta = kyz / kw;
+					double cosPhi;
+					double sinPhi;
+					if (kk + kj > 0) {
+						cosPhi = ky / kyz;
+						sinPhi = kz / kyz;
+					} else {
+						cosPhi = 1.0;
+						sinPhi = 0.0;
+					}
+
+					double Bturbulent = evaluateTurbulenceFieldAmplitude(kx, ky, kz);
+
+					for (int i = 0; i <= xnumberAdded; ++i) {
+						for (int j = 0; j <= ynumberAdded; ++j) {
+							for (int k = 0; k <= znumberAdded; ++k) {
+								if(i <= 1 + additionalBinNumber && cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT){
+								} else {
+									double kmultr = kx*xgrid[i] + ky*ygrid[j] + kz*zgrid[k];
+									double localB1 = Bturbulent*sin(kmultr + phase1);
+									double localB2 = Bturbulent*sin(kmultr + phase2);
+									Vector3d localB = Vector3d(-sinTheta*localB1, cosTheta*cosPhi*localB1 - sinTheta*localB2, cosTheta*sinPhi*localB1 - cosTheta*localB2);
+									Vector3d localE = V0.vectorMult(localB)/speed_of_light_normalized;
+									Efield[i][j][k] -= localE;
+									newEfield[i][j][k] = Efield[i][j][k];
+									tempEfield[i][j][k] = Efield[i][j][k];
+								}
+							}
+						}
+					}
+					for (int i = 0; i < xnumberAdded; ++i) {
+						for (int j = 0; j < ynumberAdded; ++j) {
+							for (int k = 0; k < znumberAdded; ++k) {
+								double kmultr = kx*middleXgrid[i] + ky*middleYgrid[j] + kz*middleZgrid[k];
+								double localB1 = Bturbulent*sin(kmultr + phase1);
+								double localB2 = Bturbulent*sin(kmultr + phase2);
+								Vector3d localB = Vector3d(-sinTheta*localB1, cosTheta*cosPhi*localB1 - sinTheta*localB2, cosTheta*sinPhi*localB1 - cosTheta*localB2);
+								Bfield[i][j][k] += localB;
+								newBfield[i][j][k] = Bfield[i][j][k];
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if(boundaryConditionTypeX == FREE_BOTH) {
+		leftBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[1+additionalBinNumber], deltaX, deltaY, deltaZ);
+		rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ);
+	}
+	if(boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
+		leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
+		rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ);
+	}
 }
 
 
 void Simulation::initializeRandomModes(int number, int minNumber, double energyFraction) {
 	//use if defined shockWavePoint
 
-	double deltaK = 2*pi/xsizeGeneral;
-	double minK = minNumber*deltaK;
-	double maxK = minK*number;
+	double deltaK = 2 * pi / xsizeGeneral;
+	double minK = minNumber * deltaK;
+	double maxK = minK * number;
 
 	double constFieldFraction = sqrt(1.0 - energyFraction);
 
 
 	double energy = energyFraction * B0.scalarMult(B0);
-	double amplitude = sqrt(2*energy/number);
+	double amplitude = sqrt(2 * energy / number);
 
 	double* phases = new double[2 * number];
-	double* amplitudes = new double[2*number];
+	double* amplitudes = new double[2 * number];
 	double* knumbers = new double[number];
 	double* omega = new double[number];
 
 	if (rank == 0) {
-		for (int i = 0; i < 2*number; ++i) {
+		for (int i = 0; i < 2 * number; ++i) {
 			phases[i] = 2 * pi * uniformDistribution();
 			//phases[i] = 0;
 		}
@@ -5330,9 +5399,9 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 	MPI_Barrier(cartComm);
 	MPI_Bcast(phases, number, MPI_DOUBLE, 0, cartComm);
 	MPI_Barrier(cartComm);
-	
-	B0 = B0*constFieldFraction;
-	E0 = E0*constFieldFraction;
+
+	B0 = B0 * constFieldFraction;
+	E0 = E0 * constFieldFraction;
 
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -5344,12 +5413,12 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 	}
 
 	for (int l = 0; l < number; ++l) {
-		double kw = minK + l*deltaK;
+		double kw = minK + l * deltaK;
 		knumbers[l] = kw;
 		omega[l] = 0;
 		double Bamplitude = amplitude;
-		amplitudes[2*l] = 0;
-		amplitudes[2*l + 1] = amplitude;
+		amplitudes[2 * l] = 0;
+		amplitudes[2 * l + 1] = amplitude;
 		///double phiY = 2 * pi * uniformDistribution();
 		//double phiZ = 2 * pi * uniformDistribution();
 
@@ -5365,30 +5434,32 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 	}
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					Efield[i][j][k] = E0;
-					if(i > 0 && i < xnumberAdded && j < ynumberAdded && k < znumberAdded) {
-						Vector3d B = (Bfield[i-1][j][k] + Bfield[i][j][k])*0.5;
-						Efield[i][j][k] = V0.vectorMult(B)/(speed_of_light_normalized * speed_of_light_correction*(-1.0));
-					}
-					if (boundaryConditionTypeX != PERIODIC) {
-						if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
-							Efield[i][j][k].y = 0;
-							Efield[i][j][k].z = 0;
-						}
-					}
-					tempEfield[i][j][k] = Efield[i][j][k];
-					newEfield[i][j][k] = Efield[i][j][k];
-					explicitEfield[i][j][k] = Efield[i][j][k];
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				Efield[i][j][k] = E0;
+				if (i > 0 && i < xnumberAdded && j < ynumberAdded && k < znumberAdded) {
+					Vector3d B = (Bfield[i - 1][j][k] + Bfield[i][j][k]) * 0.5;
+					Efield[i][j][k] = V0.vectorMult(B) / (speed_of_light_normalized * speed_of_light_correction * (-1.0));
 				}
+				if (boundaryConditionTypeX != PERIODIC) {
+					if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
+						Efield[i][j][k].y = 0;
+						Efield[i][j][k].z = 0;
+					}
+				}
+				tempEfield[i][j][k] = Efield[i][j][k];
+				newEfield[i][j][k] = Efield[i][j][k];
+				explicitEfield[i][j][k] = Efield[i][j][k];
 			}
 		}
+	}
 
 	//rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
 	//leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
-	rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, middleXgrid[xnumberAdded - additionalBinNumber], speed_of_light_normalized);
-	leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega, xgrid[1 + additionalBinNumber], speed_of_light_normalized);
+	rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega,
+	                                                                   middleXgrid[xnumberAdded - additionalBinNumber], speed_of_light_normalized);
+	leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers, omega,
+	                                                                  xgrid[1 + additionalBinNumber], speed_of_light_normalized);
 
 	delete[] phases;
 	delete[] amplitudes;
@@ -5601,7 +5672,7 @@ void Simulation::initializeAnisotropic() {
 	if (rank == 0) printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 	fflush(stdout);
 
-	initializeKolmogorovSpectrum(1, 100, 0.0000001);
+	initializeKolmogorovSpectrum();
 
 	double omegaGyroHelium = B0.norm() * electron_charge_normalized / (massHelium3 * speed_of_light_normalized);
 
@@ -5664,7 +5735,7 @@ void Simulation::initializeAnisotropicSilicon() {
 	double vthermalProton = sqrt(kBoltzman_normalized * types[1].temperatureX / massProton);
 
 
-	initializeKolmogorovSpectrum(1, 100, 0.0000001);
+	initializeKolmogorovSpectrum();
 
 	if (rank == 0) {
 		double increment = 0.011 * omegaGyroSilicon;
@@ -5718,7 +5789,7 @@ void Simulation::initializeWeibel() {
 	if (rank == 0) printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
 	if (rank == 0) printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 
-	initializeKolmogorovSpectrum(1, 100, 0.0000001);
+	initializeKolmogorovSpectrum();
 
 	if (rank == 0) printf("evaluating increment\n");
 	if (rank == 0) {
@@ -5795,7 +5866,7 @@ void Simulation::initializeRingWeibel() {
 	if (rank == 0) printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 	fflush(stdout);
 
-	initializeKolmogorovSpectrum(1, 100, 0.0000001);
+	initializeKolmogorovSpectrum();
 
 	double pNormal = 20 * massElectron * speed_of_light_normalized;
 	double pParallel = 2 * massElectron * speed_of_light_normalized;
@@ -6069,10 +6140,10 @@ void Simulation::createArrays() {
 	fourierScalarTempOutput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
 	fourierScalarTempOutput1 = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
 
-	fourierScalarMirrorInput = create3complexArray(2*xnumberAdded, ynumberAdded, znumberAdded);
-	fourierScalarMirrorOutput = create3complexArray(2*xnumberAdded, ynumberAdded, znumberAdded);
-	fourierScalarMirrorTempOutput = create3complexArray(2*xnumberAdded, ynumberAdded, znumberAdded);
-	fourierScalarMirrorTempOutput1 = create3complexArray(2*xnumberAdded, ynumberAdded, znumberAdded);
+	fourierScalarMirrorInput = create3complexArray(2 * xnumberAdded, ynumberAdded, znumberAdded);
+	fourierScalarMirrorOutput = create3complexArray(2 * xnumberAdded, ynumberAdded, znumberAdded);
+	fourierScalarMirrorTempOutput = create3complexArray(2 * xnumberAdded, ynumberAdded, znumberAdded);
+	fourierScalarMirrorTempOutput1 = create3complexArray(2 * xnumberAdded, ynumberAdded, znumberAdded);
 
 	localFactorX = new Complex[2 * (xnumberAdded + 1)];
 	localFactorY = new Complex[ynumberAdded + 1];
@@ -6195,95 +6266,95 @@ void Simulation::createArrays() {
 	bottomInCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
 
 	////// Masha's buffers
-	rightOutNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
-	leftOutNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
-	leftInNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
-	rightInNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
+	rightOutNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
+	leftOutNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
+	leftInNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
+	rightInNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
 
-	rightOutVectorNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
-	leftOutVectorNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
-	leftInVectorNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
-	rightInVectorNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+	rightOutVectorNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2 * additionalBinNumber)];
+	leftOutVectorNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2 * additionalBinNumber)];
+	leftInVectorNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2 * additionalBinNumber)];
+	rightInVectorNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2 * additionalBinNumber)];
 
-	rightOutMatrixNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
-	leftOutMatrixNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
-	leftInMatrixNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
-	rightInMatrixNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+	rightOutMatrixNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	leftOutMatrixNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	leftInMatrixNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	rightInMatrixNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
 
-	rightOutCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
-	leftOutCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
-	leftInCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
-	rightInCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
+	rightOutCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * (2 + 2 * additionalBinNumber)];
+	leftOutCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * (2 + 2 * additionalBinNumber)];
+	leftInCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * (2 + 2 * additionalBinNumber)];
+	rightInCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * (2 + 2 * additionalBinNumber)];
 
-	rightOutVectorCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
-	leftOutVectorCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
-	leftInVectorCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
-	rightInVectorCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+	rightOutVectorCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * 3 * (2 + 2 * additionalBinNumber)];
+	leftOutVectorCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * 3 * (2 + 2 * additionalBinNumber)];
+	leftInVectorCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * 3 * (2 + 2 * additionalBinNumber)];
+	rightInVectorCellBufferMasha = new double[(ynumberAdded) * (znumberAdded) * 3 * (2 + 2 * additionalBinNumber)];
 
-	rightOutMatrixCellBufferMasha = new double[ynumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
-	leftOutMatrixCellBufferMasha = new double[ynumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
-	leftInMatrixCellBufferMasha = new double[ynumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
-	rightInMatrixCellBufferMasha = new double[ynumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
+	rightOutMatrixCellBufferMasha = new double[ynumberAdded * znumberAdded * 9 * (2 + 2 * additionalBinNumber)];
+	leftOutMatrixCellBufferMasha = new double[ynumberAdded * znumberAdded * 9 * (2 + 2 * additionalBinNumber)];
+	leftInMatrixCellBufferMasha = new double[ynumberAdded * znumberAdded * 9 * (2 + 2 * additionalBinNumber)];
+	rightInMatrixCellBufferMasha = new double[ynumberAdded * znumberAdded * 9 * (2 + 2 * additionalBinNumber)];
 
-	backOutVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
-	frontOutVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
-	backInVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
-	frontInVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+	backOutVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2 * additionalBinNumber)];
+	frontOutVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2 * additionalBinNumber)];
+	backInVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2 * additionalBinNumber)];
+	frontInVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 3 * (3 + 2 * additionalBinNumber)];
 
-	backOutNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
-	frontOutNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
-	backInNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
-	frontInNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (3 + 2*additionalBinNumber)];
+	backOutNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
+	frontOutNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
+	backInNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
+	frontInNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
 
-	backOutMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
-	frontOutMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
-	backInMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
-	frontInMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+	backOutMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	frontOutMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	backInMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	frontInMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
 
-	backOutVectorCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
-	frontOutVectorCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
-	backInVectorCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
-	frontInVectorCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+	backOutVectorCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * 3 * (2 + 2 * additionalBinNumber)];
+	frontOutVectorCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * 3 * (2 + 2 * additionalBinNumber)];
+	backInVectorCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * 3 * (2 + 2 * additionalBinNumber)];
+	frontInVectorCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * 3 * (2 + 2 * additionalBinNumber)];
 
-	backOutCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
-	frontOutCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
-	backInCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
-	frontInCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * (2 + 2*additionalBinNumber)];
+	backOutCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * (2 + 2 * additionalBinNumber)];
+	frontOutCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * (2 + 2 * additionalBinNumber)];
+	backInCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * (2 + 2 * additionalBinNumber)];
+	frontInCellBufferMasha = new double[(xnumberAdded) * (znumberAdded) * (2 + 2 * additionalBinNumber)];
 
-	backOutMatrixCellBufferMasha = new double[xnumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
-	frontOutMatrixCellBufferMasha = new double[xnumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
-	backInMatrixCellBufferMasha = new double[xnumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
-	frontInMatrixCellBufferMasha = new double[xnumberAdded * znumberAdded * 9 * (2 + 2*additionalBinNumber)];
+	backOutMatrixCellBufferMasha = new double[xnumberAdded * znumberAdded * 9 * (2 + 2 * additionalBinNumber)];
+	frontOutMatrixCellBufferMasha = new double[xnumberAdded * znumberAdded * 9 * (2 + 2 * additionalBinNumber)];
+	backInMatrixCellBufferMasha = new double[xnumberAdded * znumberAdded * 9 * (2 + 2 * additionalBinNumber)];
+	frontInMatrixCellBufferMasha = new double[xnumberAdded * znumberAdded * 9 * (2 + 2 * additionalBinNumber)];
 
-	topOutNodeBufferMasha = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (3 + 2*additionalBinNumber)];
-	bottomOutNodeBufferMasha = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (3 + 2*additionalBinNumber)];
-	topInNodeBufferMasha = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (3 + 2*additionalBinNumber)];
-	bottomInNodeBufferMasha = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (3 + 2*additionalBinNumber)];
+	topOutNodeBufferMasha = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (3 + 2 * additionalBinNumber)];
+	bottomOutNodeBufferMasha = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (3 + 2 * additionalBinNumber)];
+	topInNodeBufferMasha = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (3 + 2 * additionalBinNumber)];
+	bottomInNodeBufferMasha = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * (3 + 2 * additionalBinNumber)];
 
-	topOutVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
-	bottomOutVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
-	topInVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
-	bottomInVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (3 + 2*additionalBinNumber)];
+	topOutVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (3 + 2 * additionalBinNumber)];
+	bottomOutVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (3 + 2 * additionalBinNumber)];
+	topInVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (3 + 2 * additionalBinNumber)];
+	bottomInVectorNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 3 * (3 + 2 * additionalBinNumber)];
 
-	topOutMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
-	bottomOutMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
-	topInMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
-	bottomInMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (3 + 2*additionalBinNumber)];
+	topOutMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	bottomOutMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	topInMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	bottomInMatrixNodeBufferMasha = new double[(xnumberAdded + 1) * (ynumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
 
-	topOutVectorCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * 3 * (2 + 2*additionalBinNumber)];
-	bottomOutVectorCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * 3 * (2 + 2*additionalBinNumber)];
-	topInVectorCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * 3 * (2 + 2*additionalBinNumber)];
-	bottomInVectorCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * 3 * (2 + 2*additionalBinNumber)];
+	topOutVectorCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * 3 * (2 + 2 * additionalBinNumber)];
+	bottomOutVectorCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * 3 * (2 + 2 * additionalBinNumber)];
+	topInVectorCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * 3 * (2 + 2 * additionalBinNumber)];
+	bottomInVectorCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * 3 * (2 + 2 * additionalBinNumber)];
 
-	topOutCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * (2 + 2*additionalBinNumber)];
-	bottomOutCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * (2 + 2*additionalBinNumber)];
-	topInCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * (2 + 2*additionalBinNumber)];
-	bottomInCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * (2 + 2*additionalBinNumber)];
+	topOutCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * (2 + 2 * additionalBinNumber)];
+	bottomOutCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * (2 + 2 * additionalBinNumber)];
+	topInCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * (2 + 2 * additionalBinNumber)];
+	bottomInCellBufferMasha = new double[(ynumberAdded) * (xnumberAdded) * (2 + 2 * additionalBinNumber)];
 
-	topOutMatrixCellBufferMasha = new double[xnumberAdded  * ynumberAdded * 9 * (2 + 2*additionalBinNumber)];
-	bottomOutMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2*additionalBinNumber)];
-	topInMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2*additionalBinNumber)];
-	bottomInMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2*additionalBinNumber)];
+	topOutMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2 * additionalBinNumber)];
+	bottomOutMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2 * additionalBinNumber)];
+	topInMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2 * additionalBinNumber)];
+	bottomInMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2 * additionalBinNumber)];
 
 	////buneman E
 	leftOutBunemanExBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
@@ -6408,20 +6479,20 @@ void Simulation::createArrays() {
 	bottomOutDivergenceBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
 	bottomInDivergenceBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
 
-	tempCellParameterLeft = create3array(2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
-	tempCellParameterRight = create3array(2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
-	tempNodeParameterLeft = create3array(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
-	tempNodeParameterRight = create3array(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+	tempCellParameterLeft = create3array(2 + 2 * additionalBinNumber, ynumberAdded, znumberAdded);
+	tempCellParameterRight = create3array(2 + 2 * additionalBinNumber, ynumberAdded, znumberAdded);
+	tempNodeParameterLeft = create3array(3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+	tempNodeParameterRight = create3array(3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 
-	tempCellVectorParameterLeft = create3vectorArray(2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
-	tempCellVectorParameterRight = create3vectorArray(2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
-	tempNodeVectorParameterLeft = create3vectorArray(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
-	tempNodeVectorParameterRight = create3vectorArray(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+	tempCellVectorParameterLeft = create3vectorArray(2 + 2 * additionalBinNumber, ynumberAdded, znumberAdded);
+	tempCellVectorParameterRight = create3vectorArray(2 + 2 * additionalBinNumber, ynumberAdded, znumberAdded);
+	tempNodeVectorParameterLeft = create3vectorArray(3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+	tempNodeVectorParameterRight = create3vectorArray(3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 
-	tempCellMatrixParameterLeft = create3matrixArray(2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
-	tempCellMatrixParameterRight = create3matrixArray(2 + 2*additionalBinNumber, ynumberAdded, znumberAdded);
-	tempNodeMatrixParameterLeft = create3matrixArray(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
-	tempNodeMatrixParameterRight = create3matrixArray(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+	tempCellMatrixParameterLeft = create3matrixArray(2 + 2 * additionalBinNumber, ynumberAdded, znumberAdded);
+	tempCellMatrixParameterRight = create3matrixArray(2 + 2 * additionalBinNumber, ynumberAdded, znumberAdded);
+	tempNodeMatrixParameterLeft = create3matrixArray(3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+	tempNodeMatrixParameterRight = create3matrixArray(3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 
 	tempNodeMassMatrixParameterLeft = new MassMatrix **[3 + 2 * additionalBinNumber];
 	tempNodeMassMatrixParameterRight = new MassMatrix **[3 + 2 * additionalBinNumber];
@@ -6445,20 +6516,20 @@ void Simulation::createArrays() {
 		}
 	}
 
-	tempCellParameterFront = create3array(xnumberAdded, 2 + 2*additionalBinNumber, znumberAdded);
-	tempCellParameterBack = create3array(xnumberAdded, 2 + 2*additionalBinNumber, znumberAdded);
-	tempNodeParameterFront = create3array(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded + 1);
-	tempNodeParameterBack = create3array(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded + 1);
+	tempCellParameterFront = create3array(xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
+	tempCellParameterBack = create3array(xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
+	tempNodeParameterFront = create3array(xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
+	tempNodeParameterBack = create3array(xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
 
-	tempCellVectorParameterFront = create3vectorArray(xnumberAdded, 2 + 2*additionalBinNumber, znumberAdded);
-	tempCellVectorParameterBack = create3vectorArray(xnumberAdded, 2 + 2*additionalBinNumber, znumberAdded);
-	tempNodeVectorParameterFront = create3vectorArray(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded + 1);
-	tempNodeVectorParameterBack = create3vectorArray(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded + 1);
+	tempCellVectorParameterFront = create3vectorArray(xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
+	tempCellVectorParameterBack = create3vectorArray(xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
+	tempNodeVectorParameterFront = create3vectorArray(xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
+	tempNodeVectorParameterBack = create3vectorArray(xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
 
-	tempCellMatrixParameterFront = create3matrixArray(xnumberAdded, 2 + 2*additionalBinNumber, znumberAdded);
-	tempCellMatrixParameterBack = create3matrixArray(xnumberAdded, 2 + 2*additionalBinNumber, znumberAdded);
-	tempNodeMatrixParameterFront = create3matrixArray(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded + 1);
-	tempNodeMatrixParameterBack = create3matrixArray(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded + 1);
+	tempCellMatrixParameterFront = create3matrixArray(xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
+	tempCellMatrixParameterBack = create3matrixArray(xnumberAdded, 2 + 2 * additionalBinNumber, znumberAdded);
+	tempNodeMatrixParameterFront = create3matrixArray(xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
+	tempNodeMatrixParameterBack = create3matrixArray(xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
 
 	tempNodeMassMatrixParameterFront = new MassMatrix **[xnumberAdded + 1];
 	tempNodeMassMatrixParameterBack = new MassMatrix **[xnumberAdded + 1];
@@ -6482,20 +6553,20 @@ void Simulation::createArrays() {
 		}
 	}
 
-	tempCellParameterBottom = create3array(xnumberAdded, ynumberAdded, 2 + 2*additionalBinNumber);
-	tempCellParameterTop = create3array(xnumberAdded, ynumberAdded, 2 + 2*additionalBinNumber);
-	tempNodeParameterBottom = create3array(xnumberAdded + 1, ynumberAdded + 1, 3 + 2*additionalBinNumber);
-	tempNodeParameterTop = create3array(xnumberAdded + 1, ynumberAdded + 1, 3 + 2*additionalBinNumber);
+	tempCellParameterBottom = create3array(xnumberAdded, ynumberAdded, 2 + 2 * additionalBinNumber);
+	tempCellParameterTop = create3array(xnumberAdded, ynumberAdded, 2 + 2 * additionalBinNumber);
+	tempNodeParameterBottom = create3array(xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
+	tempNodeParameterTop = create3array(xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
 
-	tempCellVectorParameterBottom = create3vectorArray(xnumberAdded, ynumberAdded, 2 + 2*additionalBinNumber);
-	tempCellVectorParameterTop = create3vectorArray(xnumberAdded, ynumberAdded, 2 + 2*additionalBinNumber);
-	tempNodeVectorParameterBottom = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2*additionalBinNumber);
-	tempNodeVectorParameterTop = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2*additionalBinNumber);
+	tempCellVectorParameterBottom = create3vectorArray(xnumberAdded, ynumberAdded, 2 + 2 * additionalBinNumber);
+	tempCellVectorParameterTop = create3vectorArray(xnumberAdded, ynumberAdded, 2 + 2 * additionalBinNumber);
+	tempNodeVectorParameterBottom = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
+	tempNodeVectorParameterTop = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
 
-	tempCellMatrixParameterBottom = create3matrixArray(xnumberAdded, ynumberAdded, 2 + 2*additionalBinNumber);
-	tempCellMatrixParameterTop = create3matrixArray(xnumberAdded, ynumberAdded, 2 + 2*additionalBinNumber);
-	tempNodeMatrixParameterBottom = create3matrixArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2*additionalBinNumber);
-	tempNodeMatrixParameterTop = create3matrixArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2*additionalBinNumber);
+	tempCellMatrixParameterBottom = create3matrixArray(xnumberAdded, ynumberAdded, 2 + 2 * additionalBinNumber);
+	tempCellMatrixParameterTop = create3matrixArray(xnumberAdded, ynumberAdded, 2 + 2 * additionalBinNumber);
+	tempNodeMatrixParameterBottom = create3matrixArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
+	tempNodeMatrixParameterTop = create3matrixArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
 
 	tempNodeMassMatrixParameterBottom = new MassMatrix **[xnumberAdded + 1];
 	tempNodeMassMatrixParameterTop = new MassMatrix **[xnumberAdded + 1];
@@ -6568,40 +6639,40 @@ void Simulation::createArrays() {
 		bunemanNewBz = create3array(xnumberAdded, ynumberAdded, znumberAdded + 1);
 		tempBunemanBzParameter = create3array(xnumberAdded, ynumberAdded, znumberAdded + 1);
 		bunemanDivCleaningBz = create3array(xnumberAdded, ynumberAdded, znumberAdded + 1);
-		
+
 
 		bunemanChargeDensity = create3array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 		bunemanDivergenceCleaningPotential = create4array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1, 1);
 
 		/// left right
-		tempBunemanJxLeft = create3array(2 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
-		tempBunemanJxRight = create3array(2 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
-		
-		tempBunemanJyLeft = create3array(3 + 2*additionalBinNumber, ynumberAdded, znumberAdded + 1);
-		tempBunemanJyRight = create3array(3 + 2*additionalBinNumber, ynumberAdded, znumberAdded + 1);
-		
-		tempBunemanJzLeft = create3array(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded);
-		tempBunemanJzRight = create3array(3 + 2*additionalBinNumber, ynumberAdded + 1, znumberAdded);
+		tempBunemanJxLeft = create3array(2 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+		tempBunemanJxRight = create3array(2 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
+
+		tempBunemanJyLeft = create3array(3 + 2 * additionalBinNumber, ynumberAdded, znumberAdded + 1);
+		tempBunemanJyRight = create3array(3 + 2 * additionalBinNumber, ynumberAdded, znumberAdded + 1);
+
+		tempBunemanJzLeft = create3array(3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded);
+		tempBunemanJzRight = create3array(3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded);
 
 		///front back
-		tempBunemanJxFront = create3array(xnumberAdded, 3 + 2*additionalBinNumber, znumberAdded + 1);
-		tempBunemanJxBack = create3array(xnumberAdded, 3 + 2*additionalBinNumber, znumberAdded + 1);
+		tempBunemanJxFront = create3array(xnumberAdded, 3 + 2 * additionalBinNumber, znumberAdded + 1);
+		tempBunemanJxBack = create3array(xnumberAdded, 3 + 2 * additionalBinNumber, znumberAdded + 1);
 
-		tempBunemanJyFront = create3array(xnumberAdded + 1, 2 + 2*additionalBinNumber, znumberAdded + 1);
-		tempBunemanJyBack = create3array(xnumberAdded + 1, 2 + 2*additionalBinNumber, znumberAdded + 1);
+		tempBunemanJyFront = create3array(xnumberAdded + 1, 2 + 2 * additionalBinNumber, znumberAdded + 1);
+		tempBunemanJyBack = create3array(xnumberAdded + 1, 2 + 2 * additionalBinNumber, znumberAdded + 1);
 
-		tempBunemanJzFront = create3array(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded);
-		tempBunemanJzBack = create3array(xnumberAdded + 1, 3 + 2*additionalBinNumber, znumberAdded);
+		tempBunemanJzFront = create3array(xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded);
+		tempBunemanJzBack = create3array(xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded);
 		// bottom top
 
-		tempBunemanJxBottom = create3array(xnumberAdded, ynumberAdded + 1, 3 + 2*additionalBinNumber);
-		tempBunemanJxTop = create3array(xnumberAdded, ynumberAdded + 1, 3 + 2*additionalBinNumber);
+		tempBunemanJxBottom = create3array(xnumberAdded, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
+		tempBunemanJxTop = create3array(xnumberAdded, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
 
-		tempBunemanJyBottom = create3array(xnumberAdded + 1, ynumberAdded, 3 + 2*additionalBinNumber);
-		tempBunemanJyTop = create3array(xnumberAdded + 1, ynumberAdded, 3 + 2*additionalBinNumber);
+		tempBunemanJyBottom = create3array(xnumberAdded + 1, ynumberAdded, 3 + 2 * additionalBinNumber);
+		tempBunemanJyTop = create3array(xnumberAdded + 1, ynumberAdded, 3 + 2 * additionalBinNumber);
 
-		tempBunemanJzBottom = create3array(xnumberAdded + 1, ynumberAdded + 1, 2 + 2*additionalBinNumber);
-		tempBunemanJzTop = create3array(xnumberAdded + 1, ynumberAdded + 1, 2 + 2*additionalBinNumber);
+		tempBunemanJzBottom = create3array(xnumberAdded + 1, ynumberAdded + 1, 2 + 2 * additionalBinNumber);
+		tempBunemanJzTop = create3array(xnumberAdded + 1, ynumberAdded + 1, 2 + 2 * additionalBinNumber);
 	}
 
 	arrayCreated = true;
@@ -6623,7 +6694,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = -1;
 	type.charge = -electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[0];
-	type.concentration = concentrations[0]*initialElectronConcentration;
+	type.concentration = concentrations[0] * initialElectronConcentration;
 	type.typeName = "electron";
 
 	types[0] = type;
@@ -6634,7 +6705,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 1;
 	type.charge = electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[1];
-	type.concentration = concentrations[1]*initialElectronConcentration;
+	type.concentration = concentrations[1] * initialElectronConcentration;
 	type.typeName = "proton";
 
 	types[1] = type;
@@ -6645,7 +6716,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 1;
 	type.charge = electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[2];
-	type.concentration = concentrations[2]*initialElectronConcentration;
+	type.concentration = concentrations[2] * initialElectronConcentration;
 	type.typeName = "positron";
 
 	types[2] = type;
@@ -6656,7 +6727,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 2;
 	type.charge = 2 * electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[3];
-	type.concentration = concentrations[3]*initialElectronConcentration;
+	type.concentration = concentrations[3] * initialElectronConcentration;
 	type.typeName = "alpha";
 
 	types[3] = type;
@@ -6667,7 +6738,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 1;
 	type.charge = electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[4];
-	type.concentration = concentrations[4]*initialElectronConcentration;
+	type.concentration = concentrations[4] * initialElectronConcentration;
 	type.typeName = "deuterium";
 
 	types[4] = type;
@@ -6678,7 +6749,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 2;
 	type.charge = 2 * electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[5];
-	type.concentration = concentrations[5]*initialElectronConcentration;
+	type.concentration = concentrations[5] * initialElectronConcentration;
 	type.typeName = "helium3";
 
 	types[5] = type;
@@ -6689,7 +6760,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 3;
 	type.charge = 3 * electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[6];
-	type.concentration = concentrations[6]*initialElectronConcentration;
+	type.concentration = concentrations[6] * initialElectronConcentration;
 	type.typeName = "oxygen_plus_3";
 
 	types[6] = type;
@@ -6700,7 +6771,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.chargeCount = 1;
 	type.charge = electron_charge_normalized;
 	type.particlesPerBin = particlesPerBin[7];
-	type.concentration = concentrations[7]*initialElectronConcentration;
+	type.concentration = concentrations[7] * initialElectronConcentration;
 	type.typeName = "silicon_plus_1";
 
 	types[7] = type;
@@ -8192,4 +8263,3 @@ int Simulation::getLocalIndexByAbsoluteY(int j) {
 int Simulation::getLocalIndexByAbsoluteZ(int k) {
 	return k - firstAbsoluteZindex;
 }
-
