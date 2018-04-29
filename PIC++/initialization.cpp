@@ -320,7 +320,6 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 
 	massElectron = electronMassInput * massProtonReal;
 	massProton = massProtonReal;
-	massElectron = electronMassInput * massProtonReal;
 	massAlpha = massAlphaReal;
 	massDeuterium = massDeuteriumReal;
 	massHelium3 = massHelium3Real;
@@ -360,9 +359,14 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 		E0 = E0 * (plasma_period * sqrt(scaleFactor));
 		B0 = B0 * (plasma_period * sqrt(scaleFactor));
 
+		//electron_charge_normalized = electron_charge * (plasma_period / sqrt(cube(scaleFactor)));
 		rescaleConstants();
-
 		initialElectronConcentration *= cube(scaleFactor);
+
+		double tempOmegaPlasma = sqrt(
+			4 * pi * electron_charge_normalized * electron_charge_normalized * 
+			concentrations[0]*initialElectronConcentration / (massElectron * (gamma0)))/plasma_period;
+		
 		density = density * cube(scaleFactor);
 		/*for (int i = 0; i < typesNumber; ++i) {
 			concentrations[i] = concentrations[i] * cube(scaleFactor);
@@ -591,7 +595,6 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 
 	massElectron = electronMassInput * massProtonReal;
 	massProton = massProtonReal;
-	massElectron = electronMassInput * massProtonReal;
 	massAlpha = massAlphaReal;
 	massDeuterium = massDeuteriumReal;
 	massHelium3 = massHelium3Real;
@@ -5261,11 +5264,11 @@ void Simulation::initializeKolmogorovSpectrum() {
 	srand(turbulenceRandomSeed);
 
 	minTurbulenceLengthX = 10;
-	maxTurbulenceLengthX = 50;
+	maxTurbulenceLengthX = 500;
 	minTurbulenceLengthY = 10;
-	maxTurbulenceLengthY = 50;
+	maxTurbulenceLengthY = 500;
 	minTurbulenceLengthZ = 10;
-	maxTurbulenceLengthZ = 50;
+	maxTurbulenceLengthZ = 500;
 
 	int maxKxnumber = maxTurbulenceLengthX / minTurbulenceLengthX;
 	int maxKynumber = maxTurbulenceLengthY / minTurbulenceLengthY;
@@ -5360,12 +5363,12 @@ void Simulation::initializeKolmogorovSpectrum() {
 	}
 
 	if(boundaryConditionTypeX == FREE_BOTH) {
-		leftBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[1+additionalBinNumber], deltaX, deltaY, deltaZ);
-		rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ);
+		leftBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[1+additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral);
+		rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral);
 	}
 	if(boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 		leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
-		rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ);
+		rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral);
 	}
 }
 

@@ -101,7 +101,7 @@ Vector3d TurbulenceBoundaryFieldEvaluator::evaluateEfield(double t, int j, int k
 RandomTurbulenceBoundaryFieldEvaluator::RandomTurbulenceBoundaryFieldEvaluator(int randomSeedV, int minLengthXV, int maxLengthXV, int minLengthYV,
                                                                                int maxLengthYV, int minLengthZV, int maxLengthZV,
                                                                                Simulation* simuationV, Vector3d V0, Vector3d E, Vector3d B, double xv,
-                                                                               double dx, double dy, double dz) {
+                                                                               double dx, double dy, double dz, int xnumberGeneralV, int ynumberGeneralV, int znumberGeneralV) {
 	randomSeed = randomSeedV;
 	minLengthX = minLengthXV;
 	maxLengthX = maxLengthXV;
@@ -117,6 +117,9 @@ RandomTurbulenceBoundaryFieldEvaluator::RandomTurbulenceBoundaryFieldEvaluator(i
 	deltaX = dx;
 	deltaY = dy;
 	deltaZ = dz;
+	xnumberGeneral = xnumberGeneralV;
+	ynumberGeneral = ynumberGeneralV;
+	znumberGeneral = znumberGeneralV;
 }
 
 Vector3d RandomTurbulenceBoundaryFieldEvaluator::evaluateBfield(double t, int j, int k) {
@@ -124,6 +127,14 @@ Vector3d RandomTurbulenceBoundaryFieldEvaluator::evaluateBfield(double t, int j,
 	int maxKxnumber = maxLengthX / minLengthX;
 	int maxKynumber = maxLengthY / minLengthY;
 	int maxKznumber = maxLengthZ / minLengthZ;
+
+	if (ynumberGeneral == 1) {
+		maxKynumber = 1;
+	}
+	if (znumberGeneral == 1) {
+		maxKznumber = 1;
+	}
+
 	Vector3d result = B0;
 	for (int ki = 0; ki < maxKxnumber; ki++) {
 		for (int kj = 0; kj < maxKynumber; ++kj) {
@@ -167,6 +178,14 @@ Vector3d RandomTurbulenceBoundaryFieldEvaluator::evaluateEfield(double t, int j,
 	int maxKxnumber = maxLengthX / minLengthX;
 	int maxKynumber = maxLengthY / minLengthY;
 	int maxKznumber = maxLengthZ / minLengthZ;
+
+	if (ynumberGeneral == 1) {
+		maxKynumber = 1;
+	}
+	if (znumberGeneral == 1) {
+		maxKznumber = 1;
+	}
+
 	Vector3d result = E0;
 	for (int ki = 0; ki < maxKxnumber; ki++) {
 		for (int kj = 0; kj < maxKynumber; ++kj) {

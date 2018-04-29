@@ -1034,16 +1034,6 @@ void Simulation::updateDeltaT() {
 			}
 		}
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					if (concentrations[0] > nmax) {
-						nmax = concentrations[0];
-					}
-				}
-			}
-		}
-
 		/*double minFlux = electricFlux[0][0][0].norm();
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {

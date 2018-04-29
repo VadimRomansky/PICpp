@@ -78,8 +78,11 @@ class RandomTurbulenceBoundaryFieldEvaluator : public BoundaryFieldEvaluator {
 	double deltaX;
 	double deltaY;
 	double deltaZ;
+	int xnumberGeneral;
+	int ynumberGeneral;
+	int znumberGeneral;
 public:
-	RandomTurbulenceBoundaryFieldEvaluator(int randomSeedV, int minLengthXV, int maxLengthXV, int minLengthYV, int maxLengthYV, int minLengthZV, int maxLengthZV, Simulation* simuationV, Vector3d V, Vector3d E, Vector3d B, double x, double dx, double dy, double dz);
+	RandomTurbulenceBoundaryFieldEvaluator(int randomSeedV, int minLengthXV, int maxLengthXV, int minLengthYV, int maxLengthYV, int minLengthZV, int maxLengthZV, Simulation* simuationV, Vector3d V, Vector3d E, Vector3d B, double x, double dx, double dy, double dz, int xnumberGeneral, int ynumberGeneral, int znumberGeneral);
 	virtual Vector3d evaluateEfield(double t, int j, int k);
 	virtual Vector3d evaluateBfield(double t, int j, int k);
 };

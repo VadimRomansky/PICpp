@@ -293,14 +293,15 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 		fscanf(inputFile, "%c", &ch);
 	}
 
-	double* concentrations = new double[typesNumber];
+	double* relativeConcentrations = new double[typesNumber];
 	int* particlesPerBin = new int[typesNumber];
 
 	for (int i = 0; i < typesNumber; ++i) {
 		int particlePerBin;
 		double typeConcentration;
 		fscanf(inputFile, "%lf %d", &typeConcentration, &particlePerBin);
-		concentrations[i] = typeConcentration*initialElectronConcentration;
+		//concentrations[i] = typeConcentration*initialElectronConcentration;
+		relativeConcentrations[i] = typeConcentration;
 		particlesPerBin[i] = particlePerBin;
 
 		if (particlesPerBin[i] < 0) {
@@ -325,7 +326,7 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 
 	printf("finish read input\n");
 	return Simulation(xnumber, ynumber, znumber, dx, temperature, Vx, Vy, Vz, sigma, Btheta, Bphi, Ex, Ey, Ez, initialElectronConcentration,
-	                  maxIterations, maxTime, writeIterationParameter, writeGeneralParameter, writeTrajectoryParameter, writeParticleStep, smoothingCount, smoothingParameter, typesNumber, particlesPerBin, concentrations, inputType, nprocs, verbocity,
+	                  maxIterations, maxTime, writeIterationParameter, writeGeneralParameter, writeTrajectoryParameter, writeParticleStep, smoothingCount, smoothingParameter, typesNumber, particlesPerBin, relativeConcentrations, inputType, nprocs, verbocity,
 	                  preferedTimeStep, massElectronInput, comm);
 }
 
