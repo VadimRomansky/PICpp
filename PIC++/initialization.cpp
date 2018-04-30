@@ -5287,11 +5287,11 @@ void Simulation::initializeKolmogorovSpectrum() {
 	turbulenceAmplitude = 1.0;
 	turbulenceEnergy = 0;
 	for (int ki = 0; ki < maxKxnumber; ki++) {
+		double kx = 2 * pi * ki / (deltaX * maxTurbulenceLengthX);
 		for (int kj = 0; kj < maxKynumber; ++kj) {
+			double ky = 2 * pi * kj / (deltaY * maxTurbulenceLengthY);
 			for (int kk = 0; kk < maxKznumber; ++kk) {
 				if (ki + kj + kk > 0) {
-					double kx = 2 * pi * ki / (deltaX * maxTurbulenceLengthX);
-					double ky = 2 * pi * kj / (deltaY * maxTurbulenceLengthY);
 					double kz = 2 * pi * kk / (deltaZ * maxTurbulenceLengthZ);
 					double B = evaluateTurbulenceFieldAmplitude(kx, ky, kz);
 					turbulenceEnergy += B * B;
@@ -5303,11 +5303,11 @@ void Simulation::initializeKolmogorovSpectrum() {
 	turbulenceAmplitude = sqrt(B0.scalarMult(B0) * turbulenceFraction / turbulenceEnergy);
 
 	for (int ki = 0; ki < maxKxnumber; ki++) {
+		double kx = 2 * pi * ki / (deltaX * maxTurbulenceLengthX);
 		for (int kj = 0; kj < maxKynumber; ++kj) {
+			double ky = 2 * pi * kj / (deltaY * maxTurbulenceLengthY);
 			for (int kk = 0; kk < maxKznumber; ++kk) {
 				if (ki + kj + kk > 0) {
-					double kx = 2 * pi * ki / (deltaX * maxTurbulenceLengthX);
-					double ky = 2 * pi * kj / (deltaY * maxTurbulenceLengthY);
 					double kz = 2 * pi * kk / (deltaZ * maxTurbulenceLengthZ);
 					double phase1 = 2 * pi * uniformDistribution();
 					double phase2 = 2 * pi * uniformDistribution();
@@ -5362,13 +5362,11 @@ void Simulation::initializeKolmogorovSpectrum() {
 		}
 	}
 
-	if(boundaryConditionTypeX == FREE_BOTH) {
-		leftBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[1+additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral);
-		rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral);
+	if((cartCoord[0] == cartDim[0] - 1) && (boundaryConditionTypeX != PERIODIC)) {
+		rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
 	}
-	if(boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
-		leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
-		rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral);
+	if((cartCoord[0] == 0) && (boundaryConditionTypeX == FREE_BOTH)) {
+		leftBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[1+additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
 	}
 }
 

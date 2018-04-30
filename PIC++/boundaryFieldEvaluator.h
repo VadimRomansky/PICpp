@@ -10,6 +10,8 @@ public:
 	virtual ~BoundaryFieldEvaluator();
 	virtual Vector3d evaluateEfield(double t, int j, int k) = 0;
 	virtual Vector3d evaluateBfield(double t, int j, int k) = 0;
+	virtual void prepareB(double t);
+	virtual void prepareE(double t);
 };
 
 /*Vector3d BoundaryFieldEvaluator::evaluateEfield(double& t, int j, int k) {
@@ -81,10 +83,18 @@ class RandomTurbulenceBoundaryFieldEvaluator : public BoundaryFieldEvaluator {
 	int xnumberGeneral;
 	int ynumberGeneral;
 	int znumberGeneral;
+	int xnumberAdded;
+	int ynumberAdded;
+	int znumberAdded;
+	Vector3d** Bfield;
+	Vector3d** Efield;
 public:
-	RandomTurbulenceBoundaryFieldEvaluator(int randomSeedV, int minLengthXV, int maxLengthXV, int minLengthYV, int maxLengthYV, int minLengthZV, int maxLengthZV, Simulation* simuationV, Vector3d V, Vector3d E, Vector3d B, double x, double dx, double dy, double dz, int xnumberGeneral, int ynumberGeneral, int znumberGeneral);
+	RandomTurbulenceBoundaryFieldEvaluator(int randomSeedV, int minLengthXV, int maxLengthXV, int minLengthYV, int maxLengthYV, int minLengthZV, int maxLengthZV, Simulation* simuationV, Vector3d V, Vector3d E, Vector3d B, double x, double dx, double dy, double dz, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, int xnumberAdded, int ynumberAdded, int znumberAdded);
+	virtual ~RandomTurbulenceBoundaryFieldEvaluator();
 	virtual Vector3d evaluateEfield(double t, int j, int k);
 	virtual Vector3d evaluateBfield(double t, int j, int k);
+	virtual void prepareB(double t);
+	virtual void prepareE(double t);
 };
 
 #endif

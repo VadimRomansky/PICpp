@@ -313,6 +313,13 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 		}
 	}
 
+	if((cartDim[0] == 0) && (boundaryConditionTypeX != PERIODIC)) {
+		leftBoundaryFieldEvaluator->prepareE(time + theta*deltaT);
+	}
+	if((cartDim[0] == cartCoord[0] - 1) && (boundaryConditionTypeX != PERIODIC)) {
+		rightBoundaryFieldEvaluator->prepareE(time + theta*deltaT);
+	}
+
 	if (cartDim[0] > 1) {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
@@ -2570,6 +2577,12 @@ void Simulation::evaluateMagneticField() {
 	double procTime = 0;
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
+	}
+	if((cartDim[0] == 0) && (boundaryConditionTypeX != PERIODIC)) {
+		leftBoundaryFieldEvaluator->prepareB(time + deltaT);
+	}
+	if((cartDim[0] == cartCoord[0] - 1) && (boundaryConditionTypeX != PERIODIC)) {
+		rightBoundaryFieldEvaluator->prepareB(time + deltaT);
 	}
 	if (solverType == BUNEMAN) {
 		evaluateBunemanMagneticField();
