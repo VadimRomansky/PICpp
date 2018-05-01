@@ -465,9 +465,9 @@ void Simulation::output() {
 	if ((rank == 0) && (verbosity > 0)) printLog("outputing\n");
 
 	std::string fileNumber = "";
-	bool differentFiles = true;
+	bool differentFiles = false;
 	if(differentFiles) {
-		fileNumber = convertIntToString(currentWriteNumber);
+		fileNumber = std::string("_") + convertIntToString(currentWriteNumber);
 	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution protons\n");

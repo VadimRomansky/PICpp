@@ -641,7 +641,7 @@ void outputGridX(const char* outFileName, double* grid, int number, int addition
 
 	FILE* outFile = NULL;
 
-	if ((rank == 0) && (newFile)) {
+	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && (cartCoord[2] == 0) && (newFile)) {
 		outFile = fopen(outFileName, "w");
 		fclose(outFile);
 	}
@@ -677,7 +677,7 @@ void outputGridY(const char* outFileName, double* grid, int number, int addition
 
 	FILE* outFile = NULL;
 
-	if ((rank == 0) && (newFile)) {
+	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && (cartCoord[2] == 0) && (newFile)) {
 		outFile = fopen(outFileName, "w");
 		fclose(outFile);
 	}
@@ -713,7 +713,7 @@ void outputGridZ(const char* outFileName, double* grid, int number, int addition
 
 	FILE* outFile = NULL;
 
-	if ((rank == 0) && (newFile)) {
+	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && (cartCoord[2] == 0) && (newFile)) {
 		outFile = fopen(outFileName, "w");
 		fclose(outFile);
 	}
@@ -751,7 +751,7 @@ void outputGridReducedX(const char* outFileName, double* grid, int number, int a
 
 	FILE* outFile = NULL;
 
-	if ((rank == 0) && (newFile)) {
+	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && (cartCoord[2] == 0) && (newFile)) {
 		outFile = fopen(outFileName, "w");
 		fclose(outFile);
 	}
@@ -794,7 +794,7 @@ void outputGridReducedY(const char* outFileName, double* grid, int number, int a
 
 	FILE* outFile = NULL;
 
-	if ((rank == 0) && (newFile)) {
+	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && (cartCoord[2] == 0) && (newFile)) {
 		outFile = fopen(outFileName, "w");
 		fclose(outFile);
 	}
@@ -837,7 +837,7 @@ void outputGridReducedZ(const char* outFileName, double* grid, int number, int a
 
 	FILE* outFile = NULL;
 
-	if ((rank == 0) && (newFile)) {
+	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && (cartCoord[2] == 0) && (newFile)) {
 		outFile = fopen(outFileName, "w");
 		fclose(outFile);
 	}
