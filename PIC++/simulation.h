@@ -114,6 +114,7 @@ public:
 	int writeGeneralParameter;
 	int writeTrajectoryNumber;
 	int writeParticleNumber;
+	int currentWriteNumber;
 	double smoothingParameter;
 	int smoothingCount;
 	double xsizeGeneral;

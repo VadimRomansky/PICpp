@@ -354,7 +354,7 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
                                       int xnumberAdded, int ynumberAdded, int znumberAdded, int lnumber,
                                       int xnumberGeneral,
                                       int znumberGeneral, int ynumberGeneral, int additionalBinNumber, double precision,
-                                      int maxIteration, bool periodicX, bool periodicY, bool periodicZ, int verbocity,
+                                      int maxIteration, bool periodicX, bool periodicY, bool periodicZ, int verbosity,
                                       double* leftOutGmresBuffer, double* rightOutGmresBuffer,
                                       double* leftInGmresBuffer, double* rightInGmresBuffer,
                                       double* frontOutGmresBuffer, double* backOutGmresBuffer,
@@ -368,7 +368,7 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 	MPI_Comm_rank(cartComm, &rank);
 
 	MPI_Barrier(cartComm);
-	if ((rank == 0) && (verbocity > 0)) printf("start GMRES\n");
+	if ((rank == 0) && (verbosity > 0)) printf("start GMRES\n");
 
 
 	MPI_Barrier(cartComm);
@@ -465,7 +465,7 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 	//double maxRelativeError = precision;
 
 	while ((relativeError > max2(maxRelativeError, 1E-15) && (n < min2(maxIteration, matrixDimension + 3)))) {
-		if ((rank == 0) && (verbocity > 1)) printf("GMRES iteration %d\n", n);
+		if ((rank == 0) && (verbosity > 1)) printf("GMRES iteration %d\n", n);
 		newHessenbergMatrix = new double*[n];
 		for (int i = 0; i < n; ++i) {
 			newHessenbergMatrix[i] = new double[n - 1];
@@ -602,7 +602,7 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 	}
 
 	n = n - 1;
-	//if(rank == 0) printf("total GMRES iteration = %d\n", n);
+	if((rank == 0) && (verbosity > 0)) printf("total GMRES iteration = %d\n", n);
 
 	//out result
 

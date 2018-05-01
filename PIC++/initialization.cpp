@@ -64,6 +64,7 @@ Simulation::Simulation() {
 	derExPoint = 0;
 	derConcentrationPoint = 0;
 	constMeanElevelPoint = 0;
+	currentWriteNumber = 0;
 }
 
 void Simulation::setSpaceForProc() {
@@ -431,6 +432,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	derExPoint = 0;
 	constMeanElevelPoint = 0;
 	derConcentrationPoint = 0;
+	currentWriteNumber = 0;
 	//if(rank == 0) printf("end constructor\n");
 	//fflush(stdout);
 }
@@ -702,6 +704,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	derExPoint = 0;
 	constMeanElevelPoint = 0;
 	derConcentrationPoint = 0;
+	currentWriteNumber = 0;
 	//if(rank == 0) printf("end constructor\n");
 	//fflush(stdout);
 }

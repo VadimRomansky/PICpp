@@ -112,6 +112,7 @@ void Simulation::simulate() {
 		updateEnergy();
 		if (currentIteration % writeParameter == 0) {
 			output();
+			currentWriteNumber++;
 		}
 		if (currentIteration % writeGeneralParameter == 0) {
 			if (rank == 0) outputGeneral((outputDir + "general.dat").c_str(), this);
@@ -463,37 +464,43 @@ void Simulation::output() {
 	collectMostAcceleratedParticles();
 	if ((rank == 0) && (verbosity > 0)) printLog("outputing\n");
 
+	std::string fileNumber = "";
+	bool differentFiles = true;
+	if(differentFiles) {
+		fileNumber = convertIntToString(currentWriteNumber);
+	}
+
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution protons\n");
-	outputDistribution((outputDir + "distribution_protons.dat").c_str(), particles, PROTON, scaleFactor,
-	                   plasma_period, verbosity);
+	outputDistribution((outputDir + "distribution_protons" + fileNumber + ".dat").c_str(), particles, PROTON, scaleFactor,
+	                   plasma_period, verbosity, differentFiles);
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution electrons\n");
-	outputDistribution((outputDir + "distribution_electrons.dat").c_str(), particles, ELECTRON, scaleFactor,
-	                   plasma_period, verbosity);
+	outputDistribution((outputDir + "distribution_electrons" + fileNumber + ".dat").c_str(), particles, ELECTRON, scaleFactor,
+	                   plasma_period, verbosity, differentFiles);
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution alphas\n");
-	outputDistribution((outputDir + "distribution_alphas.dat").c_str(), particles, ALPHA, scaleFactor,
-	                   plasma_period, verbosity);
+	outputDistribution((outputDir + "distribution_alphas" + fileNumber + ".dat").c_str(), particles, ALPHA, scaleFactor,
+	                   plasma_period, verbosity, differentFiles);
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution positrons\n");
-	outputDistribution((outputDir + "distribution_positrons.dat").c_str(), particles, POSITRON, scaleFactor,
-	                   plasma_period, verbosity);
+	outputDistribution((outputDir + "distribution_positrons" + fileNumber + ".dat").c_str(), particles, POSITRON, scaleFactor,
+	                   plasma_period, verbosity, differentFiles);
 
 	Vector3d shockWaveV = V0 / 3;
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution protons shock wave\n");
-	outputDistributionShiftedSystem((outputDir + "distribution_protons_sw.dat").c_str(), particles, shockWaveV,
+	outputDistributionShiftedSystem((outputDir + "distribution_protons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
 	                                speed_of_light_normalized, PROTON, scaleFactor,
-	                                plasma_period, verbosity);
+	                                plasma_period, verbosity, differentFiles);
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution electrons shock wave\n");
-	outputDistributionShiftedSystem((outputDir + "distribution_electrons_sw.dat").c_str(), particles, shockWaveV,
+	outputDistributionShiftedSystem((outputDir + "distribution_electrons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
 	                                speed_of_light_normalized, ELECTRON, scaleFactor,
-	                                plasma_period, verbosity);
+	                                plasma_period, verbosity, differentFiles);
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution alphas shock wave\n");
-	outputDistributionShiftedSystem((outputDir + "distribution_alphas_sw.dat").c_str(), particles, shockWaveV,
+	outputDistributionShiftedSystem((outputDir + "distribution_alphas_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
 	                                speed_of_light_normalized, ALPHA, scaleFactor,
-	                                plasma_period, verbosity);
+	                                plasma_period, verbosity, differentFiles);
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution positrons shock wave\n");
-	outputDistributionShiftedSystem((outputDir + "distribution_positrons_sw.dat").c_str(), particles, shockWaveV,
+	outputDistributionShiftedSystem((outputDir + "distribution_positrons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
 	                                speed_of_light_normalized, POSITRON, scaleFactor,
-	                                plasma_period, verbosity);
+	                                plasma_period, verbosity, differentFiles);
 
 	//if ((rank == 0) && (verbosity > 1)) printf("outputing anisotropy electrons\n");
 	//outputAnisotropy((outputDir + "anisotropy_electrons.dat").c_str(), this, ELECTRON, scaleFactor, plasma_period);
@@ -548,30 +555,30 @@ void Simulation::output() {
 	if (coordX == cartCoord[0]) {
 		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
 		if (verbosity > 2) printf("x local index = %d\n", xindex);
-		outputFieldsCrossectionYZ((outputDir + "EfieldYZ.dat").c_str(), (outputDir + "BfieldYZ.dat").c_str(), Efield, Bfield,
+		outputFieldsCrossectionYZ((outputDir + "EfieldYZ.dat").c_str(), (outputDir + "BfieldYZ" + fileNumber + ".dat").c_str(), Efield, Bfield,
 		                          xnumberAdded,
 		                          ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommYZ,
-		                          cartCommZ, cartCoord, cartDim, xindex);
+		                          cartCommZ, cartCoord, cartDim, xindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output crossection fields y\n");
 	if (coordY == cartCoord[1]) {
 		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral / 2);
 		if (verbosity > 2) printf("y local index = %d\n", yindex);
-		outputFieldsCrossectionXZ((outputDir + "EfieldXZ.dat").c_str(), (outputDir + "BfieldXZ.dat").c_str(), Efield, Bfield,
+		outputFieldsCrossectionXZ((outputDir + "EfieldXZ.dat").c_str(), (outputDir + "BfieldXZ" + fileNumber + ".dat").c_str(), Efield, Bfield,
 		                          xnumberAdded,
 		                          ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommXZ,
-		                          cartCommZ, cartCoord, cartDim, yindex);
+		                          cartCommZ, cartCoord, cartDim, yindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output crossection fields z\n");
 	if (coordZ == cartCoord[2]) {
 		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 		if (verbosity > 2) printf("z local index = %d\n", zindex);
-		outputFieldsCrossectionXY((outputDir + "EfieldXY.dat").c_str(), (outputDir + "BfieldXY.dat").c_str(), Efield, Bfield,
+		outputFieldsCrossectionXY((outputDir + "EfieldXY.dat").c_str(), (outputDir + "BfieldXY" + fileNumber + ".dat").c_str(), Efield, Bfield,
 		                          xnumberAdded,
 		                          ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommXY,
-		                          cartCommY, cartCoord, cartDim, zindex);
+		                          cartCommY, cartCoord, cartDim, zindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output line fields x\n");
@@ -580,10 +587,10 @@ void Simulation::output() {
 		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 		if (verbosity > 2) printf("y local index = %d\n", yindex);
 		if (verbosity > 2) printf("z local index = %d\n", zindex);
-		outputFieldsLineX((outputDir + "EfieldX.dat").c_str(), (outputDir + "BfieldX.dat").c_str(), Efield, Bfield,
+		outputFieldsLineX((outputDir + "EfieldX.dat").c_str(), (outputDir + "BfieldX" + fileNumber + ".dat").c_str(), Efield, Bfield,
 		                  xnumberAdded,
 		                  ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommX, cartCoord,
-		                  cartDim, yindex, zindex);
+		                  cartDim, yindex, zindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output line fields y\n");
@@ -592,10 +599,10 @@ void Simulation::output() {
 		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 		if (verbosity > 2) printf("x local index = %d\n", xindex);
 		if (verbosity > 2) printf("z local index = %d\n", zindex);
-		outputFieldsLineY((outputDir + "EfieldY.dat").c_str(), (outputDir + "BfieldY.dat").c_str(), Efield, Bfield,
+		outputFieldsLineY((outputDir + "EfieldY.dat").c_str(), (outputDir + "BfieldY" + fileNumber + ".dat").c_str(), Efield, Bfield,
 		                  xnumberAdded,
 		                  ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommY, cartCoord,
-		                  cartDim, xindex, zindex);
+		                  cartDim, xindex, zindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output line fields z\n");
@@ -604,27 +611,27 @@ void Simulation::output() {
 		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
 		if (verbosity > 2) printf("y local index = %d\n", yindex);
 		if (verbosity > 2) printf("x local index = %d\n", xindex);
-		outputFieldsLineZ((outputDir + "EfieldZ.dat").c_str(), (outputDir + "BfieldZ.dat").c_str(), Efield, Bfield,
+		outputFieldsLineZ((outputDir + "EfieldZ.dat").c_str(), (outputDir + "BfieldZ" + fileNumber + ".dat").c_str(), Efield, Bfield,
 		                  xnumberAdded,
 		                  ynumberAdded, znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartCommZ, cartCoord,
-		                  cartDim, xindex, yindex);
+		                  cartDim, xindex, yindex, differentFiles);
 	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing grid\n");
 	outputGridX((outputDir + "Xfile.dat").c_str(), xgrid, xnumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim,
-	            scaleFactor);
+	            true, scaleFactor);
 	outputGridReducedX((outputDir + "XfileReduced.dat").c_str(), xgrid, xnumberAdded, additionalBinNumber, reduceStepX,
-	                   rank, leftRank, rightRank, cartComm, cartCoord, cartDim, scaleFactor);
+	                   rank, leftRank, rightRank, cartComm, cartCoord, cartDim, true, scaleFactor);
 
 	outputGridY((outputDir + "Yfile.dat").c_str(), ygrid, ynumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim,
-	            scaleFactor);
+	            true, scaleFactor);
 	outputGridReducedY((outputDir + "YfileReduced.dat").c_str(), ygrid, ynumberAdded, additionalBinNumber, reduceStepY,
-	                   rank, frontRank, backRank, cartComm, cartCoord, cartDim, scaleFactor);
+	                   rank, frontRank, backRank, cartComm, cartCoord, cartDim, true, scaleFactor);
 
 	outputGridZ((outputDir + "Zfile.dat").c_str(), zgrid, znumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim,
-	            scaleFactor);
+	            true, scaleFactor);
 	outputGridReducedZ((outputDir + "ZfileReduced.dat").c_str(), zgrid, znumberAdded, additionalBinNumber, reduceStepZ,
-	                   rank, bottomRank, topRank, cartComm, cartCoord, cartDim, scaleFactor);
+	                   rank, bottomRank, topRank, cartComm, cartCoord, cartDim, true, scaleFactor);
 
 
 	//if ((rank == 0) && (verbosity > 1)) printf("outputing concentrations\n");
@@ -637,30 +644,30 @@ void Simulation::output() {
 	if (coordX == cartCoord[0]) {
 		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
 		if (verbosity > 2) printf("x local index = %d\n", xindex);
-		outputConcentrationsCrossectionYZ((outputDir + "concentrationsYZ.dat").c_str(), particleConcentrations, chargeDensity,
+		outputConcentrationsCrossectionYZ((outputDir + "concentrationsYZ" + fileNumber + ".dat").c_str(), particleConcentrations, chargeDensity,
 		                                  chargeDensityHat, xnumberAdded,
 		                                  ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period,
-		                                  scaleFactor, cartCommYZ, cartCommZ, cartCoord, cartDim, xindex);
+		                                  scaleFactor, cartCommYZ, cartCommZ, cartCoord, cartDim, xindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output crossection concentrations y\n");
 	if (coordY == cartCoord[1]) {
 		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral / 2);
 		if (verbosity > 2) printf("y local index = %d\n", yindex);
-		outputConcentrationsCrossectionXZ((outputDir + "concentrationsXZ.dat").c_str(), particleConcentrations, chargeDensity,
+		outputConcentrationsCrossectionXZ((outputDir + "concentrationsXZ" + fileNumber + ".dat").c_str(), particleConcentrations, chargeDensity,
 		                                  chargeDensityHat, xnumberAdded,
 		                                  ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period,
-		                                  scaleFactor, cartCommXZ, cartCommZ, cartCoord, cartDim, yindex);
+		                                  scaleFactor, cartCommXZ, cartCommZ, cartCoord, cartDim, yindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output crossection concentrations z\n");
 	if (coordZ == cartCoord[2]) {
 		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 		if (verbosity > 2) printf("z local index = %d\n", zindex);
-		outputConcentrationsCrossectionXY((outputDir + "concentrationsXY.dat").c_str(), particleConcentrations, chargeDensity,
+		outputConcentrationsCrossectionXY((outputDir + "concentrationsXY" + fileNumber + ".dat").c_str(), particleConcentrations, chargeDensity,
 		                                  chargeDensityHat, xnumberAdded,
 		                                  ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period,
-		                                  scaleFactor, cartCommXY, cartCommY, cartCoord, cartDim, zindex);
+		                                  scaleFactor, cartCommXY, cartCommY, cartCoord, cartDim, zindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output line concentrations x\n");
@@ -669,10 +676,10 @@ void Simulation::output() {
 		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 		if (verbosity > 2) printf("y local index = %d\n", yindex);
 		if (verbosity > 2) printf("z local index = %d\n", zindex);
-		outputConcentrationsLineX((outputDir + "concentrationsX.dat").c_str(), particleConcentrations, chargeDensity,
+		outputConcentrationsLineX((outputDir + "concentrationsX" + fileNumber + ".dat").c_str(), particleConcentrations, chargeDensity,
 		                          chargeDensityHat, xnumberAdded,
 		                          ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor,
-		                          cartCommX, cartCoord, cartDim, yindex, zindex);
+		                          cartCommX, cartCoord, cartDim, yindex, zindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output line concentrations y\n");
@@ -681,10 +688,10 @@ void Simulation::output() {
 		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 		if (verbosity > 2) printf("x local index = %d\n", xindex);
 		if (verbosity > 2) printf("z local index = %d\n", zindex);
-		outputConcentrationsLineY((outputDir + "concentrationsY.dat").c_str(), particleConcentrations, chargeDensity,
+		outputConcentrationsLineY((outputDir + "concentrationsY" + fileNumber + ".dat").c_str(), particleConcentrations, chargeDensity,
 		                          chargeDensityHat, xnumberAdded,
 		                          ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor,
-		                          cartCommY, cartCoord, cartDim, xindex, zindex);
+		                          cartCommY, cartCoord, cartDim, xindex, zindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output line concentrations z\n");
@@ -693,10 +700,10 @@ void Simulation::output() {
 		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
 		if (verbosity > 2) printf("y local index = %d\n", yindex);
 		if (verbosity > 2) printf("x local index = %d\n", xindex);
-		outputConcentrationsLineZ((outputDir + "concentrationsZ.dat").c_str(), particleConcentrations, chargeDensity,
+		outputConcentrationsLineZ((outputDir + "concentrationsZ" + fileNumber + ".dat").c_str(), particleConcentrations, chargeDensity,
 		                          chargeDensityHat, xnumberAdded,
 		                          ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor,
-		                          cartCommZ, cartCoord, cartDim, xindex, yindex);
+		                          cartCommZ, cartCoord, cartDim, xindex, yindex, differentFiles);
 	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing velocity\n");
@@ -709,27 +716,27 @@ void Simulation::output() {
 	if (coordX == cartCoord[0]) {
 		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
 		if (verbosity > 2) printf("x local index = %d\n", xindex);
-		outputVelocityCrossectionYZ((outputDir + "velocityYZ.dat").c_str(), particleBulkVelocities, types, xnumberAdded,
+		outputVelocityCrossectionYZ((outputDir + "velocityYZ" + fileNumber + ".dat").c_str(), particleBulkVelocities, types, xnumberAdded,
 		                            ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor,
-		                            cartCommYZ, cartCommZ, cartCoord, cartDim, xindex);
+		                            cartCommYZ, cartCommZ, cartCoord, cartDim, xindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output crossection velocity y\n");
 	if (coordY == cartCoord[1]) {
 		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral / 2);
 		if (verbosity > 2) printf("y local index = %d\n", yindex);
-		outputVelocityCrossectionXZ((outputDir + "velocityXZ.dat").c_str(), particleBulkVelocities, types, xnumberAdded,
+		outputVelocityCrossectionXZ((outputDir + "velocityXZ" + fileNumber + ".dat").c_str(), particleBulkVelocities, types, xnumberAdded,
 		                            ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor,
-		                            cartCommXZ, cartCommZ, cartCoord, cartDim, yindex);
+		                            cartCommXZ, cartCommZ, cartCoord, cartDim, yindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output crossection velocity z\n");
 	if (coordZ == cartCoord[2]) {
 		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 		if (verbosity > 2) printf("z local index = %d\n", zindex);
-		outputVelocityCrossectionXY((outputDir + "velocityXY.dat").c_str(), particleBulkVelocities, types, xnumberAdded,
+		outputVelocityCrossectionXY((outputDir + "velocityXY" + fileNumber + ".dat").c_str(), particleBulkVelocities, types, xnumberAdded,
 		                            ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor,
-		                            cartCommXY, cartCommY, cartCoord, cartDim, zindex);
+		                            cartCommXY, cartCommY, cartCoord, cartDim, zindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output line velocity x\n");
@@ -738,9 +745,9 @@ void Simulation::output() {
 		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 		if (verbosity > 2) printf("y local index = %d\n", yindex);
 		if (verbosity > 2) printf("z local index = %d\n", zindex);
-		outputVelocityLineX((outputDir + "velocityX.dat").c_str(), particleBulkVelocities, types, xnumberAdded,
+		outputVelocityLineX((outputDir + "velocityX" + fileNumber + ".dat").c_str(), particleBulkVelocities, types, xnumberAdded,
 		                    ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor,
-		                    cartCommX, cartCoord, cartDim, yindex, zindex);
+		                    cartCommX, cartCoord, cartDim, yindex, zindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output line velocity y\n");
@@ -749,9 +756,9 @@ void Simulation::output() {
 		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 		if (verbosity > 2) printf("x local index = %d\n", xindex);
 		if (verbosity > 2) printf("z local index = %d\n", zindex);
-		outputVelocityLineY((outputDir + "velocityY.dat").c_str(), particleBulkVelocities, types, xnumberAdded,
+		outputVelocityLineY((outputDir + "velocityY" + fileNumber + ".dat").c_str(), particleBulkVelocities, types, xnumberAdded,
 		                    ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor,
-		                    cartCommY, cartCoord, cartDim, xindex, zindex);
+		                    cartCommY, cartCoord, cartDim, xindex, zindex, differentFiles);
 	}
 	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output line velocity z\n");
@@ -760,9 +767,9 @@ void Simulation::output() {
 		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
 		if (verbosity > 2) printf("y local index = %d\n", yindex);
 		if (verbosity > 2) printf("x local index = %d\n", xindex);
-		outputVelocityLineZ((outputDir + "velocityZ.dat").c_str(), particleBulkVelocities, types, xnumberAdded,
+		outputVelocityLineZ((outputDir + "velocityZ" + fileNumber + ".dat").c_str(), particleBulkVelocities, types, xnumberAdded,
 		                    ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor,
-		                    cartCommZ, cartCoord, cartDim, xindex, yindex);
+		                    cartCommZ, cartCoord, cartDim, xindex, yindex, differentFiles);
 	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing flux\n");
@@ -770,7 +777,7 @@ void Simulation::output() {
 	           znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim);*/
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing divergence\n");
-	outputDivergenceError((outputDir + "divergence_error.dat").c_str(), this, plasma_period, scaleFactor);
+	outputDivergenceError((outputDir + "divergence_error.dat").c_str(), this, plasma_period, scaleFactor, differentFiles);
 
 	double rotBscale = 1.0 / (plasma_period * plasma_period * sqrt(scaleFactor));
 

@@ -58,6 +58,10 @@ void Simulation::evaluateElectricField() {
 			bool periodicX = (boundaryConditionTypeX == PERIODIC);
 			bool periodicY = (boundaryConditionTypeY == PERIODIC);
 			bool periodicZ = (boundaryConditionTypeZ == PERIODIC);
+			double procTime2 = 0;
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime2 = clock();
+			}
 			generalizedMinimalResidualMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumberAdded,
 			                                 ynumberAdded,
 			                                 znumberAdded, maxwellEquationMatrixSize, xnumberGeneral, ynumberGeneral,
@@ -67,6 +71,10 @@ void Simulation::evaluateElectricField() {
 			                                 frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer,
 			                                 bottomInGmresBuffer, topInGmresBuffer, gmresMaxwellBasis, cartComm, cartCoord,
 			                                 cartDim);
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime2 = clock() - procTime2;
+				printf("gmres time = %g sec\n", procTime2 / CLOCKS_PER_SEC);
+			}
 			//biconjugateStabilizedGradientMethod(maxwellEquationMatrix, maxwellEquationRightPart, gmresOutput, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, maxwellEquationMatrixSize, maxErrorLevel, maxGMRESIterations, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, cartCoord, cartDim, residualBiconjugateMaxwell, firstResidualBiconjugateMaxwell, vBiconjugateMaxwell, pBiconjugateMaxwell, sBiconjugateMaxwell, tBiconjugateMaxwell, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
 
 
@@ -302,6 +310,10 @@ void Simulation::updateFields() {
 }
 
 void Simulation::evaluateMaxwellEquationMatrix() {
+	double procTime = 0;
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
 	int resistiveLayerWidth = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -450,6 +462,11 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 
 	if (debugMode) {
 		checkEquationMatrix(maxwellEquationMatrix, maxwellEquationMatrixSize);
+	}
+
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("evaluate maxwell equation matrix time= %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }
 
@@ -2636,7 +2653,7 @@ void Simulation::evaluateMagneticField() {
 }
 
 bool Simulation::isInResistiveLayer(int i, int j, int k) {
-	//return false;
+	return false;
 	if (boundaryConditionTypeX == PERIODIC) {
 		return false;
 	}
