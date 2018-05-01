@@ -171,12 +171,19 @@ void multiplySpecialMatrixVector(double**** result, std::vector < MatrixElement 
 			for (int k = 0; k < znumberAdded; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
 					result[i][j][k][l] = 0;
+					if(i >= minI && i <= maxI && j >= minJ && j <= maxJ && k >= minK && k <= maxK) {
+						for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+							MatrixElement element = matrix[i][j][k][l][m];
+
+							result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
+						}
+					}
 				}
 			}
 		}
 	}
 
-	for (int i = minI; i <= maxI; ++i) {
+	/*for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
@@ -189,7 +196,7 @@ void multiplySpecialMatrixVector(double**** result, std::vector < MatrixElement 
 				}
 			}
 		}
-	}
+	}*/
 }
 
 void multiplySpecialMatrixVector(double**** result, std::vector < MatrixElement >**** matrix, double**** vector,
@@ -215,12 +222,19 @@ void multiplySpecialMatrixVector(double**** result, std::vector < MatrixElement 
 			for (int k = 0; k < znumberAdded; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
 					result[i][j][k][l] = 0;
+					if(i >= minI && i <= maxI && j >= minJ && j <= maxJ && k >= minK && k <= maxK) {
+						for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+							MatrixElement element = matrix[i][j][k][l][m];
+
+							result[i][j][k][l] += element.value * vector[element.i][element.j][element.k][element.l];
+						}
+					}
 				}
 			}
 		}
 	}
 
-	for (int i = minI; i <= maxI; ++i) {
+	/*for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
@@ -234,7 +248,7 @@ void multiplySpecialMatrixVector(double**** result, std::vector < MatrixElement 
 				}
 			}
 		}
-	}
+	}*/
 }
 
 void arnoldiIterations(std::vector < MatrixElement >**** matrix, double** outHessenbergMatrix, int n,
@@ -623,55 +637,11 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 
 	gmresBasis->clear();
 
-	//printf("rank = %d outvector[0][0][0][1] = %g\n", rank, outvector[0][0][0][1]);
-	//printf("rank = %d outvector[1][0][0][1] = %g\n", rank, outvector[1][0][0][1]);
-	//printf("rank = %d outvector[2][0][0][1] = %g\n", rank, outvector[2][0][0][1]);
-	//printf("rank = %d outvector[xnumber - 2][0][0][1] = %g\n", rank, outvector[xnumber - 2][0][0][1]);
-	//printf("rank = %d outvector[xnumber - 1][0][0][1] = %g\n", rank, outvector[xnumber - 1][0][0][1]);
-	//printf("rank = %d outvector[xnumber][0][0][1] = %g\n", rank, outvector[xnumber][0][0][1]);
-
 	MPI_Barrier(cartComm);
 
 	exchangeLargeVector(outvector, xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
 	MPI_Barrier(cartComm);
-	/*if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-		sendLargeVectorToLeftReceiveFromRight(outvector, leftOutGmresBuffer, rightInGmresBuffer, xnumberAdded, ynumberAdded,
-		                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
-	} else if (cartCoord[0] == 0) {
-		receiveLargeVectorFromRight(outvector, rightInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
-		                            additionalBinNumber, cartComm);
-	} else if (cartCoord[0] == cartDim[0] - 1) {
-		sendLargeVectorToLeft(outvector, leftOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
-		                      additionalBinNumber, cartComm);
-	}
-
-	if (periodicX || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-		sendLargeVectorToRightReceiveFromLeft(outvector, rightOutGmresBuffer, leftInGmresBuffer, xnumberAdded, ynumberAdded,
-		                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
-	} else if (cartCoord[0] == 0) {
-		sendLargeVectorToRight(outvector, rightOutGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
-		                       additionalBinNumber, cartComm);
-	} else if (cartCoord[0] == cartDim[0] - 1) {
-		receiveLargeVectorFromLeft(outvector, leftInGmresBuffer, xnumberAdded, ynumberAdded, znumberAdded, lnumber,
-		                           additionalBinNumber, cartComm);
-	}
-
-	sendLargeVectorToFrontReceiveFromBack(outvector, frontOutGmresBuffer, backInGmresBuffer, xnumberAdded, ynumberAdded,
-	                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
-	sendLargeVectorToBackReceiveFromFront(outvector, backOutGmresBuffer, frontInGmresBuffer, xnumberAdded, ynumberAdded,
-	                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
-
-	sendLargeVectorToBottomReceiveFromTop(outvector, bottomOutGmresBuffer, topInGmresBuffer, xnumberAdded, ynumberAdded,
-	                                      znumberAdded, lnumber, additionalBinNumber, cartComm);
-	sendLargeVectorToTopReceiveFromBottom(outvector, topOutGmresBuffer, bottomInGmresBuffer, xnumberAdded, ynumberAdded,
-	                                      znumberAdded, lnumber, additionalBinNumber, cartComm);*/
-
-	//printf("rank = %d outvector[0][0][0][1] = %g\n", rank, outvector[0][0][0][1]);
-	//printf("rank = %d outvector[1][0][0][1] = %g\n", rank, outvector[1][0][0][1]);
-	//printf("rank = %d outvector[2][0][0][1] = %g\n", rank, outvector[2][0][0][1]);
-	//printf("rank = %d outvector[xnumber - 2][0][0][1] = %g\n", rank, outvector[xnumber - 2][0][0][1]);
-	//printf("rank = %d outvector[xnumber - 1][0][0][1] = %g\n", rank, outvector[xnumber - 1][0][0][1]);
-	//printf("rank = %d outvector[xnumber][0][0][1] = %g\n", rank, outvector[xnumber][0][0][1]);
+	
 
 	for (int i = 0; i < n; ++i) {
 		delete[] Qmatrix[i];
@@ -726,8 +696,8 @@ double scalarMultiplyLargeVectors(double**** a, double**** b, int xnumberAdded, 
 			for (int k = minK; k <= maxK; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
 					result[0] += a[i][j][k][l] * b[i][j][k][l];
-					alertNaNOrInfinity(a[i][j][k][l], "a[i][j][k][l] = NaN in scalarMult\n");
-					alertNaNOrInfinity(result[0], "result[0] = NaN in scalarMult\n");
+					//alertNaNOrInfinity(a[i][j][k][l], "a[i][j][k][l] = NaN in scalarMult\n");
+					//alertNaNOrInfinity(result[0], "result[0] = NaN in scalarMult\n");
 				}
 			}
 		}

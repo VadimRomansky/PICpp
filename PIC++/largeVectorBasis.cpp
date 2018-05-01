@@ -106,7 +106,7 @@ void LargeVectorBasis::resize(int capacityv) {
 
 void LargeVectorBasis::clear() {
 	size = 0;
-	for (int m = 0; m < capacity; ++m) {
+	/*for (int m = 0; m < capacity; ++m) {
 		for (int i = 0; i < xnumber; ++i) {
 			for (int j = 0; j < ynumber; ++j) {
 				for (int k = 0; k < znumber; ++k) {
@@ -116,5 +116,5 @@ void LargeVectorBasis::clear() {
 				}
 			}
 		}
-	}
+	}*/
 }
