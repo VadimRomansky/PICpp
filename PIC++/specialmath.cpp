@@ -595,6 +595,7 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 		}
 
 		error = fabs(beta * Qmatrix[n - 1][0]);
+		//double error1 = evaluateError(hessenbergMatrix, y, beta, n);
 
 		relativeError = error / normRightPart;
 

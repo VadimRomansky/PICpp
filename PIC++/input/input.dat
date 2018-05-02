@@ -18,6 +18,7 @@
 10                      write particle step
 4			smothing iterations
 0.5                     smothing parameter
+0                       write each iteration in different file
 0.05    	        electron mass (in units of proton mass)
 8                       particle types number
 1.0 10                	electrons relative concentration and particles per bin

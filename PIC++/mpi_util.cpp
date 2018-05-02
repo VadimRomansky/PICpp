@@ -13,7 +13,7 @@
 #include "paths.h"
 
 void sendInput(Simulation& simulation, int nprocs) {
-	const int integerDataNumber = 20;
+	const int integerDataNumber = 21;
 	const int doubleDataNumber = 29;
 	int integerData[integerDataNumber];
 	double doubleData[doubleDataNumber];
@@ -55,6 +55,13 @@ void sendInput(Simulation& simulation, int nprocs) {
 			solverType = 3;
 		}
 		integerData[19] = solverType;
+		int multiplyOutput = 0;
+		if(simulation.multiplyFileOutput) {
+			multiplyOutput = 1;
+		} else {
+			multiplyOutput = 0;
+		}
+		integerData[20] = multiplyOutput;
 
 		doubleData[0] = simulation.xsizeGeneral;
 		doubleData[1] = simulation.ysizeGeneral;
@@ -99,7 +106,7 @@ void sendInput(Simulation& simulation, int nprocs) {
 }
 
 Simulation recieveInput(MPI_Comm cartComm) {
-	const int integerDataNumber = 20;
+	const int integerDataNumber = 21;
 	const int doubleDataNumber = 29;
 	int integerData[integerDataNumber];
 	double doubleData[doubleDataNumber];
@@ -153,6 +160,8 @@ Simulation recieveInput(MPI_Comm cartComm) {
 			MPI_Finalize();
 			exit(0);
 		}
+		int multiplyOutput = integerData[20];
+		bool multiplyFileOutput = (multiplyOutput == 1);
 		double xsize = doubleData[0];
 		double ysize = doubleData[1];
 		double zsize = doubleData[2];
@@ -183,7 +192,7 @@ Simulation recieveInput(MPI_Comm cartComm) {
 		double plasma_period = doubleData[27];
 		double scaleFactor = doubleData[28];
 		return Simulation(xnumber, ynumber, znumber, deltaX, temperature, V0x, V0y, V0z, initialMagnetization, Btheta, Bphi, E0x, E0y, E0z, initialElectronConcentration,
-	                  maxIteration, maxTime, writeParameter, writeGeneralParameter, writeTrajectoryNumber, writeParticleNumber, smoothingCount, smoothingParameter, typesNumber, particlesPerBin, concentrations, inputType, nprocs, verbosity,
+	                  maxIteration, maxTime, writeParameter, writeGeneralParameter, writeTrajectoryNumber, writeParticleNumber, smoothingCount, smoothingParameter, multiplyFileOutput, typesNumber, particlesPerBin, concentrations, inputType, nprocs, verbosity,
 	                  preferedDeltaT, electronMassInput, plasma_period, scaleFactor, solverTypev, cartComm);
 	}
 	printf("recieve input only with not 0 rank!\n");

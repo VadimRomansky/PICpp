@@ -65,6 +65,7 @@ Simulation::Simulation() {
 	derConcentrationPoint = 0;
 	constMeanElevelPoint = 0;
 	currentWriteNumber = 0;
+	multiplyFileOutput = false;
 }
 
 void Simulation::setSpaceForProc() {
@@ -167,7 +168,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
                        double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z,
                        double initialElectronConcentrationV,
                        int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV,
-                       int smoothingCountV, double smoothingParameterV, int typesNumberV, int* particlesPerBinV,
+                       int smoothingCountV, double smoothingParameterV, bool multiplyFileOutputV, int typesNumberV, int* particlesPerBinV,
                        double* concentrationsV, int inputTypeV, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV,
                        MPI_Comm& comm) {
 
@@ -318,6 +319,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	writeParticleNumber = writeParticleV;
 	smoothingCount = smoothingCountV;
 	smoothingParameter = smoothingParameterV;
+	multiplyFileOutput = multiplyFileOutputV;
 
 	massElectron = electronMassInput * massProtonReal;
 	massProton = massProtonReal;
@@ -441,7 +443,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
                        double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z,
                        double initialElectronConcentrationV,
                        int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV,
-                       int smoothingCountV, double smoothingParameterV, int typesNumberV, int* particlesPerBinV,
+                       int smoothingCountV, double smoothingParameterV, bool multiplyFileOutputV, int typesNumberV, int* particlesPerBinV,
                        double* concentrationsV, int inputTypeV, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV,
                        double plasma_periodv, double scaleFactorv, SolverType solverTypev, MPI_Comm& comm) {
 	//TODO 
@@ -594,6 +596,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	writeParticleNumber = writeParticleV;
 	smoothingCount = smoothingCountV;
 	smoothingParameter = smoothingParameterV;
+	multiplyFileOutput = multiplyFileOutputV;
 
 	massElectron = electronMassInput * massProtonReal;
 	massProton = massProtonReal;
@@ -4847,7 +4850,7 @@ void Simulation::initializeFluxFromRight() {
 	}
 
 	//turbulence
-	initializeKolmogorovSpectrum();
+	//initializeKolmogorovSpectrum();
 
 	double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
 	double p0 = gamma * massProton * V0.norm();

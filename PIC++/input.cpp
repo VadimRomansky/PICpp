@@ -259,6 +259,15 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 		fscanf(inputFile, "%c", &ch);
 	}
 
+	int multiplyOutput;
+	ch = ' ';
+	fscanf(inputFile, "%d", &multiplyOutput);
+
+	while (ch != '\n') {
+		fscanf(inputFile, "%c", &ch);
+	}
+	bool multiplyFileOutput = (multiplyOutput == 1);
+
 	double massElectronInput;
 	fscanf(inputFile, "%lf", &massElectronInput);
 
@@ -326,7 +335,7 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 
 	printf("finish read input\n");
 	return Simulation(xnumber, ynumber, znumber, dx, temperature, Vx, Vy, Vz, sigma, Btheta, Bphi, Ex, Ey, Ez, initialElectronConcentration,
-	                  maxIterations, maxTime, writeIterationParameter, writeGeneralParameter, writeTrajectoryParameter, writeParticleStep, smoothingCount, smoothingParameter, typesNumber, particlesPerBin, relativeConcentrations, inputType, nprocs, verbocity,
+	                  maxIterations, maxTime, writeIterationParameter, writeGeneralParameter, writeTrajectoryParameter, writeParticleStep, smoothingCount, smoothingParameter, multiplyFileOutput, typesNumber, particlesPerBin, relativeConcentrations, inputType, nprocs, verbocity,
 	                  preferedTimeStep, massElectronInput, comm);
 }
 

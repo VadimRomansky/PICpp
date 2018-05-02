@@ -117,6 +117,7 @@ public:
 	int currentWriteNumber;
 	double smoothingParameter;
 	int smoothingCount;
+	bool multiplyFileOutput;
 	double xsizeGeneral;
 	double ysizeGeneral;
 	double zsizeGeneral;
@@ -824,11 +825,11 @@ public:
 	void setSpaceForProc();
 	Simulation(int xn, int yn, int zn, double dxv, double temp, double Vx,
                    double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z, double electronInitConc, 
-                   int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesperBin,
+                   int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, bool multiplyFileOutputV, int typesNumberV, int *particlesperBin,
                    double *concentrations, int inputType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, MPI_Comm& comm);
 	Simulation(int xn, int yn, int zn, double dxv, double temp, double Vx,
                    double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y, double E0z, double electronInitConc, 
-                   int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, int typesNumberV, int *particlesperBin,
+                   int maxIterations, double maxTimeV, int writeIterationV, int writeGeneralV, int writeTrajectoryV, int writeParticleV, int smoothingCountV, double smoothingParameterV, bool multiplyFileOutputV, int typesNumberV, int *particlesperBin,
                    double *concentrations, int inputType, int nprocsV, int verbosityV, double preferedTimeStepV, double massElectronInputV, double plasmaPeriodV,
                    double scaleFactorV, SolverType solverTypev, MPI_Comm& comm);
 	/*Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
