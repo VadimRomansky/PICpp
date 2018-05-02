@@ -820,7 +820,7 @@ void Simulation::updateCorrelationMapCell(Particle& particle) {
 	updateCorrelationMapCellY(particle);
 	updateCorrelationMapCellZ(particle);
 
-	double fullCorrelation = 0;
+	/*double fullCorrelation = 0;
 	for (int i = 0; i < splineOrder + 2; ++i) {
 		for (int j = 0; j < splineOrder + 2; ++j) {
 			for (int k = 0; k < splineOrder + 2; ++k) {
@@ -831,7 +831,7 @@ void Simulation::updateCorrelationMapCell(Particle& particle) {
 	}
 	if ((fullCorrelation < 1.0 - 1E-10) || (fullCorrelation > 1.0 + 1E-10)) {
 		printf("full correlation cell = %20.15g\n", fullCorrelation);
-	}
+	}*/
 }
 
 void Simulation::updateCorrelationMapNode(Particle* particle) {
@@ -993,7 +993,7 @@ void Simulation::updateCorrelationMapNode(Particle& particle) {
 	updateCorrelationMapNodeY(particle);
 	updateCorrelationMapNodeZ(particle);
 
-	double fullCorrelation = 0;
+	/*double fullCorrelation = 0;
 	for (int i = 0; i < splineOrder + 2; ++i) {
 		for (int j = 0; j < splineOrder + 2; ++j) {
 			for (int k = 0; k < splineOrder + 2; ++k) {
@@ -1004,5 +1004,5 @@ void Simulation::updateCorrelationMapNode(Particle& particle) {
 	}
 	if ((fullCorrelation < 1.0 - 1E-10) || (fullCorrelation > 1.0 + 1E-10)) {
 		printf("full correlation node = %20.15g\n", fullCorrelation);
-	}
+	}*/
 }

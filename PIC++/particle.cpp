@@ -343,6 +343,19 @@ void Particle::setMomentumByV(const Vector3d& v, const double& c) {
 	momentum = v * (mass * gamma);
 }
 
+Vector3d Particle::evaluateVelocity(const Vector3d& p, const double& m, const double& c) {
+	double p2 = p.x * p.x + p.y * p.y + p.z * p.z;
+	double c2 = c * c;
+	double mc2 = m * c2;
+	if (p2 < relativisticPrecision * m * m * c2) {
+		return p / m;
+	} else {
+		double g = sqrt(p2 * c2 + mc2 * mc2) / mc2;;
+
+		return p / (m * g);
+	}
+}
+
 double Particle::gammaFactor(const double& c) {
 	if (!gammaCashed) {
 		double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;

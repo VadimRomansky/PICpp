@@ -119,6 +119,8 @@ public:
 	double fullEnergy(const double& c);
 
 	void setMomentumByV(const Vector3d& v, const  double& c);
+
+	static Vector3d evaluateVelocity(const Vector3d& p, const double& m, const double& c);
 };
 
 #endif
