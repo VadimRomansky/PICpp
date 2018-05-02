@@ -710,7 +710,7 @@ void Simulation::output() {
 	               particleBulkVelocities, types, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber,
 	               typesNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim);*/
 
-	MPI_Barrier(cartComm);
+	/*MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output crossection velocity x\n");
 	if (coordX == cartCoord[0]) {
 		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
@@ -769,14 +769,14 @@ void Simulation::output() {
 		outputVelocityLineZ((outputDir + "velocityZ" + fileNumber + ".dat").c_str(), particleBulkVelocities, types, xnumberAdded,
 		                    ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor,
 		                    cartCommZ, cartCoord, cartDim, xindex, yindex, multiplyFileOutput);
-	}
+	}*/
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing flux\n");
 	/*outputFlux((outputDir + "flux.dat").c_str(), electricFlux, externalElectricFlux, xnumberAdded, ynumberAdded,
 	           znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim);*/
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing divergence\n");
-	outputDivergenceError((outputDir + "divergence_error.dat").c_str(), this, plasma_period, scaleFactor, multiplyFileOutput);
+	//outputDivergenceError((outputDir + "divergence_error.dat").c_str(), this, plasma_period, scaleFactor, multiplyFileOutput);
 
 	double rotBscale = 1.0 / (plasma_period * plasma_period * sqrt(scaleFactor));
 
