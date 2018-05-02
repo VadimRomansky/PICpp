@@ -426,13 +426,17 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 	                                                       rank, nprocs, cartComm, cartCoord, cartDim));
 	int matrixDimension = lnumber * xnumberGeneral * ynumberGeneral * znumberGeneral;
 
-	double** hessenbergMatrix;
+	/*double** hessenbergMatrix;
 	double** newHessenbergMatrix;
 	hessenbergMatrix = new double*[1];
 	hessenbergMatrix[0] = new double[1];
+	hessenbergMatrix[0][0] = 0;*/
+
+	double hessenbergMatrix[maxGMRESIterations][maxGMRESIterations-1];
+	double newHessenbergMatrix[maxGMRESIterations][maxGMRESIterations-1];
 	hessenbergMatrix[0][0] = 0;
 
-	double** Qmatrix = new double*[2];
+	/*double** Qmatrix = new double*[2];
 	double** Rmatrix = new double*[2];
 	double** oldQmatrix = new double*[2];
 	double** oldRmatrix = new double*[2];
@@ -446,7 +450,12 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 	Rmatrix[1] = new double[1];
 	oldRmatrix[0] = new double[1];
 	//oldQmatrix[0] = new double[1];
-	oldRmatrix[1] = new double[1];
+	oldRmatrix[1] = new double[1];*/
+
+	double Qmatrix[maxGMRESIterations][maxGMRESIterations];
+	double Rmatrix[maxGMRESIterations][maxGMRESIterations-1];
+	double oldQmatrix[maxGMRESIterations][maxGMRESIterations];
+	double oldRmatrix[maxGMRESIterations][maxGMRESIterations-1];
 
 	if (gmresBasis->capacity <= 0) {
 		gmresBasis->resize(10);
@@ -480,18 +489,132 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 
 	while ((relativeError > max2(maxRelativeError, 1E-15) && (n < min2(maxIteration, matrixDimension + 3)))) {
 		if ((rank == 0) && (verbosity > 1)) printf("GMRES iteration %d\n", n);
-		newHessenbergMatrix = new double*[n];
+		/*newHessenbergMatrix = new double*[n];
 		for (int i = 0; i < n; ++i) {
 			newHessenbergMatrix[i] = new double[n - 1];
-		}
-		arnoldiIterations(matrix, newHessenbergMatrix, n, gmresBasis, hessenbergMatrix, xnumberAdded, ynumberAdded,
+		}*/
+		/*arnoldiIterations(matrix, newHessenbergMatrix, n, gmresBasis, hessenbergMatrix, xnumberAdded, ynumberAdded,
 		                  znumberAdded,
 		                  additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs, leftOutGmresBuffer,
 		                  rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer,
 		                  frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer,
-		                  topInGmresBuffer, cartComm, cartCoord, cartDim);
+		                  topInGmresBuffer, cartComm, cartCoord, cartDim);*/
 
-		hessenbergMatrix = newHessenbergMatrix;
+
+
+		//////////////////startArnoldi
+		MPI_Barrier(cartComm);
+
+		for (int i = 0; i < n; ++i) {
+			if (i < n - 1) {
+				for (int j = 0; j < n - 2; ++j) {
+					newHessenbergMatrix[i][j] = hessenbergMatrix[i][j];
+				}
+				//delete[] prevHessenbergMatrix[i];
+			} else {
+				for (int j = 0; j < n - 2; ++j) {
+					newHessenbergMatrix[i][j] = 0;
+				}
+			}
+		}
+		//delete[] prevHessenbergMatrix;
+		//printf("update hessenberg\n");
+		if (n >= gmresBasis->capacity) {
+			gmresBasis->resize(2 * n);
+		}
+		multiplySpecialMatrixVector(gmresBasis->array[n - 1], matrix, gmresBasis->array[n - 2], xnumberAdded, ynumberAdded,
+	                            znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs,
+	                            cartComm, cartCoord, cartDim);
+		gmresBasis->size += 1;
+		//printf("mult special matrix");
+
+		//printf("start exchange\n");
+
+		MPI_Barrier(cartComm);
+
+		exchangeLargeVector(gmresBasis->array[n-1], xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
+
+
+		for (int m = 0; m < n - 1; ++m) {
+			//double a = scalarMultiplyLargeVectors(resultBasis[m], tempVector, xnumber, ynumber, znumber, lnumber);
+			newHessenbergMatrix[m][n - 2] = scalarMultiplyLargeVectors(gmresBasis->array[m], gmresBasis->array[n - 1],
+		                                                           xnumberAdded, ynumberAdded,
+		                                                           znumberAdded, additionalBinNumber, lnumber, periodicX,
+		                                                           periodicY, periodicZ, rank, nprocs, cartComm, cartCoord,
+		                                                           cartDim);
+			//printf("outHessenbergMatrix[%d][%d] = %g\n", m, n-2, outHessenbergMatrix[m][n - 2]);
+
+			//for (int i = 0; i < xnumber+1; ++i) {
+
+			int minI = 1 + additionalBinNumber;
+			if (cartCoord[0] == 0 && !periodicX) {
+				minI = 0;
+			}
+			int maxI = xnumberAdded - 2 - additionalBinNumber;
+			if (cartCoord[0] == cartDim[0] - 1 && !periodicX) {
+				maxI = xnumberAdded - 1;
+			}
+			int minJ = 1 + additionalBinNumber;
+			int maxJ = ynumberAdded - 2 - additionalBinNumber;
+			int	 minK = 1 + additionalBinNumber;
+			int maxK = znumberAdded - 2 - additionalBinNumber;
+
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						for (int l = 0; l < lnumber; ++l) {
+							if (i >= minI && i <= maxI && j >= minJ && j <= maxJ && k >= minK && k <= maxK) {
+								gmresBasis->array[n - 1][i][j][k][l] -= newHessenbergMatrix[m][n - 2] * gmresBasis->array[m][i][j][k][l];
+							} else {
+								gmresBasis->array[n - 1][i][j][k][l] = 0;
+							}
+						}	
+					}
+				}
+			}
+		}
+		//printf("finish orthogonalisation\n");
+		newHessenbergMatrix[n - 1][n - 2] = sqrt(
+			scalarMultiplyLargeVectors(gmresBasis->array[n - 1], gmresBasis->array[n - 1], xnumberAdded, ynumberAdded,
+		                           znumberAdded, additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank, nprocs,
+		                           cartComm, cartCoord, cartDim));
+		//printf("outHessenbergMatrix[%d][%d] = %g\n", n-1, n-2, outHessenbergMatrix[n - 1][n - 2]);
+		if (newHessenbergMatrix[n - 1][n - 2] > 0) {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						for (int l = 0; l < lnumber; ++l) {
+							gmresBasis->array[n - 1][i][j][k][l] /= newHessenbergMatrix[n - 1][n - 2];
+						}
+					}
+				}
+			}
+
+			MPI_Barrier(cartComm);
+		} else {
+			printf("outHessenbergMatrix[n-1][n-2] == 0\n");
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						for (int l = 0; l < lnumber; ++l) {
+							gmresBasis->array[n - 1][i][j][k][l] = 0;
+						}
+					}
+				}
+			}
+		}
+
+		exchangeLargeVector(gmresBasis->array[n-1], xnumberAdded, ynumberAdded, znumberAdded, lnumber, additionalBinNumber, periodicX, periodicY, periodicZ, cartComm, cartCoord, cartDim, leftOutGmresBuffer, rightOutGmresBuffer, leftInGmresBuffer, rightInGmresBuffer, frontOutGmresBuffer, backOutGmresBuffer, frontInGmresBuffer, backInGmresBuffer, bottomOutGmresBuffer, topOutGmresBuffer, bottomInGmresBuffer, topInGmresBuffer);
+
+		//////////////////end Arnoldi
+
+
+		for(int l1 = 0; l1 < n; ++l1) {
+			for(int l2 = 0; l2 < n-1; ++l2){
+				hessenbergMatrix[l1][l2] = newHessenbergMatrix[l1][l2];
+			}
+		}
+		//hessenbergMatrix = newHessenbergMatrix;
 
 		if (n == 2) {
 			rho = hessenbergMatrix[0][0];
@@ -519,9 +642,9 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 			oldRmatrix[1][0] = Rmatrix[1][0];
 
 		} else {
-			Rmatrix = new double*[n];
+			//Rmatrix = new double*[n];
 			for (int i = 0; i < n; ++i) {
-				Rmatrix[i] = new double[n - 1];
+				//Rmatrix[i] = new double[n - 1];
 				if (i < n - 1) {
 					for (int j = 0; j < n - 2; ++j) {
 						Rmatrix[i][j] = oldRmatrix[i][j];
@@ -533,9 +656,9 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 				}
 			}
 
-			Qmatrix = new double*[n];
+			//Qmatrix = new double*[n];
 			for (int i = 0; i < n; ++i) {
-				Qmatrix[i] = new double[n];
+				//Qmatrix[i] = new double[n];
 				if (i < n - 1) {
 					for (int j = 0; j < n - 1; ++j) {
 						Qmatrix[i][j] = oldQmatrix[i][j];
@@ -595,11 +718,10 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 		}
 
 		error = fabs(beta * Qmatrix[n - 1][0]);
-		//double error1 = evaluateError(hessenbergMatrix, y, beta, n);
 
 		relativeError = error / normRightPart;
 
-		for (int i = 0; i < n - 1; ++i) {
+		/*for (int i = 0; i < n - 1; ++i) {
 			delete[] oldQmatrix[i];
 			delete[] oldRmatrix[i];
 		}
@@ -608,10 +730,18 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 			delete[] oldRmatrix[1];
 		}
 		delete[] oldQmatrix;
-		delete[] oldRmatrix;
+		delete[] oldRmatrix;*/
 
-		oldQmatrix = Qmatrix;
-		oldRmatrix = Rmatrix;
+		for(int l1 = 0; l1 < n; ++l1) {
+			for(int l2 = 0; l2 < n; ++l2){
+				oldQmatrix[l1][l2] = Qmatrix[l1][l2];
+			}
+			for(int l2 = 0; l2 < n-1; ++l2){
+				oldRmatrix[l1][l2] = Rmatrix[l1][l2];
+			}
+		}
+		//oldQmatrix = Qmatrix;
+		//oldRmatrix = Rmatrix;
 
 		n++;
 	}
@@ -644,14 +774,14 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 	MPI_Barrier(cartComm);
 	
 
-	for (int i = 0; i < n; ++i) {
+	/*for (int i = 0; i < n; ++i) {
 		delete[] Qmatrix[i];
 		delete[] Rmatrix[i];
 		delete[] hessenbergMatrix[i];
 	}
 	delete[] Qmatrix;
 	delete[] Rmatrix;
-	delete[] hessenbergMatrix;
+	delete[] hessenbergMatrix;*/
 	delete[] y;
 
 	for (int i = 0; i < xnumberAdded; ++i) {

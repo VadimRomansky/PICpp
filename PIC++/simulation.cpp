@@ -619,18 +619,18 @@ void Simulation::output() {
 	if ((rank == 0) && (verbosity > 1)) printf("outputing grid\n");
 	outputGridX((outputDir + "Xfile.dat").c_str(), xgrid, xnumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim,
 	            true, scaleFactor);
-	outputGridReducedX((outputDir + "XfileReduced.dat").c_str(), xgrid, xnumberAdded, additionalBinNumber, reduceStepX,
-	                   rank, leftRank, rightRank, cartComm, cartCoord, cartDim, true, scaleFactor);
+	/*outputGridReducedX((outputDir + "XfileReduced.dat").c_str(), xgrid, xnumberAdded, additionalBinNumber, reduceStepX,
+	                   rank, leftRank, rightRank, cartComm, cartCoord, cartDim, true, scaleFactor);*/
 
 	outputGridY((outputDir + "Yfile.dat").c_str(), ygrid, ynumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim,
 	            true, scaleFactor);
-	outputGridReducedY((outputDir + "YfileReduced.dat").c_str(), ygrid, ynumberAdded, additionalBinNumber, reduceStepY,
-	                   rank, frontRank, backRank, cartComm, cartCoord, cartDim, true, scaleFactor);
+	/*outputGridReducedY((outputDir + "YfileReduced.dat").c_str(), ygrid, ynumberAdded, additionalBinNumber, reduceStepY,
+	                   rank, frontRank, backRank, cartComm, cartCoord, cartDim, true, scaleFactor);*/
 
 	outputGridZ((outputDir + "Zfile.dat").c_str(), zgrid, znumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim,
 	            true, scaleFactor);
-	outputGridReducedZ((outputDir + "ZfileReduced.dat").c_str(), zgrid, znumberAdded, additionalBinNumber, reduceStepZ,
-	                   rank, bottomRank, topRank, cartComm, cartCoord, cartDim, true, scaleFactor);
+	/*outputGridReducedZ((outputDir + "ZfileReduced.dat").c_str(), zgrid, znumberAdded, additionalBinNumber, reduceStepZ,
+	                   rank, bottomRank, topRank, cartComm, cartCoord, cartDim, true, scaleFactor);*/
 
 
 	//if ((rank == 0) && (verbosity > 1)) printf("outputing concentrations\n");

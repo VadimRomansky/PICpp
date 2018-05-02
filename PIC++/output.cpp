@@ -734,6 +734,15 @@ void outputGridZ(const char* outFileName, double* grid, int number, int addition
 
 void outputGridReducedX(const char* outFileName, double* grid, int number, int additionalBinNumber, int step, int rank,
                         int prevRank, int nextRank, MPI_Comm& cartComm, int* cartCoord, int* cartDim, bool newFile, double scale) {
+	FILE* outFile = NULL;
+
+	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && (cartCoord[2] == 0) && (newFile)) {
+		outFile = fopen(outFileName, "w");
+		fclose(outFile);
+	}
+
+	MPI_Barrier(cartComm);
+	
 	int shift[1];
 	shift[0] = step - 1;
 	if (cartCoord[0] > 0 && cartCoord[1] == 0 && cartCoord[2] == 0) {
@@ -748,15 +757,6 @@ void outputGridReducedX(const char* outFileName, double* grid, int number, int a
 	if (cartCoord[0] == cartDim[0] - 1) {
 		maxI = number;
 	}
-
-	FILE* outFile = NULL;
-
-	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && (cartCoord[2] == 0) && (newFile)) {
-		outFile = fopen(outFileName, "w");
-		fclose(outFile);
-	}
-
-	MPI_Barrier(cartComm);
 
 	if (cartCoord[1] == 0 && cartCoord[2] == 0) {
 		outFile = fopen(outFileName, "a");
@@ -777,6 +777,15 @@ void outputGridReducedX(const char* outFileName, double* grid, int number, int a
 
 void outputGridReducedY(const char* outFileName, double* grid, int number, int additionalBinNumber, int step, int rank,
                         int prevRank, int nextRank, MPI_Comm& cartComm, int* cartCoord, int* cartDim, bool newFile, double scale) {
+	FILE* outFile = NULL;
+
+	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && (cartCoord[2] == 0) && (newFile)) {
+		outFile = fopen(outFileName, "w");
+		fclose(outFile);
+	}
+
+	MPI_Barrier(cartComm);
+	
 	int shift[1];
 	shift[0] = step - 1;
 	if (cartCoord[1] > 0 && cartCoord[0] == 0 && cartCoord[2] == 0) {
@@ -791,15 +800,6 @@ void outputGridReducedY(const char* outFileName, double* grid, int number, int a
 	if (cartCoord[1] == cartDim[1] - 1) {
 		maxI = number;
 	}
-
-	FILE* outFile = NULL;
-
-	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && (cartCoord[2] == 0) && (newFile)) {
-		outFile = fopen(outFileName, "w");
-		fclose(outFile);
-	}
-
-	MPI_Barrier(cartComm);
 
 	if (cartCoord[0] == 0 && cartCoord[2] == 0) {
 		outFile = fopen(outFileName, "a");
@@ -820,6 +820,15 @@ void outputGridReducedY(const char* outFileName, double* grid, int number, int a
 
 void outputGridReducedZ(const char* outFileName, double* grid, int number, int additionalBinNumber, int step, int rank,
                         int prevRank, int nextRank, MPI_Comm& cartComm, int* cartCoord, int* cartDim, bool newFile, double scale) {
+	FILE* outFile = NULL;
+
+	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && (cartCoord[2] == 0) && (newFile)) {
+		outFile = fopen(outFileName, "w");
+		fclose(outFile);
+	}
+
+	MPI_Barrier(cartComm);
+	
 	int shift[1];
 	shift[0] = step - 1;
 	if (cartCoord[2] > 0 && cartCoord[1] == 0 && cartCoord[0] == 0) {
@@ -834,15 +843,6 @@ void outputGridReducedZ(const char* outFileName, double* grid, int number, int a
 	if (cartCoord[2] == cartDim[2] - 1) {
 		maxI = number;
 	}
-
-	FILE* outFile = NULL;
-
-	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && (cartCoord[2] == 0) && (newFile)) {
-		outFile = fopen(outFileName, "w");
-		fclose(outFile);
-	}
-
-	MPI_Barrier(cartComm);
 
 	if (cartCoord[1] == 0 && cartCoord[0] == 0) {
 		outFile = fopen(outFileName, "a");
