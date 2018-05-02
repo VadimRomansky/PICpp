@@ -1299,6 +1299,7 @@ Simulation::~Simulation() {
 		delete3vectorArray(tempNodeVectorParameter, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 		delete3matrixArray(tempNodeMatrixParameter, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 
+		if(solverType == IMPLICIT_EC){
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				delete[] massMatrix[i][j];
@@ -1310,6 +1311,7 @@ Simulation::~Simulation() {
 
 		delete[] massMatrix;
 		delete[] tempMassMatrix;
+		}
 
 		delete3vectorArray(electricFlux, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 		delete3vectorArray(electricFluxMinus, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
@@ -6051,6 +6053,7 @@ void Simulation::createArrays() {
 	tempCellVectorParameter = create3vectorArray(xnumberAdded, ynumberAdded, znumberAdded);
 	tempCellMatrixParameter = create3matrixArray(xnumberAdded, ynumberAdded, znumberAdded);
 
+	if(solverType == IMPLICIT_EC){
 	massMatrix = new MassMatrix**[xnumberAdded + 1];
 	tempMassMatrix = new MassMatrix**[xnumberAdded + 1];
 
@@ -6082,6 +6085,7 @@ void Simulation::createArrays() {
 				}
 			}
 		}
+	}
 	}
 
 	leftElevel = new Vector3d*[ynumberAdded + 1];
