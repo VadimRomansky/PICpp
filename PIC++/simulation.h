@@ -342,7 +342,7 @@ public:
 	Complex*** fourierImage;
 	Complex*** fourierOutput;
 
-	double* leftOutNodeBuffer;
+	/*double* leftOutNodeBuffer;
 	double* rightOutNodeBuffer;
 	double* leftInNodeBuffer;
 	double* rightInNodeBuffer;
@@ -416,11 +416,11 @@ public:
 	double* bottomOutVectorCellBuffer;
 	double* topOutVectorCellBuffer;
 	double* bottomInVectorCellBuffer;
-	double* topInVectorCellBuffer;
+	double* topInVectorCellBuffer;*/
 
 	//////Masha's buffers/////
 
-	double* leftOutNodeBufferMasha;
+	/*double* leftOutNodeBufferMasha;
 	double* rightOutNodeBufferMasha;
 	double* leftInNodeBufferMasha;
 	double* rightInNodeBufferMasha;
@@ -509,8 +509,23 @@ public:
 	double* bottomOutMatrixCellBufferMasha;
 	double* topOutMatrixCellBufferMasha;
 	double* bottomInMatrixCellBufferMasha;
-	double* topInMatrixCellBufferMasha;
+	double* topInMatrixCellBufferMasha;*/
 	////////////////////////
+
+	double* leftOutMaximumBuffer;
+	double* rightOutMaximumBuffer;
+	double* leftInMaximumBuffer;
+	double* rightInMaximumBuffer;
+
+	double* frontOutMaximumBuffer;
+	double* backOutMaximumBuffer;
+	double* frontInMaximumBuffer;
+	double* backInMaximumBuffer;
+
+	double* topOutMaximumBuffer;
+	double* bottomOutMaximumBuffer;
+	double* topInMaximumBuffer;
+	double* bottomInMaximumBuffer;
 
 	double* leftOutGmresBuffer;
 	double* rightOutGmresBuffer;

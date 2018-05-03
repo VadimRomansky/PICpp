@@ -516,7 +516,7 @@ void Simulation::sumNodeVectorParameterX(Vector3d*** array) {
 
 		//MPI_Barrier(cartComm);
 		//sumNodeVectorParametersGeneralX(array, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
-		sumNodeVectorParametersGeneralX(array, rightInVectorNodeBufferMasha, rightOutVectorNodeBufferMasha, leftInVectorNodeBufferMasha, leftOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralX(array, rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 		
 	} else {
 		if (boundaryConditionTypeX == PERIODIC) {
@@ -539,16 +539,16 @@ void Simulation::sumNodeVectorParametersX() {
 
 		//MPI_Barrier(cartComm);
 		//sumNodeVectorParametersGeneralX(electricFlux, inBufferRight, outBufferRight, inBufferLeft, outBufferLeft);
-		sumNodeVectorParametersGeneralX(electricFlux, rightInVectorNodeBufferMasha, rightOutVectorNodeBufferMasha, leftInVectorNodeBufferMasha, leftOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralX(electricFlux, rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 		//////
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralX(electricFluxMinus, rightInVectorNodeBufferMasha, rightOutVectorNodeBufferMasha, leftInVectorNodeBufferMasha, leftOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralX(electricFluxMinus, rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralX(divPressureTensor, rightInVectorNodeBufferMasha, rightOutVectorNodeBufferMasha, leftInVectorNodeBufferMasha, leftOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralX(divPressureTensor, rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralX(divPressureTensorMinus, rightInVectorNodeBufferMasha, rightOutVectorNodeBufferMasha, leftInVectorNodeBufferMasha, leftOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralX(divPressureTensorMinus, rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 
 		//MPI_Barrier(cartComm);
 
@@ -595,7 +595,7 @@ void Simulation::sumNodeVectorParametersX() {
 void Simulation::sumNodeVectorParameterY(Vector3d*** array) {
 	if (cartDim[1] > 1) {
 
-		sumNodeVectorParametersGeneralY(array, backInVectorNodeBufferMasha, backOutVectorNodeBufferMasha, frontInVectorNodeBufferMasha, frontOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralY(array, backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
 
 	} else {
 		if (boundaryConditionTypeY == PERIODIC) {
@@ -626,16 +626,16 @@ void Simulation::sumNodeVectorParametersY() {
 	if (cartDim[1] > 1) {
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralY(electricFlux, backInVectorNodeBufferMasha, backOutVectorNodeBufferMasha, frontInVectorNodeBufferMasha, frontOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralY(electricFlux, backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
 		//////
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralY(electricFluxMinus, backInVectorNodeBufferMasha, backOutVectorNodeBufferMasha, frontInVectorNodeBufferMasha, frontOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralY(electricFluxMinus, backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralY(divPressureTensor, backInVectorNodeBufferMasha, backOutVectorNodeBufferMasha, frontInVectorNodeBufferMasha, frontOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralY(divPressureTensor, backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralY(divPressureTensorMinus, backInVectorNodeBufferMasha, backOutVectorNodeBufferMasha, frontInVectorNodeBufferMasha, frontOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralY(divPressureTensorMinus, backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
 
 
 		/*if (debugMode) {
@@ -692,7 +692,7 @@ void Simulation::sumNodeVectorParameterZ(Vector3d*** array) {
 	if (cartDim[2] > 1) {
 
 		//sumNodeVectorParametersGeneralZ(array, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
-		sumNodeVectorParametersGeneralZ(array, topInVectorNodeBufferMasha, topOutVectorNodeBufferMasha, bottomInVectorNodeBufferMasha, bottomOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralZ(array, topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
 
 	} else {
 		if (boundaryConditionTypeZ == PERIODIC) {
@@ -724,16 +724,16 @@ void Simulation::sumNodeVectorParametersZ() {
 	if (cartDim[2] > 1) {
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralZ(electricFlux, topInVectorNodeBufferMasha, topOutVectorNodeBufferMasha, bottomInVectorNodeBufferMasha, bottomOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralZ(electricFlux, topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
 		//////
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralZ(electricFluxMinus, topInVectorNodeBufferMasha, topOutVectorNodeBufferMasha, bottomInVectorNodeBufferMasha, bottomOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralZ(electricFluxMinus, topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralZ(divPressureTensor, topInVectorNodeBufferMasha, topOutVectorNodeBufferMasha, bottomInVectorNodeBufferMasha, bottomOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralZ(divPressureTensor, topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
 
 		//MPI_Barrier(cartComm);
-		sumNodeVectorParametersGeneralZ(divPressureTensorMinus, topInVectorNodeBufferMasha, topOutVectorNodeBufferMasha, bottomInVectorNodeBufferMasha, bottomOutVectorNodeBufferMasha);
+		sumNodeVectorParametersGeneralZ(divPressureTensorMinus, topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
 
 
 		/*if (debugMode) {
@@ -857,26 +857,26 @@ void Simulation::sumNodeMatrixParametersX() {
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("send left dielectric tensor sum node matrix parameters x rank = %d\n", rank);
 		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeMatrixParametersToLeftReceiveFromRight(dielectricTensor, leftOutMatrixNodeBufferMasha, tempNodeMatrixParameterRight,
-			                                               rightInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersToLeftReceiveFromRight(dielectricTensor, leftOutMaximumBuffer, tempNodeMatrixParameterRight,
+			                                               rightInMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if (cartCoord[0] == 0) {
-			receiveNodeMatrixParametersRight(tempNodeMatrixParameterRight, rightInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded,
+			receiveNodeMatrixParametersRight(tempNodeMatrixParameterRight, rightInMaximumBuffer, xnumberAdded, ynumberAdded,
 			                                 znumberAdded, additionalBinNumber, cartComm, rank, rightRank);
 		} else if (cartCoord[0] == cartDim[0] - 1) {
-			sendNodeMatrixParametersLeft(dielectricTensor, leftOutMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersLeft(dielectricTensor, leftOutMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                             additionalBinNumber, cartComm, rank, leftRank);
 		}
 
 		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeMatrixParametersToRightReceiveFromLeft(dielectricTensor, rightOutMatrixNodeBufferMasha, tempNodeMatrixParameterLeft,
-			                                               leftInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersToRightReceiveFromLeft(dielectricTensor, rightOutMaximumBuffer, tempNodeMatrixParameterLeft,
+			                                               leftInMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                                               additionalBinNumber, cartComm, rank, leftRank, rightRank);
 		} else if (cartCoord[0] == 0) {
-			sendNodeMatrixParametersRight(dielectricTensor, rightOutMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersRight(dielectricTensor, rightOutMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                              additionalBinNumber, cartComm, rank, rightRank);
 		} else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveNodeMatrixParametersLeft(tempNodeMatrixParameterLeft, leftInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			receiveNodeMatrixParametersLeft(tempNodeMatrixParameterLeft, leftInMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                                additionalBinNumber, cartComm, rank, leftRank);
 		}
 
@@ -905,26 +905,26 @@ void Simulation::sumNodeMatrixParametersY() {
 	if (cartDim[1] > 1) {
 
 		if ((boundaryConditionTypeY == PERIODIC) || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
-			sendNodeMatrixParametersToFrontReceiveFromBack(dielectricTensor, frontOutMatrixNodeBufferMasha, tempNodeMatrixParameterBack,
-			                                               backInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersToFrontReceiveFromBack(dielectricTensor, frontOutMaximumBuffer, tempNodeMatrixParameterBack,
+			                                               backInMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
 		} else if (cartCoord[1] == 0) {
-			receiveNodeMatrixParametersBack(tempNodeMatrixParameterBack, backInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded,
+			receiveNodeMatrixParametersBack(tempNodeMatrixParameterBack, backInMaximumBuffer, xnumberAdded, ynumberAdded,
 			                                znumberAdded, additionalBinNumber, cartComm, rank, backRank);
 		} else if (cartCoord[1] == cartDim[1] - 1) {
-			sendNodeMatrixParametersFront(dielectricTensor, frontOutMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersFront(dielectricTensor, frontOutMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                              additionalBinNumber, cartComm, rank, frontRank);
 		}
 
 		if ((boundaryConditionTypeY == PERIODIC) || (cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1)) {
-			sendNodeMatrixParametersToBackReceiveFromFront(dielectricTensor, backOutMatrixNodeBufferMasha, tempNodeMatrixParameterFront,
-			                                               frontInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersToBackReceiveFromFront(dielectricTensor, backOutMaximumBuffer, tempNodeMatrixParameterFront,
+			                                               frontInMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                                               additionalBinNumber, cartComm, rank, frontRank, backRank);
 		} else if (cartCoord[1] == 0) {
-			sendNodeMatrixParametersBack(dielectricTensor, backOutMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersBack(dielectricTensor, backOutMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                             additionalBinNumber, cartComm, rank, backRank);
 		} else if (cartCoord[1] == cartDim[1] - 1) {
-			receiveNodeMatrixParametersFront(tempNodeMatrixParameterFront, frontInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			receiveNodeMatrixParametersFront(tempNodeMatrixParameterFront, frontInMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                                 additionalBinNumber, cartComm, rank, frontRank);
 		}
 
@@ -958,26 +958,26 @@ void Simulation::sumNodeMatrixParametersZ() {
 	if (cartDim[2] > 1) {
 
 		if ((boundaryConditionTypeZ == PERIODIC) || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
-			sendNodeMatrixParametersToBottomReceiveFromTop(dielectricTensor, bottomOutMatrixNodeBufferMasha, tempNodeMatrixParameterTop,
-			                                               topInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersToBottomReceiveFromTop(dielectricTensor, bottomOutMaximumBuffer, tempNodeMatrixParameterTop,
+			                                               topInMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
 		} else if (cartCoord[2] == 0) {
-			receiveNodeMatrixParametersTop(tempNodeMatrixParameterTop, topInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded,
+			receiveNodeMatrixParametersTop(tempNodeMatrixParameterTop, topInMaximumBuffer, xnumberAdded, ynumberAdded,
 			                               znumberAdded, additionalBinNumber, cartComm, rank, topRank);
 		} else if (cartCoord[2] == cartDim[2] - 1) {
-			sendNodeMatrixParametersBottom(dielectricTensor, bottomOutMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersBottom(dielectricTensor, bottomOutMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                               additionalBinNumber, cartComm, rank, bottomRank);
 		}
 
 		if ((boundaryConditionTypeZ == PERIODIC) || (cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1)) {
-			sendNodeMatrixParametersToTopReceiveFromBottom(dielectricTensor, topOutMatrixNodeBufferMasha, tempNodeMatrixParameterBottom,
-			                                               bottomInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersToTopReceiveFromBottom(dielectricTensor, topOutMaximumBuffer, tempNodeMatrixParameterBottom,
+			                                               bottomInMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                                               additionalBinNumber, cartComm, rank, bottomRank, topRank);
 		} else if (cartCoord[2] == 0) {
-			sendNodeMatrixParametersTop(dielectricTensor, topOutMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			sendNodeMatrixParametersTop(dielectricTensor, topOutMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                            additionalBinNumber, cartComm, rank, topRank);
 		} else if (cartCoord[2] == cartDim[2] - 1) {
-			receiveNodeMatrixParametersBottom(tempNodeMatrixParameterBottom, bottomInMatrixNodeBufferMasha, xnumberAdded, ynumberAdded, znumberAdded,
+			receiveNodeMatrixParametersBottom(tempNodeMatrixParameterBottom, bottomInMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded,
 			                                  additionalBinNumber, cartComm, rank, bottomRank);
 		}
 
@@ -1208,10 +1208,10 @@ void Simulation::sumChargeDensityHatX() {
 		//MPI_Barrier(cartComm);
 		if ((rank == 0) && (verbosity > 2)) printf("sending left sum charge density hat x rank = %d\n", rank);
 
-		sumCellParametersGeneralX(chargeDensityHat, rightInCellBufferMasha, rightOutCellBufferMasha, leftInCellBufferMasha, leftOutCellBufferMasha);
+		sumCellParametersGeneralX(chargeDensityHat, rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 		/////
 
-		sumCellParametersGeneralX(chargeDensityMinus, rightInCellBufferMasha, rightOutCellBufferMasha, leftInCellBufferMasha, leftOutCellBufferMasha);
+		sumCellParametersGeneralX(chargeDensityMinus, rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 
 
 		//MPI_Barrier(cartComm);
@@ -1235,9 +1235,9 @@ void Simulation::sumChargeDensityHatX() {
 void Simulation::sumChargeDensityHatY() {
 	if (cartDim[1] > 1) {
 
-		sumCellParametersGeneralY(chargeDensityHat, backInCellBufferMasha, backOutCellBufferMasha, frontInCellBufferMasha, frontOutCellBufferMasha);
+		sumCellParametersGeneralY(chargeDensityHat, backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
 
-		sumCellParametersGeneralY(chargeDensityMinus, backInCellBufferMasha, backOutCellBufferMasha, frontInCellBufferMasha, frontOutCellBufferMasha);
+		sumCellParametersGeneralY(chargeDensityMinus, backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
 
 
 		//MPI_Barrier(cartComm);
@@ -1267,9 +1267,9 @@ void Simulation::sumChargeDensityHatY() {
 void Simulation::sumChargeDensityHatZ() {
 	if (cartDim[2] > 1) {
 
-		sumCellParametersGeneralZ(chargeDensityHat, topInCellBufferMasha, topOutCellBufferMasha, bottomInCellBufferMasha, bottomOutCellBufferMasha);
+		sumCellParametersGeneralZ(chargeDensityHat, topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
 
-		sumCellParametersGeneralZ(chargeDensityMinus, topInCellBufferMasha, topOutCellBufferMasha, bottomInCellBufferMasha, bottomOutCellBufferMasha);
+		sumCellParametersGeneralZ(chargeDensityMinus, topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
 
 		//MPI_Barrier(cartComm);
 	} else {
@@ -1300,7 +1300,7 @@ void Simulation::sumCellParametersX() {
 		for (int t = 0; t < typesNumber; ++t) {
 			//MPI_Barrier(cartComm);
 			if (types[t].particlesPerBin > 0) {
-				sumCellParametersGeneralX(particleConcentrations[t], rightInCellBufferMasha, rightOutCellBufferMasha, leftInCellBufferMasha, leftOutCellBufferMasha);
+				sumCellParametersGeneralX(particleConcentrations[t], rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 
 			}
 		}
@@ -1308,16 +1308,16 @@ void Simulation::sumCellParametersX() {
 		for (int t = 0; t < typesNumber; ++t) {
 			//MPI_Barrier(cartComm);
 			if (types[t].particlesPerBin > 0) {
-				sumCellParametersGeneralX(particleEnergies[t], rightInCellBufferMasha, rightOutCellBufferMasha, leftInCellBufferMasha, leftOutCellBufferMasha);
+				sumCellParametersGeneralX(particleEnergies[t], rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 
 			}
 		}
 		//MPI_Barrier(cartComm);
 
 
-		sumCellParametersGeneralX(chargeDensity, rightInCellBufferMasha, rightOutCellBufferMasha, leftInCellBufferMasha, leftOutCellBufferMasha);
+		sumCellParametersGeneralX(chargeDensity, rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 
-		sumCellParametersGeneralX(chargeDensityMinus, rightInCellBufferMasha, rightOutCellBufferMasha, leftInCellBufferMasha, leftOutCellBufferMasha);
+		sumCellParametersGeneralX(chargeDensityMinus, rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 
 		//MPI_Barrier(cartComm);
 
@@ -1421,19 +1421,19 @@ void Simulation::sumCellParametersY() {
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
 
-				sumCellParametersGeneralY(particleConcentrations[t], backInCellBufferMasha, backOutCellBufferMasha, frontInCellBufferMasha, frontOutCellBufferMasha);
+				sumCellParametersGeneralY(particleConcentrations[t], backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
 			}
 		}
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
 
-				sumCellParametersGeneralY(particleEnergies[t], backInCellBufferMasha, backOutCellBufferMasha, frontInCellBufferMasha, frontOutCellBufferMasha);
+				sumCellParametersGeneralY(particleEnergies[t], backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
 			}
 		}
 
-		sumCellParametersGeneralY(chargeDensity, backInCellBufferMasha, backOutCellBufferMasha, frontInCellBufferMasha, frontOutCellBufferMasha);
-		sumCellParametersGeneralY(chargeDensityMinus, backInCellBufferMasha, backOutCellBufferMasha, frontInCellBufferMasha, frontOutCellBufferMasha);
+		sumCellParametersGeneralY(chargeDensity, backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
+		sumCellParametersGeneralY(chargeDensityMinus, backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
 	} else {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int k = 0; k < znumberAdded; ++k) {
@@ -1480,18 +1480,18 @@ void Simulation::sumCellParametersZ() {
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sumCellParametersGeneralZ(particleConcentrations[t], topInCellBufferMasha, topOutCellBufferMasha, bottomInCellBufferMasha, bottomOutCellBufferMasha);
+				sumCellParametersGeneralZ(particleConcentrations[t], topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
 			}
 		}
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sumCellParametersGeneralZ(particleEnergies[t], topInCellBufferMasha, topOutCellBufferMasha, bottomInCellBufferMasha, bottomOutCellBufferMasha);
+				sumCellParametersGeneralZ(particleEnergies[t], topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
 			}
 		}
 
-		sumCellParametersGeneralZ(chargeDensity, topInCellBufferMasha, topOutCellBufferMasha, bottomInCellBufferMasha, bottomOutCellBufferMasha);
-		sumCellParametersGeneralZ(chargeDensityMinus, topInCellBufferMasha, topOutCellBufferMasha, bottomInCellBufferMasha, bottomOutCellBufferMasha);
+		sumCellParametersGeneralZ(chargeDensity, topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
+		sumCellParametersGeneralZ(chargeDensityMinus, topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
 
 	} else {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -1695,7 +1695,7 @@ void Simulation::sumCellVectorParametersX() {
 		for (int t = 0; t < typesNumber; ++t) {
 			//MPI_Barrier(cartComm);
 			if (types[t].particlesPerBin > 0) {
-				sumCellVectorParametersGeneralX(particleBulkVelocities[t], rightInVectorCellBufferMasha, rightOutVectorCellBufferMasha, leftInVectorCellBufferMasha, leftOutVectorCellBufferMasha);
+				sumCellVectorParametersGeneralX(particleBulkVelocities[t], rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 			}
 		}
 
@@ -1764,7 +1764,7 @@ void Simulation::sumCellVectorParametersY() {
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sumCellVectorParametersGeneralY(particleBulkVelocities[t], backInVectorCellBufferMasha, backOutVectorCellBufferMasha, frontInVectorCellBufferMasha, frontOutVectorCellBufferMasha);
+				sumCellVectorParametersGeneralY(particleBulkVelocities[t], backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
 			}
 		}
 	} else {
@@ -1803,7 +1803,7 @@ void Simulation::sumCellVectorParametersZ() {
 
 		for (int t = 0; t < typesNumber; ++t) {
 			if (types[t].particlesPerBin > 0) {
-				sumCellVectorParametersGeneralZ(particleBulkVelocities[t], topInVectorCellBufferMasha, topOutVectorCellBufferMasha, bottomInVectorCellBufferMasha, bottomOutVectorCellBufferMasha);
+				sumCellVectorParametersGeneralZ(particleBulkVelocities[t], topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
 			}
 		}
 
@@ -1996,7 +1996,7 @@ void Simulation::sumCellMatrixParametersX() {
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("sending left  pressure tensor sum cell matrix parameters rank = %d\n", rank);
 
-		sumCellMatrixParameterGeneralX(pressureTensor, rightInMatrixCellBufferMasha, rightOutMatrixCellBufferMasha, leftInMatrixCellBufferMasha, leftOutMatrixCellBufferMasha);
+		sumCellMatrixParameterGeneralX(pressureTensor, rightInMaximumBuffer, rightOutMaximumBuffer, leftInMaximumBuffer, leftOutMaximumBuffer);
 		//MPI_Barrier(cartComm);
 	} else {
 		if (boundaryConditionTypeX == PERIODIC) {
@@ -2016,7 +2016,7 @@ void Simulation::sumCellMatrixParametersX() {
 void Simulation::sumCellMatrixParametersY() {
 	if (cartDim[1] > 1) {
 
-		sumCellMatrixParameterGeneralY(pressureTensor, backInMatrixCellBufferMasha, backOutMatrixCellBufferMasha, frontInMatrixCellBufferMasha, frontOutMatrixCellBufferMasha);
+		sumCellMatrixParameterGeneralY(pressureTensor, backInMaximumBuffer, backOutMaximumBuffer, frontInMaximumBuffer, frontOutMaximumBuffer);
 		//MPI_Barrier(cartComm);
 	} else {
 		if (boundaryConditionTypeY == PERIODIC) {
@@ -2048,7 +2048,7 @@ void Simulation::sumCellMatrixParametersZ() {
 	if (cartDim[2] > 1) {
 
 		//sumCellMatrixParameterGeneralZ(pressureTensor, inBufferTop, outBufferTop, inBufferBottom, outBufferBottom);
-		sumCellMatrixParameterGeneralZ(pressureTensor, topInMatrixCellBufferMasha, topOutMatrixCellBufferMasha, bottomInMatrixCellBufferMasha, bottomOutMatrixCellBufferMasha);
+		sumCellMatrixParameterGeneralZ(pressureTensor, topInMaximumBuffer, topOutMaximumBuffer, bottomInMaximumBuffer, bottomOutMaximumBuffer);
 		//MPI_Barrier(cartComm);
 	} else {
 		if (boundaryConditionTypeZ == PERIODIC) {

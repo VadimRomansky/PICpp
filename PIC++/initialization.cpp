@@ -1355,7 +1355,7 @@ Simulation::~Simulation() {
 		delete[] zgrid;
 		delete[] middleZgrid;
 
-		delete[] rightOutNodeBuffer;
+		/*delete[] rightOutNodeBuffer;
 		delete[] rightInNodeBuffer;
 		delete[] leftOutNodeBuffer;
 		delete[] leftInNodeBuffer;
@@ -1428,11 +1428,11 @@ Simulation::~Simulation() {
 		delete[] topOutCellBuffer;
 		delete[] topInCellBuffer;
 		delete[] bottomOutCellBuffer;
-		delete[] bottomInCellBuffer;
+		delete[] bottomInCellBuffer;*/
 
 		/// Masha's buffers
 
-		delete[] rightOutNodeBufferMasha;
+		/*delete[] rightOutNodeBufferMasha;
 		delete[] rightInNodeBufferMasha;
 		delete[] leftOutNodeBufferMasha;
 		delete[] leftInNodeBufferMasha;
@@ -1505,8 +1505,8 @@ Simulation::~Simulation() {
 		delete[] topOutCellBufferMasha;
 		delete[] topInCellBufferMasha;
 		delete[] bottomOutCellBufferMasha;
-		delete[] bottomInCellBufferMasha;
-
+		delete[] bottomInCellBufferMasha;*/
+		
 		////buneman E
 		delete[] leftOutBunemanExBuffer;
 		delete[] rightOutBunemanExBuffer;
@@ -1598,6 +1598,21 @@ Simulation::~Simulation() {
 		delete[] topOutBunemanBzBuffer;
 		delete[] bottomInBunemanBzBuffer;
 		delete[] topInBunemanBzBuffer;
+		/////////////////////////
+		delete[] rightOutMaximumBuffer;
+		delete[] rightInMaximumBuffer;
+		delete[] leftOutMaximumBuffer;
+		delete[] leftInMaximumBuffer;
+
+		delete[] backOutMaximumBuffer;
+		delete[] backInMaximumBuffer;
+		delete[] frontOutMaximumBuffer;
+		delete[] frontInMaximumBuffer;
+
+		delete[] topOutMaximumBuffer;
+		delete[] topInMaximumBuffer;
+		delete[] bottomOutMaximumBuffer;
+		delete[] bottomInMaximumBuffer;
 
 		delete[] rightOutGmresBuffer;
 		delete[] rightInGmresBuffer;
@@ -4852,7 +4867,7 @@ void Simulation::initializeFluxFromRight() {
 	}
 
 	//turbulence
-	//initializeKolmogorovSpectrum();
+	initializeKolmogorovSpectrum();
 
 	double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
 	double p0 = gamma * massProton * V0.norm();
@@ -6201,7 +6216,7 @@ void Simulation::createArrays() {
 	fflush(stdout);
 	//if(rank == 0) printLog("creating arrays for buffers\n");
 
-	rightOutNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
+	/*rightOutNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
 	leftOutNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
 	leftInNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
 	rightInNodeBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (2 + additionalBinNumber)];
@@ -6274,10 +6289,10 @@ void Simulation::createArrays() {
 	topOutCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
 	bottomOutCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
 	topInCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
-	bottomInCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];
+	bottomInCellBuffer = new double[(ynumberAdded) * (xnumberAdded) * (1 + additionalBinNumber)];*/
 
 	////// Masha's buffers
-	rightOutNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
+	/*rightOutNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
 	leftOutNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
 	leftInNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
 	rightInNodeBufferMasha = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (3 + 2 * additionalBinNumber)];
@@ -6365,7 +6380,7 @@ void Simulation::createArrays() {
 	topOutMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2 * additionalBinNumber)];
 	bottomOutMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2 * additionalBinNumber)];
 	topInMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2 * additionalBinNumber)];
-	bottomInMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2 * additionalBinNumber)];
+	bottomInMatrixCellBufferMasha = new double[xnumberAdded * ynumberAdded * 9 * (2 + 2 * additionalBinNumber)];*/
 
 	////buneman E
 	leftOutBunemanExBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * (1 + additionalBinNumber)];
@@ -6458,6 +6473,24 @@ void Simulation::createArrays() {
 	topOutBunemanBzBuffer = new double[(ynumberAdded) * (xnumberAdded) * (2 + additionalBinNumber)];
 	bottomInBunemanBzBuffer = new double[(ynumberAdded) * (xnumberAdded) * (2 + additionalBinNumber)];
 	topInBunemanBzBuffer = new double[(ynumberAdded) * (xnumberAdded) * (2 + additionalBinNumber)];
+
+
+	///////////////////
+
+	rightOutMaximumBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	leftOutMaximumBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	leftInMaximumBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	rightInMaximumBuffer = new double[(ynumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+
+	frontOutMaximumBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	backOutMaximumBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	frontInMaximumBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	backInMaximumBuffer = new double[(xnumberAdded + 1) * (znumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+
+	topOutMaximumBuffer = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	topInMaximumBuffer = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	bottomOutMaximumBuffer = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
+	bottomInMaximumBuffer = new double[(ynumberAdded + 1) * (xnumberAdded + 1) * 9 * (3 + 2 * additionalBinNumber)];
 
 
 	rightOutGmresBuffer = new double[(ynumberAdded) * (znumberAdded) * 3 * (1 + additionalBinNumber)];
