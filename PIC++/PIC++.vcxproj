@@ -182,6 +182,7 @@
     <ClCompile Include="fourier.cpp" />
     <ClCompile Include="initialization.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="intHarris.cpp" />
     <ClCompile Include="largeVectorBasis.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="massMatrix.cpp" />
