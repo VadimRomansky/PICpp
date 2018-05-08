@@ -11,7 +11,7 @@ void Simulation::initializeHarris() {
 	//boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
 	//boundaryConditionTypeX = FREE_BOTH;
 	boundaryConditionTypeX = FREE_MIRROR_BOTH;
-	double l = 10*deltaX;
+	double l = 4*deltaX;
     //E0 = Vector3d(0, 0, 0);
 	//B0 = Vector3d(0, 0, 0);
 	for (int i = 0; i < xnumberAdded; ++i) {
