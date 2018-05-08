@@ -19,7 +19,7 @@ enum SolverType {EXPLICIT, IMPLICIT, IMPLICIT_EC, BUNEMAN};
 
 enum InputType {CGS, Theoretical};
 
-enum BoundaryConditionType {PERIODIC, SUPER_CONDUCTOR_LEFT, FREE_BOTH};
+enum BoundaryConditionType {PERIODIC, SUPER_CONDUCTOR_LEFT, FREE_BOTH, FREE_MIRROR_BOTH};
 
 class Matrix3d;
 class Vector3d;

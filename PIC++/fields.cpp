@@ -342,13 +342,13 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 					} else {
 						if (cartCoord[0] == 0) {
 							if (i <= additionalBinNumber) {
-								if (boundaryConditionTypeX == FREE_BOTH) {
+								if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 									createFreeLeftEquation(i, j, k);
 								} else {
 									createFakeEquation(i, j, k);
 								}
 							} else if (i == 1 + additionalBinNumber) {
-								if(boundaryConditionTypeX == FREE_BOTH){
+								if(boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH){
 									createFreeLeftEquation(i, j, k);
 								} else if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 									createSuperConductorLeftEquation(i, j, k);
@@ -401,13 +401,13 @@ void Simulation::evaluateMaxwellEquationMatrix() {
 						createFakeEquation(i, j, k);
 					} else {
 						if (i <= additionalBinNumber) {
-							if (boundaryConditionTypeX == FREE_BOTH) {
+							if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 								createFreeLeftEquation(i, j, k);
 							} else {
 								createFakeEquation(i, j, k);
 							}
 						} else if (i == 1 + additionalBinNumber) {
-							if (boundaryConditionTypeX == FREE_BOTH) {
+							if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 								createFreeLeftEquation(i, j, k);
 							} else if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 								createSuperConductorLeftEquation(i, j, k);
@@ -2627,7 +2627,7 @@ void Simulation::evaluateMagneticField() {
 			for (int i = 0; i <= additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
-						if(boundaryConditionTypeX == FREE_BOTH) {
+						if(boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							newBfield[i][j][k] = leftBoundaryFieldEvaluator->evaluateBfield(time + deltaT, j, k);
 						} else {
 							newBfield[i][j][k] = newBfield[additionalBinNumber + 1][j][k];
@@ -2666,7 +2666,7 @@ bool Simulation::isInResistiveLayer(int i, int j, int k) {
 	}
 
 	if (i > 1 + additionalBinNumber && i <= 1 + additionalBinNumber + resistiveLayerWidth) {
-		if (boundaryConditionTypeX != FREE_BOTH) {
+		if (boundaryConditionTypeX != FREE_BOTH  && boundaryConditionTypeX != FREE_MIRROR_BOTH) {
 			return false;
 		}
 		return cartCoord[0] == 0;

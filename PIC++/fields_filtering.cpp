@@ -105,7 +105,7 @@ void Simulation::filterFields(int cutWaveNumber) {
 						}
 					}
 				}*/
-			} else if (boundaryConditionTypeX == FREE_BOTH) {
+			} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 				for (int i = 0; i < 1 + additionalBinNumber; ++i) {
 					for (int j = 0; j < ynumberAdded + 1; ++j) {
 						for (int k = 0; k < znumberAdded + 1; ++k) {

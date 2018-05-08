@@ -91,7 +91,7 @@ void Simulation::exchangeGeneralEfieldX(Vector3d*** field) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[1 + additionalBinNumber][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH  || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							field[i][j][k] = leftBoundaryFieldEvaluator->evaluateEfield(time + deltaT, j, k);
 						}
 					}
@@ -176,7 +176,7 @@ void Simulation::exchangeGeneralEfieldX(Vector3d*** field) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[1 + additionalBinNumber][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							field[i][j][k] = leftBoundaryFieldEvaluator->evaluateEfield(time + deltaT, j, k);
 						}
 					}
@@ -236,7 +236,7 @@ void Simulation::exchangeGeneralEfieldY(Vector3d*** field) {
 						//todo!!!!
 						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
 							field[i][j][k] = field[i][1 + additionalBinNumber][k];
-						} else if (boundaryConditionTypeY == FREE_BOTH) {
+						} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[i][additionalBinNumber][k];
 						}
 					}
@@ -327,7 +327,7 @@ void Simulation::exchangeGeneralEfieldY(Vector3d*** field) {
 						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[i][1 + additionalBinNumber][k];
-						} else if (boundaryConditionTypeY == FREE_BOTH) {
+						} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[i][additionalBinNumber][k];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
@@ -389,7 +389,7 @@ void Simulation::exchangeGeneralEfieldZ(Vector3d*** field) {
 						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[i][j][1 + additionalBinNumber];
-						} else if (boundaryConditionTypeZ == FREE_BOTH) {
+						} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[i][j][additionalBinNumber];
 						}
 					}
@@ -480,7 +480,7 @@ void Simulation::exchangeGeneralEfieldZ(Vector3d*** field) {
 						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[i][j][1 + additionalBinNumber];
-						} else if (boundaryConditionTypeZ == FREE_BOTH) {
+						} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[i][j][additionalBinNumber];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
@@ -595,7 +595,7 @@ void Simulation::exchangeGeneralBfieldX(Vector3d*** field) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[additionalBinNumber + 1][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH  || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							field[i][j][k] = leftBoundaryFieldEvaluator->evaluateBfield(time + deltaT, j, k);
 						}
 					}
@@ -631,7 +631,7 @@ void Simulation::exchangeGeneralBfieldX(Vector3d*** field) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							field[i][j][k] = field[additionalBinNumber + 1][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							field[i][j][k] = leftBoundaryFieldEvaluator->evaluateBfield(time + deltaT, j, k);
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
@@ -731,7 +731,7 @@ void Simulation::exchangeGeneralBfieldY(Vector3d*** field) {
 						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[i][additionalBinNumber + 1][k];
-						} else if (boundaryConditionTypeY == FREE_BOTH) {
+						} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[i][additionalBinNumber + 1][k];
 						}
 					}
@@ -773,7 +773,7 @@ void Simulation::exchangeGeneralBfieldY(Vector3d*** field) {
 					for (int j = 0; j <= additionalBinNumber; ++j) {
 						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
 							field[i][j][k] = Vector3d(0, 0, 0);
-						} else if (boundaryConditionTypeY == FREE_BOTH) {
+						} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[i][additionalBinNumber + 1][k];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
@@ -873,7 +873,7 @@ void Simulation::exchangeGeneralBfieldZ(Vector3d*** field) {
 						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[i][j][additionalBinNumber + 1];
-						} else if (boundaryConditionTypeZ == FREE_BOTH) {
+						} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[i][j][additionalBinNumber + 1];
 						}
 					}
@@ -915,7 +915,7 @@ void Simulation::exchangeGeneralBfieldZ(Vector3d*** field) {
 					for (int k = 0; k <= additionalBinNumber; ++k) {
 						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
 							field[i][j][k] = Vector3d(0, 0, 0);
-						} else if (boundaryConditionTypeZ == FREE_BOTH) {
+						} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[i][j][additionalBinNumber + 1];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
@@ -1011,7 +1011,7 @@ void Simulation::exchangeGeneralScalarCellFieldX(double**** field) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k][0] = field[additionalBinNumber + 1][j][k][0];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							field[i][j][k][0] = field[additionalBinNumber + 1][j][k][0];
 						}
 					}
@@ -1047,7 +1047,7 @@ void Simulation::exchangeGeneralScalarCellFieldX(double**** field) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							field[i][j][k][0] = 0;
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							field[i][j][k][0] = field[additionalBinNumber + 1][j][k][0];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
@@ -1137,7 +1137,7 @@ void Simulation::exchangeGeneralScalarCellFieldY(double**** field) {
 						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k][0] = field[i][additionalBinNumber + 1][k][0];
-						} else if (boundaryConditionTypeY == FREE_BOTH) {
+						} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
 							field[i][j][k][0] = field[i][additionalBinNumber + 1][k][0];
 						}
 					}
@@ -1179,7 +1179,7 @@ void Simulation::exchangeGeneralScalarCellFieldY(double**** field) {
 					for (int j = 0; j <= additionalBinNumber; ++j) {
 						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
 							field[i][j][k][0] = 0;
-						} else if (boundaryConditionTypeY == FREE_BOTH) {
+						} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
 							field[i][j][k][0] = field[i][additionalBinNumber + 1][k][0];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
@@ -1269,7 +1269,7 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double**** field) {
 						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k][0] = field[i][j][additionalBinNumber + 1][0];
-						} else if (boundaryConditionTypeZ == FREE_BOTH) {
+						} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
 							field[i][j][k][0] = field[i][j][additionalBinNumber + 1][0];
 						}
 					}
@@ -1311,7 +1311,7 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double**** field) {
 					for (int k = 0; k <= additionalBinNumber; ++k) {
 						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
 							field[i][j][k][0] = 0;
-						} else if (boundaryConditionTypeZ == FREE_BOTH) {
+						} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
 							field[i][j][k][0] = field[i][j][additionalBinNumber + 1][0];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
@@ -1408,7 +1408,7 @@ void Simulation::exchangeGeneralScalarCellFieldX(double*** field) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[additionalBinNumber + 1][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[additionalBinNumber + 1][j][k];
 						}
 					}
@@ -1444,7 +1444,7 @@ void Simulation::exchangeGeneralScalarCellFieldX(double*** field) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							field[i][j][k] = 0;
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[additionalBinNumber + 1][j][k];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
@@ -1534,7 +1534,7 @@ void Simulation::exchangeGeneralScalarCellFieldY(double*** field) {
 						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[i][additionalBinNumber + 1][k];
-						} else if (boundaryConditionTypeY == FREE_BOTH) {
+						} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[i][additionalBinNumber + 1][k];
 						}
 					}
@@ -1576,7 +1576,7 @@ void Simulation::exchangeGeneralScalarCellFieldY(double*** field) {
 					for (int j = 0; j <= additionalBinNumber; ++j) {
 						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
 							field[i][j][k] = 0;
-						} else if (boundaryConditionTypeY == FREE_BOTH) {
+						} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[i][additionalBinNumber + 1][k];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
@@ -1666,7 +1666,7 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double*** field) {
 						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[i][j][additionalBinNumber + 1];
-						} else if (boundaryConditionTypeZ == FREE_BOTH) {
+						} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[i][j][additionalBinNumber + 1];
 						}
 					}
@@ -1708,7 +1708,7 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double*** field) {
 					for (int k = 0; k <= additionalBinNumber; ++k) {
 						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
 							field[i][j][k] = 0;
-						} else if (boundaryConditionTypeZ == FREE_BOTH) {
+						} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
 							field[i][j][k] = field[i][j][additionalBinNumber + 1];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
@@ -1813,7 +1813,7 @@ void Simulation::exchangeGeneralScalarNodeFieldX(double**** field) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k][0] = field[1 + additionalBinNumber][j][k][0];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							field[i][j][k][0] = field[additionalBinNumber][j][k][0];
 						}
 					}
@@ -1851,7 +1851,7 @@ void Simulation::exchangeGeneralScalarNodeFieldX(double**** field) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k][0] = field[1 + additionalBinNumber][j][k][0];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							field[i][j][k][0] = field[additionalBinNumber][j][k][0];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
@@ -2147,7 +2147,7 @@ void Simulation::exchangeGeneralMatrixNodeFieldX(Matrix3d*** field) {
 								if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 									//field[i][j][k] = Vector3d(0, 0, 0);
 									field[i][j][k].matrix[l][m] = field[1 + additionalBinNumber][j][k].matrix[l][m];
-								} else if (boundaryConditionTypeX == FREE_BOTH) {
+								} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 									field[i][j][k].matrix[l][m] = field[additionalBinNumber][j][k].matrix[l][m];
 								}
 							}
@@ -2197,7 +2197,7 @@ void Simulation::exchangeGeneralMatrixNodeFieldX(Matrix3d*** field) {
 							if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 								//field[i][j][k] = Vector3d(0, 0, 0);
 								field[i][j][k].matrix[l][m] = field[1 + additionalBinNumber][j][k].matrix[l][m];
-							} else if (boundaryConditionTypeX == FREE_BOTH) {
+							} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 								field[i][j][k].matrix[l][m] = field[additionalBinNumber][j][k].matrix[l][m];
 							}
 							//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
@@ -2516,7 +2516,7 @@ void Simulation::exchangeBunemanExAlongX(double*** fieldX) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							fieldX[i][j][k] = fieldX[additionalBinNumber + 1][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldX[i][j][k] = fieldX[additionalBinNumber + 1][j][k];
 						}
 					}
@@ -2552,7 +2552,7 @@ void Simulation::exchangeBunemanExAlongX(double*** fieldX) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							fieldX[i][j][k] = 0;
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldX[i][j][k] = fieldX[additionalBinNumber + 1][j][k];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
@@ -2821,7 +2821,7 @@ void Simulation::exchangeBunemanEyAlongX(double*** fieldY) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							fieldY[i][j][k] = fieldY[1 + additionalBinNumber][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldY[i][j][k] = fieldY[additionalBinNumber][j][k];
 						}
 					}
@@ -2859,7 +2859,7 @@ void Simulation::exchangeBunemanEyAlongX(double*** fieldY) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							fieldY[i][j][k] = fieldY[1 + additionalBinNumber][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldY[i][j][k] = fieldY[additionalBinNumber][j][k];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
@@ -3120,7 +3120,7 @@ void Simulation::exchangeBunemanEzAlongX(double*** fieldZ) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							fieldZ[i][j][k] = fieldZ[1 + additionalBinNumber][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldZ[i][j][k] = fieldZ[additionalBinNumber][j][k];
 						}
 					}
@@ -3157,7 +3157,7 @@ void Simulation::exchangeBunemanEzAlongX(double*** fieldZ) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							fieldZ[i][j][k] = fieldZ[1 + additionalBinNumber][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldZ[i][j][k] = fieldZ[additionalBinNumber][j][k];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
@@ -3431,7 +3431,7 @@ void Simulation::exchangeBunemanBxAlongX(double*** fieldX) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							fieldX[i][j][k] = fieldX[1 + additionalBinNumber][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldX[i][j][k] = fieldX[additionalBinNumber][j][k];
 						}
 					}
@@ -3468,7 +3468,7 @@ void Simulation::exchangeBunemanBxAlongX(double*** fieldX) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							fieldX[i][j][k] = fieldX[1 + additionalBinNumber][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldX[i][j][k] = fieldX[additionalBinNumber][j][k];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
@@ -3712,7 +3712,7 @@ void Simulation::exchangeBunemanByAlongX(double*** fieldY) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							fieldY[i][j][k] = fieldY[additionalBinNumber + 1][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldY[i][j][k] = fieldY[additionalBinNumber + 1][j][k];
 						}
 					}
@@ -3748,7 +3748,7 @@ void Simulation::exchangeBunemanByAlongX(double*** fieldY) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							fieldY[i][j][k] = 0;
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldY[i][j][k] = fieldY[additionalBinNumber + 1][j][k];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
@@ -4000,7 +4000,7 @@ void Simulation::exchangeBunemanBzAlongX(double*** fieldZ) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							fieldZ[i][j][k] = fieldZ[additionalBinNumber + 1][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldZ[i][j][k] = fieldZ[additionalBinNumber + 1][j][k];
 						}
 					}
@@ -4036,7 +4036,7 @@ void Simulation::exchangeBunemanBzAlongX(double*** fieldZ) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							fieldZ[i][j][k] = 0;
-						} else if (boundaryConditionTypeX == FREE_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldZ[i][j][k] = fieldZ[additionalBinNumber + 1][j][k];
 						}
 						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];

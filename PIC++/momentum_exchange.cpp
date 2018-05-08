@@ -1390,7 +1390,7 @@ void Simulation::sumCellParametersX() {
 				}
 			}
 
-			if (boundaryConditionTypeX == FREE_BOTH) {
+			if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
 						for (int i = 0; i <= additionalBinNumber; ++i) {
@@ -1742,7 +1742,7 @@ void Simulation::sumCellVectorParametersX() {
 				}
 			}
 
-			if (boundaryConditionTypeX == FREE_BOTH) {
+			if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 				for (int j = 0; j < ynumberAdded; ++j) {
 					for (int k = 0; k < znumberAdded; ++k) {
 						for (int i = 0; i <= additionalBinNumber; ++i) {

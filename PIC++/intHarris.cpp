@@ -1,15 +1,16 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "particle.h"
 #include "simulation.h"
 #include "vector3d.h"
 #include "boundaryFieldEvaluator.h"
-#include "particle.h"
 #include "util.h"
 
 void Simulation::initializeHarris() {
 	//boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
-	boundaryConditionTypeX = FREE_BOTH;
+	//boundaryConditionTypeX = FREE_BOTH;
+	boundaryConditionTypeX = FREE_MIRROR_BOTH;
 	double l = 10*deltaX;
     //E0 = Vector3d(0, 0, 0);
 	//B0 = Vector3d(0, 0, 0);
@@ -46,6 +47,12 @@ void Simulation::createParticlesHarris(double harrisWidth) {
 	if (rank == 0) printLog("creating particles harris\n");
 	double n0 = types[0].concentration;
 	int n = 0;
+	double ionTemperatureFactor = 5;
+	for(int t = 1; t < typesNumber; ++t) {
+		types[t].temperatureX = types[0].temperatureX*ionTemperatureFactor;
+		types[t].temperatureY = types[0].temperatureY*ionTemperatureFactor;
+		types[t].temperatureZ = types[0].temperatureZ*ionTemperatureFactor;
+	}
 	//int density = ; %задаем значение плотности
 	//for (int i = 0; i < xnumber; ++i) {
 	for (int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i) {
@@ -84,7 +91,7 @@ void Simulation::createParticlesHarris(double harrisWidth) {
 						particle->initialCoordinates = particle->coordinates;
 
 						double P=harrisWidth*B0.norm()*types[typeCounter].charge;
-						Vector3d V = Vector3d(0, 1.0, 0) * (-2*kBoltzman_normalized*speed_of_light_normalized*types[typeCounter].temperatureY/P);
+						Vector3d V = Vector3d(0, 1.0, 0) * (-2*kBoltzman_normalized*speed_of_light_normalized*types[typeCounter].temperatureX/P);
 
 							particle->addVelocity(V, speed_of_light_normalized);
 

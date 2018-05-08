@@ -5388,7 +5388,7 @@ void Simulation::initializeKolmogorovSpectrum() {
 	if((cartCoord[0] == cartDim[0] - 1) && (boundaryConditionTypeX != PERIODIC)) {
 		rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
 	}
-	if((cartCoord[0] == 0) && (boundaryConditionTypeX == FREE_BOTH)) {
+	if((cartCoord[0] == 0) && (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH)) {
 		leftBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY, minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[1+additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
 	}
 }

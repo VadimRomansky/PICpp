@@ -96,7 +96,7 @@ void Simulation::removeEscapedParticles() {
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if ((cartDim[0] > 1) || (boundaryConditionTypeX == FREE_BOTH)) {
+	if ((cartDim[0] > 1) || (boundaryConditionTypeX == FREE_BOTH )) {
 		for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
 			Particle* particle = escapedParticlesLeft[i];
 			//reservedParticles.push_back(particle);
@@ -251,8 +251,7 @@ void Simulation::moveParticle(Particle* particle) {
 	particle->coordinates.z += middleVelocity.z * eta * deltaT;
 
 	//if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT)
-	if ((particle->coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT)
-		&& (cartCoord[0] == 0)) {
+	if ((particle->coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == 0)) {
 		//particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 			//middleVelocity.x * (1 - eta) * deltaT);
 		//particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
@@ -262,6 +261,18 @@ void Simulation::moveParticle(Particle* particle) {
 		particle->coordinates.y = particle->coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
 		particle->coordinates.z = particle->coordinates.z + middleVelocity.z * (1 - eta) * deltaT;
 		newVelocity.x = fabs(newVelocity.x);
+		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+		sortParticleToEscaped(particle);
+		return;
+	}
+
+	if((particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) && (boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == cartDim[0] - 1)) {
+		particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - particle->coordinates.x - fabs(
+			middleVelocity.x * (1 - eta) * deltaT);
+		particle->coordinates.y = particle->coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
+		particle->coordinates.z = particle->coordinates.z + middleVelocity.z * (1 - eta) * deltaT;
+		newVelocity.x = -fabs(newVelocity.x);
 		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
 		sortParticleToEscaped(particle);
@@ -329,7 +340,7 @@ void Simulation::moveParticle(Particle* particle) {
 		newCoordinates = particle->coordinates;
 
 		//if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
-		if ((particle->coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
+		if ((particle->coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == 0)) {
 			//particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 			//	middleVelocity.x * restEtaDeltaT);
 			//particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * restEtaDeltaT;
@@ -346,6 +357,19 @@ void Simulation::moveParticle(Particle* particle) {
 			sortParticleToEscaped(particle);
 			return;
 
+		}
+
+		if((particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) && (boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == cartDim[0] - 1)) {
+			particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - particle->coordinates.x - fabs(
+				middleVelocity.x * restEtaDeltaT);
+			particle->coordinates.y = particle->coordinates.y + middleVelocity.y * restEtaDeltaT;
+			particle->coordinates.z = particle->coordinates.z + middleVelocity.z * restEtaDeltaT;
+
+			newVelocity.x = -fabs(newVelocity.x);
+			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+			sortParticleToEscaped(particle);
+			return;
 		}
 
 
@@ -435,7 +459,7 @@ void Simulation::moveParticle(Particle* particle) {
 	}*/
 
 	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
-		if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+		if ((boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == 0) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
 			particle->reflectMomentumX();
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
@@ -448,10 +472,16 @@ void Simulation::moveParticle(Particle* particle) {
 		}
 	}
 	if (particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
-		escapedParticlesRight.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
-		return;
+		if ((boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == cartDim[0] - 1)) {
+			particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - particle->coordinates.x;
+			particle->reflectMomentumX();
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+		} else {
+			escapedParticlesRight.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+			return;
+		}
 	}
 
 	if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
@@ -542,13 +572,27 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 	tempParticle.coordinates.y += middleVelocity.y * eta * deltaT;
 	tempParticle.coordinates.z += middleVelocity.z * eta * deltaT;
 
-	if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT)
+	if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH)
 		&& (cartCoord[0] == 0)) {
 		particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 			middleVelocity.x * (1 - eta) * deltaT / N);
 		particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT / N;
 		particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * (1 - eta) * deltaT / N;
 		newVelocity.x = fabs(newVelocity.x);
+		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+		//sortParticleToEscaped(particle);
+		moveParticle(particle, cur + 1, N);
+		return;
+	}
+
+	if ((tempParticle.coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) && ( boundaryConditionTypeX == FREE_MIRROR_BOTH)
+		&& (cartCoord[0] == cartDim[0]-1)) {
+		particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - tempParticle.coordinates.x - fabs(
+			middleVelocity.x * (1 - eta) * deltaT / N);
+		particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT / N;
+		particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * (1 - eta) * deltaT / N;
+		newVelocity.x = -fabs(newVelocity.x);
 		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
 		//sortParticleToEscaped(particle);
@@ -599,7 +643,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 		tempParticle.coordinates.y += (middleVelocity.y * etaDeltaT);
 		tempParticle.coordinates.z += (middleVelocity.z * etaDeltaT);
 
-		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT)
+		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX == FREE_MIRROR_BOTH)
 			&& (cartCoord[0] == 0)) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 				middleVelocity.x * restEtaDeltaT);
@@ -607,6 +651,22 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 			particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * restEtaDeltaT;
 
 			newVelocity.x = fabs(newVelocity.x);
+			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+			//sortParticleToEscaped(particle);
+			moveParticle(particle, cur + 1, N);
+			return;
+
+		}
+
+		if ((tempParticle.coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) && (boundaryConditionTypeX == FREE_MIRROR_BOTH)
+			&& (cartCoord[0] == cartDim[0]-1)) {
+			particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - tempParticle.coordinates.x - fabs(
+				middleVelocity.x * restEtaDeltaT);
+			particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * restEtaDeltaT;
+			particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * restEtaDeltaT;
+
+			newVelocity.x = -fabs(newVelocity.x);
 			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
 			//sortParticleToEscaped(particle);
@@ -654,6 +714,15 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 
 	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
 		if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
+			particle->reflectMomentumX();
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+			//return;
+		}
+	}
+
+	if (particle->coordinates.x < xgrid[xnumberAdded - 1 - additionalBinNumber]) {
+		if (boundaryConditionTypeX == FREE_MIRROR_BOTH && cartCoord[0] == cartDim[0]-1) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
 			particle->reflectMomentumX();
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
@@ -710,7 +779,7 @@ void Simulation::moveParticleBoris(Particle* particle) {
 	particle->coordinates += newVelocity * deltaT;
 
 	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
-		if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
+		if ((boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == 0) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
 			particle->reflectMomentumX();
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
@@ -719,6 +788,19 @@ void Simulation::moveParticleBoris(Particle* particle) {
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 			escapedParticlesLeft.push_back(particle);
+			return;
+		}
+	}
+	if (particle->coordinates.x > xgrid[xnumberAdded -1 - additionalBinNumber]) {
+		if ((boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == cartDim[0] - 1) {
+			particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - particle->coordinates.x;
+			particle->reflectMomentumX();
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+			//return;
+		} else {
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+			escapedParticlesRight.push_back(particle);
 			return;
 		}
 	}
