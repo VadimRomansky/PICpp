@@ -7896,7 +7896,7 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 	double thetaParamter = kBoltzman_normalized * (localTemperatureX + localTemperatureY + localTemperatureZ) / (3 * mass *
 		speed_of_light_normalized_sqr);
 
-	if (thetaParamter < 0.02) {
+	if (thetaParamter < 0.1) {
 		//energy = maxwellDistribution(localTemparature, kBoltzman_normalized);
 		px = sqrt(mass * kBoltzman_normalized * localTemperatureX) * normalDistribution();
 		py = sqrt(mass * kBoltzman_normalized * localTemperatureY) * normalDistribution();

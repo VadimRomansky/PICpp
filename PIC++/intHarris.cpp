@@ -11,7 +11,7 @@ void Simulation::initializeHarris() {
 	//boundaryConditionTypeX = SUPER_CONDUCTOR_LEFT;
 	//boundaryConditionTypeX = FREE_BOTH;
 	boundaryConditionTypeX = FREE_MIRROR_BOTH;
-	double l = 4*deltaX;
+	double l = 5*deltaX;
     //E0 = Vector3d(0, 0, 0);
 	//B0 = Vector3d(0, 0, 0);
 	for (int i = 0; i < xnumberAdded; ++i) {
@@ -48,6 +48,10 @@ void Simulation::createParticlesHarris(double harrisWidth) {
 	double n0 = types[0].concentration;
 	int n = 0;
 	double ionTemperatureFactor = 5;
+	double electronTemperature = B0.scalarMult(B0)/(2*kBoltzman_normalized*types[0].concentration*(1 + ionTemperatureFactor)*4*pi);
+	types[0].temperatureX = electronTemperature;
+	types[0].temperatureY = electronTemperature;
+	types[0].temperatureZ = electronTemperature;
 	for(int t = 1; t < typesNumber; ++t) {
 		types[t].temperatureX = types[0].temperatureX*ionTemperatureFactor;
 		types[t].temperatureY = types[0].temperatureY*ionTemperatureFactor;

@@ -710,7 +710,7 @@ void Simulation::output() {
 	               particleBulkVelocities, types, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber,
 	               typesNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim);*/
 
-	/*MPI_Barrier(cartComm);
+	MPI_Barrier(cartComm);
 	if (verbosity > 2) printf("output crossection velocity x\n");
 	if (coordX == cartCoord[0]) {
 		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
@@ -769,28 +769,28 @@ void Simulation::output() {
 		outputVelocityLineZ((outputDir + "velocityZ" + fileNumber + ".dat").c_str(), particleBulkVelocities, types, xnumberAdded,
 		                    ynumberAdded, znumberAdded, additionalBinNumber, typesNumber, plasma_period, scaleFactor,
 		                    cartCommZ, cartCoord, cartDim, xindex, yindex, multiplyFileOutput);
-	}*/
+	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing flux\n");
-	/*outputFlux((outputDir + "flux.dat").c_str(), electricFlux, externalElectricFlux, xnumberAdded, ynumberAdded,
-	           znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim);*/
+	outputFlux((outputDir + "flux.dat").c_str(), electricFlux, externalElectricFlux, xnumberAdded, ynumberAdded,
+	           znumberAdded, additionalBinNumber, plasma_period, scaleFactor, cartComm, cartCoord, cartDim, multiplyFileOutput);
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing divergence\n");
-	//outputDivergenceError((outputDir + "divergence_error.dat").c_str(), this, plasma_period, scaleFactor, multiplyFileOutput);
+	outputDivergenceError((outputDir + "divergence_error.dat").c_str(), this, plasma_period, scaleFactor, multiplyFileOutput);
 
 	double rotBscale = 1.0 / (plasma_period * plasma_period * sqrt(scaleFactor));
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing rotB\n");
-	/*outputVectorNodeArray((outputDir + "rotBFile.dat").c_str(), rotB, xnumberAdded, ynumberAdded, znumberAdded,
-	                      additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);*/
+	outputVectorNodeArray((outputDir + "rotBFile.dat").c_str(), rotB, xnumberAdded, ynumberAdded, znumberAdded,
+	                      additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing Ederivative\n");
-	/*outputVectorNodeArray((outputDir + "EderivativeFile.dat").c_str(), Ederivative, xnumberAdded, ynumberAdded,
-	                      znumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);*/
+	outputVectorNodeArray((outputDir + "EderivativeFile.dat").c_str(), Ederivative, xnumberAdded, ynumberAdded,
+	                      znumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing rotE\n");
-	/*outputVectorCellArray((outputDir + "rotEFile.dat").c_str(), rotE, xnumberAdded, ynumberAdded, znumberAdded,
-	                      additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);*/
+	outputVectorCellArray((outputDir + "rotEFile.dat").c_str(), rotE, xnumberAdded, ynumberAdded, znumberAdded,
+	                      additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);
 
 	/*if (rank == 0) printf("outputing dielectricTensor\n");
 	outputMatrixArray((outputDir + "dielectricTensorFile.dat").c_str(), dielectricTensor, xnumber + 1, ynumber + 1,

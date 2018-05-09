@@ -9,7 +9,7 @@ Ny = size(Yfile, 1)-1;
 Nz = size(Zfile, 1)-1;
 
 NE = Nx*Ny*Nz;
-Nt = (size(rotEFile, 1)/NE)-1;
+Nt = (size(rotEFile, 1)/NE);
 
 ynumber = 1;
 znumber = 1;

@@ -7,7 +7,7 @@
 90                      B theta in grad  Bx = B cos theta, By = B sin theta cos phi, Bz = B sin theta sin phi
 90                      B phi
 0 0 0                   Electric field
-0.25                    total electron concentration (always in cgs)
+1                    total electron concentration (always in cgs)
 10000000                max iterations
 1E100                   max time
 1                  	prefered time step
@@ -16,13 +16,13 @@
 10                      write general parameter (for output energy)
 10                      write trajectory parameter
 10                      write particle step
-0			smothing iterations
+4			smothing iterations
 0.5                     smothing parameter
 0                       write each iteration in different file
 0.015625    	        electron mass (in units of proton mass)
 8                       particle types number
-1.0 10                	electrons relative concentration and particles per bin
-1.0 10                	protons relative  concentration and particles per bin
+1.0 40                	electrons relative concentration and particles per bin
+1.0 40                	protons relative  concentration and particles per bin
 0 0                 	positrons relative  concentration and particles per bin
 0 0                     alpha  relative   concentration and particles per bin
 0 0                     deuterium  relative  concentration and particles per bin
