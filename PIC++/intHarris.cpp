@@ -47,16 +47,7 @@ void Simulation::createParticlesHarris(double harrisWidth) {
 	if (rank == 0) printLog("creating particles harris\n");
 	double n0 = types[0].concentration;
 	int n = 0;
-	double ionTemperatureFactor = 5;
-	double electronTemperature = B0.scalarMult(B0)/(2*kBoltzman_normalized*types[0].concentration*(1 + ionTemperatureFactor)*4*pi);
-	types[0].temperatureX = electronTemperature;
-	types[0].temperatureY = electronTemperature;
-	types[0].temperatureZ = electronTemperature;
-	for(int t = 1; t < typesNumber; ++t) {
-		types[t].temperatureX = types[0].temperatureX*ionTemperatureFactor;
-		types[t].temperatureY = types[0].temperatureY*ionTemperatureFactor;
-		types[t].temperatureZ = types[0].temperatureZ*ionTemperatureFactor;
-	}
+	
 	//int density = ; %задаем значение плотности
 	//for (int i = 0; i < xnumber; ++i) {
 	for (int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i) {
