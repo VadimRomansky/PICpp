@@ -4874,13 +4874,8 @@ void Simulation::initializeFluxFromRight() {
 	double protonGyroRadius = p0 * speed_of_light_normalized / (fabs(electron_charge_normalized) * B0.norm());
 	int countGyroRadius = xsizeGeneral / protonGyroRadius;
 	double deltaK = 2 * pi / xsizeGeneral;
-	double minK = deltaK;
-	double maxK = 2 * pi / deltaX;
 	int maxCount = min2(2 * countGyroRadius, xnumberGeneral);
 	int minCount = max2(1, countGyroRadius / 2);
-	int count = maxCount - minCount + 1;
-
-	//initializeRandomModes(count, minCount, 0.5);
 
 	double magneticEnergy = B0.scalarMult(B0) / (8 * pi);
 	double kineticEnergy = density * V0.scalarMult(V0) / 2;
@@ -5287,7 +5282,7 @@ void Simulation::initializeKolmogorovSpectrum() {
 	srand(turbulenceRandomSeed);
 
 	minTurbulenceLengthX = 10;
-	maxTurbulenceLengthX = 500;
+	maxTurbulenceLengthX = 5000;
 	minTurbulenceLengthY = 10;
 	maxTurbulenceLengthY = 500;
 	minTurbulenceLengthZ = 10;
@@ -7623,6 +7618,10 @@ void Simulation::createParticles() {
 
 
 	synchronizeParticleNumber();
+
+	if(rank == 0) {
+		printf("finish creating particles\n");
+	}
 
 	//printf("rank = %d p0 = %d p1 = %d p2 = %d e0 = %d e1 = %d e2 = %d Np = %d\n", rank, protonNumber, protonNumber1, protonNumber2, electronNumber, electronNumber1, electronNumber2, particlesNumber);
 
