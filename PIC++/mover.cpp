@@ -433,10 +433,10 @@ void Simulation::moveParticle(Particle* particle) {
 		printf("relative error = %g\n", error/momentumNorm);
 	}*/
 
-	if (fabs(newGamma - oldGamma) > 0.2) {
-		printf("delta gamma > 0.2\n");
-		printf("oldGamma = %g newGamma = %g delta gamma = %g\n", oldGamma, newGamma, newGamma - oldGamma);
-		printf("theoretical delta gamma = %g\n", deltaGammaTheor);
+	//if (fabs(newGamma - oldGamma) > 0.2) {
+		//printf("delta gamma > 0.2\n");
+		//printf("oldGamma = %g newGamma = %g delta gamma = %g\n", oldGamma, newGamma, newGamma - oldGamma);
+		//printf("theoretical delta gamma = %g\n", deltaGammaTheor);
 		/*printf("particle iterations = %d\n", i);
 		printf("cartx = %d carty = %d cartz = %d\n", cartCoord[0], cartCoord[1], cartCoord[2]);
 		printf("particle number = %d\n", particle->number);
@@ -451,7 +451,7 @@ void Simulation::moveParticle(Particle* particle) {
 				printf("alpha[%d][%d] = %g\n", i, j, particle->rotationTensor.matrix[i][j]);
 			}
 		}*/
-	}
+	//}
 
 	//correctParticlePosition(particle);
 	/*if(particle->coordinates.x > xgrid[xnumberAdded - additionalBinNumber]){
