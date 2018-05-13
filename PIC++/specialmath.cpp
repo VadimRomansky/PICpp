@@ -395,7 +395,7 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 	                                              additionalBinNumber, lnumber, periodicX, periodicY, periodicZ, rank,
 	                                              nprocs, cartComm, cartCoord, cartDim));
 	//printf("norm = %g\n", norm);
-	alertNaNOrInfinity(norm, "right partnorm = NaN in gmres\n");
+	//alertNaNOrInfinity(norm, "right partnorm = NaN in gmres\n");
 
 	if (norm == 0) {
 		for (int i = 0; i < xnumberAdded; ++i) {
@@ -591,7 +591,7 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 				printf("Rmatrix[%d][%d] = 0\n", i, i);
 			}
 			//printf("y[%d] = %g\n", i, y[i]);
-			alertNaNOrInfinity(y[i], "y = NaN\n");
+			//alertNaNOrInfinity(y[i], "y = NaN\n");
 		}
 
 		error = fabs(beta * Qmatrix[n - 1][0]);
@@ -659,11 +659,11 @@ void generalizedMinimalResidualMethod(std::vector < MatrixElement >**** matrix, 
 			for (int k = 0; k < znumberAdded; ++k) {
 				for (int l = 0; l < lnumber; ++l) {
 					rightPart[i][j][k][l] *= norm;
-					for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
+					/*for (int m = 0; m < matrix[i][j][k][l].size(); ++m) {
 						double value = matrix[i][j][k][l][m].value;
 						//matrix[i][l][m].value *= norm;
 						value = matrix[i][j][k][l][m].value;
-					}
+					}*/
 				}
 			}
 		}
@@ -786,7 +786,7 @@ void simpleIterationSolver(double**** outVector, double**** tempVector, int xnum
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int l = 0; l < lnumber; ++l) {
 						tempVector[i][j][k][l] = rightPartEvaluator->rightPart(outVector, i, j, k, l);
-						alertNaNOrInfinity(tempVector[i][j][k][l], "tempvector = NaN in simpleIterationSolver\n");
+						//alertNaNOrInfinity(tempVector[i][j][k][l], "tempvector = NaN in simpleIterationSolver\n");
 					}
 				}
 			}
