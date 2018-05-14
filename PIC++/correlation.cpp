@@ -34,7 +34,7 @@ Vector3d Simulation::correlationEfield(Particle* particle) {
 
 Vector3d Simulation::correlationGeneralEfield(Particle& particle, Vector3d*** field) {
 	//alertNaNOrInfinity(particle.coordinates.x, "particle.x = NaN in correlationGeneralEfield\n");
-	int xcount = floor(((particle.coordinates.x - xgrid[0]) / deltaX) + 0.5);
+	/*int xcount = floor(((particle.coordinates.x - xgrid[0]) / deltaX) + 0.5);
 	int ycount = floor(((particle.coordinates.y - ygrid[0]) / deltaY) + 0.5);
 	int zcount = floor(((particle.coordinates.z - zgrid[0]) / deltaZ) + 0.5);
 	if (xcount < 0) {
@@ -56,7 +56,7 @@ Vector3d Simulation::correlationGeneralEfield(Particle& particle, Vector3d*** fi
 		fprintf(errorLogFile, "xgrid[xnumber + 1] = %g particle.x = %g\n", xgrid[xnumberAdded], particle.coordinates.x);
 		MPI_Finalize();
 		exit(0);
-	}
+	}*/
 
 	Vector3d result = Vector3d(0, 0, 0);
 
@@ -67,8 +67,7 @@ Vector3d Simulation::correlationGeneralEfield(Particle& particle, Vector3d*** fi
 				int curJ = particle.correlationMapNode.yindex[j];
 				int curK = particle.correlationMapNode.zindex[k];
 
-				Vector3d E = Vector3d(0, 0, 0);
-				E = field[curI][curJ][curK];
+				Vector3d E = field[curI][curJ][curK];
 
 				double correlation = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j] *
 					particle.correlationMapNode.zcorrelation[k];
@@ -101,10 +100,7 @@ Vector3d Simulation::correlationBfield(Particle& particle) const {
 				int curJ = particle.correlationMapCell.yindex[j];
 				int curK = particle.correlationMapCell.zindex[k];
 
-
-				Vector3d B = Vector3d(0, 0, 0);
-
-				B = Bfield[curI][curJ][curK];
+				Vector3d B = Bfield[curI][curJ][curK];
 
 				double correlation = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] *
 					particle.correlationMapCell.zcorrelation[k];

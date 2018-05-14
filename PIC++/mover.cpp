@@ -234,6 +234,9 @@ void Simulation::moveParticle(Particle* particle) {
 	}
 	//
 
+	double etaDeltaT = eta * deltaT;
+	double restEtaDeltaT = (1.0 - eta) * deltaT;
+
 	//tempParticle.addMomentum((E + (velocity.vectorMult(B) / (speed_of_light_normalized))) * particle->charge * deltaT);
 	newMomentum +=(E + (velocity.vectorMult(B) / (speed_of_light_normalized))) * particle->charge * deltaT;
 
@@ -246,9 +249,9 @@ void Simulation::moveParticle(Particle* particle) {
 	//tempParticle.coordinates.y += middleVelocity.y * eta * deltaT;
 	//tempParticle.coordinates.z += middleVelocity.z * eta * deltaT;
 	
-	particle->coordinates.x += middleVelocity.x * eta * deltaT;
-	particle->coordinates.y += middleVelocity.y * eta * deltaT;
-	particle->coordinates.z += middleVelocity.z * eta * deltaT;
+	particle->coordinates.x += middleVelocity.x * etaDeltaT;
+	particle->coordinates.y += middleVelocity.y * etaDeltaT;
+	particle->coordinates.z += middleVelocity.z * etaDeltaT;
 
 	//if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT)
 	if ((particle->coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == 0)) {
@@ -257,9 +260,9 @@ void Simulation::moveParticle(Particle* particle) {
 		//particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
 		//particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * (1 - eta) * deltaT;
 		particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x + fabs(
-			middleVelocity.x * (1 - eta) * deltaT);
-		particle->coordinates.y = particle->coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
-		particle->coordinates.z = particle->coordinates.z + middleVelocity.z * (1 - eta) * deltaT;
+			middleVelocity.x * restEtaDeltaT);
+		particle->coordinates.y = particle->coordinates.y + middleVelocity.y * restEtaDeltaT;
+		particle->coordinates.z = particle->coordinates.z + middleVelocity.z * restEtaDeltaT;
 		newVelocity.x = fabs(newVelocity.x);
 		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
@@ -269,9 +272,9 @@ void Simulation::moveParticle(Particle* particle) {
 
 	if((particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) && (boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == cartDim[0] - 1)) {
 		particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - particle->coordinates.x - fabs(
-			middleVelocity.x * (1 - eta) * deltaT);
-		particle->coordinates.y = particle->coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
-		particle->coordinates.z = particle->coordinates.z + middleVelocity.z * (1 - eta) * deltaT;
+			middleVelocity.x * restEtaDeltaT);
+		particle->coordinates.y = particle->coordinates.y + middleVelocity.y * restEtaDeltaT;
+		particle->coordinates.z = particle->coordinates.z + middleVelocity.z * restEtaDeltaT;
 		newVelocity.x = -fabs(newVelocity.x);
 		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
 		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
@@ -280,22 +283,20 @@ void Simulation::moveParticle(Particle* particle) {
 	}
 
 
-	Vector3d prevVelocity = velocity;
+	//Vector3d prevVelocity = velocity;
 	int i = 0;
 	Vector3d velocityHat = (particle->rotationTensor * particle->gammaFactor(
 		speed_of_light_normalized) * velocity);
-	double velocityNorm = velocity.norm();
-	double velocityHatNorm = velocityHat.norm();
+	//double velocityNorm = velocity.norm();
+	//double velocityHatNorm = velocityHat.norm();
 	//velocityHat = velocityHat*(velocityNorm/velocityHatNorm);
 
-	if (velocityHat.norm() > speed_of_light_normalized) {
+	//if (velocityHat.norm() > speed_of_light_normalized) {
 		//printf("velocity Hat norm > c\n");
 		//MPI_Finalize();
 		//exit(0);
-	}
+	//}
 	//double a = tempParticle.gammaFactor(speed_of_light_normalized);
-	double etaDeltaT = eta * deltaT;
-	double restEtaDeltaT = (1.0 - eta) * deltaT;
 	//double velocityNorm = velocity.norm();
 
 	Vector3d prevMomentum = particle->getMomentum();
@@ -414,11 +415,11 @@ void Simulation::moveParticle(Particle* particle) {
 	particle->coordinates.y = oldCoordinates.y + middleVelocity.y * deltaT;
 	particle->coordinates.z = oldCoordinates.z + middleVelocity.z * deltaT;
 
-	double newGamma = particle->gammaFactor(speed_of_light_normalized);
+	//double newGamma = particle->gammaFactor(speed_of_light_normalized);
 
 	double deltaGammaTheor = particle->charge * deltaT * E.scalarMult(middleVelocity) / (particle->mass *
 		speed_of_light_normalized_sqr);
-	double theorNewGamma = oldGamma + deltaGammaTheor;
+	//double theorNewGamma = oldGamma + deltaGammaTheor;
 	/*if(theorNewGamma - 1 > relativisticPrecision){
 		double newTheorMomentumNorm = particle->mass*speed_of_light_normalized*sqrt(theorNewGamma*theorNewGamma - 1.0);
 		Vector3d p = particle->getMomentum();

@@ -26,6 +26,7 @@ Pa(1:Np, 1:3) = 0;
 Ppos(1:Np, 1:3) = 0;
 
 me = initialParameters(36);
+mp = 1.67262177*10^-24;
 v=3*10^10;
 
 for i=1:Np,
@@ -64,7 +65,7 @@ end;
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
 figure(1);
-plot (Pp(1:Np,1)/(me*v),Fp(1:Np,1), 'red',Pp(1:Np,2)/(me*v),Fp(1:Np,2), 'green',Pp(1:Np,3)/(me*v),Fp(1:Np,3), 'blue');
+plot (Pp(1:Np,1)/(mp*v),Fp(1:Np,1), 'red',Pp(1:Np,2)/(mp*v),Fp(1:Np,2), 'green',Pp(1:Np,3)/(mp*v),Fp(1:Np,3), 'blue');
 %title ('protons distribution function');
 xlabel ('p/{m_e c}');
 ylabel ('F_p(p) p^4');
