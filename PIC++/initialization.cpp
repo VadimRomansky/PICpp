@@ -1973,9 +1973,17 @@ void Simulation::initialize() {
 	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
 	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
 
-	if (verbosity > 2) printf("creating particle types rank = %d\n", rank);
+	printf("creating particle types rank = %d\n", rank);
 
 	createParticleTypes(concentrations, particlesPerBin);
+	int allTypesInBin = 0;
+	for(int t  = 0; t < typesNumber; ++t) {
+		allTypesInBin += types[t].particlesPerBin;
+	}
+	particles.reserve(4*allTypesInBin*xnumber*ynumber*znumber);
+
+	//int maxParticles = fakeParticles.max_size();
+	//printf("rank = %d maxParticles = %d necessary paricles = %d\n", rank, maxParticles, allTypesInBin*xnumber*ynumber*znumber);
 
 	density = 0;
 	for (int i = 0; i < typesNumber; ++i) {
@@ -6064,38 +6072,38 @@ void Simulation::createArrays() {
 	tempCellMatrixParameter = create3matrixArray(xnumberAdded, ynumberAdded, znumberAdded);
 
 	if(solverType == IMPLICIT_EC){
-	massMatrix = new MassMatrix**[xnumberAdded + 1];
-	tempMassMatrix = new MassMatrix**[xnumberAdded + 1];
+		massMatrix = new MassMatrix**[xnumberAdded + 1];
+		tempMassMatrix = new MassMatrix**[xnumberAdded + 1];
 
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		massMatrix[i] = new MassMatrix*[ynumberAdded + 1];
-		tempMassMatrix[i] = new MassMatrix*[ynumberAdded + 1];
-		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			massMatrix[i][j] = new MassMatrix[znumberAdded + 1];
-			tempMassMatrix[i][j] = new MassMatrix[znumberAdded + 1];
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
-					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
-						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
-							for (int curI = 0; curI < 3; ++curI) {
-								for (int curJ = 0; curJ < 3; ++curJ) {
-									massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[curI][curJ] = 0;
-									tempMassMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[curI][curJ] = 0;
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			massMatrix[i] = new MassMatrix*[ynumberAdded + 1];
+			tempMassMatrix[i] = new MassMatrix*[ynumberAdded + 1];
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				massMatrix[i][j] = new MassMatrix[znumberAdded + 1];
+				tempMassMatrix[i][j] = new MassMatrix[znumberAdded + 1];
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+						for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+							for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
+								for (int curI = 0; curI < 3; ++curI) {
+									for (int curJ = 0; curJ < 3; ++curJ) {
+										massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[curI][curJ] = 0;
+										tempMassMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[curI][curJ] = 0;
+									}
 								}
+								massMatrix[i][j][k].xindex[tempI] = i + tempI - splineOrder - 1;
+								massMatrix[i][j][k].yindex[tempJ] = j + tempJ - splineOrder - 1;
+								massMatrix[i][j][k].zindex[tempK] = k + tempK - splineOrder - 1;
+	
+								tempMassMatrix[i][j][k].xindex[tempI] = i + tempI - splineOrder - 1;
+								tempMassMatrix[i][j][k].yindex[tempJ] = j + tempJ - splineOrder - 1;
+								tempMassMatrix[i][j][k].zindex[tempK] = k + tempK - splineOrder - 1;
 							}
-							massMatrix[i][j][k].xindex[tempI] = i + tempI - splineOrder - 1;
-							massMatrix[i][j][k].yindex[tempJ] = j + tempJ - splineOrder - 1;
-							massMatrix[i][j][k].zindex[tempK] = k + tempK - splineOrder - 1;
-
-							tempMassMatrix[i][j][k].xindex[tempI] = i + tempI - splineOrder - 1;
-							tempMassMatrix[i][j][k].yindex[tempJ] = j + tempJ - splineOrder - 1;
-							tempMassMatrix[i][j][k].zindex[tempK] = k + tempK - splineOrder - 1;
 						}
 					}
 				}
 			}
 		}
-	}
 	}
 
 	leftElevel = new Vector3d*[ynumberAdded + 1];
@@ -6533,21 +6541,23 @@ void Simulation::createArrays() {
 	tempNodeMatrixParameterLeft = create3matrixArray(3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 	tempNodeMatrixParameterRight = create3matrixArray(3 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 
-	tempNodeMassMatrixParameterLeft = new MassMatrix **[3 + 2 * additionalBinNumber];
-	tempNodeMassMatrixParameterRight = new MassMatrix **[3 + 2 * additionalBinNumber];
+	if(solverType == IMPLICIT_EC){
+		tempNodeMassMatrixParameterLeft = new MassMatrix **[3 + 2 * additionalBinNumber];
+		tempNodeMassMatrixParameterRight = new MassMatrix **[3 + 2 * additionalBinNumber];
 
-	for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
-		tempNodeMassMatrixParameterLeft[i] = new MassMatrix *[ynumberAdded + 1];
-		tempNodeMassMatrixParameterRight[i] = new MassMatrix *[ynumberAdded + 1];
-		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			tempNodeMassMatrixParameterLeft[i][j] = new MassMatrix[znumberAdded + 1];
-			tempNodeMassMatrixParameterRight[i][j] = new MassMatrix[znumberAdded + 1];
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
-					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
-						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
-							tempNodeMassMatrixParameterLeft[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-							tempNodeMassMatrixParameterRight[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+		for (int i = 0; i < 3 + 2 * additionalBinNumber; ++i) {
+			tempNodeMassMatrixParameterLeft[i] = new MassMatrix *[ynumberAdded + 1];
+			tempNodeMassMatrixParameterRight[i] = new MassMatrix *[ynumberAdded + 1];
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				tempNodeMassMatrixParameterLeft[i][j] = new MassMatrix[znumberAdded + 1];
+				tempNodeMassMatrixParameterRight[i][j] = new MassMatrix[znumberAdded + 1];
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+						for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+							for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
+								tempNodeMassMatrixParameterLeft[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+								tempNodeMassMatrixParameterRight[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+							}
 						}
 					}
 				}
@@ -6570,21 +6580,24 @@ void Simulation::createArrays() {
 	tempNodeMatrixParameterFront = create3matrixArray(xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
 	tempNodeMatrixParameterBack = create3matrixArray(xnumberAdded + 1, 3 + 2 * additionalBinNumber, znumberAdded + 1);
 
-	tempNodeMassMatrixParameterFront = new MassMatrix **[xnumberAdded + 1];
-	tempNodeMassMatrixParameterBack = new MassMatrix **[xnumberAdded + 1];
 
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		tempNodeMassMatrixParameterFront[i] = new MassMatrix *[3 + 2 * additionalBinNumber];
-		tempNodeMassMatrixParameterBack[i] = new MassMatrix *[3 + 2 * additionalBinNumber];
-		for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
-			tempNodeMassMatrixParameterFront[i][j] = new MassMatrix[znumberAdded + 1];
-			tempNodeMassMatrixParameterBack[i][j] = new MassMatrix[znumberAdded + 1];
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
-					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
-						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
-							tempNodeMassMatrixParameterFront[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-							tempNodeMassMatrixParameterBack[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+	if(solverType == IMPLICIT_EC){
+		tempNodeMassMatrixParameterFront = new MassMatrix **[xnumberAdded + 1];
+		tempNodeMassMatrixParameterBack = new MassMatrix **[xnumberAdded + 1];
+
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			tempNodeMassMatrixParameterFront[i] = new MassMatrix *[3 + 2 * additionalBinNumber];
+			tempNodeMassMatrixParameterBack[i] = new MassMatrix *[3 + 2 * additionalBinNumber];
+			for (int j = 0; j < 3 + 2 * additionalBinNumber; ++j) {
+				tempNodeMassMatrixParameterFront[i][j] = new MassMatrix[znumberAdded + 1];
+				tempNodeMassMatrixParameterBack[i][j] = new MassMatrix[znumberAdded + 1];
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+						for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+							for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
+								tempNodeMassMatrixParameterFront[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+								tempNodeMassMatrixParameterBack[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+							}
 						}
 					}
 				}
@@ -6607,21 +6620,23 @@ void Simulation::createArrays() {
 	tempNodeMatrixParameterBottom = create3matrixArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
 	tempNodeMatrixParameterTop = create3matrixArray(xnumberAdded + 1, ynumberAdded + 1, 3 + 2 * additionalBinNumber);
 
-	tempNodeMassMatrixParameterBottom = new MassMatrix **[xnumberAdded + 1];
-	tempNodeMassMatrixParameterTop = new MassMatrix **[xnumberAdded + 1];
+	if(solverType == IMPLICIT_EC){
+		tempNodeMassMatrixParameterBottom = new MassMatrix **[xnumberAdded + 1];
+		tempNodeMassMatrixParameterTop = new MassMatrix **[xnumberAdded + 1];
 
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		tempNodeMassMatrixParameterBottom[i] = new MassMatrix *[ynumberAdded + 1];
-		tempNodeMassMatrixParameterTop[i] = new MassMatrix *[ynumberAdded + 1];
-		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			tempNodeMassMatrixParameterBottom[i][j] = new MassMatrix[3 + 2 * additionalBinNumber];
-			tempNodeMassMatrixParameterTop[i][j] = new MassMatrix[3 + 2 * additionalBinNumber];
-			for (int k = 0; k < 3 + 2 * additionalBinNumber; ++k) {
-				for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
-					for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
-						for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
-							tempNodeMassMatrixParameterBottom[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
-							tempNodeMassMatrixParameterTop[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			tempNodeMassMatrixParameterBottom[i] = new MassMatrix *[ynumberAdded + 1];
+			tempNodeMassMatrixParameterTop[i] = new MassMatrix *[ynumberAdded + 1];
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				tempNodeMassMatrixParameterBottom[i][j] = new MassMatrix[3 + 2 * additionalBinNumber];
+				tempNodeMassMatrixParameterTop[i][j] = new MassMatrix[3 + 2 * additionalBinNumber];
+				for (int k = 0; k < 3 + 2 * additionalBinNumber; ++k) {
+					for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
+						for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
+							for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
+								tempNodeMassMatrixParameterBottom[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+								tempNodeMassMatrixParameterTop[i][j][k].matrix[tempI][tempJ][tempK] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+							}
 						}
 					}
 				}

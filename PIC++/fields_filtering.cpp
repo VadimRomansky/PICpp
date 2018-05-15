@@ -1112,7 +1112,7 @@ void Simulation::updateBoundaryLevelX() {
 	int bcount = 0;
 
 	///left
-	if (cartCoord[0] = 0) {
+	if (cartCoord[0] == 0) {
 		bcount = 0;
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			for (int k = 0; k < znumberAdded + 1; ++k) {

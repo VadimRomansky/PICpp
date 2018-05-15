@@ -80,13 +80,13 @@ void Simulation::simulate() {
 		//updateShockWaveX();
 	}
 
-	evaluateExplicitDerivative();
+	//evaluateExplicitDerivative();
 	if (currentIteration % divergenceCleanUpParameter == 0) {
 		if (solverType == BUNEMAN) {
 			//cleanupDivergenceBuneman();
 			//cleanUpDivergenceBunemanMagnetic();
 		} else {
-			cleanupDivergence(newEfield, chargeDensity);
+			//cleanupDivergence(newEfield, chargeDensity);
 			//cleanupDivergenceMagnetic();
 		}
 	}
