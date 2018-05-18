@@ -1,9 +1,9 @@
 0                       input type - cgs or in omega_e and skin depth units
-100 1 100                 grid numbers
+50 1 50                 grid numbers
 3.5E6         		grid step
 2E9                     temperature
 0 0 0                   velocity (in c always)
-0.00038                    magnetization
+0.1                    magnetization
 90                      B theta in grad  Bx = B cos theta, By = B sin theta cos phi, Bz = B sin theta sin phi
 90                      B phi
 0 0 0                   Electric field
@@ -12,8 +12,8 @@
 1E100                   max time
 1                  	prefered time step
 0                  	log verbocity level
-100                      write iteration parameter (for output fields)
-10                      write general parameter (for output energy)
+1000                      write iteration parameter (for output fields)
+100                      write general parameter (for output energy)
 10                      write trajectory parameter
 10                      write particle step
 4			smothing iterations
@@ -21,8 +21,8 @@
 0                       write each iteration in different file
 0.015625    	        electron mass (in units of proton mass)
 8                       particle types number
-1.0 40                	electrons relative concentration and particles per bin
-1.0 40                	protons relative  concentration and particles per bin
+1.0 10                	electrons relative concentration and particles per bin
+1.0 10                	protons relative  concentration and particles per bin
 0 0                 	positrons relative  concentration and particles per bin
 0 0                     alpha  relative   concentration and particles per bin
 0 0                     deuterium  relative  concentration and particles per bin
