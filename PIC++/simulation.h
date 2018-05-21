@@ -892,6 +892,8 @@ public:
 	void synchronizeParticleNumber();
 	void createArrays();
 	void createParticleTypes(double* concentrations, int* particlesPerBin);
+	void evaluateJuttnerFunctions();
+	void evaluateJuttnerFunction(ParticleTypeContainer& typeContainer);
     void evaluateParticleTypesAlpha();
 	void createFiles();
 	void simulate();

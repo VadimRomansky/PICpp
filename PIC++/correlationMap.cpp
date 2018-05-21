@@ -5,6 +5,11 @@
 #include "constants.h"
 #include "paths.h"
 
+ParticleTypeContainer::~ParticleTypeContainer() {
+	delete[] juttnerFunction;
+	delete[] juttnerValue;
+}
+
 CorrelationMap::CorrelationMap() {
 	for (int i = 0; i < splineOrder + 2; ++i) {
 		xindex[i] = - splineOrder;

@@ -68,11 +68,12 @@ void Simulation::createParticlesHarris(double harrisWidth) {
 	types[0].temperatureX = Te;
 	types[0].temperatureY = Te;
 	types[0].temperatureZ = Te;
-		for (int m = 0; m < types[m].particlesPerBin; ++m) {
-			types[m].temperatureX = Te*tempFactor;
-			types[m].temperatureY = Te*tempFactor;
-			types[m].temperatureZ = Te*tempFactor;
-		}
+	for (int m = 0; m < types[m].particlesPerBin; ++m) {
+		types[m].temperatureX = Te*tempFactor;
+		types[m].temperatureY = Te*tempFactor;
+		types[m].temperatureZ = Te*tempFactor;
+	}
+	evaluateJuttnerFunctions();
 	
 	//int density = ; %задаем значение плотности
 	//for (int i = 0; i < xnumber; ++i) {

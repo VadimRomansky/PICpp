@@ -928,6 +928,24 @@ double polynomDerivativeValue(const double* coefficients, double x, int n) {
 	return result;
 }
 
+double dichotomySolver(const double* functionValue, int minIndex, int maxIndex, double* xValue, double y) {
+	if(minIndex + 1 == maxIndex) {
+		double y1 = functionValue[minIndex];
+		double y2 = functionValue[maxIndex];
+		double x1 = xValue[minIndex];
+		double x2 = xValue[maxIndex];
+		return (x2 - x1)*(y - y1)/(y2 - y1) + x1;
+	}
+	int middleIndex = (minIndex + maxIndex)/2;
+	if(functionValue[middleIndex] > y) {
+		return dichotomySolver(functionValue, middleIndex, maxIndex, xValue, y);
+	} else if(functionValue[middleIndex] < y) {
+		return dichotomySolver(functionValue, minIndex, maxIndex, xValue, y);
+	} else {
+		return xValue[middleIndex];
+	}
+}
+
 Complex*** fastFourierTransition(double*** a, int xnumber, int ynumber, int znumber) {
 	int kx = xnumber;
 	while (kx > 1) {

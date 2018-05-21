@@ -11,6 +11,7 @@
 #include "constants.h"
 #include "random.h"
 #include "paths.h"
+#include "specialmath.h"
 
 double uniformDistribution() {
 	return (rand() % randomParameter + 0.5) / randomParameter;
@@ -37,6 +38,30 @@ double maxwellJuttnerDistribution(double temperature, double mass, double c, dou
 	double gamma = solveInverceJuttnerFunction(x, theta, besselK);
 
 	return gamma * mass * c * c;
+}
+
+double maxwellJuttnerMomentumColdDistribution(double temperature, double mass, double c, double k, double* function, double* xvalue, int number) {
+	double theta = k * temperature / (mass * c * c);
+	double y = uniformDistribution();
+	return mass*c*dichotomySolver(function, 0, number - 1, xvalue, y);
+}
+
+double maxwellJuttnerMomentumHotDistribution(double temperature, double mass, double c, double k) {
+	double theta = k * temperature / (mass * c * c);
+	double x1 = uniformDistribution();
+	double x2 = uniformDistribution();
+	double x3 = uniformDistribution();
+	double x4 = uniformDistribution();
+	double u = - theta*log(x2*x3*x4);
+	double exp1 = exp((u - sqrt(1 + u*u))/theta);
+	while(exp1 < x1) {
+		x2 = uniformDistribution();
+		x3 = uniformDistribution();
+		x4 = uniformDistribution();
+		u = - theta*log(x2*x3*x4);
+		exp1 = exp((u - sqrt(1 + u*u))/theta);
+	}
+	return mass*c*u;
 }
 
 double solveInverceJuttnerFunction(double x, double theta, double besselK) {

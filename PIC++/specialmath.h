@@ -62,6 +62,8 @@ double solveBigOrderEquation(const double* coefficients, int n, double startX);
 double polynomValue(const double* coefficients, double x, int n);
 double polynomDerivativeValue(const double* coefficients, double x, int n);
 
+double dichotomySolver(const double* functionValue, int minIndex, int maxIndex, double* xValue, double y);
+
 void sortInputFastFourierX(Complex ***a, int xnumber, int ynumber, int znumber);
 void sortInputFastFourierY(Complex ***a, int xnumber, int ynumber, int znumber);
 void sortInputFastFourierZ(Complex ***a, int xnumber, int ynumber, int znumber);
