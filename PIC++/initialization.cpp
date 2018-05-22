@@ -6753,8 +6753,8 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.concentration = concentrations[0] * initialElectronConcentration;
 	type.typeName = "electron";
 	type.jutnerNumber = randomParameter;
-	type.juttnerFunction = new double[type.jutnerNumber];
-	type.juttnerValue = new double[type.jutnerNumber];
+	//type.juttnerFunction = new double[type.jutnerNumber];
+	//type.juttnerValue = new double[type.jutnerNumber];
 
 	types[0] = type;
 
@@ -6767,8 +6767,8 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.concentration = concentrations[1] * initialElectronConcentration;
 	type.typeName = "proton";
 	type.jutnerNumber = randomParameter;
-	type.juttnerFunction = new double[type.jutnerNumber];
-	type.juttnerValue = new double[type.jutnerNumber];
+	//type.juttnerFunction = new double[type.jutnerNumber];
+	//type.juttnerValue = new double[type.jutnerNumber];
 
 	types[1] = type;
 
@@ -6781,8 +6781,8 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.concentration = concentrations[2] * initialElectronConcentration;
 	type.typeName = "positron";
 	type.jutnerNumber = randomParameter;
-	type.juttnerFunction = new double[type.jutnerNumber];
-	type.juttnerValue = new double[type.jutnerNumber];
+	//type.juttnerFunction = new double[type.jutnerNumber];
+	//type.juttnerValue = new double[type.jutnerNumber];
 
 	types[2] = type;
 
@@ -6795,8 +6795,8 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.concentration = concentrations[3] * initialElectronConcentration;
 	type.typeName = "alpha";
 	type.jutnerNumber = randomParameter;
-	type.juttnerFunction = new double[type.jutnerNumber];
-	type.juttnerValue = new double[type.jutnerNumber];
+	//type.juttnerFunction = new double[type.jutnerNumber];
+	//type.juttnerValue = new double[type.jutnerNumber];
 
 	types[3] = type;
 
@@ -6809,8 +6809,8 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.concentration = concentrations[4] * initialElectronConcentration;
 	type.typeName = "deuterium";
 	type.jutnerNumber = randomParameter;
-	type.juttnerFunction = new double[type.jutnerNumber];
-	type.juttnerValue = new double[type.jutnerNumber];
+	//type.juttnerFunction = new double[type.jutnerNumber];
+	//type.juttnerValue = new double[type.jutnerNumber];
 
 	types[4] = type;
 
@@ -6823,8 +6823,8 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.concentration = concentrations[5] * initialElectronConcentration;
 	type.typeName = "helium3";
 	type.jutnerNumber = randomParameter;
-	type.juttnerFunction = new double[type.jutnerNumber];
-	type.juttnerValue = new double[type.jutnerNumber];
+	//type.juttnerFunction = new double[type.jutnerNumber];
+	//type.juttnerValue = new double[type.jutnerNumber];
 
 	types[5] = type;
 
@@ -6837,8 +6837,8 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.concentration = concentrations[6] * initialElectronConcentration;
 	type.typeName = "oxygen_plus_3";
 	type.jutnerNumber = randomParameter;
-	type.juttnerFunction = new double[type.jutnerNumber];
-	type.juttnerValue = new double[type.jutnerNumber];
+	//type.juttnerFunction = new double[type.jutnerNumber];
+	//type.juttnerValue = new double[type.jutnerNumber];
 
 	types[6] = type;
 
@@ -6851,8 +6851,8 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 	type.concentration = concentrations[7] * initialElectronConcentration;
 	type.typeName = "silicon_plus_1";
 	type.jutnerNumber = randomParameter;
-	type.juttnerFunction = new double[type.jutnerNumber];
-	type.juttnerValue = new double[type.jutnerNumber];
+	//type.juttnerFunction = new double[type.jutnerNumber];
+	//type.juttnerValue = new double[type.jutnerNumber];
 
 	types[7] = type;
 
@@ -6889,6 +6889,26 @@ void Simulation::evaluateJuttnerFunctions() {
 }
 
 void Simulation::evaluateJuttnerFunction(ParticleTypeContainer& typeContainer) {
+	double theta1 = kBoltzman_normalized*typeContainer.temperatureX/(typeContainer.mass*speed_of_light_normalized_sqr);
+	double umax = 20*theta1;
+	double deltaU = umax/(typeContainer.jutnerNumber-1);
+	typeContainer.juttnerFunction[0] = 0;
+	typeContainer.juttnerValue[0] = 0;
+	int subIter = 10;
+	double subDeltaU = deltaU/subIter;
+	for(int i = 1; i < typeContainer.jutnerNumber; ++i) {
+		typeContainer.juttnerValue[i] = typeContainer.juttnerValue[i-1] + deltaU;
+		typeContainer.juttnerFunction[i] = typeContainer.juttnerFunction[i-1];
+		double localU = typeContainer.juttnerValue[i-1];
+		for(int j = 0; j < subIter; ++j) {
+			typeContainer.juttnerFunction[i] += juttnerFunction(localU, theta1)*subDeltaU;
+			localU += subDeltaU;
+		}
+	}
+	for(int i = 0; i < typeContainer.jutnerNumber; ++i) {
+		typeContainer.juttnerFunction[i] /= typeContainer.juttnerFunction[typeContainer.jutnerNumber - 1];
+	}
+	typeContainer.juttnerFunction[typeContainer.jutnerNumber - 1] = 1.0;
 }
 
 void Simulation::createFiles() {
@@ -7947,16 +7967,19 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 		speed_of_light_normalized_sqr);
 
 	if (thetaParamter < 0.1) {
+		printf("create maxwell particle\n");
 		//energy = maxwellDistribution(localTemparature, kBoltzman_normalized);
 		px = sqrt(mass * kBoltzman_normalized * localTemperatureX) * normalDistribution();
 		py = sqrt(mass * kBoltzman_normalized * localTemperatureY) * normalDistribution();
 		pz = sqrt(mass * kBoltzman_normalized * localTemperatureZ) * normalDistribution();
 		p = sqrt(px * px + py * py + pz * pz);
 	} else if (localTemperatureX == localTemperatureY && localTemperatureX == localTemperatureZ) {
-		double theta = kBoltzman_normalized * temperature / (mass * speed_of_light_normalized_sqr);
-		if(theta < 2) {
+		double theta1 = kBoltzman_normalized * temperature / (mass * speed_of_light_normalized_sqr);
+		if(theta1 < 2) {
+			printf("create cold juttner particle\n");
 			p = maxwellJuttnerMomentumColdDistribution(temperature, mass, speed_of_light_normalized, kBoltzman_normalized, typeContainer.juttnerFunction, typeContainer.juttnerValue, typeContainer.jutnerNumber);
 		} else {
+			printf("create hot juttner particle\n");
 			p = maxwellJuttnerMomentumHotDistribution(temperature, mass,speed_of_light_normalized, kBoltzman_normalized);
 		}
 

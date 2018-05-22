@@ -928,7 +928,7 @@ double polynomDerivativeValue(const double* coefficients, double x, int n) {
 	return result;
 }
 
-double dichotomySolver(const double* functionValue, int minIndex, int maxIndex, double* xValue, double y) {
+double dichotomySolver(const double* functionValue, int minIndex, int maxIndex, const double* xValue, double y) {
 	if(minIndex + 1 == maxIndex) {
 		double y1 = functionValue[minIndex];
 		double y2 = functionValue[maxIndex];
@@ -938,12 +938,16 @@ double dichotomySolver(const double* functionValue, int minIndex, int maxIndex, 
 	}
 	int middleIndex = (minIndex + maxIndex)/2;
 	if(functionValue[middleIndex] > y) {
-		return dichotomySolver(functionValue, middleIndex, maxIndex, xValue, y);
+		return dichotomySolver(functionValue, minIndex, middleIndex, xValue, y);
 	} else if(functionValue[middleIndex] < y) {
-		return dichotomySolver(functionValue, minIndex, maxIndex, xValue, y);
+		return dichotomySolver(functionValue, middleIndex, maxIndex, xValue, y);
 	} else {
 		return xValue[middleIndex];
 	}
+}
+
+double juttnerFunction(const double& u, const double& theta) {
+	return exp(-sqrt(1 + u*u)/theta)*u*u;
 }
 
 Complex*** fastFourierTransition(double*** a, int xnumber, int ynumber, int znumber) {

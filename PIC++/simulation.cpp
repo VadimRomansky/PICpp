@@ -20,6 +20,11 @@
 
 void Simulation::simulate() {
 	MPI_Barrier(cartComm);
+	double initializationTime = 0;
+	MPI_Barrier(cartComm);
+	if (rank == 0) {
+		initializationTime = clock();
+	}
 	if (newlyStarted) {
 		//if(rank == 0) printf("create arrays\n");
 		createArrays();
@@ -37,7 +42,7 @@ void Simulation::simulate() {
 		//initializeWeibel();
 		//initializeRingWeibel();
 		//initializeFluxFromRight();
-		initializeHarris();
+		//initializeHarris();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();
 		//initializeSimpleElectroMagneticWaveY();
@@ -45,10 +50,14 @@ void Simulation::simulate() {
 		//initializeRotatedSimpleElectroMagneticWave(1, 1, 0);
 		//initializeHomogenouseFlow();
 		//initializeLangmuirWave();
-		//createParticles();
+		createParticles();
 		//initializeShockWave();
 		//initializeFake();
 		//initializeTestOneParticle();
+	}
+	if (rank == 0) {
+		initializationTime = clock() - initializationTime;
+		printf("initialization time time = %g sec\n", initializationTime / CLOCKS_PER_SEC);
 	}
 
 	outputGeneralInitialParameters((outputDir + "initialParameters.dat").c_str(),
@@ -122,8 +131,8 @@ void Simulation::simulate() {
 			outputTrajectories();
 		}
 
-		double iterationTime = 0;
 		MPI_Barrier(cartComm);
+		double iterationTime = 0;
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			iterationTime = clock();
 		}

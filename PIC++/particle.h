@@ -4,6 +4,7 @@
 #include <string>
 
 #include "constants.h"
+#include "constants.h"
 #include "matrix3d.h"
 #include "vector3d.h"
 
@@ -34,8 +35,10 @@ public:
 	double parallelTemperatureEvaluated;
 	double normalTemperatureEvaluated;
 	double generalWeight;
-	double* juttnerFunction;
-	double* juttnerValue;
+	//double* juttnerFunction;
+	double juttnerFunction[randomParameter];
+	//double* juttnerValue;
+	double juttnerValue[randomParameter];
 	int jutnerNumber;
 
 	std::string typeName;

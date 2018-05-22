@@ -24,12 +24,15 @@ Pp(1:Np, 1:3) = 0;
 Pe(1:Np, 1:3) = 0;
 Pa(1:Np, 1:3) = 0;
 Ppos(1:Np, 1:3) = 0;
+Pejuttner(1:Np)=0;
 
 me = initialParameters(36);
 mp = 1.67262177*10^-24;
-v=3*10^10;
-
-for i=1:Np,
+v=2.998*10^10;
+T = 2*10^15;
+kB = 1.3806488*10^-16;
+theta = kB*T/(me*v*v);
+for i=1:Np,   
    Pp(i,1) = distribution_protons(i + a*Np,1);
    Pp(i,2) = distribution_protons(i + b*Np,1);
    Pp(i,3) = distribution_protons(i + c*Np,1);
@@ -61,6 +64,12 @@ for i=1:Np,
    Fpos(i,1) = distribution_positrons(i + a*Np, 2)*Ppos(i,1)*Ppos(i,1);
    Fpos(i,2) = distribution_positrons(i + b*Np, 2)*Ppos(i,2)*Ppos(i,2);
    Fpos(i,3) = distribution_positrons(i + c*Np, 2)*Ppos(i,3)*Ppos(i,3);
+   
+   exp1 = exp(-sqrt(1+Pe(i,1)*Pe(i,1)/(me*me*v*v))/theta);
+   bes = besselk(2, 1/theta);
+   p = Pe(i,1);
+   p3 = (p/(me*v))^3;
+   Pejuttner(i) = (1.0/(theta*bes))*exp1*p3*Pe(i,1);
 end;
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
@@ -74,6 +83,7 @@ grid ;
 
 figure(2);
 plot (Pe(1:Np,1)/(me*v),Fe(1:Np,1), 'red',Pe(1:Np,2)/(me*v),Fe(1:Np,2), 'green',Pe(1:Np,3)/(me*v),Fe(1:Np,3), 'blue');
+%plot (Pe(1:Np,1)/(me*v),Fe(1:Np,1), 'red',Pe(1:Np,2)/(me*v),Fe(1:Np,2), 'green',Pe(1:Np,3)/(me*v),Fe(1:Np,3), 'blue', Pe(1:Np,1)/(me*v), Pejuttner(1:Np), 'black');
 %title ('electrons distribution function');
 xlabel ('p/{m_e c}');
 ylabel ('F_e(p) p^4');

@@ -1,7 +1,7 @@
 0                       input type - cgs or in omega_e and skin depth units
 50 1 50                 grid numbers
 3.5E6         		grid step
-2E9                     temperature
+2E15                     temperature
 0 0 0                   velocity (in c always)
 0.1                    magnetization
 90                      B theta in grad  Bx = B cos theta, By = B sin theta cos phi, Bz = B sin theta sin phi
@@ -21,8 +21,8 @@
 0                       write each iteration in different file
 0.015625    	        electron mass (in units of proton mass)
 8                       particle types number
-1.0 10                	electrons relative concentration and particles per bin
-1.0 10                	protons relative  concentration and particles per bin
+1.0 100                	electrons relative concentration and particles per bin
+1.0 100                	protons relative  concentration and particles per bin
 0 0                 	positrons relative  concentration and particles per bin
 0 0                     alpha  relative   concentration and particles per bin
 0 0                     deuterium  relative  concentration and particles per bin

@@ -40,10 +40,11 @@ double maxwellJuttnerDistribution(double temperature, double mass, double c, dou
 	return gamma * mass * c * c;
 }
 
-double maxwellJuttnerMomentumColdDistribution(double temperature, double mass, double c, double k, double* function, double* xvalue, int number) {
+double maxwellJuttnerMomentumColdDistribution(double temperature, double mass, double c, double k, const double* function, const double* xvalue, int number) {
 	double theta = k * temperature / (mass * c * c);
 	double y = uniformDistribution();
-	return mass*c*dichotomySolver(function, 0, number - 1, xvalue, y);
+	double x = dichotomySolver(function, 0, number - 1, xvalue, y);
+	return mass*c*x;
 }
 
 double maxwellJuttnerMomentumHotDistribution(double temperature, double mass, double c, double k) {

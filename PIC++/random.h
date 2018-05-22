@@ -6,7 +6,7 @@ double normalDistribution();
 double maxwellDistribution(double temperature, double k);
 double maxwellJuttnerDistribution(double temperature, double mass, double c, double k);
 double maxwellJuttnerMomentumDistribution(double temperature, double mass, double c, double k);
-double maxwellJuttnerMomentumColdDistribution(double temperature, double mass, double c, double k, double* function, double* xvalue, int number);
+double maxwellJuttnerMomentumColdDistribution(double temperature, double mass, double c, double k, const double* function, const double* xvalue, int number);
 double maxwellJuttnerMomentumHotDistribution(double temperature, double mass, double c, double k);
 double solveInverceJuttnerFunction(double x, double theta, double besselK);
 double solveInverceJuttnerFunction(double x, double theta, double besselK, double left, double right);

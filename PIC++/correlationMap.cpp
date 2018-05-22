@@ -6,8 +6,8 @@
 #include "paths.h"
 
 ParticleTypeContainer::~ParticleTypeContainer() {
-	delete[] juttnerFunction;
-	delete[] juttnerValue;
+	//delete[] juttnerFunction;
+	//delete[] juttnerValue;
 }
 
 CorrelationMap::CorrelationMap() {
