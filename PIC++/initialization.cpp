@@ -7967,7 +7967,7 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 		speed_of_light_normalized_sqr);
 
 	if (thetaParamter < 0.1) {
-		printf("create maxwell particle\n");
+		//printf("create maxwell particle\n");
 		//energy = maxwellDistribution(localTemparature, kBoltzman_normalized);
 		px = sqrt(mass * kBoltzman_normalized * localTemperatureX) * normalDistribution();
 		py = sqrt(mass * kBoltzman_normalized * localTemperatureY) * normalDistribution();
@@ -7976,10 +7976,10 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 	} else if (localTemperatureX == localTemperatureY && localTemperatureX == localTemperatureZ) {
 		double theta1 = kBoltzman_normalized * temperature / (mass * speed_of_light_normalized_sqr);
 		if(theta1 < 2) {
-			printf("create cold juttner particle\n");
+			//printf("create cold juttner particle\n");
 			p = maxwellJuttnerMomentumColdDistribution(temperature, mass, speed_of_light_normalized, kBoltzman_normalized, typeContainer.juttnerFunction, typeContainer.juttnerValue, typeContainer.jutnerNumber);
 		} else {
-			printf("create hot juttner particle\n");
+			//printf("create hot juttner particle\n");
 			p = maxwellJuttnerMomentumHotDistribution(temperature, mass,speed_of_light_normalized, kBoltzman_normalized);
 		}
 
