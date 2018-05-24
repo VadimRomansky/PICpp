@@ -18,6 +18,7 @@ public:
 	Vector3d& operator=(const Vector3d& vector);
 
 	double norm() const;
+	double norm2() const;
 	Vector3d operator-(const Vector3d& vector) const;
 	Vector3d operator+(const Vector3d& vector) const;
 	Vector3d& operator+=(const Vector3d& vector);

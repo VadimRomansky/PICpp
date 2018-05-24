@@ -24,12 +24,12 @@ double normalDistribution() {
 	return cos(2 * pi * x) * sqrt(-2 * log(y));
 }
 
-double maxwellDistribution(double temperature, double k) {
+double maxwellDistribution(const double& temperature, const double& k) {
 	double normal = normalDistribution();
 	return k * temperature * (0.5 * normal * normal - log(uniformDistribution()));
 }
 
-double maxwellJuttnerDistribution(double temperature, double mass, double c, double k) {
+double maxwellJuttnerDistribution(const double& temperature, const double& mass, const double& c, const double& k) {
 	double theta = k * temperature / (mass * c * c);
 	double besselK = McDonaldFunction(1.0 / theta, 2.0);
 
@@ -40,14 +40,14 @@ double maxwellJuttnerDistribution(double temperature, double mass, double c, dou
 	return gamma * mass * c * c;
 }
 
-double maxwellJuttnerMomentumColdDistribution(double temperature, double mass, double c, double k, const double* function, const double* xvalue, int number) {
+double maxwellJuttnerMomentumColdDistribution(const double& temperature, const double& mass, const double& c, const double& k, const double* function, const double* xvalue, int number) {
 	double theta = k * temperature / (mass * c * c);
 	double y = uniformDistribution();
 	double x = dichotomySolver(function, 0, number - 1, xvalue, y);
 	return mass*c*x;
 }
 
-double maxwellJuttnerMomentumHotDistribution(double temperature, double mass, double c, double k) {
+double maxwellJuttnerMomentumHotDistribution(const double& temperature, const double& mass, const double& c, const double& k) {
 	double theta = k * temperature / (mass * c * c);
 	double x1 = uniformDistribution();
 	double x2 = uniformDistribution();
@@ -65,7 +65,7 @@ double maxwellJuttnerMomentumHotDistribution(double temperature, double mass, do
 	return mass*c*u;
 }
 
-double solveInverceJuttnerFunction(double x, double theta, double besselK) {
+double solveInverceJuttnerFunction(const double& x, const double& theta, const double& besselK) {
 	if (x >= 1) {
 		printf("distribution function can not be more than 1\n");
 		std::string outputDir = outputDirectory;
@@ -90,7 +90,7 @@ double solveInverceJuttnerFunction(double x, double theta, double besselK) {
 	return solveInverceJuttnerFunction(x, theta, besselK, 0.0, gamma);
 }
 
-double solveInverceJuttnerFunction(double x, double theta, double besselK, double left, double right) {
+double solveInverceJuttnerFunction(const double& x, const double& theta, const double& besselK, const double& left, const double& right) {
 	if (right < left) {
 		printf("right < left\n");
 		std::string outputDir = outputDirectory;
@@ -113,12 +113,12 @@ double solveInverceJuttnerFunction(double x, double theta, double besselK, doubl
 	return solveInverceJuttnerFunction(x, theta, besselK, gamma, right);
 }
 
-double maxwellJuttnerFunction(double gamma, double theta, double besselK) {
+double maxwellJuttnerFunction(const double& gamma, const double& theta, const double& besselK) {
 	double beta = sqrt(1.0 - 1.0 / (gamma * gamma));
 	return gamma * gamma * beta * exp(-gamma / theta) / (theta * besselK);
 }
 
-double maxwellJuttnerIntegral(double gamma, double theta, double besselK) {
+double maxwellJuttnerIntegral(const double& gamma, const double& theta, const double& besselK) {
 	if (gamma < 1) {
 		return 0;
 	}
@@ -198,6 +198,6 @@ void anisotropicMaxwellJuttnerDistribution(double& momentumNormal, double& momen
 	momentumParallel = tempP2 * m_c;
 }
 
-double anisotropicMaxwellJuttnerFunction(double p1, double p2, double alpha1, double alpha2) {
+double anisotropicMaxwellJuttnerFunction(const double& p1, const double& p2, const double& alpha1, const double& alpha2) {
 	return p1 * exp(-alpha1 * (sqrt(1 + p1 * p1 + p2 * p2) - sqrt(1 + p2 * p2)) - alpha2 * sqrt(1 + p2 * p2));
 }

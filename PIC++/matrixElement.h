@@ -11,9 +11,9 @@ public:
 	int l;
 
 	MatrixElement();
-	MatrixElement(double v, int iv, int jv, int kv, int lv);
+	MatrixElement(const double& v, int iv, int jv, int kv, int lv);
 
-	bool equalsIndex(MatrixElement& element);
+	bool equalsIndex(const MatrixElement& element);
 };
 
 #endif

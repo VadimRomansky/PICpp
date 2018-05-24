@@ -104,12 +104,12 @@ public:
 
 	double shapeFunction(const double& xvalue, const double& yvalue, const double& zvalue);
 
-	void setMomentum(Vector3d& p);
+	void setMomentum(const Vector3d& p);
 	void setMomentum(const double& px, const double& py, const double& pz);
 	void setMomentumX(const double& px);
 	void setMomentumY(const double& py);
 	void setMomentumZ(const double& pz);
-	void addMomentum(Vector3d dp);
+	void addMomentum(const Vector3d& dp);
 	void reflectMomentumX();
 	void reflectMomentumY();
 	void reflectMomentumZ();

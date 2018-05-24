@@ -10,7 +10,7 @@ MatrixElement::MatrixElement() {
 	l = 0;
 }
 
-MatrixElement::MatrixElement(double v, int iv, int jv, int kv, int lv) {
+MatrixElement::MatrixElement(const double& v, int iv, int jv, int kv, int lv) {
 	value = v;
 	i = iv;
 	j = jv;
@@ -18,7 +18,7 @@ MatrixElement::MatrixElement(double v, int iv, int jv, int kv, int lv) {
 	l = lv;
 }
 
-bool MatrixElement::equalsIndex(MatrixElement& element) {
+bool MatrixElement::equalsIndex(const MatrixElement& element) {
 	if (i != element.i) return false;
 	if (j != element.j) return false;
 	if (k != element.k) return false;

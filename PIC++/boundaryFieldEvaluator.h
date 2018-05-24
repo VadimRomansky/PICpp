@@ -8,10 +8,10 @@ class BoundaryFieldEvaluator {
 public:
 	BoundaryFieldEvaluator();
 	virtual ~BoundaryFieldEvaluator();
-	virtual Vector3d evaluateEfield(double t, int j, int k) = 0;
-	virtual Vector3d evaluateBfield(double t, int j, int k) = 0;
-	virtual void prepareB(double t);
-	virtual void prepareE(double t);
+	virtual Vector3d evaluateEfield(const double& t, int j, int k) = 0;
+	virtual Vector3d evaluateBfield(const double& t, int j, int k) = 0;
+	virtual void prepareB(const double& t);
+	virtual void prepareE(const double& t);
 };
 
 /*Vector3d BoundaryFieldEvaluator::evaluateEfield(double& t, int j, int k) {
@@ -29,8 +29,8 @@ class ConstantBoundaryFieldEvaluator : public BoundaryFieldEvaluator{
 public:
 	ConstantBoundaryFieldEvaluator(Vector3d& E0, Vector3d& B0);
 
-	virtual Vector3d evaluateEfield(double t, int j, int k);
-	virtual Vector3d evaluateBfield(double t, int j, int k);
+	virtual Vector3d evaluateEfield(const double& t, int j, int k);
+	virtual Vector3d evaluateBfield(const double& t, int j, int k);
 };
 
 class StripeBoundaryFieldEvaluator : BoundaryFieldEvaluator{
@@ -40,12 +40,12 @@ class StripeBoundaryFieldEvaluator : BoundaryFieldEvaluator{
 	double ux;
 	double shiftX;
 
-	int halfPeriodNumber(double& t);
+	int halfPeriodNumber(const double& t);
 public:
 	StripeBoundaryFieldEvaluator(Vector3d& E0, Vector3d& B0, double l, double u, double shift);
 
-	virtual Vector3d evaluateEfield(double t, int j, int k);
-	virtual Vector3d evaluateBfield(double t, int j, int k);
+	virtual Vector3d evaluateEfield(const double& t, int j, int k);
+	virtual Vector3d evaluateBfield(const double& t, int j, int k);
 };
 
 class TurbulenceBoundaryFieldEvaluator : public  BoundaryFieldEvaluator {
@@ -63,8 +63,8 @@ public:
 	TurbulenceBoundaryFieldEvaluator(Vector3d& E0, Vector3d& B0, Vector3d& V0, int number, double* amplitude, double* phase, double* kv, double* omega, double xv, double c);
 	~TurbulenceBoundaryFieldEvaluator();
 
-	virtual Vector3d evaluateEfield(double t, int j, int k);
-	virtual Vector3d evaluateBfield(double t, int j, int k);
+	virtual Vector3d evaluateEfield(const double& t, int j, int k);
+	virtual Vector3d evaluateBfield(const double& t, int j, int k);
 };
 
 class RandomTurbulenceBoundaryFieldEvaluator : public BoundaryFieldEvaluator {
@@ -91,10 +91,10 @@ class RandomTurbulenceBoundaryFieldEvaluator : public BoundaryFieldEvaluator {
 public:
 	RandomTurbulenceBoundaryFieldEvaluator(int randomSeedV, int minLengthXV, int maxLengthXV, int minLengthYV, int maxLengthYV, int minLengthZV, int maxLengthZV, Simulation* simuationV, Vector3d V, Vector3d E, Vector3d B, double x, double dx, double dy, double dz, int xnumberGeneral, int ynumberGeneral, int znumberGeneral, int xnumberAdded, int ynumberAdded, int znumberAdded);
 	virtual ~RandomTurbulenceBoundaryFieldEvaluator();
-	virtual Vector3d evaluateEfield(double t, int j, int k);
-	virtual Vector3d evaluateBfield(double t, int j, int k);
-	virtual void prepareB(double t);
-	virtual void prepareE(double t);
+	virtual Vector3d evaluateEfield(const double& t, int j, int k);
+	virtual Vector3d evaluateBfield(const double& t, int j, int k);
+	virtual void prepareB(const double& t);
+	virtual void prepareE(const double& t);
 };
 
 #endif

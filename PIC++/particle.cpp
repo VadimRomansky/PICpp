@@ -129,7 +129,7 @@ double Particle::shapeFunction(const double& xvalue, const double& yvalue, const
 	return shapeFunctionX(xvalue) * shapeFunctionY(yvalue) * shapeFunctionZ(zvalue);
 }
 
-void Particle::setMomentum(Vector3d& p) {
+void Particle::setMomentum(const Vector3d& p) {
 	velocityCashed = false;
 	gammaCashed = false;
 	momentum = p;
@@ -161,7 +161,7 @@ void Particle::setMomentumZ(const double& pz) {
 	momentum.z = pz;
 }
 
-void Particle::addMomentum(Vector3d dp) {
+void Particle::addMomentum(const Vector3d& dp) {
 	velocityCashed = false;
 	gammaCashed = false;
 	momentum = momentum + dp;

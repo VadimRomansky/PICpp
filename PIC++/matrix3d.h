@@ -8,7 +8,7 @@ public:
   double matrix[3][3];
   //double** matrix;
   Matrix3d();
-  Matrix3d(double m11,double m12,double m13,double m21,double m22,double m23,double m31,double m32,double m33);
+  Matrix3d(const double& m11,const double& m12,const double& m13,const double& m21,const double& m22,const double& m23,const double& m31,const double& m32,const double& m33);
   Matrix3d(const Matrix3d& matrix);
 
   ~Matrix3d();

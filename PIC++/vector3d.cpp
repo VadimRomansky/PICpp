@@ -39,6 +39,10 @@ double Vector3d::norm() const {
 	return sqrt(x * x + y * y + z * z);
 }
 
+double Vector3d::norm2() const {
+	return x * x + y * y + z * z;
+}
+
 Vector3d Vector3d::operator+(const Vector3d& vector) const {
 	return Vector3d(x + vector.x, y + vector.y, z + vector.z);
 }

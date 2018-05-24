@@ -18,11 +18,11 @@ BoundaryFieldEvaluator::~BoundaryFieldEvaluator() {
 
 }
 
-void BoundaryFieldEvaluator::prepareB(double t) {
+void BoundaryFieldEvaluator::prepareB(const double& t) {
 
 }
 
-void BoundaryFieldEvaluator::prepareE(double t) {
+void BoundaryFieldEvaluator::prepareE(const double& t) {
 
 }
 
@@ -32,15 +32,15 @@ ConstantBoundaryFieldEvaluator::ConstantBoundaryFieldEvaluator(Vector3d& E0, Vec
 	B = B0;
 }
 
-Vector3d ConstantBoundaryFieldEvaluator::evaluateEfield(double t, int j, int k) {
+Vector3d ConstantBoundaryFieldEvaluator::evaluateEfield(const double& t, int j, int k) {
 	return E;
 }
 
-Vector3d ConstantBoundaryFieldEvaluator::evaluateBfield(double t, int j, int k) {
+Vector3d ConstantBoundaryFieldEvaluator::evaluateBfield(const double& t, int j, int k) {
 	return B;
 }
 
-int StripeBoundaryFieldEvaluator::halfPeriodNumber(double& t) {
+int StripeBoundaryFieldEvaluator::halfPeriodNumber(const double& t) {
 	return ((t * ux * 2 + shiftX) / lambda);
 }
 
@@ -53,12 +53,12 @@ StripeBoundaryFieldEvaluator(Vector3d& E0, Vector3d& B0, double l, double u, dou
 	shiftX = shift;
 }
 
-Vector3d StripeBoundaryFieldEvaluator::evaluateEfield(double t, int j, int k) {
+Vector3d StripeBoundaryFieldEvaluator::evaluateEfield(const double& t, int j, int k) {
 	int n = halfPeriodNumber(t);
 	return E * n;
 }
 
-Vector3d StripeBoundaryFieldEvaluator::evaluateBfield(double t, int j, int k) {
+Vector3d StripeBoundaryFieldEvaluator::evaluateBfield(const double& t, int j, int k) {
 	int n = halfPeriodNumber(t);
 	return B * n;
 }
@@ -94,7 +94,7 @@ TurbulenceBoundaryFieldEvaluator::~TurbulenceBoundaryFieldEvaluator() {
 	delete[] omega;
 }
 
-Vector3d TurbulenceBoundaryFieldEvaluator::evaluateBfield(double t, int j, int k) {
+Vector3d TurbulenceBoundaryFieldEvaluator::evaluateBfield(const double& t, int j, int k) {
 	Vector3d result = B0;
 	for (int i = 0; i < number; ++i) {
 		result.y += amplitude[2 * i] * sin(kw[i] * (x - V0.x * t) - omega[i] * t + phase[2 * i]);
@@ -103,7 +103,7 @@ Vector3d TurbulenceBoundaryFieldEvaluator::evaluateBfield(double t, int j, int k
 	return result;
 }
 
-Vector3d TurbulenceBoundaryFieldEvaluator::evaluateEfield(double t, int j, int k) {
+Vector3d TurbulenceBoundaryFieldEvaluator::evaluateEfield(const double& t, int j, int k) {
 	Vector3d result = E0;
 	Vector3d B = evaluateBfield(t, j, k) - B0;
 	result = result - V0.vectorMult(B) / (speed_of_light_normalized * speed_of_light_correction);
@@ -167,11 +167,11 @@ RandomTurbulenceBoundaryFieldEvaluator::~RandomTurbulenceBoundaryFieldEvaluator(
 }
 
 
-Vector3d RandomTurbulenceBoundaryFieldEvaluator::evaluateBfield(double t, int j, int k) {
+Vector3d RandomTurbulenceBoundaryFieldEvaluator::evaluateBfield(const double& t, int j, int k) {
 	return Bfield[j][k];
 }
 
-void RandomTurbulenceBoundaryFieldEvaluator::prepareB(double t) {
+void RandomTurbulenceBoundaryFieldEvaluator::prepareB(const double& t) {
 	srand(randomSeed);
 	int maxKxnumber = maxLengthX / minLengthX;
 	int maxKynumber = maxLengthY / minLengthY;
@@ -230,7 +230,7 @@ void RandomTurbulenceBoundaryFieldEvaluator::prepareB(double t) {
 	}
 }
 
-void RandomTurbulenceBoundaryFieldEvaluator::prepareE(double t) {
+void RandomTurbulenceBoundaryFieldEvaluator::prepareE(const double& t) {
 	srand(randomSeed);
 	int maxKxnumber = maxLengthX / minLengthX;
 	int maxKynumber = maxLengthY / minLengthY;
@@ -291,7 +291,7 @@ void RandomTurbulenceBoundaryFieldEvaluator::prepareE(double t) {
 	}
 }
 
-Vector3d RandomTurbulenceBoundaryFieldEvaluator::evaluateEfield(double t, int j, int k) {
+Vector3d RandomTurbulenceBoundaryFieldEvaluator::evaluateEfield(const double& t, int j, int k) {
 	return Efield[j][k];
 }
 

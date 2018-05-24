@@ -202,9 +202,6 @@ void Simulation::moveParticle(Particle* particle) {
 		//B = correlationBfield(particle)*(1-theta) + correlationNewBfield(particle)*theta;
 		B = correlationBfield(particle);
 	}
-	//B = B0;
-	//printf("E = %g %g %g\n", E.x, E.y, E.z);
-	//printf("B = %g %g %g\n", B.x, B.y, B.z);
 
 	Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
 	Vector3d newVelocity = velocity;
@@ -237,28 +234,19 @@ void Simulation::moveParticle(Particle* particle) {
 	double etaDeltaT = eta * deltaT;
 	double restEtaDeltaT = (1.0 - eta) * deltaT;
 
-	//tempParticle.addMomentum((E + (velocity.vectorMult(B) / (speed_of_light_normalized))) * particle->charge * deltaT);
 	newMomentum +=(E + (velocity.vectorMult(B) / (speed_of_light_normalized))) * particle->charge * deltaT;
 
-	//newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
 	newVelocity = Particle::evaluateVelocity(newMomentum, particle->mass, speed_of_light_normalized);
 
 	middleVelocity = velocity * (1 - eta) + newVelocity * eta;
 
-	//tempParticle.coordinates.x += middleVelocity.x * eta * deltaT;
-	//tempParticle.coordinates.y += middleVelocity.y * eta * deltaT;
-	//tempParticle.coordinates.z += middleVelocity.z * eta * deltaT;
 	
 	particle->coordinates.x += middleVelocity.x * etaDeltaT;
 	particle->coordinates.y += middleVelocity.y * etaDeltaT;
 	particle->coordinates.z += middleVelocity.z * etaDeltaT;
 
-	//if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT)
+
 	if ((particle->coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == 0)) {
-		//particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
-			//middleVelocity.x * (1 - eta) * deltaT);
-		//particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT;
-		//particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * (1 - eta) * deltaT;
 		particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x + fabs(
 			middleVelocity.x * restEtaDeltaT);
 		particle->coordinates.y = particle->coordinates.y + middleVelocity.y * restEtaDeltaT;
@@ -287,25 +275,12 @@ void Simulation::moveParticle(Particle* particle) {
 	int i = 0;
 	Vector3d velocityHat = (particle->rotationTensor * particle->gammaFactor(
 		speed_of_light_normalized) * velocity);
-	//double velocityNorm = velocity.norm();
-	//double velocityHatNorm = velocityHat.norm();
-	//velocityHat = velocityHat*(velocityNorm/velocityHatNorm);
 
-	//if (velocityHat.norm() > speed_of_light_normalized) {
-		//printf("velocity Hat norm > c\n");
-		//MPI_Finalize();
-		//exit(0);
-	//}
-	//double a = tempParticle.gammaFactor(speed_of_light_normalized);
-	//double velocityNorm = velocity.norm();
 
 	Vector3d prevMomentum = particle->getMomentum();
-	//Vector3d momentum = tempParticle.getMomentum();
-	//Vector3d newMomentum = tempParticle.getMomentum();
 	Vector3d momentum = oldMomentum;
 	double momentumNorm = momentum.norm();
 
-	//double error = (prevVelocity - newVelocity).norm();
 	double error = (prevMomentum - newMomentum).norm();
 	Vector3d prevCoordinates = particle->coordinates;
 	Vector3d newCoordinates = particle->coordinates;
@@ -325,13 +300,8 @@ void Simulation::moveParticle(Particle* particle) {
 		double Enorm = E.norm();
 		double rotatedEnorm = rotatedE.norm();
 
-		//rotatedE = rotatedE*(Enorm/rotatedEnorm);
-
 		middleVelocity = velocityHat + rotatedE * beta;
 
-		//tempParticle.coordinates.x += (middleVelocity.x * etaDeltaT);
-		//tempParticle.coordinates.y += (middleVelocity.y * etaDeltaT);
-		//tempParticle.coordinates.z += (middleVelocity.z * etaDeltaT);
 		
 		particle->coordinates.x = oldCoordinates.x + (middleVelocity.x * etaDeltaT);
 		particle->coordinates.y = oldCoordinates.y + (middleVelocity.y * etaDeltaT);
