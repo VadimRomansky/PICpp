@@ -4,7 +4,7 @@
 #include <string>
 
 double power(const double & v, const double & p);
-double sqr(double v);
+double sqr(const double& v);
 double cube(const double & v);
 double max2(const double & a, const double & b);
 double max3(const double & a, const double & b, const double & c);

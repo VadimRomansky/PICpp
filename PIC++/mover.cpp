@@ -899,7 +899,7 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(const double& beta, Vector3d& v
 	return result;
 }
 
-void Simulation::injectNewParticles(int count, ParticleTypeContainer typeContainer, double length) {
+void Simulation::injectNewParticles(int count, ParticleTypeContainer& typeContainer, const double& length) {
 	if ((rank == 0) && (verbosity > 0)) printf("inject new particles\n");
 
 	//Particle* tempParticle = particles[0];

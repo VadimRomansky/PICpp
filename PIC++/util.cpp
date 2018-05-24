@@ -14,7 +14,7 @@ double power(const double& v, const double& p) {
 	return exp(p * log(v));
 }
 
-double sqr(double v) {
+double sqr(const double& v) {
 	return v * v;
 }
 

@@ -3486,7 +3486,7 @@ double Simulation::averageConcentrationYZ(double*** concentration, int i) {
 	return result;
 }
 
-double Simulation::evaluateTurbulenceFieldAmplitude(double kx, double ky, double kz) {
+double Simulation::evaluateTurbulenceFieldAmplitude(const double& kx, const double& ky, const double& kz) {
 	if(ynumberGeneral == 1 && znumberGeneral == 1) {
 		double kw = kx;
 		return turbulenceAmplitude/power(kw, 5.0/6.0);

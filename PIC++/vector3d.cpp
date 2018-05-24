@@ -15,7 +15,7 @@ Vector3d::Vector3d() {
 	z = 0;
 }
 
-Vector3d::Vector3d(double vx, double vy, double vz) {
+Vector3d::Vector3d(const double& vx, const double& vy, const double& vz) {
 	x = vx;
 	y = vy;
 	z = vz;

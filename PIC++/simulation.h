@@ -914,7 +914,7 @@ public:
 	int getLocalIndexByAbsoluteY(int j);
 	int getLocalIndexByAbsoluteZ(int k);
 
-	Matrix3d evaluateAlphaRotationTensor(double beta, Vector3d& velocity, double& gamma, Vector3d& EField, Vector3d& BField);
+	Matrix3d evaluateAlphaRotationTensor(const double& beta, Vector3d& velocity, double& gamma, Vector3d& EField, Vector3d& BField);
 	void updateDeltaT();
 	void evaluateElectricField();
 	void updateEfield();
@@ -1103,7 +1103,7 @@ public:
 
 	Vector3d getBunemanFlux(int i, int j, int k);
 
-	double evaluateTurbulenceFieldAmplitude(double kx, double ky, double kz);
+	double evaluateTurbulenceFieldAmplitude(const double& kx, const double& ky, const double& kz);
 
 	void evaluateBunemanElectricField();
 	void evaluateBunemanElectricFieldX();
@@ -1173,7 +1173,7 @@ public:
 
 
 	void evaluateParticlesRotationTensor();
-	void injectNewParticles(int count, ParticleTypeContainer typeContainer, double length);
+	void injectNewParticles(int count, ParticleTypeContainer& typeContainer, const double& length);
 
 	void updateParticleCorrelationMaps();
 	void updateCorrelationMaps(Particle* particle);
