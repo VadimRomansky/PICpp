@@ -16,7 +16,6 @@ Nt = fix(size(EfieldXZ, 1)/NE);
 a = 0;
 b = fix(Nt/2);
 c = fix(Nt)-1;
-c=0;
 Ex(1:Nx, 1:Nz) = 0;
 Ey(1:Nx, 1:Nz) = 0;
 Ez(1:Nx, 1:Nz) = 0;
