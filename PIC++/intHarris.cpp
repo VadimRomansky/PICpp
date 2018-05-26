@@ -75,7 +75,6 @@ void Simulation::createParticlesHarris(double harrisWidth) {
 	}
 	evaluateJuttnerFunctions();
 	
-	//int density = ; %задаем значение плотности
 	//for (int i = 0; i < xnumber; ++i) {
 	for (int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i) {
 		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {

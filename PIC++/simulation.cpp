@@ -42,7 +42,7 @@ void Simulation::simulate() {
 		//initializeWeibel();
 		//initializeRingWeibel();
 		//initializeFluxFromRight();
-		//initializeHarris();
+		initializeHarris();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();
 		//initializeSimpleElectroMagneticWaveY();
@@ -50,7 +50,7 @@ void Simulation::simulate() {
 		//initializeRotatedSimpleElectroMagneticWave(1, 1, 0);
 		//initializeHomogenouseFlow();
 		//initializeLangmuirWave();
-		createParticles();
+		//createParticles();
 		//initializeShockWave();
 		//initializeFake();
 		//initializeTestOneParticle();

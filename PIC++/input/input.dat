@@ -1,20 +1,20 @@
 0                       input type - cgs or in omega_e and skin depth units
-50 1 50                 grid numbers
-3.5E6         		grid step
-2E15                     temperature
+200 1 200                 grid numbers
+3.5E5         		grid step
+2E9                     temperature
 0 0 0                   velocity (in c always)
-0.1                    magnetization
+0.001                    magnetization
 90                      B theta in grad  Bx = B cos theta, By = B sin theta cos phi, Bz = B sin theta sin phi
 90                      B phi
 0 0 0                   Electric field
 1                    total electron concentration (always in cgs)
-20                max iterations
+10000000                max iterations
 1E100                   max time
 1                  	prefered time step
 0                  	log verbocity level
 1000                      write iteration parameter (for output fields)
 100                      write general parameter (for output energy)
-10                      write trajectory parameter
+100                      write trajectory parameter
 10                      write particle step
 4			smothing iterations
 0.5                     smothing parameter
