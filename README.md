@@ -22,6 +22,9 @@ https://github.com/CmPA/iPic3D
 
 [4] M. Innocenti, G. Lapenta, S. Markidis, A. Beck, A. Vapirev, Journal of Computational Physics 238 (2013) 115–140
 
+[5] V. I. Romansky, A. M. Bykov, S. M. Osipov and P. E. Gladilin, Journal of Physics: Conferenced Series Volume 929 012014
+(2017) "Particle-in-cell simulation of shock waves with different kinds of ions." 
+
 
 
 

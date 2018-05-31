@@ -4875,7 +4875,7 @@ void Simulation::initializeFluxFromRight() {
 	}
 
 	//turbulence
-	initializeKolmogorovSpectrum();
+	//initializeKolmogorovSpectrum();
 
 	double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
 	double p0 = gamma * massProton * V0.norm();
@@ -5292,7 +5292,7 @@ void Simulation::initializeKolmogorovSpectrum() {
 	srand(turbulenceRandomSeed);
 
 	minTurbulenceLengthX = 10;
-	maxTurbulenceLengthX = 5000;
+	maxTurbulenceLengthX = 500;
 	minTurbulenceLengthY = 10;
 	maxTurbulenceLengthY = 500;
 	minTurbulenceLengthZ = 10;

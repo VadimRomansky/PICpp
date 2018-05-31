@@ -41,8 +41,8 @@ void Simulation::simulate() {
 		//initializeAnisotropicSilicon();
 		//initializeWeibel();
 		//initializeRingWeibel();
-		//initializeFluxFromRight();
-		initializeHarris();
+		initializeFluxFromRight();
+		//initializeHarris();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();
 		//initializeSimpleElectroMagneticWaveY();
