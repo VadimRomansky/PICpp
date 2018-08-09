@@ -31,7 +31,7 @@ void Simulation::simulate() {
 		initialize();
 		updateDeltaT();
 		createFiles();
-		//initializeTwoStream();
+		initializeTwoStream();
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWaveX(1, 0.01);
 		//initializeAlfvenWaveY(1, 0.01);
@@ -41,7 +41,7 @@ void Simulation::simulate() {
 		//initializeAnisotropicSilicon();
 		//initializeWeibel();
 		//initializeRingWeibel();
-		initializeFluxFromRight();
+		//initializeFluxFromRight();
 		//initializeHarris();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();

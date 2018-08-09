@@ -5499,10 +5499,10 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 void Simulation::initializeTwoStream() {
 	boundaryConditionTypeX = PERIODIC;
 	createParticles();
-	double u = 0.99 * speed_of_light_normalized;
+	double u = 0.5 * speed_of_light_normalized;
 	double gamma = 1 / sqrt(1 - u * u / speed_of_light_normalized_sqr);
-	Vector3d electronsVelocityPlus = Vector3d(0, u, 0);
-	Vector3d electronsVelocityMinus = Vector3d(0, -u, 0);
+	Vector3d electronsVelocityPlus = Vector3d(u, 0, 0);
+	Vector3d electronsVelocityMinus = Vector3d(-u, 0, 0);
 	//B0 = Vector3d(0, 0, 0);
 
 	double Bamplitude = 1E-12 * (plasma_period * sqrt(scaleFactor));
