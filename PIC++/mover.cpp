@@ -828,12 +828,12 @@ void Simulation::moveParticleTristan(Particle* particle) {
 	Vector3d dp = E*(particle->charge*deltaT*0.5);
 	particle->addMomentum(dp);
 	double gamma = particle->gammaFactor();
-	double beta = particle->charge*deltaT/(2*particle->mass*speed_of_light_normalized);
+	double beta = particle->charge*deltaT/(2.0*particle->mass*speed_of_light_normalized);
 	double betaShift = beta/gamma;
-	double f = 1.0/sqrt(1 + betaShift*betaShift*B.norm2());
+	double f = 1.0/sqrt(1.0 + betaShift*betaShift*B.norm2());
 	Vector3d momentum = particle->getMomentum();
-	Vector3d tempMomentum = momentum + momentum.vectorMult(B)*betaShift;
-	momentum += tempMomentum.vectorMult(B)*(f*2*betaShift) + dp;
+	Vector3d tempMomentum = momentum + momentum.vectorMult(B)*(betaShift*particle->mass);
+	momentum += tempMomentum.vectorMult(B)*(f*2.0*betaShift*particle->mass) + dp;
 	particle->setMomentum(momentum);
 	particle->coordinates += momentum*deltaT/(particle->mass*gamma);
 	

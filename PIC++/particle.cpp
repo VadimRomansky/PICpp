@@ -219,7 +219,7 @@ Vector3d Particle::getVelocity() {
 			velocity = momentum / mass;
 		} else {
 			if (!gammaCashed) {
-				gamma = sqrt(p2 * c2 + mc2 * mc2) / mc2;
+				gamma = sqrt(p2 * c2/(mc2*mc2) + 1.0);
 				gammaCashed = true;
 			}
 			velocity = momentum / (mass * gamma);
@@ -238,7 +238,7 @@ double Particle::velocityX() {
 		return momentum.x / mass;
 	}
 	if (!gammaCashed) {
-		gamma = sqrt(p2 * c2 + mc2 * mc2) / mc2;
+		gamma = sqrt(p2 * c2/(mc2*mc2) + 1.0);
 		gammaCashed = true;
 	}
 	return momentum.x / (mass * gamma);
@@ -253,7 +253,7 @@ double Particle::velocityY() {
 		return momentum.y / mass;
 	}
 	if (!gammaCashed) {
-		gamma = sqrt(p2 * c2 + mc2 * mc2) / mc2;
+		gamma = sqrt(p2 * c2/(mc2*mc2) + 1.0);
 		gammaCashed = true;
 	}
 	return momentum.y / (mass * gamma);
@@ -268,7 +268,7 @@ double Particle::velocityZ() {
 		return momentum.z / mass;
 	}
 	if (!gammaCashed) {
-		gamma = sqrt(p2 * c2 + mc2 * mc2) / mc2;
+		gamma = sqrt(p2 * c2/(mc2*mc2) + 1.0);
 		gammaCashed = true;
 	}
 	return momentum.z / (mass * gamma);
@@ -358,7 +358,7 @@ Vector3d Particle::evaluateVelocity(const Vector3d& p, const double& m, const do
 double Particle::gammaFactor() {
 	if (!gammaCashed) {
 		double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
-		gamma = sqrt(p2 * c2 + mc2 * mc2) / mc2;
+		gamma = sqrt(p2 * c2/(mc2*mc2) + 1.0);
 		//alertNaNOrInfinity(gamma, "gamma = NaN");
 		gammaCashed = true;
 	}

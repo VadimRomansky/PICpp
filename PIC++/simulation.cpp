@@ -138,6 +138,7 @@ void Simulation::simulate() {
 		}
 
 		//updateDeltaT();
+		/////////////////////////////////////////////////////
 
 		evaluateParticlesRotationTensor();
 
