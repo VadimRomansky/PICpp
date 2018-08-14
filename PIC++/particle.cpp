@@ -13,7 +13,7 @@
 #include "paths.h"
 
 Particle::Particle(int n, double m, int qcount, double q, double w, ParticleTypes t, double x0, double y0,
-                   double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0) {
+                   double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0, double cv) {
 	number = n;
 
 	mass = m;
@@ -40,6 +40,9 @@ Particle::Particle(int n, double m, int qcount, double q, double w, ParticleType
 	velocityCashed = false;
 	gammaCashed = false;
 	crossBoundaryCount = 0;
+	c = cv;
+	c2 = c*c;
+	mc2 = mass*c*c;
 }
 
 Particle::Particle(const Particle& particle) {
@@ -49,6 +52,9 @@ Particle::Particle(const Particle& particle) {
 	velocityCashed = particle.velocityCashed;
 	gammaCashed = particle.gammaCashed;
 	gamma = particle.gamma;
+	c = particle.c;
+	c2 = c*c;
+	mc2 = particle.mc2;
 	//
 
 
@@ -85,6 +91,9 @@ Particle::Particle(const Particle* const particle) {
 	velocityCashed = particle->velocityCashed;
 	gammaCashed = particle->gammaCashed;
 	gamma = particle->gamma;
+	c = particle->c;
+	c2 = c*c;
+	mc2 = particle->mc2;
 	//
 
 
@@ -202,12 +211,10 @@ double Particle::momentumAbs() const {
 	return momentum.norm();
 }
 
-Vector3d Particle::getVelocity(const double& c) {
+Vector3d Particle::getVelocity() {
 	if (!velocityCashed) {
 		double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
 		//alertNaNOrInfinity(p2, "p2 = NaN in particle::getVelocity\n");
-		double c2 = c * c;
-		double mc2 = mass * c2;
 		if (p2 < relativisticPrecision * mass * mass * c2) {
 			velocity = momentum / mass;
 		} else {
@@ -222,13 +229,11 @@ Vector3d Particle::getVelocity(const double& c) {
 	return velocity;
 }
 
-double Particle::velocityX(const double& c) {
+double Particle::velocityX() {
 	if (velocityCashed) {
 		return velocity.x;
 	}
-	double c2 = c * c;
 	double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
-	double mc2 = mass * c2;
 	if (p2 < relativisticPrecision * mass * mass * c2) {
 		return momentum.x / mass;
 	}
@@ -239,13 +244,11 @@ double Particle::velocityX(const double& c) {
 	return momentum.x / (mass * gamma);
 }
 
-double Particle::velocityY(const double& c) {
+double Particle::velocityY() {
 	if (velocityCashed) {
 		return velocity.y;
 	}
-	double c2 = c * c;
 	double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
-	double mc2 = mass * c2;
 	if (p2 < relativisticPrecision * mass * mass * c2) {
 		return momentum.y / mass;
 	}
@@ -256,13 +259,11 @@ double Particle::velocityY(const double& c) {
 	return momentum.y / (mass * gamma);
 }
 
-double Particle::velocityZ(const double& c) {
+double Particle::velocityZ() {
 	if (velocityCashed) {
 		return velocity.z;
 	}
-	double c2 = c * c;
 	double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
-	double mc2 = mass * c2;
 	if (p2 < relativisticPrecision * mass * mass * c2) {
 		return momentum.z / mass;
 	}
@@ -273,7 +274,7 @@ double Particle::velocityZ(const double& c) {
 	return momentum.z / (mass * gamma);
 }
 
-void Particle::addVelocity(const Vector3d& v, const double& c) {
+void Particle::addVelocity(const Vector3d& v) {
 	velocityCashed = false;
 	gammaCashed = false;
 	if (v.norm() > c) {
@@ -287,7 +288,6 @@ void Particle::addVelocity(const Vector3d& v, const double& c) {
 		exit(0);
 	}
 
-	double c2 = c * c;
 
 	//Vector3d vel = getVelocity(c);
 	//vel += v;
@@ -295,7 +295,7 @@ void Particle::addVelocity(const Vector3d& v, const double& c) {
 	Matrix3d* rotation = Matrix3d::createBasisByOneVector(v);
 	Matrix3d* inverse = rotation->Inverse();
 
-	Vector3d rotatedV = (*inverse) * getVelocity(c);
+	Vector3d rotatedV = (*inverse) * getVelocity();
 
 	gamma = 1 / (sqrt(1 - v.scalarMult(v) / c2));
 	double vnorm = v.norm();
@@ -311,13 +311,13 @@ void Particle::addVelocity(const Vector3d& v, const double& c) {
 
 	//todo relativistic!
 	//setMomentumByV(vel, c);
-	setMomentumByV(vel1, c);
+	setMomentumByV(vel1);
 
 	delete rotation;
 	delete inverse;
 }
 
-void Particle::setMomentumByV(const Vector3d& v, const double& c) {
+void Particle::setMomentumByV(const Vector3d& v) {
 	if (v.norm() > c) {
 		printf("ERROR v > c in particle::setMomentumByV\n");
 		printf("v = %g\n", v.norm());
@@ -333,7 +333,6 @@ void Particle::setMomentumByV(const Vector3d& v, const double& c) {
 	velocity = v;
 	velocityCashed = true;
 	double v2 = v.scalarMult(v);
-	double c2 = c * c;
 	if (v2 < relativisticPrecision * c2) {
 		momentum = v * mass;
 		return;
@@ -356,25 +355,24 @@ Vector3d Particle::evaluateVelocity(const Vector3d& p, const double& m, const do
 	}
 }
 
-double Particle::gammaFactor(const double& c) {
+double Particle::gammaFactor() {
 	if (!gammaCashed) {
 		double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
-		double mc2 = mass * c * c;
-		gamma = sqrt(p2 * c * c + mc2 * mc2) / mc2;
+		gamma = sqrt(p2 * c2 + mc2 * mc2) / mc2;
 		//alertNaNOrInfinity(gamma, "gamma = NaN");
 		gammaCashed = true;
 	}
 	return gamma;
 }
 
-double Particle::energy(const double& c) {
-	double gamma_factor = gammaFactor(c);
+double Particle::energy() {
+	double gamma_factor = gammaFactor();
 	//return gamma_factor*mass*c*c;
-	return (gamma_factor - 1) * mass * c * c;
+	return (gamma_factor - 1) * mc2;
 }
 
-double Particle::fullEnergy(const double& c) {
-	double gamma_factor = gammaFactor(c);
-	return gamma_factor * mass * c * c;
+double Particle::fullEnergy() {
+	double gamma_factor = gammaFactor();
+	return gamma_factor * mc2;
 }
  

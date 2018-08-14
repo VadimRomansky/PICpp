@@ -607,8 +607,9 @@ void readParticles(const char* particlesFileName, Simulation& simulation) {
 					}
 					ParticleTypeContainer typeContainer = simulation.types[type - 1];
 
+					//todo speed_of_light
 					Particle* particle = new Particle(number, mass, typeContainer.chargeCount, typeContainer.charge, weight,
-					                                  particleType, x, y, z, px, py, pz, dx, dy, dz);
+					                                  particleType, x, y, z, px, py, pz, dx, dy, dz, 1.0);
 					simulation.chargeBalance += particle->chargeCount;
 					simulation.particles.push_back(particle);
 				} else if (x > simulation.xgrid[simulation.xnumber]) {

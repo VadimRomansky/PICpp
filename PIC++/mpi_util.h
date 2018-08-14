@@ -217,22 +217,28 @@ void sendNodeMassMatrixParametersTop(MassMatrix ***array, double * outBuffer, in
 void receiveNodeMassMatrixParametersBottom(MassMatrix ***array, double *inBuffer, int xnumberAdded, int ynumberAdded, int znumberAdded, int additionalNumber, MPI_Comm& cartComm, int rank, int bottomRank);
 
 void sendLeftReceiveRightParticles(std::vector<Particle *> &outParticles, std::vector<Particle *> &inParticles,
-                                   std::vector<Particle*>& reservedParticles, ParticleTypeContainer *types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int leftRank, int rightRank);
+                                   std::vector<Particle*>& reservedParticles, ParticleTypeContainer *types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int leftRank, int rightRank, double
+                                   & c);
 
 void sendRightReceiveLeftParticles(std::vector<Particle *> &outParticles, std::vector<Particle *> &inParticles,
-                                   std::vector<Particle*>& reservedParticles, ParticleTypeContainer *types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int leftRank, int rightRank);
+                                   std::vector<Particle*>& reservedParticles, ParticleTypeContainer *types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int leftRank, int rightRank, double
+                                   & c);
 
 void sendFrontReceiveBackParticles(std::vector<Particle *> &outParticles, std::vector<Particle *> &inParticles,
-                                   std::vector<Particle*>& reservedParticles, ParticleTypeContainer *types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int frontRank, int backRank);
+                                   std::vector<Particle*>& reservedParticles, ParticleTypeContainer *types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int frontRank, int backRank, double
+                                   & c);
 
 void sendBackReceiveFrontParticles(std::vector<Particle *> &outParticles, std::vector<Particle *> &inParticles,
-                                   std::vector<Particle*>& reservedParticles, ParticleTypeContainer *types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int frontRank, int backRank);
+                                   std::vector<Particle*>& reservedParticles, ParticleTypeContainer *types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int frontRank, int backRank, double
+                                   & c);
 
 void sendBottomReceiveTopParticles(std::vector<Particle *> &outParticles, std::vector<Particle *> &inParticles,
-                                   std::vector<Particle*>& reservedParticles, ParticleTypeContainer *types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int bottomRank, int topRank);
+                                   std::vector<Particle*>& reservedParticles, ParticleTypeContainer *types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int bottomRank, int topRank, double
+                                   & c);
 
 void sendTopReceiveBottomParticles(std::vector<Particle *> &outParticles, std::vector<Particle *> &inParticles,
-                                   std::vector<Particle*>& reservedParticles, ParticleTypeContainer *types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int bottomRank, int topRank);
+                                   std::vector<Particle*>& reservedParticles, ParticleTypeContainer *types, int typesNumber, bool periodic, int verbosity, MPI_Comm& cartComm, int rank, int bottomRank, int topRank, double
+                                   & c);
 
 
 #endif //PIC_MPI_UTIL_H

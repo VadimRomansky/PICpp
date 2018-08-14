@@ -115,7 +115,7 @@ void Simulation::createParticlesHarris(double harrisWidth) {
 						double P=harrisWidth*B0.norm()*types[typeCounter].charge;
 						Vector3d V = Vector3d(0, 1.0, 0) * (-2*kBoltzman_normalized*speed_of_light_normalized*types[typeCounter].temperatureX/P);
 
-						particle->addVelocity(V, speed_of_light_normalized);
+						particle->addVelocity(V);
 
 						Vector3d momentum = particle->getMomentum();
 						particle->initialMomentum = momentum;

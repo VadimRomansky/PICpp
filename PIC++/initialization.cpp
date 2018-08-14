@@ -2683,7 +2683,7 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
-		Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle->getVelocity();
 		int xn = (particle->coordinates.x - xgrid[0]) / deltaX;
 		double rightWeight = (particle->coordinates.x - xgrid[xn]) / deltaX;
 		double leftWeight = (xgrid[xn + 1] - particle->coordinates.x) / deltaX;
@@ -2700,7 +2700,7 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 			//velocity = Vector3d(0, 0, 1) * (VzamplitudeElectron) * (leftWeight*(cos(kw * (xgrid[xn] - xshift)) + rightWeight*cos(kw*(xgrid[xn+1] - xshift)))) + Vector3d(0, 1, 0) * VyamplitudeElectron * (leftWeight*(sin(kw * (xgrid[xn] - xshift)) + rightWeight*sin(kw*(xgrid[xn+1] - xshift))));
 		}
 		double beta = velocity.norm() / speed_of_light_normalized;
-		particle->addVelocity(velocity, speed_of_light_normalized);
+		particle->addVelocity(velocity);
 		Vector3d momentum = particle->getMomentum();
 		particle->initialMomentum = momentum;
 		particle->prevMomentum = momentum;
@@ -3262,7 +3262,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
-		Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle->getVelocity();
 		int yn = (particle->coordinates.y - ygrid[0]) / deltaY;
 		double rightWeight = (particle->coordinates.y - ygrid[yn]) / deltaY;
 		double leftWeight = (ygrid[yn + 1] - particle->coordinates.y) / deltaY;
@@ -3281,7 +3281,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 				kw * particle->coordinates.y - kw * xshift));
 		}
 		double beta = velocity.norm() / speed_of_light_normalized;
-		particle->addVelocity(velocity, speed_of_light_normalized);
+		particle->addVelocity(velocity);
 		Vector3d momentum = particle->getMomentum();
 		particle->initialMomentum = momentum;
 		particle->prevMomentum = momentum;
@@ -3842,7 +3842,7 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
-		Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle->getVelocity();
 		int yn = (particle->coordinates.y - ygrid[0]) / deltaY;
 		double rightWeight = (particle->coordinates.y - ygrid[yn]) / deltaY;
 		double leftWeight = (ygrid[yn + 1] - particle->coordinates.y) / deltaY;
@@ -3861,7 +3861,7 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 				kw * particle->coordinates.z - kw * xshift));
 		}
 		double beta = velocity.norm() / speed_of_light_normalized;
-		particle->addVelocity(velocity, speed_of_light_normalized);
+		particle->addVelocity(velocity);
 		Vector3d momentum = particle->getMomentum();
 		particle->initialMomentum = momentum;
 		particle->prevMomentum = momentum;
@@ -4451,7 +4451,7 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
-		Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle->getVelocity();
 		int xn = (particle->coordinates.x - xgrid[0]) / deltaX;
 		int yn = (particle->coordinates.y - ygrid[0]) / deltaY;
 		double rightWeightX = (particle->coordinates.x - xgrid[xn]) / deltaX;
@@ -4493,7 +4493,7 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		velocity = rotationMatrix * velocity;
 		//velocity = inverse * velocity;
 		double beta = velocity.norm() / speed_of_light_normalized;
-		particle->addVelocity(velocity, speed_of_light_normalized);
+		particle->addVelocity(velocity);
 	}
 
 	updateDeltaT();
@@ -4774,7 +4774,7 @@ void Simulation::initializeLangmuirWave() {
 		Particle* particle = particles[pcount];
 		if (particle->type == ELECTRON) {
 			Vector3d velocity = Vector3d(1, 0, 0) * Vamplitude * cos(kw * particle->coordinates.x);
-			particle->addVelocity(velocity, speed_of_light_normalized);
+			particle->addVelocity(velocity);
 		}
 	}
 
@@ -5199,7 +5199,7 @@ void Simulation::initializeShockWave() {
 							}
 						}
 						if (localVelocity.norm() > 0) {
-							particle->addVelocity(particleVelocity, speed_of_light_normalized);
+							particle->addVelocity(particleVelocity);
 						}
 						Vector3d momentum = particle->getMomentum();
 						particle->initialMomentum = momentum;
@@ -5590,9 +5590,9 @@ void Simulation::initializeTwoStream() {
 		Particle* particle = particles[pcount];
 		if (particle->type == ELECTRON) {
 			if (electronCount % 2 == 0) {
-				particle->addVelocity(electronsVelocityPlus, speed_of_light_normalized);
+				particle->addVelocity(electronsVelocityPlus);
 			} else {
-				particle->addVelocity(electronsVelocityMinus, speed_of_light_normalized);
+				particle->addVelocity(electronsVelocityMinus);
 			}
 			electronCount++;
 		}
@@ -7400,7 +7400,7 @@ void Simulation::initializeBell() {
 							particle->addVelocity(V0, speed_of_light_normalized);
 						}*/
 						if (type == 0) {
-							particle->addVelocity(Vd, speed_of_light_normalized);
+							particle->addVelocity(Vd);
 						}
 						Vector3d momentum = particle->getMomentum();
 						particle->initialMomentum = momentum;
@@ -7443,7 +7443,7 @@ void Simulation::initializeBell() {
 					particle->coordinates.z = zgrid[k] + uniformDistribution() * deltaZ;
 
 					particle->initialCoordinates = particle->coordinates;
-					particle->addVelocity(Vsh, speed_of_light_normalized);
+					particle->addVelocity(Vsh);
 					Vector3d particleMomentum = particle->getMomentum();
 					particle->initialMomentum = particleMomentum;
 					particle->prevMomentum = particleMomentum;
@@ -7607,7 +7607,7 @@ void Simulation::initializeTestOneParticle() {
 		//particle->coordinates.z = zgrid[k] + uniformDistribution()*deltaZ;
 		particle->initialCoordinates = particle->coordinates;
 		if (V0.norm() > 0) {
-			particle->addVelocity(V0, speed_of_light_normalized);
+			particle->addVelocity(V0);
 		}
 		Vector3d momentum = particle->getMomentum();
 		particle->initialMomentum = momentum;
@@ -7668,7 +7668,7 @@ void Simulation::createParticles() {
 						//particle->coordinates.z = zgrid[k] + uniformDistribution()*deltaZ;
 						particle->initialCoordinates = particle->coordinates;
 						if (V0.norm() > 0) {
-							particle->addVelocity(V0, speed_of_light_normalized);
+							particle->addVelocity(V0);
 						}
 						Vector3d momentum = particle->getMomentum();
 						particle->initialMomentum = momentum;
@@ -7775,12 +7775,12 @@ void Simulation::addToPreserveChargeGlobal() {
 						newParticle->coordinates.z = zgrid[znumberAdded - 1 - additionalBinNumber] - deltaZ * uniformDistribution();
 					}
 					newParticle->initialCoordinates = newParticle->coordinates;
-					newParticle->addVelocity(V0, speed_of_light_normalized);
+					newParticle->addVelocity(V0);
 					Vector3d momentum = particle->getMomentum();
 					newParticle->initialMomentum = momentum;
 					//newParticle->prevMomentum = momentum;
 					particles.push_back(newParticle);
-					theoreticalEnergy += newParticle->energy(speed_of_light_normalized) * newParticle->weight *
+					theoreticalEnergy += newParticle->energy() * newParticle->weight *
 						sqr(scaleFactor / plasma_period);
 					theoreticalMomentum += newParticle->getMomentum() * newParticle->weight * scaleFactor / plasma_period;
 					particlesNumber++;
@@ -8022,7 +8022,7 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 	}
 
 
-	Particle* particle = new Particle(n, mass, chargeCount, charge, weight, type, x, y, z, px, py, pz, dx, dy, dz);
+	Particle* particle = new Particle(n, mass, chargeCount, charge, weight, type, x, y, z, px, py, pz, dx, dy, dz, speed_of_light_normalized);
 
 	return particle;
 }

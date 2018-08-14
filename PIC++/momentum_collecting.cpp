@@ -64,8 +64,8 @@ void Simulation::updateElectroMagneticParameters() {
 		for (int pcount = 0; pcount < particles.size(); ++pcount) {
 			Particle* particle = particles[pcount];
 
-			Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
-			double gamma = particle->gammaFactor(speed_of_light_normalized);
+			Vector3d velocity = particle->getVelocity();
+			double gamma = particle->gammaFactor();
 
 			Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
 			
@@ -200,8 +200,8 @@ void Simulation::updateElectroMagneticParameters() {
 
 		for (int pcount = 0; pcount < particles.size(); ++pcount) {
 			Particle* particle = particles[pcount];
-			Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
-			double gamma = particle->gammaFactor(speed_of_light_normalized);
+			Vector3d velocity = particle->getVelocity();
+			double gamma = particle->gammaFactor();
 			Vector3d rotatedVelocity = particle->rotationTensor * (velocity * gamma);
 			Matrix3d tensor = rotatedVelocity.selfTensorMult();
 
@@ -464,7 +464,7 @@ void Simulation::updateDensityParameters() {
 						printf("curI < 0 %d particle number = %d\n", curI, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
 						       particle->coordinates.y, particle->coordinates.z, zgrid[0], zgrid[znumberAdded]);
-						Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+						Vector3d velocity = particle->getVelocity();
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);
@@ -473,7 +473,7 @@ void Simulation::updateDensityParameters() {
 						printf("curI > xnumberAdded - 1 %d particle number = %d\n", curI, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
 						       particle->coordinates.y, particle->coordinates.z, zgrid[0], zgrid[znumberAdded]);
-						Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+						Vector3d velocity = particle->getVelocity();
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);
@@ -482,7 +482,7 @@ void Simulation::updateDensityParameters() {
 						printf("curJ < 0 %d particle number = %d\n", curJ, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
 						       particle->coordinates.y, particle->coordinates.z, zgrid[0], zgrid[znumberAdded]);
-						Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+						Vector3d velocity = particle->getVelocity();
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);
@@ -491,7 +491,7 @@ void Simulation::updateDensityParameters() {
 						printf("curJ > ynumberAdded - 1 %d particle number = %d\n", curJ, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
 						       particle->coordinates.y, particle->coordinates.z, zgrid[0], zgrid[znumberAdded]);
-						Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+						Vector3d velocity = particle->getVelocity();
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);
@@ -500,7 +500,7 @@ void Simulation::updateDensityParameters() {
 						printf("curK < 0 %d particle number = %d\n", curK, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
 						       particle->coordinates.y, particle->coordinates.z, zgrid[0], zgrid[znumberAdded]);
-						Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+						Vector3d velocity = particle->getVelocity();
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);
@@ -509,7 +509,7 @@ void Simulation::updateDensityParameters() {
 						printf("curK > znumberAdded - 1 %d particle number = %d\n", curK, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
 						       particle->coordinates.y, particle->coordinates.z, zgrid[0], zgrid[znumberAdded]);
-						Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+						Vector3d velocity = particle->getVelocity();
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);
@@ -531,7 +531,7 @@ void Simulation::updateDensityParameters() {
 						}
 						particleConcentrations[typeN][1 + 2 * additionalBinNumber - curI][curJ][curK] += particle->weight * correlation;
 						particleEnergies[typeN][1 + 2 * additionalBinNumber - curI][curJ][curK] += particle->weight * particle->
-							fullEnergy(speed_of_light_normalized) * correlation;
+							fullEnergy() * correlation;
 					} else {
 						particleBulkVelocities[typeN][curI][curJ][curK] += particle->getMomentum() * particle->weight * correlation;
 						if (particleCharge > 0) {
@@ -540,7 +540,7 @@ void Simulation::updateDensityParameters() {
 							chargeDensityMinus[curI][curJ][curK] += particleCharge * correlation;
 						}
 						particleConcentrations[typeN][curI][curJ][curK] += particle->weight * correlation;
-						particleEnergies[typeN][curI][curJ][curK] += particle->weight * particle->fullEnergy(speed_of_light_normalized) *
+						particleEnergies[typeN][curI][curJ][curK] += particle->weight * particle->fullEnergy() *
 							correlation;
 					}
 				}
@@ -678,7 +678,7 @@ void Simulation::updateBunemanChargeDensity() {
 						printf("curI < 0 %d particle number = %d\n", curI, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
 						       particle->coordinates.y, particle->coordinates.z, zgrid[0], zgrid[znumberAdded]);
-						Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+						Vector3d velocity = particle->getVelocity();
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);
@@ -687,7 +687,7 @@ void Simulation::updateBunemanChargeDensity() {
 						printf("curI > xnumberAdded - 1 %d particle number = %d\n", curI, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
 						       particle->coordinates.y, particle->coordinates.z, zgrid[0], zgrid[znumberAdded]);
-						Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+						Vector3d velocity = particle->getVelocity();
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);
@@ -696,7 +696,7 @@ void Simulation::updateBunemanChargeDensity() {
 						printf("curJ < 0 %d particle number = %d\n", curJ, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
 						       particle->coordinates.y, particle->coordinates.z, zgrid[0], zgrid[znumberAdded]);
-						Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+						Vector3d velocity = particle->getVelocity();
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);
@@ -705,7 +705,7 @@ void Simulation::updateBunemanChargeDensity() {
 						printf("curJ > ynumberAdded - 1 %d particle number = %d\n", curJ, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
 						       particle->coordinates.y, particle->coordinates.z, zgrid[0], zgrid[znumberAdded]);
-						Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+						Vector3d velocity = particle->getVelocity();
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);
@@ -714,7 +714,7 @@ void Simulation::updateBunemanChargeDensity() {
 						printf("curK < 0 %d particle number = %d\n", curK, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
 						       particle->coordinates.y, particle->coordinates.z, zgrid[0], zgrid[znumberAdded]);
-						Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+						Vector3d velocity = particle->getVelocity();
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);
@@ -723,7 +723,7 @@ void Simulation::updateBunemanChargeDensity() {
 						printf("curK > znumberAdded - 1 %d particle number = %d\n", curK, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
 						       particle->coordinates.y, particle->coordinates.z, zgrid[0], zgrid[znumberAdded]);
-						Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+						Vector3d velocity = particle->getVelocity();
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);

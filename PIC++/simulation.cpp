@@ -31,7 +31,7 @@ void Simulation::simulate() {
 		initialize();
 		updateDeltaT();
 		createFiles();
-		initializeTwoStream();
+		//initializeTwoStream();
 		//initializeExternalFluxInstability();
 		//initializeAlfvenWaveX(1, 0.01);
 		//initializeAlfvenWaveY(1, 0.01);
@@ -41,7 +41,7 @@ void Simulation::simulate() {
 		//initializeAnisotropicSilicon();
 		//initializeWeibel();
 		//initializeRingWeibel();
-		//initializeFluxFromRight();
+		initializeFluxFromRight();
 		//initializeHarris();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();
@@ -1219,7 +1219,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
+		        (particle.getVelocity().norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1238,7 +1238,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
+		        (particle.getVelocity().norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1252,7 +1252,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
+		        (particle.getVelocity().norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1266,7 +1266,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
+		        (particle.getVelocity().norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1280,7 +1280,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
+		        (particle.getVelocity().norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1294,7 +1294,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
+		        (particle.getVelocity().norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1324,39 +1324,39 @@ void Simulation::updateTheoreticalEnergy() {
 
 	for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
 		Particle* particle = escapedParticlesLeft[i];
-		theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy -= particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 	}
 	for (int i = 0; i < escapedParticlesRight.size(); ++i) {
 		Particle* particle = escapedParticlesRight[i];
-		theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy -= particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 	}
 
 	for (int i = 0; i < escapedParticlesFront.size(); ++i) {
 		Particle* particle = escapedParticlesFront[i];
-		theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy -= particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 	}
 	for (int i = 0; i < escapedParticlesBack.size(); ++i) {
 		Particle* particle = escapedParticlesBack[i];
-		theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy -= particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 	}
 
 	for (int i = 0; i < escapedParticlesTop.size(); ++i) {
 		Particle* particle = escapedParticlesTop[i];
-		theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy -= particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 	}
 	for (int i = 0; i < escapedParticlesBottom.size(); ++i) {
 		Particle* particle = escapedParticlesBottom[i];
-		theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy -= particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 	}
@@ -1498,10 +1498,10 @@ void Simulation::updateEnergy() {
 		}
 
 		for (int pcount = 0; pcount < particles.size(); ++pcount) {
-			double particleE = particles[pcount]->energy(speed_of_light_normalized);
+			double particleE = particles[pcount]->energy();
 			if (particleE < 0) {
 				printf("particle energy < o\n");
-				particleE = particles[pcount]->energy(speed_of_light_normalized);
+				particleE = particles[pcount]->energy();
 			}
 			particleEnergy += particleE * particles[pcount]->weight;
 			globalMomentum += particles[pcount]->getMomentum() * particles[pcount]->weight;
@@ -1776,9 +1776,9 @@ void Simulation::updateAnisotropy() {
 		Particle* particle = particles[p];
 		int t = getTypeNumber(particle);
 		types[t].generalWeight += particle->weight;
-		parallelV2[t] = parallelV2[t] + sqr(particle->velocityX(speed_of_light_normalized)) * particle->weight;
-		normalV2[t] = normalV2[t] + (sqr(particle->velocityY(speed_of_light_normalized))
-			+ sqr(particle->velocityZ(speed_of_light_normalized))) * particle->weight;
+		parallelV2[t] = parallelV2[t] + sqr(particle->velocityX()) * particle->weight;
+		normalV2[t] = normalV2[t] + (sqr(particle->velocityY())
+			+ sqr(particle->velocityZ())) * particle->weight;
 	}
 
 	MPI_Barrier(cartComm);
