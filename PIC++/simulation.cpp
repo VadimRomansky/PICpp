@@ -41,7 +41,7 @@ void Simulation::simulate() {
 		//initializeAnisotropicSilicon();
 		//initializeWeibel();
 		//initializeRingWeibel();
-		initializeFluxFromRight();
+		//initializeFluxFromRight();
 		//initializeHarris();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();
@@ -50,7 +50,7 @@ void Simulation::simulate() {
 		//initializeRotatedSimpleElectroMagneticWave(1, 1, 0);
 		//initializeHomogenouseFlow();
 		//initializeLangmuirWave();
-		//createParticles();
+		createParticles();
 		//initializeShockWave();
 		//initializeFake();
 		//initializeTestOneParticle();
@@ -139,76 +139,81 @@ void Simulation::simulate() {
 
 		//updateDeltaT();
 		/////////////////////////////////////////////////////
-
-		evaluateParticlesRotationTensor();
-
-		updateElectroMagneticParameters();
 		double procTime = 0;
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock();
-		}
-		for(int n = 0; n < smoothingCount; ++n){
-			smoothChargeDensityHat();
-			smoothFlux();
-			smoothMatrixNodeParameter(dielectricTensor);
-		}
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock() - procTime;
-			printf("smoothing chatge density and flux = %g sec\n", procTime / CLOCKS_PER_SEC);
-		}
-
-		evaluateElectricField();
-		exchangeEfield();
-		if (solverType == BUNEMAN) {
-			exchangeBunemanEfield(bunemanEx, bunemanEy, bunemanEz);
-			exchangeBunemanEfield(bunemanNewEx, bunemanNewEy, bunemanNewEz);
-		}
-
-		if (solverType == BUNEMAN) {
-		} else if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
-			/*cleanupDivergence(tempEfield, chargeDensityHat);
-			for (int i = 0; i < xnumberAdded + 1; ++i) {
-				for (int j = 0; j < ynumberAdded + 1; ++j) {
-					for (int k = 0; k < znumberAdded + 1; ++k) {
-						newEfield[i][j][k] = (tempEfield[i][j][k] - Efield[i][j][k] * (1 - theta)) / theta;
-					}
-				}
-			}
-			exchangeEfield();*/
-		} else {
-		}
-
-		evaluateMagneticField();
-		if (solverType == BUNEMAN) {
+		if(solverType == BUNEMAN) {
+			tristanEvaluateBhalfStep();
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
 			exchangeBunemanBfield(bunemanNewBx, bunemanNewBy, bunemanNewBz);
-		}
-		procTime = 0;
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock();
-		}
-		exchangeGeneralBfield(newBfield);
-		exchangeGeneralEfield(tempEfield);
-		exchangeGeneralEfield(newEfield);
-		//MPI_Barrier(cartComm);
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock() - procTime;
-			printf("exchanging all B field time = %g sec\n", procTime / CLOCKS_PER_SEC);
-		}
-
-		for(int n = 0; n < smoothingCount; ++n){
-			//smoothTempEfield();
-		}
-		if (solverType == BUNEMAN) {
-			//cleanupDivergenceBuneman();
-			//cleanupDivergenceBunemanMagnetic();
+			moveParticles();
+			tristanEvaluateBhalfStep();
+			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
+			exchangeBunemanBfield(bunemanNewBx, bunemanNewBy, bunemanNewBz);
+			tristanEvaluateE();
 		} else {
+			evaluateParticlesRotationTensor();
+
+			updateElectroMagneticParameters();
+			procTime = 0;
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock();
+			}
+			for(int n = 0; n < smoothingCount; ++n){
+				smoothChargeDensityHat();
+				smoothFlux();
+				smoothMatrixNodeParameter(dielectricTensor);
+			}
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock() - procTime;
+				printf("smoothing chatge density and flux = %g sec\n", procTime / CLOCKS_PER_SEC);
+			}
+
+			//evaluateElectricField();
+			exchangeEfield();
+			if (solverType == BUNEMAN) {
+				exchangeBunemanEfield(bunemanEx, bunemanEy, bunemanEz);
+				exchangeBunemanEfield(bunemanNewEx, bunemanNewEy, bunemanNewEz);
+			}
+
+			if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
+				/*cleanupDivergence(tempEfield, chargeDensityHat);
+				for (int i = 0; i < xnumberAdded + 1; ++i) {
+					for (int j = 0; j < ynumberAdded + 1; ++j) {
+						for (int k = 0; k < znumberAdded + 1; ++k) {
+							newEfield[i][j][k] = (tempEfield[i][j][k] - Efield[i][j][k] * (1 - theta)) / theta;
+						}
+					}
+				}
+				exchangeEfield();*/
+			} else {
+			}
+
+			//evaluateMagneticField();
+			if (solverType == BUNEMAN) {
+				exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
+				exchangeBunemanBfield(bunemanNewBx, bunemanNewBy, bunemanNewBz);
+			}
+			procTime = 0;
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock();
+			}
+			exchangeGeneralBfield(newBfield);
+			exchangeGeneralEfield(tempEfield);
+			exchangeGeneralEfield(newEfield);
+			//MPI_Barrier(cartComm);
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock() - procTime;
+				printf("exchanging all B field time = %g sec\n", procTime / CLOCKS_PER_SEC);
+			}
+
+			for(int n = 0; n < smoothingCount; ++n){
+				//smoothTempEfield();
+			}
+
 			//cleanupDivergence(tempEfield, chargeDensityHat);
 			//cleanupDivergenceMagnetic();
+			moveParticles();
 		}
 
-
-		moveParticles();
 
 		if ((rank == 0) && (verbosity > 1)) printLog("erasing escaped particles\n");
 		if ((rank == 0) && (verbosity > 1)) printf("erasing escaped particles\n");
@@ -380,7 +385,7 @@ void Simulation::simulate() {
 			//filterFieldsLocal(5);
 		}
 
-		updateFields();
+		//updateFields();
 		if ((rank == 0) && (verbosity > 0)) {
 			printf("finish update fields\n");
 		}

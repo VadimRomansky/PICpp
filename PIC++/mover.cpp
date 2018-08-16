@@ -34,8 +34,8 @@ void Simulation::moveParticles() {
 				printf("move particle number %d rank %d\n", i, rank);
 			}
 		}
-		//moveParticle(particles[i]);
-		moveParticleTristan(particles[i]);
+		moveParticle(particles[i]);
+		//moveParticleTristan(particles[i]);
 		//moveParticle(particles[i], 0, 10);
 		//particles[i]->momentum.x = 0;
 	}
@@ -832,8 +832,8 @@ void Simulation::moveParticleTristan(Particle* particle) {
 	double betaShift = beta/gamma;
 	double f = 1.0/sqrt(1.0 + betaShift*betaShift*B.norm2());
 	Vector3d momentum = particle->getMomentum();
-	Vector3d tempMomentum = momentum + momentum.vectorMult(B)*(betaShift*particle->mass);
-	momentum += tempMomentum.vectorMult(B)*(f*2.0*betaShift*particle->mass) + dp;
+	Vector3d tempMomentum = momentum + momentum.vectorMult(B)*(betaShift);
+	momentum += tempMomentum.vectorMult(B)*(f*2.0*betaShift) + dp;
 	particle->setMomentum(momentum);
 	particle->coordinates += momentum*deltaT/(particle->mass*gamma);
 	

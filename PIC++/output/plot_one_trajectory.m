@@ -2,7 +2,7 @@ clear;
 load particlesTrajectories.dat;
 N1=size(particlesTrajectories,1);
 N2=(size(particlesTrajectories,2) - 2)/8;
-n = 1;
+n = 17;
 figure(1);
 plot(particlesTrajectories(1:N1,1),particlesTrajectories(1:N1,3 + (n-1)*8), 'red');
 xlabel ('t s');
