@@ -174,7 +174,7 @@ void outputDistributionShiftedSystem(const char* outFileName, std::vector < Part
 	for (int i = 0; i < particles.size(); ++i) {
 		if (particles[i]->type == particleType) {
 			Particle tempParticle = *particles[i];
-			tempParticle.addVelocity(shiftV, speed_of_light_normalized);
+			tempParticle.addVelocity(shiftV);
 			Vector3d momentum = tempParticle.getMomentum();
 			if (minMomentum <= 0) {
 				minMomentum = momentum.norm() * gyroradius / plasma_period;
@@ -246,7 +246,7 @@ void outputDistributionShiftedSystem(const char* outFileName, std::vector < Part
 	for (int i = 0; i < particles.size(); ++i) {
 		if (particles[i]->type == particleType) {
 			Particle tempParticle = *particles[i];
-			tempParticle.addVelocity(shiftV, speed_of_light_normalized);
+			tempParticle.addVelocity(shiftV);
 			int j = (log(tempParticle.getMomentum().norm() * gyroradius / plasma_period) - logMinMomentum) / deltaLogP;
 			if (j >= 0 && j < pnumber) {
 				distribution[j] += particles[i]->weight;

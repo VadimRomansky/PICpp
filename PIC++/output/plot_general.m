@@ -34,6 +34,8 @@ for i = 2:N2,
         linearField(i) = linearField(Nsaturation);
         linearMagneticEnergy(i) = linearMagneticEnergy(Nsaturation);
     end
+    linearField(i) = 0;
+    linearMagneticEnergy(i) = 0;
 end
 shockWave(2) = 0;
 

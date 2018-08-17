@@ -42,7 +42,7 @@ void Simulation::simulate() {
 		//initializeWeibel();
 		//initializeRingWeibel();
 		//initializeFluxFromRight();
-		initializeHarris();
+		//initializeHarris();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();
 		//initializeSimpleElectroMagneticWaveY();
@@ -50,7 +50,7 @@ void Simulation::simulate() {
 		//initializeRotatedSimpleElectroMagneticWave(1, 1, 0);
 		//initializeHomogenouseFlow();
 		//initializeLangmuirWave();
-		//createParticles();
+		createParticles();
 		//initializeShockWave();
 		//initializeFake();
 		//initializeTestOneParticle();
@@ -138,76 +138,82 @@ void Simulation::simulate() {
 		}
 
 		//updateDeltaT();
-
-		evaluateParticlesRotationTensor();
-
-		updateElectroMagneticParameters();
+		/////////////////////////////////////////////////////
 		double procTime = 0;
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock();
-		}
-		for(int n = 0; n < smoothingCount; ++n){
-			smoothChargeDensityHat();
-			smoothFlux();
-			smoothMatrixNodeParameter(dielectricTensor);
-		}
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock() - procTime;
-			printf("smoothing chatge density and flux = %g sec\n", procTime / CLOCKS_PER_SEC);
-		}
-
-		evaluateElectricField();
-		exchangeEfield();
-		if (solverType == BUNEMAN) {
-			exchangeBunemanEfield(bunemanEx, bunemanEy, bunemanEz);
-			exchangeBunemanEfield(bunemanNewEx, bunemanNewEy, bunemanNewEz);
-		}
-
-		if (solverType == BUNEMAN) {
-		} else if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
-			/*cleanupDivergence(tempEfield, chargeDensityHat);
-			for (int i = 0; i < xnumberAdded + 1; ++i) {
-				for (int j = 0; j < ynumberAdded + 1; ++j) {
-					for (int k = 0; k < znumberAdded + 1; ++k) {
-						newEfield[i][j][k] = (tempEfield[i][j][k] - Efield[i][j][k] * (1 - theta)) / theta;
-					}
-				}
-			}
-			exchangeEfield();*/
-		} else {
-		}
-
-		evaluateMagneticField();
-		if (solverType == BUNEMAN) {
+		if(solverType == BUNEMAN) {
+			tristanEvaluateBhalfStep();
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
 			exchangeBunemanBfield(bunemanNewBx, bunemanNewBy, bunemanNewBz);
-		}
-		procTime = 0;
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock();
-		}
-		exchangeGeneralBfield(newBfield);
-		exchangeGeneralEfield(tempEfield);
-		exchangeGeneralEfield(newEfield);
-		//MPI_Barrier(cartComm);
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock() - procTime;
-			printf("exchanging all B field time = %g sec\n", procTime / CLOCKS_PER_SEC);
-		}
-
-		for(int n = 0; n < smoothingCount; ++n){
-			//smoothTempEfield();
-		}
-		if (solverType == BUNEMAN) {
-			//cleanupDivergenceBuneman();
-			//cleanupDivergenceBunemanMagnetic();
+			moveParticles();
+			tristanEvaluateBhalfStep();
+			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
+			exchangeBunemanBfield(bunemanNewBx, bunemanNewBy, bunemanNewBz);
+			tristanEvaluateE();
 		} else {
+			evaluateParticlesRotationTensor();
+
+			updateElectroMagneticParameters();
+			procTime = 0;
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock();
+			}
+			for(int n = 0; n < smoothingCount; ++n){
+				smoothChargeDensityHat();
+				smoothFlux();
+				smoothMatrixNodeParameter(dielectricTensor);
+			}
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock() - procTime;
+				printf("smoothing chatge density and flux = %g sec\n", procTime / CLOCKS_PER_SEC);
+			}
+
+			//evaluateElectricField();
+			exchangeEfield();
+			if (solverType == BUNEMAN) {
+				exchangeBunemanEfield(bunemanEx, bunemanEy, bunemanEz);
+				exchangeBunemanEfield(bunemanNewEx, bunemanNewEy, bunemanNewEz);
+			}
+
+			if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
+				/*cleanupDivergence(tempEfield, chargeDensityHat);
+				for (int i = 0; i < xnumberAdded + 1; ++i) {
+					for (int j = 0; j < ynumberAdded + 1; ++j) {
+						for (int k = 0; k < znumberAdded + 1; ++k) {
+							newEfield[i][j][k] = (tempEfield[i][j][k] - Efield[i][j][k] * (1 - theta)) / theta;
+						}
+					}
+				}
+				exchangeEfield();*/
+			} else {
+			}
+
+			//evaluateMagneticField();
+			if (solverType == BUNEMAN) {
+				exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
+				exchangeBunemanBfield(bunemanNewBx, bunemanNewBy, bunemanNewBz);
+			}
+			procTime = 0;
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock();
+			}
+			exchangeGeneralBfield(newBfield);
+			exchangeGeneralEfield(tempEfield);
+			exchangeGeneralEfield(newEfield);
+			//MPI_Barrier(cartComm);
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock() - procTime;
+				printf("exchanging all B field time = %g sec\n", procTime / CLOCKS_PER_SEC);
+			}
+
+			for(int n = 0; n < smoothingCount; ++n){
+				//smoothTempEfield();
+			}
+
 			//cleanupDivergence(tempEfield, chargeDensityHat);
 			//cleanupDivergenceMagnetic();
+			moveParticles();
 		}
 
-
-		moveParticles();
 
 		if ((rank == 0) && (verbosity > 1)) printLog("erasing escaped particles\n");
 		if ((rank == 0) && (verbosity > 1)) printf("erasing escaped particles\n");
@@ -379,7 +385,7 @@ void Simulation::simulate() {
 			//filterFieldsLocal(5);
 		}
 
-		updateFields();
+		//updateFields();
 		if ((rank == 0) && (verbosity > 0)) {
 			printf("finish update fields\n");
 		}
@@ -1219,7 +1225,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
+		        (particle.getVelocity().norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1238,7 +1244,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
+		        (particle.getVelocity().norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1252,7 +1258,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
+		        (particle.getVelocity().norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1266,7 +1272,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
+		        (particle.getVelocity().norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1280,7 +1286,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
+		        (particle.getVelocity().norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1294,7 +1300,7 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
 		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity(speed_of_light_normalized).norm() / speed_of_light_normalized));
+		        (particle.getVelocity().norm() / speed_of_light_normalized));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1324,39 +1330,39 @@ void Simulation::updateTheoreticalEnergy() {
 
 	for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
 		Particle* particle = escapedParticlesLeft[i];
-		theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy -= particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 	}
 	for (int i = 0; i < escapedParticlesRight.size(); ++i) {
 		Particle* particle = escapedParticlesRight[i];
-		theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy -= particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 	}
 
 	for (int i = 0; i < escapedParticlesFront.size(); ++i) {
 		Particle* particle = escapedParticlesFront[i];
-		theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy -= particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 	}
 	for (int i = 0; i < escapedParticlesBack.size(); ++i) {
 		Particle* particle = escapedParticlesBack[i];
-		theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy -= particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 	}
 
 	for (int i = 0; i < escapedParticlesTop.size(); ++i) {
 		Particle* particle = escapedParticlesTop[i];
-		theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy -= particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 	}
 	for (int i = 0; i < escapedParticlesBottom.size(); ++i) {
 		Particle* particle = escapedParticlesBottom[i];
-		theoreticalEnergy -= particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy -= particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum -= particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 	}
@@ -1498,10 +1504,10 @@ void Simulation::updateEnergy() {
 		}
 
 		for (int pcount = 0; pcount < particles.size(); ++pcount) {
-			double particleE = particles[pcount]->energy(speed_of_light_normalized);
+			double particleE = particles[pcount]->energy();
 			if (particleE < 0) {
 				printf("particle energy < o\n");
-				particleE = particles[pcount]->energy(speed_of_light_normalized);
+				particleE = particles[pcount]->energy();
 			}
 			particleEnergy += particleE * particles[pcount]->weight;
 			globalMomentum += particles[pcount]->getMomentum() * particles[pcount]->weight;
@@ -1776,9 +1782,9 @@ void Simulation::updateAnisotropy() {
 		Particle* particle = particles[p];
 		int t = getTypeNumber(particle);
 		types[t].generalWeight += particle->weight;
-		parallelV2[t] = parallelV2[t] + sqr(particle->velocityX(speed_of_light_normalized)) * particle->weight;
-		normalV2[t] = normalV2[t] + (sqr(particle->velocityY(speed_of_light_normalized))
-			+ sqr(particle->velocityZ(speed_of_light_normalized))) * particle->weight;
+		parallelV2[t] = parallelV2[t] + sqr(particle->velocityX()) * particle->weight;
+		normalV2[t] = normalV2[t] + (sqr(particle->velocityY())
+			+ sqr(particle->velocityZ())) * particle->weight;
 	}
 
 	MPI_Barrier(cartComm);

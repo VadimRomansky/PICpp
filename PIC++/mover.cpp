@@ -35,6 +35,7 @@ void Simulation::moveParticles() {
 			}
 		}
 		moveParticle(particles[i]);
+		//moveParticleTristan(particles[i]);
 		//moveParticle(particles[i], 0, 10);
 		//particles[i]->momentum.x = 0;
 	}
@@ -190,7 +191,7 @@ void Simulation::moveParticle(Particle* particle) {
 	Vector3d E;
 	Vector3d B;
 
-	double oldGamma = particle->gammaFactor(speed_of_light_normalized);
+	double oldGamma = particle->gammaFactor();
 
 	if (solverType == BUNEMAN) {
 		E = (correlationBunemanEfield(particle) + correlationBunemanNewEfield(particle)) / 2.0;
@@ -203,13 +204,13 @@ void Simulation::moveParticle(Particle* particle) {
 		B = correlationBfield(particle);
 	}
 
-	Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+	Vector3d velocity = particle->getVelocity();
 	Vector3d newVelocity = velocity;
 	Vector3d middleVelocity = velocity;
 
 
 	//see Noguchi
-	double gamma = particle->gammaFactor(speed_of_light_normalized);
+	double gamma = particle->gammaFactor();
 	double beta = 0.5 * particle->charge * deltaT / particle->mass;
 
 	int particleIterations = 50 * gamma;
@@ -252,7 +253,7 @@ void Simulation::moveParticle(Particle* particle) {
 		particle->coordinates.y = particle->coordinates.y + middleVelocity.y * restEtaDeltaT;
 		particle->coordinates.z = particle->coordinates.z + middleVelocity.z * restEtaDeltaT;
 		newVelocity.x = fabs(newVelocity.x);
-		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+		particle->setMomentumByV(newVelocity);
 		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
 		sortParticleToEscaped(particle);
 		return;
@@ -264,7 +265,7 @@ void Simulation::moveParticle(Particle* particle) {
 		particle->coordinates.y = particle->coordinates.y + middleVelocity.y * restEtaDeltaT;
 		particle->coordinates.z = particle->coordinates.z + middleVelocity.z * restEtaDeltaT;
 		newVelocity.x = -fabs(newVelocity.x);
-		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+		particle->setMomentumByV(newVelocity);
 		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
 		sortParticleToEscaped(particle);
 		return;
@@ -274,7 +275,7 @@ void Simulation::moveParticle(Particle* particle) {
 	//Vector3d prevVelocity = velocity;
 	int i = 0;
 	Vector3d velocityHat = (particle->rotationTensor * particle->gammaFactor(
-		speed_of_light_normalized) * velocity);
+	) * velocity);
 
 
 	Vector3d prevMomentum = particle->getMomentum();
@@ -323,7 +324,7 @@ void Simulation::moveParticle(Particle* particle) {
 			particle->coordinates.z = particle->coordinates.z + middleVelocity.z * restEtaDeltaT;
 
 			newVelocity.x = fabs(newVelocity.x);
-			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+			particle->setMomentumByV(newVelocity);
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
 			sortParticleToEscaped(particle);
 			return;
@@ -337,7 +338,7 @@ void Simulation::moveParticle(Particle* particle) {
 			particle->coordinates.z = particle->coordinates.z + middleVelocity.z * restEtaDeltaT;
 
 			newVelocity.x = -fabs(newVelocity.x);
-			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+			particle->setMomentumByV(newVelocity);
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
 			sortParticleToEscaped(particle);
 			return;
@@ -511,7 +512,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 	//printf("E = %g %g %g\n", E.x, E.y, E.z);
 	//printf("B = %g %g %g\n", B.x, B.y, B.z);
 
-	Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+	Vector3d velocity = particle->getVelocity();
 	Vector3d newVelocity = velocity;
 	Vector3d middleVelocity = velocity;
 
@@ -519,7 +520,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 	oldB = correlationBfield(particle) * (1 - localTheta);
 
 	//see Noguchi
-	double gamma = particle->gammaFactor(speed_of_light_normalized);
+	double gamma = particle->gammaFactor();
 	double beta = 0.5 * particle->charge * deltaT / particle->mass;
 
 	particle->rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
@@ -535,7 +536,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 	tempParticle.addMomentum((E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT / N);
 	//alertNaNOrInfinity(E.x, "E.x = Nan in move particle\n");
 
-	newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
+	newVelocity = tempParticle.getVelocity();
 
 	middleVelocity = velocity * (1 - eta) + newVelocity * eta;
 
@@ -550,7 +551,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 		particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT / N;
 		particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * (1 - eta) * deltaT / N;
 		newVelocity.x = fabs(newVelocity.x);
-		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+		particle->setMomentumByV(newVelocity);
 		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
 		//sortParticleToEscaped(particle);
 		moveParticle(particle, cur + 1, N);
@@ -564,7 +565,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 		particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT / N;
 		particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * (1 - eta) * deltaT / N;
 		newVelocity.x = -fabs(newVelocity.x);
-		particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+		particle->setMomentumByV(newVelocity);
 		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
 		//sortParticleToEscaped(particle);
 		moveParticle(particle, cur + 1, N);
@@ -575,7 +576,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 	Vector3d prevVelocity = velocity;
 	int i = 0;
 	Vector3d velocityHat = (particle->rotationTensor * particle->gammaFactor(
-		speed_of_light_normalized) * velocity);
+	) * velocity);
 	Vector3d Eperp = E - velocity * (velocity.scalarMult(E) / (velocity.scalarMult(velocity)));
 	Vector3d electricVelocityShift = (Eperp * (2 * eta * beta / gamma));
 	//velocityHat += electricVelocityShift;
@@ -585,7 +586,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 		//MPI_Finalize();
 		//exit(0);
 	}
-	double a = tempParticle.gammaFactor(speed_of_light_normalized);
+	double a = tempParticle.gammaFactor();
 	double etaDeltaT = eta * deltaT / N;
 	double restEtaDeltaT = (1.0 - eta) * deltaT / N;
 	double velocityNorm = velocity.norm();
@@ -622,7 +623,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 			particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * restEtaDeltaT;
 
 			newVelocity.x = fabs(newVelocity.x);
-			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+			particle->setMomentumByV(newVelocity);
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
 			//sortParticleToEscaped(particle);
 			moveParticle(particle, cur + 1, N);
@@ -638,7 +639,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 			particle->coordinates.z = tempParticle.coordinates.z + middleVelocity.z * restEtaDeltaT;
 
 			newVelocity.x = -fabs(newVelocity.x);
-			particle->setMomentumByV(newVelocity, speed_of_light_normalized);
+			particle->setMomentumByV(newVelocity);
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
 			//sortParticleToEscaped(particle);
 			moveParticle(particle, cur + 1, N);
@@ -665,7 +666,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 
 		tempParticle.addMomentum(
 			(E + (middleVelocity.vectorMult(B) / speed_of_light_normalized)) * (particle->charge * deltaT / N));
-		newVelocity = tempParticle.getVelocity(speed_of_light_normalized);
+		newVelocity = tempParticle.getVelocity();
 		newMomentum = tempParticle.getMomentum();
 		//error = (prevVelocity - newVelocity).norm();
 		error = (prevMomentum - newMomentum).norm();
@@ -746,8 +747,97 @@ void Simulation::moveParticleBoris(Particle* particle) {
 	Vector3d newMomentum = p2 + E2 * beta;
 
 	particle->setMomentum(newMomentum);
-	Vector3d newVelocity = particle->getVelocity(speed_of_light_normalized);
+	Vector3d newVelocity = particle->getVelocity();
 	particle->coordinates += newVelocity * deltaT;
+
+	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
+		if ((boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == 0) {
+			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
+			particle->reflectMomentumX();
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+			//return;
+		} else {
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+			escapedParticlesLeft.push_back(particle);
+			return;
+		}
+	}
+	if (particle->coordinates.x > xgrid[xnumberAdded -1 - additionalBinNumber]) {
+		if ((boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == cartDim[0] - 1) {
+			particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - particle->coordinates.x;
+			particle->reflectMomentumX();
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+			//return;
+		} else {
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+			escapedParticlesRight.push_back(particle);
+			return;
+		}
+	}
+	if (particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
+		escapedParticlesRight.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+		return;
+	}
+
+	if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
+		escapedParticlesFront.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+		return;
+	}
+
+	if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
+		escapedParticlesBack.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+		return;
+	}
+
+	if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+		escapedParticlesBottom.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+		return;
+	}
+
+	if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+		escapedParticlesTop.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+	}
+}
+
+void Simulation::moveParticleTristan(Particle* particle) {
+	updateCorrelationMaps(particle);
+
+	Vector3d E;
+	Vector3d B;
+
+	if (solverType == BUNEMAN) {
+		E = correlationBunemanEfield(particle);// + correlationBunemanNewEfield(particle);
+		B = correlationBunemanBfield(particle);// + correlationBunemanNewBfield(particle);
+	} else {
+		E = correlationEfield(particle);
+		B = correlationBfield(particle) * (1 - theta) + correlationNewBfield(particle) * theta;
+	}
+
+	Vector3d dp = E*(particle->charge*deltaT*0.5);
+	particle->addMomentum(dp);
+	double gamma = particle->gammaFactor();
+	double beta = particle->charge*deltaT/(2.0*particle->mass*speed_of_light_normalized);
+	double betaShift = beta/gamma;
+	double f = 1.0/sqrt(1.0 + betaShift*betaShift*B.norm2());
+	Vector3d momentum = particle->getMomentum();
+	Vector3d tempMomentum = momentum + momentum.vectorMult(B)*(betaShift);
+	momentum += tempMomentum.vectorMult(B)*(f*2.0*betaShift) + dp;
+	particle->setMomentum(momentum);
+	particle->coordinates += momentum*deltaT/(particle->mass*gamma);
+	
+
 
 	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
 		if ((boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == 0) {
@@ -818,8 +908,8 @@ void Simulation::evaluateParticlesRotationTensor() {
 	for (int i = 0; i < particles.size(); ++i) {
 		Particle* particle = particles[i];
 		double beta = 0.5 * particle->charge * deltaT / particle->mass;
-		double gamma = particle->gammaFactor(speed_of_light_normalized);
-		Vector3d velocity = particle->getVelocity(speed_of_light_normalized);
+		double gamma = particle->gammaFactor();
+		Vector3d velocity = particle->getVelocity();
 
 		Vector3d oldE;
 		Vector3d oldB;
@@ -933,14 +1023,14 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer& typeContai
 				double y = particle->coordinates.y;
 				double z = particle->coordinates.z;
 
-				particle->addVelocity(V0, speed_of_light_normalized);
+				particle->addVelocity(V0);
 				Vector3d momentum = particle->getMomentum();
 				particle->initialMomentum = momentum;
 				//particle->prevMomentum = momentum;
 				particles.push_back(particle);
-				double en = particle->energy(speed_of_light_normalized) * particle->weight * sqr(
+				double en = particle->energy() * particle->weight * sqr(
 					scaleFactor / plasma_period);
-				theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight * sqr(
+				theoreticalEnergy += particle->energy() * particle->weight * sqr(
 					scaleFactor / plasma_period);
 				theoreticalMomentum += particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 			}
@@ -987,7 +1077,7 @@ void Simulation::exchangeParticles() {
 		}*/
 		if (verbosity > 2) printf("send particles left rank = %d\n", rank);
 		sendLeftReceiveRightParticles(escapedParticlesLeft, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank);
+		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank, speed_of_light_normalized);
 		MPI_Barrier(cartComm);
 		/*for(int i = 0; i < escapedParticlesRight.size(); ++i) {
 			Particle* particle = escapedParticlesRight[i];
@@ -995,7 +1085,7 @@ void Simulation::exchangeParticles() {
 		}*/
 		if (verbosity > 2) printf("send particles right rank = %d\n", rank);
 		sendRightReceiveLeftParticles(escapedParticlesRight, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank);
+		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank, speed_of_light_normalized);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
@@ -1017,7 +1107,7 @@ void Simulation::exchangeParticles() {
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 		} else {
-			theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight *
+			theoreticalEnergy += particle->energy() * particle->weight *
 				sqr(scaleFactor / plasma_period);
 			theoreticalMomentum += particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 			particle->escaped = false;
@@ -1061,7 +1151,7 @@ void Simulation::exchangeParticles() {
 		}*/
 		if (verbosity > 2) printf("send particles front rank = %d\n", rank);
 		sendFrontReceiveBackParticles(escapedParticlesFront, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
+		                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank, speed_of_light_normalized);
 		MPI_Barrier(cartComm);
 		/*for(int i = 0; i < escapedParticlesBack.size(); ++i) {
 			Particle* particle = escapedParticlesBack[i];
@@ -1069,7 +1159,7 @@ void Simulation::exchangeParticles() {
 		}*/
 		if (verbosity > 2) printf("send particles back rank = %d\n", rank);
 		sendBackReceiveFrontParticles(escapedParticlesBack, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank);
+		                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank, speed_of_light_normalized);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
@@ -1083,7 +1173,7 @@ void Simulation::exchangeParticles() {
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 		} else {
-			theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight *
+			theoreticalEnergy += particle->energy() * particle->weight *
 				sqr(scaleFactor / plasma_period);
 			theoreticalMomentum += particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 			particle->escaped = false;
@@ -1128,7 +1218,7 @@ void Simulation::exchangeParticles() {
 		}*/
 		if (verbosity > 2) printf("send particles bottom rank = %d\n", rank);
 		sendBottomReceiveTopParticles(escapedParticlesBottom, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
+		                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank, speed_of_light_normalized);
 		MPI_Barrier(cartComm);
 		/*for(int i = 0; i < escapedParticlesTop.size(); ++i) {
 			Particle* particle = escapedParticlesTop[i];
@@ -1136,12 +1226,12 @@ void Simulation::exchangeParticles() {
 		}*/
 		if (verbosity > 2) printf("send particles top rank = %d\n", rank);
 		sendTopReceiveBottomParticles(escapedParticlesTop, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank);
+		                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank, speed_of_light_normalized);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
 		Particle* particle = tempParticles[pcount];
-		theoreticalEnergy += particle->energy(speed_of_light_normalized) * particle->weight *
+		theoreticalEnergy += particle->energy() * particle->weight *
 			sqr(scaleFactor / plasma_period);
 		theoreticalMomentum += particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 		particle->escaped = false;

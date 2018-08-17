@@ -667,7 +667,7 @@ void Simulation::updateCorrelationMapCellX(Particle& particle) {
 		printf("particle.coordinates.x < 0 %g particle number = %d\n", particle.coordinates.x, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, x[0] = %g x[xnumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.x, xgrid[0], xgrid[xnumberAdded]);
-		Vector3d velocity = particle.getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle.getVelocity();
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
@@ -678,7 +678,7 @@ void Simulation::updateCorrelationMapCellX(Particle& particle) {
 		       particle.coordinates.x, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, x[0] = %g x[xnumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.x, xgrid[0], xgrid[xnumberAdded]);
-		Vector3d velocity = particle.getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle.getVelocity();
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
@@ -717,7 +717,7 @@ void Simulation::updateCorrelationMapCellY(Particle& particle) {
 		printf("particle.coordinates.y < 0 %g particle number = %d\n", particle.coordinates.y, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, y[0] = %g y[ynumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.x, ygrid[0], ygrid[ynumberAdded]);
-		Vector3d velocity = particle.getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle.getVelocity();
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
@@ -728,7 +728,7 @@ void Simulation::updateCorrelationMapCellY(Particle& particle) {
 		       particle.coordinates.y, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, y[0] = %g y[ynumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.y, ygrid[0], ygrid[ynumberAdded]);
-		Vector3d velocity = particle.getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle.getVelocity();
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
@@ -767,7 +767,7 @@ void Simulation::updateCorrelationMapCellZ(Particle& particle) {
 		printf("particle.coordinates.z < 0 %g particle number = %d\n", particle.coordinates.z, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, z[0] = %g z[znumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.x, zgrid[0], zgrid[znumberAdded]);
-		Vector3d velocity = particle.getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle.getVelocity();
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
@@ -778,7 +778,7 @@ void Simulation::updateCorrelationMapCellZ(Particle& particle) {
 		       particle.coordinates.z, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, z[0] = %g z[znumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.x, zgrid[0], zgrid[znumberAdded]);
-		Vector3d velocity = particle.getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle.getVelocity();
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
@@ -840,7 +840,7 @@ void Simulation::updateCorrelationMapNodeX(Particle& particle) {
 		printf("particle.coordinates.x < 0 %g particle number = %d\n", particle.coordinates.x, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, x[0] = %g x[xnumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.x, xgrid[0], xgrid[xnumberAdded]);
-		Vector3d velocity = particle.getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle.getVelocity();
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
@@ -851,7 +851,7 @@ void Simulation::updateCorrelationMapNodeX(Particle& particle) {
 		       particle.coordinates.x, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, x[0] = %g x[xnumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.x, xgrid[0], xgrid[xnumberAdded]);
-		Vector3d velocity = particle.getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle.getVelocity();
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
@@ -890,7 +890,7 @@ void Simulation::updateCorrelationMapNodeY(Particle& particle) {
 		printf("particle.coordinates.y < 0 %g particle number = %d\n", particle.coordinates.y, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, y[0] = %g y[ynumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.x, ygrid[0], ygrid[ynumberAdded]);
-		Vector3d velocity = particle.getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle.getVelocity();
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
@@ -901,7 +901,7 @@ void Simulation::updateCorrelationMapNodeY(Particle& particle) {
 		       particle.coordinates.y, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, y[0] = %g y[ynumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.y, ygrid[0], ygrid[ynumberAdded]);
-		Vector3d velocity = particle.getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle.getVelocity();
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
@@ -940,7 +940,7 @@ void Simulation::updateCorrelationMapNodeZ(Particle& particle) {
 		printf("particle.coordinates.z < 0 %g particle number = %d\n", particle.coordinates.z, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, z[0] = %g z[znumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.x, zgrid[0], zgrid[znumberAdded]);
-		Vector3d velocity = particle.getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle.getVelocity();
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
@@ -951,7 +951,7 @@ void Simulation::updateCorrelationMapNodeZ(Particle& particle) {
 		       particle.coordinates.z, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, z[0] = %g z[znumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.x, zgrid[0], zgrid[znumberAdded]);
-		Vector3d velocity = particle.getVelocity(speed_of_light_normalized);
+		Vector3d velocity = particle.getVelocity();
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
