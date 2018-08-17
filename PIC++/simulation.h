@@ -896,6 +896,8 @@ public:
 	void evaluateJuttnerFunction(ParticleTypeContainer& typeContainer);
     void evaluateParticleTypesAlpha();
 	void createFiles();
+	void tristanEvaluateBhalfStep();
+	void tristanEvaluateE();
 	void simulate();
 	void output();
 	void outputTrajectories();

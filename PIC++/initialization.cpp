@@ -235,10 +235,10 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	debugMode = false;
 	newlyStarted = true;
 	preserveChargeGlobal = true;
-	solverType = IMPLICIT; //не явный
+	//solverType = IMPLICIT; //не явный
 	//solverType = IMPLICIT_EC; //не явный с сохранением энергии
 	//solverType = EXPLICIT; //явный
-	//solverType = BUNEMAN;
+	solverType = BUNEMAN;
 	boundaryConditionTypeX = PERIODIC;
 	boundaryConditionTypeY = PERIODIC;
 	boundaryConditionTypeZ = PERIODIC;

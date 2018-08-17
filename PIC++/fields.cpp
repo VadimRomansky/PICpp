@@ -18,6 +18,96 @@
 #include "output.h"
 #include "paths.h"
 
+void Simulation::tristanEvaluateBhalfStep() {
+	double procTime = 0;
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
+	int minI = 1 + additionalBinNumber;
+	int maxI = xnumberAdded - 1 - additionalBinNumber;
+	int minJ = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - 1 - additionalBinNumber;
+	int minK = 1 + additionalBinNumber;
+	int maxK = znumberAdded - 1 - additionalBinNumber;
+	for (int i = minI; i <= maxI; ++i) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
+				bunemanBx[i][j][k] = bunemanBx[i][j][k] - speed_of_light_normalized * evaluateBunemanRotEx(i, j, k) * deltaT/2;
+			}
+		}
+	}
+	for (int i = minI; i < maxI; ++i) {
+		for (int j = minJ; j <= maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
+				bunemanBy[i][j][k] = bunemanBy[i][j][k] - speed_of_light_normalized * evaluateBunemanRotEy(i, j, k) * deltaT/2;
+			}
+		}
+	}
+	for (int i = minI; i < maxI; ++i) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k <= maxK; ++k) {
+				bunemanBz[i][j][k] = bunemanBz[i][j][k] - speed_of_light_normalized * evaluateBunemanRotEz(i, j, k) * deltaT/2;
+			}
+		}
+	}
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("evaluating magnetic field time = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}
+}
+
+void Simulation::tristanEvaluateE() {
+	double procTime = 0;
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
+	int minI = 1 + additionalBinNumber;
+	int maxI = xnumberAdded - 1 - additionalBinNumber;
+	int minJ = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - 1 - additionalBinNumber;
+	int minK = 1 + additionalBinNumber;
+	int maxK = znumberAdded - 1 - additionalBinNumber;
+	for (int i = minI; i < maxI; ++i) {
+		for (int j = minJ; j <= maxJ; ++j) {
+			for (int k = minK; k <= maxK; ++k) {
+				bunemanEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBx(i, j, k) - 4 * pi * bunemanJx[i][j][k]) * deltaT;
+			}
+		}
+	}
+	for (int i = minI; i <= maxI; ++i) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k <= maxK; ++k) {
+				bunemanEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBy(i, j, k) - 4 * pi *
+					bunemanJy[i][j][k]) * deltaT;
+				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
+					bunemanEy[i][j][k] = 0;
+				}
+				if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC && i >= maxI) {
+					bunemanEy[i][j][k] = E0.y;
+				}
+			}
+		}
+	}
+	for (int i = minI; i <= maxI; ++i) {
+		for (int j = minJ; j <= maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
+				bunemanEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBz(i, j, k) - 4 * pi *
+					bunemanJz[i][j][k]) * deltaT;
+				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
+					bunemanEz[i][j][k] = 0;
+				}
+				if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC && i >= maxI) {
+					bunemanEz[i][j][k] = E0.z;
+				}
+			}
+		}
+	}
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("evaluating magnetic field time = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}
+}
+
 void Simulation::evaluateElectricField() {
 	double procTime = 0;
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {

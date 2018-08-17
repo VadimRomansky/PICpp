@@ -143,12 +143,12 @@ void Simulation::simulate() {
 		if(solverType == BUNEMAN) {
 			tristanEvaluateBhalfStep();
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
-			exchangeBunemanBfield(bunemanNewBx, bunemanNewBy, bunemanNewBz);
 			moveParticles();
 			tristanEvaluateBhalfStep();
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
-			exchangeBunemanBfield(bunemanNewBx, bunemanNewBy, bunemanNewBz);
+			trastanUpdateFlux();
 			tristanEvaluateE();
+			exchangeBunemanEfield(bunemanEx, bunemanBy, bunemanBz);
 		} else {
 			evaluateParticlesRotationTensor();
 
