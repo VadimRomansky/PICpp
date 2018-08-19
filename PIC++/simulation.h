@@ -21,6 +21,8 @@ enum InputType {CGS, Theoretical};
 
 enum BoundaryConditionType {PERIODIC, SUPER_CONDUCTOR_LEFT, FREE_BOTH, FREE_MIRROR_BOTH};
 
+enum DimensionType {ONE_D, TWO_D_XY, TWO_D_XZ, THREE_D};
+
 class Matrix3d;
 class Vector3d;
 class Particle;
@@ -160,6 +162,7 @@ public:
 	BoundaryConditionType boundaryConditionTypeX;
 	BoundaryConditionType boundaryConditionTypeY;
 	BoundaryConditionType boundaryConditionTypeZ;
+	DimensionType dimensionType;
 	int maxwellEquationMatrixSize;
 
 	double particleEnergy;
@@ -898,6 +901,8 @@ public:
 	void createFiles();
 	void tristanEvaluateBhalfStep();
 	void tristanEvaluateE();
+	void addParticleFluxZigzag(Particle* particle);
+	void tristanUpdateFlux();
 	void simulate();
 	void output();
 	void outputTrajectories();

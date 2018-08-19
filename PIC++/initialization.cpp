@@ -69,6 +69,18 @@ Simulation::Simulation() {
 }
 
 void Simulation::setSpaceForProc() {
+	dimensionType = DimensionType::THREE_D;
+	if(znumberGeneral == 1) {
+		if(ynumberGeneral == 1) {
+			dimensionType = DimensionType::ONE_D;
+		} else {
+			dimensionType = DimensionType::TWO_D_XY;
+		}
+	} else {
+		if(ynumberGeneral == 1) {
+			dimensionType = DimensionType::TWO_D_XZ;
+		}
+	}
 	int tempXnumber = ((xnumberGeneral) / cartDim[0]);
 	int modXnumber = (xnumberGeneral) % cartDim[0];
 

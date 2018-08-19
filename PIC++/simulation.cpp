@@ -146,7 +146,7 @@ void Simulation::simulate() {
 			moveParticles();
 			tristanEvaluateBhalfStep();
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
-			trastanUpdateFlux();
+			tristanUpdateFlux();
 			tristanEvaluateE();
 			exchangeBunemanEfield(bunemanEx, bunemanBy, bunemanBz);
 		} else {

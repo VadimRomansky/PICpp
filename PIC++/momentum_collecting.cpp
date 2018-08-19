@@ -17,6 +17,166 @@
 #include "simulation.h"
 #include "paths.h"
 
+void Simulation::tristanUpdateFlux() {
+	double procTime = 0;
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
+	//MPI_Barrier(cartComm);
+	if ((rank == 0) && (verbosity > 0)) printf("updating tristan flux\n");
+	if ((rank == 0) && (verbosity > 0)) printLog("updating tristan flux\n");
+	int particlePartsCount = 0;
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				bunemanJx[i][j][k] = 0;
+			}
+		}
+	}
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded + 1; ++k) {
+				bunemanJy[i][j][k] = 0;
+			}
+		}
+	}
+	for (int i = 0; i < xnumberAdded + 1; ++i) {
+		for (int j = 0; j < ynumberAdded + 1; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				bunemanJz[i][j][k] = 0;
+			}
+		}
+	}
+
+	for (int pcount = 0; pcount < particles.size(); ++pcount) {
+		Particle* particle = particles[pcount];
+		addParticleFluxZigzag(particle);
+	}
+
+
+	exchangeBunemanFlux();
+
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("evaluating electric flux time = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}
+}
+
+void Simulation::addParticleFluxZigzag(Particle* particle) {
+	Vector3d velocity = particle->getVelocity();
+	Vector3d localCoordinates = particle->coordinates - Vector3d(xgrid[0], ygrid[0], zgrid[0]);
+	Vector3d prevLocalCoordinates = localCoordinates - velocity*deltaT;
+	double fullCharge = particle->charge*particle->weight;
+	const int i = floor(localCoordinates.x/deltaX);
+	const int j = floor(localCoordinates.y/deltaY);
+	const int k = floor(localCoordinates.z/deltaZ);
+	const int previ = floor(prevLocalCoordinates.x/deltaX);
+	const int prevj = floor(prevLocalCoordinates.y/deltaY);
+	const int prevk = floor(prevLocalCoordinates.z/deltaZ);
+
+	double xr = (localCoordinates.x + prevLocalCoordinates.x)/2;
+	double yr = (localCoordinates.y + prevLocalCoordinates.y)/2;
+	double zr = (localCoordinates.z + prevLocalCoordinates.z)/2;
+
+	if(dimensionType == THREE_D) {
+		if(i != previ) {
+			xr = max2(xgrid[previ], xgrid[i]);
+		}
+		if(j != prevj) {
+			yr = max2(ygrid[prevj], ygrid[j]);
+		}
+		if(k != prevk) {
+			zr = max2(zgrid[prevk], zgrid[k]);
+		}
+
+		double Fx1 = fullCharge*(xr - prevLocalCoordinates.x)/deltaT;
+		double Fy1 = fullCharge*(yr - prevLocalCoordinates.y)/deltaT;
+		double Fz1 = fullCharge*(zr - prevLocalCoordinates.z)/deltaT;
+		double Fx2 = fullCharge*velocity.x - Fx1;
+		double Fy2 = fullCharge*velocity.y - Fy1;
+		double Fz2 = fullCharge*velocity.z - Fz1;
+
+		double Wx1 = (prevLocalCoordinates.x + xr)/(2*deltaX) - previ;
+		double Wy1 = (prevLocalCoordinates.y + yr)/(2*deltaY) - prevj;
+		double Wz1 = (prevLocalCoordinates.z + zr)/(2*deltaZ) - prevk;
+		double Wx2 = (localCoordinates.x + xr)/(2*deltaX) - i;
+		double Wy2 = (localCoordinates.y + yr)/(2*deltaY) - j;
+		double Wz2 = (localCoordinates.z + zr)/(2*deltaZ) - k;
+
+		bunemanJx[previ][prevj][prevk] += Fx1*(1.0 - Wy1)*(1.0 - Wz1)/cellVolume;
+		bunemanJx[previ][prevj+1][prevk] += Fx1*Wy1*(1 - Wz1)/cellVolume;
+		bunemanJx[previ][prevj][prevk+1] += Fx1*(1.0 - Wy1)*Wz1/cellVolume;
+		bunemanJx[previ][prevj+1][prevk+1] += Fx1*Wy1*Wz1/cellVolume;
+		bunemanJy[previ][prevj][prevk] += Fy1*(1.0 - Wx1)*(1.0 - Wz1)/cellVolume;
+		bunemanJy[previ+1][prevj][prevk] += Fy1*Wx1*(1.0 - Wz1)/cellVolume;
+		bunemanJy[previ][prevj][prevk+1] += Fy1*(1.0 - Wx1)*Wz1/cellVolume;
+		bunemanJy[previ+1][prevj][prevk+1] += Fy1*Wx1*Wz1/cellVolume;
+		bunemanJz[previ][prevj][prevk] = Fz1*(1.0 - Wx1)*(1.0 - Wy1)/cellVolume;
+		bunemanJz[previ][prevj+1][prevk] = Fz1*(1.0 - Wx1)*Wy1/cellVolume;
+		bunemanJz[previ+1][prevj][prevk] = Fz1*Wx1*(1.0 - Wy1)/cellVolume;
+		bunemanJz[previ+1][prevj+1][prevk] = Fz1*Wx1*Wy1/cellVolume;
+
+		bunemanJx[i][j][k] += Fx2*(1.0 - Wy2)*(1.0 - Wz2)/cellVolume;
+		bunemanJx[i][j+1][k] += Fx2*Wy2*(1.0 - Wz2)/cellVolume;
+		bunemanJx[i][j][k+1] += Fx2*(1.0 - Wy2)*Wz2/cellVolume;
+		bunemanJx[i][j+1][k+1] += Fx2*Wy2*Wz2/cellVolume;
+		bunemanJy[i][j][k] += Fy2*(1.0 - Wx2)*(1.0 - Wz2)/cellVolume;
+		bunemanJy[i+1][j][k] += Fy2*Wx2*(1.0 - Wz2)/cellVolume;
+		bunemanJy[i][j][k+1] += Fy2*(1.0 - Wx2)*Wz2/cellVolume;
+		bunemanJy[i+1][j][k+1] += Fy2*Wx2*Wz2/cellVolume;
+		bunemanJz[i][j][k] = Fz2*(1.0 - Wx2)*(1.0 - Wy2)/cellVolume;
+		bunemanJz[i][j+1][k] = Fz2*(1.0 - Wx2)*Wy2/cellVolume;
+		bunemanJz[i+1][j][k] = Fz2*Wx2*(1.0 - Wy2)/cellVolume;
+		bunemanJz[i+1][j+1][k] = Fz2*Wx2*Wy2/cellVolume;
+		
+	} else if(dimensionType == TWO_D_XY) {
+	
+		if(i != previ) {
+			xr = max2(xgrid[previ], xgrid[i]);
+		}
+		if(j != prevj) {
+			yr = max2(ygrid[prevj], ygrid[j]);
+		}
+
+		double Fx1 = fullCharge*(xr - prevLocalCoordinates.x)/deltaT;
+		double Fy1 = fullCharge*(yr - prevLocalCoordinates.y)/deltaT;
+		double Fz1 = fullCharge*(zr - prevLocalCoordinates.z)/deltaT;
+		double Fx2 = fullCharge*velocity.x - Fx1;
+		double Fy2 = fullCharge*velocity.y - Fy1;
+		double Fz2 = fullCharge*velocity.z - Fz1;
+
+		double Wx1 = (prevLocalCoordinates.x + xr)/(2*deltaX) - previ;
+		double Wy1 = (prevLocalCoordinates.y + yr)/(2*deltaY) - prevj;
+		double Wx2 = (localCoordinates.x + xr)/(2*deltaX) - i;
+		double Wy2 = (localCoordinates.y + yr)/(2*deltaY) - j;
+
+		bunemanJx[previ][prevj][0] += Fx1*(1.0 - Wy1)/cellVolume;
+		bunemanJx[previ][prevj+1][0] += Fx1*Wy1/cellVolume;
+		bunemanJy[previ][prevj][0] += Fy1*(1.0 - Wx1)/cellVolume;
+		bunemanJy[previ+1][prevj][0] += Fy1*Wx1/cellVolume;
+
+		bunemanJz[previ][prevj][0] = Fz1*(1 - Wx1)*(1 - Wy1)/cellVolume;
+		bunemanJz[previ][prevj+1][0] = Fz1*(1 - Wx1)*Wy1/cellVolume;
+		bunemanJz[previ+1][prevj][0] = Fz1*Wx1*(1 - Wy1)/cellVolume;
+		bunemanJz[previ+1][prevj+1][0] = Fz1*Wx1*Wy1/cellVolume;
+
+		bunemanJx[i][j][0] += Fx2*(1.0 - Wy2)/cellVolume;
+		bunemanJx[i][j+1][0] += Fx2*Wy2/cellVolume;
+		bunemanJy[i][j][0] += Fy2*(1.0 - Wx2)/cellVolume;
+		bunemanJy[i+1][j][0] += Fy2*Wx2/cellVolume;
+
+		bunemanJz[i][j][0] = Fz2*(1.0 - Wx2)*(1.0 - Wy2)/cellVolume;
+		bunemanJz[i][j+1][0] = Fz2*(1.0 - Wx2)*Wy2/cellVolume;
+		bunemanJz[i+1][j][0] = Fz2*Wx2*(1.0 - Wy2)/cellVolume;
+		bunemanJz[i+1][j+1][0] = Fz2*Wx2*Wy2/cellVolume;
+		
+	} else if(dimensionType == TWO_D_XZ) {
+		
+	} else if(dimensionType == ONE_D) {
+		
+	}
+}
+
 void Simulation::updateElectroMagneticParameters() {
 	double procTime = 0;
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
