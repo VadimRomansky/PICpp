@@ -17,7 +17,6 @@
 #include "simulation.h"
 #include "paths.h"
 
-
 void Simulation::simulate() {
 	MPI_Barrier(cartComm);
 	double initializationTime = 0;
@@ -147,6 +146,18 @@ void Simulation::simulate() {
 			tristanEvaluateBhalfStep();
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
 			tristanUpdateFlux();
+			////////////////////////////////
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock();
+			}
+			for(int n = 0; n < smoothingCount; ++n){
+				smoothBunemanEfieldGeneral(bunemanJx, bunemanJy, bunemanJz);
+			}
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock() - procTime;
+				printf("smoothing flux = %g sec\n", procTime / CLOCKS_PER_SEC);
+			}
+			//////////////////////////
 			tristanEvaluateE();
 			exchangeBunemanEfield(bunemanEx, bunemanBy, bunemanBz);
 		} else {
@@ -167,31 +178,22 @@ void Simulation::simulate() {
 				printf("smoothing chatge density and flux = %g sec\n", procTime / CLOCKS_PER_SEC);
 			}
 
-			//evaluateElectricField();
+			evaluateElectricField();
 			exchangeEfield();
-			if (solverType == BUNEMAN) {
-				exchangeBunemanEfield(bunemanEx, bunemanEy, bunemanEz);
-				exchangeBunemanEfield(bunemanNewEx, bunemanNewEy, bunemanNewEz);
-			}
 
-			if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
-				/*cleanupDivergence(tempEfield, chargeDensityHat);
-				for (int i = 0; i < xnumberAdded + 1; ++i) {
-					for (int j = 0; j < ynumberAdded + 1; ++j) {
-						for (int k = 0; k < znumberAdded + 1; ++k) {
-							newEfield[i][j][k] = (tempEfield[i][j][k] - Efield[i][j][k] * (1 - theta)) / theta;
-						}
+			/*cleanupDivergence(tempEfield, chargeDensityHat);
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					for (int k = 0; k < znumberAdded + 1; ++k) {
+						newEfield[i][j][k] = (tempEfield[i][j][k] - Efield[i][j][k] * (1 - theta)) / theta;
 					}
 				}
-				exchangeEfield();*/
-			} else {
 			}
+			exchangeEfield();*/
 
-			//evaluateMagneticField();
-			if (solverType == BUNEMAN) {
-				exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
-				exchangeBunemanBfield(bunemanNewBx, bunemanNewBy, bunemanNewBz);
-			}
+
+			evaluateMagneticField();
+		
 			procTime = 0;
 			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 				procTime = clock();
@@ -238,34 +240,7 @@ void Simulation::simulate() {
 			types[i].injectionLength += fabs(V0.x * deltaT);
 		}
 		if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX == FREE_BOTH) {
-			for (int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
-				for (int cartK = 0; cartK < cartDim[2]; ++cartK) {
-					if (cartJ == cartCoord[1] && cartK == cartCoord[2] && cartCoord[0] == cartDim[0] - 1) {
-						for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
-							if (types[typeCounter].particlesPerBin > 0) {
-								if (types[typeCounter].particlesPerBin * types[typeCounter].injectionLength >= deltaX) {
-									int newParticlesCount = types[typeCounter].injectionLength * types[typeCounter].particlesPerBin / deltaX;
-									for (int i = newParticlesCount; i > 0; --i) {
-										types[typeCounter].injectionLength -= deltaX / types[typeCounter].particlesPerBin;
-										injectNewParticles(1, types[typeCounter], types[typeCounter].injectionLength);
-									}
-								}
-							}
-						}
-					}
-					int tempRank;
-					int tempCartCoord[3];
-					tempCartCoord[0] = cartDim[0] - 1;
-					tempCartCoord[1] = cartJ;
-					tempCartCoord[2] = cartK;
-					MPI_Cart_rank(cartComm, tempCartCoord, &tempRank);
-					MPI_Barrier(cartComm);
-					int tempParticleNumber[1];
-					tempParticleNumber[0] = particlesNumber;
-					MPI_Bcast(tempParticleNumber, 1, MPI_INT, tempRank, cartComm);
-					particlesNumber = tempParticleNumber[0];
-				}
-			}
+			injectNewParticles();
 		}
 		if (preserveChargeGlobal && (boundaryConditionTypeX != PERIODIC)) {
 			addToPreserveChargeGlobal();
@@ -276,157 +251,93 @@ void Simulation::simulate() {
 			printf("injecting and preserving time = %g sec\n", procTime / CLOCKS_PER_SEC);
 		}
 
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock();
-		}
-		updateParticleCorrelationMaps();
-		//MPI_Barrier(cartComm);
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock() - procTime;
-			printf("updating correlation maps = %g sec\n", procTime / CLOCKS_PER_SEC);
-		}
+		if(solverType != BUNEMAN){
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock();
+			}
+			updateParticleCorrelationMaps();
+			//MPI_Barrier(cartComm);
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock() - procTime;
+				printf("updating correlation maps = %g sec\n", procTime / CLOCKS_PER_SEC);
+			}
 
-		updateDensityParameters();
+			updateDensityParameters();
 
-		for(int n = 0; n < smoothingCount; ++n){
-			smoothChargeDensity();
-		}
+			/*for(int n = 0; n < smoothingCount; ++n){
+				smoothChargeDensity();
+			}*/
 
-		if ((rank == 0) && (verbosity > 0)) {
-			printf("finish update density parameters\n");
-		}
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock();
-		}
-		exchangeGeneralEfield(newEfield);
-		if ((rank == 0) && (verbosity > 0)) {
-			printf("finish exchange new efield\n");
-		}
-		//MPI_Barrier(cartComm);
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock() - procTime;
-			printf("exchanging fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
-		}
+			if ((rank == 0) && (verbosity > 0)) {
+				printf("finish update density parameters\n");
+			}
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock();
+			}
+			exchangeGeneralEfield(newEfield);
+			if ((rank == 0) && (verbosity > 0)) {
+				printf("finish exchange new efield\n");
+			}
+			//MPI_Barrier(cartComm);
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock() - procTime;
+				printf("exchanging fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
+			}
 
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock();
-		}
-		if (solverType == BUNEMAN) {
-			//smoothBunemanEfieldGeneral(bunemanNewEx, bunemanNewEy, bunemanNewEz);
-			//smoothBunemanBfieldGeneral(bunemanNewBx, bunemanNewBy, bunemanNewBz);
-		} else {
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock();
+			}
+
 			/*for(int n = 0; n < smoothingCount; ++n){
 				smoothNewEfield();
 				smoothNewBfield();
 			}*/
-		}
-		//MPI_Barrier(cartComm);
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock() - procTime;
-			printf("smoothing fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
-		}
-		if (currentIteration % divergenceCleanUpParameter == 0) {
-			if (solverType == BUNEMAN) {
-				//cleanupDivergenceBuneman();
-				//cleanupDivergenceBunemanMagnetic();
-			} else {
+
+			//MPI_Barrier(cartComm);
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock() - procTime;
+				printf("smoothing fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
+			}	
+			if (currentIteration % divergenceCleanUpParameter == 0) {
 				//cleanupDivergence(newEfield, chargeDensity);
 				//cleanupDivergenceMagnetic();
-			}
-		}
 
-		/*if (solverType == BUNEMAN) {
-			//smoothBunemanEfieldGeneral(bunemanNewEx, bunemanNewEy, bunemanNewEz);
-			//smoothBunemanBfieldGeneral(bunemanNewBx, bunemanNewBy, bunemanNewBz);
-		} else {
+			}
+
+			/*
 			for(int n = 0; n < smoothingCount; ++n){
 				smoothNewEfield();
 				smoothNewBfield();
 			}
-		}*/
+			*/
 
-		/*if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock();
-		}
-		updateMaxEderivativePoint();
-		MPI_Barrier(cartComm);
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock() - procTime;
-			printf("updating max e derivative point = %g sec\n", procTime / CLOCKS_PER_SEC);
-		}
-
-		MPI_Barrier(cartComm);
-		if ((rank == 0) && (verbosity > 0)) {
-			printf("finish updating derEx point\n");
-		}*/
-
-		/*if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock();
-		}
-		updateMaxConcentrationDerivativePoint();
-		MPI_Barrier(cartComm);
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock() - procTime;
-			printf("updating max concentration derivative point = %g sec\n", procTime / CLOCKS_PER_SEC);
-		}
-
-		MPI_Barrier(cartComm);
-		if ((rank == 0) && (verbosity > 0)) {
-			printf("finish updating shock wave point\n");
-		}*/
-
-		if (currentIteration % filteringParameter == 0) {
-			if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
-				//updateMaxEderivativePoint();
+			//updateFields();
+			if ((rank == 0) && (verbosity > 0)) {
+				printf("finish update fields\n");
 			}
-			//if(currentIteration > 150){
-			//filterFields(10);
-			//}
-			//filterFieldsLocal(5);
+
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock();
+			}
+			exchangeGeneralEfield(newEfield);
+			exchangeGeneralEfield(Efield);
+			exchangeGeneralBfield(Bfield);
+
+			if ((rank == 0) && (verbosity > 0)) {
+				printf("finish exchange fields\n");
+			}
+
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock() - procTime;
+				printf("exchanging fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
+			}
 		}
 
-		//updateFields();
-		if ((rank == 0) && (verbosity > 0)) {
-			printf("finish update fields\n");
-		}
-
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock();
-		}
-		exchangeGeneralEfield(newEfield);
-		exchangeGeneralEfield(Efield);
-		exchangeGeneralBfield(Bfield);
-		if (solverType == BUNEMAN) {
-			exchangeBunemanEfield(bunemanEx, bunemanEy, bunemanEz);
-			exchangeBunemanEfield(bunemanNewEx, bunemanNewEy, bunemanNewEz);
-			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
-			exchangeBunemanBfield(bunemanNewBx, bunemanNewBy, bunemanNewBz);
-		}
-
-		/*if(solverType == BUNEMAN){
-			smoothBunemanEfieldGeneral(bunemanEx, bunemanEy, bunemanEz);
-			smoothBunemanBfieldGeneral(bunemanBx, bunemanBy, bunemanBz);
-		}*/
-		if ((rank == 0) && (verbosity > 0)) {
-			printf("finish exchange fields\n");
-		}
-		//MPI_Barrier(cartComm);
-		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-			procTime = clock() - procTime;
-			printf("exchanging fields time = %g sec\n", procTime / CLOCKS_PER_SEC);
-		}
-
-		//smoothNewEfield();
 
 
 		if ((currentIteration + 1) % writeGeneralParameter == 0) {
 			updateParameters();
 			//updateAnisotropy();
-		}
-
-		if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
-			//todo
-			//updateShockWaveX();
 		}
 
 		removeEscapedParticles();

@@ -97,10 +97,16 @@ void Simulation::setSpaceForProc() {
 
 	if (cartCoord[1] >= cartDim[1] - modYnumber) {
 		ynumber = tempYnumber + 1;
-		firstAbsoluteYindex = ynumberGeneral - (ynumber) * (cartDim[1] - cartCoord[1]) - additionalBinNumber - 1;
+		firstAbsoluteYindex = ynumberGeneral - (ynumber) * (cartDim[1] - cartCoord[1]);
+		if(ynumberGeneral > 1){
+			firstAbsoluteYindex = firstAbsoluteYindex - additionalBinNumber - 1;
+		}
 	} else {
 		ynumber = tempYnumber;
-		firstAbsoluteYindex = (ynumber) * cartCoord[1] - additionalBinNumber - 1;
+		firstAbsoluteYindex = (ynumber) * cartCoord[1];
+		if(ynumberGeneral > 1){
+			firstAbsoluteYindex = firstAbsoluteYindex - additionalBinNumber - 1;
+		}
 	}
 
 	int tempZnumber = ((znumberGeneral) / cartDim[2]);
@@ -108,10 +114,16 @@ void Simulation::setSpaceForProc() {
 
 	if (cartCoord[2] >= cartDim[2] - modZnumber) {
 		znumber = tempZnumber + 1;
-		firstAbsoluteZindex = znumberGeneral - (znumber) * (cartDim[2] - cartCoord[2]) - additionalBinNumber - 1;
+		firstAbsoluteZindex	 = znumberGeneral - (znumber) * (cartDim[2] - cartCoord[2]);
+		if(znumberGeneral > 1){
+			firstAbsoluteZindex = firstAbsoluteZindex - additionalBinNumber - 1;
+		}
 	} else {
 		znumber = tempZnumber;
-		firstAbsoluteZindex = (znumber) * cartCoord[2] - additionalBinNumber - 1;
+		firstAbsoluteZindex = (znumber) * cartCoord[2];
+		if(znumberGeneral > 1){
+			firstAbsoluteZindex = firstAbsoluteZindex - additionalBinNumber - 1;
+		}
 	}
 
 	//todo boundary conditiontype
@@ -145,8 +157,12 @@ void Simulation::setSpaceForProc() {
 	}*/
 	//printf("xnumber = %d\n", xnumber);
 	xnumberAdded = xnumber + 2 + 2 * additionalBinNumber;
-	ynumberAdded = ynumber + 2 + 2 * additionalBinNumber;
-	znumberAdded = znumber + 2 + 2 * additionalBinNumber;
+	if(ynumberGeneral != 1){
+		ynumberAdded = ynumber + 2 + 2 * additionalBinNumber;
+	}
+	if(znumberGeneral != 1){
+		znumberAdded = znumber + 2 + 2 * additionalBinNumber;
+	}
 
 	xsize = xnumberAdded * xsizeGeneral / xnumberGeneral;
 	ysize = ynumberAdded * ysizeGeneral / ynumberGeneral;

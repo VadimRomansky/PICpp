@@ -403,8 +403,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
 			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
-				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 1
-				) {
+				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 1) {
 					tempBunemanExParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter);
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -1; tempJ <= 1; ++tempJ) {

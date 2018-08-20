@@ -993,6 +993,37 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(const double& beta, Vector3d& v
 	return result;
 }
 
+void Simulation::injectNewParticles() {
+	for (int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
+		for (int cartK = 0; cartK < cartDim[2]; ++cartK) {
+			if (cartJ == cartCoord[1] && cartK == cartCoord[2] && cartCoord[0] == cartDim[0] - 1) {
+				for (int typeCounter = 0; typeCounter < typesNumber; ++typeCounter) {
+					if (types[typeCounter].particlesPerBin > 0) {
+						if (types[typeCounter].particlesPerBin * types[typeCounter].injectionLength >= deltaX) {
+							int newParticlesCount = types[typeCounter].injectionLength * types[typeCounter].particlesPerBin / deltaX;
+							for (int i = newParticlesCount; i > 0; --i) {
+								types[typeCounter].injectionLength -= deltaX / types[typeCounter].particlesPerBin;
+								injectNewParticles(1, types[typeCounter], types[typeCounter].injectionLength);
+							}
+						}
+					}
+				}
+			}
+			int tempRank;
+			int tempCartCoord[3];
+			tempCartCoord[0] = cartDim[0] - 1;
+			tempCartCoord[1] = cartJ;
+			tempCartCoord[2] = cartK;
+			MPI_Cart_rank(cartComm, tempCartCoord, &tempRank);
+			MPI_Barrier(cartComm);
+			int tempParticleNumber[1];
+			tempParticleNumber[0] = particlesNumber;
+			MPI_Bcast(tempParticleNumber, 1, MPI_INT, tempRank, cartComm);
+			particlesNumber = tempParticleNumber[0];
+		}
+	}
+}
+
 void Simulation::injectNewParticles(int count, ParticleTypeContainer& typeContainer, const double& length) {
 	if ((rank == 0) && (verbosity > 0)) printf("inject new particles\n");
 

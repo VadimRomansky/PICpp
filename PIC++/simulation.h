@@ -903,6 +903,7 @@ public:
 	void tristanEvaluateE();
 	void addParticleFluxZigzag(Particle* particle);
 	void tristanUpdateFlux();
+	void injectNewParticles();
 	void simulate();
 	void output();
 	void outputTrajectories();
