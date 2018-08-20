@@ -1,3 +1,6 @@
+//#include <crtdbg.h>
+
+//#include "memory_debug.h"
 #include "creating_arrays.h"
 #include "vector3d.h"
 

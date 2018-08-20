@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 //#include <crtdbg.h>
+
 #include "mpi.h"
 #include <omp.h>
 //#include "memory_debug.h"
@@ -15,7 +16,7 @@
 #include "paths.h"
 
 int main(int argc, char** argv) {
-	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
 	int size;
 	int rank;
 	MPI_Init(&argc, &argv);

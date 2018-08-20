@@ -1,5 +1,8 @@
 #include <math.h>
 #include <stdio.h>
+//#include <crtdbg.h>
+
+//#include "memory_debug.h"
 
 #include "particle.h"
 #include "simulation.h"

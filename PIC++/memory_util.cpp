@@ -3,6 +3,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+//#include <crtdbg.h>
+
+//#include "memory_debug.h"
 #include "memory_util.h"
 #include "paths.h"
 

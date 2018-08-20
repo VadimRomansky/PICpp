@@ -171,9 +171,74 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		bunemanJz[i+1][j+1][0] = Fz2*Wx2*Wy2/cellVolume;
 		
 	} else if(dimensionType == TWO_D_XZ) {
-		
+		if(i != previ) {
+			xr = max2(xgrid[previ], xgrid[i]);
+		}
+		if(k != prevk) {
+			zr = max2(zgrid[prevk], zgrid[k]);
+		}
+
+		double Fx1 = fullCharge*(xr - prevLocalCoordinates.x)/deltaT;
+		double Fy1 = fullCharge*(yr - prevLocalCoordinates.y)/deltaT;
+		double Fz1 = fullCharge*(zr - prevLocalCoordinates.z)/deltaT;
+		double Fx2 = fullCharge*velocity.x - Fx1;
+		double Fy2 = fullCharge*velocity.y - Fy1;
+		double Fz2 = fullCharge*velocity.z - Fz1;
+
+		double Wx1 = (prevLocalCoordinates.x + xr)/(2*deltaX) - previ;
+		double Wz1 = (prevLocalCoordinates.z + zr)/(2*deltaZ) - prevk;
+		double Wx2 = (localCoordinates.x + xr)/(2*deltaX) - i;
+		double Wz2 = (localCoordinates.z + zr)/(2*deltaZ) - k;
+
+		bunemanJx[previ][0][prevk] += Fx1*(1.0 - Wz1)/cellVolume;
+		bunemanJx[previ][0][prevk+1] += Fx1*Wz1/cellVolume;
+		bunemanJz[previ][0][prevk] += Fy1*(1.0 - Wx1)/cellVolume;
+		bunemanJz[previ+1][0][prevk] += Fy1*Wx1/cellVolume;
+
+		bunemanJy[previ][0][prevk] = Fz1*(1 - Wx1)*(1 - Wz1)/cellVolume;
+		bunemanJy[previ][0][prevk+1] = Fz1*(1 - Wx1)*Wz1/cellVolume;
+		bunemanJy[previ+1][0][prevk] = Fz1*Wx1*(1 - Wz1)/cellVolume;
+		bunemanJy[previ+1][0][prevj+k] = Fz1*Wx1*Wz1/cellVolume;
+
+		bunemanJx[i][0][k] += Fx2*(1.0 - Wz2)/cellVolume;
+		bunemanJx[i][0][k+1] += Fx2*Wz2/cellVolume;
+		bunemanJz[i][0][k] += Fy2*(1.0 - Wx2)/cellVolume;
+		bunemanJz[i+1][0][k] += Fy2*Wx2/cellVolume;
+
+		bunemanJy[i][0][k] = Fz2*(1.0 - Wx2)*(1.0 - Wz2)/cellVolume;
+		bunemanJy[i][0][k+1] = Fz2*(1.0 - Wx2)*Wz2/cellVolume;
+		bunemanJy[i+1][0][k] = Fz2*Wx2*(1.0 - Wz2)/cellVolume;
+		bunemanJy[i+1][0][k+1] = Fz2*Wx2*Wz2/cellVolume;
 	} else if(dimensionType == ONE_D) {
-		
+		if(i != previ) {
+			xr = max2(xgrid[previ], xgrid[i]);
+		}
+
+		double Fx1 = fullCharge*(xr - prevLocalCoordinates.x)/deltaT;
+		double Fy1 = fullCharge*(yr - prevLocalCoordinates.y)/deltaT;
+		double Fz1 = fullCharge*(zr - prevLocalCoordinates.z)/deltaT;
+		double Fx2 = fullCharge*velocity.x - Fx1;
+		double Fy2 = fullCharge*velocity.y - Fy1;
+		double Fz2 = fullCharge*velocity.z - Fz1;
+
+		double Wx1 = (prevLocalCoordinates.x + xr)/(2*deltaX) - previ;
+		double Wx2 = (localCoordinates.x + xr)/(2*deltaX) - i;
+
+		bunemanJx[previ][0][0] += Fx1/cellVolume;
+
+		bunemanJy[previ][0][0] += Fy1*(1.0 - Wx1)/cellVolume;
+		bunemanJy[previ+1][0][0] += Fy1*Wx1/cellVolume;
+
+		bunemanJz[previ][0][0] = Fz1*(1 - Wx1)/cellVolume;
+		bunemanJz[previ+1][0][0] = Fz1*Wx1/cellVolume;
+
+		bunemanJx[i][0][0] += Fx2/cellVolume;
+
+		bunemanJy[i][0][0] += Fy2*(1.0 - Wx2)/cellVolume;
+		bunemanJy[i+1][0][0] += Fy2*Wx2/cellVolume;
+
+		bunemanJz[i][0][0] = Fz2*(1 - Wx2)/cellVolume;
+		bunemanJz[i+1][0][0] = Fz2*Wx2/cellVolume;
 	}
 }
 

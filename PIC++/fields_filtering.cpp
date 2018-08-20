@@ -3,6 +3,9 @@
 #include <cmath>
 #include <mpi.h>
 #include <time.h>
+//#include <crtdbg.h>
+
+//#include "memory_debug.h"
 
 #include "particle.h"
 #include "constants.h"
