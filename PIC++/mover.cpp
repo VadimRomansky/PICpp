@@ -240,7 +240,7 @@ void Simulation::moveParticle(Particle* particle) {
 
 	newMomentum +=(E + (velocity.vectorMult(B) / (speed_of_light_normalized))) * particle->charge * deltaT;
 
-	newVelocity = Particle::evaluateVelocity(newMomentum, particle->mass, speed_of_light_normalized);
+	newVelocity = Particle::evaluateVelocity(newMomentum, particle->mass);
 
 	middleVelocity = velocity * (1 - eta) + newVelocity * eta;
 

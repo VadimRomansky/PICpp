@@ -129,6 +129,19 @@ void outputVectorNodeArray(const char *outFileName, Vector3d ***vector3d, int xn
                            int additionalBinNumber, int stepX, int stepY, int stepZ, double scale = 1.0);*/
 void outputVectorCellArray(const char *outFileName, Vector3d ***vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
                            int additionalBinNumber, MPI_Comm& cartComm, int* cartCoord, int* cartDim, bool newFile, double scale = 1.0);
+void outputVectorCellArrayCrossectionXY(const char *outFileName, Vector3d ***vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                        int additionalBinNumber, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int zindex, bool
+                                        newFile, double scale = 1.0);
+void outputVectorCellArrayCrossectionXZ(const char *outFileName, Vector3d ***vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                        int additionalBinNumber, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int yindex, bool newFile, double scale = 1.0);
+void outputVectorCellArrayCrossectionYZ(const char *outFileName, Vector3d ***vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                        int additionalBinNumber, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, bool newFile, double scale = 1.0);
+void outputVectorCellArrayLineX(const char *outFileName, Vector3d ***vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                           int additionalBinNumber, MPI_Comm& cartComm, int* cartCoord, int* cartDim, int yindex, int zindex, bool newFile, double scale = 1.0);
+void outputVectorCellArrayLineY(const char *outFileName, Vector3d ***vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                           int additionalBinNumber, MPI_Comm& cartComm, int* cartCoord, int* cartDim, int xindex, int zindex, bool newFile, double scale = 1.0);
+void outputVectorCellArrayLineZ(const char *outFileName, Vector3d ***vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                           int additionalBinNumber, MPI_Comm& cartComm, int* cartCoord, int* cartDim, int xindex, int yindex, bool newFile, double scale = 1.0);
 void outputVectorCellArray(const char *outFileName, double ****vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
                            int additionalBinNumber, MPI_Comm& cartComm, int* cartCoord, int* cartDim, bool newFile, double scale = 1.0);
 void outputMatrixArray(const char *outFileName, Matrix3d ***matrix3d, int xnumberAdded, int ynumberAdded, int znumberAdded,

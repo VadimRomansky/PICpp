@@ -17,6 +17,19 @@
 #include "simulation.h"
 #include "paths.h"
 
+double Simulation::massProton;
+double Simulation::massElectron;
+double Simulation::massAlpha;
+double Simulation::massDeuterium;
+double Simulation::massHelium3;
+double Simulation::massOxygen;
+double Simulation::massSilicon;
+
+double Simulation::speed_of_light_normalized;
+double Simulation::speed_of_light_normalized_sqr;
+double Simulation::kBoltzman_normalized;
+double Simulation::electron_charge_normalized;
+
 void Simulation::simulate() {
 	MPI_Barrier(cartComm);
 	double initializationTime = 0;
@@ -119,7 +132,11 @@ void Simulation::simulate() {
 		if ((rank == 0)) printf("start iteration number = %d time = %15.10g\n", currentIteration, time);
 		updateEnergy();
 		if (currentIteration % writeParameter == 0) {
-			output();
+			if(solverType == BUNEMAN){
+				outputBuneman();
+			} else {
+				output();
+			}
 			currentWriteNumber++;
 		}
 		if (currentIteration % writeGeneralParameter == 0) {
@@ -153,13 +170,14 @@ void Simulation::simulate() {
 			for(int n = 0; n < smoothingCount; ++n){
 				smoothBunemanEfieldGeneral(bunemanJx, bunemanJy, bunemanJz);
 			}
+			exchangeBunemanFlux();
 			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 				procTime = clock() - procTime;
 				printf("smoothing flux = %g sec\n", procTime / CLOCKS_PER_SEC);
 			}
 			//////////////////////////
 			tristanEvaluateE();
-			exchangeBunemanEfield(bunemanEx, bunemanBy, bunemanBz);
+			exchangeBunemanEfield(bunemanEx, bunemanEy, bunemanEz);
 		} else {
 			evaluateParticlesRotationTensor();
 
@@ -250,12 +268,12 @@ void Simulation::simulate() {
 			procTime = clock() - procTime;
 			printf("injecting and preserving time = %g sec\n", procTime / CLOCKS_PER_SEC);
 		}
+		updateParticleCorrelationMaps();
 
 		if(solverType != BUNEMAN){
 			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 				procTime = clock();
 			}
-			updateParticleCorrelationMaps();
 			//MPI_Barrier(cartComm);
 			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 				procTime = clock() - procTime;
@@ -736,6 +754,220 @@ void Simulation::output() {
 
 	//if (rank == 0) outputGeneral((outputDir + "general.dat").c_str(), this);
 	if (rank == 0) outputGeneralAnisotropy((outputDir + "generalAnisotropy.dat").c_str(), this);
+	if ((rank == 0) && (verbosity > 0)) printf("finish outputing\n");
+	if ((rank == 0) && (verbosity > 0)) printLog("finish outputing\n");
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("outputing time = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}
+}
+
+void Simulation::resetBunemanFieldToCellVectorParameter(double*** bunemanEx, double*** bunemanEy, double*** bunemanEz) {
+	for(int i = 0; i < xnumberAdded; ++i) {
+		for(int j = 0; j < ynumberAdded; ++j) {
+			for(int k = 0; k < znumberAdded; ++k) {
+				tempCellVectorParameter[i][j][k].x = bunemanEx[i][j][k];
+				tempCellVectorParameter[i][j][k].y = bunemanEy[i][j][k];
+				tempCellVectorParameter[i][j][k].z = bunemanEz[i][j][k];
+			}
+		}
+	}
+}
+
+void Simulation::outputBuneman() {
+	double procTime = 0;
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
+	if ((rank == 0) && (verbosity > 0)) printf("outputing iteration number %d\n", currentIteration);
+	if ((rank == 0) && (verbosity > 0)) printLog("collecting most accelerate particles\n");
+	collectMostAcceleratedParticles();
+	if ((rank == 0) && (verbosity > 0)) printLog("outputing\n");
+
+	std::string fileNumber = "";
+	if(multiplyFileOutput) {
+		fileNumber = std::string("_") + convertIntToString(currentWriteNumber);
+	}
+
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution protons\n");
+	outputDistribution((outputDir + "distribution_protons" + fileNumber + ".dat").c_str(), particles, PROTON, scaleFactor,
+	                   plasma_period, verbosity, multiplyFileOutput);
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution electrons\n");
+	outputDistribution((outputDir + "distribution_electrons" + fileNumber + ".dat").c_str(), particles, ELECTRON, scaleFactor,
+	                   plasma_period, verbosity, multiplyFileOutput);
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution alphas\n");
+	outputDistribution((outputDir + "distribution_alphas" + fileNumber + ".dat").c_str(), particles, ALPHA, scaleFactor,
+	                   plasma_period, verbosity, multiplyFileOutput);
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution positrons\n");
+	outputDistribution((outputDir + "distribution_positrons" + fileNumber + ".dat").c_str(), particles, POSITRON, scaleFactor,
+	                   plasma_period, verbosity, multiplyFileOutput);
+
+	Vector3d shockWaveV = V0 / 3;
+
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution protons shock wave\n");
+	outputDistributionShiftedSystem((outputDir + "distribution_protons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
+	                                speed_of_light_normalized, PROTON, scaleFactor,
+	                                plasma_period, verbosity, multiplyFileOutput);
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution electrons shock wave\n");
+	outputDistributionShiftedSystem((outputDir + "distribution_electrons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
+	                                speed_of_light_normalized, ELECTRON, scaleFactor,
+	                                plasma_period, verbosity, multiplyFileOutput);
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution alphas shock wave\n");
+	outputDistributionShiftedSystem((outputDir + "distribution_alphas_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
+	                                speed_of_light_normalized, ALPHA, scaleFactor,
+	                                plasma_period, verbosity, multiplyFileOutput);
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution positrons shock wave\n");
+	outputDistributionShiftedSystem((outputDir + "distribution_positrons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
+	                                speed_of_light_normalized, POSITRON, scaleFactor,
+	                                plasma_period, verbosity, multiplyFileOutput);
+
+	if ((rank == 0) && (verbosity > 1)) printf("outputing fields\n");
+	double fieldScale = 1.0 / (plasma_period * sqrt(scaleFactor));
+
+	resetBunemanFieldToCellVectorParameter(bunemanEx, bunemanEy, bunemanEz);
+
+	//outputVectorCellArray((outputDir + "Efield.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim, multiplyFileOutput, fieldScale);
+
+	if (verbosity > 2) printf("get cart coord with absolute index rank = %d\n", rank);
+	int coordX = getCartCoordWithAbsoluteIndexX(xnumberGeneral / 2);
+	int coordY = getCartCoordWithAbsoluteIndexY(ynumberGeneral / 2);
+	int coordZ = getCartCoordWithAbsoluteIndexZ(znumberGeneral / 2);
+
+	MPI_Barrier(cartComm);
+	if (verbosity > 2) printf("output crossection fields yz\n");
+	if (coordX == cartCoord[0]) {
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
+		if (verbosity > 2) printf("x local index = %d\n", xindex);
+		outputVectorCellArrayCrossectionYZ((outputDir + "EfieldYZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartCommYZ, cartCommZ, cartCoord, cartDim, xindex, multiplyFileOutput, fieldScale);
+	}
+	MPI_Barrier(cartComm);
+
+	if (verbosity > 2) printf("output crossection fields xz\n");
+	if (coordY == cartCoord[1]) {
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral / 2);
+		if (verbosity > 2) printf("y local index = %d\n", yindex);
+		outputVectorCellArrayCrossectionYZ((outputDir + "EfieldXZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartCommXZ, cartCommZ, cartCoord, cartDim, yindex, multiplyFileOutput, fieldScale);
+	}
+	MPI_Barrier(cartComm);
+
+	if (verbosity > 2) printf("output crossection fields xy\n");
+	if (coordZ == cartCoord[2]) {
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
+		if (verbosity > 2) printf("z local index = %d\n", zindex);
+		outputVectorCellArrayCrossectionYZ((outputDir + "EfieldXY.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartCommXY, cartCommY, cartCoord, cartDim, zindex, multiplyFileOutput, fieldScale);
+	}
+	MPI_Barrier(cartComm);
+
+	if (verbosity > 2) printf("output line field x\n");
+	if (coordY == cartCoord[1] && coordZ == cartCoord[2]) {
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral / 2);
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
+		if (verbosity > 2) printf("y local index = %d\n", yindex);
+		if (verbosity > 2) printf("z local index = %d\n", zindex);
+		outputVectorCellArrayLineX((outputDir + "EfieldX.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartCommX, cartCoord, cartDim, yindex, zindex, multiplyFileOutput, fieldScale);
+	}
+	MPI_Barrier(cartComm);
+
+	if (verbosity > 2) printf("output line field y\n");
+	if (coordX == cartCoord[0] && coordZ == cartCoord[2]) {
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
+		if (verbosity > 2) printf("x local index = %d\n", xindex);
+		if (verbosity > 2) printf("z local index = %d\n", zindex);
+		outputVectorCellArrayLineX((outputDir + "EfieldY.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartCommY, cartCoord, cartDim, xindex, zindex, multiplyFileOutput, fieldScale);
+	}
+	MPI_Barrier(cartComm);
+
+	if (verbosity > 2) printf("output line field z\n");
+	if (coordX == cartCoord[0] && coordY == cartCoord[1]) {
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral / 2);
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
+		if (verbosity > 2) printf("y local index = %d\n", yindex);
+		if (verbosity > 2) printf("x local index = %d\n", xindex);
+		outputVectorCellArrayLineX((outputDir + "EfieldZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartCommZ, cartCoord, cartDim, xindex, yindex, multiplyFileOutput, fieldScale);
+	}
+	MPI_Barrier(cartComm);
+
+	resetBunemanFieldToCellVectorParameter(bunemanBx, bunemanBy, bunemanBz);
+
+	//outputVectorCellArray((outputDir + "Bfield.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim, multiplyFileOutput, fieldScale);
+
+	MPI_Barrier(cartComm);
+	if (verbosity > 2) printf("output crossection fields yz\n");
+	if (coordX == cartCoord[0]) {
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
+		if (verbosity > 2) printf("x local index = %d\n", xindex);
+		outputVectorCellArrayCrossectionYZ((outputDir + "BfieldYZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartCommYZ, cartCommZ, cartCoord, cartDim, xindex, multiplyFileOutput, fieldScale);
+	}
+	MPI_Barrier(cartComm);
+
+	if (verbosity > 2) printf("output crossection fields xz\n");
+	if (coordY == cartCoord[1]) {
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral / 2);
+		if (verbosity > 2) printf("y local index = %d\n", yindex);
+		outputVectorCellArrayCrossectionYZ((outputDir + "BfieldXZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartCommXZ, cartCommZ, cartCoord, cartDim, yindex, multiplyFileOutput, fieldScale);
+	}
+	MPI_Barrier(cartComm);
+
+	if (verbosity > 2) printf("output crossection fields xy\n");
+	if (coordZ == cartCoord[2]) {
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
+		if (verbosity > 2) printf("z local index = %d\n", zindex);
+		outputVectorCellArrayCrossectionYZ((outputDir + "BfieldXY.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartCommXY, cartCommY, cartCoord, cartDim, zindex, multiplyFileOutput, fieldScale);
+	}
+	MPI_Barrier(cartComm);
+
+	if (verbosity > 2) printf("output line field x\n");
+	if (coordY == cartCoord[1] && coordZ == cartCoord[2]) {
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral / 2);
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
+		if (verbosity > 2) printf("y local index = %d\n", yindex);
+		if (verbosity > 2) printf("z local index = %d\n", zindex);
+		outputVectorCellArrayLineX((outputDir + "BfieldX.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartCommX, cartCoord, cartDim, yindex, zindex, multiplyFileOutput, fieldScale);
+	}
+	MPI_Barrier(cartComm);
+
+	if (verbosity > 2) printf("output line field y\n");
+	if (coordX == cartCoord[0] && coordZ == cartCoord[2]) {
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
+		int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
+		if (verbosity > 2) printf("x local index = %d\n", xindex);
+		if (verbosity > 2) printf("z local index = %d\n", zindex);
+		outputVectorCellArrayLineX((outputDir + "BfieldY.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartCommY, cartCoord, cartDim, xindex, zindex, multiplyFileOutput, fieldScale);
+	}
+	MPI_Barrier(cartComm);
+
+	if (verbosity > 2) printf("output line field z\n");
+	if (coordX == cartCoord[0] && coordY == cartCoord[1]) {
+		int yindex = getLocalIndexByAbsoluteY(ynumberGeneral / 2);
+		int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
+		if (verbosity > 2) printf("y local index = %d\n", yindex);
+		if (verbosity > 2) printf("x local index = %d\n", xindex);
+		outputVectorCellArrayLineX((outputDir + "BfieldZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartCommZ, cartCoord, cartDim, xindex, yindex, multiplyFileOutput, fieldScale);
+	}
+	MPI_Barrier(cartComm);
+
+
+	if ((rank == 0) && (verbosity > 1)) printf("outputing grid\n");
+	outputGridX((outputDir + "Xfile.dat").c_str(), xgrid, xnumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim,
+	            true, scaleFactor);
+
+	outputGridY((outputDir + "Yfile.dat").c_str(), ygrid, ynumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim,
+	            true, scaleFactor);
+
+	outputGridZ((outputDir + "Zfile.dat").c_str(), zgrid, znumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim,
+	            true, scaleFactor);
+
+
+
+	if ((rank == 0) && (verbosity > 1)) printf("outputing particles\n");
+	for (int i = 0; i < typesNumber; ++i) {
+		outputParticles((outputDir + types[i].typeName + ".dat").c_str(), this, types[i].type);
+	}
+
+	if ((rank == 0) && (verbosity > 1)) printf("outputing accelerated particles\n");
+	outputAcceleratedParticlesNumbers((outputDir + "acceleratedParticlesNumbers.dat").c_str(), this);
+
 	if ((rank == 0) && (verbosity > 0)) printf("finish outputing\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("finish outputing\n");
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {

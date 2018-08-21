@@ -1,6 +1,6 @@
 0                       input type - cgs or in omega_e and skin depth units
 10 10 10              grid numbers
-4E13         		grid step
+4E11        		grid step
 5E8                     temperature
 -0.7453559925 0 0       velocity (in c always)
 0.015                    magnetization
@@ -12,8 +12,8 @@
 1E100                   max time
 1                  	prefered time step
 0                  	log verbocity level
-2000                      write iteration parameter (for output fields)
-100                      write general parameter (for output energy)
+200                      write iteration parameter (for output fields)
+10                      write general parameter (for output energy)
 10                      write trajectory parameter
 100                      write particle step
 8			smothing iterations

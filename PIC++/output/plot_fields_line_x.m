@@ -11,7 +11,7 @@ Nx = size(Xfile, 1);
 Ny = size(Yfile, 1);
 Nz = size(Zfile, 1);
 
-NE = Nx;
+NE = Nx-1;
 NB = (Nx-1);
 Nt = (size(EfieldX, 1)/NE);
 %Nt=2;
@@ -42,7 +42,7 @@ omega = initialParameters(21);
 omegaElectron = initialParameters(20);
 
 
-for i=1:Nx,
+for i=1:Nx-1,
    %Xgrid(i) = (Xfile(i) - Xfile(2))*omegaElectron/cv;
    Xgrid(i) = (Xfile(i) - Xfile(2));
    Ex(i,1) = EfieldX((i) + a*NE, 1);

@@ -33,6 +33,19 @@ class Simulation {
 private:
 	bool arrayCreated;
 public:
+	static double massProton;
+	static double massElectron;
+	static double massAlpha;
+	static double massDeuterium;
+	static double massHelium3;
+	static double massOxygen;
+	static double massSilicon;
+
+	static double speed_of_light_normalized;
+	static double speed_of_light_normalized_sqr;
+	static double kBoltzman_normalized;
+	static double electron_charge_normalized;
+
 	int rank;
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -78,14 +91,6 @@ public:
 	int resistiveLayerWidth;
 	double fakeCondactivity;
 
-	double massProton;
-	double massElectron;
-	double massAlpha;
-	double massDeuterium;
-	double massHelium3;
-	double massOxygen;
-	double massSilicon;
-
 	double* concentrations;
 	int* particlesPerBin;
 
@@ -102,11 +107,6 @@ public:
 	double plasma_period;
 	double plasma_period2;
 	double scaleFactor;
-
-	double speed_of_light_normalized;
-	double speed_of_light_normalized_sqr;
-	double kBoltzman_normalized;
-	double electron_charge_normalized;
 
 	double time;
 	double maxTime;
@@ -344,176 +344,6 @@ public:
 	Complex*** fourierInput;
 	Complex*** fourierImage;
 	Complex*** fourierOutput;
-
-	/*double* leftOutNodeBuffer;
-	double* rightOutNodeBuffer;
-	double* leftInNodeBuffer;
-	double* rightInNodeBuffer;
-
-	double* frontOutNodeBuffer;
-	double* backOutNodeBuffer;
-	double* frontInNodeBuffer;
-	double* backInNodeBuffer;
-
-	double* bottomOutNodeBuffer;
-	double* topOutNodeBuffer;
-	double* bottomInNodeBuffer;
-	double* topInNodeBuffer;
-
-	double* leftOutVectorNodeBuffer;
-	double* rightOutVectorNodeBuffer;
-	double* leftInVectorNodeBuffer;
-	double* rightInVectorNodeBuffer;
-
-	double* frontOutVectorNodeBuffer;
-	double* backOutVectorNodeBuffer;
-	double* frontInVectorNodeBuffer;
-	double* backInVectorNodeBuffer;
-
-	double* bottomOutVectorNodeBuffer;
-	double* topOutVectorNodeBuffer;
-	double* bottomInVectorNodeBuffer;
-	double* topInVectorNodeBuffer;
-
-	double* leftOutMatrixNodeBuffer;
-	double* rightOutMatrixNodeBuffer;
-	double* leftInMatrixNodeBuffer;
-	double* rightInMatrixNodeBuffer;
-
-	double* frontOutMatrixNodeBuffer;
-	double* backOutMatrixNodeBuffer;
-	double* frontInMatrixNodeBuffer;
-	double* backInMatrixNodeBuffer;
-
-	double* bottomOutMatrixNodeBuffer;
-	double* topOutMatrixNodeBuffer;
-	double* bottomInMatrixNodeBuffer;
-	double* topInMatrixNodeBuffer;
-
-	double* leftOutCellBuffer;
-	double* rightOutCellBuffer;
-	double* leftInCellBuffer;
-	double* rightInCellBuffer;
-
-	double* frontOutCellBuffer;
-	double* backOutCellBuffer;
-	double* frontInCellBuffer;
-	double* backInCellBuffer;
-
-	double* bottomOutCellBuffer;
-	double* topOutCellBuffer;
-	double* bottomInCellBuffer;
-	double* topInCellBuffer;
-	
-
-	double* leftOutVectorCellBuffer;
-	double* rightOutVectorCellBuffer;
-	double* leftInVectorCellBuffer;
-	double* rightInVectorCellBuffer;
-
-	double* frontOutVectorCellBuffer;
-	double* backOutVectorCellBuffer;
-	double* frontInVectorCellBuffer;
-	double* backInVectorCellBuffer;
-
-	double* bottomOutVectorCellBuffer;
-	double* topOutVectorCellBuffer;
-	double* bottomInVectorCellBuffer;
-	double* topInVectorCellBuffer;*/
-
-	//////Masha's buffers/////
-
-	/*double* leftOutNodeBufferMasha;
-	double* rightOutNodeBufferMasha;
-	double* leftInNodeBufferMasha;
-	double* rightInNodeBufferMasha;
-
-	double* frontOutNodeBufferMasha;
-	double* backOutNodeBufferMasha;
-	double* frontInNodeBufferMasha;
-	double* backInNodeBufferMasha;
-
-	double* bottomOutNodeBufferMasha;
-	double* topOutNodeBufferMasha;
-	double* bottomInNodeBufferMasha;
-	double* topInNodeBufferMasha;
-
-	double* leftOutVectorNodeBufferMasha;
-	double* rightOutVectorNodeBufferMasha;
-	double* leftInVectorNodeBufferMasha;
-	double* rightInVectorNodeBufferMasha;
-
-	double* frontOutVectorNodeBufferMasha;
-	double* backOutVectorNodeBufferMasha;
-	double* frontInVectorNodeBufferMasha;
-	double* backInVectorNodeBufferMasha;
-
-	double* bottomOutVectorNodeBufferMasha;
-	double* topOutVectorNodeBufferMasha;
-	double* bottomInVectorNodeBufferMasha;
-	double* topInVectorNodeBufferMasha;
-
-	double* leftOutMatrixNodeBufferMasha;
-	double* rightOutMatrixNodeBufferMasha;
-	double* leftInMatrixNodeBufferMasha;
-	double* rightInMatrixNodeBufferMasha;
-
-	double* frontOutMatrixNodeBufferMasha;
-	double* backOutMatrixNodeBufferMasha;
-	double* frontInMatrixNodeBufferMasha;
-	double* backInMatrixNodeBufferMasha;
-
-	double* bottomOutMatrixNodeBufferMasha;
-	double* topOutMatrixNodeBufferMasha;
-	double* bottomInMatrixNodeBufferMasha;
-	double* topInMatrixNodeBufferMasha;
-
-	double* leftOutCellBufferMasha;
-	double* rightOutCellBufferMasha;
-	double* leftInCellBufferMasha;
-	double* rightInCellBufferMasha;
-
-	double* frontOutCellBufferMasha;
-	double* backOutCellBufferMasha;
-	double* frontInCellBufferMasha;
-	double* backInCellBufferMasha;
-
-	double* bottomOutCellBufferMasha;
-	double* topOutCellBufferMasha;
-	double* bottomInCellBufferMasha;
-	double* topInCellBufferMasha;
-	
-
-	double* leftOutVectorCellBufferMasha;
-	double* rightOutVectorCellBufferMasha;
-	double* leftInVectorCellBufferMasha;
-	double* rightInVectorCellBufferMasha;
-
-	double* frontOutVectorCellBufferMasha;
-	double* backOutVectorCellBufferMasha;
-	double* frontInVectorCellBufferMasha;
-	double* backInVectorCellBufferMasha;
-
-	double* bottomOutVectorCellBufferMasha;
-	double* topOutVectorCellBufferMasha;
-	double* bottomInVectorCellBufferMasha;
-	double* topInVectorCellBufferMasha;
-
-	double* leftOutMatrixCellBufferMasha;
-	double* rightOutMatrixCellBufferMasha;
-	double* leftInMatrixCellBufferMasha;
-	double* rightInMatrixCellBufferMasha;
-
-	double* frontOutMatrixCellBufferMasha;
-	double* backOutMatrixCellBufferMasha;
-	double* frontInMatrixCellBufferMasha;
-	double* backInMatrixCellBufferMasha;
-
-	double* bottomOutMatrixCellBufferMasha;
-	double* topOutMatrixCellBufferMasha;
-	double* bottomInMatrixCellBufferMasha;
-	double* topInMatrixCellBufferMasha;*/
-	////////////////////////
 
 	double* leftOutMaximumBuffer;
 	double* rightOutMaximumBuffer;
@@ -906,6 +736,8 @@ public:
 	void injectNewParticles();
 	void simulate();
 	void output();
+	void resetBunemanFieldToCellVectorParameter(double*** bunemanEx, double*** bunemanEy, double*** bunemanEz);
+	void outputBuneman();
 	void outputTrajectories();
 	void outputBackup();
 	void rescaleConstants();

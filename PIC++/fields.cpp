@@ -6,6 +6,7 @@
 //#include <crtdbg.h>
 
 //#include "memory_debug.h"
+#include "simulation.h"
 #include "specialmath.h"
 #include "util.h"
 #include "matrixElement.h"
@@ -13,7 +14,6 @@
 #include "matrix3d.h"
 #include "vector3d.h"
 #include "particle.h"
-#include "simulation.h"
 #include "mpi_util.h"
 #include "output.h"
 #include "paths.h"
@@ -77,8 +77,7 @@ void Simulation::tristanEvaluateE() {
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
-				bunemanEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBy(i, j, k) - 4 * pi *
-					bunemanJy[i][j][k]) * deltaT;
+				bunemanEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBy(i, j, k) - 4 * pi *bunemanJy[i][j][k]) * deltaT;
 				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
 					bunemanEy[i][j][k] = 0;
 				}
@@ -91,8 +90,7 @@ void Simulation::tristanEvaluateE() {
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k < maxK; ++k) {
-				bunemanEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBz(i, j, k) - 4 * pi *
-					bunemanJz[i][j][k]) * deltaT;
+				bunemanEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBz(i, j, k) - 4 * pi * bunemanJz[i][j][k]) * deltaT;
 				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
 					bunemanEz[i][j][k] = 0;
 				}

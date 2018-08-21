@@ -65,9 +65,7 @@ private:
 	double gamma;
 	bool velocityCashed;
 	bool gammaCashed;
-	double c;
 	double mc2;
-	double c2;
 public:
 	int number;
 
@@ -97,7 +95,7 @@ public:
 	double dz;
 
 	Particle(int n, double m, int qcount, double q, double w, ParticleTypes type, double x0, double y0,
-                 double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0, double cv);
+                 double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0);
 	Particle(const Particle& particle);
 	Particle(const Particle* const particle);
 
@@ -131,7 +129,7 @@ public:
 
 	void setMomentumByV(const Vector3d& v);
 
-	static Vector3d evaluateVelocity(const Vector3d& p, const double& m, const double& c);
+	static Vector3d evaluateVelocity(const Vector3d& p, const double& m);
 };
 
 #endif

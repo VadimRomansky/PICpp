@@ -5428,7 +5428,7 @@ void addParticlesFromParameters(std::vector < Particle* >& inParticles, std::vec
 			particle->crossBoundaryCount = 0;
 		} else {
 			particle = new Particle(number, mass, chargeCount, charge, weight, particleType, x, y, z,
-		                                  initialMomentumX, initialMomentumY, initialMomentumZ, dx, dy, dz, c);
+		                                  initialMomentumX, initialMomentumY, initialMomentumZ, dx, dy, dz);
 		}
 
 

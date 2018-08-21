@@ -8050,7 +8050,7 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 	}
 
 
-	Particle* particle = new Particle(n, mass, chargeCount, charge, weight, type, x, y, z, px, py, pz, dx, dy, dz, speed_of_light_normalized);
+	Particle* particle = new Particle(n, mass, chargeCount, charge, weight, type, x, y, z, px, py, pz, dx, dy, dz);
 
 	return particle;
 }

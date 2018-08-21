@@ -2750,6 +2750,284 @@ void outputVectorCellArray(const char* outFileName, Vector3d*** vector3d, int xn
 	}
 }
 
+void outputVectorCellArrayCrossectionXY(const char* outFileName, Vector3d*** vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
+                                        int additionalBinNumber, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int zindex, bool newFile, double scale) {
+	int dims1[3];
+	FILE* outFile = NULL;
+	if ((cartCoord[0] == 0) && (cartCoord[1] == 0) && newFile) {
+		outFile = fopen(outFileName, "w");
+		fclose(outFile);
+	}
+
+	MPI_Barrier(cartComm);
+
+	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
+		int minI = 2 + 2 * additionalBinNumber;
+		if (cartCoord[0] == 0) {
+			minI = 0;
+		}
+		int maxI = xnumberAdded - 1;
+		if (cartCoord[0] == cartDim[0] - 1) {
+			maxI = xnumberAdded - 1;
+		}
+		MPI_Barrier(cartComm);
+		if (cartCoord[0] == cartI) {
+			if (cartDim[1] == 1) {
+				outFile = fopen(outFileName, "a");
+			}
+			for (int i = minI; i <= maxI; ++i) {
+				for (int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
+					int minJ = 2 + 2 * additionalBinNumber;
+					if (cartCoord[1] == 0) {
+						minJ = 0;
+					}
+					int maxJ = ynumberAdded - 1;
+					if (cartCoord[1] == cartDim[1] - 1) {
+						maxJ = ynumberAdded - 1;
+					}
+					MPI_Barrier(subCommY);
+					if (cartJ == cartCoord[1]) {
+						if (cartDim[1] > 1) {
+							outFile = fopen(outFileName, "a");
+						}
+						for (int j = minJ; j <= maxJ; ++j) {
+								fprintf(outFile, "%15.10g %15.10g %15.10g\n",
+								        vector3d[i][j][zindex].x * scale,
+								        vector3d[i][j][zindex].y * scale,
+								        vector3d[i][j][zindex].z * scale);
+						}
+						if (cartDim[1] > 1) {
+							fclose(outFile);
+						}
+					}
+				}
+			}
+			if (cartDim[1] == 1) {
+				fclose(outFile);
+			}
+		}
+	}
+}
+
+void outputVectorCellArrayCrossectionXZ(const char* outFileName, Vector3d*** vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
+	int additionalBinNumber, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int yindex, bool newFile, double scale) {
+		FILE* outFile = NULL;
+	if ((cartCoord[0] == 0) && (cartCoord[2] == 0) && newFile) {
+		outFile = fopen(outFileName, "w");
+		fclose(outFile);
+	}
+
+	MPI_Barrier(cartComm);
+	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
+		int minI = 2 + 2 * additionalBinNumber;
+		if (cartCoord[0] == 0) {
+			minI = 0;
+		}
+		int maxI = xnumberAdded - 1;
+		if (cartCoord[0] == cartDim[0] - 1) {
+			maxI = xnumberAdded - 1;
+		}
+		MPI_Barrier(cartComm);
+		if (cartCoord[0] == cartI) {
+			if (cartDim[2] == 1) {
+				outFile = fopen(outFileName, "a");
+			}
+			for (int i = minI; i <= maxI; ++i) {
+				for (int cartK = 0; cartK < cartDim[2]; ++cartK) {
+					int minK = 2 + 2 * additionalBinNumber;
+					if (cartCoord[2] == 0) {
+						minK = 0;
+					}
+					int maxK = znumberAdded - 1;
+					if (cartCoord[2] == cartDim[2] - 1) {
+						maxK = znumberAdded - 1;
+					}
+					MPI_Barrier(subCommY);
+					if (cartK == cartCoord[2]) {
+						if (cartDim[2] > 1) {
+							outFile = fopen(outFileName, "a");
+						}
+						for (int k = minK; k <= maxK; ++k) {
+								fprintf(outFile, "%15.10g %15.10g %15.10g\n",
+								        vector3d[i][yindex][k].x * scale,
+								        vector3d[i][yindex][k].y * scale,
+								        vector3d[i][yindex][k].z * scale);
+						}
+						if (cartDim[2] > 1) {
+							fclose(outFile);
+						}
+					}
+				}
+			}
+			if (cartDim[2] == 1) {
+				fclose(outFile);
+			}
+		}
+	}
+}
+
+void outputVectorCellArrayCrossectionYZ(const char* outFileName, Vector3d*** vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
+	int additionalBinNumber, MPI_Comm& cartComm, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, bool newFile, double scale) {
+	FILE* outFile = NULL;
+	if ((cartCoord[1] == 0) && (cartCoord[2] == 0) && newFile) {
+		outFile = fopen(outFileName, "w");
+		fclose(outFile);
+	}
+
+	MPI_Barrier(cartComm);
+
+	if (cartDim[1] == 1 && cartDim[2] == 1) {
+		outFile = fopen(outFileName, "a");
+	}
+	for (int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
+		int minJ = 2 + 2 * additionalBinNumber;
+		if (cartCoord[1] == 0) {
+			minJ = 0;
+		}
+		int maxJ = ynumberAdded - 1;
+		if (cartCoord[1] == cartDim[1] - 1) {
+			maxJ = ynumberAdded - 1;
+		}
+		MPI_Barrier(cartComm);
+		if (cartJ == cartCoord[1]) {
+			if (cartDim[1] > 1 && cartDim[2] == 1) {
+				outFile = fopen(outFileName, "a");
+			}
+			for (int j = minJ; j <= maxJ; ++j) {
+				for (int cartK = 0; cartK < cartDim[2]; ++cartK) {
+					int minK = 2 + 2 * additionalBinNumber;
+					if (cartCoord[2] == 0) {
+						minK = 0;
+					}
+					int maxK = znumberAdded - 1;
+					if (cartCoord[2] == cartDim[2] - 1) {
+						maxK = znumberAdded - 1;
+					}
+					MPI_Barrier(subCommY);
+					if (cartK == cartCoord[2]) {
+						if (cartDim[2] > 1) {
+							outFile = fopen(outFileName, "a");
+						}
+						for (int k = minK; k <= maxK; ++k) {
+								fprintf(outFile, "%15.10g %15.10g %15.10g\n",
+								        vector3d[xindex][j][k].x * scale,
+								        vector3d[xindex][j][k].y * scale,
+								        vector3d[xindex][j][k].z * scale);
+						}
+						if (cartDim[2] > 1) {
+							fclose(outFile);
+						}
+					}
+				}
+			}
+			if (cartDim[1] > 1 && cartDim[2] == 1) {
+				fclose(outFile);
+			}
+		}
+	}
+	if (cartDim[1] == 1 && cartDim[2] == 1) {
+		fclose(outFile);
+	}
+}
+
+void outputVectorCellArrayLineX(const char* outFileName, Vector3d*** vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
+	int additionalBinNumber, MPI_Comm& subCommX, int* cartCoord, int* cartDim, int yindex, int zindex, bool newFile, double scale) {
+		FILE* outFile = NULL;
+	if ((cartCoord[0] == 0) && newFile) {
+		outFile = fopen(outFileName, "w");
+		fclose(outFile);
+	}
+
+	MPI_Barrier(subCommX);
+	for (int cartI = 0; cartI < cartDim[0]; ++cartI) {
+		int minI = 2 + 2 * additionalBinNumber;
+		if (cartCoord[0] == 0) {
+			minI = 0;
+		}
+		int maxI = xnumberAdded - 1;
+		if (cartCoord[0] == cartDim[0] - 1) {
+			maxI = xnumberAdded - 1;
+		}
+		MPI_Barrier(subCommX);
+		if (cartCoord[0] == cartI) {
+			outFile = fopen(outFileName, "a");
+			for (int i = minI; i <= maxI; ++i) {
+					fprintf(outFile, "%15.10g %15.10g %15.10g\n",
+					        vector3d[i][yindex][zindex].x * scale,
+					        vector3d[i][yindex][zindex].y * scale,
+					        vector3d[i][yindex][zindex].z * scale);
+			}
+			fclose(outFile);
+		}
+	}
+}
+
+void outputVectorCellArrayLineY(const char* outFileName, Vector3d*** vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
+	int additionalBinNumber, MPI_Comm& subCommY, int* cartCoord, int* cartDim, int xindex, int zindex, bool newFile, double scale) {
+		FILE* outFile = NULL;
+	if ((cartCoord[1] == 0) && newFile) {
+		outFile = fopen(outFileName, "w");
+		fclose(outFile);
+	}
+
+	MPI_Barrier(subCommY);
+
+	for (int cartJ = 0; cartJ < cartDim[1]; ++cartJ) {
+		int minJ = 2 + 2 * additionalBinNumber;
+		if (cartCoord[1] == 0) {
+			minJ = 0;
+		}
+		int maxJ = ynumberAdded - 1;
+		if (cartCoord[1] == cartDim[1] - 1) {
+			maxJ = ynumberAdded - 1;
+		}
+		MPI_Barrier(subCommY);
+		if (cartJ == cartCoord[1]) {
+			outFile = fopen(outFileName, "a");
+			for (int j = minJ; j <= maxJ; ++j) {
+					fprintf(outFile, "%15.10g %15.10g %15.10g\n",
+					        vector3d[xindex][j][zindex].x * scale,
+					        vector3d[xindex][j][zindex].y * scale,
+					        vector3d[xindex][j][zindex].z * scale);
+			}
+			fclose(outFile);
+		}
+	}
+}
+
+void outputVectorCellArrayLineZ(const char* outFileName, Vector3d*** vector3d, int xnumberAdded, int ynumberAdded, int znumberAdded,
+	int additionalBinNumber, MPI_Comm& subCommZ, int* cartCoord, int* cartDim, int xindex, int yindex, bool newFile, double scale) {
+	FILE* outFile = NULL;
+	if ((cartCoord[2] == 0) && newFile) {
+		outFile = fopen(outFileName, "w");
+		fclose(outFile);
+	}
+
+	MPI_Barrier(subCommZ);
+
+	for (int cartK = 0; cartK < cartDim[2]; ++cartK) {
+		int minK = 2 + 2 * additionalBinNumber;
+		if (cartCoord[2] == 0) {
+			minK = 0;
+		}
+		int maxK = znumberAdded - 1;
+		if (cartCoord[2] == cartDim[2] - 1) {
+			maxK = znumberAdded - 1;
+		}
+		MPI_Barrier(subCommZ);
+		if (cartK == cartCoord[2]) {
+			outFile = fopen(outFileName, "a");
+			for (int k = minK; k <= maxK; ++k) {
+					fprintf(outFile, "%15.10g %15.10g %15.10g\n",
+					        vector3d[xindex][yindex][k].x * scale,
+					        vector3d[xindex][yindex][k].y * scale,
+					        vector3d[xindex][yindex][k].z * scale);
+			}
+			fclose(outFile);
+		}
+	}
+}
+
 void outputVectorCellArray(const char* outFileName, double**** vector3d, int xnumberAdded, int ynumberAdded,
                            int znumberAdded,
                            int additionalBinNumber, MPI_Comm& cartComm, int* cartCoord, int* cartDim, bool newFile, double scale) {
