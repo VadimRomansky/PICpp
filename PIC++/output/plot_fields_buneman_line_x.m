@@ -11,7 +11,7 @@ Nx = size(Xfile, 1);
 Ny = size(Yfile, 1);
 Nz = size(Zfile, 1);
 
-NE = Nx;
+NE = Nx-1;
 NB = (Nx-1);
 Nt = (size(EfieldX, 1)/NE);
 %Nt=2;
@@ -23,9 +23,9 @@ a = 0;
 b = fix(Nt/2);
 c = fix(Nt)-1;
 
-Ex(1:Nx, 1:3) = 0;
-Ey(1:Nx, 1:3) = 0;
-Ez(1:Nx, 1:3) = 0;
+Ex(1:Nx-1, 1:3) = 0;
+Ey(1:Nx-1, 1:3) = 0;
+Ez(1:Nx-1, 1:3) = 0;
 
 Bx(1:Nx-1, 1:3) = 0;
 By(1:Nx-1, 1:3) = 0;
@@ -42,7 +42,7 @@ omega = initialParameters(21);
 omegaElectron = initialParameters(20);
 
 
-for i=1:Nx,
+for i=1:Nx-1,
    %Xgrid(i) = (Xfile(i) - Xfile(2))*omegaElectron/cv;
    Xgrid(i) = (Xfile(i) - Xfile(2));
    Ex(i,1) = EfieldX((i) + a*NE, 1);
@@ -82,21 +82,21 @@ set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
 
 figure(1);
-plot (Xgrid(1:Nx),Ex(1:Nx,1), 'red',Xgrid(1:Nx),Ex(1:Nx,2), 'green',Xgrid(1:Nx),Ex(1:Nx,3), 'blue');
+plot (Xgrid(1:Nx-1),Ex(1:Nx-1,1), 'red',Xgrid(1:Nx-1),Ex(1:Nx-1,2), 'green',Xgrid(1:Nx-1),Ex(1:Nx-1,3), 'blue');
 %title ('E_x');
 xlabel ('x');
 ylabel ('E_x gauss');
 grid ;
 
 figure(2);
-plot (Xgrid(1:Nx),Ey(1:Nx, 1), 'red', Xgrid(1:Nx), Ey(1:Nx, 2), 'green',Xgrid(1:Nx),Ey(1:Nx, 3), 'blue');
+plot (Xgrid(1:Nx-1),Ey(1:Nx-1, 1), 'red', Xgrid(1:Nx-1), Ey(1:Nx-1, 2), 'green',Xgrid(1:Nx-1),Ey(1:Nx-1, 3), 'blue');
 %title ('E_y');
 xlabel ('x');
 ylabel ('E_y gauss');
 grid ;
 
 figure(3);
-plot (Xgrid(1:Nx),Ez(1:Nx, 1), 'red', Xgrid(1:Nx), Ez(1:Nx, 2), 'green', Xgrid(1:Nx), Ez(1:Nx, 3), 'blue');
+plot (Xgrid(1:Nx-1),Ez(1:Nx-1, 1), 'red', Xgrid(1:Nx-1), Ez(1:Nx-1, 2), 'green', Xgrid(1:Nx-1), Ez(1:Nx-1, 3), 'blue');
 %title ('E_z');
 xlabel ('x');
 ylabel ('E_z gauss');
