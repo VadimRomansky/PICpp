@@ -12,8 +12,8 @@
 1E100                   max time
 1                  	prefered time step
 0                  	log verbocity level
-200                      write iteration parameter (for output fields)
-10                      write general parameter (for output energy)
+100                      write iteration parameter (for output fields)
+1                      write general parameter (for output energy)
 10                      write trajectory parameter
 100                      write particle step
 8			smothing iterations

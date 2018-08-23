@@ -1998,6 +1998,58 @@ void Simulation::initialize() {
 		}
 	}
 
+	if(solverType == BUNEMAN) {
+		for(int i = 0; i < xnumberAdded; ++i) {
+			for(int j = 0; j < ynumberAdded + 1; ++j) {
+				for(int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanEx[i][j][k] = E0.x;
+					bunemanNewEx[i][j][k] = E0.x;
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i) {
+			for(int j = 0; j < ynumberAdded; ++j) {
+				for(int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanEy[i][j][k] = E0.y;
+					bunemanNewEy[i][j][k] = E0.y;
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i) {
+			for(int j = 0; j < ynumberAdded + 1; ++j) {
+				for(int k = 0; k < znumberAdded; ++k) {
+					bunemanEz[i][j][k] = E0.z;
+					bunemanNewEz[i][j][k] = E0.z;
+				}
+			}
+		}
+
+		for(int i = 0; i < xnumberAdded + 1; ++i) {
+			for(int j = 0; j < ynumberAdded; ++j) {
+				for(int k = 0; k < znumberAdded; ++k) {
+					bunemanBx[i][j][k] = B0.x;
+					bunemanNewBx[i][j][k] = B0.x;
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded; ++i) {
+			for(int j = 0; j < ynumberAdded + 1; ++j) {
+				for(int k = 0; k < znumberAdded; ++k) {
+					bunemanBy[i][j][k] = B0.y;
+					bunemanNewBy[i][j][k] = B0.y;
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded; ++i) {
+			for(int j = 0; j < ynumberAdded; ++j) {
+				for(int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanBz[i][j][k] = B0.z;
+					bunemanNewBz[i][j][k] = B0.z;
+				}
+			}
+		}
+	}
+
 	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
 	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
 
@@ -6015,6 +6067,57 @@ void Simulation::initializeHomogenouseFlow() {
 				tempEfield[i][j][k] = Efield[i][j][k];
 				newEfield[i][j][k] = Efield[i][j][k];
 				explicitEfield[i][j][k] = Efield[i][j][k];
+			}
+		}
+	}
+	if(solverType == BUNEMAN) {
+		for(int i = 0; i < xnumberAdded; ++i) {
+			for(int j = 0; j < ynumberAdded + 1; ++j) {
+				for(int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanEx[i][j][k] = E0.x;
+					bunemanNewEx[i][j][k] = E0.x;
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i) {
+			for(int j = 0; j < ynumberAdded; ++j) {
+				for(int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanEy[i][j][k] = E0.y;
+					bunemanNewEy[i][j][k] = E0.y;
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded + 1; ++i) {
+			for(int j = 0; j < ynumberAdded + 1; ++j) {
+				for(int k = 0; k < znumberAdded; ++k) {
+					bunemanEz[i][j][k] = E0.z;
+					bunemanNewEz[i][j][k] = E0.z;
+				}
+			}
+		}
+
+		for(int i = 0; i < xnumberAdded + 1; ++i) {
+			for(int j = 0; j < ynumberAdded; ++j) {
+				for(int k = 0; k < znumberAdded; ++k) {
+					bunemanBx[i][j][k] = B0.x;
+					bunemanNewBx[i][j][k] = B0.x;
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded; ++i) {
+			for(int j = 0; j < ynumberAdded + 1; ++j) {
+				for(int k = 0; k < znumberAdded; ++k) {
+					bunemanBy[i][j][k] = B0.y;
+					bunemanNewBy[i][j][k] = B0.y;
+				}
+			}
+		}
+		for(int i = 0; i < xnumberAdded; ++i) {
+			for(int j = 0; j < ynumberAdded; ++j) {
+				for(int k = 0; k < znumberAdded + 1; ++k) {
+					bunemanBz[i][j][k] = B0.z;
+					bunemanNewBz[i][j][k] = B0.z;
+				}
 			}
 		}
 	}

@@ -53,7 +53,6 @@ void Simulation::tristanUpdateFlux() {
 		addParticleFluxZigzag(particle);
 	}
 
-
 	exchangeBunemanFlux();
 
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
@@ -80,13 +79,13 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 
 	if(dimensionType == THREE_D) {
 		if(i != previ) {
-			xr = max2(xgrid[previ], xgrid[i]);
+			xr = max2(xgrid[previ], xgrid[i]) - xgrid[0];
 		}
 		if(j != prevj) {
-			yr = max2(ygrid[prevj], ygrid[j]);
+			yr = max2(ygrid[prevj], ygrid[j]) - ygrid[0];
 		}
 		if(k != prevk) {
-			zr = max2(zgrid[prevk], zgrid[k]);
+			zr = max2(zgrid[prevk], zgrid[k]) - zgrid[0];
 		}
 
 		double Fx1 = fullChargeDensity*(xr - prevLocalCoordinates.x)/deltaT;
@@ -111,10 +110,10 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		bunemanJy[previ+1][prevj][prevk] += Fy1*Wx1*(1.0 - Wz1);
 		bunemanJy[previ][prevj][prevk+1] += Fy1*(1.0 - Wx1)*Wz1;
 		bunemanJy[previ+1][prevj][prevk+1] += Fy1*Wx1*Wz1;
-		bunemanJz[previ][prevj][prevk] = Fz1*(1.0 - Wx1)*(1.0 - Wy1);
-		bunemanJz[previ][prevj+1][prevk] = Fz1*(1.0 - Wx1)*Wy1;
-		bunemanJz[previ+1][prevj][prevk] = Fz1*Wx1*(1.0 - Wy1);
-		bunemanJz[previ+1][prevj+1][prevk] = Fz1*Wx1*Wy1;
+		bunemanJz[previ][prevj][prevk] += Fz1*(1.0 - Wx1)*(1.0 - Wy1);
+		bunemanJz[previ][prevj+1][prevk] += Fz1*(1.0 - Wx1)*Wy1;
+		bunemanJz[previ+1][prevj][prevk] += Fz1*Wx1*(1.0 - Wy1);
+		bunemanJz[previ+1][prevj+1][prevk] += Fz1*Wx1*Wy1;
 
 		bunemanJx[i][j][k] += Fx2*(1.0 - Wy2)*(1.0 - Wz2);
 		bunemanJx[i][j+1][k] += Fx2*Wy2*(1.0 - Wz2);
@@ -124,18 +123,18 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		bunemanJy[i+1][j][k] += Fy2*Wx2*(1.0 - Wz2);
 		bunemanJy[i][j][k+1] += Fy2*(1.0 - Wx2)*Wz2;
 		bunemanJy[i+1][j][k+1] += Fy2*Wx2*Wz2;
-		bunemanJz[i][j][k] = Fz2*(1.0 - Wx2)*(1.0 - Wy2);
-		bunemanJz[i][j+1][k] = Fz2*(1.0 - Wx2)*Wy2;
-		bunemanJz[i+1][j][k] = Fz2*Wx2*(1.0 - Wy2);
-		bunemanJz[i+1][j+1][k] = Fz2*Wx2*Wy2;
+		bunemanJz[i][j][k] += Fz2*(1.0 - Wx2)*(1.0 - Wy2);
+		bunemanJz[i][j+1][k] += Fz2*(1.0 - Wx2)*Wy2;
+		bunemanJz[i+1][j][k] += Fz2*Wx2*(1.0 - Wy2);
+		bunemanJz[i+1][j+1][k] += Fz2*Wx2*Wy2;
 		
 	} else if(dimensionType == TWO_D_XY) {
 	
 		if(i != previ) {
-			xr = max2(xgrid[previ], xgrid[i]);
+			xr = max2(xgrid[previ], xgrid[i]) - xgrid[0];
 		}
 		if(j != prevj) {
-			yr = max2(ygrid[prevj], ygrid[j]);
+			yr = max2(ygrid[prevj], ygrid[j]) - ygrid[0];
 		}
 
 		double Fx1 = fullChargeDensity*(xr - prevLocalCoordinates.x)/deltaT;
@@ -155,27 +154,27 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		bunemanJy[previ][prevj][0] += Fy1*(1.0 - Wx1);
 		bunemanJy[previ+1][prevj][0] += Fy1*Wx1;
 
-		bunemanJz[previ][prevj][0] = Fz1*(1 - Wx1)*(1 - Wy1);
-		bunemanJz[previ][prevj+1][0] = Fz1*(1 - Wx1)*Wy1;
-		bunemanJz[previ+1][prevj][0] = Fz1*Wx1*(1 - Wy1);
-		bunemanJz[previ+1][prevj+1][0] = Fz1*Wx1*Wy1;
+		bunemanJz[previ][prevj][0] += Fz1*(1 - Wx1)*(1 - Wy1);
+		bunemanJz[previ][prevj+1][0] += Fz1*(1 - Wx1)*Wy1;
+		bunemanJz[previ+1][prevj][0] += Fz1*Wx1*(1 - Wy1);
+		bunemanJz[previ+1][prevj+1][0] += Fz1*Wx1*Wy1;
 
 		bunemanJx[i][j][0] += Fx2*(1.0 - Wy2);
 		bunemanJx[i][j+1][0] += Fx2*Wy2;
 		bunemanJy[i][j][0] += Fy2*(1.0 - Wx2);
 		bunemanJy[i+1][j][0] += Fy2*Wx2;
 
-		bunemanJz[i][j][0] = Fz2*(1.0 - Wx2)*(1.0 - Wy2);
-		bunemanJz[i][j+1][0] = Fz2*(1.0 - Wx2)*Wy2;
-		bunemanJz[i+1][j][0] = Fz2*Wx2*(1.0 - Wy2);
-		bunemanJz[i+1][j+1][0] = Fz2*Wx2*Wy2;
+		bunemanJz[i][j][0] += Fz2*(1.0 - Wx2)*(1.0 - Wy2);
+		bunemanJz[i][j+1][0] += Fz2*(1.0 - Wx2)*Wy2;
+		bunemanJz[i+1][j][0] += Fz2*Wx2*(1.0 - Wy2);
+		bunemanJz[i+1][j+1][0] += Fz2*Wx2*Wy2;
 		
 	} else if(dimensionType == TWO_D_XZ) {
 		if(i != previ) {
-			xr = max2(xgrid[previ], xgrid[i]);
+			xr = max2(xgrid[previ], xgrid[i]) - xgrid[0];
 		}
 		if(k != prevk) {
-			zr = max2(zgrid[prevk], zgrid[k]);
+			zr = max2(zgrid[prevk], zgrid[k]) - zgrid[0];
 		}
 
 		double Fx1 = fullChargeDensity*(xr - prevLocalCoordinates.x)/deltaT;
@@ -192,26 +191,26 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 
 		bunemanJx[previ][0][prevk] += Fx1*(1.0 - Wz1);
 		bunemanJx[previ][0][prevk+1] += Fx1*Wz1;
-		bunemanJz[previ][0][prevk] += Fy1*(1.0 - Wx1);
-		bunemanJz[previ+1][0][prevk] += Fy1*Wx1;
+		bunemanJz[previ][0][prevk] += Fz1*(1.0 - Wx1);
+		bunemanJz[previ+1][0][prevk] += Fz1*Wx1;
 
-		bunemanJy[previ][0][prevk] = Fz1*(1 - Wx1)*(1 - Wz1);
-		bunemanJy[previ][0][prevk+1] = Fz1*(1 - Wx1)*Wz1;
-		bunemanJy[previ+1][0][prevk] = Fz1*Wx1*(1 - Wz1);
-		bunemanJy[previ+1][0][prevj+k] = Fz1*Wx1*Wz1;
+		bunemanJy[previ][0][prevk] += Fy1*(1 - Wx1)*(1 - Wz1);
+		bunemanJy[previ][0][prevk+1] += Fy1*(1 - Wx1)*Wz1;
+		bunemanJy[previ+1][0][prevk] += Fy1*Wx1*(1 - Wz1);
+		bunemanJy[previ+1][0][prevj+k] += Fy1*Wx1*Wz1;
 
 		bunemanJx[i][0][k] += Fx2*(1.0 - Wz2);
 		bunemanJx[i][0][k+1] += Fx2*Wz2;
-		bunemanJz[i][0][k] += Fy2*(1.0 - Wx2);
-		bunemanJz[i+1][0][k] += Fy2*Wx2;
+		bunemanJz[i][0][k] += Fz2*(1.0 - Wx2);
+		bunemanJz[i+1][0][k] += Fz2*Wx2;
 
-		bunemanJy[i][0][k] = Fz2*(1.0 - Wx2)*(1.0 - Wz2);
-		bunemanJy[i][0][k+1] = Fz2*(1.0 - Wx2)*Wz2;
-		bunemanJy[i+1][0][k] = Fz2*Wx2*(1.0 - Wz2);
-		bunemanJy[i+1][0][k+1] = Fz2*Wx2*Wz2;
+		bunemanJy[i][0][k] += Fy2*(1.0 - Wx2)*(1.0 - Wz2);
+		bunemanJy[i][0][k+1] += Fy2*(1.0 - Wx2)*Wz2;
+		bunemanJy[i+1][0][k] += Fy2*Wx2*(1.0 - Wz2);
+		bunemanJy[i+1][0][k+1] += Fy2*Wx2*Wz2;
 	} else if(dimensionType == ONE_D) {
 		if(i != previ) {
-			xr = max2(xgrid[previ], xgrid[i]);
+			xr = max2(xgrid[previ], xgrid[i]) - xgrid[0];
 		}
 
 		double Fx1 = fullChargeDensity*(xr - prevLocalCoordinates.x)/deltaT;
@@ -229,16 +228,16 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		bunemanJy[previ][0][0] += Fy1*(1.0 - Wx1);
 		bunemanJy[previ+1][0][0] += Fy1*Wx1;
 
-		bunemanJz[previ][0][0] = Fz1*(1 - Wx1);
-		bunemanJz[previ+1][0][0] = Fz1*Wx1;
+		bunemanJz[previ][0][0] += Fz1*(1 - Wx1);
+		bunemanJz[previ+1][0][0] += Fz1*Wx1;
 
 		bunemanJx[i][0][0] += Fx2;
 
 		bunemanJy[i][0][0] += Fy2*(1.0 - Wx2);
 		bunemanJy[i+1][0][0] += Fy2*Wx2;
 
-		bunemanJz[i][0][0] = Fz2*(1 - Wx2);
-		bunemanJz[i+1][0][0] = Fz2*Wx2;
+		bunemanJz[i][0][0] += Fz2*(1 - Wx2);
+		bunemanJz[i+1][0][0] += Fz2*Wx2;
 	}
 }
 

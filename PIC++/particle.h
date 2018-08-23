@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "particleTypes.h"
 #include "constants.h"
 #include "constants.h"
 #include "matrix3d.h"
@@ -10,8 +11,7 @@
 
 class Matrix3d;
 class Vector3d;
-
-enum ParticleTypes {ELECTRON, PROTON, POSITRON, ALPHA, DEUTERIUM, HELIUM3, OXYGEN_PLUS3, SILICON_PLUS1};
+class Simulation;
 
 class ParticleTypeContainer {
 public:

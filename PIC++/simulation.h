@@ -5,6 +5,7 @@
 #include <string>
 #include "stdlib.h"
 #include "constants.h"
+#include "particleTypes.h"
 #include "stdio.h"
 #include "vector"
 #include "list"
@@ -27,7 +28,6 @@ class Matrix3d;
 class Vector3d;
 class Particle;
 class ParticleTypeContainer;
-enum ParticleTypes;
 
 class Simulation {
 private:
@@ -737,7 +737,6 @@ public:
 	void simulate();
 	void output();
 	void resetBunemanFieldToCellVectorParameter(double*** bunemanEx, double*** bunemanEy, double*** bunemanEz);
-	void outputBuneman();
 	void outputTrajectories();
 	void outputBackup();
 	void rescaleConstants();
