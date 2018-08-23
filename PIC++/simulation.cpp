@@ -401,7 +401,7 @@ void Simulation::output() {
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if ((rank == 0) && (verbosity > 0)) printf("outputing iteration number %d\n", currentIteration);
+	if ((rank == 0)) printf("outputing iteration number %d\n", currentIteration);
 	if ((rank == 0) && (verbosity > 0)) printLog("collecting most accelerate particles\n");
 	collectMostAcceleratedParticles();
 	if ((rank == 0) && (verbosity > 0)) printLog("outputing\n");
@@ -472,7 +472,7 @@ void Simulation::output() {
 		if (coordY == cartCoord[1]) {
 			int yindex = getLocalIndexByAbsoluteY(ynumberGeneral / 2);
 			if (verbosity > 2) printf("y local index = %d\n", yindex);
-			outputVectorCellArrayCrossectionYZ((outputDir + "EfieldXZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
+			outputVectorCellArrayCrossectionXZ((outputDir + "EfieldXZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
 			                                   additionalBinNumber, cartCommXZ, cartCommZ, cartCoord, cartDim, yindex, multiplyFileOutput, fieldScale);
 		}
 		MPI_Barrier(cartComm);
@@ -481,7 +481,7 @@ void Simulation::output() {
 		if (coordZ == cartCoord[2]) {
 			int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 			if (verbosity > 2) printf("z local index = %d\n", zindex);
-			outputVectorCellArrayCrossectionYZ((outputDir + "EfieldXY.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
+			outputVectorCellArrayCrossectionXY((outputDir + "EfieldXY.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
 			                                   additionalBinNumber, cartCommXY, cartCommY, cartCoord, cartDim, zindex, multiplyFileOutput, fieldScale);
 		}
 		MPI_Barrier(cartComm);
@@ -503,7 +503,7 @@ void Simulation::output() {
 			int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 			if (verbosity > 2) printf("x local index = %d\n", xindex);
 			if (verbosity > 2) printf("z local index = %d\n", zindex);
-			outputVectorCellArrayLineX((outputDir + "EfieldY.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
+			outputVectorCellArrayLineY((outputDir + "EfieldY.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
 			                           additionalBinNumber, cartCommY, cartCoord, cartDim, xindex, zindex, multiplyFileOutput, fieldScale);
 		}
 		MPI_Barrier(cartComm);
@@ -514,7 +514,7 @@ void Simulation::output() {
 			int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
 			if (verbosity > 2) printf("y local index = %d\n", yindex);
 			if (verbosity > 2) printf("x local index = %d\n", xindex);
-			outputVectorCellArrayLineX((outputDir + "EfieldZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
+			outputVectorCellArrayLineZ((outputDir + "EfieldZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
 			                           additionalBinNumber, cartCommZ, cartCoord, cartDim, xindex, yindex, multiplyFileOutput, fieldScale);
 		}
 		MPI_Barrier(cartComm);
@@ -537,7 +537,7 @@ void Simulation::output() {
 		if (coordY == cartCoord[1]) {
 			int yindex = getLocalIndexByAbsoluteY(ynumberGeneral / 2);
 			if (verbosity > 2) printf("y local index = %d\n", yindex);
-			outputVectorCellArrayCrossectionYZ((outputDir + "BfieldXZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
+			outputVectorCellArrayCrossectionXZ((outputDir + "BfieldXZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
 			                                   additionalBinNumber, cartCommXZ, cartCommZ, cartCoord, cartDim, yindex, multiplyFileOutput, fieldScale);
 		}
 		MPI_Barrier(cartComm);
@@ -546,7 +546,7 @@ void Simulation::output() {
 		if (coordZ == cartCoord[2]) {
 			int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 			if (verbosity > 2) printf("z local index = %d\n", zindex);
-			outputVectorCellArrayCrossectionYZ((outputDir + "BfieldXY.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
+			outputVectorCellArrayCrossectionXY((outputDir + "BfieldXY.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
 			                                   additionalBinNumber, cartCommXY, cartCommY, cartCoord, cartDim, zindex, multiplyFileOutput, fieldScale);
 		}
 		MPI_Barrier(cartComm);
@@ -568,7 +568,7 @@ void Simulation::output() {
 			int zindex = getLocalIndexByAbsoluteZ(znumberGeneral / 2);
 			if (verbosity > 2) printf("x local index = %d\n", xindex);
 			if (verbosity > 2) printf("z local index = %d\n", zindex);
-			outputVectorCellArrayLineX((outputDir + "BfieldY.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
+			outputVectorCellArrayLineY((outputDir + "BfieldY.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
 			                           additionalBinNumber, cartCommY, cartCoord, cartDim, xindex, zindex, multiplyFileOutput, fieldScale);
 		}
 		MPI_Barrier(cartComm);
@@ -579,7 +579,7 @@ void Simulation::output() {
 			int xindex = getLocalIndexByAbsoluteX(xnumberGeneral / 2);
 			if (verbosity > 2) printf("y local index = %d\n", yindex);
 			if (verbosity > 2) printf("x local index = %d\n", xindex);
-			outputVectorCellArrayLineX((outputDir + "BfieldZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
+			outputVectorCellArrayLineZ((outputDir + "BfieldZ.dat").c_str(), tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded,
 			                           additionalBinNumber, cartCommZ, cartCoord, cartDim, xindex, yindex, multiplyFileOutput, fieldScale);
 		}
 		MPI_Barrier(cartComm);
