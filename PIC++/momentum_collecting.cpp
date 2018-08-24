@@ -101,31 +101,37 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		double Wx2 = (localCoordinates.x + xr)/(2*deltaX) - i;
 		double Wy2 = (localCoordinates.y + yr)/(2*deltaY) - j;
 		double Wz2 = (localCoordinates.z + zr)/(2*deltaZ) - k;
+		double onemWx1 = 1.0 - Wx1;
+		double onemWy1 = 1.0 - Wy1;
+		double onemWz1 = 1.0 - Wz1;
+		double onemWx2 = 1.0 - Wx2;
+		double onemWy2 = 1.0 - Wy2;
+		double onemWz2 = 1.0 - Wz2;
 
-		bunemanJx[previ][prevj][prevk] += Fx1*(1.0 - Wy1)*(1.0 - Wz1);
-		bunemanJx[previ][prevj+1][prevk] += Fx1*Wy1*(1 - Wz1);
-		bunemanJx[previ][prevj][prevk+1] += Fx1*(1.0 - Wy1)*Wz1;
+		bunemanJx[previ][prevj][prevk] += Fx1*onemWy1*onemWz1;
+		bunemanJx[previ][prevj+1][prevk] += Fx1*Wy1*onemWz1;
+		bunemanJx[previ][prevj][prevk+1] += Fx1*onemWy1*Wz1;
 		bunemanJx[previ][prevj+1][prevk+1] += Fx1*Wy1*Wz1;
-		bunemanJy[previ][prevj][prevk] += Fy1*(1.0 - Wx1)*(1.0 - Wz1);
-		bunemanJy[previ+1][prevj][prevk] += Fy1*Wx1*(1.0 - Wz1);
-		bunemanJy[previ][prevj][prevk+1] += Fy1*(1.0 - Wx1)*Wz1;
+		bunemanJy[previ][prevj][prevk] += Fy1*onemWx1*onemWz1;
+		bunemanJy[previ+1][prevj][prevk] += Fy1*Wx1*onemWz1;
+		bunemanJy[previ][prevj][prevk+1] += Fy1*onemWx1*Wz1;
 		bunemanJy[previ+1][prevj][prevk+1] += Fy1*Wx1*Wz1;
-		bunemanJz[previ][prevj][prevk] += Fz1*(1.0 - Wx1)*(1.0 - Wy1);
-		bunemanJz[previ][prevj+1][prevk] += Fz1*(1.0 - Wx1)*Wy1;
-		bunemanJz[previ+1][prevj][prevk] += Fz1*Wx1*(1.0 - Wy1);
+		bunemanJz[previ][prevj][prevk] += Fz1*onemWx1*onemWy1;
+		bunemanJz[previ][prevj+1][prevk] += Fz1*onemWx1*Wy1;
+		bunemanJz[previ+1][prevj][prevk] += Fz1*Wx1*onemWy1;
 		bunemanJz[previ+1][prevj+1][prevk] += Fz1*Wx1*Wy1;
 
-		bunemanJx[i][j][k] += Fx2*(1.0 - Wy2)*(1.0 - Wz2);
-		bunemanJx[i][j+1][k] += Fx2*Wy2*(1.0 - Wz2);
-		bunemanJx[i][j][k+1] += Fx2*(1.0 - Wy2)*Wz2;
+		bunemanJx[i][j][k] += Fx2*onemWy2*onemWz2;
+		bunemanJx[i][j+1][k] += Fx2*Wy2*onemWz2;
+		bunemanJx[i][j][k+1] += Fx2*onemWy2*Wz2;
 		bunemanJx[i][j+1][k+1] += Fx2*Wy2*Wz2;
-		bunemanJy[i][j][k] += Fy2*(1.0 - Wx2)*(1.0 - Wz2);
-		bunemanJy[i+1][j][k] += Fy2*Wx2*(1.0 - Wz2);
-		bunemanJy[i][j][k+1] += Fy2*(1.0 - Wx2)*Wz2;
+		bunemanJy[i][j][k] += Fy2*onemWx2*onemWz2;
+		bunemanJy[i+1][j][k] += Fy2*Wx2*onemWz2;
+		bunemanJy[i][j][k+1] += Fy2*onemWx2*Wz2;
 		bunemanJy[i+1][j][k+1] += Fy2*Wx2*Wz2;
-		bunemanJz[i][j][k] += Fz2*(1.0 - Wx2)*(1.0 - Wy2);
-		bunemanJz[i][j+1][k] += Fz2*(1.0 - Wx2)*Wy2;
-		bunemanJz[i+1][j][k] += Fz2*Wx2*(1.0 - Wy2);
+		bunemanJz[i][j][k] += Fz2*onemWx2*onemWy2;
+		bunemanJz[i][j+1][k] += Fz2*onemWx2*Wy2;
+		bunemanJz[i+1][j][k] += Fz2*Wx2*onemWy2;
 		bunemanJz[i+1][j+1][k] += Fz2*Wx2*Wy2;
 		
 	} else if(dimensionType == TWO_D_XY) {
@@ -149,24 +155,29 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		double Wx2 = (localCoordinates.x + xr)/(2*deltaX) - i;
 		double Wy2 = (localCoordinates.y + yr)/(2*deltaY) - j;
 
-		bunemanJx[previ][prevj][0] += Fx1*(1.0 - Wy1);
+		double onemWx1 = 1.0 - Wx1;
+		double onemWy1 = 1.0 - Wy1;
+		double onemWx2 = 1.0 - Wx2;
+		double onemWy2 = 1.0 - Wy2;
+
+		bunemanJx[previ][prevj][0] += Fx1*onemWy1;
 		bunemanJx[previ][prevj+1][0] += Fx1*Wy1;
-		bunemanJy[previ][prevj][0] += Fy1*(1.0 - Wx1);
+		bunemanJy[previ][prevj][0] += Fy1*onemWx1;
 		bunemanJy[previ+1][prevj][0] += Fy1*Wx1;
 
-		bunemanJz[previ][prevj][0] += Fz1*(1 - Wx1)*(1 - Wy1);
-		bunemanJz[previ][prevj+1][0] += Fz1*(1 - Wx1)*Wy1;
-		bunemanJz[previ+1][prevj][0] += Fz1*Wx1*(1 - Wy1);
+		bunemanJz[previ][prevj][0] += Fz1*onemWx1*onemWy1;
+		bunemanJz[previ][prevj+1][0] += Fz1*onemWx1*Wy1;
+		bunemanJz[previ+1][prevj][0] += Fz1*Wx1*onemWy1;
 		bunemanJz[previ+1][prevj+1][0] += Fz1*Wx1*Wy1;
 
-		bunemanJx[i][j][0] += Fx2*(1.0 - Wy2);
+		bunemanJx[i][j][0] += Fx2*onemWy2;
 		bunemanJx[i][j+1][0] += Fx2*Wy2;
-		bunemanJy[i][j][0] += Fy2*(1.0 - Wx2);
+		bunemanJy[i][j][0] += Fy2*onemWx2;
 		bunemanJy[i+1][j][0] += Fy2*Wx2;
 
-		bunemanJz[i][j][0] += Fz2*(1.0 - Wx2)*(1.0 - Wy2);
-		bunemanJz[i][j+1][0] += Fz2*(1.0 - Wx2)*Wy2;
-		bunemanJz[i+1][j][0] += Fz2*Wx2*(1.0 - Wy2);
+		bunemanJz[i][j][0] += Fz2*onemWx2*onemWy2;
+		bunemanJz[i][j+1][0] += Fz2*onemWx2*Wy2;
+		bunemanJz[i+1][j][0] += Fz2*Wx2*onemWy2;
 		bunemanJz[i+1][j+1][0] += Fz2*Wx2*Wy2;
 		
 	} else if(dimensionType == TWO_D_XZ) {
@@ -188,25 +199,29 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		double Wz1 = (prevLocalCoordinates.z + zr)/(2*deltaZ) - prevk;
 		double Wx2 = (localCoordinates.x + xr)/(2*deltaX) - i;
 		double Wz2 = (localCoordinates.z + zr)/(2*deltaZ) - k;
+		double onemWx1 = 1.0 - Wx1;
+		double onemWz1 = 1.0 - Wz1;
+		double onemWx2 = 1.0 - Wx2;
+		double onemWz2 = 1.0 - Wz2;
 
-		bunemanJx[previ][0][prevk] += Fx1*(1.0 - Wz1);
+		bunemanJx[previ][0][prevk] += Fx1*onemWz1;
 		bunemanJx[previ][0][prevk+1] += Fx1*Wz1;
-		bunemanJz[previ][0][prevk] += Fz1*(1.0 - Wx1);
+		bunemanJz[previ][0][prevk] += Fz1*onemWx1;
 		bunemanJz[previ+1][0][prevk] += Fz1*Wx1;
 
-		bunemanJy[previ][0][prevk] += Fy1*(1 - Wx1)*(1 - Wz1);
-		bunemanJy[previ][0][prevk+1] += Fy1*(1 - Wx1)*Wz1;
-		bunemanJy[previ+1][0][prevk] += Fy1*Wx1*(1 - Wz1);
+		bunemanJy[previ][0][prevk] += Fy1*onemWx1*onemWz1;
+		bunemanJy[previ][0][prevk+1] += Fy1*onemWx1*Wz1;
+		bunemanJy[previ+1][0][prevk] += Fy1*Wx1*onemWz1;
 		bunemanJy[previ+1][0][prevj+k] += Fy1*Wx1*Wz1;
 
-		bunemanJx[i][0][k] += Fx2*(1.0 - Wz2);
+		bunemanJx[i][0][k] += Fx2*onemWz2;
 		bunemanJx[i][0][k+1] += Fx2*Wz2;
-		bunemanJz[i][0][k] += Fz2*(1.0 - Wx2);
+		bunemanJz[i][0][k] += Fz2*onemWx2;
 		bunemanJz[i+1][0][k] += Fz2*Wx2;
 
-		bunemanJy[i][0][k] += Fy2*(1.0 - Wx2)*(1.0 - Wz2);
-		bunemanJy[i][0][k+1] += Fy2*(1.0 - Wx2)*Wz2;
-		bunemanJy[i+1][0][k] += Fy2*Wx2*(1.0 - Wz2);
+		bunemanJy[i][0][k] += Fy2*onemWx2*onemWz2;
+		bunemanJy[i][0][k+1] += Fy2*onemWx2*Wz2;
+		bunemanJy[i+1][0][k] += Fy2*Wx2*onemWz2;
 		bunemanJy[i+1][0][k+1] += Fy2*Wx2*Wz2;
 	} else if(dimensionType == ONE_D) {
 		if(i != previ) {
@@ -246,9 +261,6 @@ void Simulation::updateElectroMagneticParameters() {
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if (solverType == BUNEMAN) {
-		updateBunemanFlux();
-	} else {
 		//MPI_Barrier(cartComm);
 		if ((rank == 0) && (verbosity > 0)) printf("updating flux, density snd dielectric tensor\n");
 		if ((rank == 0) && (verbosity > 0)) printLog("updating flux, density and dielectric tensor\n");
@@ -262,21 +274,6 @@ void Simulation::updateElectroMagneticParameters() {
 					dielectricTensor[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 					divPressureTensor[i][j][k] = Vector3d(0, 0, 0);
 					divPressureTensorMinus[i][j][k] = Vector3d(0, 0, 0);
-
-					if(solverType == IMPLICIT_EC){
-					for (int tempI = 0; tempI < 2 * splineOrder + 3; ++tempI) {
-						for (int tempJ = 0; tempJ < 2 * splineOrder + 3; ++tempJ) {
-							for (int tempK = 0; tempK < 2 * splineOrder + 3; ++tempK) {
-								for (int curI = 0; curI < 3; ++curI) {
-									for (int curJ = 0; curJ < 3; ++curJ) {
-										massMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[curI][curJ] = 0;
-										tempMassMatrix[i][j][k].matrix[tempI][tempJ][tempK].matrix[curI][curJ] = 0;
-									}
-								}
-							}
-						}
-					}
-					}
 				}
 			}
 		}
@@ -284,6 +281,12 @@ void Simulation::updateElectroMagneticParameters() {
 		int crossBinNumberX = splineOrder + 2;
 		int crossBinNumberY = splineOrder + 2;
 		int crossBinNumberZ = splineOrder + 2;
+		if(ynumberGeneral == 1) {
+			crossBinNumberY = 1;
+		}
+		if(znumberGeneral == 1) {
+			crossBinNumberZ = 1;
+		}
 
 		for (int pcount = 0; pcount < particles.size(); ++pcount) {
 			Particle* particle = particles[pcount];
@@ -302,10 +305,28 @@ void Simulation::updateElectroMagneticParameters() {
 					for (int k = 0; k < crossBinNumberZ; ++k) {
 						int curI = particle->correlationMapNode.xindex[i];
 						int curJ = particle->correlationMapNode.yindex[j];
+						if(ynumberGeneral == 1) {
+							curJ = 0;
+						}
 						int curK = particle->correlationMapNode.zindex[k];
+						if(znumberGeneral == 1) {
+							curK = 0;
+						}
 
-						double correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] *
-							particle->correlationMapNode.zcorrelation[k] / volumeE();
+						double correlation;
+						switch(Simulation::dimensionType){
+							case DimensionType::THREE_D: correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k] / volumeE();
+								break;
+							case DimensionType::TWO_D_XY: correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j]/ volumeE();
+								break;
+							case DimensionType::TWO_D_XZ: correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.zcorrelation[k] / volumeE();
+								break;
+							case DimensionType::ONE_D: correlation =  particle->correlationMapNode.xcorrelation[i]/ volumeE();
+								break;
+							default: correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k] / volumeE();
+								break;				
+						}
+
 						double particleCharge = particle->charge * particle->weight;
 						if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
 							Particle tempParticle = *particle;
@@ -314,7 +335,7 @@ void Simulation::updateElectroMagneticParameters() {
 							tempVelocity.x = -tempVelocity.x;
 							//tempParticle.rotationTensor = evaluateAlphaRotationTensor(beta, velocity, gamma, oldE, oldB);
 							Vector3d tempRotatedVelocity = tempParticle.rotationTensor * (tempVelocity * gamma);
-							if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
+							if (solverType == IMPLICIT) {
 								if (particleCharge > 0) {
 									electricFlux[2 + 2 * additionalBinNumber - curI][curJ][curK] += tempRotatedVelocity * (particleCharge * correlation);																
 								} else {
@@ -329,38 +350,7 @@ void Simulation::updateElectroMagneticParameters() {
 							}
 						} else {
 
-							if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
-								if (solverType == IMPLICIT_EC) {
-									for (int tempI = 0; tempI < splineOrder + 2; ++tempI) {
-										for (int tempJ = 0; tempJ < splineOrder + 2; ++tempJ) {
-											for (int tempK = 0; tempK < splineOrder + 2; ++tempK) {
-												int xindex = particle->correlationMapNode.xindex[tempI];
-												int yindex = particle->correlationMapNode.yindex[tempJ];
-												int zindex = particle->correlationMapNode.zindex[tempK];
-
-												double tempCorrelation1 = particle->correlationMapNode.xcorrelation[tempI] * particle->correlationMapNode.
-												                              ycorrelation[tempJ] * particle->correlationMapNode.zcorrelation[tempK];
-
-												for (int tempI1 = 0; tempI1 < splineOrder + 2; ++tempI1) {
-													for (int tempJ1 = 0; tempJ1 < splineOrder + 2; ++tempJ1) {
-														for (int tempK1 = 0; tempK1 < splineOrder + 2; ++tempK1) {
-															double tempCorrelation2 = particle->correlationMapNode.xcorrelation[tempI1] * particle->correlationMapNode.
-															                              ycorrelation[tempJ1]*particle->correlationMapNode.zcorrelation[tempK1];
-															double doubleCorrelation = tempCorrelation1 * tempCorrelation2 / volumeE();
-															for (int l = 0; l < 3; ++l) {
-																for (int m = 0; m < 3; ++ m) {
-																	massMatrix[xindex][yindex][zindex].matrix[splineOrder + 1 - tempI + tempI1][splineOrder + 1 - tempJ + tempJ1][
-																			splineOrder + 1 - tempK + tempK1].matrix[l][m] += particle->rotationTensor.matrix[l][m] *particleOmega * doubleCorrelation;
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-
+							if (solverType == IMPLICIT) {
 								if (particleCharge > 0) {
 									electricFlux[curI][curJ][curK] += rotatedVelocity * (particleCharge * correlation);
 								} else {
@@ -434,10 +424,27 @@ void Simulation::updateElectroMagneticParameters() {
 					for (int k = 0; k < crossBinNumberZ; ++k) {
 						int curI = particle->correlationMapCell.xindex[i];
 						int curJ = particle->correlationMapCell.yindex[j];
+						if(ynumberGeneral == 0) {
+							curJ = 0;
+						}
 						int curK = particle->correlationMapCell.zindex[k];
+						if(znumberGeneral == 0) {
+							curK = 0;
+						}
 
-						double correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] *
-							particle->correlationMapCell.zcorrelation[k] / volumeB();
+						double correlation;
+						switch(Simulation::dimensionType){
+							case DimensionType::THREE_D: correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] * particle->correlationMapCell.zcorrelation[k] / volumeB();
+								break;
+							case DimensionType::TWO_D_XY: correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j]/ volumeB();
+								break;
+							case DimensionType::TWO_D_XZ: correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.zcorrelation[k] / volumeB();
+								break;
+							case DimensionType::ONE_D: correlation =  particle->correlationMapCell.xcorrelation[i]/ volumeB();
+								break;
+							default: correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] * particle->correlationMapCell.zcorrelation[k] / volumeB();
+								break;				
+						}
 						double particleCharge = particle->charge * particle->weight;
 
 
@@ -472,6 +479,7 @@ void Simulation::updateElectroMagneticParameters() {
 
 		if (rank == 0 && (verbosity > 0)) printf("start exchange parameters\n");
 		if ((verbosity > 1)) printf("sum charge density hat\n");
+		////todo geometry!!!!
 		//MPI_Barrier(cartComm);
 		sumChargeDensityHatX();
 		sumChargeDensityHatY();
@@ -481,17 +489,12 @@ void Simulation::updateElectroMagneticParameters() {
 		sumCellMatrixParametersX();
 		sumCellMatrixParametersY();
 		sumCellMatrixParametersZ();
+
 		if ((verbosity > 1)) printf("sum node vector parameters\n");
 		//MPI_Barrier(cartComm);
 		sumNodeVectorParametersX();
 		sumNodeVectorParametersY();
 		sumNodeVectorParametersZ();
-
-		if (solverType == IMPLICIT_EC) {
-			sumNodeMassMatrixParametersX();
-			sumNodeMassMatrixParametersY();
-			sumNodeMassMatrixParametersZ();
-		}
 
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -511,7 +514,7 @@ void Simulation::updateElectroMagneticParameters() {
 			}
 		}
 
-		if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
+		if (solverType == IMPLICIT) {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -539,7 +542,7 @@ void Simulation::updateElectroMagneticParameters() {
 
 		//here for evaluating div J
 
-		if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
+		if (solverType == IMPLICIT) {
 			int minI = 0;
 			/*if(boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0){
 				minI = 2 + additionalBinNumber;
@@ -640,7 +643,6 @@ void Simulation::updateElectroMagneticParameters() {
 				}
 			}
 		}*/
-	}
 	if ((verbosity > 1)) printf("finish updating electromagnetic parameters\n");
 	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
@@ -675,15 +677,31 @@ void Simulation::updateDensityParameters() {
 		}
 	}
 
+	int crossBinNumberX = splineOrder + 2;
+	int crossBinNumberY = splineOrder + 2;
+	int crossBinNumberZ = splineOrder + 2;
+	if(ynumberGeneral == 1) {
+		crossBinNumberY = 1;
+	}
+	if(znumberGeneral == 1) {
+		crossBinNumberZ = 1;
+	}
+
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
-		for (int i = 0; i < splineOrder + 2; ++i) {
+		for (int i = 0; i < crossBinNumberX; ++i) {
 			//todo
-			for (int j = 0; j < splineOrder + 2; ++j) {
-				for (int k = 0; k < splineOrder + 2; ++k) {
+			for (int j = 0; j < crossBinNumberY; ++j) {
+				for (int k = 0; k < crossBinNumberZ; ++k) {
 					int curI = particle->correlationMapCell.xindex[i];
 					int curJ = particle->correlationMapCell.yindex[j];
+					if(ynumberGeneral == 0) {
+						curJ = 0;
+					}
 					int curK = particle->correlationMapCell.zindex[k];
+					if(znumberGeneral == 0) {
+						curK = 0;
+					}
 					if (curI < 0) {
 						printf("curI < 0 %d particle number = %d\n", curI, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
@@ -738,8 +756,19 @@ void Simulation::updateDensityParameters() {
 						MPI_Finalize();
 						exit(0);
 					}
-					double correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] *
-						particle->correlationMapCell.zcorrelation[k] / volumeB();
+					double correlation;
+					switch(Simulation::dimensionType){
+						case DimensionType::THREE_D: correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] * particle->correlationMapCell.zcorrelation[k] / volumeB();
+							break;
+						case DimensionType::TWO_D_XY: correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j]/ volumeB();
+							break;
+						case DimensionType::TWO_D_XZ: correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.zcorrelation[k] / volumeB();
+							break;
+						case DimensionType::ONE_D: correlation =  particle->correlationMapCell.xcorrelation[i]/ volumeB();
+							break;
+						default: correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] * particle->correlationMapCell.zcorrelation[k] / volumeB();
+							break;				
+					}
 					double particleCharge = particle->charge * particle->weight;
 					int typeN = getTypeNumber(particle);
 
@@ -889,15 +918,31 @@ void Simulation::updateBunemanChargeDensity() {
 		}
 	}
 
+	int crossBinNumberX = splineOrder + 2;
+	int crossBinNumberY = splineOrder + 2;
+	int crossBinNumberZ = splineOrder + 2;
+	if(ynumberGeneral == 1) {
+		crossBinNumberY = 1;
+	}
+	if(znumberGeneral == 1) {
+		crossBinNumberZ = 1;
+	}
+
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
-		for (int i = 0; i < splineOrder + 2; ++i) {
+		for (int i = 0; i < crossBinNumberX; ++i) {
 			//todo
-			for (int j = 0; j < splineOrder + 2; ++j) {
-				for (int k = 0; k < splineOrder + 2; ++k) {
+			for (int j = 0; j < crossBinNumberY; ++j) {
+				for (int k = 0; k < crossBinNumberZ; ++k) {
 					int curI = particle->correlationMapNode.xindex[i];
 					int curJ = particle->correlationMapNode.yindex[j];
+					if(ynumberGeneral == 1) {
+						curJ = 0;
+					}
 					int curK = particle->correlationMapNode.zindex[k];
+					if(znumberGeneral == 1) {
+						curK = 0;
+					}
 					if (curI < 0) {
 						printf("curI < 0 %d particle number = %d\n", curI, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
@@ -952,8 +997,19 @@ void Simulation::updateBunemanChargeDensity() {
 						MPI_Finalize();
 						exit(0);
 					}
-					double correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] *
-						particle->correlationMapNode.zcorrelation[k] / volumeB();
+					double correlation;
+					switch(Simulation::dimensionType){
+						case DimensionType::THREE_D: correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k] / volumeE();
+							break;
+						case DimensionType::TWO_D_XY: correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j]/ volumeE();
+							break;
+						case DimensionType::TWO_D_XZ: correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.zcorrelation[k] / volumeE();
+							break;
+						case DimensionType::ONE_D: correlation =  particle->correlationMapNode.xcorrelation[i]/ volumeE();
+							break;
+						default: correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k] / volumeE();
+							break;				
+					}
 					double particleCharge = particle->charge * particle->weight;
 
 					if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
@@ -968,33 +1024,6 @@ void Simulation::updateBunemanChargeDensity() {
 	sumNodeParametersX();
 	sumNodeParametersY();
 	sumNodeParametersZ();
-}
-
-void Simulation::smoothDensity() {
-	//todo
-	for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-		for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
-			double newLeftDensity = (chargeDensityHat[0][j][k] + chargeDensityHat[1][j][k]) / 2.0;
-			double newRightDensity = (chargeDensityHat[xnumberAdded - 1][j][k] + chargeDensityHat[xnumberAdded - 2][j][k]) / 2.0;
-			if (boundaryConditionTypeX == PERIODIC) {
-				newLeftDensity = (chargeDensityHat[xnumberAdded - 1][j][k] + 2.0 * chargeDensityHat[0][j][k] + chargeDensityHat[1][j
-				][k]) / 4.0;
-				newRightDensity = (chargeDensityHat[xnumberAdded - 2][j][k] + 2.0 * chargeDensityHat[xnumberAdded - 1][j][k] +
-					chargeDensityHat[0][j][k]) / 4.0;
-			}
-			double prevDensity = chargeDensityHat[0][j][k];
-			for (int i = 1; i < xnumberAdded - 1; ++i) {
-				double tempDensity = chargeDensityHat[i][j][k];
-
-				chargeDensityHat[i][j][k] = (prevDensity + 2.0 * chargeDensityHat[i][j][k] + chargeDensityHat[i + 1][j][k]) / 4.0;
-
-				prevDensity = tempDensity;
-			}
-
-			chargeDensityHat[0][j][k] = newLeftDensity;
-			chargeDensityHat[xnumberAdded - 1][j][k] = newRightDensity;
-		}
-	}
 }
 
 void Simulation::updateExternalFlux() {
@@ -1014,103 +1043,6 @@ void Simulation::updateExternalFlux() {
 			for (int k = 0; k < znumberAdded + 1; ++k) {
 				externalElectricFlux[i][j][k] = Vector3d(0, 0, 1.0) * extJ * cos(kw * xgrid[i] - omega * time);
 				//alertNaNOrInfinity(externalElectricFlux[i][j][k].x, "externalFlux.x = NaN\n");
-			}
-		}
-	}
-}
-
-void Simulation::updateBunemanFlux() {
-	double procTime = 0;
-	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-		procTime = clock();
-	}
-	//MPI_Barrier(cartComm);
-	if ((rank == 0) && (verbosity > 0)) printf("updating buneman flux\n");
-	if ((rank == 0) && (verbosity > 0)) printLog("updating buneman flux\n");
-	int particlePartsCount = 0;
-	for (int i = 0; i < xnumberAdded; ++i) {
-		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				bunemanJx[i][j][k] = 0;
-			}
-		}
-	}
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		for (int j = 0; j < ynumberAdded; ++j) {
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				bunemanJy[i][j][k] = 0;
-			}
-		}
-	}
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			for (int k = 0; k < znumberAdded; ++k) {
-				bunemanJz[i][j][k] = 0;
-			}
-		}
-	}
-
-	int crossBinNumberX = splineOrder + 2;
-	int crossBinNumberY = splineOrder + 2;
-	int crossBinNumberZ = splineOrder + 2;
-
-	for (int pcount = 0; pcount < particles.size(); ++pcount) {
-		Particle* particle = particles[pcount];
-		Vector3d uVelocity = (particle->getMomentum() + particle->prevMomentum) / (2.0 * particle->mass);
-		double tempGamma = sqrt(1.0 + uVelocity.scalarMult(uVelocity) / speed_of_light_normalized_sqr);
-		Vector3d velocity = uVelocity / tempGamma;
-		double particleCharge = particle->charge * particle->weight;
-		for (int i = 0; i < crossBinNumberX; ++i) {
-			for (int j = 0; j < crossBinNumberY; ++j) {
-				for (int k = 0; k < crossBinNumberZ; ++k) {
-					int curI = particle->correlationMapCell.xindex[i];
-					int curJ = particle->correlationMapNode.yindex[j];
-					int curK = particle->correlationMapNode.zindex[k];
-
-					double correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] *
-						particle->correlationMapNode.zcorrelation[k] / volumeE();
-
-					if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
-						velocity.x = -velocity.x;
-						bunemanJx[2 + 2 * additionalBinNumber - curI][curJ][curK] += velocity.x * (particleCharge * correlation);
-					} else {
-						bunemanJx[curI][curJ][curK] += velocity.x * (particleCharge * correlation);
-					}
-
-					curI = particle->correlationMapNode.xindex[i];
-					curJ = particle->correlationMapCell.yindex[j];
-					curK = particle->correlationMapNode.zindex[k];
-
-					correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] *
-						particle->correlationMapNode.zcorrelation[k] / volumeE();
-					if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
-						bunemanJy[2 + 2 * additionalBinNumber - curI][curJ][curK] += velocity.y * (particleCharge * correlation);
-					} else {
-						bunemanJy[curI][curJ][curK] += velocity.y * (particleCharge * correlation);
-					}
-
-					curI = particle->correlationMapNode.xindex[i];
-					curJ = particle->correlationMapNode.yindex[j];
-					curK = particle->correlationMapCell.zindex[k];
-
-					correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] *
-						particle->correlationMapCell.zcorrelation[k] / volumeE();
-					if (curI <= additionalBinNumber && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && cartCoord[0] == 0) {
-						bunemanJz[2 + 2 * additionalBinNumber - curI][curJ][curK] += velocity.z * (particleCharge * correlation);
-					} else {
-						bunemanJz[curI][curJ][curK] += velocity.z * (particleCharge * correlation);
-					}
-				}
-			}
-		}
-	}
-
-	exchangeBunemanFlux();
-
-	for (int i = 0; i < xnumberAdded; ++i) {
-		for (int j = 0; j < ynumberAdded; ++j) {
-			for (int k = 0; k < znumberAdded; ++k) {
-				electricFlux[i][j][k] = getBunemanFlux(i, j, k);
 			}
 		}
 	}

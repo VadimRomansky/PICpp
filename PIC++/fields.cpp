@@ -119,7 +119,7 @@ void Simulation::evaluateElectricField() {
 	} else {
 		//fopen("./output/outputEverythingFile.dat","a");
 
-		if (solverType == IMPLICIT || solverType == IMPLICIT_EC) {
+		if (solverType == IMPLICIT) {
 			evaluateMaxwellEquationMatrix();
 			//outputVectorCellArray((outputDir + "rightPart.dat").c_str(), maxwellEquationRightPart, xnumberAdded, ynumberAdded, znumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim);
 			//maxwellMatrixFile = fopen("./output/maxwellMatrixFile.dat", "w");
@@ -2613,9 +2613,6 @@ void Simulation::createInternalEquation(int i, int j, int k) {
 			) -
 			(gradDensity * speed_of_light_normalized_sqr * speed_of_light_correction_sqr * theta * theta * deltaT * deltaT * 4 *
 				pi);
-	} else if (solverType == IMPLICIT_EC) {
-		rightPart = rightPart +
-			(rotorB * speed_of_light_normalized - (electricFlux[i][j][k] * 4 * pi)) * (theta * deltaT);
 	} else {
 		printf("wrong soler type in create internal equation\n");
 		MPI_Finalize();
@@ -2630,10 +2627,6 @@ void Simulation::createInternalEquation(int i, int j, int k) {
 		createInternalEquationX(i, j, k);
 		createInternalEquationY(i, j, k);
 		createInternalEquationZ(i, j, k);
-	} else if (solverType == IMPLICIT_EC) {
-		createInternalECEquationX(i, j, k);
-		createInternalECEquationY(i, j, k);
-		createInternalECEquationZ(i, j, k);
 	} else {
 		printf("wrong solver type in create internal equation\n");
 		MPI_Finalize();

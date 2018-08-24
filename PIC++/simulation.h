@@ -16,7 +16,7 @@
 class MatrixElement;
 class Complex;
 
-enum SolverType {EXPLICIT, IMPLICIT, IMPLICIT_EC, BUNEMAN};
+enum SolverType {EXPLICIT, IMPLICIT, BUNEMAN};
 
 enum InputType {CGS, Theoretical};
 
@@ -45,6 +45,7 @@ public:
 	static double speed_of_light_normalized_sqr;
 	static double kBoltzman_normalized;
 	static double electron_charge_normalized;
+	static DimensionType dimensionType;
 
 	int rank;
 	int cartCoord[MPI_dim];
@@ -162,7 +163,6 @@ public:
 	BoundaryConditionType boundaryConditionTypeX;
 	BoundaryConditionType boundaryConditionTypeY;
 	BoundaryConditionType boundaryConditionTypeZ;
-	DimensionType dimensionType;
 	int maxwellEquationMatrixSize;
 
 	double particleEnergy;

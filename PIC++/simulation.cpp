@@ -29,6 +29,7 @@ double Simulation::speed_of_light_normalized;
 double Simulation::speed_of_light_normalized_sqr;
 double Simulation::kBoltzman_normalized;
 double Simulation::electron_charge_normalized;
+DimensionType Simulation::dimensionType;
 
 void Simulation::simulate() {
 	MPI_Barrier(cartComm);

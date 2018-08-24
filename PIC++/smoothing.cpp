@@ -23,17 +23,39 @@ void Simulation::smoothCellParameter(double*** array) {
 		minI = 2 + additionalBinNumber;
 	}*/
 	int maxI = xnumberAdded - additionalBinNumber;
+	int minJ = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - additionalBinNumber - 1;
+	int minK = 1 + additionalBinNumber;
+	int maxK = znumberAdded - additionalBinNumber - 1;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 1;
+	}
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 1;
+	}
+
+
 	double smoothingmatrix[3][3][3];
 	createSmoothingMatrix(smoothingmatrix);
 
 	for (int i = minI; i < maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minJ; k < maxK; ++k) {
 				if (boundaryConditionTypeX == PERIODIC || ((i > 1 + additionalBinNumber) && (i < xnumberAdded - additionalBinNumber - 1))) {
 					tempCellParameter[i][j][k] = 0;
+					int jwidth = 1;
+					if(ynumberGeneral == 1) {
+						jwidth = 0;
+					}
+					int kwidth = 1;
+					if(znumberGeneral == 1) {
+						kwidth = 0;
+					}
 					for (int tempI = -1; tempI <= 1; ++tempI) {
-						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-							for (int tempK = -1; tempK <= 1; ++tempK) {
+						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
 								tempCellParameter[i][j][k] += array[i + tempI][j + tempJ][k + tempK] *smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 							}
 						}
@@ -62,8 +84,8 @@ void Simulation::smoothCellParameter(double*** array) {
 	}
 
 	for (int i = minI; i < maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				array[i][j][k] = tempCellParameter[i][j][k];
 			}
 		}
@@ -87,18 +109,26 @@ void Simulation::createSmoothingMatrix(double smoothingmatrix[3][3][3]) {
 			factorX = 1 - smoothingParameter;
 		}
 		for(int j = 0; j < 3; ++j) {
-			//double factorY = smoothingParameter/2;
-			double factorY = 0;
+			double factorY = smoothingParameter/2;
+			if(ynumberGeneral == 1){
+				factorY = 0;
+			}
 			if(j == 1) {
-				//factorY = 1 - smoothingParameter;
-				factorY = 1;
+				factorY = 1 - smoothingParameter;
+				if(ynumberGeneral == 1){
+					factorY = 1;
+				}
 			}
 			for(int k = 0; k < 3; ++k) {
-				//double factorZ = smoothingParameter/2;
-				double factorZ = 0;
+				double factorZ = smoothingParameter/2;
+				if(znumberGeneral == 1){
+					factorZ = 0;
+				}
 				if(k == 1) {
-					//factorZ = 1 - smoothingParameter;
-					factorZ = 1;
+					factorZ = 1 - smoothingParameter;
+					if(znumberGeneral == 1){
+						factorZ = 1;
+					}
 				}
 				smoothingmatrix[i][j][k] = factorX*factorY*factorZ;
 			}
@@ -112,18 +142,38 @@ void Simulation::smoothVectorNodeParameter(Vector3d*** E) {
 		minI = 2 + additionalBinNumber;
 	}
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
+	int minJ = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - additionalBinNumber;
+	int minK = 1 + additionalBinNumber;
+	int maxK = znumberAdded - additionalBinNumber;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 1;
+	}
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 1;
+	}
 
 	double smoothingmatrix[3][3][3];
 	createSmoothingMatrix(smoothingmatrix);
 
 	for (int i = minI; i <= maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				if (i > 1 + additionalBinNumber && i < xnumberAdded - 1 - additionalBinNumber) {
 					tempNodeVectorParameter[i][j][k] = Vector3d(0, 0, 0);
+					int jwidth = 1;
+					if(ynumberGeneral == 1) {
+						jwidth = 0;
+					}
+					int kwidth = 1;
+					if(znumberGeneral == 1) {
+						kwidth = 0;
+					}
 					for (int tempI = -1; tempI <= 1; ++tempI) {
-						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-							for (int tempK = -1; tempK <= 1; ++tempK) {
+						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
 								tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1+tempI][1+tempJ][1+tempK];
 							}
 						}
@@ -140,9 +190,17 @@ void Simulation::smoothVectorNodeParameter(Vector3d*** E) {
 						}*/
 					} else {
 						tempNodeVectorParameter[i][j][k] = Vector3d(0, 0, 0);
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
 									tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1+tempI][1+tempJ][1+tempK];
 								}
 							}
@@ -160,9 +218,17 @@ void Simulation::smoothVectorNodeParameter(Vector3d*** E) {
 						}*/
 					} else {
 						tempNodeVectorParameter[i][j][k] = Vector3d(0, 0, 0);
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
 									tempNodeVectorParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1+tempI][1+tempJ][1+tempK];
 								}
 							}
@@ -174,8 +240,8 @@ void Simulation::smoothVectorNodeParameter(Vector3d*** E) {
 	}
 
 	for (int i = minI; i <= maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				E[i][j][k] = tempNodeVectorParameter[i][j][k];
 			}
 		}
@@ -188,18 +254,37 @@ void Simulation::smoothMatrixNodeParameter(Matrix3d*** E) {
 		minI = 2 + additionalBinNumber;
 	}
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
-
+	int minJ = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - additionalBinNumber;
+	int minK = 1 + additionalBinNumber;
+	int maxK = znumberAdded - additionalBinNumber;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 1;
+	}
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 1;
+	}
 	double smoothingmatrix[3][3][3];
 	createSmoothingMatrix(smoothingmatrix);
 
 	for (int i = minI; i <= maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				if (i > 1 + additionalBinNumber && i < xnumberAdded - 1 - additionalBinNumber) {
 					tempNodeMatrixParameter[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+					int jwidth = 1;
+					if(ynumberGeneral == 1) {
+						jwidth = 0;
+					}
+					int kwidth = 1;
+					if(znumberGeneral == 1) {
+						kwidth = 0;
+					}
 					for (int tempI = -1; tempI <= 1; ++tempI) {
-						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-							for (int tempK = -1; tempK <= 1; ++tempK) {
+						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
 								tempNodeMatrixParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1+tempI][1+tempJ][1+tempK];
 							}
 						}
@@ -216,9 +301,17 @@ void Simulation::smoothMatrixNodeParameter(Matrix3d*** E) {
 						}*/
 					} else {
 						tempNodeMatrixParameter[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
 									tempNodeMatrixParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1+tempI][1+tempJ][1+tempK];
 								}
 							}
@@ -236,9 +329,17 @@ void Simulation::smoothMatrixNodeParameter(Matrix3d*** E) {
 						}*/
 					} else {
 						tempNodeMatrixParameter[i][j][k] = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
 									tempNodeMatrixParameter[i][j][k] += E[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1+tempI][1+tempJ][1+tempK];
 								}
 							}
@@ -250,8 +351,8 @@ void Simulation::smoothMatrixNodeParameter(Matrix3d*** E) {
 	}
 
 	for (int i = minI; i <= maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				for(int l = 0; l < 3; ++l) {
 					for(int m = 0; m < 3; ++m){			
 						E[i][j][k].matrix[l][m] = tempNodeMatrixParameter[i][j][k].matrix[l][m];
@@ -316,17 +417,37 @@ void Simulation::smoothVectorCellParameter(Vector3d*** B) {
 		minI = 2 + additionalBinNumber;
 	}*/
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
+	int minJ = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - additionalBinNumber - 1;
+	int minK = 1 + additionalBinNumber;
+	int maxK = znumberAdded - additionalBinNumber - 1;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 1;
+	}
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 1;
+	}
 	double smoothingmatrix[3][3][3];
 	createSmoothingMatrix(smoothingmatrix);
 
 	for (int i = minI; i < maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minJ; k < maxJ; ++k) {
 				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 2) {
 					tempCellVectorParameter[i][j][k] = Vector3d(0, 0, 0);
+					int jwidth = 1;
+					if(ynumberGeneral == 1) {
+						jwidth = 0;
+					}
+					int kwidth = 1;
+					if(znumberGeneral == 1) {
+						kwidth = 0;
+					}
 					for (int tempI = -1; tempI <= 1; ++tempI) {
-						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-							for (int tempK = -1; tempK <= 1; ++tempK) {
+						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
 								tempCellVectorParameter[i][j][k] += B[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 							}
 						}
@@ -343,9 +464,17 @@ void Simulation::smoothVectorCellParameter(Vector3d*** B) {
 						}*/
 					} else {
 						tempCellVectorParameter[i][j][k] = Vector3d(0, 0, 0);
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
 									tempCellVectorParameter[i][j][k] += B[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
@@ -363,9 +492,17 @@ void Simulation::smoothVectorCellParameter(Vector3d*** B) {
 						}*/
 					} else {
 						tempCellVectorParameter[i][j][k] = Vector3d(0, 0, 0);
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
 									tempCellVectorParameter[i][j][k] += B[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
@@ -377,8 +514,8 @@ void Simulation::smoothVectorCellParameter(Vector3d*** B) {
 	}
 
 	for (int i = minI; i < maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				B[i][j][k] = tempCellVectorParameter[i][j][k];
 			}
 		}
@@ -398,56 +535,80 @@ void Simulation::smoothNewBfield() {
 void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, double*** fieldZ) {
 	int minI = 1 + additionalBinNumber;
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
+	int minJ = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - additionalBinNumber;
+	int minK = 1 + additionalBinNumber;
+	int maxK = znumberAdded - additionalBinNumber;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 1;
+	}
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 1;
+	}
 
+	double smoothingmatrix[3][3][3];
+	createSmoothingMatrix(smoothingmatrix);
 	////Ex
 	for (int i = minI; i < maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 1) {
-					tempBunemanExParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter);
+					tempBunemanExParameter[i][j][k] = 0;
+					int jwidth = 1;
+					if(ynumberGeneral == 1) {
+						jwidth = 0;
+					}
+					int kwidth = 1;
+					if(znumberGeneral == 1) {
+						kwidth = 0;
+					}
 					for (int tempI = -1; tempI <= 1; ++tempI) {
-						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-							for (int tempK = -1; tempK <= 1; ++tempK) {
-								tempBunemanExParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+								tempBunemanExParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 							}
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
-						tempBunemanExParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = 0; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanExParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
-								}
-							}
-						}
+						tempBunemanExParameter[i][j][k] = fieldX[i][j][k];
 					} else {
-						tempBunemanExParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter);
+						tempBunemanExParameter[i][j][k] = 0;
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanExParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+									tempBunemanExParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
 					}
 				} else if (i == xnumberAdded - additionalBinNumber - 2) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
-						tempBunemanExParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = -1; tempI <= 0; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanExParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
-								}
-							}
-						}
+						tempBunemanExParameter[i][j][k] = fieldX[i][j][k];
 					} else {
-						tempBunemanExParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter);
+						tempBunemanExParameter[i][j][k] = 0;
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanExParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+									tempBunemanExParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
@@ -458,8 +619,8 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	}
 
 	for (int i = minI; i < maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				fieldX[i][j][k] = tempBunemanExParameter[i][j][k];
 			}
 		}
@@ -469,55 +630,69 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	minI = 1 + additionalBinNumber;
 	maxI = xnumberAdded - 1 - additionalBinNumber;
 
-
+	maxJ = ynumberAdded - additionalBinNumber - 1;
+	if(ynumberGeneral == 1) {
+		maxJ = 1;
+	}
+	
 	for (int i = minI; i <= maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				if (i > 1 + additionalBinNumber && i < xnumberAdded - 1 - additionalBinNumber) {
-					tempBunemanEyParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter);
+					tempBunemanEyParameter[i][j][k] = 0;
+					int jwidth = 1;
+					if(ynumberGeneral == 1) {
+						jwidth = 0;
+					}
+					int kwidth = 1;
+					if(znumberGeneral == 1) {
+						kwidth = 0;
+					}
 					for (int tempI = -1; tempI <= 1; ++tempI) {
-						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-							for (int tempK = -1; tempK <= 1; ++tempK) {
-								tempBunemanEyParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+								tempBunemanEyParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 							}
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
-						tempBunemanEyParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = 0; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanEyParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
-								}
-							}
-						}
+						tempBunemanEyParameter[i][j][k] = fieldY[i][j][k];
 					} else {
-						tempBunemanEyParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter);
+						tempBunemanEyParameter[i][j][k] = 0;
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanEyParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+									tempBunemanEyParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
 					}
 				} else if (i == xnumberAdded - 1 - additionalBinNumber) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
-						tempBunemanEyParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = -1; tempI <= 0; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanEyParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
-								}
-							}
-						}
+						tempBunemanEyParameter[i][j][k] = fieldY[i][j][k];
 					} else {
-						tempBunemanEyParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter);
+						tempBunemanEyParameter[i][j][k] = 0;
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanEyParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+									tempBunemanEyParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
@@ -528,8 +703,8 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	}
 
 	for (int i = minI; i <= maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				fieldY[i][j][k] = tempBunemanEyParameter[i][j][k];
 			}
 		}
@@ -538,56 +713,73 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	////Ez
 	minI = 1 + additionalBinNumber;
 	maxI = xnumberAdded - 1 - additionalBinNumber;
-
+	maxJ = ynumberAdded - additionalBinNumber;
+	if(ynumberGeneral == 1) {
+		maxJ = 1;
+	}
+	maxK = znumberAdded - additionalBinNumber - 1;
+	if(znumberGeneral == 1) {
+		maxK = 1;
+	}
 
 	for (int i = minI; i <= maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				if (i > 1 + additionalBinNumber && i < xnumberAdded - 1 - additionalBinNumber) {
-					tempBunemanEzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter);
+					tempBunemanEzParameter[i][j][k] = 0;
+					int jwidth = 1;
+					if(ynumberGeneral == 1) {
+						jwidth = 0;
+					}
+					int kwidth = 1;
+					if(znumberGeneral == 1) {
+						kwidth = 0;
+					}
 					for (int tempI = -1; tempI <= 1; ++tempI) {
-						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-							for (int tempK = -1; tempK <= 1; ++tempK) {
-								tempBunemanEzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+								tempBunemanEzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 							}
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
-						tempBunemanEzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = 0; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanEzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
-								}
-							}
-						}
+						tempBunemanEzParameter[i][j][k] = fieldZ[i][j][k];
 					} else {
-						tempBunemanEzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter);
+						tempBunemanEzParameter[i][j][k] = 0;
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanEzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+									tempBunemanEzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
 					}
 				} else if (i == xnumberAdded - 1 - additionalBinNumber) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
-						tempBunemanEzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = -1; tempI <= 0; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanEzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
-								}
-							}
-						}
+						tempBunemanEzParameter[i][j][k] = fieldZ[i][j][k];
 					} else {
-						tempBunemanEzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter);
+						tempBunemanEzParameter[i][j][k] = 0;
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanEzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+									tempBunemanEzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
@@ -598,8 +790,8 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	}
 
 	for (int i = minI; i <= maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				fieldZ[i][j][k] = tempBunemanEzParameter[i][j][k];
 			}
 		}
@@ -611,56 +803,80 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, double*** fieldZ) {
 	int minI = 1 + additionalBinNumber;
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
+	int minJ = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - additionalBinNumber - 1;
+	int minK = 1 + additionalBinNumber;
+	int maxK = znumberAdded - additionalBinNumber - 1;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 0;
+	}
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 1;
+	}
 
+	double smoothingmatrix[3][3][3];
+	createSmoothingMatrix(smoothingmatrix);
 
 	for (int i = minI; i <= maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				if (i > 1 + additionalBinNumber && i < xnumberAdded - 1 - additionalBinNumber) {
-					tempBunemanBxParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter);
+					tempBunemanBxParameter[i][j][k] = 0;
+					int jwidth = 1;
+					if(ynumberGeneral == 1) {
+						jwidth = 0;
+					}
+					int kwidth = 1;
+					if(znumberGeneral == 1) {
+						kwidth = 0;
+					}
 					for (int tempI = -1; tempI <= 1; ++tempI) {
-						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-							for (int tempK = -1; tempK <= 1; ++tempK) {
-								tempBunemanBxParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+								tempBunemanBxParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 							}
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
-						tempBunemanBxParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = 0; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanBxParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
-								}
-							}
-						}
+						tempBunemanBxParameter[i][j][k] = fieldX[i][j][k];
 					} else {
-						tempBunemanBxParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter);
+						tempBunemanBxParameter[i][j][k] = 0;
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanBxParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+									tempBunemanBxParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
 					}
 				} else if (i == xnumberAdded - 1 - additionalBinNumber) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
-						tempBunemanBxParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = -1; tempI <= 0; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanBxParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
-								}
-							}
-						}
+						tempBunemanBxParameter[i][j][k] = fieldX[i][j][k];
 					} else {
-						tempBunemanBxParameter[i][j][k] = fieldX[i][j][k] * (1 - smoothingParameter);
+						tempBunemanBxParameter[i][j][k] = 0;
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanBxParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+									tempBunemanBxParameter[i][j][k] += fieldX[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
@@ -671,8 +887,8 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 	}
 
 	for (int i = minI; i <= maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				fieldX[i][j][k] = tempBunemanBxParameter[i][j][k];
 			}
 		}
@@ -681,57 +897,72 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 	////By
 	minI = 1 + additionalBinNumber;
 	maxI = xnumberAdded - 1 - additionalBinNumber;
+	
+	maxJ = ynumberAdded - additionalBinNumber;
+	if(ynumberGeneral == 1) {
+		maxJ = 1;
+	}
 
 
 	for (int i = minI; i < maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 2
 				) {
-					tempBunemanByParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter);
+					tempBunemanByParameter[i][j][k] = 0;
+					int jwidth = 1;
+					if(ynumberGeneral == 1) {
+						jwidth = 0;
+					}
+					int kwidth = 1;
+					if(znumberGeneral == 1) {
+						kwidth = 0;
+					}
 					for (int tempI = -1; tempI <= 1; ++tempI) {
-						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-							for (int tempK = -1; tempK <= 1; ++tempK) {
-								tempBunemanByParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+								tempBunemanByParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 							}
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
-						tempBunemanByParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = 0; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanByParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
-								}
-							}
-						}
+						tempBunemanByParameter[i][j][k] = fieldY[i][j][k];
 					} else {
-						tempBunemanByParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter);
+						tempBunemanByParameter[i][j][k] = 0;
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanByParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+									tempBunemanByParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
 					}
 				} else if (i == xnumberAdded - additionalBinNumber - 2) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
-						tempBunemanByParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = -1; tempI <= 0; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanByParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
-								}
-							}
-						}
+						tempBunemanByParameter[i][j][k] = fieldY[i][j][k];
 					} else {
-						tempBunemanByParameter[i][j][k] = fieldY[i][j][k] * (1 - smoothingParameter);
+						tempBunemanByParameter[i][j][k] = 0;
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanByParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+									tempBunemanByParameter[i][j][k] += fieldY[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
@@ -742,8 +973,8 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 	}
 
 	for (int i = minI; i < maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				fieldY[i][j][k] = tempBunemanByParameter[i][j][k];
 			}
 		}
@@ -752,57 +983,75 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 	///Bz
 	minI = 1 + additionalBinNumber;
 	maxI = xnumberAdded - 1 - additionalBinNumber;
+	maxJ = ynumberAdded - additionalBinNumber - 1;
+	if(ynumberGeneral == 1) {
+		maxJ = 1;
+	}
+	maxK = znumberAdded - additionalBinNumber;
+	if(znumberGeneral == 1) {
+		maxK = 1;
+	}
 
 
 	for (int i = minI; i < maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 2
 				) {
-					tempBunemanBzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter);
+					tempBunemanBzParameter[i][j][k] = 0;
+					int jwidth = 1;
+					if(ynumberGeneral == 1) {
+						jwidth = 0;
+					}
+					int kwidth = 1;
+					if(znumberGeneral == 1) {
+						kwidth = 0;
+					}
 					for (int tempI = -1; tempI <= 1; ++tempI) {
-						for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-							for (int tempK = -1; tempK <= 1; ++tempK) {
-								tempBunemanBzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+								tempBunemanBzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 							}
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
-						tempBunemanBzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = 0; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanBzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
-								}
-							}
-						}
+						tempBunemanBzParameter[i][j][k] = fieldZ[i][j][k];
 					} else {
-						tempBunemanBzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter);
+						tempBunemanBzParameter[i][j][k] = 0;
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanBzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+									tempBunemanBzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
 					}
 				} else if (i == xnumberAdded - additionalBinNumber - 2) {
 					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
-						tempBunemanBzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter * 2.0 / 3.0);
-						for (int tempI = -1; tempI <= 0; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanBzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
-								}
-							}
-						}
+						tempBunemanBzParameter[i][j][k] = fieldZ[i][j][k];
 					} else {
-						tempBunemanBzParameter[i][j][k] = fieldZ[i][j][k] * (1 - smoothingParameter);
+						tempBunemanBzParameter[i][j][k] = 0;
+						int jwidth = 1;
+						if(ynumberGeneral == 1) {
+							jwidth = 0;
+						}
+						int kwidth = 1;
+						if(znumberGeneral == 1) {
+							kwidth = 0;
+						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
-							for (int tempJ = -1; tempJ <= 1; ++tempJ) {
-								for (int tempK = -1; tempK <= 1; ++tempK) {
-									tempBunemanBzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingParameter / 27.0;
+							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
+								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
+									tempBunemanBzParameter[i][j][k] += fieldZ[i + tempI][j + tempJ][k + tempK] * smoothingmatrix[1 + tempI][1 + tempJ][1 + tempK];
 								}
 							}
 						}
@@ -813,8 +1062,8 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 	}
 
 	for (int i = minI; i < maxI; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				fieldZ[i][j][k] = tempBunemanBzParameter[i][j][k];
 			}
 		}

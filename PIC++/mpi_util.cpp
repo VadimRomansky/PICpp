@@ -51,8 +51,6 @@ void sendInput(Simulation& simulation, int nprocs) {
 			solverType = 1;
 		} else if (simulation.solverType == BUNEMAN) {
 			solverType = 2;
-		} else if (simulation.solverType == IMPLICIT_EC) {
-			solverType = 3;
 		}
 		integerData[19] = solverType;
 		int multiplyOutput = 0;
@@ -153,8 +151,6 @@ Simulation recieveInput(MPI_Comm cartComm) {
 			solverTypev = EXPLICIT;
 		} else if (solverType == 2) {
 			solverTypev = BUNEMAN;
-		} else if (solverType == 3) {
-			solverTypev = IMPLICIT_EC;
 		} else {
 			printf("wrong solver type\n");
 			MPI_Finalize();
