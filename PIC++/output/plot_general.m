@@ -20,7 +20,7 @@ shockWaveV(1) = 0;
 %gamma = 0;
 cv = initialParameters(10);
 lorentzFactor = initialParameters(30);
-omega_plasma = lorentzFactor*initialParameters(21);
+omega_plasma = initialParameters(21);
 
 
 linearField(1) = general(Nbestincrement, 16)/exp(gamma*general(Nbestincrement,2));

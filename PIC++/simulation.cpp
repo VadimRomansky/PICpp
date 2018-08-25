@@ -61,9 +61,9 @@ void Simulation::simulate() {
 		//initializeSimpleElectroMagneticWaveY();
 		//initializeSimpleElectroMagneticWaveZ();
 		//initializeRotatedSimpleElectroMagneticWave(1, 1, 0);
-		//initializeHomogenouseFlow();
+		initializeHomogenouseFlow();
 		//initializeLangmuirWave();
-		createParticles();
+		//createParticles();
 		//initializeShockWave();
 		//initializeFake();
 		//initializeTestOneParticle();
@@ -1132,32 +1132,31 @@ void Simulation::updateDeltaT() {
 
 		double concentration = density / (massProton + massElectron);
 
+		double gamma = 1.0/sqrt(1.0 - V0.norm2()/speed_of_light_normalized_sqr);
 
 		omegaPlasmaProton = sqrt(
-			4 * pi * types[1].concentration * types[1].charge * types[1].charge / types[1].mass);
+			4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / (massProton*gamma));
 		omegaPlasmaElectron = sqrt(
-			4 * pi * types[0].concentration * types[0].charge * types[0].charge / types[0].mass);
+			4 * pi *types[0].concentration * electron_charge_normalized * electron_charge_normalized / (massElectron*gamma));
+		omegaPlasmaTotal = 0;
+		for(int i = 0; i < typesNumber; ++i) {
+			omegaPlasmaTotal += 4 * pi *types[i].concentration * electron_charge_normalized * electron_charge_normalized / (types[i].mass*gamma);
+		}
+		omegaPlasmaTotal = sqrt(omegaPlasmaTotal);
 		double omegaCapture = sqrt(electron_charge_normalized * derEmax / massElectron);
 
 
 		omegaGyroProton = electron_charge_normalized * B / (massProton * speed_of_light_normalized);
 		omegaGyroElectron = electron_charge_normalized * B / (massElectron * speed_of_light_normalized);
 
-		double omega2 = 0;
-		for (int i = 0; i < typesNumber; ++i) {
-			omega2 += 4 * pi * types[i].concentration * types[i].charge * types[i].charge / types[i].mass;
-		}
 
-		double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
-		double omega = sqrt(omega2 / gamma);
-
-		if (timeEpsilonPlasma / omega < deltaT) {
+		if (timeEpsilonPlasma / omegaPlasmaTotal < deltaT) {
 			if (rank == 0) {
 				printf("plasma frequency time limitation\n");
 			}
 		}
 
-		deltaT = min2(deltaT, timeEpsilonPlasma / omega);
+		deltaT = min2(deltaT, timeEpsilonPlasma / omegaPlasmaTotal);
 
 		double maxOmega = sqrt(4 * pi * nmax * types[0].charge * types[0].charge / types[0].mass);
 

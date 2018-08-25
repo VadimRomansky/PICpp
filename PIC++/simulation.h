@@ -222,6 +222,7 @@ public:
 
 	double omegaPlasmaProton;
 	double omegaPlasmaElectron;
+	double omegaPlasmaTotal;
 	double omegaGyroProton;
 	double omegaGyroElectron;
 
@@ -235,7 +236,7 @@ public:
 	int minTurbulenceLengthZ, maxTurbulenceLengthZ;
 
 	//for debug alven wave only/////
-	double omega;
+	double omegaAlfven;
 	double VyamplitudeProton;
 	double VyamplitudeElectron;
 	double VzamplitudeProton;

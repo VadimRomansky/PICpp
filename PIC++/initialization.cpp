@@ -368,6 +368,15 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	masses[5] = massHelium3;
 	masses[6] = massOxygen;
 	masses[7] = massSilicon;
+	double charges[8];
+	charges[0] = -electron_charge;
+	charges[1] = electron_charge;
+	charges[2] = electron_charge;
+	charges[3] = 2*electron_charge;
+	charges[4] = electron_charge;
+	charges[5] = 2*electron_charge;
+	charges[6] = electron_charge;
+	charges[7] = electron_charge;
 	for (int i = 0; i < typesNumber; ++i) {
 		density += initialElectronConcentration * concentrations[i] * masses[i];
 	}
@@ -382,8 +391,14 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	E0 = Vector3d(E0x, E0y, E0z);
 
 	omegaPlasmaElectron = sqrt(4 * pi * electron_charge * electron_charge * initialElectronConcentration / (massElectron * gamma0));
+	omegaPlasmaTotal = 0;
+	for(int i = 0; i < typesNumber; ++i) {
+		omegaPlasmaTotal += 4*pi*charges[i]*charges[i]*initialElectronConcentration*concentrations[i]/(masses[i]*gamma0);
+	}
+	omegaPlasmaTotal = sqrt(omegaPlasmaTotal);
 
-	plasma_period = 1.0 / omegaPlasmaElectron;
+	//plasma_period = 1.0 / omegaPlasmaElectron;
+	plasma_period = 1.0 / omegaPlasmaTotal;
 	scaleFactor = speed_of_light * plasma_period;
 
 	if (inputType == CGS) {
@@ -645,6 +660,15 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	masses[5] = massHelium3;
 	masses[6] = massOxygen;
 	masses[7] = massSilicon;
+	double charges[8];
+	charges[0] = -electron_charge;
+	charges[1] = electron_charge;
+	charges[2] = electron_charge;
+	charges[3] = 2*electron_charge;
+	charges[4] = electron_charge;
+	charges[5] = 2*electron_charge;
+	charges[6] = electron_charge;
+	charges[7] = electron_charge;
 	for (int i = 0; i < typesNumber; ++i) {
 		density += initialElectronConcentration * concentrations[i] * masses[i];
 	}
@@ -659,6 +683,11 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	E0 = Vector3d(E0x, E0y, E0z);
 
 	omegaPlasmaElectron = sqrt(4 * pi * electron_charge * electron_charge * initialElectronConcentration / (massElectron * gamma0));
+	omegaPlasmaTotal = 0;
+	for(int i = 0; i < typesNumber; ++i) {
+		omegaPlasmaTotal += 4*pi*charges[i]*charges[i]*initialElectronConcentration*concentrations[i]/(masses[i]*gamma0);
+	}
+	omegaPlasmaTotal = sqrt(omegaPlasmaTotal);
 
 	plasma_period = plasma_periodv;
 	scaleFactor = scaleFactorv;
@@ -2046,7 +2075,7 @@ void Simulation::initialize() {
 	for(int t  = 0; t < typesNumber; ++t) {
 		allTypesInBin += types[t].particlesPerBin;
 	}
-	particles.reserve(4*allTypesInBin*xnumber*ynumber*znumber);
+	particles.reserve(allTypesInBin*xnumber*ynumber*znumber);
 
 	//int maxParticles = fakeParticles.max_size();
 	//printf("rank = %d maxParticles = %d necessary paricles = %d\n", rank, maxParticles, allTypesInBin*xnumber*ynumber*znumber);
@@ -2059,11 +2088,17 @@ void Simulation::initialize() {
 	checkDebyeParameter();
 
 	double concentration = density / (massProton + massElectron);
+	double gamma = 1.0/sqrt(1.0 - V0.norm2()/speed_of_light_normalized_sqr);
 
 	omegaPlasmaProton = sqrt(
-		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massProton);
+		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / (massProton*gamma));
 	omegaPlasmaElectron = sqrt(
-		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
+		4 * pi *types[0].concentration * electron_charge_normalized * electron_charge_normalized / (massElectron*gamma));
+	omegaPlasmaTotal = 0;
+	for(int i = 0; i < typesNumber; ++i) {
+		omegaPlasmaTotal += 4 * pi *types[i].concentration * electron_charge_normalized * electron_charge_normalized / (types[i].mass*gamma);
+	}
+	omegaPlasmaTotal = sqrt(omegaPlasmaTotal);
 
 	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
 	if (omegaPlasmaElectron * xsize / speed_of_light_normalized < 5) {
@@ -2377,9 +2412,14 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 	double kw = (wavesCount * 2 * pi / xsizeGeneral);
 
 	omegaPlasmaProton = sqrt(
-		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massProton);
+		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / massProton);
 	omegaPlasmaElectron = sqrt(
-		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
+		4 * pi *types[0].concentration * electron_charge_normalized * electron_charge_normalized / (massElectron));
+	omegaPlasmaTotal = 0;
+	for(int i = 0; i < typesNumber; ++i) {
+		omegaPlasmaTotal += 4 * pi *types[i].concentration * electron_charge_normalized * electron_charge_normalized / (types[i].mass);
+	}
+	omegaPlasmaTotal = sqrt(omegaPlasmaTotal);
 	omegaGyroProton = B0.norm() * electron_charge_normalized / (massProton * speed_of_light_normalized);
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
@@ -2485,12 +2525,12 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 	if (rank == 0) fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	double realOmega2 = solve4orderEquation(a4, a3, a2, a1, a0, 1.0);
 	if (realOmega2 < 0) {
-		printf("omega^2 < 0\n");
+		printf("omegaAlfven^2 < 0\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega^2 < 0\n");
+		if (rank == 0) fprintf(informationFile, "omegaAlfven^2 < 0\n");
 		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
+		fprintf(errorLogFile, "omegaAlfven^2 = %15.10g > 1\n", realOmega2);
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -2501,52 +2541,52 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 	fflush(stdout);
 	if (rank == 0) fprintf(informationFile, "error = %15.10g\n", error);
 	//double
-	omega = sqrt(realOmega2) * fakeOmega;
-	if (omega < 0) {
-		omega = -omega;
+	omegaAlfven = sqrt(realOmega2) * fakeOmega;
+	if (omegaAlfven < 0) {
+		omegaAlfven = -omegaAlfven;
 	}
 
-	if (omega > speed_of_light_normalized * kw / 5.0) {
-		if (rank == 0) printf("omega > k*c/5\n");
+	if (omegaAlfven > speed_of_light_normalized * kw / 5.0) {
+		if (rank == 0) printf("omegaAlfven > k*c/5\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > k*c/5\n");
-		if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(informationFile, "omegaAlfven Alfven > k*c/5\n");
+		if (rank == 0) printf("omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(informationFile, "omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 		//fclose(informationFile);
 		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		if (rank == 0) fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n", omegaAlfven / (kw * speed_of_light_normalized));
 		if (rank == 0) fclose(errorLogFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omega = %g\n", omega / plasma_period);
+	if (rank == 0) printf("omegaAlfven = %g\n", omegaAlfven / plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega = %g\n", omega / plasma_period);
+	if (rank == 0) fprintf(informationFile, "omegaAlfven = %g\n", omegaAlfven / plasma_period);
 
-	if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	if (rank == 0) printf("omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	if (rank == 0) fprintf(informationFile, "omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 
-	if (fabs(omega) > omegaGyroProton / 2) {
-		if (rank == 0) printf("omega > omegaGyroProton/2\n");
+	if (fabs(omegaAlfven) > omegaGyroProton / 2) {
+		if (rank == 0) printf("omegaAlfven > omegaGyroProton/2\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > omegaGyroProton/2\n");
+		if (rank == 0) fprintf(informationFile, "omegaAlfven > omegaGyroProton/2\n");
 	}
-	if (rank == 0) printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) printf("omegaAlfven/omegaGyroProton = %g\n", omegaAlfven / omegaGyroProton);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) fprintf(informationFile, "omegaAlfven/omegaGyroProton = %g\n", omegaAlfven / omegaGyroProton);
 	if (rank == 0) fclose(informationFile);
 
-	checkFrequency(omega);
+	checkFrequency(omegaAlfven);
 
 	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
-	//checkCollisionTime(omega);
+	//checkCollisionTime(omegaAlfven);
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
 
 	double epsilonAmplitude = amplitudeRelation;
 
-	double alfvenVReal = omega / kw;
+	double alfvenVReal = omegaAlfven / kw;
 
 	//double
 	Bzamplitude = B0.norm() * epsilonAmplitude;
@@ -2563,31 +2603,31 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 	double kc = kw * speed_of_light_normalized;
 	double kc2 = kc * kc;
 
-	double denominator = omega * omega - Omegae2 - (omegae2 * omega * omega / (omega * omega - kc2));
+	double denominator = omegaAlfven * omegaAlfven - Omegae2 - (omegae2 * omegaAlfven * omegaAlfven / (omegaAlfven * omegaAlfven - kc2));
 
 	//double
-	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega
-		* omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) *
-		denominator)) + (Omegap / omega))) * Bzamplitude;
+	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omegaAlfven
+		* omegaAlfven) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omegaAlfven / ((kc2 - omegaAlfven * omegaAlfven) *
+		denominator)) + (Omegap / omegaAlfven))) * Bzamplitude;
 	//double
-	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 *
-		omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
+	VzamplitudeElectron = (((electron_charge_normalized * omegaAlfven * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 *
+		omegaAlfven * omegaAlfven / (kc2 - omegaAlfven * omegaAlfven)) * VzamplitudeProton) / denominator;
 
 	//double
-	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (
+	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omegaAlfven * omegaAlfven / kc) - kc)) * (
 		VzamplitudeElectron - VzamplitudeProton);
 
 	//double
-	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) *
+	VyamplitudeProton = -(Omegap / omegaAlfven) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) *
 		Bzamplitude;
 	//double
-	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) *
+	VyamplitudeElectron = (Omegae / omegaAlfven) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) *
 		Bzamplitude;
 
 	//double
-	Eyamplitude = (omega / kc) * Bzamplitude;
+	Eyamplitude = (omegaAlfven / kc) * Bzamplitude;
 	//double
-	Ezamplitude = -(omega / kc) * Byamplitude;
+	Ezamplitude = -(omegaAlfven / kc) * Byamplitude;
 
 	double xshift = 0;
 	double phase = 0;
@@ -2774,10 +2814,10 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 
 	updateDeltaT();
 
-	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omegaAlfven / (2 * pi));
 	if (rank == 0) printf("dt = %g\n", deltaT * plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omegaAlfven / (2 * pi));
 	if (rank == 0) fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
 
 	double Vthermal = sqrt(2 * kBoltzman_normalized * temperature / massElectron);
@@ -2835,33 +2875,33 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative By amplitude = %g\n",
-		        -omega * Byamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        -omegaAlfven * Byamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "-c*rotEy = %g\n",
 		        speed_of_light_normalized * kw * Ezamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Bz amplitude = %g\n",
-		        omega * Bzamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        omegaAlfven * Bzamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "-c*rotEz = %g\n",
 		        speed_of_light_normalized * kw * Eyamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ey amplitude = %g\n",
-		        omega * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        omegaAlfven * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
 		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (
 			        VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ez amplitude = %g\n",
-		        -omega * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        -omegaAlfven * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
 		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (
 			        VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 
-		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) * omega;
+		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) * omegaAlfven;
 		fprintf(informationFile, "w*Jy amplitude = %g\n",
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
@@ -2874,7 +2914,7 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 			        plasma_period * sqrt(
 				        scaleFactor)));
 		fprintf(informationFile, "\n");
-		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omega;
+		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omegaAlfven;
 		fprintf(informationFile, "w*Jz amplitude = %g\n",
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
@@ -2888,7 +2928,7 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 				        scaleFactor)));
 		fprintf(informationFile, "\n");
 
-		double derivativVyp = -omega * VyamplitudeProton;
+		double derivativVyp = -omegaAlfven * VyamplitudeProton;
 		fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeProton /
@@ -2897,7 +2937,7 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		        derivativeVelocityProtonY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
 
-		double derivativVzp = omega * VzamplitudeProton;
+		double derivativVzp = omegaAlfven * VzamplitudeProton;
 		fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeProton /
@@ -2906,7 +2946,7 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		        derivativeVelocityProtonZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
 
-		double derivativVye = -omega * VyamplitudeElectron;
+		double derivativVye = -omegaAlfven * VyamplitudeElectron;
 		fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeElectron /
@@ -2915,7 +2955,7 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		        derivativeVelocityElectronY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
 
-		double derivativVze = omega * VzamplitudeElectron;
+		double derivativVze = omegaAlfven * VzamplitudeElectron;
 		fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeElectron /
@@ -2973,9 +3013,14 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	double kw = wavesCount * 2 * pi / ysizeGeneral;
 
 	omegaPlasmaProton = sqrt(
-		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massProton);
+		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / massProton);
 	omegaPlasmaElectron = sqrt(
-		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
+		4 * pi *types[0].concentration * electron_charge_normalized * electron_charge_normalized / (massElectron));
+	omegaPlasmaTotal = 0;
+	for(int i = 0; i < typesNumber; ++i) {
+		omegaPlasmaTotal += 4 * pi *types[i].concentration * electron_charge_normalized * electron_charge_normalized / (types[i].mass);
+	}
+	omegaPlasmaTotal = sqrt(omegaPlasmaTotal);
 	omegaGyroProton = B0.norm() * electron_charge_normalized / (massProton * speed_of_light_normalized);
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
@@ -3081,12 +3126,12 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	if (rank == 0) fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	double realOmega2 = solve4orderEquation(a4, a3, a2, a1, a0, 1.0);
 	if (realOmega2 < 0) {
-		printf("omega^2 < 0\n");
+		printf("omegaAlfven^2 < 0\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega^2 < 0\n");
+		if (rank == 0) fprintf(informationFile, "omegaAlfven^2 < 0\n");
 		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
+		fprintf(errorLogFile, "omegaAlfven^2 = %15.10g > 1\n", realOmega2);
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -3097,52 +3142,52 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	fflush(stdout);
 	if (rank == 0) fprintf(informationFile, "error = %15.10g\n", error);
 	//double
-	omega = sqrt(realOmega2) * fakeOmega;
-	if (omega < 0) {
-		omega = -omega;
+	omegaAlfven = sqrt(realOmega2) * fakeOmega;
+	if (omegaAlfven < 0) {
+		omegaAlfven = -omegaAlfven;
 	}
 
-	if (omega > speed_of_light_normalized * kw / 5.0) {
-		printf("omega > k*c/5\n");
+	if (omegaAlfven > speed_of_light_normalized * kw / 5.0) {
+		printf("omegaAlfven > k*c/5\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > k*c/5\n");
-		if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(informationFile, "omegaAlfven > k*c/5\n");
+		if (rank == 0) printf("omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(informationFile, "omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 		//fclose(informationFile);
 		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		if (rank == 0) fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n", omegaAlfven / (kw * speed_of_light_normalized));
 		if (rank == 0) fclose(errorLogFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omega = %g\n", omega / plasma_period);
+	if (rank == 0) printf("omegaAlfven = %g\n", omegaAlfven / plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega = %g\n", omega / plasma_period);
+	if (rank == 0) fprintf(informationFile, "omegaAlfven = %g\n", omegaAlfven / plasma_period);
 
-	if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	if (rank == 0) printf("omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	if (rank == 0) fprintf(informationFile, "omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 
-	if (fabs(omega) > omegaGyroProton / 2) {
-		if (rank == 0) printf("omega > omegaGyroProton/2\n");
+	if (fabs(omegaAlfven) > omegaGyroProton / 2) {
+		if (rank == 0) printf("omegaAlfven > omegaGyroProton/2\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > omegaGyroProton/2\n");
+		if (rank == 0) fprintf(informationFile, "omegaAlfven > omegaGyroProton/2\n");
 	}
-	if (rank == 0) printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) printf("omegaAlfven/omegaGyroProton = %g\n", omegaAlfven / omegaGyroProton);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) fprintf(informationFile, "omegaAlfven/omegaGyroProton = %g\n", omegaAlfven / omegaGyroProton);
 	if (rank == 0) fclose(informationFile);
 
-	checkFrequency(omega);
+	checkFrequency(omegaAlfven);
 
 	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
-	//checkCollisionTime(omega);
+	//checkCollisionTime(omegaAlfven);
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
 
 	double epsilonAmplitude = amplitudeRelation;
 
-	double alfvenVReal = omega / kw;
+	double alfvenVReal = omegaAlfven / kw;
 
 	//double
 	Bzamplitude = B0.norm() * epsilonAmplitude;
@@ -3159,31 +3204,31 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 	double kc = kw * speed_of_light_normalized;
 	double kc2 = kc * kc;
 
-	double denominator = omega * omega - Omegae2 - (omegae2 * omega * omega / (omega * omega - kc2));
+	double denominator = omegaAlfven * omegaAlfven - Omegae2 - (omegae2 * omegaAlfven * omegaAlfven / (omegaAlfven * omegaAlfven - kc2));
 
 	//double
-	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega
-		* omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) *
-		denominator)) + (Omegap / omega))) * Bzamplitude;
+	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omegaAlfven
+		* omegaAlfven) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omegaAlfven / ((kc2 - omegaAlfven * omegaAlfven) *
+		denominator)) + (Omegap / omegaAlfven))) * Bzamplitude;
 	//double
-	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 *
-		omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
+	VzamplitudeElectron = (((electron_charge_normalized * omegaAlfven * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 *
+		omegaAlfven * omegaAlfven / (kc2 - omegaAlfven * omegaAlfven)) * VzamplitudeProton) / denominator;
 
 	//double
-	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (
+	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omegaAlfven * omegaAlfven / kc) - kc)) * (
 		VzamplitudeElectron - VzamplitudeProton);
 
 	//double
-	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) *
+	VyamplitudeProton = -(Omegap / omegaAlfven) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) *
 		Bzamplitude;
 	//double
-	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) *
+	VyamplitudeElectron = (Omegae / omegaAlfven) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) *
 		Bzamplitude;
 
 	//double
-	Eyamplitude = (omega / kc) * Bzamplitude;
+	Eyamplitude = (omegaAlfven / kc) * Bzamplitude;
 	//double
-	Ezamplitude = -(omega / kc) * Byamplitude;
+	Ezamplitude = -(omegaAlfven / kc) * Byamplitude;
 
 	double xshift = 0;
 	//double xshift = xsize/4;
@@ -3355,10 +3400,10 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 
 	updateDeltaT();
 
-	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omegaAlfven / (2 * pi));
 	if (rank == 0) printf("dt = %g\n", deltaT * plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omegaAlfven / (2 * pi));
 	if (rank == 0) fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
 
 	double Vthermal = sqrt(2 * kBoltzman_normalized * temperature / massElectron);
@@ -3416,33 +3461,33 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative By amplitude = %g\n",
-		        -omega * Byamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        -omegaAlfven * Byamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "-c*rotEy = %g\n",
 		        speed_of_light_normalized * kw * Ezamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Bz amplitude = %g\n",
-		        omega * Bzamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        omegaAlfven * Bzamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "-c*rotEz = %g\n",
 		        speed_of_light_normalized * kw * Eyamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ey amplitude = %g\n",
-		        omega * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        omegaAlfven * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
 		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (
 			        VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ez amplitude = %g\n",
-		        -omega * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        -omegaAlfven * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
 		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (
 			        VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 
-		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) * omega;
+		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) * omegaAlfven;
 		fprintf(informationFile, "w*Jy amplitude = %g\n",
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
@@ -3455,7 +3500,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 			        plasma_period * sqrt(
 				        scaleFactor)));
 		fprintf(informationFile, "\n");
-		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omega;
+		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omegaAlfven;
 		fprintf(informationFile, "w*Jz amplitude = %g\n",
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
@@ -3469,7 +3514,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 				        scaleFactor)));
 		fprintf(informationFile, "\n");
 
-		double derivativVyp = -omega * VyamplitudeProton;
+		double derivativVyp = -omegaAlfven * VyamplitudeProton;
 		fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeProton /
@@ -3478,7 +3523,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		        derivativeVelocityProtonY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
 
-		double derivativVzp = omega * VzamplitudeProton;
+		double derivativVzp = omegaAlfven * VzamplitudeProton;
 		fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeProton /
@@ -3487,7 +3532,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		        derivativeVelocityProtonZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
 
-		double derivativVye = -omega * VyamplitudeElectron;
+		double derivativVye = -omegaAlfven * VyamplitudeElectron;
 		fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeElectron /
@@ -3496,7 +3541,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		        derivativeVelocityElectronY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
 
-		double derivativVze = omega * VzamplitudeElectron;
+		double derivativVze = omegaAlfven * VzamplitudeElectron;
 		fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeElectron /
@@ -3553,9 +3598,14 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 	double kw = wavesCount * 2 * pi / zsizeGeneral;
 
 	omegaPlasmaProton = sqrt(
-		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massProton);
+		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / massProton);
 	omegaPlasmaElectron = sqrt(
-		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
+		4 * pi *types[0].concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
+	omegaPlasmaTotal = 0;
+	for(int i = 0; i < typesNumber; ++i) {
+		omegaPlasmaTotal += 4 * pi *types[i].concentration * electron_charge_normalized * electron_charge_normalized / (types[i].mass);
+	}
+	omegaPlasmaTotal = sqrt(omegaPlasmaTotal);
 	omegaGyroProton = B0.norm() * electron_charge_normalized / (massProton * speed_of_light_normalized);
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
@@ -3661,12 +3711,12 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 	if (rank == 0) fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	double realOmega2 = solve4orderEquation(a4, a3, a2, a1, a0, 1.0);
 	if (realOmega2 < 0) {
-		printf("omega^2 < 0\n");
+		printf("omegaAlfven^2 < 0\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega^2 < 0\n");
+		if (rank == 0) fprintf(informationFile, "omegaAlfven^2 < 0\n");
 		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
+		fprintf(errorLogFile, "omegaAlfven^2 = %15.10g > 1\n", realOmega2);
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -3677,52 +3727,52 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 	fflush(stdout);
 	if (rank == 0) fprintf(informationFile, "error = %15.10g\n", error);
 	//double
-	omega = sqrt(realOmega2) * fakeOmega;
-	if (omega < 0) {
-		omega = -omega;
+	omegaAlfven = sqrt(realOmega2) * fakeOmega;
+	if (omegaAlfven < 0) {
+		omegaAlfven = -omegaAlfven;
 	}
 
-	if (omega > speed_of_light_normalized * kw / 5.0) {
-		printf("omega > k*c/5\n");
+	if (omegaAlfven > speed_of_light_normalized * kw / 5.0) {
+		printf("omegaAlfven > k*c/5\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > k*c/5\n");
-		if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(informationFile, "omegaAlfven > k*c/5\n");
+		if (rank == 0) printf("omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(informationFile, "omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 		//fclose(informationFile);
 		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		if (rank == 0) fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n", omegaAlfven / (kw * speed_of_light_normalized));
 		if (rank == 0) fclose(errorLogFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omega = %g\n", omega / plasma_period);
+	if (rank == 0) printf("omegaAlfven = %g\n", omegaAlfven / plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega = %g\n", omega / plasma_period);
+	if (rank == 0) fprintf(informationFile, "omegaAlfven = %g\n", omegaAlfven / plasma_period);
 
-	if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	if (rank == 0) printf("omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	if (rank == 0) fprintf(informationFile, "omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 
-	if (fabs(omega) > omegaGyroProton / 2) {
-		if (rank == 0) printf("omega > omegaGyroProton/2\n");
+	if (fabs(omegaAlfven) > omegaGyroProton / 2) {
+		if (rank == 0) printf("omegaAlfven > omegaGyroProton/2\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > omegaGyroProton/2\n");
+		if (rank == 0) fprintf(informationFile, "omegaAlfven > omegaGyroProton/2\n");
 	}
-	if (rank == 0) printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) printf("omegaAlfven/omegaGyroProton = %g\n", omegaAlfven / omegaGyroProton);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) fprintf(informationFile, "omegaAlfven/omegaGyroProton = %g\n", omegaAlfven / omegaGyroProton);
 	if (rank == 0) fclose(informationFile);
 
-	checkFrequency(omega);
+	checkFrequency(omegaAlfven);
 
 	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
-	//checkCollisionTime(omega);
+	//checkCollisionTime(omegaAlfven);
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
 
 	double epsilonAmplitude = amplitudeRelation;
 
-	double alfvenVReal = omega / kw;
+	double alfvenVReal = omegaAlfven / kw;
 
 	//double
 	Bzamplitude = B0.norm() * epsilonAmplitude;
@@ -3739,31 +3789,31 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 	double kc = kw * speed_of_light_normalized;
 	double kc2 = kc * kc;
 
-	double denominator = omega * omega - Omegae2 - (omegae2 * omega * omega / (omega * omega - kc2));
+	double denominator = omegaAlfven * omegaAlfven - Omegae2 - (omegae2 * omegaAlfven * omegaAlfven / (omegaAlfven * omegaAlfven - kc2));
 
 	//double
-	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega
-		* omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) *
-		denominator)) + (Omegap / omega))) * Bzamplitude;
+	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omegaAlfven
+		* omegaAlfven) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omegaAlfven / ((kc2 - omegaAlfven * omegaAlfven) *
+		denominator)) + (Omegap / omegaAlfven))) * Bzamplitude;
 	//double
-	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 *
-		omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
+	VzamplitudeElectron = (((electron_charge_normalized * omegaAlfven * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 *
+		omegaAlfven * omegaAlfven / (kc2 - omegaAlfven * omegaAlfven)) * VzamplitudeProton) / denominator;
 
 	//double
-	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (
+	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omegaAlfven * omegaAlfven / kc) - kc)) * (
 		VzamplitudeElectron - VzamplitudeProton);
 
 	//double
-	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) *
+	VyamplitudeProton = -(Omegap / omegaAlfven) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) *
 		Bzamplitude;
 	//double
-	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) *
+	VyamplitudeElectron = (Omegae / omegaAlfven) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) *
 		Bzamplitude;
 
 	//double
-	Eyamplitude = (omega / kc) * Bzamplitude;
+	Eyamplitude = (omegaAlfven / kc) * Bzamplitude;
 	//double
-	Ezamplitude = -(omega / kc) * Byamplitude;
+	Ezamplitude = -(omegaAlfven / kc) * Byamplitude;
 
 	double xshift = 0;
 	//double xshift = xsize/4;
@@ -3935,10 +3985,10 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 
 	updateDeltaT();
 
-	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omegaAlfven / (2 * pi));
 	if (rank == 0) printf("dt = %g\n", deltaT * plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omegaAlfven / (2 * pi));
 	if (rank == 0) fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
 
 	double Vthermal = sqrt(2 * kBoltzman_normalized * temperature / massElectron);
@@ -3996,33 +4046,33 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative By amplitude = %g\n",
-		        -omega * Byamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        -omegaAlfven * Byamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "-c*rotEy = %g\n",
 		        speed_of_light_normalized * kw * Ezamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Bz amplitude = %g\n",
-		        omega * Bzamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        omegaAlfven * Bzamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "-c*rotEz = %g\n",
 		        speed_of_light_normalized * kw * Eyamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ey amplitude = %g\n",
-		        omega * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        omegaAlfven * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
 		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (
 			        VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ez amplitude = %g\n",
-		        -omega * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        -omegaAlfven * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
 		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (
 			        VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 
-		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) * omega;
+		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) * omegaAlfven;
 		fprintf(informationFile, "w*Jy amplitude = %g\n",
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
@@ -4035,7 +4085,7 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 			        plasma_period * sqrt(
 				        scaleFactor)));
 		fprintf(informationFile, "\n");
-		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omega;
+		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omegaAlfven;
 		fprintf(informationFile, "w*Jz amplitude = %g\n",
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
@@ -4049,7 +4099,7 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 				        scaleFactor)));
 		fprintf(informationFile, "\n");
 
-		double derivativVyp = -omega * VyamplitudeProton;
+		double derivativVyp = -omegaAlfven * VyamplitudeProton;
 		fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeProton /
@@ -4058,7 +4108,7 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		        derivativeVelocityProtonY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
 
-		double derivativVzp = omega * VzamplitudeProton;
+		double derivativVzp = omegaAlfven * VzamplitudeProton;
 		fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeProton /
@@ -4067,7 +4117,7 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		        derivativeVelocityProtonZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
 
-		double derivativVye = -omega * VyamplitudeElectron;
+		double derivativVye = -omegaAlfven * VyamplitudeElectron;
 		fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0.norm() * VzamplitudeElectron /
@@ -4076,7 +4126,7 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		        derivativeVelocityElectronY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
 
-		double derivativVze = omega * VzamplitudeElectron;
+		double derivativVze = omegaAlfven * VzamplitudeElectron;
 		fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0.norm() * VyamplitudeElectron /
@@ -4142,9 +4192,14 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 	double weight = concentration * volumeB() / types[0].particlesPerBin;
 
 	omegaPlasmaProton = sqrt(
-		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massProton);
+		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / massProton);
 	omegaPlasmaElectron = sqrt(
-		4 * pi * concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
+		4 * pi *types[0].concentration * electron_charge_normalized * electron_charge_normalized / (massElectron));
+	omegaPlasmaTotal = 0;
+	for(int i = 0; i < typesNumber; ++i) {
+		omegaPlasmaTotal += 4 * pi *types[i].concentration * electron_charge_normalized * electron_charge_normalized / (types[i].mass);
+	}
+	omegaPlasmaTotal = sqrt(omegaPlasmaTotal);
 	omegaGyroProton = B0norm * electron_charge_normalized / (massProton * speed_of_light_normalized);
 	omegaGyroElectron = B0norm * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
@@ -4250,12 +4305,12 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 	if (rank == 0) fprintf(informationFile, "fakeOmega = %g\n", fakeOmega1 / plasma_period);
 	double realOmega2 = solve4orderEquation(a4, a3, a2, a1, a0, 1.0);
 	if (realOmega2 < 0) {
-		printf("omega^2 < 0\n");
+		printf("omegaAlfven^2 < 0\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega^2 < 0\n");
+		if (rank == 0) fprintf(informationFile, "omegaAlfven^2 < 0\n");
 		if (rank == 0) fclose(informationFile);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		fprintf(errorLogFile, "omega^2 = %15.10g > 1\n", realOmega2);
+		fprintf(errorLogFile, "omegaAlfven^2 = %15.10g > 1\n", realOmega2);
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -4266,52 +4321,52 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 	fflush(stdout);
 	if (rank == 0) fprintf(informationFile, "error = %15.10g\n", error);
 	//double
-	omega = sqrt(realOmega2) * fakeOmega;
-	if (omega < 0) {
-		omega = -omega;
+	omegaAlfven = sqrt(realOmega2) * fakeOmega;
+	if (omegaAlfven < 0) {
+		omegaAlfven = -omegaAlfven;
 	}
 
-	if (omega > speed_of_light_normalized * kw / 5.0) {
-		if (rank == 0) printf("omega > k*c/5\n");
+	if (omegaAlfven > speed_of_light_normalized * kw / 5.0) {
+		if (rank == 0) printf("omegaAlfven > k*c/5\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > k*c/5\n");
-		if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(informationFile, "omegaAlfven > k*c/5\n");
+		if (rank == 0) printf("omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(informationFile, "omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 		//fclose(informationFile);
 		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
-		if (rank == 0) fprintf(errorLogFile, "omega/kc = %15.10g > 0.2\n", omega / (kw * speed_of_light_normalized));
+		if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n", omegaAlfven / (kw * speed_of_light_normalized));
 		if (rank == 0) fclose(errorLogFile);
 		//exit(0);
 	}
-	if (rank == 0) printf("omega = %g\n", omega / plasma_period);
+	if (rank == 0) printf("omegaAlfven = %g\n", omegaAlfven / plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega = %g\n", omega / plasma_period);
+	if (rank == 0) fprintf(informationFile, "omegaAlfven = %g\n", omegaAlfven / plasma_period);
 
-	if (rank == 0) printf("omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	if (rank == 0) printf("omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/kc = %g\n", omega / (kw * speed_of_light_normalized));
+	if (rank == 0) fprintf(informationFile, "omegaAlfven/kc = %g\n", omegaAlfven / (kw * speed_of_light_normalized));
 
-	if (fabs(omega) > omegaGyroProton / 2) {
-		if (rank == 0) printf("omega > omegaGyroProton/2\n");
+	if (fabs(omegaAlfven) > omegaGyroProton / 2) {
+		if (rank == 0) printf("omegaAlfven > omegaGyroProton/2\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > omegaGyroProton/2\n");
+		if (rank == 0) fprintf(informationFile, "omegaAlfven > omegaGyroProton/2\n");
 	}
-	if (rank == 0) printf("omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) printf("omegaAlfven/omegaGyroProton = %g\n", omegaAlfven / omegaGyroProton);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/omegaGyroProton = %g\n", omega / omegaGyroProton);
+	if (rank == 0) fprintf(informationFile, "omegaAlfven/omegaGyroProton = %g\n", omegaAlfven / omegaGyroProton);
 	if (rank == 0) fclose(informationFile);
 
-	checkFrequency(omega);
+	checkFrequency(omegaAlfven);
 
 	if (rank == 0) informationFile = fopen((outputDir + "information.dat").c_str(), "a");
-	//checkCollisionTime(omega);
+	//checkCollisionTime(omegaAlfven);
 	//checkMagneticReynolds(alfvenV);
 	//checkDissipation(kw, alfvenV);
 
 	double epsilonAmplitude = amplitudeRelation;
 
-	double alfvenVReal = omega / kw;
+	double alfvenVReal = omegaAlfven / kw;
 
 	if (rank == 0) fprintf(informationFile, "alfven V real = %15.10g\n", alfvenVReal * scaleFactor / plasma_period);
 	if (rank == 0)
@@ -4332,31 +4387,31 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 	double kc = kw * speed_of_light_normalized;
 	double kc2 = kc * kc;
 
-	double denominator = omega * omega - Omegae2 - (omegae2 * omega * omega / (omega * omega - kc2));
+	double denominator = omegaAlfven * omegaAlfven - Omegae2 - (omegae2 * omegaAlfven * omegaAlfven / (omegaAlfven * omegaAlfven - kc2));
 
 	//double
-	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omega
-		* omega) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omega / ((kc2 - omega * omega) *
-		denominator)) + (Omegap / omega))) * Bzamplitude;
+	VzamplitudeProton = -((1.0 / (4 * pi * concentration * electron_charge_normalized)) * (kc + ((omegae2 + omegap2 - omegaAlfven
+		* omegaAlfven) / kc) + (omegae2 * Omegae2 / (kc * denominator))) / ((Omegae * omegae2 * omegaAlfven / ((kc2 - omegaAlfven * omegaAlfven) *
+		denominator)) + (Omegap / omegaAlfven))) * Bzamplitude;
 	//double
-	VzamplitudeElectron = (((electron_charge_normalized * omega * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 *
-		omega * omega / (kc2 - omega * omega)) * VzamplitudeProton) / denominator;
+	VzamplitudeElectron = (((electron_charge_normalized * omegaAlfven * Omegae) / (massElectron * kc)) * Bzamplitude + (omegae2 *
+		omegaAlfven * omegaAlfven / (kc2 - omegaAlfven * omegaAlfven)) * VzamplitudeProton) / denominator;
 
 	//double
-	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omega * omega / kc) - kc)) * (
+	Byamplitude = (4 * pi * concentration * electron_charge_normalized / ((omegaAlfven * omegaAlfven / kc) - kc)) * (
 		VzamplitudeElectron - VzamplitudeProton);
 
 	//double
-	VyamplitudeProton = -(Omegap / omega) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) *
+	VyamplitudeProton = -(Omegap / omegaAlfven) * VzamplitudeProton - (electron_charge_normalized / (massProton * kc)) *
 		Bzamplitude;
 	//double
-	VyamplitudeElectron = (Omegae / omega) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) *
+	VyamplitudeElectron = (Omegae / omegaAlfven) * VzamplitudeElectron + (electron_charge_normalized / (massElectron * kc)) *
 		Bzamplitude;
 
 	//double
-	Eyamplitude = (omega / kc) * Bzamplitude;
+	Eyamplitude = (omegaAlfven / kc) * Bzamplitude;
 	//double
-	Ezamplitude = -(omega / kc) * Byamplitude;
+	Ezamplitude = -(omegaAlfven / kc) * Byamplitude;
 
 	double xshift = 0.0;
 
@@ -4564,10 +4619,10 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 
 	updateDeltaT();
 
-	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) printf("dt/Talfven = %g\n", deltaT * omegaAlfven / (2 * pi));
 	if (rank == 0) printf("dt = %g\n", deltaT * plasma_period);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omega / (2 * pi));
+	if (rank == 0) fprintf(informationFile, "dt/Talfven = %g\n", deltaT * omegaAlfven / (2 * pi));
 	if (rank == 0) fprintf(informationFile, "dt = %g\n", deltaT * plasma_period);
 
 	double Vthermal = sqrt(2 * kBoltzman_normalized * temperature / massElectron);
@@ -4625,33 +4680,33 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative By amplitude = %g\n",
-		        -omega * Byamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        -omegaAlfven * Byamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "-c*rotEy = %g\n",
 		        speed_of_light_normalized * kw * Ezamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Bz amplitude = %g\n",
-		        omega * Bzamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        omegaAlfven * Bzamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "-c*rotEz = %g\n",
 		        speed_of_light_normalized * kw * Eyamplitude / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ey amplitude = %g\n",
-		        omega * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        omegaAlfven * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
 		        (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (
 			        VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ez amplitude = %g\n",
-		        -omega * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		        -omegaAlfven * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
 		        (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (
 			        VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(
 			        scaleFactor)));
 		fprintf(informationFile, "\n");
 
-		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) * omega;
+		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) * omegaAlfven;
 		fprintf(informationFile, "w*Jy amplitude = %g\n",
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
@@ -4662,7 +4717,7 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 			        plasma_period * sqrt(
 				        scaleFactor)));
 		fprintf(informationFile, "\n");
-		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omega;
+		double derivativJz = electron_charge_normalized * concentration * (VzamplitudeProton - VzamplitudeElectron) * omegaAlfven;
 		fprintf(informationFile, "w*Jz amplitude = %g\n",
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
@@ -4674,7 +4729,7 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 				        scaleFactor)));
 		fprintf(informationFile, "\n");
 
-		double derivativVyp = -omega * VyamplitudeProton;
+		double derivativVyp = -omegaAlfven * VyamplitudeProton;
 		fprintf(informationFile, "-w*Vyp amplitude = %g\n", derivativVyp * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityProtonY = electron_charge_normalized * (Eyamplitude + B0norm * VzamplitudeProton /
@@ -4683,7 +4738,7 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		        derivativeVelocityProtonY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
 
-		double derivativVzp = omega * VzamplitudeProton;
+		double derivativVzp = omegaAlfven * VzamplitudeProton;
 		fprintf(informationFile, "w*Vzp amplitude = %g\n", derivativVzp * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityProtonZ = electron_charge_normalized * (Ezamplitude - B0norm * VyamplitudeProton /
@@ -4692,7 +4747,7 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		        derivativeVelocityProtonZ * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
 
-		double derivativVye = -omega * VyamplitudeElectron;
+		double derivativVye = -omegaAlfven * VyamplitudeElectron;
 		fprintf(informationFile, "-w*Vye amplitude = %g\n", derivativVye * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityElectronY = -electron_charge_normalized * (Eyamplitude + B0norm * VzamplitudeElectron /
@@ -4701,7 +4756,7 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		        derivativeVelocityElectronY * scaleFactor / sqr(plasma_period));
 		fprintf(informationFile, "\n");
 
-		double derivativVze = omega * VzamplitudeElectron;
+		double derivativVze = omegaAlfven * VzamplitudeElectron;
 		fprintf(informationFile, "w*Vze amplitude = %g\n", derivativVze * scaleFactor / sqr(plasma_period));
 
 		double derivativeVelocityElectronZ = -electron_charge_normalized * (Ezamplitude - B0norm * VyamplitudeElectron /
@@ -5695,18 +5750,18 @@ void Simulation::initializeExternalFluxInstability() {
 		fprintf(informationFile, "external flux = %g\n", extJ * plasma_period * plasma_period * sqrt(scaleFactor));
 		fprintf(informationFile, "By max amplitude = %g\n", Byamplitude);
 		fprintf(informationFile, "Uy max amplitude = %g\n", Uyamplitude);
-		fprintf(informationFile, "omega/omega_plasma = %g\n", omega);
+		fprintf(informationFile, "omegaAlfven/omega_plasma = %g\n", omega);
 		if (omega > cyclothronOmegaProton) {
-			printf("omega > cyclothron Omega Proton\n");
+			printf("omegaAlfven > cyclothron Omega Proton\n");
 			fflush(stdout);
-			fprintf(informationFile, "omega > cyclothron Omega Proton\n");
+			fprintf(informationFile, "omegaAlfven > cyclothron Omega Proton\n");
 		} else if (omega > cyclothronOmegaProton / 100.0) {
-			printf("omega > cyclothrone Omega Proton/100\n");
+			printf("omegaAlfven > cyclothrone Omega Proton/100\n");
 			fflush(stdout);
-			fprintf(informationFile, "omega > cyclothron Omega Proton/100\n");
+			fprintf(informationFile, "omegaAlfven > cyclothron Omega Proton/100\n");
 		}
-		printf("omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
-		fprintf(informationFile, "omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
+		printf("omegaAlfven/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
+		fprintf(informationFile, "omegaAlfven/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
 
 		fclose(informationFile);
 	}
@@ -5744,10 +5799,17 @@ void Simulation::initializeAnisotropic() {
 
 	createParticles();
 
+	double gamma = 1.0/sqrt(1.0 - V0.norm2()/speed_of_light_normalized_sqr);
+
 	omegaPlasmaProton = sqrt(
-		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / massProton);
+		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / (massProton*gamma));
 	omegaPlasmaElectron = sqrt(
-		4 * pi * types[0].concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
+		4 * pi *types[0].concentration * electron_charge_normalized * electron_charge_normalized / (massElectron*gamma));
+	omegaPlasmaTotal = 0;
+	for(int i = 0; i < typesNumber; ++i) {
+		omegaPlasmaTotal += 4 * pi *types[i].concentration * electron_charge_normalized * electron_charge_normalized / (types[i].mass*gamma);
+	}
+	omegaPlasmaTotal = sqrt(omegaPlasmaTotal);
 	double omegaPlasmaAlpha = sqrt(
 		4 * pi * types[3].concentration * 2 * electron_charge_normalized * 2 * electron_charge_normalized / massAlpha);
 	omegaGyroProton = B0.norm() * electron_charge_normalized / (massProton * speed_of_light_normalized);
@@ -5762,9 +5824,9 @@ void Simulation::initializeAnisotropic() {
 	if (rank == 0) printf("delta Omega/kmax vth = %g\n", (omegaGyroAlpha - omegaGyroProton) / (kmax * vthermalProton));
 	if (rank == 0) printf("delta Omega/kmin vth = %g\n", (omegaGyroAlpha - omegaGyroProton) / (kmin * vthermalProton));
 
-	if (rank == 0) printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
-	if (rank == 0) printf("omega plasma/gyro omega alphas = %g\n", omegaPlasmaAlpha / omegaGyroAlpha);
-	if (rank == 0) printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
+	if (rank == 0) printf("omegaAlfven plasma/gyro omegaAlfven protons = %g\n", omegaPlasmaProton / omegaGyroProton);
+	if (rank == 0) printf("omegaAlfven plasma/gyro omegaAlfven alphas = %g\n", omegaPlasmaAlpha / omegaGyroAlpha);
+	if (rank == 0) printf("omegaAlfven plasma/gyro omegaAlfven electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 	fflush(stdout);
 
 	initializeKolmogorovSpectrum();
@@ -5814,10 +5876,17 @@ void Simulation::initializeAnisotropicSilicon() {
 
 	createParticles();
 
+	double gamma = 1.0/sqrt(1.0 - V0.norm2()/speed_of_light_normalized_sqr);
+
 	omegaPlasmaProton = sqrt(
-		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / massProton);
+		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / (massProton*gamma));
 	omegaPlasmaElectron = sqrt(
-		4 * pi * types[0].concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
+		4 * pi *types[0].concentration * electron_charge_normalized * electron_charge_normalized / (massElectron*gamma));
+	omegaPlasmaTotal = 0;
+	for(int i = 0; i < typesNumber; ++i) {
+		omegaPlasmaTotal += 4 * pi *types[i].concentration * electron_charge_normalized * electron_charge_normalized / (types[i].mass*gamma);
+	}
+	omegaPlasmaTotal = sqrt(omegaPlasmaTotal);
 	double omegaPlasmaOxygen = sqrt(
 		4 * pi * types[6].concentration * 3 * electron_charge_normalized * 3 * electron_charge_normalized / massOxygen);
 	omegaGyroProton = B0.norm() * electron_charge_normalized / (massProton * speed_of_light_normalized);
@@ -5873,16 +5942,23 @@ void Simulation::initializeWeibel() {
 
 	createParticles();
 
+	double gamma = 1.0/sqrt(1.0 - V0.norm2()/speed_of_light_normalized_sqr);
+
 	omegaPlasmaProton = sqrt(
-		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / massProton);
+		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / (massProton*gamma));
 	omegaPlasmaElectron = sqrt(
-		4 * pi * types[0].concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
+		4 * pi *types[0].concentration * electron_charge_normalized * electron_charge_normalized / (massElectron*gamma));
+	omegaPlasmaTotal = 0;
+	for(int i = 0; i < typesNumber; ++i) {
+		omegaPlasmaTotal += 4 * pi *types[i].concentration * electron_charge_normalized * electron_charge_normalized / (types[i].mass*gamma);
+	}
+	omegaPlasmaTotal = sqrt(omegaPlasmaTotal);
 
 	omegaGyroProton = B0.norm() * electron_charge_normalized / (massProton * speed_of_light_normalized);
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
-	if (rank == 0) printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
-	if (rank == 0) printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
+	if (rank == 0) printf("omegaAlfven plasma/gyro omegaAlfven protons = %g\n", omegaPlasmaProton / omegaGyroProton);
+	if (rank == 0) printf("omegaAlfven plasma/gyro omegaAlfven electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 
 	initializeKolmogorovSpectrum();
 
@@ -5948,17 +6024,24 @@ void Simulation::initializeRingWeibel() {
 
 	createParticles();
 
+	double gamma0 = 1.0/sqrt(1.0 - V0.norm2()/speed_of_light_normalized_sqr);
+
 	omegaPlasmaProton = sqrt(
-		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / massProton);
+		4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / (massProton*gamma0));
 	omegaPlasmaElectron = sqrt(
-		4 * pi * types[0].concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
+		4 * pi *types[0].concentration * electron_charge_normalized * electron_charge_normalized / (massElectron*gamma0));
+	omegaPlasmaTotal = 0;
+	for(int i = 0; i < typesNumber; ++i) {
+		omegaPlasmaTotal += 4 * pi *types[i].concentration * electron_charge_normalized * electron_charge_normalized / (types[i].mass*gamma0);
+	}
+	omegaPlasmaTotal = sqrt(omegaPlasmaTotal);
 	double omegaPlasmaAlpha = sqrt(
 		4 * pi * types[3].concentration * 2 * electron_charge_normalized * 2 * electron_charge_normalized / massAlpha);
 	omegaGyroProton = B0.norm() * electron_charge_normalized / (massProton * speed_of_light_normalized);
 	omegaGyroElectron = B0.norm() * electron_charge_normalized / (massElectron * speed_of_light_normalized);
 
-	if (rank == 0) printf("omega plasma/gyro omega protons = %g\n", omegaPlasmaProton / omegaGyroProton);
-	if (rank == 0) printf("omega plasma/gyro omega electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
+	if (rank == 0) printf("omegaAlfven plasma/gyro omegaAlfven protons = %g\n", omegaPlasmaProton / omegaGyroProton);
+	if (rank == 0) printf("omegaAlfven plasma/gyro omegaAlfven electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 	fflush(stdout);
 
 	initializeKolmogorovSpectrum();
@@ -7106,30 +7189,30 @@ void Simulation::checkFrequency(double omega) {
 	double cyclothronOmegaElectron = electron_charge_normalized * B0.norm() / (massElectron * speed_of_light_normalized);
 	double cyclothronOmegaProton = electron_charge_normalized * B0.norm() / (massProton * speed_of_light_normalized);
 	if (omega > cyclothronOmegaProton) {
-		if (rank == 0) printf("omega > cyclothron Omega Proton\n");
+		if (rank == 0) printf("omegaAlfven > cyclothron Omega Proton\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > cyclothron Omega Proton\n");
+		if (rank == 0) fprintf(informationFile, "omegaAlfven > cyclothron Omega Proton\n");
 	} else if (omega > cyclothronOmegaProton / 100.0) {
-		if (rank == 0) printf("omega > cyclothrone Omega Proton/100\n");
+		if (rank == 0) printf("omegaAlfven > cyclothrone Omega Proton/100\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > cyclothron Omega Proton/100\n");
+		if (rank == 0) fprintf(informationFile, "omegaAlfven > cyclothron Omega Proton/100\n");
 	}
-	if (rank == 0) printf("omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
+	if (rank == 0) printf("omegaAlfven/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
+	if (rank == 0) fprintf(informationFile, "omegaAlfven/cyclothronOmega = %g\n", omega / cyclothronOmegaProton);
 
 	if (omega > 1.0) {
-		if (rank == 0) printf("omega > omega plasma\n");
+		if (rank == 0) printf("omegaAlfven > omegaAlfven plasma\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > omega plasma\n");
+		if (rank == 0) fprintf(informationFile, "omegaAlfven > omegaAlfven plasma\n");
 	} else if (omega > 0.01) {
-		if (rank == 0) printf("omega > omega plasma/100\n");
+		if (rank == 0) printf("omegaAlfven > omegaAlfven plasma/100\n");
 		fflush(stdout);
-		if (rank == 0) fprintf(informationFile, "omega > omega plasma/100\n");
+		if (rank == 0) fprintf(informationFile, "omegaAlfven > omegaAlfven plasma/100\n");
 	}
-	if (rank == 0) printf("omega/omega plasma = %g\n", omega);
+	if (rank == 0) printf("omegaAlfven/omegaAlfven plasma = %g\n", omega);
 	fflush(stdout);
-	if (rank == 0) fprintf(informationFile, "omega/omega plasma = %g\n", omega);
+	if (rank == 0) fprintf(informationFile, "omegaAlfven/omegaAlfven plasma = %g\n", omega);
 
 	if (rank == 0) fclose(informationFile);
 }
@@ -7486,10 +7569,10 @@ void Simulation::initializeBell() {
 		fprintf(informationFile, "lmax = %g\n", lmax);
 		double omega_pe = sqrt(
 			4 * pi * types[0].concentration * electron_charge_normalized * electron_charge_normalized / massElectron);
-		fprintf(informationFile, "omega plasma electron = %g\n", omega_pe);
+		fprintf(informationFile, "omegaAlfven plasma electron = %g\n", omega_pe);
 		double omega_pp = sqrt(
 			4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / massProton);
-		fprintf(informationFile, "omega plasma electron = %g\n", omega_pp);
+		fprintf(informationFile, "omegaAlfven plasma electron = %g\n", omega_pp);
 		double electronSkinDepth = speed_of_light_normalized / omega_pe;
 		fprintf(informationFile, "electron skin depth = %g\n", electronSkinDepth);
 		double protonSkinDepth = speed_of_light_normalized / omega_pp;

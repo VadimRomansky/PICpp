@@ -287,7 +287,7 @@ void Simulation::evaluateElectricField() {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
 						newEfield[i][j][k] = (tempEfield[i][j][k] - Efield[i][j][k] * (1 - theta)) / theta;
 						//newEfield[i][j][k].x= 0;
-						//newEfield[i][j][k].x = E0.x*cos(omega*(time + deltaT));
+						//newEfield[i][j][k].x = E0.x*cos(omegaAlfven*(time + deltaT));
 						//newEfield[i][j][k].y= 0;
 						//newEfield[i][j][k].z= 0;
 						if (newEfield[i][j][k].x > Efield[i][j][k].x) {
@@ -3299,7 +3299,7 @@ void Simulation::evaluateBunemanElectricFieldX() {
 			for (int k = 1 + additionalBinNumber; k <= znumberAdded - 1 - additionalBinNumber; ++k) {
 				bunemanNewEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBx(i, j, k) - 4 * pi *
 					bunemanJx[i][j][k]) * deltaT;
-				//bunemanNewEx[i][j][k] = E0.x*cos(omega*(time + deltaT));
+				//bunemanNewEx[i][j][k] = E0.x*cos(omegaAlfven*(time + deltaT));
 				//bunemanNewEx[i][j][k] = 0;
 			}
 		}
