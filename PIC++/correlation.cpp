@@ -170,16 +170,22 @@ Vector3d Simulation::correlationBunemanGeneralBfield(Particle& particle, double*
 		maxK = 1;
 	}
 	for (int i = 0; i < maxI; ++i) {
+		int cellI = particle.correlationMapCell.xindex[i];
+		int nodeI = particle.correlationMapNode.xindex[i];
 		for (int j = 0; j < maxJ; ++j) {
+			int cellJ = particle.correlationMapCell.yindex[j];
+			int nodeJ = particle.correlationMapNode.yindex[j];
+			if(ynumberGeneral == 1) {
+				cellJ = 0;
+				nodeJ = 0;
+			}
 			for (int k = 0; k < maxK; ++k) {
-				int curI = particle.correlationMapNode.xindex[i];
-				int curJ = particle.correlationMapCell.yindex[j];
-				int curK = particle.correlationMapCell.zindex[k];
-				if(ynumberGeneral == 1) {
-					curJ = 0;
-				}
+				int cellK = particle.correlationMapCell.zindex[k];
+				int nodeK = particle.correlationMapNode.zindex[k];
+
 				if(znumberGeneral == 1) {
-					curK = 0;
+					cellK = 0;
+					nodeK = 0;
 				}
 
 				double correlationX = 0;
@@ -209,35 +215,14 @@ Vector3d Simulation::correlationBunemanGeneralBfield(Particle& particle, double*
 					correlationZ = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] * particle.correlationMapNode.zcorrelation[k];
 				}
 
-				double Bx = fieldX[curI][curJ][curK];
+				double Bx = fieldX[nodeI][cellJ][cellK];
 				result.x = result.x + Bx * correlationX;
 
-				curI = particle.correlationMapCell.xindex[i];
-				curJ = particle.correlationMapNode.yindex[j];
-				curK = particle.correlationMapCell.zindex[k];
-				if(ynumberGeneral == 1) {
-					curJ = 0;
-				}
-				if(znumberGeneral == 1) {
-					curK = 0;
-				}
-
-				double By = fieldY[curI][curJ][curK];
-
+				double By = fieldY[cellI][nodeJ][cellK];
 				result.y = result.y + By * correlationY;
 
-				curI = particle.correlationMapCell.xindex[i];
-				curJ = particle.correlationMapCell.yindex[j];
-				curK = particle.correlationMapNode.zindex[k];
-				if(ynumberGeneral == 1) {
-					curJ = 0;
-				}
-				if(znumberGeneral == 1) {
-					curK = 0;
-				}
 
-				double Bz = fieldZ[curI][curJ][curK];
-
+				double Bz = fieldZ[cellI][cellJ][nodeK];
 				result.z = result.z + Bz * correlationZ;
 			}
 		}
@@ -280,19 +265,23 @@ Vector3d Simulation::correlationBunemanGeneralEfield(Particle& particle, double*
 		maxK = 1;
 	}
 	for (int i = 0; i < maxI; ++i) {
+		int cellI = particle.correlationMapCell.xindex[i];
+		int nodeI = particle.correlationMapNode.xindex[i];
 		for (int j = 0; j < maxJ; ++j) {
+			int cellJ = particle.correlationMapCell.yindex[j];
+			int nodeJ = particle.correlationMapNode.yindex[j];
+			if(ynumberGeneral == 1) {
+				cellJ = 0;
+				nodeJ = 0;
+			}
 			for (int k = 0; k < maxK; ++k) {
-				int curI = particle.correlationMapCell.xindex[i];
-				int curJ = particle.correlationMapNode.yindex[j];
-				int curK = particle.correlationMapNode.zindex[k];
-				if(ynumberGeneral == 1) {
-					curJ = 0;
-				}
-				if(znumberGeneral == 1) {
-					curK = 0;
-				}
+				int cellK = particle.correlationMapCell.zindex[k];
+				int nodeK = particle.correlationMapNode.zindex[k];
 
-				double Ex = fieldX[curI][curJ][curK];
+				if(znumberGeneral == 1) {
+					cellK = 0;
+					nodeK = 0;
+				}
 
 				double correlationX;
 				double correlationY;
@@ -320,34 +309,13 @@ Vector3d Simulation::correlationBunemanGeneralEfield(Particle& particle, double*
 					break;
 				}
 
+				double Ex = fieldX[cellI][nodeJ][nodeK];
 				result.x = result.x + Ex * correlationX;
 
-				curI = particle.correlationMapNode.xindex[i];
-				curJ = particle.correlationMapCell.yindex[j];
-				curK = particle.correlationMapNode.zindex[k];
-				if(ynumberGeneral == 1) {
-					curJ = 0;
-				}
-				if(znumberGeneral == 1) {
-					curK = 0;
-				}
-
-				double Ey = fieldY[curI][curJ][curK];
-
+				double Ey = fieldY[nodeI][cellJ][nodeK];
 				result.y = result.y + Ey * correlationY;
 
-				curI = particle.correlationMapNode.xindex[i];
-				curJ = particle.correlationMapNode.yindex[j];
-				curK = particle.correlationMapCell.zindex[k];
-				if(ynumberGeneral == 1) {
-					curJ = 0;
-				}
-				if(znumberGeneral == 1) {
-					curK = 0;
-				}
-
-				double Ez = fieldZ[curI][curJ][curK];
-
+				double Ez = fieldZ[nodeI][nodeJ][cellK];
 				result.z = result.z + Ez * correlationZ;
 			}
 		}
