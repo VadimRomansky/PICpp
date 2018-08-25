@@ -27,8 +27,16 @@ void Simulation::tristanEvaluateBhalfStep() {
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
 	int minJ = 1 + additionalBinNumber;
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 1;
+	}
 	int minK = 1 + additionalBinNumber;
 	int maxK = znumberAdded - 1 - additionalBinNumber;
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 1;
+	}
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
 			for (int k = minK; k < maxK; ++k) {
@@ -36,12 +44,21 @@ void Simulation::tristanEvaluateBhalfStep() {
 			}
 		}
 	}
+	if(ynumberGeneral == 1) {
+		maxJ = 0;
+	}
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k < maxK; ++k) {
 				bunemanBy[i][j][k] = bunemanBy[i][j][k] - speed_of_light_normalized * evaluateBunemanRotEy(i, j, k) * deltaT/2;
 			}
 		}
+	}
+	if(ynumberGeneral == 1) {
+		maxJ = 1;
+	}
+	if(znumberGeneral == 1) {
+		maxK = 0;
 	}
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
@@ -67,12 +84,23 @@ void Simulation::tristanEvaluateE() {
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
 	int minK = 1 + additionalBinNumber;
 	int maxK = znumberAdded - 1 - additionalBinNumber;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 0;
+	}
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 0;
+	}
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
 				bunemanEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBx(i, j, k) - 4 * pi * bunemanJx[i][j][k]) * deltaT;
 			}
 		}
+	}
+	if(ynumberGeneral == 1) {
+		maxJ = 1;
 	}
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
@@ -86,6 +114,12 @@ void Simulation::tristanEvaluateE() {
 				}
 			}
 		}
+	}
+	if(ynumberGeneral == 1) {
+		maxJ = 0;
+	}
+	if(znumberGeneral == 1) {
+		maxK = 1;
 	}
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j <= maxJ; ++j) {
@@ -114,9 +148,6 @@ void Simulation::evaluateElectricField() {
 	if ((rank == 0) && (verbosity > 0)) printf("evaluating fields\n");
 	fflush(stdout);
 	if ((rank == 0) && (verbosity > 0)) printLog("evaluating fields\n");
-	if (solverType == BUNEMAN) {
-		evaluateBunemanElectricField();
-	} else {
 		//fopen("./output/outputEverythingFile.dat","a");
 
 		if (solverType == IMPLICIT) {
@@ -326,7 +357,6 @@ void Simulation::evaluateElectricField() {
 				}
 			}
 		}
-	}
 	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
@@ -2682,9 +2712,6 @@ void Simulation::evaluateMagneticField() {
 	if((cartDim[0] == cartCoord[0] - 1) && (boundaryConditionTypeX != PERIODIC)) {
 		rightBoundaryFieldEvaluator->prepareB(time + deltaT);
 	}
-	if (solverType == BUNEMAN) {
-		evaluateBunemanMagneticField();
-	} else {
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
@@ -2725,7 +2752,6 @@ void Simulation::evaluateMagneticField() {
 				}
 			}
 		}*/
-	}
 	//MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
@@ -3234,143 +3260,69 @@ void Simulation::createFakeEquation(int i, int j, int k) {
 double Simulation::evaluateBunemanRotEx(int i, int j, int k) {
 	int nextJ = j + 1;
 	int nextK = k + 1;
-	double result = ((bunemanEz[i][nextJ][k] - bunemanEz[i][j][k]) / deltaY) - ((bunemanEy[i][j][nextK] - bunemanEy[i][j][k
-	]) / deltaZ);
+	double result = 0;
+	if(ynumberGeneral > 1){
+		result += ((bunemanEz[i][nextJ][k] - bunemanEz[i][j][k]) / deltaY);
+	}
+	if(znumberGeneral > 1){
+		result -= ((bunemanEy[i][j][nextK] - bunemanEy[i][j][k]) / deltaZ);
+	}
 	return result;
 }
 
 double Simulation::evaluateBunemanRotEy(int i, int j, int k) {
 	int nextI = i + 1;
 	int nextK = k + 1;
-	double result = ((bunemanEx[i][j][nextK] - bunemanEx[i][j][k]) / deltaZ) - ((bunemanEz[nextI][j][k] - bunemanEz[i][j][k
-	]) / deltaZ);
+	double result = - ((bunemanEz[nextI][j][k] - bunemanEz[i][j][k]) / deltaX);
+	if(znumberGeneral > 1) {
+		result += ((bunemanEx[i][j][nextK] - bunemanEx[i][j][k]) / deltaZ);
+	}
 	return result;
 }
 
 double Simulation::evaluateBunemanRotEz(int i, int j, int k) {
 	int nextI = i + 1;
 	int nextJ = j + 1;
-	double result = ((bunemanEy[nextI][j][k] - bunemanEy[i][j][k]) / deltaX) - ((bunemanEx[i][nextJ][k] - bunemanEx[i][j][k
-	]) / deltaY);
+	double result = ((bunemanEy[nextI][j][k] - bunemanEy[i][j][k]) / deltaX);
+	if(ynumberGeneral < 1){
+		result -= ((bunemanEx[i][nextJ][k] - bunemanEx[i][j][k]) / deltaY);
+	}
 	return result;
 }
 
 double Simulation::evaluateBunemanRotBx(int i, int j, int k) {
 	int prevJ = j - 1;
 	int prevK = k - 1;
-	double result = ((bunemanBz[i][j][k] - bunemanBz[i][prevJ][k]) / deltaY) - ((bunemanBy[i][j][k] - bunemanBy[i][j][prevK
-	]) / deltaZ);
+	double result = 0;
+	if(ynumberGeneral > 1){
+		result += ((bunemanBz[i][j][k] - bunemanBz[i][prevJ][k]) / deltaY);
+	}
+	if(znumberGeneral > 1){
+		result -= ((bunemanBy[i][j][k] - bunemanBy[i][j][prevK]) / deltaZ);
+	}
 	return result;
 }
 
 double Simulation::evaluateBunemanRotBy(int i, int j, int k) {
 	int prevI = i - 1;
 	int prevK = k - 1;
-	double result = ((bunemanBx[i][j][k] - bunemanBx[i][j][prevK]) / deltaZ) - ((bunemanBz[i][j][k] - bunemanBz[prevI][j][k
-	]) / deltaX);
+	double result = - ((bunemanBz[i][j][k] - bunemanBz[prevI][j][k]) / deltaX);
+	if(znumberGeneral > 1) {
+		result += ((bunemanBx[i][j][k] - bunemanBx[i][j][prevK]) / deltaZ);
+	}
 	return result;
 }
 
 double Simulation::evaluateBunemanRotBz(int i, int j, int k) {
 	int prevJ = j - 1;
 	int prevI = i - 1;
-	double result = ((bunemanBy[i][j][k] - bunemanBy[prevI][j][k]) / deltaX) - ((bunemanBx[i][j][k] - bunemanBx[i][prevJ][k
-	]) / deltaY);
+	double result = ((bunemanBy[i][j][k] - bunemanBy[prevI][j][k]) / deltaX);
+	if(ynumberGeneral > 1){
+		result -= ((bunemanBx[i][j][k] - bunemanBx[i][prevJ][k]) / deltaY);
+	}
 	return result;
 }
 
-void Simulation::evaluateBunemanElectricField() {
-	evaluateBunemanElectricFieldX();
-	evaluateBunemanElectricFieldY();
-	evaluateBunemanElectricFieldZ();
-}
-
-void Simulation::evaluateBunemanElectricFieldX() {
-	double omega2 = 0;
-	for (int i = 0; i < typesNumber; ++i) {
-		omega2 += 4 * pi * types[i].concentration * types[i].charge * types[i].charge / types[i].mass;
-	}
-
-	double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
-	double omega = sqrt(omega2 / (gamma) * gamma * gamma);
-
-	for (int i = 1 + additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i) {
-		for (int j = 1 + additionalBinNumber; j <= ynumberAdded - 1 - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k <= znumberAdded - 1 - additionalBinNumber; ++k) {
-				bunemanNewEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBx(i, j, k) - 4 * pi *
-					bunemanJx[i][j][k]) * deltaT;
-				//bunemanNewEx[i][j][k] = E0.x*cos(omegaAlfven*(time + deltaT));
-				//bunemanNewEx[i][j][k] = 0;
-			}
-		}
-	}
-}
-
-void Simulation::evaluateBunemanElectricFieldY() {
-	for (int i = 1 + additionalBinNumber; i <= xnumberAdded - 1 - additionalBinNumber; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k <= znumberAdded - 1 - additionalBinNumber; ++k) {
-				bunemanNewEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBy(i, j, k) - 4 * pi *
-					bunemanJy[i][j][k]) * deltaT;
-				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= 1 + additionalBinNumber) {
-					bunemanNewEy[i][j][k] = 0;
-				}
-				//bunemanNewEy[i][j][k] = 0;
-			}
-		}
-	}
-}
-
-void Simulation::evaluateBunemanElectricFieldZ() {
-	for (int i = 1 + additionalBinNumber; i <= xnumberAdded - 1 - additionalBinNumber; ++i) {
-		for (int j = 1 + additionalBinNumber; j <= ynumberAdded - 1 - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k) {
-				bunemanNewEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBz(i, j, k) - 4 * pi *
-					bunemanJz[i][j][k]) * deltaT;
-				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= 1 + additionalBinNumber) {
-					bunemanNewEz[i][j][k] = 0;
-				}
-				//bunemanNewEz[i][j][k] = 0;
-			}
-		}
-	}
-}
-
-void Simulation::evaluateBunemanMagneticField() {
-	evaluateBunemanMagneticFieldX();
-	evaluateBunemanMagneticFieldY();
-	evaluateBunemanMagneticFieldZ();
-}
-
-void Simulation::evaluateBunemanMagneticFieldX() {
-	for (int i = 1 + additionalBinNumber; i <= xnumberAdded - 1 - additionalBinNumber; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k) {
-				bunemanNewBx[i][j][k] = bunemanBx[i][j][k] - speed_of_light_normalized * evaluateBunemanRotEx(i, j, k) * deltaT;
-			}
-		}
-	}
-}
-
-void Simulation::evaluateBunemanMagneticFieldY() {
-	for (int i = 1 + additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i) {
-		for (int j = 1 + additionalBinNumber; j <= ynumberAdded - 1 - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k) {
-				bunemanNewBy[i][j][k] = bunemanBy[i][j][k] - speed_of_light_normalized * evaluateBunemanRotEy(i, j, k) * deltaT;
-			}
-		}
-	}
-}
-
-void Simulation::evaluateBunemanMagneticFieldZ() {
-	for (int i = 1 + additionalBinNumber; i < xnumberAdded - 1 - additionalBinNumber; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j) {
-			for (int k = 1 + additionalBinNumber; k <= znumberAdded - 1 - additionalBinNumber; ++k) {
-				bunemanNewBz[i][j][k] = bunemanBz[i][j][k] - speed_of_light_normalized * evaluateBunemanRotEz(i, j, k) * deltaT;
-			}
-		}
-	}
-}
 
 void Simulation::updateBunemanFields() {
 	updateBunemanElectricField();

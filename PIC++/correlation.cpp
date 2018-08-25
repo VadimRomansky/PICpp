@@ -160,38 +160,85 @@ Vector3d Simulation::correlationBunemanGeneralBfield(Particle* particle, double*
 Vector3d Simulation::correlationBunemanGeneralBfield(Particle& particle, double*** fieldX, double*** fieldY,
                                                      double*** fieldZ) {
 	Vector3d result = Vector3d(0, 0, 0);
-	for (int i = 0; i < splineOrder + 2; ++i) {
-		for (int j = 0; j < splineOrder + 2; ++j) {
-			for (int k = 0; k < splineOrder + 2; ++k) {
+	int maxI = splineOrder + 2;
+	int maxJ = splineOrder + 2;
+	if(ynumberGeneral == 1) {
+		maxJ = 1;
+	}
+	int maxK = splineOrder + 2;
+	if(znumberGeneral == 1) {
+		maxK = 1;
+	}
+	for (int i = 0; i < maxI; ++i) {
+		for (int j = 0; j < maxJ; ++j) {
+			for (int k = 0; k < maxK; ++k) {
 				int curI = particle.correlationMapNode.xindex[i];
 				int curJ = particle.correlationMapCell.yindex[j];
 				int curK = particle.correlationMapCell.zindex[k];
+				if(ynumberGeneral == 1) {
+					curJ = 0;
+				}
+				if(znumberGeneral == 1) {
+					curK = 0;
+				}
+
+				double correlationX = 0;
+				double correlationY = 0;
+				double correlationZ = 0;
+
+				
+				switch(Simulation::dimensionType) {
+				case DimensionType::THREE_D: correlationX = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] * particle.correlationMapCell.zcorrelation[k];
+					correlationY = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j] * particle.correlationMapCell.zcorrelation[k];
+					correlationZ = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] * particle.correlationMapNode.zcorrelation[k];
+					break;
+				case DimensionType::TWO_D_XY: correlationX = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j];
+					correlationY = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j];
+					correlationZ = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j];
+					break;
+				case DimensionType::TWO_D_XZ: correlationX = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapCell.zcorrelation[k];
+					correlationY = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapCell.zcorrelation[k];
+					correlationZ = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapNode.zcorrelation[k];
+					break;
+				case DimensionType::ONE_D: correlationX = particle.correlationMapNode.xcorrelation[i];
+					correlationY = particle.correlationMapCell.xcorrelation[i];
+					correlationZ = particle.correlationMapCell.xcorrelation[i];
+					break;
+				default: correlationX = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] * particle.correlationMapCell.zcorrelation[k];
+					correlationY = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j] * particle.correlationMapCell.zcorrelation[k];
+					correlationZ = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] * particle.correlationMapNode.zcorrelation[k];
+				}
 
 				double Bx = fieldX[curI][curJ][curK];
-
-				double correlation = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] *
-					particle.correlationMapCell.zcorrelation[k];
-				result.x = result.x + Bx * correlation;
+				result.x = result.x + Bx * correlationX;
 
 				curI = particle.correlationMapCell.xindex[i];
 				curJ = particle.correlationMapNode.yindex[j];
 				curK = particle.correlationMapCell.zindex[k];
+				if(ynumberGeneral == 1) {
+					curJ = 0;
+				}
+				if(znumberGeneral == 1) {
+					curK = 0;
+				}
 
 				double By = fieldY[curI][curJ][curK];
 
-				correlation = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j] * particle.
-					correlationMapCell.zcorrelation[k];
-				result.y = result.y + By * correlation;
+				result.y = result.y + By * correlationY;
 
 				curI = particle.correlationMapCell.xindex[i];
 				curJ = particle.correlationMapCell.yindex[j];
 				curK = particle.correlationMapNode.zindex[k];
+				if(ynumberGeneral == 1) {
+					curJ = 0;
+				}
+				if(znumberGeneral == 1) {
+					curK = 0;
+				}
 
 				double Bz = fieldZ[curI][curJ][curK];
 
-				correlation = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] * particle.
-					correlationMapNode.zcorrelation[k];
-				result.z = result.z + Bz * correlation;
+				result.z = result.z + Bz * correlationZ;
 			}
 		}
 	}
@@ -223,38 +270,85 @@ Vector3d Simulation::correlationBunemanGeneralEfield(Particle* particle, double*
 Vector3d Simulation::correlationBunemanGeneralEfield(Particle& particle, double*** fieldX, double*** fieldY,
                                                      double*** fieldZ) {
 	Vector3d result = Vector3d(0, 0, 0);
-	for (int i = 0; i < splineOrder + 2; ++i) {
-		for (int j = 0; j < splineOrder + 2; ++j) {
-			for (int k = 0; k < splineOrder + 2; ++k) {
+	int maxI = splineOrder + 2;
+	int maxJ = splineOrder + 2;
+	if(ynumberGeneral == 1) {
+		maxJ = 1;
+	}
+	int maxK = splineOrder + 2;
+	if(znumberGeneral == 1) {
+		maxK = 1;
+	}
+	for (int i = 0; i < maxI; ++i) {
+		for (int j = 0; j < maxJ; ++j) {
+			for (int k = 0; k < maxK; ++k) {
 				int curI = particle.correlationMapCell.xindex[i];
 				int curJ = particle.correlationMapNode.yindex[j];
 				int curK = particle.correlationMapNode.zindex[k];
+				if(ynumberGeneral == 1) {
+					curJ = 0;
+				}
+				if(znumberGeneral == 1) {
+					curK = 0;
+				}
 
 				double Ex = fieldX[curI][curJ][curK];
 
-				double correlation = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j] *
-					particle.correlationMapNode.zcorrelation[k];
-				result.x = result.x + Ex * correlation;
+				double correlationX;
+				double correlationY;
+				double correlationZ;
+				switch (Simulation::dimensionType){
+				case DimensionType::THREE_D: correlationX = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j] * particle.correlationMapNode.zcorrelation[k];
+					correlationY = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] * particle.correlationMapNode.zcorrelation[k];
+					correlationZ = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j] * particle.correlationMapCell.zcorrelation[k];
+					break;
+				case DimensionType::TWO_D_XY: correlationX = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j];
+					correlationY = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j];
+					correlationZ = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j];
+					break;
+				case DimensionType::TWO_D_XZ: correlationX = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapNode.zcorrelation[k];
+					correlationY = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapNode.zcorrelation[k];
+					correlationZ = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapCell.zcorrelation[k];
+					break;
+				case DimensionType::ONE_D: correlationX = particle.correlationMapCell.xcorrelation[i];
+					correlationY = particle.correlationMapNode.xcorrelation[i];
+					correlationZ = particle.correlationMapNode.xcorrelation[i];
+					break;
+				default: correlationX = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j] * particle.correlationMapNode.zcorrelation[k];
+					correlationY = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] * particle.correlationMapNode.zcorrelation[k];
+					correlationZ = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j] * particle.correlationMapCell.zcorrelation[k];
+					break;
+				}
+
+				result.x = result.x + Ex * correlationX;
 
 				curI = particle.correlationMapNode.xindex[i];
 				curJ = particle.correlationMapCell.yindex[j];
 				curK = particle.correlationMapNode.zindex[k];
+				if(ynumberGeneral == 1) {
+					curJ = 0;
+				}
+				if(znumberGeneral == 1) {
+					curK = 0;
+				}
 
 				double Ey = fieldY[curI][curJ][curK];
 
-				correlation = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] * particle.
-					correlationMapNode.zcorrelation[k];
-				result.y = result.y + Ey * correlation;
+				result.y = result.y + Ey * correlationY;
 
 				curI = particle.correlationMapNode.xindex[i];
 				curJ = particle.correlationMapNode.yindex[j];
 				curK = particle.correlationMapCell.zindex[k];
+				if(ynumberGeneral == 1) {
+					curJ = 0;
+				}
+				if(znumberGeneral == 1) {
+					curK = 0;
+				}
 
 				double Ez = fieldZ[curI][curJ][curK];
 
-				correlation = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j] * particle.
-					correlationMapCell.zcorrelation[k];
-				result.z = result.z + Ez * correlation;
+				result.z = result.z + Ez * correlationZ;
 			}
 		}
 	}
@@ -813,8 +907,12 @@ void Simulation::updateCorrelationMapCellZ(Particle& particle) {
 
 void Simulation::updateCorrelationMapCell(Particle& particle) {
 	updateCorrelationMapCellX(particle);
-	updateCorrelationMapCellY(particle);
-	updateCorrelationMapCellZ(particle);
+	if(ynumberGeneral > 1){
+		updateCorrelationMapCellY(particle);
+	}
+	if(znumberGeneral > 1){
+		updateCorrelationMapCellZ(particle);
+	}
 
 	/*double fullCorrelation = 0;
 	for (int i = 0; i < splineOrder + 2; ++i) {
@@ -986,8 +1084,12 @@ void Simulation::updateCorrelationMapNodeZ(Particle& particle) {
 
 void Simulation::updateCorrelationMapNode(Particle& particle) {
 	updateCorrelationMapNodeX(particle);
-	updateCorrelationMapNodeY(particle);
-	updateCorrelationMapNodeZ(particle);
+	if(ynumberGeneral > 1){
+		updateCorrelationMapNodeY(particle);
+	}
+	if(znumberGeneral > 1){
+		updateCorrelationMapNodeZ(particle);
+	}
 
 	/*double fullCorrelation = 0;
 	for (int i = 0; i < splineOrder + 2; ++i) {

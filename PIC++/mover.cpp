@@ -1037,8 +1037,20 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer& typeContai
 	    return;
 	}*/
 
-	for (int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j) {
-		for (int k = 1 + additionalBinNumber; k < znumberAdded - 1 - additionalBinNumber; ++k) {
+	int minJ = 1 + additionalBinNumber;
+	int minK = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - 1 - additionalBinNumber;
+	int maxK = znumberAdded - 1 - additionalBinNumber;
+	if(ynumberGeneral == 0) {
+		minJ = 0;
+		maxJ = 1;
+	}
+	if(znumberGeneral == 0) {
+		minK = 0;
+		maxK = 1;
+	}
+	for (int j = minJ; j < maxJ; ++j) {
+		for (int k = minK; k < maxK; ++k) {
 			double weight = (typeContainer.concentration / typeContainer.particlesPerBin) * volumeB();
 			for (int l = 0; l < count; ++l) {
 				ParticleTypes type = typeContainer.type;

@@ -35,15 +35,11 @@ public:
 	double parallelTemperatureEvaluated;
 	double normalTemperatureEvaluated;
 	double generalWeight;
-	//double* juttnerFunction;
 	double juttnerFunction[randomParameter];
-	//double* juttnerValue;
 	double juttnerValue[randomParameter];
 	int jutnerNumber;
 
 	std::string typeName;
-
-	~ParticleTypeContainer();
 };
 
 class CorrelationMap {

@@ -105,10 +105,10 @@ void Simulation::simulate() {
 	//evaluateExplicitDerivative();
 	if (currentIteration % divergenceCleanUpParameter == 0) {
 		if (solverType == BUNEMAN) {
-			//cleanupDivergenceBuneman();
+			cleanupDivergenceBuneman();
 			//cleanUpDivergenceBunemanMagnetic();
 		} else {
-			//cleanupDivergence(newEfield, chargeDensity);
+			cleanupDivergence(newEfield, chargeDensity);
 			//cleanupDivergenceMagnetic();
 		}
 	}
@@ -131,7 +131,9 @@ void Simulation::simulate() {
 			fclose(logFile);
 		}
 		if ((rank == 0)) printf("start iteration number = %d time = %15.10g\n", currentIteration, time);
-		updateEnergy();
+		if(currentIteration % writeGeneralParameter == 0) {
+			updateEnergy();
+		}
 		if (currentIteration % writeParameter == 0) {
 			output();
 			currentWriteNumber++;
@@ -1365,6 +1367,14 @@ void Simulation::updateTheoreticalEnergy() {
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
 	int minK = 1 + additionalBinNumber;
 	int maxK = znumberAdded - 1 - additionalBinNumber;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 1;
+	}
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 1;
+	}
 
 	//if (currentIteration > 0) {
 	//if (boundaryConditionTypeX != PERIODIC) {
@@ -1475,6 +1485,14 @@ void Simulation::updateEnergy() {
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
 	int minK = 1 + additionalBinNumber;
 	int maxK = znumberAdded - 1 - additionalBinNumber;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 1;
+	}
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 1;
+	}
 
 	globalMomentum = Vector3d(0, 0, 0);
 	electromagneticMomentum = Vector3d(0, 0, 0);

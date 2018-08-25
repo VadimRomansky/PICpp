@@ -945,20 +945,10 @@ public:
 
 	double evaluateTurbulenceFieldAmplitude(const double& kx, const double& ky, const double& kz);
 
-	void evaluateBunemanElectricField();
-	void evaluateBunemanElectricFieldX();
-	void evaluateBunemanElectricFieldY();
-	void evaluateBunemanElectricFieldZ();
-	void evaluateBunemanMagneticField();
-	void evaluateBunemanMagneticFieldX();
-	void evaluateBunemanMagneticFieldY();
-	void evaluateBunemanMagneticFieldZ();
-
 	void updateBunemanFields();
 	void updateBunemanElectricField();
 	void updateBunemanMagneticField();
 
-	void updateBunemanFlux();
 	void updateBunemanChargeDensity();
 
 	void filterFields(int cutWaveNumber);

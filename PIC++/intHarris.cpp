@@ -78,10 +78,23 @@ void Simulation::createParticlesHarris(double harrisWidth) {
 	}
 	evaluateJuttnerFunctions();
 	
-	//for (int i = 0; i < xnumber; ++i) {
-	for (int i = 1 + additionalBinNumber; i < xnumberAdded - additionalBinNumber - 1; ++i) {
-		for (int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber - 1; ++j) {
-			for (int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber - 1; ++k) {
+	int minI = 1 + additionalBinNumber;
+	int minJ = 1 + additionalBinNumber;
+	int minK = 1 + additionalBinNumber;
+	int maxI = xnumberAdded - additionalBinNumber - 1;
+	int maxJ = ynumberAdded - additionalBinNumber - 1;
+	int maxK = znumberAdded - additionalBinNumber - 1;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 1;
+	}
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 1;
+	}
+	for (int i = minI; i < maxI; ++i) {
+		for (int j = minJ; j < maxJ; ++j) {
+			for (int k = minK; k < maxK; ++k) {
 				//int maxParticlesPerBin = types[0].particlesPerBin;
 				double x = xgrid[i] + 0.0001 * deltaX;
 				double y = ygrid[j] + 0.0001 * deltaY;
