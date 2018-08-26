@@ -54,14 +54,14 @@ void Simulation::simulate() {
 		//initializeAnisotropicSilicon();
 		//initializeWeibel();
 		//initializeRingWeibel();
-		//initializeFluxFromRight();
+		initializeFluxFromRight();
 		//initializeHarris();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();
 		//initializeSimpleElectroMagneticWaveY();
 		//initializeSimpleElectroMagneticWaveZ();
 		//initializeRotatedSimpleElectroMagneticWave(1, 1, 0);
-		initializeHomogenouseFlow();
+		//initializeHomogenouseFlow();
 		//initializeLangmuirWave();
 		//createParticles();
 		//initializeShockWave();
@@ -105,10 +105,10 @@ void Simulation::simulate() {
 	//evaluateExplicitDerivative();
 	if (currentIteration % divergenceCleanUpParameter == 0) {
 		if (solverType == BUNEMAN) {
-			cleanupDivergenceBuneman();
+			//cleanupDivergenceBuneman();
 			//cleanUpDivergenceBunemanMagnetic();
 		} else {
-			cleanupDivergence(newEfield, chargeDensity);
+			//cleanupDivergence(newEfield, chargeDensity);
 			//cleanupDivergenceMagnetic();
 		}
 	}

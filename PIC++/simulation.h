@@ -897,7 +897,6 @@ public:
 	void checkParticleInBox(Particle& particle);
 
 	void updateElectroMagneticParameters();
-	void smoothDensity();
 	void updateDensityParameters();
 
 	void updateEnergy();
@@ -1037,18 +1036,14 @@ public:
 	Vector3d correlationNewBfield(Particle& particle) const;
 
 	Vector3d correlationBunemanBfield(Particle* particle);
-	Vector3d correlationBunemanBfield(Particle& particle);
 	Vector3d correlationBunemanNewBfield(Particle* particle);
-	Vector3d correlationBunemanNewBfield(Particle& particle);
 	Vector3d correlationBunemanGeneralBfield(Particle* particle, double*** fieldX, double*** fieldY, double*** fieldZ);
-	Vector3d correlationBunemanGeneralBfield(Particle& particle, double*** fieldX, double*** fieldY, double*** fieldZ);
 
 	Vector3d correlationBunemanEfield(Particle* particle);
-	Vector3d correlationBunemanEfield(Particle& particle);
 	Vector3d correlationBunemanNewEfield(Particle* particle);
-	Vector3d correlationBunemanNewEfield(Particle& particle);
 	Vector3d correlationBunemanGeneralEfield(Particle* particle, double*** fieldX, double*** fieldY, double*** fieldZ);
-	Vector3d correlationBunemanGeneralEfield(Particle& particle, double*** fieldX, double*** fieldY, double*** fieldZ);
+
+	void correlationBunemanEBfields(Particle* particle, double*** Ex, double*** Ey, double*** Ez, double*** Bx, double*** By, double*** Bz, Vector3d& E, Vector3d& B);
 
 	double correlationWithBbin(Particle& particle, int i, int j, int k);
 
@@ -1106,9 +1101,6 @@ public:
 	void sumNodeMatrixParametersX();
 	void sumNodeMatrixParametersY();
 	void sumNodeMatrixParametersZ();
-	void sumNodeMassMatrixParametersX();
-	void sumNodeMassMatrixParametersY();
-	void sumNodeMassMatrixParametersZ();
     void sumChargeDensityHatX();
     void sumChargeDensityHatY();
     void sumChargeDensityHatZ();
@@ -1146,9 +1138,6 @@ public:
 	void sumTempNodeMatrixParametersY(Matrix3d*** array);
 	void sumTempNodeMatrixParametersZ(Matrix3d*** array);
 
-	void sumTempNodeMassMatrixParametersX(MassMatrix*** array);
-	void sumTempNodeMassMatrixParametersY(MassMatrix*** array);
-	void sumTempNodeMassMatrixParametersZ(MassMatrix*** array);
 	void sumNodeVectorParametersGeneralX(Vector3d*** vector, double* inBufferRight, double* outBufferRight,
 	                                     double* inBufferLeft, double* outBufferLeft);
 	void sumNodeVectorParametersGeneralY(Vector3d*** vector, double* inBufferBack, double* outBufferBack,

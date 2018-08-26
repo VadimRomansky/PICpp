@@ -2097,11 +2097,14 @@ void Simulation::initialize() {
 	printf("creating particle types rank = %d\n", rank);
 
 	createParticleTypes(concentrations, particlesPerBin);
+
+	if(verbosity > 3) printf("finish creating particle types rank = %d\n", rank);
 	int allTypesInBin = 0;
 	for (int t = 0; t < typesNumber; ++t) {
 		allTypesInBin += types[t].particlesPerBin;
 	}
 	particles.reserve(allTypesInBin * xnumber * ynumber * znumber);
+	if(verbosity > 3) printf("finish reserving memory for particle rank = %d\n", rank);
 
 	//int maxParticles = fakeParticles.max_size();
 	//printf("rank = %d maxParticles = %d necessary paricles = %d\n", rank, maxParticles, allTypesInBin*xnumber*ynumber*znumber);

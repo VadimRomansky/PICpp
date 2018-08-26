@@ -71,7 +71,7 @@ void Simulation::exchangeGeneralEfieldX(Vector3d*** field) {
 		bcount = 0;
 		if ((cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			if (verbosity > 2) printf("receive general field rigth from %d to %d\n", rightRank, rank);
-			for (int i = 0; i < 2 + additionalBinNumber; ++i){
+			for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
 						for (int l = 0; l < 3; ++l) {
@@ -91,7 +91,7 @@ void Simulation::exchangeGeneralEfieldX(Vector3d*** field) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[1 + additionalBinNumber][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH  || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							field[i][j][k] = leftBoundaryFieldEvaluator->evaluateEfield(time + deltaT, j, k);
 						}
 					}
@@ -103,7 +103,7 @@ void Simulation::exchangeGeneralEfieldX(Vector3d*** field) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
-						field[xnumberAdded - 1 - i][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time + deltaT, j, k);;
+						field[xnumberAdded - 1 - i][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time + deltaT, j, k);
 					}
 				}
 			}
@@ -192,8 +192,8 @@ void Simulation::exchangeGeneralEfieldY(Vector3d*** field) {
 		///to left
 		int bcount = 0;
 		int number = (2 + additionalBinNumber) * 3 * (xnumberAdded + 1) * (znumberAdded + 1);
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-		for (int j = 0; j < 2 + additionalBinNumber; ++j) {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					for (int l = 0; l < 3; ++l) {
 						frontOutMaximumBuffer[bcount] = field[i][1 + additionalBinNumber + j][k][l];
@@ -218,20 +218,20 @@ void Simulation::exchangeGeneralEfieldY(Vector3d*** field) {
 		bcount = 0;
 		if ((cartCoord[1] < cartDim[1] - 1) || (boundaryConditionTypeY == PERIODIC)) {
 			if (verbosity > 2) printf("receive general field rigth from %d to %d\n", rightRank, rank);
-			for(int i = 0; i < xnumberAdded + 1; ++i){
-			for (int j = 0; j < 2 + additionalBinNumber; ++j)
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < 2 + additionalBinNumber; ++j)
 					for (int k = 0; k < znumberAdded + 1; ++k) {
 						for (int l = 0; l < 3; ++l) {
 							field[i][ynumberAdded - additionalBinNumber - 1 + j][k][l] = backInMaximumBuffer[bcount];
 							bcount++;
 						}
 					}
-				}
+			}
 		}
 
 		if ((cartCoord[1] == 0) && (boundaryConditionTypeY != PERIODIC)) {
-			for(int i = 0; i < xnumberAdded + 1; ++i){
-			for (int j = 0; j <= additionalBinNumber; ++j) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j <= additionalBinNumber; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
 						//todo!!!!
 						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
@@ -257,8 +257,8 @@ void Simulation::exchangeGeneralEfieldY(Vector3d*** field) {
 		//////to right
 		bcount = 0;
 
-		for(int i = 0; i < xnumberAdded + 1; ++i){
-		for (int j = 0; j < 2 + additionalBinNumber; ++j) {
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					for (int l = 0; l < 3; ++l) {
 						backOutMaximumBuffer[bcount] = field[i][ynumberAdded - additionalBinNumber - 1 - j][k][l];
@@ -287,8 +287,8 @@ void Simulation::exchangeGeneralEfieldY(Vector3d*** field) {
 		bcount = 0;
 		if ((cartCoord[1] > 0) || (boundaryConditionTypeY == PERIODIC)) {
 			if (verbosity > 2) printf("receive general field left from %d to %d\n", leftRank, rank);
-			for(int i = 0; i < xnumberAdded + 1; ++i){
-			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
 						for (int l = 0; l < 3; ++l) {
 							field[i][additionalBinNumber + 1 - j][k][l] = frontInMaximumBuffer[bcount];
@@ -303,34 +303,37 @@ void Simulation::exchangeGeneralEfieldY(Vector3d*** field) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		if (boundaryConditionTypeY == PERIODIC) {
+		if (ynumberGeneral == 1) {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-					if (ynumberGeneral == 1) {
-						for (int j = 0; j < ynumberAdded + 1; ++j) {
-							field[i][j][k] = field[i][1 + additionalBinNumber][k];
-						}
-					} else {
+					field[i][1][k] = field[i][0][k];
+				}
+			}
+		} else {
+			if (boundaryConditionTypeY == PERIODIC) {
+				for (int i = 0; i < xnumberAdded + 1; ++i) {
+					for (int k = 0; k < znumberAdded + 1; ++k) {
 						for (int j = 0; j <= additionalBinNumber; ++j) {
 							field[i][ynumberAdded - additionalBinNumber + j][k] = field[i][2 + additionalBinNumber + j][k];
 							field[i][j][k] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
 						}
 						field[i][ynumberAdded - additionalBinNumber - 1][k] = field[i][1 + additionalBinNumber][k];
+
 					}
 				}
-			}
-		} else {
-			for (int i = 0; i < xnumberAdded + 1; ++i) {
-				for (int k = 0; k < znumberAdded + 1; ++k) {
-					field[i][0][k] = field[i][2][k];
-					for (int j = 0; j <= additionalBinNumber; ++j) {
-						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
-							//field[i][j][k] = Vector3d(0, 0, 0);
-							field[i][j][k] = field[i][1 + additionalBinNumber][k];
-						} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
-							field[i][j][k] = field[i][additionalBinNumber][k];
+			} else {
+				for (int i = 0; i < xnumberAdded + 1; ++i) {
+					for (int k = 0; k < znumberAdded + 1; ++k) {
+						field[i][0][k] = field[i][2][k];
+						for (int j = 0; j <= additionalBinNumber; ++j) {
+							if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
+								//field[i][j][k] = Vector3d(0, 0, 0);
+								field[i][j][k] = field[i][1 + additionalBinNumber][k];
+							} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
+								field[i][j][k] = field[i][additionalBinNumber][k];
+							}
+							//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -456,34 +459,42 @@ void Simulation::exchangeGeneralEfieldZ(Vector3d*** field) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		if (boundaryConditionTypeZ == PERIODIC) {
+		if (znumberGeneral == 1) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int i = 0; i < xnumberAdded + 1; ++i) {
-					if (znumberGeneral == 1) {
-						for (int k = 0; k < znumberAdded + 1; ++k) {
-							field[i][j][k] = field[i][j][1 + additionalBinNumber];
-						}
-					} else {
-						for (int k = 0; k <= additionalBinNumber; ++k) {
-							field[i][j][znumberAdded - additionalBinNumber + k] = field[i][j][2 + additionalBinNumber + k];
-							field[i][j][k] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
-						}
-						field[i][j][znumberAdded - additionalBinNumber - 1] = field[i][j][1 + additionalBinNumber];
-					}
+					field[i][j][1] = field[i][j][0];
 				}
 			}
 		} else {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				for (int i = 0; i < xnumberAdded + 1; ++i) {
-					field[i][j][0] = field[i][j][2];
-					for (int k = 0; k <= additionalBinNumber; ++k) {
-						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
-							//field[i][j][k] = Vector3d(0, 0, 0);
-							field[i][j][k] = field[i][j][1 + additionalBinNumber];
-						} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
-							field[i][j][k] = field[i][j][additionalBinNumber];
+			if (boundaryConditionTypeZ == PERIODIC) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					for (int i = 0; i < xnumberAdded + 1; ++i) {
+						if (znumberGeneral == 1) {
+							for (int k = 0; k < znumberAdded + 1; ++k) {
+								field[i][j][k] = field[i][j][1 + additionalBinNumber];
+							}
+						} else {
+							for (int k = 0; k <= additionalBinNumber; ++k) {
+								field[i][j][znumberAdded - additionalBinNumber + k] = field[i][j][2 + additionalBinNumber + k];
+								field[i][j][k] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+							}
+							field[i][j][znumberAdded - additionalBinNumber - 1] = field[i][j][1 + additionalBinNumber];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
+					}
+				}
+			} else {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					for (int i = 0; i < xnumberAdded + 1; ++i) {
+						field[i][j][0] = field[i][j][2];
+						for (int k = 0; k <= additionalBinNumber; ++k) {
+							if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
+								//field[i][j][k] = Vector3d(0, 0, 0);
+								field[i][j][k] = field[i][j][1 + additionalBinNumber];
+							} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
+								field[i][j][k] = field[i][j][additionalBinNumber];
+							}
+							//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
+						}
 					}
 				}
 			}
@@ -595,7 +606,7 @@ void Simulation::exchangeGeneralBfieldX(Vector3d*** field) {
 						if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 							//field[i][j][k] = Vector3d(0, 0, 0);
 							field[i][j][k] = field[additionalBinNumber + 1][j][k];
-						} else if (boundaryConditionTypeX == FREE_BOTH  || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
+						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							field[i][j][k] = leftBoundaryFieldEvaluator->evaluateBfield(time + deltaT, j, k);
 						}
 					}
@@ -751,32 +762,35 @@ void Simulation::exchangeGeneralBfieldY(Vector3d*** field) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		if (boundaryConditionTypeY == PERIODIC) {
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					if (ynumberGeneral == 1) {
-						for (int j = 0; j < ynumberAdded; ++j) {
-							field[i][j][k] = field[i][1 + additionalBinNumber][k];
-						}
-					}  else {
-						for (int j = 0; j <= additionalBinNumber; ++j) {
-							field[i][ynumberAdded - 1 - additionalBinNumber + j][k] = field[i][1 + additionalBinNumber + j][k];
-							field[i][j][k] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+		if (ynumberGeneral == 1) {
+		} else {
+			if (boundaryConditionTypeY == PERIODIC) {
+				for (int i = 0; i < xnumberAdded; ++i) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						if (ynumberGeneral == 1) {
+							for (int j = 0; j < ynumberAdded; ++j) {
+								field[i][j][k] = field[i][1 + additionalBinNumber][k];
+							}
+						} else {
+							for (int j = 0; j <= additionalBinNumber; ++j) {
+								field[i][ynumberAdded - 1 - additionalBinNumber + j][k] = field[i][1 + additionalBinNumber + j][k];
+								field[i][j][k] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+							}
 						}
 					}
 				}
-			}
-		} else {
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					//field[0][j][k] = field[2][j][k];
-					for (int j = 0; j <= additionalBinNumber; ++j) {
-						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
-							field[i][j][k] = Vector3d(0, 0, 0);
-						} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
-							field[i][j][k] = field[i][additionalBinNumber + 1][k];
+			} else {
+				for (int i = 0; i < xnumberAdded; ++i) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						//field[0][j][k] = field[2][j][k];
+						for (int j = 0; j <= additionalBinNumber; ++j) {
+							if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
+								field[i][j][k] = Vector3d(0, 0, 0);
+							} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
+								field[i][j][k] = field[i][additionalBinNumber + 1][k];
+							}
+							//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -893,32 +907,35 @@ void Simulation::exchangeGeneralBfieldZ(Vector3d*** field) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		if (boundaryConditionTypeZ == PERIODIC) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int i = 0; i < xnumberAdded; ++i) {
-					if (znumberGeneral == 1) {
-						for (int k = 0; k < znumberAdded; ++k) {
-							field[i][j][k] = field[i][j][1 + additionalBinNumber];
-						}
-					} else {
-						for (int k = 0; k <= additionalBinNumber; ++k) {
-							field[i][j][znumberAdded - 1 - additionalBinNumber + k] = field[i][j][1 + additionalBinNumber + k];
-							field[i][j][k] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+		if (znumberGeneral == 1) {
+		} else {
+			if (boundaryConditionTypeZ == PERIODIC) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int i = 0; i < xnumberAdded; ++i) {
+						if (znumberGeneral == 1) {
+							for (int k = 0; k < znumberAdded; ++k) {
+								field[i][j][k] = field[i][j][1 + additionalBinNumber];
+							}
+						} else {
+							for (int k = 0; k <= additionalBinNumber; ++k) {
+								field[i][j][znumberAdded - 1 - additionalBinNumber + k] = field[i][j][1 + additionalBinNumber + k];
+								field[i][j][k] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+							}
 						}
 					}
 				}
-			}
-		} else {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int i = 0; i < xnumberAdded; ++i) {
-					//field[0][j][k] = field[2][j][k];
-					for (int k = 0; k <= additionalBinNumber; ++k) {
-						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
-							field[i][j][k] = Vector3d(0, 0, 0);
-						} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
-							field[i][j][k] = field[i][j][additionalBinNumber + 1];
+			} else {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int i = 0; i < xnumberAdded; ++i) {
+						//field[0][j][k] = field[2][j][k];
+						for (int k = 0; k <= additionalBinNumber; ++k) {
+							if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
+								field[i][j][k] = Vector3d(0, 0, 0);
+							} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
+								field[i][j][k] = field[i][j][additionalBinNumber + 1];
+							}
+							//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -980,7 +997,8 @@ void Simulation::exchangeGeneralScalarCellFieldX(double**** field) {
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutMaximumBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInMaximumBuffer, number, MPI_DOUBLE,
+			MPI_Sendrecv(leftOutMaximumBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInMaximumBuffer, number,
+			             MPI_DOUBLE,
 			             rightRank, MPI_BFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
@@ -1106,7 +1124,8 @@ void Simulation::exchangeGeneralScalarCellFieldY(double**** field) {
 
 		if ((cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1) || (boundaryConditionTypeY == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(frontOutMaximumBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInMaximumBuffer, number, MPI_DOUBLE,
+			MPI_Sendrecv(frontOutMaximumBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInMaximumBuffer, number,
+			             MPI_DOUBLE,
 			             backRank, MPI_BFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[1] == 0) {
@@ -1157,32 +1176,36 @@ void Simulation::exchangeGeneralScalarCellFieldY(double**** field) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		if (boundaryConditionTypeY == PERIODIC) {
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					if (ynumberGeneral == 1) {
-						for (int j = 0; j < ynumberAdded; ++j) {
-							field[i][j][k][0] = field[i][1 + additionalBinNumber][k][0];
-						}
-					} else {
-						for (int j = 0; j <= additionalBinNumber; ++j) {
-							field[i][ynumberAdded - 1 - additionalBinNumber + j][k][0] = field[i][1 + additionalBinNumber + j][k][0];
-							field[i][j][k][0] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k][0];
+		if (ynumberGeneral == 1) {
+
+		} else {
+			if (boundaryConditionTypeY == PERIODIC) {
+				for (int i = 0; i < xnumberAdded; ++i) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						if (ynumberGeneral == 1) {
+							for (int j = 0; j < ynumberAdded; ++j) {
+								field[i][j][k][0] = field[i][1 + additionalBinNumber][k][0];
+							}
+						} else {
+							for (int j = 0; j <= additionalBinNumber; ++j) {
+								field[i][ynumberAdded - 1 - additionalBinNumber + j][k][0] = field[i][1 + additionalBinNumber + j][k][0];
+								field[i][j][k][0] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k][0];
+							}
 						}
 					}
 				}
-			}
-		} else {
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					//field[0][j][k] = field[2][j][k];
-					for (int j = 0; j <= additionalBinNumber; ++j) {
-						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
-							field[i][j][k][0] = 0;
-						} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
-							field[i][j][k][0] = field[i][additionalBinNumber + 1][k][0];
+			} else {
+				for (int i = 0; i < xnumberAdded; ++i) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						//field[0][j][k] = field[2][j][k];
+						for (int j = 0; j <= additionalBinNumber; ++j) {
+							if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
+								field[i][j][k][0] = 0;
+							} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
+								field[i][j][k][0] = field[i][additionalBinNumber + 1][k][0];
+							}
+							//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -1238,7 +1261,8 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double**** field) {
 
 		if ((cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1) || (boundaryConditionTypeZ == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(bottomOutMaximumBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInMaximumBuffer, number, MPI_DOUBLE,
+			MPI_Sendrecv(bottomOutMaximumBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInMaximumBuffer, number,
+			             MPI_DOUBLE,
 			             topRank, MPI_BFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[2] == 0) {
@@ -1289,32 +1313,36 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double**** field) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		if (boundaryConditionTypeZ == PERIODIC) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int i = 0; i < xnumberAdded; ++i) {
-					if (znumberGeneral == 1) {
-						for (int k = 0; k < znumberAdded; ++k) {
-							field[i][j][k][0] = field[i][j][1 + additionalBinNumber][0];
-						}
-					} else {
-						for (int k = 0; k <= additionalBinNumber; ++k) {
-							field[i][j][znumberAdded - 1 - additionalBinNumber + k][0] = field[i][j][1 + additionalBinNumber + k][0];
-							field[i][j][k][0] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k][0];
+		if (znumberGeneral == 1) {
+
+		} else {
+			if (boundaryConditionTypeZ == PERIODIC) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int i = 0; i < xnumberAdded; ++i) {
+						if (znumberGeneral == 1) {
+							for (int k = 0; k < znumberAdded; ++k) {
+								field[i][j][k][0] = field[i][j][1 + additionalBinNumber][0];
+							}
+						} else {
+							for (int k = 0; k <= additionalBinNumber; ++k) {
+								field[i][j][znumberAdded - 1 - additionalBinNumber + k][0] = field[i][j][1 + additionalBinNumber + k][0];
+								field[i][j][k][0] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k][0];
+							}
 						}
 					}
 				}
-			}
-		} else {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int i = 0; i < xnumberAdded; ++i) {
-					//field[0][j][k] = field[2][j][k];
-					for (int k = 0; k <= additionalBinNumber; ++k) {
-						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
-							field[i][j][k][0] = 0;
-						} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
-							field[i][j][k][0] = field[i][j][additionalBinNumber + 1][0];
+			} else {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int i = 0; i < xnumberAdded; ++i) {
+						//field[0][j][k] = field[2][j][k];
+						for (int k = 0; k <= additionalBinNumber; ++k) {
+							if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
+								field[i][j][k][0] = 0;
+							} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
+								field[i][j][k][0] = field[i][j][additionalBinNumber + 1][0];
+							}
+							//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -1377,7 +1405,8 @@ void Simulation::exchangeGeneralScalarCellFieldX(double*** field) {
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutMaximumBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInMaximumBuffer, number, MPI_DOUBLE,
+			MPI_Sendrecv(leftOutMaximumBuffer, number, MPI_DOUBLE, leftRank, MPI_BFIELD_LEFT, rightInMaximumBuffer, number,
+			             MPI_DOUBLE,
 			             rightRank, MPI_BFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
@@ -1503,7 +1532,8 @@ void Simulation::exchangeGeneralScalarCellFieldY(double*** field) {
 
 		if ((cartCoord[1] > 0 && cartCoord[1] < cartDim[1] - 1) || (boundaryConditionTypeY == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(frontOutMaximumBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInMaximumBuffer, number, MPI_DOUBLE,
+			MPI_Sendrecv(frontOutMaximumBuffer, number, MPI_DOUBLE, frontRank, MPI_BFIELD_LEFT, backInMaximumBuffer, number,
+			             MPI_DOUBLE,
 			             backRank, MPI_BFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[1] == 0) {
@@ -1554,32 +1584,36 @@ void Simulation::exchangeGeneralScalarCellFieldY(double*** field) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		if (boundaryConditionTypeY == PERIODIC) {
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					if (ynumberGeneral == 1) {
-						for (int j = 0; j < ynumberAdded; ++j) {
-							field[i][j][k] = field[i][1 + additionalBinNumber][k];
-						}
-					} else {
-						for (int j = 0; j <= additionalBinNumber; ++j) {
-							field[i][ynumberAdded - 1 - additionalBinNumber + j][k] = field[i][1 + additionalBinNumber + j][k];
-							field[i][j][k] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+		if (ynumberGeneral == 1) {
+
+		} else {
+			if (boundaryConditionTypeY == PERIODIC) {
+				for (int i = 0; i < xnumberAdded; ++i) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						if (ynumberGeneral == 1) {
+							for (int j = 0; j < ynumberAdded; ++j) {
+								field[i][j][k] = field[i][1 + additionalBinNumber][k];
+							}
+						} else {
+							for (int j = 0; j <= additionalBinNumber; ++j) {
+								field[i][ynumberAdded - 1 - additionalBinNumber + j][k] = field[i][1 + additionalBinNumber + j][k];
+								field[i][j][k] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+							}
 						}
 					}
 				}
-			}
-		} else {
-			for (int i = 0; i < xnumberAdded; ++i) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					//field[0][j][k] = field[2][j][k];
-					for (int j = 0; j <= additionalBinNumber; ++j) {
-						if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
-							field[i][j][k] = 0;
-						} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
-							field[i][j][k] = field[i][additionalBinNumber + 1][k];
+			} else {
+				for (int i = 0; i < xnumberAdded; ++i) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						//field[0][j][k] = field[2][j][k];
+						for (int j = 0; j <= additionalBinNumber; ++j) {
+							if (boundaryConditionTypeY == SUPER_CONDUCTOR_LEFT) {
+								field[i][j][k] = 0;
+							} else if (boundaryConditionTypeY == FREE_BOTH || boundaryConditionTypeY == FREE_MIRROR_BOTH) {
+								field[i][j][k] = field[i][additionalBinNumber + 1][k];
+							}
+							//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -1635,7 +1669,8 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double*** field) {
 
 		if ((cartCoord[2] > 0 && cartCoord[2] < cartDim[2] - 1) || (boundaryConditionTypeZ == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(bottomOutMaximumBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInMaximumBuffer, number, MPI_DOUBLE,
+			MPI_Sendrecv(bottomOutMaximumBuffer, number, MPI_DOUBLE, bottomRank, MPI_BFIELD_LEFT, topInMaximumBuffer, number,
+			             MPI_DOUBLE,
 			             topRank, MPI_BFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[2] == 0) {
@@ -1686,38 +1721,43 @@ void Simulation::exchangeGeneralScalarCellFieldZ(double*** field) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		if (boundaryConditionTypeZ == PERIODIC) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int i = 0; i < xnumberAdded; ++i) {
-					if (znumberGeneral == 1) {
-						for (int k = 0; k < znumberAdded; ++k) {
-							field[i][j][k] = field[i][j][1 + additionalBinNumber];
-						}
-					} else {
-						for (int k = 0; k <= additionalBinNumber; ++k) {
-							field[i][j][znumberAdded - 1 - additionalBinNumber + k] = field[i][j][1 + additionalBinNumber + k];
-							field[i][j][k] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+		if (znumberGeneral == 1) {
+
+		} else {
+			if (boundaryConditionTypeZ == PERIODIC) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int i = 0; i < xnumberAdded; ++i) {
+						if (znumberGeneral == 1) {
+							for (int k = 0; k < znumberAdded; ++k) {
+								field[i][j][k] = field[i][j][1 + additionalBinNumber];
+							}
+						} else {
+							for (int k = 0; k <= additionalBinNumber; ++k) {
+								field[i][j][znumberAdded - 1 - additionalBinNumber + k] = field[i][j][1 + additionalBinNumber + k];
+								field[i][j][k] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+							}
 						}
 					}
 				}
-			}
-		} else {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int i = 0; i < xnumberAdded; ++i) {
-					//field[0][j][k] = field[2][j][k];
-					for (int k = 0; k <= additionalBinNumber; ++k) {
-						if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
-							field[i][j][k] = 0;
-						} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
-							field[i][j][k] = field[i][j][additionalBinNumber + 1];
+			} else {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int i = 0; i < xnumberAdded; ++i) {
+						//field[0][j][k] = field[2][j][k];
+						for (int k = 0; k <= additionalBinNumber; ++k) {
+							if (boundaryConditionTypeZ == SUPER_CONDUCTOR_LEFT) {
+								field[i][j][k] = 0;
+							} else if (boundaryConditionTypeZ == FREE_BOTH || boundaryConditionTypeZ == FREE_MIRROR_BOTH) {
+								field[i][j][k] = field[i][j][additionalBinNumber + 1];
+							}
+							//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
 		}
 	}
 }
+
 ///////////
 
 void Simulation::exchangeGeneralScalarNodeField(double**** field) {
@@ -1783,7 +1823,8 @@ void Simulation::exchangeGeneralScalarNodeFieldX(double**** field) {
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutMaximumBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInMaximumBuffer, number, MPI_DOUBLE,
+			MPI_Sendrecv(leftOutMaximumBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInMaximumBuffer, number,
+			             MPI_DOUBLE,
 			             rightRank, MPI_EFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
@@ -1882,7 +1923,8 @@ void Simulation::exchangeGeneralScalarNodeFieldY(double**** field) {
 				rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (2 + additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1);
-		MPI_Sendrecv(backOutMaximumBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInMaximumBuffer, number, MPI_DOUBLE,
+		MPI_Sendrecv(backOutMaximumBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInMaximumBuffer, number,
+		             MPI_DOUBLE,
 		             frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
 
@@ -1912,7 +1954,8 @@ void Simulation::exchangeGeneralScalarNodeFieldY(double**** field) {
 			}
 		}
 
-		MPI_Sendrecv(frontOutMaximumBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInMaximumBuffer, number, MPI_DOUBLE,
+		MPI_Sendrecv(frontOutMaximumBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInMaximumBuffer, number,
+		             MPI_DOUBLE,
 		             backRank, MPI_EFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
 
@@ -1929,18 +1972,26 @@ void Simulation::exchangeGeneralScalarNodeFieldY(double**** field) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				if (ynumberGeneral == 1) {
-					for (int j = 0; j < ynumberAdded + 1; ++j) {
-						field[i][j][k][0] = field[i][1 + additionalBinNumber][k][0];
+		if (ynumberGeneral == 1) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					field[i][1][k][0] = field[i][0][k][0];
+				}
+			}
+		} else {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					if (ynumberGeneral == 1) {
+						for (int j = 0; j < ynumberAdded + 1; ++j) {
+							field[i][j][k][0] = field[i][1 + additionalBinNumber][k][0];
+						}
+					} else {
+						for (int j = 0; j <= additionalBinNumber; ++j) {
+							field[i][ynumberAdded - additionalBinNumber + j][k][0] = field[i][2 + additionalBinNumber + j][k][0];
+							field[i][j][k][0] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k][0];
+						}
+						field[i][ynumberAdded - additionalBinNumber - 1][k][0] = field[i][1 + additionalBinNumber][k][0];
 					}
-				} else {
-					for (int j = 0; j <= additionalBinNumber; ++j) {
-						field[i][ynumberAdded - additionalBinNumber + j][k][0] = field[i][2 + additionalBinNumber + j][k][0];
-						field[i][j][k][0] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k][0];
-					}
-					field[i][ynumberAdded - additionalBinNumber - 1][k][0] = field[i][1 + additionalBinNumber][k][0];
 				}
 			}
 		}
@@ -1967,7 +2018,8 @@ void Simulation::exchangeGeneralScalarNodeFieldZ(double**** field) {
 				rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (2 + additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1);
-		MPI_Sendrecv(topOutMaximumBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInMaximumBuffer, number, MPI_DOUBLE,
+		MPI_Sendrecv(topOutMaximumBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInMaximumBuffer, number,
+		             MPI_DOUBLE,
 		             bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
 
@@ -2015,18 +2067,26 @@ void Simulation::exchangeGeneralScalarNodeFieldZ(double**** field) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				if (znumberGeneral == 1) {
-					for (int k = 0; k < znumberAdded + 1; ++k) {
-						field[i][j][k][0] = field[i][j][1 + additionalBinNumber][0];
+		if (znumberGeneral == 1) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					field[i][j][1][0] = field[i][j][0][0];
+				}
+			}
+		} else {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					if (znumberGeneral == 1) {
+						for (int k = 0; k < znumberAdded + 1; ++k) {
+							field[i][j][k][0] = field[i][j][1 + additionalBinNumber][0];
+						}
+					} else {
+						for (int k = 0; k <= additionalBinNumber; ++k) {
+							field[i][j][znumberAdded - additionalBinNumber + k][0] = field[i][j][2 + additionalBinNumber + k][0];
+							field[i][j][k][0] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k][0];
+						}
+						field[i][j][znumberAdded - additionalBinNumber - 1][0] = field[i][j][1 + additionalBinNumber][0];
 					}
-				} else {
-					for (int k = 0; k <= additionalBinNumber; ++k) {
-						field[i][j][znumberAdded - additionalBinNumber + k][0] = field[i][j][2 + additionalBinNumber + k][0];
-						field[i][j][k][0] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k][0];
-					}
-					field[i][j][znumberAdded - additionalBinNumber - 1][0] = field[i][j][1 + additionalBinNumber][0];
 				}
 			}
 		}
@@ -2049,8 +2109,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldX(Matrix3d*** field) {
 		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-					for(int l = 0; l < 3; ++l) {
-						for(int m = 0; m < 3; ++m){
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
 							rightOutMaximumBuffer[bcount] = field[xnumberAdded - additionalBinNumber - 1 - i][j][k].matrix[l][m];
 							bcount++;
 						}
@@ -2082,8 +2142,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldX(Matrix3d*** field) {
 			for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-						for(int l = 0; l < 3; ++l){
-							for(int m = 0; m < 3; ++l){
+						for (int l = 0; l < 3; ++l) {
+							for (int m = 0; m < 3; ++l) {
 								field[additionalBinNumber + 1 - i][j][k].matrix[l][m] = leftInMaximumBuffer[bcount];
 								bcount++;
 							}
@@ -2098,8 +2158,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldX(Matrix3d*** field) {
 		for (int i = 0; i < 2 + additionalBinNumber; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-					for(int l = 0; l < 3; ++l) {
-						for(int m = 0; m < 3; ++m){
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
 							leftOutMaximumBuffer[bcount] = field[1 + additionalBinNumber + i][j][k].matrix[l][m];
 							bcount++;
 						}
@@ -2110,7 +2170,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldX(Matrix3d*** field) {
 
 		if ((cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1) || (boundaryConditionTypeX == PERIODIC)) {
 			MPI_Status status;
-			MPI_Sendrecv(leftOutMaximumBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInMaximumBuffer, number, MPI_DOUBLE,
+			MPI_Sendrecv(leftOutMaximumBuffer, number, MPI_DOUBLE, leftRank, MPI_EFIELD_LEFT, rightInMaximumBuffer, number,
+			             MPI_DOUBLE,
 			             rightRank, MPI_EFIELD_LEFT, cartComm, &status);
 			if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, leftRank);
 		} else if (cartCoord[0] == 0) {
@@ -2126,8 +2187,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldX(Matrix3d*** field) {
 			for (int i = 0; i < 2 + additionalBinNumber; ++i)
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-						for(int l = 0; l < 3; ++l){
-							for(int m = 0; m < 3; ++m){
+						for (int l = 0; l < 3; ++l) {
+							for (int m = 0; m < 3; ++m) {
 								field[xnumberAdded - additionalBinNumber - 1 + i][j][k].matrix[l][m] = rightInMaximumBuffer[bcount];
 								bcount++;
 							}
@@ -2140,9 +2201,9 @@ void Simulation::exchangeGeneralMatrixNodeFieldX(Matrix3d*** field) {
 			for (int i = 0; i <= additionalBinNumber; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
 					for (int k = 0; k < znumberAdded + 1; ++k) {
-						for(int l = 0; l < 3; ++l) {
-							for(int m = 0; m < 3; ++m){
-						
+						for (int l = 0; l < 3; ++l) {
+							for (int m = 0; m < 3; ++m) {
+
 								//field[0][j][k] = field[2][j][k];
 								if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 									//field[i][j][k] = Vector3d(0, 0, 0);
@@ -2161,9 +2222,10 @@ void Simulation::exchangeGeneralMatrixNodeFieldX(Matrix3d*** field) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
-						for(int l = 0; l < 3; ++l) {
-							for(int m = 0; m < 3; ++m){
-								field[xnumberAdded - 1 - i][j][k].matrix[l][m] = field[xnumberAdded - 1 - additionalBinNumber][j][k].matrix[l][m];
+						for (int l = 0; l < 3; ++l) {
+							for (int m = 0; m < 3; ++m) {
+								field[xnumberAdded - 1 - i][j][k].matrix[l][m] = field[xnumberAdded - 1 - additionalBinNumber][j][k].matrix[l][m
+								];
 							}
 						}
 					}
@@ -2176,13 +2238,15 @@ void Simulation::exchangeGeneralMatrixNodeFieldX(Matrix3d*** field) {
 		if (boundaryConditionTypeX == PERIODIC) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-					for(int l = 0; l < 3; ++l) {
-						for(int m = 0; m < 3; ++m){
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
 							for (int i = 0; i <= additionalBinNumber; ++i) {
-								field[xnumberAdded - additionalBinNumber + i][j][k].matrix[l][m] = field[2 + additionalBinNumber + i][j][k].matrix[l][m];
+								field[xnumberAdded - additionalBinNumber + i][j][k].matrix[l][m] = field[2 + additionalBinNumber + i][j][k].
+									matrix[l][m];
 								field[i][j][k].matrix[l][m] = field[xnumberAdded - 2 - 2 * additionalBinNumber + i][j][k].matrix[l][m];
 							}
-							field[xnumberAdded - additionalBinNumber - 1][j][k].matrix[l][m] = field[1 + additionalBinNumber][j][k].matrix[l][m];
+							field[xnumberAdded - additionalBinNumber - 1][j][k].matrix[l][m] = field[1 + additionalBinNumber][j][k].matrix[l]
+								[m];
 						}
 					}
 				}
@@ -2192,15 +2256,15 @@ void Simulation::exchangeGeneralMatrixNodeFieldX(Matrix3d*** field) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					//field[0][j][k] = field[2][j][k];
 					for (int i = 0; i <= additionalBinNumber; ++i) {
-						for(int l = 0; l < 3; ++l) {
-							for(int m = 0; m < 3; ++m){
-							if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
-								//field[i][j][k] = Vector3d(0, 0, 0);
-								field[i][j][k].matrix[l][m] = field[1 + additionalBinNumber][j][k].matrix[l][m];
-							} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
-								field[i][j][k].matrix[l][m] = field[additionalBinNumber][j][k].matrix[l][m];
-							}
-							//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
+						for (int l = 0; l < 3; ++l) {
+							for (int m = 0; m < 3; ++m) {
+								if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
+									//field[i][j][k] = Vector3d(0, 0, 0);
+									field[i][j][k].matrix[l][m] = field[1 + additionalBinNumber][j][k].matrix[l][m];
+								} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
+									field[i][j][k].matrix[l][m] = field[additionalBinNumber][j][k].matrix[l][m];
+								}
+								//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
 							}
 						}
 					}
@@ -2218,8 +2282,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldY(Matrix3d*** field) {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-					for(int l = 0; l < 3; ++l) {
-						for(int m = 0; m < 3; ++m){
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
 							backOutMaximumBuffer[bcount] = field[i][ynumberAdded - additionalBinNumber - 1 - j][k].matrix[l][m];
 							bcount++;
 						}
@@ -2234,7 +2298,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldY(Matrix3d*** field) {
 				rank, backRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (2 + additionalBinNumber) * 9 * (xnumberAdded + 1) * (znumberAdded + 1);
-		MPI_Sendrecv(backOutMaximumBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInMaximumBuffer, number, MPI_DOUBLE,
+		MPI_Sendrecv(backOutMaximumBuffer, number, MPI_DOUBLE, backRank, MPI_EFIELD_RIGHT, frontInMaximumBuffer, number,
+		             MPI_DOUBLE,
 		             frontRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, backRank);
 
@@ -2244,8 +2309,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldY(Matrix3d*** field) {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-					for(int l = 0; l < 3; ++l) {
-						for(int m = 0; m < 3; ++m){
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
 							field[i][additionalBinNumber + 1 - j][k].matrix[l][m] = frontInMaximumBuffer[bcount];
 							bcount++;
 						}
@@ -2262,8 +2327,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldY(Matrix3d*** field) {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-					for(int l = 0; l < 3; ++l) {
-						for(int m = 0; m < 3; ++m){
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
 							frontOutMaximumBuffer[bcount] = field[i][1 + additionalBinNumber + j][k].matrix[l][m];
 							bcount++;
 						}
@@ -2272,7 +2337,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldY(Matrix3d*** field) {
 			}
 		}
 
-		MPI_Sendrecv(frontOutMaximumBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInMaximumBuffer, number, MPI_DOUBLE,
+		MPI_Sendrecv(frontOutMaximumBuffer, number, MPI_DOUBLE, frontRank, MPI_EFIELD_LEFT, backInMaximumBuffer, number,
+		             MPI_DOUBLE,
 		             backRank, MPI_EFIELD_LEFT, cartComm, &status);
 		if (verbosity > 2) printf("send general fieldleft from %d to %d\n", rank, frontRank);
 
@@ -2282,8 +2348,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldY(Matrix3d*** field) {
 		for (int i = 0; i < xnumberAdded + 1; ++i)
 			for (int j = 0; j < 2 + additionalBinNumber; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-					for(int l = 0; l < 3; ++l) {
-						for(int m = 0; m < 3; ++m){	
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
 							field[i][ynumberAdded - additionalBinNumber - 1 + j][k].matrix[l][m] = backInMaximumBuffer[bcount];
 							bcount++;
 						}
@@ -2293,20 +2359,35 @@ void Simulation::exchangeGeneralMatrixNodeFieldY(Matrix3d*** field) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				for(int l = 0; l < 3; ++l) {
-					for(int m = 0; m < 3; ++m){
-						if (ynumberGeneral == 1) {
-							for (int j = 0; j < ynumberAdded + 1; ++j) {
-								field[i][j][k].matrix[l][m] = field[i][1 + additionalBinNumber][k].matrix[l][m];
+		if (ynumberGeneral == 1) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
+							field[i][1][k].matrix[l][m] = field[i][0][k].matrix[l][m];
+						}
+					}
+				}
+			}
+		} else {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
+							if (ynumberGeneral == 1) {
+								for (int j = 0; j < ynumberAdded + 1; ++j) {
+									field[i][j][k].matrix[l][m] = field[i][1 + additionalBinNumber][k].matrix[l][m];
+								}
+							} else {
+								for (int j = 0; j <= additionalBinNumber; ++j) {
+									field[i][ynumberAdded - additionalBinNumber + j][k].matrix[l][m] = field[i][2 + additionalBinNumber + j][k].
+										matrix[l][m];
+									field[i][j][k].matrix[l][m] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k].matrix[l][m];
+								}
+								field[i][ynumberAdded - additionalBinNumber - 1][k].matrix[l][m] = field[i][1 + additionalBinNumber][k].matrix[l
+									]
+									[m];
 							}
-						} else {
-							for (int j = 0; j <= additionalBinNumber; ++j) {
-								field[i][ynumberAdded - additionalBinNumber + j][k].matrix[l][m] = field[i][2 + additionalBinNumber + j][k].matrix[l][m];
-								field[i][j][k].matrix[l][m] = field[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k].matrix[l][m];
-							}
-							field[i][ynumberAdded - additionalBinNumber - 1][k].matrix[l][m] = field[i][1 + additionalBinNumber][k].matrix[l][m];
 						}
 					}
 				}
@@ -2323,8 +2404,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldZ(Matrix3d*** field) {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-					for(int l = 0; l < 3; ++l) {
-						for(int m = 0; m < 3; ++m){				
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
 							topOutMaximumBuffer[bcount] = field[i][j][znumberAdded - additionalBinNumber - 1 - k].matrix[l][m];
 							bcount++;
 						}
@@ -2339,7 +2420,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldZ(Matrix3d*** field) {
 				rank, topRank, additionalBinNumber, xnumberAdded, ynumberAdded, znumberAdded);
 		MPI_Status status;
 		int number = (2 + additionalBinNumber) * 9 * (xnumberAdded + 1) * (ynumberAdded + 1);
-		MPI_Sendrecv(topOutMaximumBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInMaximumBuffer, number, MPI_DOUBLE,
+		MPI_Sendrecv(topOutMaximumBuffer, number, MPI_DOUBLE, topRank, MPI_EFIELD_RIGHT, bottomInMaximumBuffer, number,
+		             MPI_DOUBLE,
 		             bottomRank, MPI_EFIELD_RIGHT, cartComm, &status);
 		if (verbosity > 2) printf("after send general field right from %d to %d\n", rank, topRank);
 
@@ -2349,8 +2431,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldZ(Matrix3d*** field) {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-					for(int l = 0; l < 3; ++l) {
-						for(int m = 0; m < 3; ++m){
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
 							field[i][j][additionalBinNumber + 1 - k].matrix[l][m] = bottomInMaximumBuffer[bcount];
 							bcount++;
 						}
@@ -2367,8 +2449,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldZ(Matrix3d*** field) {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-					for(int l = 0; l < 3; ++l) {
-						for(int m = 0; m < 3; ++m){					
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
 							bottomOutMaximumBuffer[bcount] = field[i][j][1 + additionalBinNumber + k].matrix[l][m];
 							bcount++;
 						}
@@ -2388,8 +2470,8 @@ void Simulation::exchangeGeneralMatrixNodeFieldZ(Matrix3d*** field) {
 		for (int i = 0; i < xnumberAdded + 1; ++i)
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < 2 + additionalBinNumber; ++k) {
-					for(int l = 0; l < 3; ++l) {
-						for(int m = 0; m < 3; ++m){
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
 							field[i][j][znumberAdded - additionalBinNumber - 1 + k].matrix[l][m] = topInMaximumBuffer[bcount];
 							bcount++;
 						}
@@ -2399,20 +2481,35 @@ void Simulation::exchangeGeneralMatrixNodeFieldZ(Matrix3d*** field) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				for(int l = 0; l < 3; ++l) {
-					for(int m = 0; m < 3; ++m){
-						if (znumberGeneral == 1) {
-							for (int k = 0; k < znumberAdded + 1; ++k) {
-								field[i][j][k].matrix[l][m] = field[i][j][1 + additionalBinNumber].matrix[l][m];
+		if (znumberGeneral == 1) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
+							field[i][j][1].matrix[l][m] = field[i][j][0].matrix[l][m];
+						}
+					}
+				}
+			}
+		} else {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					for (int l = 0; l < 3; ++l) {
+						for (int m = 0; m < 3; ++m) {
+							if (znumberGeneral == 1) {
+								for (int k = 0; k < znumberAdded + 1; ++k) {
+									field[i][j][k].matrix[l][m] = field[i][j][1 + additionalBinNumber].matrix[l][m];
+								}
+							} else {
+								for (int k = 0; k <= additionalBinNumber; ++k) {
+									field[i][j][znumberAdded - additionalBinNumber + k].matrix[l][m] = field[i][j][2 + additionalBinNumber + k].
+										matrix[l][m];
+									field[i][j][k].matrix[l][m] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k].matrix[l][m];
+								}
+								field[i][j][znumberAdded - additionalBinNumber - 1].matrix[l][m] = field[i][j][1 + additionalBinNumber].matrix[l
+									]
+									[m];
 							}
-						} else {
-							for (int k = 0; k <= additionalBinNumber; ++k) {
-								field[i][j][znumberAdded - additionalBinNumber + k].matrix[l][m] = field[i][j][2 + additionalBinNumber + k].matrix[l][m];
-								field[i][j][k].matrix[l][m] = field[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k].matrix[l][m];
-							}
-							field[i][j][znumberAdded - additionalBinNumber - 1].matrix[l][m] = field[i][j][1 + additionalBinNumber].matrix[l][m];
 						}
 					}
 				}
@@ -2630,18 +2727,27 @@ void Simulation::exchangeBunemanExAlongY(double*** fieldX) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				if (ynumberGeneral == 1) {
-					for (int j = 0; j < ynumberAdded + 1; ++j) {
-						fieldX[i][j][k] = fieldX[i][1 + additionalBinNumber][k];
+		if (ynumberGeneral == 1) {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					fieldX[i][1][k] = fieldX[i][0][k];
+				}
+			}
+
+		} else {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					if (ynumberGeneral == 1) {
+						for (int j = 0; j < ynumberAdded + 1; ++j) {
+							fieldX[i][j][k] = fieldX[i][1 + additionalBinNumber][k];
+						}
+					} else {
+						for (int j = 0; j <= additionalBinNumber; ++j) {
+							fieldX[i][ynumberAdded - additionalBinNumber + j][k] = fieldX[i][2 + additionalBinNumber + j][k];
+							fieldX[i][j][k] = fieldX[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+						}
+						fieldX[i][ynumberAdded - additionalBinNumber - 1][k] = fieldX[i][1 + additionalBinNumber][k];
 					}
-				} else {
-					for (int j = 0; j <= additionalBinNumber; ++j) {
-						fieldX[i][ynumberAdded - additionalBinNumber + j][k] = fieldX[i][2 + additionalBinNumber + j][k];
-						fieldX[i][j][k] = fieldX[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
-					}
-					fieldX[i][ynumberAdded - additionalBinNumber - 1][k] = fieldX[i][1 + additionalBinNumber][k];
 				}
 			}
 		}
@@ -2716,18 +2822,26 @@ void Simulation::exchangeBunemanExAlongZ(double*** fieldX) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				if (znumberGeneral == 1) {
-					for (int k = 0; k < znumberAdded + 1; ++k) {
-						fieldX[i][j][k] = fieldX[i][j][1 + additionalBinNumber];
+		if (znumberGeneral == 1) {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					fieldX[i][j][1] = fieldX[i][j][0];
+				}
+			}
+		} else {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					if (znumberGeneral == 1) {
+						for (int k = 0; k < znumberAdded + 1; ++k) {
+							fieldX[i][j][k] = fieldX[i][j][1 + additionalBinNumber];
+						}
+					} else {
+						for (int k = 0; k <= additionalBinNumber; ++k) {
+							fieldX[i][j][znumberAdded - additionalBinNumber + k] = fieldX[i][j][2 + additionalBinNumber + k];
+							fieldX[i][j][k] = fieldX[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+						}
+						fieldX[i][j][znumberAdded - additionalBinNumber - 1] = fieldX[i][j][1 + additionalBinNumber];
 					}
-				} else {
-					for (int k = 0; k <= additionalBinNumber; ++k) {
-						fieldX[i][j][znumberAdded - additionalBinNumber + k] = fieldX[i][j][2 + additionalBinNumber + k];
-						fieldX[i][j][k] = fieldX[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
-					}
-					fieldX[i][j][znumberAdded - additionalBinNumber - 1] = fieldX[i][j][1 + additionalBinNumber];
 				}
 			}
 		}
@@ -2930,16 +3044,19 @@ void Simulation::exchangeBunemanEyAlongY(double*** fieldY) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				if (ynumberGeneral == 1) {
-					for (int j = 0; j < ynumberAdded; ++j) {
-						fieldY[i][j][k] = fieldY[i][1 + additionalBinNumber][k];
-					}
-				} else {
-					for (int j = 0; j <= additionalBinNumber; ++j) {
-						fieldY[i][ynumberAdded - 1 - additionalBinNumber + j][k] = fieldY[i][1 + additionalBinNumber + j][k];
-						fieldY[i][j][k] = fieldY[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+		if (ynumberGeneral == 1) {
+		} else {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					if (ynumberGeneral == 1) {
+						for (int j = 0; j < ynumberAdded; ++j) {
+							fieldY[i][j][k] = fieldY[i][1 + additionalBinNumber][k];
+						}
+					} else {
+						for (int j = 0; j <= additionalBinNumber; ++j) {
+							fieldY[i][ynumberAdded - 1 - additionalBinNumber + j][k] = fieldY[i][1 + additionalBinNumber + j][k];
+							fieldY[i][j][k] = fieldY[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+						}
 					}
 				}
 			}
@@ -3015,18 +3132,26 @@ void Simulation::exchangeBunemanEyAlongZ(double*** fieldY) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				if (znumberGeneral == 1) {
-					for (int k = 0; k < znumberAdded + 1; ++k) {
-						fieldY[i][j][k] = fieldY[i][j][1 + additionalBinNumber];
+		if (znumberGeneral == 1) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					fieldY[i][j][1] = fieldY[i][j][0];
+				}
+			}
+		} else {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					if (znumberGeneral == 1) {
+						for (int k = 0; k < znumberAdded + 1; ++k) {
+							fieldY[i][j][k] = fieldY[i][j][1 + additionalBinNumber];
+						}
+					} else {
+						for (int k = 0; k <= additionalBinNumber; ++k) {
+							fieldY[i][j][znumberAdded - additionalBinNumber + k] = fieldY[i][j][2 + additionalBinNumber + k];
+							fieldY[i][j][k] = fieldY[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+						}
+						fieldY[i][j][znumberAdded - additionalBinNumber - 1] = fieldY[i][j][1 + additionalBinNumber];
 					}
-				} else {
-					for (int k = 0; k <= additionalBinNumber; ++k) {
-						fieldY[i][j][znumberAdded - additionalBinNumber + k] = fieldY[i][j][2 + additionalBinNumber + k];
-						fieldY[i][j][k] = fieldY[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
-					}
-					fieldY[i][j][znumberAdded - additionalBinNumber - 1] = fieldY[i][j][1 + additionalBinNumber];
 				}
 			}
 		}
@@ -3235,18 +3360,26 @@ void Simulation::exchangeBunemanEzAlongY(double*** fieldZ) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int k = 0; k < znumberAdded; ++k) {
-				if (ynumberGeneral == 1) {
-					for (int j = 0; j < ynumberAdded + 1; ++j) {
-						fieldZ[i][j][k] = fieldZ[i][1 + additionalBinNumber][k];
+		if (ynumberGeneral == 1) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					fieldZ[i][1][k] = fieldZ[i][0][k];
+				}
+			}
+		} else {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					if (ynumberGeneral == 1) {
+						for (int j = 0; j < ynumberAdded + 1; ++j) {
+							fieldZ[i][j][k] = fieldZ[i][1 + additionalBinNumber][k];
+						}
+					} else {
+						for (int j = 0; j <= additionalBinNumber; ++j) {
+							fieldZ[i][ynumberAdded - additionalBinNumber + j][k] = fieldZ[i][2 + additionalBinNumber + j][k];
+							fieldZ[i][j][k] = fieldZ[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+						}
+						fieldZ[i][ynumberAdded - additionalBinNumber - 1][k] = fieldZ[i][1 + additionalBinNumber][k];
 					}
-				} else {
-					for (int j = 0; j <= additionalBinNumber; ++j) {
-						fieldZ[i][ynumberAdded - additionalBinNumber + j][k] = fieldZ[i][2 + additionalBinNumber + j][k];
-						fieldZ[i][j][k] = fieldZ[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
-					}
-					fieldZ[i][ynumberAdded - additionalBinNumber - 1][k] = fieldZ[i][1 + additionalBinNumber][k];
 				}
 			}
 		}
@@ -3313,16 +3446,20 @@ void Simulation::exchangeBunemanEzAlongZ(double*** fieldZ) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				if (znumberGeneral == 1) {
-					for (int k = 0; k < znumberAdded; ++k) {
-						fieldZ[i][j][k] = fieldZ[i][j][1 + additionalBinNumber];
-					}
-				} else {
-					for (int k = 0; k <= additionalBinNumber; ++k) {
-						fieldZ[i][j][znumberAdded - 1 - additionalBinNumber + k] = fieldZ[i][j][1 + additionalBinNumber + k];
-						fieldZ[i][j][k] = fieldZ[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+		if (znumberGeneral == 1) {
+
+		} else {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					if (znumberGeneral == 1) {
+						for (int k = 0; k < znumberAdded; ++k) {
+							fieldZ[i][j][k] = fieldZ[i][j][1 + additionalBinNumber];
+						}
+					} else {
+						for (int k = 0; k <= additionalBinNumber; ++k) {
+							fieldZ[i][j][znumberAdded - 1 - additionalBinNumber + k] = fieldZ[i][j][1 + additionalBinNumber + k];
+							fieldZ[i][j][k] = fieldZ[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+						}
 					}
 				}
 			}
@@ -3539,16 +3676,20 @@ void Simulation::exchangeBunemanBxAlongY(double*** fieldX) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int k = 0; k < znumberAdded; ++k) {
-				if (ynumberGeneral == 1) {
-					for (int j = 0; j < ynumberAdded; ++j) {
-						fieldX[i][j][k] = fieldX[i][1 + additionalBinNumber][k];
-					}
-				} else {
-					for (int j = 0; j <= additionalBinNumber; ++j) {
-						fieldX[i][ynumberAdded - 1 - additionalBinNumber + j][k] = fieldX[i][1 + additionalBinNumber + j][k];
-						fieldX[i][j][k] = fieldX[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+		if (ynumberGeneral == 1) {
+
+		} else {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					if (ynumberGeneral == 1) {
+						for (int j = 0; j < ynumberAdded; ++j) {
+							fieldX[i][j][k] = fieldX[i][1 + additionalBinNumber][k];
+						}
+					} else {
+						for (int j = 0; j <= additionalBinNumber; ++j) {
+							fieldX[i][ynumberAdded - 1 - additionalBinNumber + j][k] = fieldX[i][1 + additionalBinNumber + j][k];
+							fieldX[i][j][k] = fieldX[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+						}
 					}
 				}
 			}
@@ -3616,16 +3757,20 @@ void Simulation::exchangeBunemanBxAlongZ(double*** fieldX) {
 		}
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded + 1; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				if (znumberGeneral == 1) {
-					for (int k = 0; k < znumberAdded; ++k) {
-						fieldX[i][j][k] = fieldX[i][j][1 + additionalBinNumber];
-					}
-				} else {
-					for (int k = 0; k <= additionalBinNumber; ++k) {
-						fieldX[i][j][znumberAdded - 1 - additionalBinNumber + k] = fieldX[i][j][1 + additionalBinNumber + k];
-						fieldX[i][j][k] = fieldX[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+		if (znumberGeneral == 1) {
+
+		} else {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					if (znumberGeneral == 1) {
+						for (int k = 0; k < znumberAdded; ++k) {
+							fieldX[i][j][k] = fieldX[i][j][1 + additionalBinNumber];
+						}
+					} else {
+						for (int k = 0; k <= additionalBinNumber; ++k) {
+							fieldX[i][j][znumberAdded - 1 - additionalBinNumber + k] = fieldX[i][j][1 + additionalBinNumber + k];
+							fieldX[i][j][k] = fieldX[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+						}
 					}
 				}
 			}
@@ -3826,18 +3971,26 @@ void Simulation::exchangeBunemanByAlongY(double*** fieldY) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int k = 0; k < znumberAdded; ++k) {
-				if (ynumberGeneral == 1) {
-					for (int j = 0; j < ynumberAdded + 1; ++j) {
-						fieldY[i][j][k] = fieldY[i][1 + additionalBinNumber][k];
+		if (ynumberGeneral == 1) {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					fieldY[i][1][k] = fieldY[i][0][k];
+				}
+			}
+		} else {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					if (ynumberGeneral == 1) {
+						for (int j = 0; j < ynumberAdded + 1; ++j) {
+							fieldY[i][j][k] = fieldY[i][1 + additionalBinNumber][k];
+						}
+					} else {
+						for (int j = 0; j <= additionalBinNumber; ++j) {
+							fieldY[i][ynumberAdded - additionalBinNumber + j][k] = fieldY[i][2 + additionalBinNumber + j][k];
+							fieldY[i][j][k] = fieldY[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+						}
+						fieldY[i][ynumberAdded - additionalBinNumber - 1][k] = fieldY[i][1 + additionalBinNumber][k];
 					}
-				} else {
-					for (int j = 0; j <= additionalBinNumber; ++j) {
-						fieldY[i][ynumberAdded - additionalBinNumber + j][k] = fieldY[i][2 + additionalBinNumber + j][k];
-						fieldY[i][j][k] = fieldY[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
-					}
-					fieldY[i][ynumberAdded - additionalBinNumber - 1][k] = fieldY[i][1 + additionalBinNumber][k];
 				}
 			}
 		}
@@ -3904,16 +4057,20 @@ void Simulation::exchangeBunemanByAlongZ(double*** fieldY) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded + 1; ++j) {
-				if (znumberGeneral == 1) {
-					for (int k = 0; k < znumberAdded; ++k) {
-						fieldY[i][j][k] = fieldY[i][j][1 + additionalBinNumber];
-					}
-				} else {
-					for (int k = 0; k <= additionalBinNumber; ++k) {
-						fieldY[i][j][znumberAdded - 1 - additionalBinNumber + k] = fieldY[i][j][1 + additionalBinNumber + k];
-						fieldY[i][j][k] = fieldY[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+		if (znumberGeneral == 1) {
+
+		} else {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					if (znumberGeneral == 1) {
+						for (int k = 0; k < znumberAdded; ++k) {
+							fieldY[i][j][k] = fieldY[i][j][1 + additionalBinNumber];
+						}
+					} else {
+						for (int k = 0; k <= additionalBinNumber; ++k) {
+							fieldY[i][j][znumberAdded - 1 - additionalBinNumber + k] = fieldY[i][j][1 + additionalBinNumber + k];
+							fieldY[i][j][k] = fieldY[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+						}
 					}
 				}
 			}
@@ -4108,16 +4265,20 @@ void Simulation::exchangeBunemanBzAlongY(double*** fieldZ) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				if (ynumberGeneral == 1) {
-					for (int j = 0; j < ynumberAdded; ++j) {
-						fieldZ[i][j][k] = fieldZ[i][1 + additionalBinNumber][k];
-					}
-				} else {
-					for (int j = 0; j <= additionalBinNumber; ++j) {
-						fieldZ[i][ynumberAdded - 1 - additionalBinNumber + j][k] = fieldZ[i][1 + additionalBinNumber + j][k];
-						fieldZ[i][j][k] = fieldZ[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+		if (ynumberGeneral == 1) {
+
+		} else {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					if (ynumberGeneral == 1) {
+						for (int j = 0; j < ynumberAdded; ++j) {
+							fieldZ[i][j][k] = fieldZ[i][1 + additionalBinNumber][k];
+						}
+					} else {
+						for (int j = 0; j <= additionalBinNumber; ++j) {
+							fieldZ[i][ynumberAdded - 1 - additionalBinNumber + j][k] = fieldZ[i][1 + additionalBinNumber + j][k];
+							fieldZ[i][j][k] = fieldZ[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
+						}
 					}
 				}
 			}
@@ -4193,18 +4354,26 @@ void Simulation::exchangeBunemanBzAlongZ(double*** fieldZ) {
 
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				if (znumberGeneral == 1) {
-					for (int k = 0; k < znumberAdded + 1; ++k) {
-						fieldZ[i][j][k] = fieldZ[i][j][1 + additionalBinNumber];
+		if (znumberGeneral == 1) {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					fieldZ[i][j][1] = fieldZ[i][j][0];
+				}
+			}
+		} else {
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					if (znumberGeneral == 1) {
+						for (int k = 0; k < znumberAdded + 1; ++k) {
+							fieldZ[i][j][k] = fieldZ[i][j][1 + additionalBinNumber];
+						}
+					} else {
+						for (int k = 0; k <= additionalBinNumber; ++k) {
+							fieldZ[i][j][znumberAdded - additionalBinNumber + k] = fieldZ[i][j][2 + additionalBinNumber + k];
+							fieldZ[i][j][k] = fieldZ[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
+						}
+						fieldZ[i][j][znumberAdded - additionalBinNumber - 1] = fieldZ[i][j][1 + additionalBinNumber];
 					}
-				} else {
-					for (int k = 0; k <= additionalBinNumber; ++k) {
-						fieldZ[i][j][znumberAdded - additionalBinNumber + k] = fieldZ[i][j][2 + additionalBinNumber + k];
-						fieldZ[i][j][k] = fieldZ[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
-					}
-					fieldZ[i][j][znumberAdded - additionalBinNumber - 1] = fieldZ[i][j][1 + additionalBinNumber];
 				}
 			}
 		}

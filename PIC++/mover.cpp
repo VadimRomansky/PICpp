@@ -655,8 +655,8 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 		updateCorrelationMaps(tempParticle);
 
 		if (solverType == BUNEMAN) {
-			E = (correlationBunemanEfield(tempParticle) + correlationBunemanNewEfield(tempParticle)) / 2.0;
-			B = (correlationBunemanBfield(tempParticle) + correlationBunemanNewBfield(tempParticle)) / 2.0;
+			E = correlationBunemanEfield(&tempParticle);
+			B = correlationBunemanBfield(&tempParticle);
 		} else {
 			E = correlationEfield(tempParticle) * (1 - localTheta - theta / N) + correlationNewEfield(tempParticle) * (localTheta
 				+ theta / N);
@@ -821,8 +821,7 @@ void Simulation::moveParticleTristan(Particle* particle) {
 	Vector3d B;
 
 	if (solverType == BUNEMAN) {
-		E = correlationBunemanEfield(particle);// + correlationBunemanNewEfield(particle);
-		B = correlationBunemanBfield(particle);// + correlationBunemanNewBfield(particle);
+		correlationBunemanEBfields(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
 	} else {
 		E = correlationEfield(particle);
 		B = correlationBfield(particle) * (1 - theta) + correlationNewBfield(particle) * theta;
