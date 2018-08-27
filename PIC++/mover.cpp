@@ -658,11 +658,11 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 			E = correlationBunemanEfield(&tempParticle);
 			B = correlationBunemanBfield(&tempParticle);
 		} else {
-			E = correlationEfield(tempParticle) * (1 - localTheta - theta / N) + correlationNewEfield(tempParticle) * (localTheta
+			E = correlationEfield(&tempParticle) * (1 - localTheta - theta / N) + correlationNewEfield(&tempParticle) * (localTheta
 				+ theta / N);
 			//E = correlationNewEfield(particle);
 			//B = correlationBfield(particle)*(1-theta) + correlationNewBfield(particle)*theta;
-			B = correlationBfield(tempParticle) * (1 - localTheta) + correlationNewBfield(tempParticle) * localTheta;
+			B = correlationBfield(&tempParticle) * (1 - localTheta) + correlationNewBfield(&tempParticle) * localTheta;
 		}
 		//E = E0;
 		//B = B0;

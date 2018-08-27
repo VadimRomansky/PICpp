@@ -1027,13 +1027,9 @@ public:
 	Vector3d correlationBfield(Particle* particle) const;
 	Vector3d correlationNewBfield(Particle* particle) const;
 	Vector3d correlationEfield(Particle* particle);
-	Vector3d correlationTempEfield(Particle& particle);
-	Vector3d correlationEfield(Particle& particle);
-	Vector3d correlationGeneralEfield(Particle& particle, Vector3d*** field);
-	Vector3d correlationNewEfield(Particle& particle);
+	Vector3d correlationGeneralEfield(Particle* particle, Vector3d*** field);
 
-	Vector3d correlationBfield(Particle& particle) const;
-	Vector3d correlationNewBfield(Particle& particle) const;
+
 
 	Vector3d correlationBunemanBfield(Particle* particle);
 	Vector3d correlationBunemanNewBfield(Particle* particle);
@@ -1093,11 +1089,8 @@ public:
 	void sumNodeParametersY();
 	void sumNodeParametersZ();
 	void sumNodeVectorParametersX();
-	void sumNodeVectorParameterX(Vector3d*** array);
 	void sumNodeVectorParametersY();
-	void sumNodeVectorParameterY(Vector3d*** array);
 	void sumNodeVectorParametersZ();
-	void sumNodeVectorParameterZ(Vector3d*** array);
 	void sumNodeMatrixParametersX();
 	void sumNodeMatrixParametersY();
 	void sumNodeMatrixParametersZ();

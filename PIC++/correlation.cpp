@@ -13,26 +13,63 @@
 
 
 Vector3d Simulation::correlationTempEfield(Particle* particle) {
-	return correlationTempEfield(*particle);
+	return correlationGeneralEfield(particle, tempEfield);
 }
 
 Vector3d Simulation::correlationNewEfield(Particle* particle) {
-	return correlationNewEfield(*particle);
+	return correlationGeneralEfield(particle, newEfield);
 }
 
 Vector3d Simulation::correlationBfield(Particle* particle) const {
-	return correlationBfield(*particle);
+	Vector3d result = Vector3d(0, 0, 0);
+	for (int i = 0; i < splineOrder + 2; ++i) {
+		for (int j = 0; j < splineOrder + 2; ++j) {
+			for (int k = 0; k < splineOrder + 2; ++k) {
+				int curI = particle->correlationMapCell.xindex[i];
+				int curJ = particle->correlationMapCell.yindex[j];
+				int curK = particle->correlationMapCell.zindex[k];
+
+				Vector3d B = Bfield[curI][curJ][curK];
+
+				double correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] *
+					particle->correlationMapCell.zcorrelation[k];
+				result = result + B * correlation;
+			}
+		}
+	}
+
+	return result;
 }
 
 Vector3d Simulation::correlationNewBfield(Particle* particle) const {
-	return correlationNewBfield(*particle);
+		Vector3d result = Vector3d(0, 0, 0);
+	for (int i = 0; i < splineOrder + 2; ++i) {
+		for (int j = 0; j < splineOrder + 2; ++j) {
+			for (int k = 0; k < splineOrder + 2; ++k) {
+				int curI = particle->correlationMapCell.xindex[i];
+				int curJ = particle->correlationMapCell.yindex[j];
+				int curK = particle->correlationMapCell.zindex[k];
+
+
+				Vector3d B = Vector3d(0, 0, 0);
+
+				B = newBfield[curI][curJ][curK];
+
+				double correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] *
+					particle->correlationMapCell.zcorrelation[k];
+				result = result + B * correlation;
+			}
+		}
+	}
+
+	return result;
 }
 
 Vector3d Simulation::correlationEfield(Particle* particle) {
-	return correlationEfield(*particle);
+	return correlationGeneralEfield(particle, Efield);
 }
 
-Vector3d Simulation::correlationGeneralEfield(Particle& particle, Vector3d*** field) {
+Vector3d Simulation::correlationGeneralEfield(Particle* particle, Vector3d*** field) {
 	//alertNaNOrInfinity(particle.coordinates.x, "particle.x = NaN in correlationGeneralEfield\n");
 	/*int xcount = floor(((particle.coordinates.x - xgrid[0]) / deltaX) + 0.5);
 	int ycount = floor(((particle.coordinates.y - ygrid[0]) / deltaY) + 0.5);
@@ -63,72 +100,15 @@ Vector3d Simulation::correlationGeneralEfield(Particle& particle, Vector3d*** fi
 	for (int i = 0; i < splineOrder + 2; ++i) {
 		for (int j = 0; j < splineOrder + 2; ++j) {
 			for (int k = 0; k < splineOrder + 2; ++k) {
-				int curI = particle.correlationMapNode.xindex[i];
-				int curJ = particle.correlationMapNode.yindex[j];
-				int curK = particle.correlationMapNode.zindex[k];
+				int curI = particle->correlationMapNode.xindex[i];
+				int curJ = particle->correlationMapNode.yindex[j];
+				int curK = particle->correlationMapNode.zindex[k];
 
 				Vector3d E = field[curI][curJ][curK];
 
-				double correlation = particle.correlationMapNode.xcorrelation[i] * particle.correlationMapNode.ycorrelation[j] *
-					particle.correlationMapNode.zcorrelation[k];
+				double correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] *
+					particle->correlationMapNode.zcorrelation[k];
 				result = result + E * correlation;
-			}
-		}
-	}
-
-	return result;
-}
-
-Vector3d Simulation::correlationEfield(Particle& particle) {
-	return correlationGeneralEfield(particle, Efield);
-}
-
-Vector3d Simulation::correlationTempEfield(Particle& particle) {
-	return correlationGeneralEfield(particle, tempEfield);
-}
-
-Vector3d Simulation::correlationNewEfield(Particle& particle) {
-	return correlationGeneralEfield(particle, newEfield);
-}
-
-Vector3d Simulation::correlationBfield(Particle& particle) const {
-	Vector3d result = Vector3d(0, 0, 0);
-	for (int i = 0; i < splineOrder + 2; ++i) {
-		for (int j = 0; j < splineOrder + 2; ++j) {
-			for (int k = 0; k < splineOrder + 2; ++k) {
-				int curI = particle.correlationMapCell.xindex[i];
-				int curJ = particle.correlationMapCell.yindex[j];
-				int curK = particle.correlationMapCell.zindex[k];
-
-				Vector3d B = Bfield[curI][curJ][curK];
-
-				double correlation = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] *
-					particle.correlationMapCell.zcorrelation[k];
-				result = result + B * correlation;
-			}
-		}
-	}
-
-	return result;
-}
-
-Vector3d Simulation::correlationNewBfield(Particle& particle) const {
-	Vector3d result = Vector3d(0, 0, 0);
-	for (int i = 0; i < splineOrder + 2; ++i) {
-		for (int j = 0; j < splineOrder + 2; ++j) {
-			for (int k = 0; k < splineOrder + 2; ++k) {
-				int curI = particle.correlationMapCell.xindex[i];
-				int curJ = particle.correlationMapCell.yindex[j];
-				int curK = particle.correlationMapCell.zindex[k];
-
-
-				Vector3d B = Vector3d(0, 0, 0);
-
-				B = newBfield[curI][curJ][curK];
-
-				double correlation = particle.correlationMapCell.xcorrelation[i] * particle.correlationMapCell.ycorrelation[j] *
-					particle.correlationMapCell.zcorrelation[k];
-				result = result + B * correlation;
 			}
 		}
 	}

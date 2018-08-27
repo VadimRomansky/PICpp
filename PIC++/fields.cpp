@@ -3284,7 +3284,7 @@ double Simulation::evaluateBunemanRotEz(int i, int j, int k) {
 	int nextI = i + 1;
 	int nextJ = j + 1;
 	double result = ((bunemanEy[nextI][j][k] - bunemanEy[i][j][k]) / deltaX);
-	if(ynumberGeneral < 1){
+	if(ynumberGeneral > 1){
 		result -= ((bunemanEx[i][nextJ][k] - bunemanEx[i][j][k]) / deltaY);
 	}
 	return result;
