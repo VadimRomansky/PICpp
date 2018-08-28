@@ -34,7 +34,7 @@ void Simulation::moveParticles() {
 				printf("move particle number %d rank %d\n", i, rank);
 			}
 		}
-		if(solverType == BUNEMAN){
+		if (solverType == BUNEMAN) {
 			moveParticleTristan(particles[i]);
 		} else {
 			moveParticle(particles[i]);
@@ -69,29 +69,33 @@ void Simulation::sortParticleToEscaped(Particle* particle) {
 		return;
 	}
 
-	if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
-		escapedParticlesFront.push_back(particle);
-		particle->escaped = true;
-		particle->crossBoundaryCount++;
-		return;
-	}
-	if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
-		escapedParticlesBack.push_back(particle);
-		particle->escaped = true;
-		particle->crossBoundaryCount++;
-		return;
+	if (ynumberGeneral > 1) {
+		if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
+			escapedParticlesFront.push_back(particle);
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+			return;
+		}
+		if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
+			escapedParticlesBack.push_back(particle);
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+			return;
+		}
 	}
 
-	if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
-		escapedParticlesBottom.push_back(particle);
-		particle->escaped = true;
-		particle->crossBoundaryCount++;
-		return;
-	}
-	if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
-		escapedParticlesTop.push_back(particle);
-		particle->escaped = true;
-		particle->crossBoundaryCount++;
+	if (znumberGeneral > 1) {
+		if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+			escapedParticlesBottom.push_back(particle);
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+			return;
+		}
+		if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+			escapedParticlesTop.push_back(particle);
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+		}
 	}
 }
 
@@ -100,7 +104,7 @@ void Simulation::removeEscapedParticles() {
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock();
 	}
-	if ((cartDim[0] > 1) || (boundaryConditionTypeX == FREE_BOTH )) {
+	if ((cartDim[0] > 1) || (boundaryConditionTypeX == FREE_BOTH)) {
 		for (int i = 0; i < escapedParticlesLeft.size(); ++i) {
 			Particle* particle = escapedParticlesLeft[i];
 			//reservedParticles.push_back(particle);
@@ -226,31 +230,23 @@ void Simulation::moveParticle(Particle* particle) {
 	Vector3d oldCoordinates = particle->coordinates;
 
 
-
-	//boris
-	bool boris = false;
-	if (boris) {
-		moveParticleBoris(particle);
-		return;
-	}
-	//
-
 	double etaDeltaT = eta * deltaT;
 	double restEtaDeltaT = (1.0 - eta) * deltaT;
 
-	newMomentum +=(E + (velocity.vectorMult(B) / (speed_of_light_normalized))) * particle->charge * deltaT;
+	newMomentum += (E + (velocity.vectorMult(B) / (speed_of_light_normalized))) * particle->charge * deltaT;
 
 	newVelocity = Particle::evaluateVelocity(newMomentum, particle->mass);
 
 	middleVelocity = velocity * (1 - eta) + newVelocity * eta;
 
-	
+
 	particle->coordinates.x += middleVelocity.x * etaDeltaT;
 	particle->coordinates.y += middleVelocity.y * etaDeltaT;
 	particle->coordinates.z += middleVelocity.z * etaDeltaT;
 
 
-	if ((particle->coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == 0)) {
+	if ((particle->coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX ==
+		FREE_MIRROR_BOTH) && (cartCoord[0] == 0)) {
 		particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x + fabs(
 			middleVelocity.x * restEtaDeltaT);
 		particle->coordinates.y = particle->coordinates.y + middleVelocity.y * restEtaDeltaT;
@@ -262,7 +258,8 @@ void Simulation::moveParticle(Particle* particle) {
 		return;
 	}
 
-	if((particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) && (boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == cartDim[0] - 1)) {
+	if ((particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) && (boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] ==
+		cartDim[0] - 1)) {
 		particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - particle->coordinates.x - fabs(
 			middleVelocity.x * restEtaDeltaT);
 		particle->coordinates.y = particle->coordinates.y + middleVelocity.y * restEtaDeltaT;
@@ -292,7 +289,7 @@ void Simulation::moveParticle(Particle* particle) {
 	//error = 0;
 
 
-	while (error > particleVelocityErrorLevel * momentumNorm && coordinatesError > particleCoordinatesErrorLevel*deltaX && i < particleIterations) {
+	while (error > particleVelocityErrorLevel * momentumNorm && coordinatesError > particleCoordinatesErrorLevel * deltaX && i < particleIterations) {
 		++i;
 		//prevVelocity = newVelocity;
 		prevMomentum = newMomentum;
@@ -306,7 +303,7 @@ void Simulation::moveParticle(Particle* particle) {
 
 		middleVelocity = velocityHat + rotatedE * beta;
 
-		
+
 		particle->coordinates.x = oldCoordinates.x + (middleVelocity.x * etaDeltaT);
 		particle->coordinates.y = oldCoordinates.y + (middleVelocity.y * etaDeltaT);
 		particle->coordinates.z = oldCoordinates.z + (middleVelocity.z * etaDeltaT);
@@ -315,7 +312,8 @@ void Simulation::moveParticle(Particle* particle) {
 		newCoordinates = particle->coordinates;
 
 		//if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) && (cartCoord[0] == 0)) {
-		if ((particle->coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == 0)) {
+		if ((particle->coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX ==
+			FREE_MIRROR_BOTH) && (cartCoord[0] == 0)) {
 			//particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 			//	middleVelocity.x * restEtaDeltaT);
 			//particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * restEtaDeltaT;
@@ -334,7 +332,8 @@ void Simulation::moveParticle(Particle* particle) {
 
 		}
 
-		if((particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) && (boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == cartDim[0] - 1)) {
+		if ((particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) && (boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] ==
+			cartDim[0] - 1)) {
 			particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - particle->coordinates.x - fabs(
 				middleVelocity.x * restEtaDeltaT);
 			particle->coordinates.y = particle->coordinates.y + middleVelocity.y * restEtaDeltaT;
@@ -371,8 +370,8 @@ void Simulation::moveParticle(Particle* particle) {
 		//tempParticle.addMomentum((E + (middleVelocity.vectorMult(B) / (speed_of_light_normalized))) * (particle->charge *deltaT));
 		//newMomentum = tempParticle.getMomentum();
 
-		newMomentum = oldMomentum + 
-			(E + (middleVelocity.vectorMult(B) / (speed_of_light_normalized))) * (particle->charge *deltaT);
+		newMomentum = oldMomentum +
+			(E + (middleVelocity.vectorMult(B) / (speed_of_light_normalized))) * (particle->charge * deltaT);
 
 		error = (prevMomentum - newMomentum).norm();
 		coordinatesError = (prevCoordinates - newCoordinates).norm();
@@ -409,23 +408,23 @@ void Simulation::moveParticle(Particle* particle) {
 	}*/
 
 	//if (fabs(newGamma - oldGamma) > 0.2) {
-		//printf("delta gamma > 0.2\n");
-		//printf("oldGamma = %g newGamma = %g delta gamma = %g\n", oldGamma, newGamma, newGamma - oldGamma);
-		//printf("theoretical delta gamma = %g\n", deltaGammaTheor);
-		/*printf("particle iterations = %d\n", i);
-		printf("cartx = %d carty = %d cartz = %d\n", cartCoord[0], cartCoord[1], cartCoord[2]);
-		printf("particle number = %d\n", particle->number);
-		printf("x = %g y = %g z = %g\n", particle->coordinates.x, particle->coordinates.y, particle->coordinates.z);
-		printf("xindex = %d yindex = %d zindex = %d\n", particle->correlationMapCell.xindex[(2 + splineOrder)/2], particle->correlationMapCell.yindex[(2 + splineOrder)/2], particle->correlationMapCell.zindex[(2 + splineOrder)/2]);
-		printf("vx = %g vy = %g vz = %g\n", velocity.x, velocity.y, velocity.z);
-		printf("newvx = %g newvy = %g newvz = %g\n", newVelocity.x, newVelocity.y, newVelocity.z);
-		printf("Ex = %g Ey = %g Ez = %g\n", E.x, E.y, E.z);
-		printf("Bx = %g By = %g Bz = %g\n", B.x, B.y, B.z);
-		for(int i = 0; i < 3; ++i){
-			for(int j = 0; j < 3; ++j){
-				printf("alpha[%d][%d] = %g\n", i, j, particle->rotationTensor.matrix[i][j]);
-			}
-		}*/
+	//printf("delta gamma > 0.2\n");
+	//printf("oldGamma = %g newGamma = %g delta gamma = %g\n", oldGamma, newGamma, newGamma - oldGamma);
+	//printf("theoretical delta gamma = %g\n", deltaGammaTheor);
+	/*printf("particle iterations = %d\n", i);
+	printf("cartx = %d carty = %d cartz = %d\n", cartCoord[0], cartCoord[1], cartCoord[2]);
+	printf("particle number = %d\n", particle->number);
+	printf("x = %g y = %g z = %g\n", particle->coordinates.x, particle->coordinates.y, particle->coordinates.z);
+	printf("xindex = %d yindex = %d zindex = %d\n", particle->correlationMapCell.xindex[(2 + splineOrder)/2], particle->correlationMapCell.yindex[(2 + splineOrder)/2], particle->correlationMapCell.zindex[(2 + splineOrder)/2]);
+	printf("vx = %g vy = %g vz = %g\n", velocity.x, velocity.y, velocity.z);
+	printf("newvx = %g newvy = %g newvz = %g\n", newVelocity.x, newVelocity.y, newVelocity.z);
+	printf("Ex = %g Ey = %g Ez = %g\n", E.x, E.y, E.z);
+	printf("Bx = %g By = %g Bz = %g\n", B.x, B.y, B.z);
+	for(int i = 0; i < 3; ++i){
+		for(int j = 0; j < 3; ++j){
+			printf("alpha[%d][%d] = %g\n", i, j, particle->rotationTensor.matrix[i][j]);
+		}
+	}*/
 	//}
 
 	//correctParticlePosition(particle);
@@ -434,7 +433,7 @@ void Simulation::moveParticle(Particle* particle) {
 	}*/
 
 	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
-		if ((boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == 0) {
+		if ((boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == 0) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
 			particle->reflectMomentumX();
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
@@ -459,31 +458,35 @@ void Simulation::moveParticle(Particle* particle) {
 		}
 	}
 
-	if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
-		escapedParticlesFront.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
-		return;
+	if (ynumberGeneral > 1) {
+		if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
+			escapedParticlesFront.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+			return;
+		}
+
+		if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
+			escapedParticlesBack.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+			return;
+		}
 	}
 
-	if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
-		escapedParticlesBack.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
-		return;
-	}
+	if (znumberGeneral > 1) {
+		if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+			escapedParticlesBottom.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+			return;
+		}
 
-	if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
-		escapedParticlesBottom.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
-		return;
-	}
-
-	if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
-		escapedParticlesTop.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
+		if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+			escapedParticlesTop.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+		}
 	}
 }
 
@@ -547,7 +550,8 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 	tempParticle.coordinates.y += middleVelocity.y * eta * deltaT;
 	tempParticle.coordinates.z += middleVelocity.z * eta * deltaT;
 
-	if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH)
+	if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX ==
+			FREE_MIRROR_BOTH)
 		&& (cartCoord[0] == 0)) {
 		particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 			middleVelocity.x * (1 - eta) * deltaT / N);
@@ -561,8 +565,8 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 		return;
 	}
 
-	if ((tempParticle.coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) && ( boundaryConditionTypeX == FREE_MIRROR_BOTH)
-		&& (cartCoord[0] == cartDim[0]-1)) {
+	if ((tempParticle.coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) && (boundaryConditionTypeX == FREE_MIRROR_BOTH)
+		&& (cartCoord[0] == cartDim[0] - 1)) {
 		particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - tempParticle.coordinates.x - fabs(
 			middleVelocity.x * (1 - eta) * deltaT / N);
 		particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * (1 - eta) * deltaT / N;
@@ -618,7 +622,8 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 		tempParticle.coordinates.y += (middleVelocity.y * etaDeltaT);
 		tempParticle.coordinates.z += (middleVelocity.z * etaDeltaT);
 
-		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX == FREE_MIRROR_BOTH)
+		if ((tempParticle.coordinates.x < xgrid[1 + additionalBinNumber]) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX ==
+				FREE_MIRROR_BOTH)
 			&& (cartCoord[0] == 0)) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - tempParticle.coordinates.x + fabs(
 				middleVelocity.x * restEtaDeltaT);
@@ -635,7 +640,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 		}
 
 		if ((tempParticle.coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) && (boundaryConditionTypeX == FREE_MIRROR_BOTH)
-			&& (cartCoord[0] == cartDim[0]-1)) {
+			&& (cartCoord[0] == cartDim[0] - 1)) {
 			particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - tempParticle.coordinates.x - fabs(
 				middleVelocity.x * restEtaDeltaT);
 			particle->coordinates.y = tempParticle.coordinates.y + middleVelocity.y * restEtaDeltaT;
@@ -697,7 +702,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 	}
 
 	if (particle->coordinates.x < xgrid[xnumberAdded - 1 - additionalBinNumber]) {
-		if (boundaryConditionTypeX == FREE_MIRROR_BOTH && cartCoord[0] == cartDim[0]-1) {
+		if (boundaryConditionTypeX == FREE_MIRROR_BOTH && cartCoord[0] == cartDim[0] - 1) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
 			particle->reflectMomentumX();
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
@@ -706,112 +711,6 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 	}
 
 	moveParticle(particle, cur + 1, N);
-}
-
-void Simulation::moveParticleBoris(Particle* particle) {
-	updateCorrelationMaps(particle);
-
-	Vector3d E1;
-	Vector3d E2;
-	Vector3d B;
-
-	if (solverType == BUNEMAN) {
-		E1 = correlationBunemanEfield(particle);// + correlationBunemanNewEfield(particle);
-		E2 = correlationBunemanNewEfield(particle);
-		B = correlationBunemanBfield(particle);// + correlationBunemanNewBfield(particle);
-	} else {
-		E1 = correlationEfield(particle);
-		E2 = correlationNewEfield(particle);
-		//E = correlationNewEfield(particle) * fieldScale;
-		B = correlationBfield(particle) * (1 - theta) + correlationNewBfield(particle) * theta;
-		//B = correlationBfield(particle);
-	}
-	//B = B0;
-	//printf("E = %g %g %g\n", E.x, E.y, E.z);
-	//printf("B = %g %g %g\n", B.x, B.y, B.z);
-
-
-	double Bnorm = B.norm();
-	double Bnorm2 = B.scalarMult(B);
-	double beta = particle->charge * deltaT / 2.0;
-
-	Vector3d p1 = particle->getMomentum() + E1 * beta;
-	double tempGamma = sqrt(1.0 + (p1.scalarMult(p1) / (particle->mass * particle->mass * speed_of_light_normalized_sqr)));
-	double omega = particle->charge * Bnorm / (particle->mass * speed_of_light_normalized * tempGamma);
-	double a1 = tan(omega * deltaT / 2.0) / Bnorm;
-	if (Bnorm <= 0) {
-		a1 = particle->charge / (2.0 * particle->mass * speed_of_light_normalized * tempGamma);
-	}
-	//double a1 = particle->charge/(2.0*particle->mass*speed_of_light*tempGamma);
-	double a2 = 2 * a1 / (1 + a1 * a1 * Bnorm2);
-	Vector3d p3 = p1 + (p1.vectorMult(B)) * a1;
-	Vector3d p2 = p1 + (p3.vectorMult(B)) * a2;
-
-	Vector3d newMomentum = p2 + E2 * beta;
-
-	particle->setMomentum(newMomentum);
-	Vector3d newVelocity = particle->getVelocity();
-	particle->coordinates += newVelocity * deltaT;
-
-	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
-		if ((boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == 0) {
-			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
-			particle->reflectMomentumX();
-			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
-			//return;
-		} else {
-			particle->escaped = true;
-			particle->crossBoundaryCount++;
-			escapedParticlesLeft.push_back(particle);
-			return;
-		}
-	}
-	if (particle->coordinates.x > xgrid[xnumberAdded -1 - additionalBinNumber]) {
-		if ((boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == cartDim[0] - 1) {
-			particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - particle->coordinates.x;
-			particle->reflectMomentumX();
-			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
-			//return;
-		} else {
-			particle->escaped = true;
-			particle->crossBoundaryCount++;
-			escapedParticlesRight.push_back(particle);
-			return;
-		}
-	}
-	if (particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
-		escapedParticlesRight.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
-		return;
-	}
-
-	if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
-		escapedParticlesFront.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
-		return;
-	}
-
-	if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
-		escapedParticlesBack.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
-		return;
-	}
-
-	if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
-		escapedParticlesBottom.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
-		return;
-	}
-
-	if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
-		escapedParticlesTop.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
-	}
 }
 
 void Simulation::moveParticleTristan(Particle* particle) {
@@ -827,23 +726,22 @@ void Simulation::moveParticleTristan(Particle* particle) {
 		B = correlationBfield(particle) * (1 - theta) + correlationNewBfield(particle) * theta;
 	}
 
-	Vector3d dp = E*(particle->charge*deltaT*0.5);
+	Vector3d dp = E * (particle->charge * deltaT * 0.5);
 	particle->addMomentum(dp);
 	double gamma = particle->gammaFactor();
-	double beta = particle->charge*deltaT/(2.0*particle->mass*speed_of_light_normalized);
-	double betaShift = beta/gamma;
-	double f = 1.0/sqrt(1.0 + betaShift*betaShift*B.norm2());
+	double beta = particle->charge * deltaT / (2.0 * particle->mass * speed_of_light_normalized);
+	double betaShift = beta / gamma;
+	double f = 1.0 / sqrt(1.0 + betaShift * betaShift * B.norm2());
 	Vector3d momentum = particle->getMomentum();
-	Vector3d tempMomentum = momentum + momentum.vectorMult(B)*(betaShift);
-	momentum += tempMomentum.vectorMult(B)*(f*2.0*betaShift) + dp;
+	Vector3d tempMomentum = momentum + momentum.vectorMult(B) * (betaShift);
+	momentum += tempMomentum.vectorMult(B) * (f * 2.0 * betaShift) + dp;
 	particle->setMomentum(momentum);
 	Vector3d velocity = particle->getVelocity();
-	particle->coordinates += velocity*deltaT;
-	
+	particle->coordinates += velocity * deltaT;
 
 
 	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
-		if ((boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT  || boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == 0) {
+		if ((boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == 0) {
 			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
 			particle->reflectMomentumX();
 			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
@@ -855,7 +753,7 @@ void Simulation::moveParticleTristan(Particle* particle) {
 			return;
 		}
 	}
-	if (particle->coordinates.x > xgrid[xnumberAdded -1 - additionalBinNumber]) {
+	if (particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
 		if ((boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == cartDim[0] - 1) {
 			particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - particle->coordinates.x;
 			particle->reflectMomentumX();
@@ -875,31 +773,34 @@ void Simulation::moveParticleTristan(Particle* particle) {
 		return;
 	}
 
-	if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
-		escapedParticlesFront.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
-		return;
-	}
+	if (ynumberGeneral > 1) {
+		if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
+			escapedParticlesFront.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+			return;
+		}
 
-	if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
-		escapedParticlesBack.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
-		return;
+		if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
+			escapedParticlesBack.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+			return;
+		}
 	}
+	if (znumberGeneral > 1) {
+		if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+			escapedParticlesBottom.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+			return;
+		}
 
-	if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
-		escapedParticlesBottom.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
-		return;
-	}
-
-	if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
-		escapedParticlesTop.push_back(particle);
-		particle->crossBoundaryCount++;
-		particle->escaped = true;
+		if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+			escapedParticlesTop.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+		}
 	}
 }
 
@@ -1040,11 +941,11 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer& typeContai
 	int minK = 1 + additionalBinNumber;
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
 	int maxK = znumberAdded - 1 - additionalBinNumber;
-	if(ynumberGeneral == 0) {
+	if (ynumberGeneral == 0) {
 		minJ = 0;
 		maxJ = 1;
 	}
-	if(znumberGeneral == 0) {
+	if (znumberGeneral == 0) {
 		minK = 0;
 		maxK = 1;
 	}
@@ -1123,7 +1024,8 @@ void Simulation::exchangeParticles() {
 		}*/
 		if (verbosity > 2) printf("send particles left rank = %d\n", rank);
 		sendLeftReceiveRightParticles(escapedParticlesLeft, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank, speed_of_light_normalized);
+		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank,
+		                              speed_of_light_normalized);
 		MPI_Barrier(cartComm);
 		/*for(int i = 0; i < escapedParticlesRight.size(); ++i) {
 			Particle* particle = escapedParticlesRight[i];
@@ -1131,24 +1033,25 @@ void Simulation::exchangeParticles() {
 		}*/
 		if (verbosity > 2) printf("send particles right rank = %d\n", rank);
 		sendRightReceiveLeftParticles(escapedParticlesRight, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank, speed_of_light_normalized);
+		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank,
+		                              speed_of_light_normalized);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
 		Particle* particle = tempParticles[pcount];
-		if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
+		if ((particle->coordinates.y < ygrid[1 + additionalBinNumber]) && (ynumberGeneral > 1)) {
 			escapedParticlesFront.push_back(particle);
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
-		} else if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
+		} else if ((particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) && (ynumberGeneral > 1)) {
 			escapedParticlesBack.push_back(particle);
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
-		} else if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+		} else if ((particle->coordinates.z < zgrid[1 + additionalBinNumber]) && (znumberGeneral > 1)) {
 			escapedParticlesBottom.push_back(particle);
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
-		} else if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+		} else if ((particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) && (znumberGeneral > 1)) {
 			escapedParticlesTop.push_back(particle);
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
@@ -1164,126 +1067,132 @@ void Simulation::exchangeParticles() {
 
 	MPI_Barrier(cartComm);
 
-	if (cartDim[1] == 1) {
-		for (int i = 0; i < escapedParticlesFront.size(); ++i) {
-			Particle* particle = escapedParticlesFront[i];
-			particle->coordinates.y += ysizeGeneral;
-			particle->escaped = false;
-			tempParticles.push_back(particle);
-		}
-		for (int i = 0; i < escapedParticlesBack.size(); ++i) {
-			Particle* particle = escapedParticlesBack[i];
-			particle->coordinates.y -= ysizeGeneral;
-			particle->escaped = false;
-			tempParticles.push_back(particle);
-		}
-
-	} else {
-		if (cartCoord[1] == 0) {
+	if (ynumberGeneral > 1) {
+		if (cartDim[1] == 1) {
 			for (int i = 0; i < escapedParticlesFront.size(); ++i) {
 				Particle* particle = escapedParticlesFront[i];
 				particle->coordinates.y += ysizeGeneral;
+				particle->escaped = false;
+				tempParticles.push_back(particle);
 			}
-		}
-		if (cartCoord[1] == cartDim[1] - 1) {
 			for (int i = 0; i < escapedParticlesBack.size(); ++i) {
 				Particle* particle = escapedParticlesBack[i];
 				particle->coordinates.y -= ysizeGeneral;
+				particle->escaped = false;
+				tempParticles.push_back(particle);
+			}
+
+		} else {
+			if (cartCoord[1] == 0) {
+				for (int i = 0; i < escapedParticlesFront.size(); ++i) {
+					Particle* particle = escapedParticlesFront[i];
+					particle->coordinates.y += ysizeGeneral;
+				}
+			}
+			if (cartCoord[1] == cartDim[1] - 1) {
+				for (int i = 0; i < escapedParticlesBack.size(); ++i) {
+					Particle* particle = escapedParticlesBack[i];
+					particle->coordinates.y -= ysizeGeneral;
+				}
+			}
+			/*for(int i = 0; i < escapedParticlesFront.size(); ++i) {
+				Particle* particle = escapedParticlesFront[i];
+				reservedParticles.push_back(particle);
+			}*/
+			if (verbosity > 2) printf("send particles front rank = %d\n", rank);
+			sendFrontReceiveBackParticles(escapedParticlesFront, tempParticles, reservedParticles, types,
+			                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank,
+			                              speed_of_light_normalized);
+			MPI_Barrier(cartComm);
+			/*for(int i = 0; i < escapedParticlesBack.size(); ++i) {
+				Particle* particle = escapedParticlesBack[i];
+				reservedParticles.push_back(particle);
+			}*/
+			if (verbosity > 2) printf("send particles back rank = %d\n", rank);
+			sendBackReceiveFrontParticles(escapedParticlesBack, tempParticles, reservedParticles, types,
+			                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank,
+			                              speed_of_light_normalized);
+		}
+
+		for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
+			Particle* particle = tempParticles[pcount];
+			if ((particle->coordinates.z < zgrid[1 + additionalBinNumber]) && (znumberGeneral > 1)) {
+				escapedParticlesBottom.push_back(particle);
+				particle->escaped = true;
+				particle->crossBoundaryCount++;
+			} else if ((particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) && (znumberGeneral > 1)) {
+				escapedParticlesTop.push_back(particle);
+				particle->escaped = true;
+				particle->crossBoundaryCount++;
+			} else {
+				theoreticalEnergy += particle->energy() * particle->weight *
+					sqr(scaleFactor / plasma_period);
+				theoreticalMomentum += particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
+				particle->escaped = false;
+				particles.push_back(particle);
 			}
 		}
-		/*for(int i = 0; i < escapedParticlesFront.size(); ++i) {
-			Particle* particle = escapedParticlesFront[i];
-			reservedParticles.push_back(particle);
-		}*/
-		if (verbosity > 2) printf("send particles front rank = %d\n", rank);
-		sendFrontReceiveBackParticles(escapedParticlesFront, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank, speed_of_light_normalized);
-		MPI_Barrier(cartComm);
-		/*for(int i = 0; i < escapedParticlesBack.size(); ++i) {
-			Particle* particle = escapedParticlesBack[i];
-			reservedParticles.push_back(particle);
-		}*/
-		if (verbosity > 2) printf("send particles back rank = %d\n", rank);
-		sendBackReceiveFrontParticles(escapedParticlesBack, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank, speed_of_light_normalized);
+		tempParticles.clear();
 	}
 
-	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
-		Particle* particle = tempParticles[pcount];
-		if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
-			escapedParticlesBottom.push_back(particle);
-			particle->escaped = true;
-			particle->crossBoundaryCount++;
-		} else if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
-			escapedParticlesTop.push_back(particle);
-			particle->escaped = true;
-			particle->crossBoundaryCount++;
+	MPI_Barrier(cartComm);
+	if (znumberGeneral > 1) {
+		if (cartDim[2] == 1) {
+			for (int i = 0; i < escapedParticlesBottom.size(); ++i) {
+				Particle* particle = escapedParticlesBottom[i];
+				particle->coordinates.z += zsizeGeneral;
+				particle->escaped = false;
+				tempParticles.push_back(particle);
+			}
+			for (int i = 0; i < escapedParticlesTop.size(); ++i) {
+				Particle* particle = escapedParticlesTop[i];
+				particle->coordinates.z -= zsizeGeneral;
+				particle->escaped = false;
+				tempParticles.push_back(particle);
+			}
+
 		} else {
+			if (cartCoord[2] == 0) {
+				for (int i = 0; i < escapedParticlesBottom.size(); ++i) {
+					Particle* particle = escapedParticlesBottom[i];
+					particle->coordinates.z += zsizeGeneral;
+				}
+			}
+			if (cartCoord[2] == cartDim[2] - 1) {
+				for (int i = 0; i < escapedParticlesTop.size(); ++i) {
+					Particle* particle = escapedParticlesTop[i];
+					particle->coordinates.z -= zsizeGeneral;
+				}
+			}
+			/*for(int i = 0; i < escapedParticlesBottom.size(); ++i) {
+				Particle* particle = escapedParticlesBottom[i];
+				reservedParticles.push_back(particle);
+			}*/
+			if (verbosity > 2) printf("send particles bottom rank = %d\n", rank);
+			sendBottomReceiveTopParticles(escapedParticlesBottom, tempParticles, reservedParticles, types,
+			                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank,
+			                              speed_of_light_normalized);
+			MPI_Barrier(cartComm);
+			/*for(int i = 0; i < escapedParticlesTop.size(); ++i) {
+				Particle* particle = escapedParticlesTop[i];
+				reservedParticles.push_back(particle);
+			}*/
+			if (verbosity > 2) printf("send particles top rank = %d\n", rank);
+			sendTopReceiveBottomParticles(escapedParticlesTop, tempParticles, reservedParticles, types,
+			                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank,
+			                              speed_of_light_normalized);
+		}
+
+		for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
+			Particle* particle = tempParticles[pcount];
 			theoreticalEnergy += particle->energy() * particle->weight *
 				sqr(scaleFactor / plasma_period);
 			theoreticalMomentum += particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
 			particle->escaped = false;
 			particles.push_back(particle);
 		}
+		tempParticles.clear();
 	}
-	tempParticles.clear();
-
-
-	MPI_Barrier(cartComm);
-
-	if (cartDim[2] == 1) {
-		for (int i = 0; i < escapedParticlesBottom.size(); ++i) {
-			Particle* particle = escapedParticlesBottom[i];
-			particle->coordinates.z += zsizeGeneral;
-			particle->escaped = false;
-			tempParticles.push_back(particle);
-		}
-		for (int i = 0; i < escapedParticlesTop.size(); ++i) {
-			Particle* particle = escapedParticlesTop[i];
-			particle->coordinates.z -= zsizeGeneral;
-			particle->escaped = false;
-			tempParticles.push_back(particle);
-		}
-
-	} else {
-		if (cartCoord[2] == 0) {
-			for (int i = 0; i < escapedParticlesBottom.size(); ++i) {
-				Particle* particle = escapedParticlesBottom[i];
-				particle->coordinates.z += zsizeGeneral;
-			}
-		}
-		if (cartCoord[2] == cartDim[2] - 1) {
-			for (int i = 0; i < escapedParticlesTop.size(); ++i) {
-				Particle* particle = escapedParticlesTop[i];
-				particle->coordinates.z -= zsizeGeneral;
-			}
-		}
-		/*for(int i = 0; i < escapedParticlesBottom.size(); ++i) {
-			Particle* particle = escapedParticlesBottom[i];
-			reservedParticles.push_back(particle);
-		}*/
-		if (verbosity > 2) printf("send particles bottom rank = %d\n", rank);
-		sendBottomReceiveTopParticles(escapedParticlesBottom, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank, speed_of_light_normalized);
-		MPI_Barrier(cartComm);
-		/*for(int i = 0; i < escapedParticlesTop.size(); ++i) {
-			Particle* particle = escapedParticlesTop[i];
-			reservedParticles.push_back(particle);
-		}*/
-		if (verbosity > 2) printf("send particles top rank = %d\n", rank);
-		sendTopReceiveBottomParticles(escapedParticlesTop, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank, speed_of_light_normalized);
-	}
-
-	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
-		Particle* particle = tempParticles[pcount];
-		theoreticalEnergy += particle->energy() * particle->weight *
-			sqr(scaleFactor / plasma_period);
-		theoreticalMomentum += particle->getMomentum() * particle->weight * scaleFactor / plasma_period;
-		particle->escaped = false;
-		particles.push_back(particle);
-	}
-	tempParticles.clear();
 
 	MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {

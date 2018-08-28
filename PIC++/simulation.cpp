@@ -1684,9 +1684,16 @@ void Simulation::updateParameters() {
 		}
 		int minJ = 1 + additionalBinNumber;
 		int maxJ = ynumberAdded - 1 - additionalBinNumber;
+		if(ynumberGeneral == 1) {
+			minJ = 0;
+			maxJ = 1;
+		}
 		int minK = 1 + additionalBinNumber;
 		int maxK = znumberAdded - 1 - additionalBinNumber;
-
+		if(znumberGeneral == 1) {
+			minK = 0;
+			maxK = 1;
+		}
 		for (int i = minI; i < maxI; ++i) {
 			for (int j = minJ; j < maxJ; ++j) {
 				for (int k = minK; k < maxK; ++k) {
@@ -1732,8 +1739,16 @@ void Simulation::updateParameters() {
 		}
 		int minJ = 1 + additionalBinNumber;
 		int maxJ = ynumberAdded - 1 - additionalBinNumber;
+		if(ynumberGeneral == 1) {
+			minJ = 0;
+			maxJ = 1;
+		}
 		int minK = 1 + additionalBinNumber;
 		int maxK = znumberAdded - 1 - additionalBinNumber;
+		if(znumberGeneral == 1) {
+			minK = 0;
+			maxK = 1;
+		}
 
 		for (int i = minI; i < maxI; ++i) {
 			for (int j = minJ; j < maxJ; ++j) {
@@ -1897,20 +1912,24 @@ void Simulation::updateAnisotropy() {
 }
 
 void Simulation::resetNewTempFields() {
-	for (int i = 0; i < xnumberAdded; ++i) {
-		for (int j = 0; j < ynumberAdded; ++j) {
-			for (int k = 0; k < znumberAdded; ++k) {
-				newBfield[i][j][k] = Bfield[i][j][k];
+	if(solverType == BUNEMAN) {
+		
+	} else {
+		for (int i = 0; i < xnumberAdded; ++i) {
+			for (int j = 0; j < ynumberAdded; ++j) {
+				for (int k = 0; k < znumberAdded; ++k) {
+					newBfield[i][j][k] = Bfield[i][j][k];
+				}
 			}
 		}
-	}
 
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				tempEfield[i][j][k] = Efield[i][j][k];
-				newEfield[i][j][k] = Efield[i][j][k];
-				explicitEfield[i][j][k] = Efield[i][j][k];
+		for (int i = 0; i < xnumberAdded + 1; ++i) {
+			for (int j = 0; j < ynumberAdded + 1; ++j) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					tempEfield[i][j][k] = Efield[i][j][k];
+					newEfield[i][j][k] = Efield[i][j][k];
+					explicitEfield[i][j][k] = Efield[i][j][k];
+				}
 			}
 		}
 	}

@@ -22,14 +22,30 @@ Vector3d Simulation::correlationNewEfield(Particle* particle) {
 
 Vector3d Simulation::correlationBfield(Particle* particle) const {
 	Vector3d result = Vector3d(0, 0, 0);
-	for (int i = 0; i < splineOrder + 2; ++i) {
-		for (int j = 0; j < splineOrder + 2; ++j) {
-			for (int k = 0; k < splineOrder + 2; ++k) {
-				int curI = particle->correlationMapCell.xindex[i];
-				int curJ = particle->correlationMapCell.yindex[j];
-				int curK = particle->correlationMapCell.zindex[k];
+	int maxI = splineOrder + 2;
+	int maxJ = splineOrder + 2;
+	if(ynumberGeneral == 1) {
+		maxJ = 1;
+	}
+	int maxK = splineOrder + 2;
+	if(znumberGeneral == 1) {
+		maxK = 1;
+	}
+	for (int i = 0; i < maxI; ++i) {
+		int cellI = particle->correlationMapCell.xindex[i];
+		for (int j = 0; j < maxJ; ++j) {
+			int cellJ = particle->correlationMapCell.yindex[j];
+			if(ynumberGeneral == 1) {
+				cellJ = 0;
+			}
+			for (int k = 0; k < maxK; ++k) {
+				int cellK = particle->correlationMapCell.zindex[k];
 
-				Vector3d B = Bfield[curI][curJ][curK];
+				if(znumberGeneral == 1) {
+					cellK = 0;
+				}
+
+				Vector3d B = Bfield[cellI][cellJ][cellK];
 
 				double correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] *
 					particle->correlationMapCell.zcorrelation[k];
@@ -42,18 +58,33 @@ Vector3d Simulation::correlationBfield(Particle* particle) const {
 }
 
 Vector3d Simulation::correlationNewBfield(Particle* particle) const {
-		Vector3d result = Vector3d(0, 0, 0);
-	for (int i = 0; i < splineOrder + 2; ++i) {
-		for (int j = 0; j < splineOrder + 2; ++j) {
-			for (int k = 0; k < splineOrder + 2; ++k) {
-				int curI = particle->correlationMapCell.xindex[i];
-				int curJ = particle->correlationMapCell.yindex[j];
-				int curK = particle->correlationMapCell.zindex[k];
+	Vector3d result = Vector3d(0, 0, 0);
+	int maxI = splineOrder + 2;
+	int maxJ = splineOrder + 2;
+	if(ynumberGeneral == 1) {
+		maxJ = 1;
+	}
+	int maxK = splineOrder + 2;
+	if(znumberGeneral == 1) {
+		maxK = 1;
+	}
+	for (int i = 0; i < maxI; ++i) {
+		int cellI = particle->correlationMapCell.xindex[i];
+		for (int j = 0; j < maxJ; ++j) {
+			int cellJ = particle->correlationMapCell.yindex[j];
+			if(ynumberGeneral == 1) {
+				cellJ = 0;
+			}
+			for (int k = 0; k < maxK; ++k) {
+				int cellK = particle->correlationMapCell.zindex[k];
+
+				if(znumberGeneral == 1) {
+					cellK = 0;
+				}
 
 
-				Vector3d B = Vector3d(0, 0, 0);
 
-				B = newBfield[curI][curJ][curK];
+				Vector3d B = newBfield[cellI][cellJ][cellK];
 
 				double correlation = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] *
 					particle->correlationMapCell.zcorrelation[k];
@@ -97,14 +128,30 @@ Vector3d Simulation::correlationGeneralEfield(Particle* particle, Vector3d*** fi
 
 	Vector3d result = Vector3d(0, 0, 0);
 
-	for (int i = 0; i < splineOrder + 2; ++i) {
-		for (int j = 0; j < splineOrder + 2; ++j) {
-			for (int k = 0; k < splineOrder + 2; ++k) {
-				int curI = particle->correlationMapNode.xindex[i];
-				int curJ = particle->correlationMapNode.yindex[j];
-				int curK = particle->correlationMapNode.zindex[k];
+	int maxI = splineOrder + 2;
+	int maxJ = splineOrder + 2;
+	if(ynumberGeneral == 1) {
+		maxJ = 1;
+	}
+	int maxK = splineOrder + 2;
+	if(znumberGeneral == 1) {
+		maxK = 1;
+	}
+	for (int i = 0; i < maxI; ++i) {
+		int nodeI = particle->correlationMapNode.xindex[i];
+		for (int j = 0; j < maxJ; ++j) {
+			int nodeJ = particle->correlationMapNode.yindex[j];
+			if(ynumberGeneral == 1) {
+				nodeJ = 0;
+			}
+			for (int k = 0; k < maxK; ++k) {
+				int nodeK = particle->correlationMapNode.zindex[k];
 
-				Vector3d E = field[curI][curJ][curK];
+				if(znumberGeneral == 1) {
+					nodeK = 0;
+				}
+
+				Vector3d E = field[nodeI][nodeJ][nodeK];
 
 				double correlation = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] *
 					particle->correlationMapNode.zcorrelation[k];
@@ -786,8 +833,7 @@ void Simulation::updateCorrelationMapCell(Particle* particle) {
 }
 
 void Simulation::updateCorrelationMapCellX(Particle& particle) {
-	//if(particle.coordinates.x < xgrid[1 + additionalBinNumber]){
-	if (particle.coordinates.x < xgrid[additionalBinNumber]) {
+	/*if (particle.coordinates.x < xgrid[additionalBinNumber]) {
 		printf("particle.coordinates.x < 0 %g particle number = %d\n", particle.coordinates.x, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, x[0] = %g x[xnumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.x, xgrid[0], xgrid[xnumberAdded]);
@@ -796,7 +842,6 @@ void Simulation::updateCorrelationMapCellX(Particle& particle) {
 		MPI_Finalize();
 		exit(0);
 	}
-	//if(particle.coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]){
 	if (particle.coordinates.x > xgrid[xnumberAdded - additionalBinNumber]) {
 		printf("particle.coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber] %g particle number = %d\n",
 		       particle.coordinates.x, particle.number);
@@ -806,7 +851,7 @@ void Simulation::updateCorrelationMapCellX(Particle& particle) {
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
-	}
+	}*/
 	int xcount = floor((particle.coordinates.x - xgrid[0]) / deltaX);
 	if ((splineOrder % 2) == 0) {
 		bool leftSideX = particle.coordinates.x < middleXgrid[xcount];
@@ -836,7 +881,7 @@ void Simulation::updateCorrelationMapCellX(Particle& particle) {
 }
 
 void Simulation::updateCorrelationMapCellY(Particle& particle) {
-	//if(particle.coordinates.y < ygrid[1 + additionalBinNumber]){
+	/*if(ynumberGeneral > 1){
 	if (particle.coordinates.y < ygrid[additionalBinNumber]) {
 		printf("particle.coordinates.y < 0 %g particle number = %d\n", particle.coordinates.y, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, y[0] = %g y[ynumberAdded] = %g", particle.coordinates.x,
@@ -846,7 +891,6 @@ void Simulation::updateCorrelationMapCellY(Particle& particle) {
 		MPI_Finalize();
 		exit(0);
 	}
-	//if(particle.coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]){
 	if (particle.coordinates.y > ygrid[ynumberAdded - additionalBinNumber]) {
 		printf("particle.coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber] %g particle number = %d\n",
 		       particle.coordinates.y, particle.number);
@@ -857,6 +901,7 @@ void Simulation::updateCorrelationMapCellY(Particle& particle) {
 		MPI_Finalize();
 		exit(0);
 	}
+	}*/
 	int ycount = floor((particle.coordinates.y - ygrid[0]) / deltaY);
 	if ((splineOrder % 2) == 0) {
 		bool leftSideY = particle.coordinates.y < middleYgrid[ycount];
@@ -886,7 +931,7 @@ void Simulation::updateCorrelationMapCellY(Particle& particle) {
 }
 
 void Simulation::updateCorrelationMapCellZ(Particle& particle) {
-	//if(particle.coordinates.z < zgrid[1 + additionalBinNumber]){
+	/*if(znumberGeneral > 1){
 	if (particle.coordinates.z < zgrid[additionalBinNumber]) {
 		printf("particle.coordinates.z < 0 %g particle number = %d\n", particle.coordinates.z, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, z[0] = %g z[znumberAdded] = %g", particle.coordinates.x,
@@ -896,7 +941,6 @@ void Simulation::updateCorrelationMapCellZ(Particle& particle) {
 		MPI_Finalize();
 		exit(0);
 	}
-	//if(particle.coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]){
 	if (particle.coordinates.z > zgrid[znumberAdded - additionalBinNumber]) {
 		printf("particle.coordinates.z > zgrid[xnumberAdded - 1 - additionalBinNumber] %g particle number = %d\n",
 		       particle.coordinates.z, particle.number);
@@ -907,6 +951,7 @@ void Simulation::updateCorrelationMapCellZ(Particle& particle) {
 		MPI_Finalize();
 		exit(0);
 	}
+	}*/
 	int zcount = floor((particle.coordinates.z - zgrid[0]) / deltaZ);
 	if ((splineOrder % 2) == 0) {
 		int tempIndex = 0;
@@ -963,8 +1008,7 @@ void Simulation::updateCorrelationMapNode(Particle* particle) {
 }
 
 void Simulation::updateCorrelationMapNodeX(Particle& particle) {
-	//if(particle.coordinates.x < xgrid[1 + additionalBinNumber]){
-	if (particle.coordinates.x < xgrid[additionalBinNumber]) {
+	/*if (particle.coordinates.x < xgrid[additionalBinNumber]) {
 		printf("particle.coordinates.x < 0 %g particle number = %d\n", particle.coordinates.x, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, x[0] = %g x[xnumberAdded] = %g", particle.coordinates.x,
 		       particle.coordinates.y, particle.coordinates.x, xgrid[0], xgrid[xnumberAdded]);
@@ -973,7 +1017,6 @@ void Simulation::updateCorrelationMapNodeX(Particle& particle) {
 		MPI_Finalize();
 		exit(0);
 	}
-	//if(particle.coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]){
 	if (particle.coordinates.x > xgrid[xnumberAdded - additionalBinNumber]) {
 		printf("particle.coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber] %g particle number = %d\n",
 		       particle.coordinates.x, particle.number);
@@ -983,7 +1026,7 @@ void Simulation::updateCorrelationMapNodeX(Particle& particle) {
 		printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 		MPI_Finalize();
 		exit(0);
-	}
+	}*/
 	int xcount = floor(((particle.coordinates.x - xgrid[0]) / deltaX) + 0.5);
 	if ((splineOrder % 2) == 0) {
 		bool leftSideX = particle.coordinates.x < xgrid[xcount];
@@ -1013,7 +1056,7 @@ void Simulation::updateCorrelationMapNodeX(Particle& particle) {
 }
 
 void Simulation::updateCorrelationMapNodeY(Particle& particle) {
-	//if(particle.coordinates.y < ygrid[1 + additionalBinNumber]){
+	/*if(ynumberGeneral > 1){
 	if (particle.coordinates.y < ygrid[additionalBinNumber]) {
 		printf("particle.coordinates.y < 0 %g particle number = %d\n", particle.coordinates.y, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, y[0] = %g y[ynumberAdded] = %g", particle.coordinates.x,
@@ -1023,7 +1066,6 @@ void Simulation::updateCorrelationMapNodeY(Particle& particle) {
 		MPI_Finalize();
 		exit(0);
 	}
-	//if(particle.coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]){
 	if (particle.coordinates.y > ygrid[ynumberAdded - additionalBinNumber]) {
 		printf("particle.coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber] %g particle number = %d\n",
 		       particle.coordinates.y, particle.number);
@@ -1034,6 +1076,7 @@ void Simulation::updateCorrelationMapNodeY(Particle& particle) {
 		MPI_Finalize();
 		exit(0);
 	}
+	}*/
 	int ycount = floor(((particle.coordinates.y - ygrid[0]) / deltaY) + 0.5);
 	if ((splineOrder % 2) == 0) {
 		bool leftSideY = particle.coordinates.y < ygrid[ycount];
@@ -1063,7 +1106,7 @@ void Simulation::updateCorrelationMapNodeY(Particle& particle) {
 }
 
 void Simulation::updateCorrelationMapNodeZ(Particle& particle) {
-	//if(particle.coordinates.z < zgrid[1 + additionalBinNumber]){
+	/*if(znumberGeneral > 1){
 	if (particle.coordinates.z < zgrid[additionalBinNumber]) {
 		printf("particle.coordinates.z < 0 %g particle number = %d\n", particle.coordinates.z, particle.number);
 		printf("particle.x = %g particle.y = %g particle.x = %g, z[0] = %g z[znumberAdded] = %g", particle.coordinates.x,
@@ -1073,7 +1116,6 @@ void Simulation::updateCorrelationMapNodeZ(Particle& particle) {
 		MPI_Finalize();
 		exit(0);
 	}
-	//if(particle.coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]){
 	if (particle.coordinates.z > zgrid[znumberAdded - additionalBinNumber]) {
 		printf("particle.coordinates.z > zgrid[xnumberAdded - 1 - additionalBinNumber] %g particle number = %d\n",
 		       particle.coordinates.z, particle.number);
@@ -1084,6 +1126,7 @@ void Simulation::updateCorrelationMapNodeZ(Particle& particle) {
 		MPI_Finalize();
 		exit(0);
 	}
+	}*/
 	int zcount = floor(((particle.coordinates.z - zgrid[0]) / deltaZ) + 0.5);
 	if ((splineOrder % 2) == 0) {
 		bool leftSideZ = particle.coordinates.z < zgrid[zcount];

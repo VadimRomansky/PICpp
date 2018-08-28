@@ -996,7 +996,6 @@ public:
 	void removeEscapedParticles();
 	void moveParticle(Particle* particle);
 	void moveParticle(Particle* particle, int cur, int N);
-	void moveParticleBoris(Particle* particle);
 	void moveParticleTristan(Particle* particle);
 	void exchangeParticles();
 	void collectMostAcceleratedParticles();
