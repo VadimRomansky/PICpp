@@ -37,10 +37,13 @@ void Simulation::tristanEvaluateBhalfStep() {
 		minK = 0;
 		maxK = 1;
 	}
+
+	double cdtd2 = speed_of_light_normalized*deltaT/2.0;
+
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
 			for (int k = minK; k < maxK; ++k) {
-				bunemanBx[i][j][k] = bunemanBx[i][j][k] - speed_of_light_normalized * evaluateBunemanRotEx(i, j, k) * deltaT/2;
+				bunemanBx[i][j][k] = bunemanBx[i][j][k] - evaluateBunemanRotEx(i, j, k) * cdtd2;
 			}
 		}
 	}
@@ -50,7 +53,7 @@ void Simulation::tristanEvaluateBhalfStep() {
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k < maxK; ++k) {
-				bunemanBy[i][j][k] = bunemanBy[i][j][k] - speed_of_light_normalized * evaluateBunemanRotEy(i, j, k) * deltaT/2;
+				bunemanBy[i][j][k] = bunemanBy[i][j][k] - evaluateBunemanRotEy(i, j, k) * cdtd2;
 			}
 		}
 	}
@@ -63,7 +66,7 @@ void Simulation::tristanEvaluateBhalfStep() {
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
-				bunemanBz[i][j][k] = bunemanBz[i][j][k] - speed_of_light_normalized * evaluateBunemanRotEz(i, j, k) * deltaT/2;
+				bunemanBz[i][j][k] = bunemanBz[i][j][k] - evaluateBunemanRotEz(i, j, k) * cdtd2;
 			}
 		}
 	}
@@ -95,7 +98,7 @@ void Simulation::tristanEvaluateE() {
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
-				bunemanEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBx(i, j, k) - 4 * pi * bunemanJx[i][j][k]) * deltaT;
+				bunemanEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBx(i, j, k) - four_pi * bunemanJx[i][j][k]) * deltaT;
 			}
 		}
 	}
@@ -105,7 +108,7 @@ void Simulation::tristanEvaluateE() {
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
-				bunemanEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBy(i, j, k) - 4 * pi *bunemanJy[i][j][k]) * deltaT;
+				bunemanEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBy(i, j, k) - four_pi *bunemanJy[i][j][k]) * deltaT;
 				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
 					bunemanEy[i][j][k] = 0;
 				}
@@ -124,7 +127,7 @@ void Simulation::tristanEvaluateE() {
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k < maxK; ++k) {
-				bunemanEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBz(i, j, k) - 4 * pi * bunemanJz[i][j][k]) * deltaT;
+				bunemanEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBz(i, j, k) - four_pi * bunemanJz[i][j][k]) * deltaT;
 				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
 					bunemanEz[i][j][k] = 0;
 				}

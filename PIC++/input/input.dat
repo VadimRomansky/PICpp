@@ -1,5 +1,5 @@
 1                       input type - cgs or in omega_e and skin depth units
-10 10 10              grid numbers
+50 50 10              grid numbers
 0.2        		grid step
 5E8                     temperature
 -0.7453559925 0 0       velocity (in c always)
@@ -12,8 +12,8 @@
 1E100                   max time
 1                  	prefered time step
 0                  	log verbocity level
-1000                      write iteration parameter (for output fields)
-100                      write general parameter (for output energy)
+100                      write iteration parameter (for output fields)
+10                      write general parameter (for output energy)
 100                      write trajectory parameter
 100                      write particle step
 8			smothing iterations
@@ -21,8 +21,8 @@
 0                       write each iteration in different file
 0.04    	        electron mass (in units of proton mass)
 8                       particle types number
-1 20                	electrons relative concentration and particles per bin
-1 20                	protons relative  concentration and particles per bin
+1 10                	electrons relative concentration and particles per bin
+1 10                	protons relative  concentration and particles per bin
 0 0                 	positrons relative  concentration and particles per bin
 0 0                     alpha  relative   concentration and particles per bin
 0 0                     deuterium  relative  concentration and particles per bin

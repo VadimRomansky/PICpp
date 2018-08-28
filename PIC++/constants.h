@@ -26,6 +26,7 @@ const double kBoltzman = 1.3806488E-16;
 const double speed_of_light = 2.99792458E10;
 const double electron_charge = 4.803529695E-10;
 const double pi = 4*atan2(1.0,1.0);
+const double four_pi = 4*pi;
 const double epsilon = 1E-16;
 const double maxErrorLevel = 1E-8;
 const double maxCleanupErrorLevel = 1E-8;
