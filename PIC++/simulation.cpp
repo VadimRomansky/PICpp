@@ -80,9 +80,14 @@ void Simulation::simulate() {
 	MPI_Barrier(cartComm);
 
 	if ((rank == 0) && (verbosity > 1)) printf("initial exchanging fields\n");
-	exchangeEfield();
-	exchangeGeneralBfield(Bfield);
-	exchangeGeneralBfield(newBfield);
+	if(solverType == BUNEMAN) {
+		exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
+		exchangeBunemanEfield(bunemanEx, bunemanEy, bunemanEz);
+	} else {
+		exchangeEfield();
+		exchangeGeneralBfield(Bfield);
+		exchangeGeneralBfield(newBfield);
+	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("initial collecting particles\n");
 	updateParticleCorrelationMaps();
@@ -91,12 +96,13 @@ void Simulation::simulate() {
 
 	//double because dielectric tensor needs deltaT;
 	updateDeltaT();
-	evaluateParticlesRotationTensor();
-	updateElectroMagneticParameters();
-	updateDensityParameters();
-	updateDeltaT();
-	evaluateParticlesRotationTensor();
-	updateElectroMagneticParameters();
+	//updateElectroMagneticParameters();
+	//updateDensityParameters();
+	//updateDeltaT();
+	if(solverType != BUNEMAN){
+		evaluateParticlesRotationTensor();
+		updateElectroMagneticParameters();
+	}
 	updateDensityParameters();
 	if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 		//updateShockWaveX();
@@ -113,7 +119,7 @@ void Simulation::simulate() {
 		}
 	}
 	updateFields();
-	exchangeGeneralBfield(Bfield);
+	//exchangeGeneralBfield(Bfield);
 	updateEnergy();
 
 	for (int i = 0; i < typesNumber; ++i) {

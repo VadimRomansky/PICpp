@@ -164,9 +164,13 @@ void Simulation::setSpaceForProc() {
 	xnumberAdded = xnumber + 2 + 2 * additionalBinNumber;
 	if (ynumberGeneral != 1) {
 		ynumberAdded = ynumber + 2 + 2 * additionalBinNumber;
+	} else {
+		ynumberAdded = 1;
 	}
 	if (znumberGeneral != 1) {
 		znumberAdded = znumber + 2 + 2 * additionalBinNumber;
+	} else {
+		znumberAdded = 1;
 	}
 
 	xsize = xnumberAdded * xsizeGeneral / xnumberGeneral;

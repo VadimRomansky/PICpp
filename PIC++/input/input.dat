@@ -1,5 +1,5 @@
 1                       input type - cgs or in omega_e and skin depth units
-50 50 10              grid numbers
+50 1 50              grid numbers
 0.2        		grid step
 5E8                     temperature
 -0.7453559925 0 0       velocity (in c always)

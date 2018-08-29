@@ -23,8 +23,8 @@ void Simulation::tristanUpdateFlux() {
 		procTime = clock();
 	}
 	//MPI_Barrier(cartComm);
-	if ((rank == 0) && (verbosity > 0)) printf("updating tristan flux\n");
-	if ((rank == 0) && (verbosity > 0)) printLog("updating tristan flux\n");
+	if ((rank == 0) && (verbosity > 1)) printf("reseting tristan flux\n");
+	if ((rank == 0) && (verbosity > 1)) printLog("reseting tristan flux\n");
 	int particlePartsCount = 0;
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -48,10 +48,17 @@ void Simulation::tristanUpdateFlux() {
 		}
 	}
 
+	MPI_Barrier(cartComm);
+
+	if ((rank == 0) && (verbosity > 0)) printf("updating tristan flux\n");
+	if ((rank == 0) && (verbosity > 0)) printLog("updating tristan flux\n");
+
 	for (int pcount = 0; pcount < particles.size(); ++pcount) {
 		Particle* particle = particles[pcount];
 		addParticleFluxZigzag(particle);
 	}
+	MPI_Barrier(cartComm);
+	if(verbosity > 2) printf("exchanging buneman flux rank = %d\n", rank);
 
 	exchangeBunemanFlux();
 
@@ -72,6 +79,71 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 	const int previ = floor(prevLocalCoordinates.x/deltaX);
 	const int prevj = floor(prevLocalCoordinates.y/deltaY);
 	const int prevk = floor(prevLocalCoordinates.z/deltaZ);
+
+	if(i < 0) {
+		printf("particle i < 0\n");
+		MPI_Finalize();
+		exit(0);
+	}
+	if(i >= xnumberAdded) {
+		printf("particle i >= xnumberAdded\n");
+		MPI_Finalize();
+		exit(0);
+	}
+	if(previ < 0) {
+		printf("particle previ < 0\n");
+		MPI_Finalize();
+		exit(0);
+	}
+	if(previ >= xnumberAdded) {
+		printf("particle previ >= xnumberAdded\n");
+		MPI_Finalize();
+		exit(0);
+	}
+	if(ynumberGeneral > 1) {
+		if(j < 0) {
+			printf("particle j < 0\n");
+			MPI_Finalize();
+			exit(0);
+		}
+		if(j >= ynumberAdded) {
+			printf("particle j >= ynumberAdded\n");
+			MPI_Finalize();
+			exit(0);
+		}
+		if(prevj < 0) {
+			printf("particle prevj < 0\n");
+			MPI_Finalize();
+			exit(0);
+		}
+		if(prevj >= ynumberAdded) {
+			printf("particle prevj >= ynumberAdded\n");
+			MPI_Finalize();
+			exit(0);
+		}
+	}
+	if(znumberGeneral > 1) {
+		if(k < 0) {
+			printf("particle k < 0\n");
+			MPI_Finalize();
+			exit(0);
+		}
+		if(k >= znumberAdded) {
+			printf("particle k >= znumberAdded\n");
+			MPI_Finalize();
+			exit(0);
+		}
+		if(prevk < 0) {
+			printf("particle prevk < 0\n");
+			MPI_Finalize();
+			exit(0);
+		}
+		if(prevk >= znumberAdded) {
+			printf("particle prevk >= znumberAdded\n");
+			MPI_Finalize();
+			exit(0);
+		}
+	}
 
 	double xr = (localCoordinates.x + prevLocalCoordinates.x)/2;
 	double yr = (localCoordinates.y + prevLocalCoordinates.y)/2;
@@ -720,6 +792,7 @@ void Simulation::updateDensityParameters() {
 						MPI_Finalize();
 						exit(0);
 					}
+					if(ynumberGeneral > 1){
 					if (curJ < 0) {
 						printf("curJ < 0 %d particle number = %d\n", curJ, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
@@ -738,6 +811,8 @@ void Simulation::updateDensityParameters() {
 						MPI_Finalize();
 						exit(0);
 					}
+					}
+					if(znumberGeneral > 1){
 					if (curK < 0) {
 						printf("curK < 0 %d particle number = %d\n", curK, particle->number);
 						printf("particle.x = %g particle.y = %g particle.z = %g, z[0] = %g z[znumberAdded] = %g", particle->coordinates.x,
@@ -755,6 +830,7 @@ void Simulation::updateDensityParameters() {
 						printf("particle.vx = %g particle.vy = %g particle.vz = %g", velocity.x, velocity.y, velocity.z);
 						MPI_Finalize();
 						exit(0);
+					}
 					}
 					double correlation;
 					switch(Simulation::dimensionType){
