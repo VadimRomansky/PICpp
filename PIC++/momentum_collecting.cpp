@@ -284,7 +284,7 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		bunemanJy[previ][0][prevk] += Fy1*onemWx1*onemWz1;
 		bunemanJy[previ][0][prevk+1] += Fy1*onemWx1*Wz1;
 		bunemanJy[previ+1][0][prevk] += Fy1*Wx1*onemWz1;
-		bunemanJy[previ+1][0][prevj+k] += Fy1*Wx1*Wz1;
+		bunemanJy[previ+1][0][prevk+1] += Fy1*Wx1*Wz1;
 
 		bunemanJx[i][0][k] += Fx2*onemWz2;
 		bunemanJx[i][0][k+1] += Fx2*Wz2;
