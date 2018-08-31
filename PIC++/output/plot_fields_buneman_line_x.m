@@ -19,6 +19,7 @@ Nt = (size(EfieldX, 1)/NE);
 NtB = (size(BfieldX, 1)/NB);
 ynumber = 2;
 znumber = 2;
+%Nt = 10;
 a = 0;
 b = fix(Nt/2);
 c = fix(Nt)-1;
