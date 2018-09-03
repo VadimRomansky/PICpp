@@ -941,11 +941,11 @@ void Simulation::injectNewParticles(int count, ParticleTypeContainer& typeContai
 	int minK = 1 + additionalBinNumber;
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
 	int maxK = znumberAdded - 1 - additionalBinNumber;
-	if (ynumberGeneral == 0) {
+	if (ynumberGeneral == 1) {
 		minJ = 0;
 		maxJ = 1;
 	}
-	if (znumberGeneral == 0) {
+	if (znumberGeneral == 1) {
 		minK = 0;
 		maxK = 1;
 	}
