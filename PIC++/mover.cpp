@@ -657,7 +657,7 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 
 
 		//correctParticlePosition(tempParticle);
-		updateCorrelationMaps(tempParticle);
+		updateCorrelationMaps(&tempParticle);
 
 		if (solverType == BUNEMAN) {
 			E = correlationBunemanEfield(&tempParticle);

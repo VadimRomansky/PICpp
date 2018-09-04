@@ -1008,18 +1008,15 @@ public:
 	void updateCorrelationMaps(Particle* particle);
 	void updateCorrelationMapCell(Particle* particle);
 	void updateCorrelationMapNode(Particle* particle);
-	void updateCorrelationMaps(Particle& particle);
-	void updateCorrelationMapsX(Particle& particle);
-	void updateCorrelationMapsY(Particle& particle);
-	void updateCorrelationMapsZ(Particle& particle);
-	void updateCorrelationMapCell(Particle& particle);
-	void updateCorrelationMapCellX(Particle& particle);
-	void updateCorrelationMapCellY(Particle& particle);
-	void updateCorrelationMapCellZ(Particle& particle);
-	void updateCorrelationMapNode(Particle& particle);
-	void updateCorrelationMapNodeX(Particle& particle);
-	void updateCorrelationMapNodeY(Particle& particle);
-	void updateCorrelationMapNodeZ(Particle& particle);
+	void updateCorrelationMapsX(Particle* particle);
+	void updateCorrelationMapsY(Particle* particle);
+	void updateCorrelationMapsZ(Particle* particle);
+	void updateCorrelationMapCellX(Particle* particle);
+	void updateCorrelationMapCellY(Particle* particle);
+	void updateCorrelationMapCellZ(Particle* particle);
+	void updateCorrelationMapNodeX(Particle* particle);
+	void updateCorrelationMapNodeY(Particle* particle);
+	void updateCorrelationMapNodeZ(Particle* particle);
 
 	Vector3d correlationTempEfield(Particle* particle);
 	Vector3d correlationNewEfield(Particle* particle);
