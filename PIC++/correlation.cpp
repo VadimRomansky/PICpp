@@ -407,24 +407,17 @@ void Simulation::correlationBunemanEBfields(Particle* particle, double*** Ex, do
 					break;
 				}
 
-				double tempEx = Ex[cellI][nodeJ][nodeK];
-				resultE.x = resultE.x + tempEx * correlationEX;
+				resultE.x = resultE.x + Ex[cellI][nodeJ][nodeK] * correlationEX;
 
-				double tempEy = Ey[nodeI][cellJ][nodeK];
-				resultE.y = resultE.y + tempEy * correlationEY;
+				resultE.y = resultE.y + Ey[nodeI][cellJ][nodeK] * correlationEY;
 
-				double tempEz = Ez[nodeI][nodeJ][cellK];
-				resultE.z = resultE.z + tempEz * correlationEZ;
+				resultE.z = resultE.z + Ez[nodeI][nodeJ][cellK] * correlationEZ;
 
-				double tempBx = Bx[nodeI][cellJ][cellK];
-				resultB.x = resultB.x + tempBx * correlationBX;
+				resultB.x = resultB.x + Bx[nodeI][cellJ][cellK] * correlationBX;
 
-				double tempBy = By[cellI][nodeJ][cellK];
-				resultB.y = resultB.y + tempBy * correlationBY;
+				resultB.y = resultB.y + By[cellI][nodeJ][cellK] * correlationBY;
 
-
-				double tempBz = Bz[cellI][cellJ][nodeK];
-				resultB.z = resultB.z + tempBz * correlationBZ;
+				resultB.z = resultB.z + Bz[cellI][cellJ][nodeK] * correlationBZ;
 			}
 		}
 	}

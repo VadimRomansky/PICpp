@@ -58,7 +58,7 @@ const int maxSimpleIterationSolverIterations = 10000;
 const int reduceStepX = 5;
 const int reduceStepY = 1;
 const int reduceStepZ = 1;
-const int splineOrder = 0;
+const int splineOrder = 0; //never use higher for buneman
 const int additionalBinNumber = 1 + (splineOrder/2);
 const int defaulResistiveLayerWidth = 20;
 

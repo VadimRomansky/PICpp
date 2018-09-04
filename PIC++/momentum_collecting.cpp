@@ -70,17 +70,25 @@ void Simulation::tristanUpdateFlux() {
 
 void Simulation::addParticleFluxZigzag(Particle* particle) {
 	Vector3d velocity = particle->getVelocity();
-	Vector3d localCoordinates = particle->coordinates - Vector3d(xgrid[0], ygrid[0], zgrid[0]);
-	Vector3d prevLocalCoordinates = localCoordinates - velocity*deltaT;
 	double fullChargeDensity = particle->charge*particle->weight/cellVolume;
+	Vector3d localCoordinates = particle->coordinates - Vector3d(xgrid[0], ygrid[0], zgrid[0]);
 	const int i = floor(localCoordinates.x/deltaX);
 	const int j = floor(localCoordinates.y/deltaY);
 	const int k = floor(localCoordinates.z/deltaZ);
+	Vector3d prevLocalCoordinates = localCoordinates - velocity*deltaT;
+	//really?
+	if((cartCoord[0] == 0) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) && (i == 1 + additionalBinNumber)) {
+		if(velocity.x > 0) {
+			if(prevLocalCoordinates.x < (1 + additionalBinNumber)*deltaX) {
+				prevLocalCoordinates.x = 2*(1 + additionalBinNumber)*deltaX - prevLocalCoordinates.x;
+			}
+		}
+	}
 	const int previ = floor(prevLocalCoordinates.x/deltaX);
 	const int prevj = floor(prevLocalCoordinates.y/deltaY);
 	const int prevk = floor(prevLocalCoordinates.z/deltaZ);
 
-	if(i < 0) {
+	/*if(i < 0) {
 		printf("particle i < 0\n");
 		MPI_Finalize();
 		exit(0);
@@ -143,7 +151,7 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 			MPI_Finalize();
 			exit(0);
 		}
-	}
+	}*/
 
 	double xr = (localCoordinates.x + prevLocalCoordinates.x)/2;
 	double yr = (localCoordinates.y + prevLocalCoordinates.y)/2;
@@ -160,10 +168,11 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 			zr = max2(zgrid[prevk], zgrid[k]) - zgrid[0];
 		}
 
+		//not optimize on vx because of reflection on the left wall
 		double Fx1 = fullChargeDensity*(xr - prevLocalCoordinates.x)/deltaT;
 		double Fy1 = fullChargeDensity*(yr - prevLocalCoordinates.y)/deltaT;
 		double Fz1 = fullChargeDensity*(zr - prevLocalCoordinates.z)/deltaT;
-		double Fx2 = fullChargeDensity*velocity.x - Fx1;
+		double Fx2 = fullChargeDensity*(localCoordinates.x - xr)/deltaT;
 		double Fy2 = fullChargeDensity*velocity.y - Fy1;
 		double Fz2 = fullChargeDensity*velocity.z - Fz1;
 
@@ -218,7 +227,7 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		double Fx1 = fullChargeDensity*(xr - prevLocalCoordinates.x)/deltaT;
 		double Fy1 = fullChargeDensity*(yr - prevLocalCoordinates.y)/deltaT;
 		double Fz1 = fullChargeDensity*(zr - prevLocalCoordinates.z)/deltaT;
-		double Fx2 = fullChargeDensity*velocity.x - Fx1;
+		double Fx2 = fullChargeDensity*(localCoordinates.x - xr)/deltaT;
 		double Fy2 = fullChargeDensity*velocity.y - Fy1;
 		double Fz2 = fullChargeDensity*velocity.z - Fz1;
 
@@ -263,7 +272,7 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		double Fx1 = fullChargeDensity*(xr - prevLocalCoordinates.x)/deltaT;
 		double Fy1 = fullChargeDensity*(yr - prevLocalCoordinates.y)/deltaT;
 		double Fz1 = fullChargeDensity*(zr - prevLocalCoordinates.z)/deltaT;
-		double Fx2 = fullChargeDensity*velocity.x - Fx1;
+		double Fx2 = fullChargeDensity*(localCoordinates.x - xr)/deltaT;
 		double Fy2 = fullChargeDensity*velocity.y - Fy1;
 		double Fz2 = fullChargeDensity*velocity.z - Fz1;
 
@@ -303,7 +312,7 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		double Fx1 = fullChargeDensity*(xr - prevLocalCoordinates.x)/deltaT;
 		double Fy1 = fullChargeDensity*(yr - prevLocalCoordinates.y)/deltaT;
 		double Fz1 = fullChargeDensity*(zr - prevLocalCoordinates.z)/deltaT;
-		double Fx2 = fullChargeDensity*velocity.x - Fx1;
+		double Fx2 = fullChargeDensity*(localCoordinates.x - xr)/deltaT;
 		double Fy2 = fullChargeDensity*velocity.y - Fy1;
 		double Fz2 = fullChargeDensity*velocity.z - Fz1;
 
@@ -496,11 +505,11 @@ void Simulation::updateElectroMagneticParameters() {
 					for (int k = 0; k < crossBinNumberZ; ++k) {
 						int curI = particle->correlationMapCell.xindex[i];
 						int curJ = particle->correlationMapCell.yindex[j];
-						if(ynumberGeneral == 0) {
+						if(ynumberGeneral == 1) {
 							curJ = 0;
 						}
 						int curK = particle->correlationMapCell.zindex[k];
-						if(znumberGeneral == 0) {
+						if(znumberGeneral == 1) {
 							curK = 0;
 						}
 
@@ -767,11 +776,11 @@ void Simulation::updateDensityParameters() {
 				for (int k = 0; k < crossBinNumberZ; ++k) {
 					int curI = particle->correlationMapCell.xindex[i];
 					int curJ = particle->correlationMapCell.yindex[j];
-					if(ynumberGeneral == 0) {
+					if(ynumberGeneral == 1) {
 						curJ = 0;
 					}
 					int curK = particle->correlationMapCell.zindex[k];
-					if(znumberGeneral == 0) {
+					if(znumberGeneral == 1) {
 						curK = 0;
 					}
 					if (curI < 0) {
