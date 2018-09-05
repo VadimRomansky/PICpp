@@ -25,6 +25,7 @@ ynumber = 2;
 znumber = 2;
 %Nt = 10;
 c = fix(Nt)-1;
+c = 8;
 
 Ex(1:Nx-1) = 0;
 Ey(1:Nx-1) = 0;

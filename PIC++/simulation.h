@@ -1002,6 +1002,7 @@ public:
 
 
 	void evaluateParticlesRotationTensor();
+	void updateParticlesBeta();
 	void injectNewParticles(int count, ParticleTypeContainer& typeContainer, const double& length);
 
 	void updateParticleCorrelationMaps();
@@ -1017,6 +1018,19 @@ public:
 	void updateCorrelationMapNodeX(Particle* particle);
 	void updateCorrelationMapNodeY(Particle* particle);
 	void updateCorrelationMapNodeZ(Particle* particle);
+
+	void updateBunemanCorrelationMaps(Particle* particle);
+	void updateBunemanCorrelationMapCell(Particle* particle);
+	void updateBunemanCorrelationMapNode(Particle* particle);
+	void updateBunemanCorrelationMapsX(Particle* particle);
+	void updateBunemanCorrelationMapsY(Particle* particle);
+	void updateBunemanCorrelationMapsZ(Particle* particle);
+	void updateBunemanCorrelationMapCellX(Particle* particle);
+	void updateBunemanCorrelationMapCellY(Particle* particle);
+	void updateBunemanCorrelationMapCellZ(Particle* particle);
+	void updateBunemanCorrelationMapNodeX(Particle* particle);
+	void updateBunemanCorrelationMapNodeY(Particle* particle);
+	void updateBunemanCorrelationMapNodeZ(Particle* particle);
 
 	Vector3d correlationTempEfield(Particle* particle);
 	Vector3d correlationNewEfield(Particle* particle);

@@ -714,23 +714,19 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 }
 
 void Simulation::moveParticleTristan(Particle* particle) {
-	updateCorrelationMaps(particle);
+	//only for Bunman solver
+	updateBunemanCorrelationMaps(particle);
 
 	Vector3d E;
 	Vector3d B;
 
-	if (solverType == BUNEMAN) {
-		correlationBunemanEBfields(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
-	} else {
-		E = correlationEfield(particle);
-		B = correlationBfield(particle) * (1 - theta) + correlationNewBfield(particle) * theta;
-	}
+	correlationBunemanEBfields(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
 
 	Vector3d dp = E * (particle->charge * deltaT * 0.5);
 	particle->addMomentum(dp);
 	double gamma = particle->gammaFactor();
-	double beta = particle->charge * deltaT / (2.0 * particle->mass * speed_of_light_normalized);
-	double betaShift = beta / gamma;
+	//double beta = particle->charge * deltaT / (2.0 * particle->mass * speed_of_light_normalized);
+	double betaShift = particle->beta / gamma;
 	double f = 1.0 / sqrt(1.0 + betaShift * betaShift * B.norm2());
 	Vector3d momentum = particle->getMomentum();
 	Vector3d tempMomentum = momentum + momentum.vectorMult(B) * (betaShift);
@@ -834,6 +830,13 @@ void Simulation::evaluateParticlesRotationTensor() {
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("evaluating ParticlesRotationTensor time = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}
+}
+
+void Simulation::updateParticlesBeta() {
+	for (int i = 0; i < particles.size(); ++i) {
+		Particle* particle = particles[i];
+		particle->beta = particle->charge * deltaT / (2.0 * particle->mass * speed_of_light_normalized);
 	}
 }
 
@@ -1024,8 +1027,7 @@ void Simulation::exchangeParticles() {
 		}*/
 		if (verbosity > 2) printf("send particles left rank = %d\n", rank);
 		sendLeftReceiveRightParticles(escapedParticlesLeft, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank,
-		                              speed_of_light_normalized);
+		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank, deltaT);
 		MPI_Barrier(cartComm);
 		/*for(int i = 0; i < escapedParticlesRight.size(); ++i) {
 			Particle* particle = escapedParticlesRight[i];
@@ -1033,8 +1035,7 @@ void Simulation::exchangeParticles() {
 		}*/
 		if (verbosity > 2) printf("send particles right rank = %d\n", rank);
 		sendRightReceiveLeftParticles(escapedParticlesRight, tempParticles, reservedParticles, types,
-		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank,
-		                              speed_of_light_normalized);
+		                              typesNumber, boundaryConditionTypeX == PERIODIC, verbosity, cartComm, rank, leftRank, rightRank, deltaT);
 	}
 
 	for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
@@ -1101,8 +1102,7 @@ void Simulation::exchangeParticles() {
 			}*/
 			if (verbosity > 2) printf("send particles front rank = %d\n", rank);
 			sendFrontReceiveBackParticles(escapedParticlesFront, tempParticles, reservedParticles, types,
-			                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank,
-			                              speed_of_light_normalized);
+			                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank, deltaT);
 			MPI_Barrier(cartComm);
 			/*for(int i = 0; i < escapedParticlesBack.size(); ++i) {
 				Particle* particle = escapedParticlesBack[i];
@@ -1110,8 +1110,7 @@ void Simulation::exchangeParticles() {
 			}*/
 			if (verbosity > 2) printf("send particles back rank = %d\n", rank);
 			sendBackReceiveFrontParticles(escapedParticlesBack, tempParticles, reservedParticles, types,
-			                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank,
-			                              speed_of_light_normalized);
+			                              typesNumber, boundaryConditionTypeY == PERIODIC, verbosity, cartComm, rank, frontRank, backRank, deltaT);
 		}
 
 		for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {
@@ -1170,8 +1169,7 @@ void Simulation::exchangeParticles() {
 			}*/
 			if (verbosity > 2) printf("send particles bottom rank = %d\n", rank);
 			sendBottomReceiveTopParticles(escapedParticlesBottom, tempParticles, reservedParticles, types,
-			                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank,
-			                              speed_of_light_normalized);
+			                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank, deltaT);
 			MPI_Barrier(cartComm);
 			/*for(int i = 0; i < escapedParticlesTop.size(); ++i) {
 				Particle* particle = escapedParticlesTop[i];
@@ -1179,8 +1177,7 @@ void Simulation::exchangeParticles() {
 			}*/
 			if (verbosity > 2) printf("send particles top rank = %d\n", rank);
 			sendTopReceiveBottomParticles(escapedParticlesTop, tempParticles, reservedParticles, types,
-			                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank,
-			                              speed_of_light_normalized);
+			                              typesNumber, boundaryConditionTypeZ == PERIODIC, verbosity, cartComm, rank, bottomRank, topRank, deltaT);
 		}
 
 		for (int pcount = 0; pcount < tempParticles.size(); ++pcount) {

@@ -1250,6 +1250,7 @@ void Simulation::updateDeltaT() {
 	}
 	if ((rank == 0) && (verbosity > 0)) printLog("end updating time step\n");
 	//MPI_Barrier(cartComm);
+	updateParticlesBeta();
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("updating deltaT = %g sec\n", procTime / CLOCKS_PER_SEC);

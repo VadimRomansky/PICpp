@@ -71,6 +71,8 @@ public:
 	double weight;
 	ParticleTypes type;
 
+	double beta;
+
 	bool escaped;
 	int crossBoundaryCount;
 
@@ -90,8 +92,8 @@ public:
 	double dy;
 	double dz;
 
-	Particle(int n, double m, int qcount, double q, double w, ParticleTypes type, double x0, double y0,
-                 double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0);
+	Particle(int n, const double& m, int qcount, const double& q, const double& w, ParticleTypes type, const double& x0, const double& y0,
+                 const double& z0, const double& px0, const double& py0, const double& pz0, const double& dx0, const double& dy0, const double& dz0, const double& deltaT);
 	Particle(const Particle& particle);
 	Particle(const Particle* const particle);
 

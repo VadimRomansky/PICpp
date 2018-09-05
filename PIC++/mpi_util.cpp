@@ -5336,7 +5336,7 @@ void collectOutIntegerParameters(std::vector < Particle* >& outParticles, Partic
 }
 
 void addParticlesFromParameters(std::vector < Particle* >& inParticles, std::vector<Particle*>& reservedParticles, ParticleTypeContainer* types, int typesNumber,
-                                int inParticlesNumber[1], int* inIntegerParticlesParameters, double* inDoubleParticlesParameters, double& c) {
+                                int inParticlesNumber[1], int* inIntegerParticlesParameters, double* inDoubleParticlesParameters, double& deltaT) {
 	int bcount = 0;
 	int doubleBcount = 0;
 	for (int i = 0; i < inParticlesNumber[0]; ++i) {
@@ -5424,7 +5424,7 @@ void addParticlesFromParameters(std::vector < Particle* >& inParticles, std::vec
 			particle->crossBoundaryCount = 0;
 		} else {
 			particle = new Particle(number, mass, chargeCount, charge, weight, particleType, x, y, z,
-		                                  initialMomentumX, initialMomentumY, initialMomentumZ, dx, dy, dz);
+		                                  initialMomentumX, initialMomentumY, initialMomentumZ, dx, dy, dz, deltaT);
 		}
 
 
@@ -5449,7 +5449,8 @@ void addParticlesFromParameters(std::vector < Particle* >& inParticles, std::vec
 void sendLeftReceiveRightParticlesGeneral(std::vector < Particle* >& outParticles, std::vector < Particle* >& inParticles,
                                           std::vector<Particle*>& reservedParticles, ParticleTypeContainer* types, int typesNumber, int verbosity, MPI_Comm& cartComm, int rank,
                                           int leftRank, int rightRank, const int numberOfIntegerParameters,
-                                          const int numberOfDoubleParameters, int outParticlesNumber[1], int inParticlesNumber[1], const bool sendingLeft, const bool receivingRight, double& c) {
+                                          const int numberOfDoubleParameters, int outParticlesNumber[1], int inParticlesNumber[1], const bool sendingLeft, const bool receivingRight, double
+                                          & deltaT) {
 	int* outIntegerParticlesParameters;
 	int* inIntegerParticlesParameters;
 	double* outDoubleParticlesParameters;
@@ -5506,7 +5507,7 @@ void sendLeftReceiveRightParticlesGeneral(std::vector < Particle* >& outParticle
 	}
 
 	if (receivingRight) {
-		addParticlesFromParameters(inParticles, reservedParticles, types, typesNumber, inParticlesNumber, inIntegerParticlesParameters, inDoubleParticlesParameters, c);
+		addParticlesFromParameters(inParticles, reservedParticles, types, typesNumber, inParticlesNumber, inIntegerParticlesParameters, inDoubleParticlesParameters, deltaT);
 	}
 
 	if (sendingLeft) {
@@ -5523,7 +5524,8 @@ void sendLeftReceiveRightParticlesGeneral(std::vector < Particle* >& outParticle
 void sendRightReceiveLeftParticlesGeneral(std::vector < Particle* >& outParticles, std::vector < Particle* >& inParticles,
                                           std::vector<Particle*>& reservedParticles, ParticleTypeContainer* types, int typesNumber, int verbosity, MPI_Comm& cartComm, int rank,
                                           int leftRank, int rightRank, const int numberOfIntegerParameters,
-                                          const int numberOfDoubleParameters, int outParticlesNumber[1], int inParticlesNumber[1], const bool sendingRight, const bool receivingLeft, double& c) {
+                                          const int numberOfDoubleParameters, int outParticlesNumber[1], int inParticlesNumber[1], const bool sendingRight, const bool receivingLeft, double
+                                          & deltaT) {
 	int* outIntegerParticlesParameters;
 	int* inIntegerParticlesParameters;
 	double* outDoubleParticlesParameters;
@@ -5580,7 +5582,7 @@ void sendRightReceiveLeftParticlesGeneral(std::vector < Particle* >& outParticle
 	}
 
 	if (receivingLeft) {
-		addParticlesFromParameters(inParticles, reservedParticles, types, typesNumber, inParticlesNumber, inIntegerParticlesParameters, inDoubleParticlesParameters, c);
+		addParticlesFromParameters(inParticles, reservedParticles, types, typesNumber, inParticlesNumber, inIntegerParticlesParameters, inDoubleParticlesParameters, deltaT);
 	}
 	if (sendingRight) {
 		delete[] outDoubleParticlesParameters;
@@ -5595,7 +5597,7 @@ void sendRightReceiveLeftParticlesGeneral(std::vector < Particle* >& outParticle
 
 void sendLeftReceiveRightParticles(std::vector < Particle * >& outParticles, std::vector < Particle * >& inParticles,
                                    std::vector<Particle*>& reservedParticles, ParticleTypeContainer* types, int typesNumber, bool periodic,
-                                   int verbosity, MPI_Comm& cartComm, int rank, int leftRank, int rightRank, double& c) {
+                                   int verbosity, MPI_Comm& cartComm, int rank, int leftRank, int rightRank, double& deltaT) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -5628,12 +5630,12 @@ void sendLeftReceiveRightParticles(std::vector < Particle * >& outParticles, std
 
 	sendLeftReceiveRightParticlesGeneral(outParticles, inParticles, reservedParticles, types, typesNumber, verbosity, cartComm, rank,
 	                                     leftRank, rightRank, numberOfIntegerParameters, numberOfDoubleParameters,
-	                                     outParticlesNumber, inParticlesNumber, sendingLeft, receivingRight, c);
+	                                     outParticlesNumber, inParticlesNumber, sendingLeft, receivingRight, deltaT);
 }
 
 void sendRightReceiveLeftParticles(std::vector < Particle * >& outParticles, std::vector < Particle * >& inParticles,
                                    std::vector<Particle*>& reservedParticles, ParticleTypeContainer* types, int typesNumber, bool periodic,
-                                   int verbosity, MPI_Comm& cartComm, int rank, int leftRank, int rightRank, double& c) {
+                                   int verbosity, MPI_Comm& cartComm, int rank, int leftRank, int rightRank, double& deltaT) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -5669,12 +5671,12 @@ void sendRightReceiveLeftParticles(std::vector < Particle * >& outParticles, std
 
 	sendRightReceiveLeftParticlesGeneral(outParticles, inParticles, reservedParticles, types, typesNumber, verbosity, cartComm, rank,
 	                                     leftRank, rightRank, numberOfIntegerParameters, numberOfDoubleParameters,
-	                                     outParticlesNumber, inParticlesNumber, sendingRight, receivingLeft, c);
+	                                     outParticlesNumber, inParticlesNumber, sendingRight, receivingLeft, deltaT);
 }
 
 void sendFrontReceiveBackParticles(std::vector < Particle * >& outParticles, std::vector < Particle * >& inParticles,
                                    std::vector<Particle*>& reservedParticles, ParticleTypeContainer* types, int typesNumber, bool periodic,
-                                   int verbosity, MPI_Comm& cartComm, int rank, int frontRank, int backRank, double& c) {
+                                   int verbosity, MPI_Comm& cartComm, int rank, int frontRank, int backRank, double& deltaT) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -5707,12 +5709,12 @@ void sendFrontReceiveBackParticles(std::vector < Particle * >& outParticles, std
 
 	sendLeftReceiveRightParticlesGeneral(outParticles, inParticles, reservedParticles, types, typesNumber, verbosity, cartComm, rank,
 	                                     frontRank, backRank, numberOfIntegerParameters, numberOfDoubleParameters,
-	                                     outParticlesNumber, inParticlesNumber, sendingLeft, receivingRight, c);
+	                                     outParticlesNumber, inParticlesNumber, sendingLeft, receivingRight, deltaT);
 }
 
 void sendBackReceiveFrontParticles(std::vector < Particle * >& outParticles, std::vector < Particle * >& inParticles,
                                    std::vector<Particle*>& reservedParticles, ParticleTypeContainer* types, int typesNumber, bool periodic,
-                                   int verbosity, MPI_Comm& cartComm, int rank, int frontRank, int backRank, double& c) {
+                                   int verbosity, MPI_Comm& cartComm, int rank, int frontRank, int backRank, double& deltaT) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -5748,12 +5750,12 @@ void sendBackReceiveFrontParticles(std::vector < Particle * >& outParticles, std
 
 	sendRightReceiveLeftParticlesGeneral(outParticles, inParticles, reservedParticles, types, typesNumber, verbosity, cartComm, rank,
 	                                     frontRank, backRank, numberOfIntegerParameters, numberOfDoubleParameters,
-	                                     outParticlesNumber, inParticlesNumber, sendingRight, receivingLeft, c);
+	                                     outParticlesNumber, inParticlesNumber, sendingRight, receivingLeft, deltaT);
 }
 
 void sendBottomReceiveTopParticles(std::vector < Particle * >& outParticles, std::vector < Particle * >& inParticles,
                                    std::vector<Particle*>& reservedParticles, ParticleTypeContainer* types, int typesNumber, bool periodic,
-                                   int verbosity, MPI_Comm& cartComm, int rank, int bottomRank, int topRank, double& c) {
+                                   int verbosity, MPI_Comm& cartComm, int rank, int bottomRank, int topRank, double& deltaT) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -5786,12 +5788,12 @@ void sendBottomReceiveTopParticles(std::vector < Particle * >& outParticles, std
 
 	sendLeftReceiveRightParticlesGeneral(outParticles, inParticles, reservedParticles, types, typesNumber, verbosity, cartComm, rank,
 	                                     bottomRank, topRank, numberOfIntegerParameters, numberOfDoubleParameters,
-	                                     outParticlesNumber, inParticlesNumber, sendingLeft, receivingRight, c);
+	                                     outParticlesNumber, inParticlesNumber, sendingLeft, receivingRight, deltaT);
 }
 
 void sendTopReceiveBottomParticles(std::vector < Particle * >& outParticles, std::vector < Particle * >& inParticles,
                                    std::vector<Particle*>& reservedParticles, ParticleTypeContainer* types, int typesNumber, bool periodic,
-                                   int verbosity, MPI_Comm& cartComm, int rank, int bottomRank, int topRank, double& c) {
+                                   int verbosity, MPI_Comm& cartComm, int rank, int bottomRank, int topRank, double& deltaT) {
 	int periods[MPI_dim];
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
@@ -5827,7 +5829,7 @@ void sendTopReceiveBottomParticles(std::vector < Particle * >& outParticles, std
 
 	sendRightReceiveLeftParticlesGeneral(outParticles, inParticles, reservedParticles, types, typesNumber, verbosity, cartComm, rank,
 	                                     bottomRank, topRank, numberOfIntegerParameters, numberOfDoubleParameters,
-	                                     outParticlesNumber, inParticlesNumber, sendingRight, receivingLeft, c);
+	                                     outParticlesNumber, inParticlesNumber, sendingRight, receivingLeft, deltaT);
 }
 
 void exchangeLargeVector(double**** vector, int xnumberAdded, int ynumberAdded, int znumberAdded, int lnumber,

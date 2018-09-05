@@ -13,8 +13,8 @@
 #include "util.h"
 #include "paths.h"
 
-Particle::Particle(int n, double m, int qcount, double q, double w, ParticleTypes t, double x0, double y0,
-                   double z0, double px0, double py0, double pz0, double dx0, double dy0, double dz0) {
+Particle::Particle(int n, const double& m, int qcount, const double& q, const double& w, ParticleTypes t, const double& x0, const double& y0,
+                   const double& z0, const double& px0, const double& py0, const double& pz0, const double& dx0, const double& dy0, const double& dz0, const double& deltaT) {
 	number = n;
 
 	mass = m;
@@ -42,6 +42,8 @@ Particle::Particle(int n, double m, int qcount, double q, double w, ParticleType
 	gammaCashed = false;
 	crossBoundaryCount = 0;
 	mc2 = mass;
+
+	beta = charge * deltaT / (2.0 * mass * Simulation::speed_of_light_normalized);
 }
 
 Particle::Particle(const Particle& particle) {
@@ -79,6 +81,8 @@ Particle::Particle(const Particle& particle) {
 	dx = particle.dx;
 	dy = particle.dy;
 	dz = particle.dz;
+
+	beta = particle.beta;
 }
 
 Particle::Particle(const Particle* const particle) {
@@ -115,6 +119,8 @@ Particle::Particle(const Particle* const particle) {
 	dx = particle->dx;
 	dy = particle->dy;
 	dz = particle->dz;
+
+	beta = particle->beta;
 }
 
 double Particle::shapeFunctionX(const double& xvalue) {
