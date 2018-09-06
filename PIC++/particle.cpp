@@ -43,7 +43,8 @@ Particle::Particle(int n, const double& m, int qcount, const double& q, const do
 	crossBoundaryCount = 0;
 	mc2 = mass;
 
-	beta = charge * deltaT / (2.0 * mass * Simulation::speed_of_light_normalized);
+	//beta = charge * deltaT / (2.0 * mass * Simulation::speed_of_light_normalized);
+	beta = charge * deltaT / (2.0 * mass);
 }
 
 Particle::Particle(const Particle& particle) {
@@ -216,11 +217,13 @@ Vector3d Particle::getVelocity() {
 	if (!velocityCashed) {
 		double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
 		//alertNaNOrInfinity(p2, "p2 = NaN in particle::getVelocity\n");
-		if (p2 < relativisticPrecision * mass * mass * Simulation::speed_of_light_normalized_sqr) {
+		//if (p2 < relativisticPrecision * mass * mass * Simulation::speed_of_light_normalized_sqr) {
+		if (p2 < relativisticPrecision * mass * mass) {
 			velocity = momentum / mass;
 		} else {
 			if (!gammaCashed) {
-				gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
+				//gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
+				gamma = sqrt(p2/(mc2*mc2) + 1.0);
 				gammaCashed = true;
 			}
 			velocity = momentum / (mass * gamma);
@@ -235,11 +238,13 @@ double Particle::velocityX() {
 		return velocity.x;
 	}
 	double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
-	if (p2 < relativisticPrecision * mass * mass * Simulation::speed_of_light_normalized_sqr) {
+	//if (p2 < relativisticPrecision * mass * mass * Simulation::speed_of_light_normalized_sqr) {
+	if (p2 < relativisticPrecision * mass * mass) {
 		return momentum.x / mass;
 	}
 	if (!gammaCashed) {
-		gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
+		//gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
+		gamma = sqrt(p2/(mc2*mc2) + 1.0);
 		gammaCashed = true;
 	}
 	return momentum.x / (mass * gamma);
@@ -250,11 +255,13 @@ double Particle::velocityY() {
 		return velocity.y;
 	}
 	double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
-	if (p2 < relativisticPrecision * mass * mass * Simulation::speed_of_light_normalized_sqr) {
+	//if (p2 < relativisticPrecision * mass * mass * Simulation::speed_of_light_normalized_sqr) {
+	if (p2 < relativisticPrecision * mass * mass) {
 		return momentum.y / mass;
 	}
 	if (!gammaCashed) {
-		gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
+		//gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
+		gamma = sqrt(p2/(mc2*mc2) + 1.0);
 		gammaCashed = true;
 	}
 	return momentum.y / (mass * gamma);
@@ -265,11 +272,13 @@ double Particle::velocityZ() {
 		return velocity.z;
 	}
 	double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
-	if (p2 < relativisticPrecision * mass * mass * Simulation::speed_of_light_normalized_sqr) {
+	//if (p2 < relativisticPrecision * mass * mass * Simulation::speed_of_light_normalized_sqr) {
+	if (p2 < relativisticPrecision * mass * mass) {
 		return momentum.z / mass;
 	}
 	if (!gammaCashed) {
-		gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
+		//gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
+		gamma = sqrt(p2/(mc2*mc2) + 1.0);
 		gammaCashed = true;
 	}
 	return momentum.z / (mass * gamma);
@@ -278,7 +287,8 @@ double Particle::velocityZ() {
 void Particle::addVelocity(const Vector3d& v) {
 	velocityCashed = false;
 	gammaCashed = false;
-	if (v.norm() > Simulation::speed_of_light_normalized) {
+	//if (v.norm() > Simulation::speed_of_light_normalized) {
+	if (v.norm() > 1.0) {
 		printf("ERROR v > c in particle::addVelocity\n");
 		std::string outputDir = outputDirectory;
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
@@ -298,9 +308,11 @@ void Particle::addVelocity(const Vector3d& v) {
 
 	Vector3d rotatedV = (*inverse) * getVelocity();
 
-	gamma = 1 / (sqrt(1 - v.scalarMult(v) / Simulation::speed_of_light_normalized_sqr));
+	//gamma = 1 / (sqrt(1 - v.scalarMult(v) / Simulation::speed_of_light_normalized_sqr));
+	gamma = 1 / (sqrt(1 - v.scalarMult(v)));
 	double vnorm = v.norm();
-	double denominator = 1 + vnorm * rotatedV.z / Simulation::speed_of_light_normalized_sqr;
+	//double denominator = 1 + vnorm * rotatedV.z / Simulation::speed_of_light_normalized_sqr;
+	double denominator = 1 + vnorm * rotatedV.z;
 
 	Vector3d shiftedV;
 
@@ -319,10 +331,12 @@ void Particle::addVelocity(const Vector3d& v) {
 }
 
 void Particle::setMomentumByV(const Vector3d& v) {
-	if (v.norm() > Simulation::speed_of_light_normalized) {
+	//if (v.norm() > Simulation::speed_of_light_normalized) {
+	if (v.norm() > 1.0) {
 		printf("ERROR v > c in particle::setMomentumByV\n");
 		printf("v = %g\n", v.norm());
-		printf("c = %g\n", Simulation::speed_of_light_normalized);
+		//printf("c = %g\n", Simulation::speed_of_light_normalized);
+		printf("c = %g\n", 1.0);
 		std::string outputDir = outputDirectory;
 		//FILE* errorLogFile = fopen("./output/errorLog.dat", "w");
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
@@ -334,22 +348,27 @@ void Particle::setMomentumByV(const Vector3d& v) {
 	velocity = v;
 	velocityCashed = true;
 	double v2 = v.scalarMult(v);
-	if (v2 < relativisticPrecision * Simulation::speed_of_light_normalized_sqr) {
+	//if (v2 < relativisticPrecision * Simulation::speed_of_light_normalized_sqr) {
+	if (v2 < relativisticPrecision) {
 		momentum = v * mass;
 		return;
 	}
-	gamma = 1 / sqrt(1 - v2 / Simulation::speed_of_light_normalized_sqr);
+	//gamma = 1 / sqrt(1 - v2 / Simulation::speed_of_light_normalized_sqr);
+	gamma = 1 / sqrt(1 - v2);
 	gammaCashed = true;
 	momentum = v * (mass * gamma);
 }
 
 Vector3d Particle::evaluateVelocity(const Vector3d& p, const double& m) {
 	double p2 = p.x * p.x + p.y * p.y + p.z * p.z;
-	double mc2 = m * Simulation::speed_of_light_normalized_sqr;
-	if (p2 < relativisticPrecision * m * m * Simulation::speed_of_light_normalized_sqr) {
+	//double mc2 = m * Simulation::speed_of_light_normalized_sqr;
+	double mc2 = m;
+	//if (p2 < relativisticPrecision * m * m * Simulation::speed_of_light_normalized_sqr) {
+	if (p2 < relativisticPrecision * m * m) {
 		return p / m;
 	} else {
-		double g = sqrt(p2 * Simulation::speed_of_light_normalized_sqr + mc2 * mc2) / mc2;;
+		//double g = sqrt(p2 * Simulation::speed_of_light_normalized_sqr + mc2 * mc2) / mc2;;
+		double g = sqrt(p2 + mc2 * mc2) / mc2;;
 
 		return p / (m * g);
 	}
@@ -358,7 +377,8 @@ Vector3d Particle::evaluateVelocity(const Vector3d& p, const double& m) {
 double Particle::gammaFactor() {
 	if (!gammaCashed) {
 		double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
-		gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
+		//gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
+		gamma = sqrt(p2/(mc2*mc2) + 1.0);
 		//alertNaNOrInfinity(gamma, "gamma = NaN");
 		gammaCashed = true;
 	}

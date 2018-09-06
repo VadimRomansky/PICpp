@@ -41,8 +41,8 @@ public:
 	static double massOxygen;
 	static double massSilicon;
 
-	static double speed_of_light_normalized;
-	static double speed_of_light_normalized_sqr;
+	//static double speed_of_light_normalized;
+	//static double speed_of_light_normalized_sqr;
 	static double kBoltzman_normalized;
 	static double electron_charge_normalized;
 	static DimensionType dimensionType;

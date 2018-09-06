@@ -13,7 +13,7 @@ class MatrixElement;
 
 void outputDistribution(const char *outFileName, std::vector<Particle *> &particles, int particleType, double plasma_period,
                         double gyroradius, int verbosity, bool newFile);
-void outputDistributionShiftedSystem(const char* outFileName, std::vector<Particle *>& particles, Vector3d& shiftV, double& speed_of_light_normalized, int particleType, double gyroradius,
+void outputDistributionShiftedSystem(const char* outFileName, std::vector<Particle *>& particles, Vector3d& shiftV, const double& speed_of_light_normalized, int particleType, double gyroradius,
                                      double plasma_period, int verbosity, bool newFile);
 //void outputAnisotropy(const char *outFileName, Simulation *simulation, int particleType, double gyroradius,
 //                      double plasma_period);

@@ -972,8 +972,8 @@ void Simulation::updateDensityParameters() {
 						/*particleBulkVelocities[t][i][j][k] = particleBulkVelocities[t][i][j][k] / (particleConcentrations[t][i][j][k] * types[t].mass);
 						double gamma = sqrt((particleBulkVelocities[t][i][j][k].scalarMult(
 							particleBulkVelocities[t][i][j][k]) / speed_of_light_normalized_sqr) + 1);*/
-						particleBulkVelocities[t][i][j][k] = particleBulkVelocities[t][i][j][k] * (speed_of_light_normalized_sqr /
-							particleEnergies[t][i][j][k]);
+						//particleBulkVelocities[t][i][j][k] = particleBulkVelocities[t][i][j][k] * (speed_of_light_normalized_sqr /particleEnergies[t][i][j][k]);
+						particleBulkVelocities[t][i][j][k] = particleBulkVelocities[t][i][j][k] / particleEnergies[t][i][j][k];
 					} else {
 						particleBulkVelocities[t][i][j][k] = particleBulkVelocities[t][i][j][k] = Vector3d(0, 0, 0);
 					}
@@ -1114,7 +1114,8 @@ void Simulation::updateBunemanChargeDensity() {
 void Simulation::updateExternalFlux() {
 	double alfvenV;
 	if (density <= 1E-100) {
-		alfvenV = speed_of_light_normalized;
+		//alfvenV = speed_of_light_normalized;
+		alfvenV =1.0;
 	} else {
 		alfvenV = B0.norm() / sqrt(4 * pi * density);
 	}

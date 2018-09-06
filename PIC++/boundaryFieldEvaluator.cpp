@@ -282,7 +282,8 @@ void RandomTurbulenceBoundaryFieldEvaluator::prepareE(const double& t) {
 							double localB2 = Bturbulent * sin(kmultr + phase2);
 							Vector3d localB = Vector3d(-sinTheta * localB1, cosTheta * cosPhi * localB1 - sinTheta * localB2,
 					                           cosTheta * sinPhi * localB1 - cosTheta * localB2);
-							Efield[j][k] = Efield[j][k] - V.vectorMult(localB) / (simulation->speed_of_light_normalized);
+							//Efield[j][k] = Efield[j][k] - V.vectorMult(localB) / (simulation->speed_of_light_normalized);
+							Efield[j][k] = Efield[j][k] - V.vectorMult(localB);
 						}
 					}
 				}

@@ -233,7 +233,8 @@ void Simulation::moveParticle(Particle* particle) {
 	double etaDeltaT = eta * deltaT;
 	double restEtaDeltaT = (1.0 - eta) * deltaT;
 
-	newMomentum += (E + (velocity.vectorMult(B) / (speed_of_light_normalized))) * particle->charge * deltaT;
+	//newMomentum += (E + (velocity.vectorMult(B) / (speed_of_light_normalized))) * particle->charge * deltaT;
+	newMomentum += (E + (velocity.vectorMult(B))) * particle->charge * deltaT;
 
 	newVelocity = Particle::evaluateVelocity(newMomentum, particle->mass);
 
@@ -370,8 +371,8 @@ void Simulation::moveParticle(Particle* particle) {
 		//tempParticle.addMomentum((E + (middleVelocity.vectorMult(B) / (speed_of_light_normalized))) * (particle->charge *deltaT));
 		//newMomentum = tempParticle.getMomentum();
 
-		newMomentum = oldMomentum +
-			(E + (middleVelocity.vectorMult(B) / (speed_of_light_normalized))) * (particle->charge * deltaT);
+		//newMomentum = oldMomentum +(E + (middleVelocity.vectorMult(B) / (speed_of_light_normalized))) * (particle->charge * deltaT);
+		newMomentum = oldMomentum +(E + middleVelocity.vectorMult(B)) * (particle->charge * deltaT);
 
 		error = (prevMomentum - newMomentum).norm();
 		coordinatesError = (prevCoordinates - newCoordinates).norm();
@@ -390,8 +391,8 @@ void Simulation::moveParticle(Particle* particle) {
 
 	//double newGamma = particle->gammaFactor(speed_of_light_normalized);
 
-	double deltaGammaTheor = particle->charge * deltaT * E.scalarMult(middleVelocity) / (particle->mass *
-		speed_of_light_normalized_sqr);
+	//double deltaGammaTheor = particle->charge * deltaT * E.scalarMult(middleVelocity) / (particle->mass *speed_of_light_normalized_sqr);
+	double deltaGammaTheor = particle->charge * deltaT * E.scalarMult(middleVelocity) / (particle->mass);
 	//double theorNewGamma = oldGamma + deltaGammaTheor;
 	/*if(theorNewGamma - 1 > relativisticPrecision){
 		double newTheorMomentumNorm = particle->mass*speed_of_light_normalized*sqrt(theorNewGamma*theorNewGamma - 1.0);
@@ -539,7 +540,8 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 	//tempParticle.addMomentum((E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT);
 
 
-	tempParticle.addMomentum((E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT / N);
+	//tempParticle.addMomentum((E + (velocity.vectorMult(B) / speed_of_light_normalized)) * particle->charge * deltaT / N);
+	tempParticle.addMomentum((E + velocity.vectorMult(B)) * particle->charge * deltaT / N);
 	//alertNaNOrInfinity(E.x, "E.x = Nan in move particle\n");
 
 	newVelocity = tempParticle.getVelocity();
@@ -588,7 +590,8 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 	Vector3d electricVelocityShift = (Eperp * (2 * eta * beta / gamma));
 	//velocityHat += electricVelocityShift;
 
-	if (velocityHat.norm() > speed_of_light_normalized) {
+	//if (velocityHat.norm() > speed_of_light_normalized) {
+	if (velocityHat.norm() > 1.0) {
 		//printf("velocity Hat norm > c\n");
 		//MPI_Finalize();
 		//exit(0);
@@ -672,8 +675,8 @@ void Simulation::moveParticle(Particle* particle, int cur, int N) {
 		//E = E0;
 		//B = B0;
 
-		tempParticle.addMomentum(
-			(E + (middleVelocity.vectorMult(B) / speed_of_light_normalized)) * (particle->charge * deltaT / N));
+		//tempParticle.addMomentum((E + (middleVelocity.vectorMult(B) / speed_of_light_normalized)) * (particle->charge * deltaT / N));
+		tempParticle.addMomentum((E + middleVelocity.vectorMult(B)) * (particle->charge * deltaT / N));
 		newVelocity = tempParticle.getVelocity();
 		newMomentum = tempParticle.getMomentum();
 		//error = (prevVelocity - newVelocity).norm();
@@ -836,7 +839,8 @@ void Simulation::evaluateParticlesRotationTensor() {
 void Simulation::updateParticlesBeta() {
 	for (int i = 0; i < particles.size(); ++i) {
 		Particle* particle = particles[i];
-		particle->beta = particle->charge * deltaT / (2.0 * particle->mass * speed_of_light_normalized);
+		//particle->beta = particle->charge * deltaT / (2.0 * particle->mass * speed_of_light_normalized);
+		particle->beta = particle->charge * deltaT / (2.0 * particle->mass);
 	}
 }
 
@@ -845,10 +849,12 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(const double& beta, Vector3d& v
 	Matrix3d result = Matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	//double G = ((beta * (EField.scalarMult(velocity)) / (speed_of_light_normalized_sqr * speed_of_light_correction_sqr)) + gamma);
-	double G = ((beta * (EField.scalarMult(velocity)) / (speed_of_light_normalized_sqr)) + gamma);
+	//double G = ((beta * (EField.scalarMult(velocity)) / (speed_of_light_normalized_sqr)) + gamma);
+	double G = ((beta * EField.scalarMult(velocity)) + gamma);
 	double betaShift = beta / G;
 	//double beta2c = betaShift * betaShift / (speed_of_light_normalized_sqr * speed_of_light_correction_sqr);
-	double beta2c = betaShift * betaShift / (speed_of_light_normalized_sqr);
+	//double beta2c = betaShift * betaShift / (speed_of_light_normalized_sqr);
+	double beta2c = betaShift * betaShift;
 	double denominator = G * (1 + beta2c * BField.scalarMult(BField));
 
 	for (int i = 0; i < 3; i++) {
@@ -858,7 +864,8 @@ Matrix3d Simulation::evaluateAlphaRotationTensor(const double& beta, Vector3d& v
 			for (int l = 0; l < 3; ++l) {
 				if (LeviCivita[j][i][l] != 0) {
 					//result.matrix[i][j] -= (betaShift * LeviCivita[j][i][l] * BField[l] / (speed_of_light_normalized *speed_of_light_correction));
-					result.matrix[i][j] -= (betaShift * LeviCivita[j][i][l] * BField[l] / (speed_of_light_normalized));
+					//result.matrix[i][j] -= (betaShift * LeviCivita[j][i][l] * BField[l] / (speed_of_light_normalized));
+					result.matrix[i][j] -= (betaShift * LeviCivita[j][i][l] * BField[l]);
 					//result.matrix[i][j] += (betaShift * LeviCivita[j][k][l] * Kronecker.matrix[i][k] * BField[l] / speed_of_light_normalized);
 				}
 			}

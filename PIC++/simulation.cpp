@@ -25,8 +25,8 @@ double Simulation::massHelium3;
 double Simulation::massOxygen;
 double Simulation::massSilicon;
 
-double Simulation::speed_of_light_normalized;
-double Simulation::speed_of_light_normalized_sqr;
+//double Simulation::speed_of_light_normalized;
+//double Simulation::speed_of_light_normalized_sqr;
 double Simulation::kBoltzman_normalized;
 double Simulation::electron_charge_normalized;
 DimensionType Simulation::dimensionType;
@@ -436,7 +436,7 @@ void Simulation::output() {
 	Vector3d shockWaveV = V0 / 3;
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution protons shock wave\n");
-	outputDistributionShiftedSystem((outputDir + "distribution_protons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
+	/*outputDistributionShiftedSystem((outputDir + "distribution_protons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
 	                                speed_of_light_normalized, PROTON, scaleFactor,
 	                                plasma_period, verbosity, multiplyFileOutput);
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution electrons shock wave\n");
@@ -450,6 +450,21 @@ void Simulation::output() {
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution positrons shock wave\n");
 	outputDistributionShiftedSystem((outputDir + "distribution_positrons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
 	                                speed_of_light_normalized, POSITRON, scaleFactor,
+	                                plasma_period, verbosity, multiplyFileOutput);*/
+	outputDistributionShiftedSystem((outputDir + "distribution_protons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
+	                                1.0, PROTON, scaleFactor,
+	                                plasma_period, verbosity, multiplyFileOutput);
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution electrons shock wave\n");
+	outputDistributionShiftedSystem((outputDir + "distribution_electrons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
+	                                1.0, ELECTRON, scaleFactor,
+	                                plasma_period, verbosity, multiplyFileOutput);
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution alphas shock wave\n");
+	outputDistributionShiftedSystem((outputDir + "distribution_alphas_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
+	                                1.0, ALPHA, scaleFactor,
+	                                plasma_period, verbosity, multiplyFileOutput);
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution positrons shock wave\n");
+	outputDistributionShiftedSystem((outputDir + "distribution_positrons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
+	                                1.0, POSITRON, scaleFactor,
 	                                plasma_period, verbosity, multiplyFileOutput);
 
 	int coordX = getCartCoordWithAbsoluteIndexX(xnumberGeneral / 2);
@@ -1038,7 +1053,8 @@ void Simulation::updateDeltaT() {
 
 	double delta = min2(deltaX, min2(deltaY, deltaZ));
 	//double delta = deltaX;
-	deltaT = min2(deltaT, timeEpsilonKourant * delta / speed_of_light_normalized);
+	//deltaT = min2(deltaT, timeEpsilonKourant * delta / speed_of_light_normalized);
+	deltaT = min2(deltaT, timeEpsilonKourant * delta);
 	if ((rank == 0) && (verbosity > 1)) printLog("dx/c\n");
 	if (particles.size() > 0) {
 		double derEmax = 0;
@@ -1140,7 +1156,8 @@ void Simulation::updateDeltaT() {
 
 		double concentration = density / (massProton + massElectron);
 
-		double gamma = 1.0/sqrt(1.0 - V0.norm2()/speed_of_light_normalized_sqr);
+		//double gamma = 1.0/sqrt(1.0 - V0.norm2()/speed_of_light_normalized_sqr);
+		double gamma = 1.0/sqrt(1.0 - V0.norm2());
 
 		omegaPlasmaProton = sqrt(
 			4 * pi * types[1].concentration * electron_charge_normalized * electron_charge_normalized / (massProton*gamma));
@@ -1154,8 +1171,10 @@ void Simulation::updateDeltaT() {
 		double omegaCapture = sqrt(electron_charge_normalized * derEmax / massElectron);
 
 
-		omegaGyroProton = electron_charge_normalized * B / (massProton * speed_of_light_normalized);
-		omegaGyroElectron = electron_charge_normalized * B / (massElectron * speed_of_light_normalized);
+		//omegaGyroProton = electron_charge_normalized * B / (massProton * speed_of_light_normalized);
+		omegaGyroProton = electron_charge_normalized * B / (massProton);
+		//omegaGyroElectron = electron_charge_normalized * B / (massElectron * speed_of_light_normalized);
+		omegaGyroElectron = electron_charge_normalized * B / (massElectron);
 
 
 		if (timeEpsilonPlasma / omegaPlasmaTotal < deltaT) {
@@ -1177,24 +1196,24 @@ void Simulation::updateDeltaT() {
 		//if ((rank == 0) && writeLog)) printLog("evaluzted omega\n");
 
 		if (B > 0) {
-			if (timeEpsilonFields * gamma * massElectron * speed_of_light_normalized / (electron_charge_normalized * B) < deltaT
-			) {
+			//if (timeEpsilonFields * gamma * massElectron * speed_of_light_normalized / (electron_charge_normalized * B) < deltaT) {
+			if (timeEpsilonFields * gamma * massElectron / (electron_charge_normalized * B) < deltaT) {
 				if (rank == 0) {
 					printf("gyro frequency time limitation\n");
 				}
 			}
-			deltaT = min2(deltaT,
-			              timeEpsilonFields * gamma * massElectron * speed_of_light_normalized / (electron_charge_normalized * B
-			              ));
+			//deltaT = min2(deltaT,timeEpsilonFields * gamma * massElectron * speed_of_light_normalized / (electron_charge_normalized * B));
+			deltaT = min2(deltaT,timeEpsilonFields * gamma * massElectron / (electron_charge_normalized * B));
 		}
 		if (E > 0) {
-			if (timeEpsilonFields * massElectron * speed_of_light_normalized / (electron_charge_normalized * E) < deltaT) {
+			//if (timeEpsilonFields * massElectron * speed_of_light_normalized / (electron_charge_normalized * E) < deltaT) {
+			if (timeEpsilonFields * massElectron / (electron_charge_normalized * E) < deltaT) {
 				if (rank == 0) {
 					printf("electric acceleration time limitation\n");
 				}
 			}
-			deltaT = min2(deltaT,
-			              timeEpsilonFields * massElectron * speed_of_light_normalized / (electron_charge_normalized * E));
+			//deltaT = min2(deltaT,timeEpsilonFields * massElectron * speed_of_light_normalized / (electron_charge_normalized * E));
+			deltaT = min2(deltaT,timeEpsilonFields * massElectron / (electron_charge_normalized * E));
 		}
 
 		if (omegaCapture > 0) {
@@ -1274,8 +1293,8 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x,
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
-		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity().norm() / speed_of_light_normalized));
+		//fprintf(errorLogFile, "particle.v/c = %15.10g\n",(particle.getVelocity().norm() / speed_of_light_normalized));
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n",(particle.getVelocity().norm()));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1293,8 +1312,8 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x,
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
-		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity().norm() / speed_of_light_normalized));
+		//fprintf(errorLogFile, "particle.v/c = %15.10g\n",(particle.getVelocity().norm() / speed_of_light_normalized));
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n",(particle.getVelocity().norm()));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1307,8 +1326,8 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x,
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
-		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity().norm() / speed_of_light_normalized));
+		//fprintf(errorLogFile, "particle.v/c = %15.10g\n",(particle.getVelocity().norm() / speed_of_light_normalized));
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n",(particle.getVelocity().norm()));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1321,8 +1340,8 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x,
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
-		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity().norm() / speed_of_light_normalized));
+		//fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.getVelocity().norm() / speed_of_light_normalized));
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.getVelocity().norm()));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1335,8 +1354,8 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x,
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
-		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity().norm() / speed_of_light_normalized));
+		//fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.getVelocity().norm() / speed_of_light_normalized));
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.getVelocity().norm()));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1349,8 +1368,8 @@ void Simulation::checkParticleInBox(Particle& particle) {
 		fprintf(errorLogFile, "particle.coordinates = %15.10g %15.10g %15.10g\n", particle.coordinates.x,
 		        particle.coordinates.y, particle.coordinates.z);
 		fprintf(errorLogFile, "particle.n = %d\n", particle.number);
-		fprintf(errorLogFile, "particle.v/c = %15.10g\n",
-		        (particle.getVelocity().norm() / speed_of_light_normalized));
+		//fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.getVelocity().norm() / speed_of_light_normalized));
+		fprintf(errorLogFile, "particle.v/c = %15.10g\n", (particle.getVelocity().norm()));
 		fclose(errorLogFile);
 		MPI_Finalize();
 		exit(0);
@@ -1442,10 +1461,10 @@ void Simulation::updateTheoreticalEnergy() {
 				Bleft = Bfield[1 + additionalBinNumber][j][k];
 				Bright = Bfield[xnumberAdded - additionalBinNumber - 1][j][k];
 			}
-			theoreticalEnergy -= (Eright.vectorMult(Bright).x * deltaT * speed_of_light_normalized * deltaZ * deltaY * sqr(
-				scaleFactor / plasma_period)) / (4 * pi);
-			theoreticalEnergy += (Eleft.vectorMult(Bleft).x * deltaT * speed_of_light_normalized * deltaZ * deltaY * sqr(
-				scaleFactor / plasma_period)) / (4 * pi);
+			//theoreticalEnergy -= (Eright.vectorMult(Bright).x * deltaT * speed_of_light_normalized * deltaZ * deltaY * sqr(scaleFactor / plasma_period)) / (4 * pi);
+			theoreticalEnergy -= (Eright.vectorMult(Bright).x * deltaT * deltaZ * deltaY * sqr(scaleFactor / plasma_period)) / (4 * pi);
+			//theoreticalEnergy += (Eleft.vectorMult(Bleft).x * deltaT * speed_of_light_normalized * deltaZ * deltaY * sqr(scaleFactor / plasma_period)) / (4 * pi);
+			theoreticalEnergy += (Eleft.vectorMult(Bleft).x * deltaT * deltaZ * deltaY * sqr(scaleFactor / plasma_period)) / (4 * pi);
 
 			theoreticalMomentum -=
 				(Eright.vectorMult(Bright)) * deltaT * deltaZ * deltaY *
@@ -1563,8 +1582,10 @@ void Simulation::updateEnergy() {
 						B = Bfield[i][j][k];
 					}
 
-					globalMomentum += (E.vectorMult(B) / (4 * pi * speed_of_light_normalized)) * volumeB();
-					electromagneticMomentum += (E.vectorMult(B) / (4 * pi * speed_of_light_normalized)) * volumeB();
+					//globalMomentum += (E.vectorMult(B) / (4 * pi * speed_of_light_normalized)) * volumeB();
+					globalMomentum += (E.vectorMult(B) / (4 * pi)) * volumeB();
+					//electromagneticMomentum += (E.vectorMult(B) / (4 * pi * speed_of_light_normalized)) * volumeB();
+					electromagneticMomentum += (E.vectorMult(B) / (4 * pi)) * volumeB();
 				}
 			}
 		}

@@ -38,7 +38,8 @@ void Simulation::tristanEvaluateBhalfStep() {
 		maxK = 1;
 	}
 
-	double cdtd2 = speed_of_light_normalized*deltaT/2.0;
+	//double cdtd2 = speed_of_light_normalized*deltaT/2.0;
+	double cdtd2 = deltaT/2.0;
 
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
@@ -98,7 +99,8 @@ void Simulation::tristanEvaluateE() {
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
-				bunemanEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBx(i, j, k) - four_pi * bunemanJx[i][j][k]) * deltaT;
+				//bunemanEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBx(i, j, k) - four_pi * bunemanJx[i][j][k]) * deltaT;
+				bunemanEx[i][j][k] = bunemanEx[i][j][k] + (evaluateBunemanRotBx(i, j, k) - four_pi * bunemanJx[i][j][k]) * deltaT;
 			}
 		}
 	}
@@ -108,7 +110,8 @@ void Simulation::tristanEvaluateE() {
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
-				bunemanEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBy(i, j, k) - four_pi *bunemanJy[i][j][k]) * deltaT;
+				//bunemanEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBy(i, j, k) - four_pi *bunemanJy[i][j][k]) * deltaT;
+				bunemanEy[i][j][k] = bunemanEy[i][j][k] + (evaluateBunemanRotBy(i, j, k) - four_pi *bunemanJy[i][j][k]) * deltaT;
 				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
 					bunemanEy[i][j][k] = 0;
 				}
@@ -127,7 +130,8 @@ void Simulation::tristanEvaluateE() {
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k < maxK; ++k) {
-				bunemanEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBz(i, j, k) - four_pi * bunemanJz[i][j][k]) * deltaT;
+				//bunemanEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBz(i, j, k) - four_pi * bunemanJz[i][j][k]) * deltaT;
+				bunemanEz[i][j][k] = bunemanEz[i][j][k] + (evaluateBunemanRotBz(i, j, k) - four_pi * bunemanJz[i][j][k]) * deltaT;
 				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
 					bunemanEz[i][j][k] = 0;
 				}
@@ -243,7 +247,8 @@ void Simulation::evaluateElectricField() {
 				omega2 += 4 * pi * types[i].concentration * types[i].charge * types[i].charge / types[i].mass;
 			}
 
-			double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
+			//double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
+			double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0));
 			double omega = sqrt(omega2 / (gamma * gamma * gamma));
 			double a = cos(omega * (time + theta * deltaT));
 			for (int i = 0; i < xnumberAdded; ++i) {
@@ -372,7 +377,8 @@ void Simulation::evaluateExplicitDerivative() {
 	for (int i = 1; i < xnumberAdded; ++i) {
 		for (int j = 1; j < ynumberAdded; ++j) {
 			for (int k = 1; k < znumberAdded; ++k) {
-				rotB[i][j][k] = evaluateRotB(i, j, k) * speed_of_light_normalized;
+				//rotB[i][j][k] = evaluateRotB(i, j, k) * speed_of_light_normalized;
+				rotB[i][j][k] = evaluateRotB(i, j, k);
 				Ederivative[i][j][k] = rotB[i][j][k] -
 					(electricFlux[i][j][k] * 4 * pi);
 				if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
@@ -876,7 +882,8 @@ void Simulation::createInternalECEquationZ(int i, int j, int k) {
 }
 
 void Simulation::createInternalEquationX(int i, int j, int k) {
-	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT) * speed_of_light_correction_sqr;
+	//double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT) * speed_of_light_correction_sqr;
+	double c_theta_deltaT2 = sqr(theta * deltaT) * speed_of_light_correction_sqr;
 	//c_theta_deltaT2 = 0;
 	double element = 1.0 - dielectricTensor[i][j][k].matrix[0][0];
 	if (isInResistiveLayer(i, j, k)) {
@@ -1501,7 +1508,8 @@ void Simulation::createInternalEquationX(int i, int j, int k) {
 }
 
 void Simulation::createInternalEquationY(int i, int j, int k) {
-	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT) * speed_of_light_correction_sqr;
+	//double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT) * speed_of_light_correction_sqr;
+	double c_theta_deltaT2 = sqr(theta * deltaT) * speed_of_light_correction_sqr;
 	//c_theta_deltaT2 = 0;
 	double element = 1.0 - dielectricTensor[i][j][k].matrix[1][1];
 	if (isInResistiveLayer(i, j, k)) {
@@ -2063,7 +2071,8 @@ void Simulation::createInternalEquationY(int i, int j, int k) {
 }
 
 void Simulation::createInternalEquationZ(int i, int j, int k) {
-	double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT) * speed_of_light_correction_sqr;
+	//double c_theta_deltaT2 = sqr(speed_of_light_normalized * theta * deltaT) * speed_of_light_correction_sqr;
+	double c_theta_deltaT2 = sqr(theta * deltaT) * speed_of_light_correction_sqr;
 	double element = 1.0 - dielectricTensor[i][j][k].matrix[2][2];
 	//c_theta_deltaT2 = 0;
 	if (isInResistiveLayer(i, j, k)) {
@@ -2641,11 +2650,10 @@ void Simulation::createInternalEquation(int i, int j, int k) {
 	//alertNaNOrInfinity(gradDensity.y, "gradDensity y = NaN in create internal\n");
 	//alertNaNOrInfinity(gradDensity.z, "gradDensity z = NaN in create internal\n");
 	if (solverType == IMPLICIT) {
-		rightPart = rightPart +
-			(rotorB * speed_of_light_normalized * speed_of_light_correction - (electricFlux[i][j][k] * 4 * pi)) * (theta * deltaT
-			) -
-			(gradDensity * speed_of_light_normalized_sqr * speed_of_light_correction_sqr * theta * theta * deltaT * deltaT * 4 *
-				pi);
+		/*rightPart = rightPart +(rotorB * speed_of_light_normalized * speed_of_light_correction - (electricFlux[i][j][k] * 4 * pi)) * (theta * deltaT) -
+			(gradDensity * speed_of_light_normalized_sqr * speed_of_light_correction_sqr * theta * theta * deltaT * deltaT * 4 *pi);*/
+		rightPart = rightPart +(rotorB  * speed_of_light_correction - (electricFlux[i][j][k] * 4 * pi)) * (theta * deltaT) -
+			(gradDensity * speed_of_light_correction_sqr * theta * theta * deltaT * deltaT * 4 *pi);
 	} else {
 		printf("wrong soler type in create internal equation\n");
 		MPI_Finalize();
@@ -2720,11 +2728,11 @@ void Simulation::evaluateMagneticField() {
 				for (int k = 0; k < znumberAdded; ++k) {
 					rotE[i][j][k] = evaluateRotTempE(i, j, k);
 					if (isInResistiveLayer(i, j, k)) {
-						newBfield[i][j][k] = (Bfield[i][j][k] + B0 * (fakeCondactivity * deltaT) - (rotE[i][j][k]) * (
-							speed_of_light_normalized * speed_of_light_correction * deltaT)) / (1 + fakeCondactivity * deltaT);
+						//newBfield[i][j][k] = (Bfield[i][j][k] + B0 * (fakeCondactivity * deltaT) - (rotE[i][j][k]) * (speed_of_light_normalized * speed_of_light_correction * deltaT)) / (1 + fakeCondactivity * deltaT);
+						newBfield[i][j][k] = (Bfield[i][j][k] + B0 * (fakeCondactivity * deltaT) - (rotE[i][j][k]) * (speed_of_light_correction * deltaT)) / (1 + fakeCondactivity * deltaT);
 					} else {
-						newBfield[i][j][k] = Bfield[i][j][k] - (rotE[i][j][k]) * (speed_of_light_normalized * speed_of_light_correction *
-							deltaT);
+						//newBfield[i][j][k] = Bfield[i][j][k] - (rotE[i][j][k]) * (speed_of_light_normalized * speed_of_light_correction *deltaT);
+						newBfield[i][j][k] = Bfield[i][j][k] - (rotE[i][j][k]) * (speed_of_light_correction *deltaT);
 					}
 					if ((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1) && (i >= xnumberAdded - 1 -
 						additionalBinNumber)) {

@@ -1041,7 +1041,8 @@ void Simulation::updateMaxEderivativePoint() {
 	}
 
 	////
-	derExPoint = floor(0.5 * speed_of_light_normalized * time / deltaX);
+	//derExPoint = floor(0.5 * speed_of_light_normalized * time / deltaX);
+	derExPoint = floor(0.5 * time / deltaX);
 }
 
 void Simulation::updateMaxConcentrationDerivativePoint() {

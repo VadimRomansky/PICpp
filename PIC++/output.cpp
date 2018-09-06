@@ -163,7 +163,7 @@ void outputDistribution(const char* outFileName, std::vector < Particle * >& par
 }
 
 void outputDistributionShiftedSystem(const char* outFileName, std::vector < Particle * >& particles, Vector3d& shiftV,
-                                     double& speed_of_light_normalized, int particleType, double gyroradius,
+                                     const double& speed_of_light_normalized, int particleType, double gyroradius,
                                      double plasma_period, int verbosity, bool newFile) {
 	int rank;
 	int nprocs;
@@ -480,7 +480,8 @@ void outputParticlesTrajectories(const char* outFileName, const char* electronOu
 		//fprintf(electronOutFile, "%15.10g %15.10g ", time, time * plasma_period);
 	}
 	Vector3d V = simulation->V0;
-	double gamma = 1.0 / sqrt(1 - sqr(V.norm() / simulation->speed_of_light_normalized));
+	//double gamma = 1.0 / sqrt(1 - sqr(V.norm() / simulation->speed_of_light_normalized));
+	double gamma = 1.0 / sqrt(1 - V.norm2());
 	for (int i = 0; i < size; ++i) {
 		const int parametersNumber = 8;
 		double parameters[parametersNumber];
@@ -3221,7 +3222,8 @@ void outputGeneral(const char* outFileName, Simulation* simulation) {
 			simulation->types[i].mass;
 	}
 
-	double gamma = 1.0 / sqrt(1 - simulation->V0.scalarMult(simulation->V0) / simulation->speed_of_light_normalized_sqr);
+	//double gamma = 1.0 / sqrt(1 - simulation->V0.scalarMult(simulation->V0) / simulation->speed_of_light_normalized_sqr);
+	double gamma = 1.0 / sqrt(1 - simulation->V0.scalarMult(simulation->V0));
 	double omega = sqrt(omega2 / (gamma * gamma * gamma));
 	fprintf(outFile,
 	        "%d %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d %15.10g %15.10g %15.10g %15.10g ",
@@ -3677,16 +3679,15 @@ void outputGeneralInitialParameters(const char* outFileName, const char* outFile
 
 
 		//todo relativistic temperature
-		double omegaGyroElectron = (simulation->types[0].charge * simulation->B0.norm() / (simulation->types[0].mass *
-			simulation->speed_of_light_normalized)) / simulation->plasma_period;
-		double omegaGyroProton = (simulation->types[1].charge * simulation->B0.norm() / (simulation->types[1].mass *
-			simulation->speed_of_light_normalized)) / simulation->plasma_period;
-		//double gyroRadiusElectron = ((simulation->types[0].mass*simulation->V0.norm()*gamma + sqrt(simulation->types[0].mass*simulation->types[0].temperatureX*simulation->kBoltzman_normalized))*simulation->speed_of_light_normalized/(simulation->types[0].charge*simulation->B0.norm()))*simulation->scaleFactor;
-		//double gyroRadiusProton = ((simulation->types[1].mass*simulation->V0.norm()*gamma + sqrt(simulation->types[1].mass*simulation->types[1].temperatureX*simulation->kBoltzman_normalized))*simulation->speed_of_light_normalized/(simulation->types[1].charge*simulation->B0.norm()))*simulation->scaleFactor;
-		double gyroRadiusElectron = ((simulation->types[0].mass * simulation->V0.norm() * gamma) * simulation->
-			speed_of_light_normalized / (simulation->types[0].charge * simulation->B0.norm())) * simulation->scaleFactor;
-		double gyroRadiusProton = ((simulation->types[1].mass * simulation->V0.norm() * gamma) * simulation->
-			speed_of_light_normalized / (simulation->types[1].charge * simulation->B0.norm())) * simulation->scaleFactor;
+		//double omegaGyroElectron = (simulation->types[0].charge * simulation->B0.norm() / (simulation->types[0].mass *simulation->speed_of_light_normalized)) / simulation->plasma_period;
+		double omegaGyroElectron = (simulation->types[0].charge * simulation->B0.norm() / (simulation->types[0].mass)) / simulation->plasma_period;
+		//double omegaGyroProton = (simulation->types[1].charge * simulation->B0.norm() / (simulation->types[1].mass * simulation->speed_of_light_normalized)) / simulation->plasma_period;
+		double omegaGyroProton = (simulation->types[1].charge * simulation->B0.norm() / (simulation->types[1].mass)) / simulation->plasma_period;
+		
+		//double gyroRadiusElectron = ((simulation->types[0].mass * simulation->V0.norm() * gamma) * simulation->speed_of_light_normalized / (simulation->types[0].charge * simulation->B0.norm())) * simulation->scaleFactor;
+		double gyroRadiusElectron = ((simulation->types[0].mass * simulation->V0.norm() * gamma) / (simulation->types[0].charge * simulation->B0.norm())) * simulation->scaleFactor;
+		//double gyroRadiusProton = ((simulation->types[1].mass * simulation->V0.norm() * gamma) * simulation->speed_of_light_normalized / (simulation->types[1].charge * simulation->B0.norm())) * simulation->scaleFactor;
+		double gyroRadiusProton = ((simulation->types[1].mass * simulation->V0.norm() * gamma) / (simulation->types[1].charge * simulation->B0.norm())) * simulation->scaleFactor;
 
 		fprintf(outFileWithText, "23 electron gyro frequency = %g\n", omegaGyroElectron);
 		fprintf(outFileWithText, "24 proton gyro frequency = %g\n", omegaGyroProton);
@@ -3728,18 +3729,20 @@ void outputGeneralInitialParameters(const char* outFileName, const char* outFile
 		Vector3d V0 = simulation->V0;
 		//double gamma = 1.0/sqrt(1 - V0.scalarMult(V0)/simulation->speed_of_light_normalized_sqr);
 
-		double sigma = simulation->B0.scalarMult(simulation->B0) / (simulation->density * simulation->
-			speed_of_light_normalized_sqr * gamma * 4 * pi);
+		//double sigma = simulation->B0.scalarMult(simulation->B0) / (simulation->density * simulation->speed_of_light_normalized_sqr * gamma * 4 * pi);
+		double sigma = simulation->B0.scalarMult(simulation->B0) / (simulation->density * gamma * 4 * pi);
 
 		fprintf(outFileWithText, "32 magnetization relativistic = %g\n", sigma);
 		fprintf(outFile, "%g\n", sigma);
 
-		double beta0 = fabs(V0.x) / simulation->speed_of_light_normalized;
+		//double beta0 = fabs(V0.x) / simulation->speed_of_light_normalized;
+		double beta0 = fabs(V0.x);
 		double betaShock = (sqrt(9 + 16 * beta0 * beta0) - 3) / (8 * beta0);
 		if (beta0 == 0) {
 			betaShock = 0;
 		}
-		double Vshock = betaShock * simulation->speed_of_light_normalized;
+		//double Vshock = betaShock * simulation->speed_of_light_normalized;
+		double Vshock = betaShock;
 
 		fprintf(outFileWithText, "33 supposed shock velocity = %g\n", Vshock);
 		fprintf(outFile, "%g\n", Vshock);
