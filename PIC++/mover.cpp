@@ -738,14 +738,13 @@ void Simulation::moveParticleTristan(Particle* particle) {
 	Vector3d velocity = particle->getVelocity();
 	particle->coordinates += velocity * deltaT;
 
-
-	if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
-		if ((boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == 0) {
-			particle->coordinates.x = 2 * xgrid[1 + additionalBinNumber] - particle->coordinates.x;
-			particle->reflectMomentumX();
-			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
-			//return;
-		} else {
+	if ((boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == 0) && particle->coordinates.x < xgrid[reflectingWallPoint]) {
+		particle->coordinates.x = 2 * xgrid[reflectingWallPoint] - particle->coordinates.x;
+		particle->reflectMomentumX();
+		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+		//return;
+	} else {
+		if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
 			particle->escaped = true;
 			particle->crossBoundaryCount++;
 			escapedParticlesLeft.push_back(particle);

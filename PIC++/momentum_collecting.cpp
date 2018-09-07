@@ -77,10 +77,10 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 	const int k = floor(localCoordinates.z/deltaZ);
 	Vector3d prevLocalCoordinates = localCoordinates - velocity*deltaT;
 	//really?
-	if((cartCoord[0] == 0) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) && (i == 1 + additionalBinNumber)) {
+	if((cartCoord[0] == 0) && (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) && (i == reflectingWallPoint)) {
 		if(velocity.x > 0) {
-			if(prevLocalCoordinates.x < (1 + additionalBinNumber)*deltaX) {
-				prevLocalCoordinates.x = 2*(1 + additionalBinNumber)*deltaX - prevLocalCoordinates.x;
+			if(prevLocalCoordinates.x < reflectingWallPoint*deltaX) {
+				prevLocalCoordinates.x = 2*reflectingWallPoint*deltaX - prevLocalCoordinates.x;
 			}
 		}
 	}

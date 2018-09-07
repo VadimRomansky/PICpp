@@ -8150,6 +8150,9 @@ void Simulation::createParticles() {
 	if (rank == 0) printLog("creating particles\n");
 	int n = 0;
 	int minI = 1 + additionalBinNumber;
+	if(cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
+		minI = reflectingWallPoint;
+	}
 	int minJ = 1 + additionalBinNumber;
 	int minK = 1 + additionalBinNumber;
 	int maxI = xnumberAdded - additionalBinNumber - 1;
