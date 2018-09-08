@@ -8,7 +8,7 @@
 90                      B phi
 0 0 0                   Electric field
 1E-4                    total electron concentration (always in cgs)
-10000000                max iterations
+100                max iterations
 1E100                   max time
 1                  	prefered time step
 0                  	log verbocity level

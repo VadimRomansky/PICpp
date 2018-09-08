@@ -536,16 +536,16 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	int minI = 1 + additionalBinNumber;
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
 	int minJ = 1 + additionalBinNumber;
-	int maxJ = ynumberAdded - additionalBinNumber;
+	int maxJ = ynumberAdded - additionalBinNumber - 1 ;
 	int minK = 1 + additionalBinNumber;
-	int maxK = znumberAdded - additionalBinNumber;
+	int maxK = znumberAdded - additionalBinNumber - 1;
 	if(ynumberGeneral == 1) {
 		minJ = 0;
-		maxJ = 1;
+		maxJ = 0;
 	}
 	if(znumberGeneral == 1) {
 		minK = 0;
-		maxK = 1;
+		maxK = 0;
 	}
 
 	double smoothingmatrix[3][3][3];
@@ -561,8 +561,8 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	}
 	////Ex
 	for (int i = minI; i < maxI; ++i) {
-		for (int j = minJ; j < maxJ; ++j) {
-			for (int k = minK; k < maxK; ++k) {
+		for (int j = minJ; j <= maxJ; ++j) {
+			for (int k = minK; k <= maxK; ++k) {
 				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 1) {
 					tempBunemanExParameter[i][j][k] = 0;					
 					for (int tempI = -1; tempI <= 1; ++tempI) {
@@ -604,8 +604,8 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	}
 
 	for (int i = minI; i < maxI; ++i) {
-		for (int j = minJ; j < maxJ; ++j) {
-			for (int k = minK; k < maxK; ++k) {
+		for (int j = minJ; j <= maxJ; ++j) {
+			for (int k = minK; k <= maxK; ++k) {
 				fieldX[i][j][k] = tempBunemanExParameter[i][j][k];
 			}
 		}
@@ -622,7 +622,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
-			for (int k = minK; k < maxK; ++k) {
+			for (int k = minK; k <= maxK; ++k) {
 				if (i > 1 + additionalBinNumber && i < xnumberAdded - 1 - additionalBinNumber) {
 					tempBunemanEyParameter[i][j][k] = 0;
 					for (int tempI = -1; tempI <= 1; ++tempI) {
@@ -665,7 +665,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
-			for (int k = minK; k < maxK; ++k) {
+			for (int k = minK; k <= maxK; ++k) {
 				fieldY[i][j][k] = tempBunemanEyParameter[i][j][k];
 			}
 		}
@@ -674,9 +674,9 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	////Ez
 	minI = 1 + additionalBinNumber;
 	maxI = xnumberAdded - 1 - additionalBinNumber;
-	maxJ = ynumberAdded - additionalBinNumber;
+	maxJ = ynumberAdded - additionalBinNumber - 1;
 	if(ynumberGeneral == 1) {
-		maxJ = 1;
+		maxJ = 0;
 	}
 	maxK = znumberAdded - additionalBinNumber - 1;
 	if(znumberGeneral == 1) {
@@ -684,7 +684,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	}
 
 	for (int i = minI; i <= maxI; ++i) {
-		for (int j = minJ; j < maxJ; ++j) {
+		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k < maxK; ++k) {
 				if (i > 1 + additionalBinNumber && i < xnumberAdded - 1 - additionalBinNumber) {
 					tempBunemanEzParameter[i][j][k] = 0;
@@ -727,7 +727,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	}
 
 	for (int i = minI; i <= maxI; ++i) {
-		for (int j = minJ; j < maxJ; ++j) {
+		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k < maxK; ++k) {
 				fieldZ[i][j][k] = tempBunemanEzParameter[i][j][k];
 			}

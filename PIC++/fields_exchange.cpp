@@ -3483,6 +3483,7 @@ void Simulation::exchangeBunemanBfield(double*** fieldX, double*** fieldY, doubl
 	exchangeBunemanBzAlongX(fieldZ);
 	exchangeBunemanBzAlongY(fieldZ);
 	exchangeBunemanBzAlongZ(fieldZ);
+	MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("exchange buneman magnetic field = %g sec\n", procTime / CLOCKS_PER_SEC);

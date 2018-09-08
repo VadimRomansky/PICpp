@@ -326,8 +326,8 @@ Vector3d Simulation::correlationBunemanGeneralEfield(Particle* particle, double*
 }
 
 void Simulation::correlationBunemanEBfields(Particle* particle, double*** Ex, double*** Ey, double*** Ez, double*** Bx, double*** By, double*** Bz, Vector3d& E, Vector3d& B) {
-	Vector3d resultE = Vector3d(0, 0, 0);
-	Vector3d resultB = Vector3d(0, 0, 0);
+	E = Vector3d(0, 0, 0);
+	B = Vector3d(0, 0, 0);
 	int maxI = splineOrder + 2;
 	int maxJ = splineOrder + 2;
 	if(ynumberGeneral == 1) {
@@ -337,19 +337,34 @@ void Simulation::correlationBunemanEBfields(Particle* particle, double*** Ex, do
 	if(znumberGeneral == 1) {
 		maxK = 1;
 	}
+	int* cellXindex = particle->correlationMapCell.xindex;
+	int* nodeXindex = particle->correlationMapNode.xindex;
+	int* cellYindex = particle->correlationMapCell.yindex;
+	int* nodeYindex = particle->correlationMapNode.yindex;
+	int* cellZindex = particle->correlationMapCell.zindex;
+	int* nodeZindex = particle->correlationMapNode.zindex;
+
+	double* cellXcorrelation = particle->correlationMapCell.xcorrelation;
+	double* nodeYcorrelation = particle->correlationMapNode.ycorrelation;
+	double* nodeZcorrelation = particle->correlationMapNode.zcorrelation;
+	double* nodeXcorrelation = particle->correlationMapNode.xcorrelation;
+	double* cellYcorrelation = particle->correlationMapCell.ycorrelation;
+	double* cellZcorrelation = particle->correlationMapCell.zcorrelation;
+
 	for (int i = 0; i < maxI; ++i) {
-		int cellI = particle->correlationMapCell.xindex[i];
-		int nodeI = particle->correlationMapNode.xindex[i];
+		
+		int cellI = cellXindex[i];
+		int nodeI = nodeXindex[i];
 		for (int j = 0; j < maxJ; ++j) {
-			int cellJ = particle->correlationMapCell.yindex[j];
-			int nodeJ = particle->correlationMapNode.yindex[j];
+			int cellJ = cellYindex[j];
+			int nodeJ = nodeYindex[j];
 			if(ynumberGeneral == 1) {
 				cellJ = 0;
 				nodeJ = 0;
 			}
 			for (int k = 0; k < maxK; ++k) {
-				int cellK = particle->correlationMapCell.zindex[k];
-				int nodeK = particle->correlationMapNode.zindex[k];
+				int cellK = cellZindex[k];
+				int nodeK = nodeZindex[k];
 
 				if(znumberGeneral == 1) {
 					cellK = 0;
@@ -365,65 +380,339 @@ void Simulation::correlationBunemanEBfields(Particle* particle, double*** Ex, do
 				double correlationBZ;
 
 				switch (Simulation::dimensionType){
-				case DimensionType::THREE_D: correlationEX = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k];
-					correlationEY = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k];
-					correlationEZ = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapCell.zcorrelation[k];
+				case DimensionType::THREE_D: correlationEX = cellXcorrelation[i] * nodeYcorrelation[j] * nodeZcorrelation[k];
+					correlationEY = nodeXcorrelation[i] * cellYcorrelation[j] * nodeZcorrelation[k];
+					correlationEZ = nodeXcorrelation[i] * nodeYcorrelation[j] * cellZcorrelation[k];
 
-					correlationBX = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] * particle->correlationMapCell.zcorrelation[k];
-					correlationBY = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapCell.zcorrelation[k];
-					correlationBZ = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k];
+					correlationBX = nodeXcorrelation[i] * cellYcorrelation[j] * cellZcorrelation[k];
+					correlationBY = cellXcorrelation[i] * nodeYcorrelation[j] * cellZcorrelation[k];
+					correlationBZ = cellXcorrelation[i] * cellYcorrelation[j] * nodeZcorrelation[k];
 					break;
-				case DimensionType::TWO_D_XY: correlationEX = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j];
-					correlationEY = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j];
-					correlationEZ = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j];
+				case DimensionType::TWO_D_XY: correlationEX = cellXcorrelation[i] * nodeYcorrelation[j];
+					correlationEY = nodeXcorrelation[i] * cellYcorrelation[j];
+					correlationEZ = nodeXcorrelation[i] * nodeYcorrelation[j];
 
-					correlationBX = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j];
-					correlationBY = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j];
-					correlationBZ = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j];
+					correlationBX = nodeXcorrelation[i] * cellYcorrelation[j];
+					correlationBY = cellXcorrelation[i] * nodeYcorrelation[j];
+					correlationBZ = cellXcorrelation[i] * cellYcorrelation[j];
 					break;
-				case DimensionType::TWO_D_XZ: correlationEX = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapNode.zcorrelation[k];
-					correlationEY = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.zcorrelation[k];
-					correlationEZ = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapCell.zcorrelation[k];
+				case DimensionType::TWO_D_XZ: correlationEX = cellXcorrelation[i] * nodeZcorrelation[k];
+					correlationEY = nodeXcorrelation[i] * nodeZcorrelation[k];
+					correlationEZ = nodeXcorrelation[i] * cellZcorrelation[k];
 
-					correlationBX = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapCell.zcorrelation[k];
-					correlationBY = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.zcorrelation[k];
-					correlationBZ = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapNode.zcorrelation[k];
+					correlationBX = nodeXcorrelation[i] * cellZcorrelation[k];
+					correlationBY = cellXcorrelation[i] * cellZcorrelation[k];
+					correlationBZ = cellXcorrelation[i] * nodeZcorrelation[k];
 					break;
-				case DimensionType::ONE_D: correlationEX = particle->correlationMapCell.xcorrelation[i];
-					correlationEY = particle->correlationMapNode.xcorrelation[i];
-					correlationEZ = particle->correlationMapNode.xcorrelation[i];
+				case DimensionType::ONE_D: correlationEX = cellXcorrelation[i];
+					correlationEY = nodeXcorrelation[i];
+					correlationEZ = nodeXcorrelation[i];
 
-					correlationBX = particle->correlationMapNode.xcorrelation[i];
-					correlationBY = particle->correlationMapCell.xcorrelation[i];
-					correlationBZ = particle->correlationMapCell.xcorrelation[i];
+					correlationBX = nodeXcorrelation[i];
+					correlationBY = cellXcorrelation[i];
+					correlationBZ = cellXcorrelation[i];
 					break;
-				default: correlationEX = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k];
-					correlationEY = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k];
-					correlationEZ = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapCell.zcorrelation[k];
+				default: correlationEX = cellXcorrelation[i] * nodeYcorrelation[j] * nodeZcorrelation[k];
+					correlationEY = nodeXcorrelation[i] * cellYcorrelation[j] * nodeZcorrelation[k];
+					correlationEZ = nodeXcorrelation[i] * nodeYcorrelation[j] * cellZcorrelation[k];
 
-					correlationBX = particle->correlationMapNode.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] * particle->correlationMapCell.zcorrelation[k];
-					correlationBY = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapNode.ycorrelation[j] * particle->correlationMapCell.zcorrelation[k];
-					correlationBZ = particle->correlationMapCell.xcorrelation[i] * particle->correlationMapCell.ycorrelation[j] * particle->correlationMapNode.zcorrelation[k];
+					correlationBX = nodeXcorrelation[i] * cellYcorrelation[j] * cellZcorrelation[k];
+					correlationBY = cellXcorrelation[i] * nodeYcorrelation[j] * cellZcorrelation[k];
+					correlationBZ = cellXcorrelation[i] * cellYcorrelation[j] * nodeZcorrelation[k];
 					break;
 				}
 
-				resultE.x = resultE.x + Ex[cellI][nodeJ][nodeK] * correlationEX;
+				E.x = E.x + Ex[cellI][nodeJ][nodeK] * correlationEX;
 
-				resultE.y = resultE.y + Ey[nodeI][cellJ][nodeK] * correlationEY;
+				E.y = E.y + Ey[nodeI][cellJ][nodeK] * correlationEY;
 
-				resultE.z = resultE.z + Ez[nodeI][nodeJ][cellK] * correlationEZ;
+				E.z = E.z + Ez[nodeI][nodeJ][cellK] * correlationEZ;
 
-				resultB.x = resultB.x + Bx[nodeI][cellJ][cellK] * correlationBX;
+				B.x = B.x + Bx[nodeI][cellJ][cellK] * correlationBX;
 
-				resultB.y = resultB.y + By[cellI][nodeJ][cellK] * correlationBY;
+				B.y = B.y + By[cellI][nodeJ][cellK] * correlationBY;
 
-				resultB.z = resultB.z + Bz[cellI][cellJ][nodeK] * correlationBZ;
+				B.z = B.z + Bz[cellI][cellJ][nodeK] * correlationBZ;
 			}
 		}
 	}
+}
 
-	E = resultE;
-	B = resultB;
+void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, double*** Ex, double*** Ey, double*** Ez, double*** Bx, double*** By, double*** Bz, Vector3d& E, Vector3d& B) {
+	double WleftCellX;
+	double WrightCellX;
+	int leftCellXindex = 0;
+	int rightCellXindex = 0;
+
+	double WleftNodeX;
+	double WrightNodeX;
+	int leftNodeXindex = 0;
+	int rightNodeXindex = 0;
+
+	double WleftCellY;
+	double WrightCellY;
+	int leftCellYindex = 0;
+	int rightCellYindex = 0;
+
+	double WleftNodeY;
+	double WrightNodeY;
+	int leftNodeYindex = 0;
+	int rightNodeYindex = 0;
+
+	double WleftCellZ;
+	double WrightCellZ;
+	int leftCellZindex = 0;
+	int rightCellZindex = 0;
+
+	double WleftNodeZ;
+	double WrightNodeZ;
+	int leftNodeZindex = 0;
+	int rightNodeZindex = 0;
+	
+	int xcount = floor((particle->coordinates.x - xgrid[0]) / deltaX);
+	if(particle->coordinates.x < middleXgrid[xcount]) {
+		leftCellXindex = xcount - 1;
+		rightCellXindex = xcount;
+		WrightCellX = 0.5 + (particle->coordinates.x - xgrid[xcount])/deltaX;
+		WleftCellX = 1.0 - WrightCellX;
+	} else {
+		leftCellXindex = xcount;
+		rightCellXindex = xcount+1;
+		WleftCellX = 0.5 + (xgrid[xcount+1] - particle->coordinates.x)/deltaX;
+		WrightCellX = 1.0 - WleftCellX;
+	}
+
+	xcount = floor(((particle->coordinates.x - xgrid[0]) / deltaX) + 0.5);
+
+	if(particle->coordinates.x < xgrid[xcount]) {
+		leftNodeXindex = xcount - 1;
+		rightNodeXindex = xcount;
+		WrightNodeX = 0.5 + (particle->coordinates.x - middleXgrid[xcount - 1])/deltaX;
+		WleftNodeX = 1.0 - WrightNodeX;
+	} else {
+		leftNodeXindex = xcount;
+		rightNodeXindex = xcount+1;
+		WleftNodeX = 0.5 + (middleXgrid[xcount] - particle->coordinates.x)/deltaX;
+		WrightNodeX = 1.0 - WleftNodeX;
+	}
+
+	if(ynumberGeneral > 1) {
+		int ycount = floor((particle->coordinates.y - ygrid[0]) / deltaY);
+		if(particle->coordinates.y < middleYgrid[ycount]) {
+			leftCellYindex = ycount - 1;
+			rightCellYindex = ycount;
+			WrightCellY = 0.5 + (particle->coordinates.y - ygrid[ycount])/deltaY;
+			WleftCellY = 1.0 - WrightCellY;
+		} else {
+			leftCellYindex = ycount;
+			rightCellYindex = ycount+1;
+			WleftCellY = 0.5 + (ygrid[ycount+1] - particle->coordinates.y)/deltaY;
+			WrightCellY = 1.0 - WleftCellY;
+		}
+
+		ycount = floor(((particle->coordinates.y - ygrid[0]) / deltaY) + 0.5);
+	
+		if(particle->coordinates.y < ygrid[ycount]) {
+			leftNodeYindex = ycount - 1;
+			rightNodeYindex = ycount;
+			WrightNodeY = 0.5 + (particle->coordinates.y - middleYgrid[ycount - 1])/deltaY;
+			WleftNodeY = 1.0 - WrightNodeY;
+		} else {
+			leftNodeYindex = ycount;
+			rightNodeYindex = ycount+1;
+			WleftNodeY = 0.5 + (middleYgrid[ycount] - particle->coordinates.y)/deltaY;
+			WrightNodeY = 1.0 - WleftNodeY;
+		}
+	}
+
+	if(znumberGeneral > 1) {
+		int zcount = floor((particle->coordinates.z - zgrid[0]) / deltaZ);
+		if(particle->coordinates.z < middleZgrid[zcount]) {
+			leftCellZindex = zcount - 1;
+			rightCellZindex = zcount;
+			WrightCellZ = 0.5 + (particle->coordinates.z - zgrid[zcount])/deltaZ;
+			WleftCellZ = 1.0 - WrightCellZ;
+		} else {
+			leftCellZindex = zcount;
+			rightCellZindex = zcount+1;
+			WleftCellZ = 0.5 + (zgrid[zcount+1] - particle->coordinates.z)/deltaZ;
+			WrightCellZ = 1.0 - WleftCellZ;
+		}
+
+		zcount = floor(((particle->coordinates.z - zgrid[0]) / deltaZ) + 0.5);
+
+		if(particle->coordinates.z < zgrid[zcount]) {
+			leftNodeZindex = zcount - 1;
+			rightNodeZindex = zcount;
+			WrightNodeZ = 0.5 + (particle->coordinates.z - middleZgrid[zcount - 1])/deltaZ;
+			WleftNodeZ = 1.0 - WrightNodeZ;
+		} else {
+			leftNodeZindex = zcount;
+			rightNodeZindex = zcount+1;
+			WleftNodeZ = 0.5 + (middleZgrid[zcount] - particle->coordinates.z)/deltaZ;
+			WrightNodeZ = 1.0 - WleftNodeZ;
+		}
+	}
+
+	E = Vector3d(0, 0, 0);
+	B = Vector3d(0, 0, 0);
+	switch (Simulation::dimensionType){
+	case THREE_D:
+		E.x += bunemanEx[leftCellXindex][leftNodeYindex][leftNodeZindex]*WleftCellX*WleftNodeY*WleftNodeZ;
+		E.y += bunemanEy[leftNodeXindex][leftCellYindex][leftNodeZindex]*WleftNodeX*WleftCellY*WleftNodeZ;
+		E.z += bunemanEz[leftNodeXindex][leftNodeYindex][leftCellZindex]*WleftNodeX*WleftNodeY*WleftCellZ;
+
+		B.x += bunemanBx[leftNodeXindex][leftCellYindex][leftCellZindex]*WleftNodeX*WleftCellY*WleftCellZ;
+		B.y += bunemanBy[leftCellXindex][leftNodeYindex][leftCellZindex]*WleftCellX*WleftNodeY*WleftCellZ;
+		B.z += bunemanBz[leftCellXindex][leftCellYindex][leftNodeZindex]*WleftCellX*WleftCellY*WleftNodeZ;
+		////
+		E.x += bunemanEx[leftCellXindex][leftNodeYindex][rightNodeZindex]*WleftCellX*WleftNodeY*WleftNodeZ;
+		E.y += bunemanEy[leftNodeXindex][leftCellYindex][rightNodeZindex]*WleftNodeX*WleftCellY*WleftNodeZ;
+		E.z += bunemanEz[leftNodeXindex][leftNodeYindex][rightCellZindex]*WleftNodeX*WleftNodeY*WleftCellZ;
+
+		B.x += bunemanBx[leftNodeXindex][leftCellYindex][rightCellZindex]*WleftNodeX*WleftCellY*WrightCellZ;
+		B.y += bunemanBy[leftCellXindex][leftNodeYindex][rightCellZindex]*WleftCellX*WleftNodeY*WrightCellZ;
+		B.z += bunemanBz[leftCellXindex][leftCellYindex][rightNodeZindex]*WleftCellX*WleftCellY*WrightNodeZ;
+		////
+		E.x += bunemanEx[leftCellXindex][rightNodeYindex][leftNodeZindex]*WleftCellX*WleftNodeY*WleftNodeZ;
+		E.y += bunemanEy[leftNodeXindex][rightCellYindex][leftNodeZindex]*WleftNodeX*WleftCellY*WleftNodeZ;
+		E.z += bunemanEz[leftNodeXindex][rightNodeYindex][leftCellZindex]*WleftNodeX*WleftNodeY*WleftCellZ;
+
+		B.x += bunemanBx[leftNodeXindex][rightCellYindex][leftCellZindex]*WleftNodeX*WrightCellY*WleftCellZ;
+		B.y += bunemanBy[leftCellXindex][rightNodeYindex][leftCellZindex]*WleftCellX*WrightNodeY*WleftCellZ;
+		B.z += bunemanBz[leftCellXindex][rightCellYindex][leftNodeZindex]*WleftCellX*WrightCellY*WleftNodeZ;
+		/////
+		E.x += bunemanEx[leftCellXindex][rightNodeYindex][rightNodeZindex]*WleftCellX*WleftNodeY*WleftNodeZ;
+		E.y += bunemanEy[leftNodeXindex][rightCellYindex][rightNodeZindex]*WleftNodeX*WleftCellY*WleftNodeZ;
+		E.z += bunemanEz[leftNodeXindex][rightNodeYindex][rightCellZindex]*WleftNodeX*WleftNodeY*WleftCellZ;
+
+		B.x += bunemanBx[leftNodeXindex][rightCellYindex][rightCellZindex]*WleftNodeX*WrightCellY*WrightCellZ;
+		B.y += bunemanBy[leftCellXindex][rightNodeYindex][rightCellZindex]*WleftCellX*WrightNodeY*WrightCellZ;
+		B.z += bunemanBz[leftCellXindex][rightCellYindex][rightNodeZindex]*WleftCellX*WrightCellY*WrightNodeZ;
+		///////////////////////////////////////////
+
+		E.x += bunemanEx[rightCellXindex][leftNodeYindex][leftNodeZindex]*WrightCellX*WleftNodeY*WleftNodeZ;
+		E.y += bunemanEy[rightNodeXindex][leftCellYindex][leftNodeZindex]*WrightNodeX*WleftCellY*WleftNodeZ;
+		E.z += bunemanEz[rightNodeXindex][leftNodeYindex][leftCellZindex]*WrightNodeX*WleftNodeY*WleftCellZ;
+
+		B.x += bunemanBx[rightNodeXindex][leftCellYindex][leftCellZindex]*WrightNodeX*WleftCellY*WleftCellZ;
+		B.y += bunemanBy[rightCellXindex][leftNodeYindex][leftCellZindex]*WrightCellX*WleftNodeY*WleftCellZ;
+		B.z += bunemanBz[rightCellXindex][leftCellYindex][leftNodeZindex]*WrightCellX*WleftCellY*WleftNodeZ;
+		////
+		E.x += bunemanEx[rightCellXindex][leftNodeYindex][rightNodeZindex]*WrightCellX*WleftNodeY*WleftNodeZ;
+		E.y += bunemanEy[rightNodeXindex][leftCellYindex][rightNodeZindex]*WrightNodeX*WleftCellY*WleftNodeZ;
+		E.z += bunemanEz[rightNodeXindex][leftNodeYindex][rightCellZindex]*WrightNodeX*WleftNodeY*WleftCellZ;
+
+		B.x += bunemanBx[rightNodeXindex][leftCellYindex][rightCellZindex]*WrightNodeX*WleftCellY*WrightCellZ;
+		B.y += bunemanBy[rightCellXindex][leftNodeYindex][rightCellZindex]*WrightCellX*WleftNodeY*WrightCellZ;
+		B.z += bunemanBz[rightCellXindex][leftCellYindex][rightNodeZindex]*WrightCellX*WleftCellY*WrightNodeZ;
+		////
+		E.x += bunemanEx[rightCellXindex][rightNodeYindex][leftNodeZindex]*WrightCellX*WleftNodeY*WleftNodeZ;
+		E.y += bunemanEy[rightNodeXindex][rightCellYindex][leftNodeZindex]*WrightNodeX*WleftCellY*WleftNodeZ;
+		E.z += bunemanEz[rightNodeXindex][rightNodeYindex][leftCellZindex]*WrightNodeX*WleftNodeY*WleftCellZ;
+
+		B.x += bunemanBx[rightNodeXindex][rightCellYindex][leftCellZindex]*WrightNodeX*WrightCellY*WleftCellZ;
+		B.y += bunemanBy[rightCellXindex][rightNodeYindex][leftCellZindex]*WrightCellX*WrightNodeY*WleftCellZ;
+		B.z += bunemanBz[rightCellXindex][rightCellYindex][leftNodeZindex]*WrightCellX*WrightCellY*WleftNodeZ;
+		/////
+		E.x += bunemanEx[rightCellXindex][rightNodeYindex][rightNodeZindex]*WrightCellX*WleftNodeY*WleftNodeZ;
+		E.y += bunemanEy[rightNodeXindex][rightCellYindex][rightNodeZindex]*WrightNodeX*WleftCellY*WleftNodeZ;
+		E.z += bunemanEz[rightNodeXindex][rightNodeYindex][rightCellZindex]*WrightNodeX*WleftNodeY*WleftCellZ;
+
+		B.x += bunemanBx[rightNodeXindex][rightCellYindex][rightCellZindex]*WrightNodeX*WrightCellY*WrightCellZ;
+		B.y += bunemanBy[rightCellXindex][rightNodeYindex][rightCellZindex]*WrightCellX*WrightNodeY*WrightCellZ;
+		B.z += bunemanBz[rightCellXindex][rightCellYindex][rightNodeZindex]*WrightCellX*WrightCellY*WrightNodeZ;
+
+		break;
+	case TWO_D_XY:
+		E.x += bunemanEx[leftCellXindex][leftNodeYindex][0]*WleftCellX*WleftNodeY;
+		E.y += bunemanEy[leftNodeXindex][leftCellYindex][0]*WleftNodeX*WleftCellY;
+		E.z += bunemanEz[leftNodeXindex][leftNodeYindex][0]*WleftNodeX*WleftNodeY;
+
+		B.x += bunemanBx[leftNodeXindex][leftCellYindex][0]*WleftNodeX*WleftCellY;
+		B.y += bunemanBy[leftCellXindex][leftNodeYindex][0]*WleftCellX*WleftNodeY;
+		B.z += bunemanBz[leftCellXindex][leftCellYindex][0]*WleftCellX*WleftCellY;
+
+		E.x += bunemanEx[leftCellXindex][rightNodeYindex][0]*WleftCellX*WleftNodeY;
+		E.y += bunemanEy[leftNodeXindex][rightCellYindex][0]*WleftNodeX*WleftCellY;
+		E.z += bunemanEz[leftNodeXindex][rightNodeYindex][0]*WleftNodeX*WleftNodeY;
+
+		B.x += bunemanBx[leftNodeXindex][rightCellYindex][0]*WleftNodeX*WrightCellY;
+		B.y += bunemanBy[leftCellXindex][rightNodeYindex][0]*WleftCellX*WrightNodeY;
+		B.z += bunemanBz[leftCellXindex][rightCellYindex][0]*WleftCellX*WrightCellY;
+		//////////////////////
+		E.x += bunemanEx[rightCellXindex][leftNodeYindex][0]*WrightCellX*WleftNodeY;
+		E.y += bunemanEy[rightNodeXindex][leftCellYindex][0]*WrightNodeX*WleftCellY;
+		E.z += bunemanEz[rightNodeXindex][leftNodeYindex][0]*WrightNodeX*WleftNodeY;
+
+		B.x += bunemanBx[rightNodeXindex][leftCellYindex][0]*WrightNodeX*WleftCellY;
+		B.y += bunemanBy[rightCellXindex][leftNodeYindex][0]*WrightCellX*WleftNodeY;
+		B.z += bunemanBz[rightCellXindex][leftCellYindex][0]*WrightCellX*WleftCellY;
+
+		E.x += bunemanEx[rightCellXindex][rightNodeYindex][0]*WrightCellX*WleftNodeY;
+		E.y += bunemanEy[rightNodeXindex][rightCellYindex][0]*WrightNodeX*WleftCellY;
+		E.z += bunemanEz[rightNodeXindex][rightNodeYindex][0]*WrightNodeX*WleftNodeY;
+
+		B.x += bunemanBx[rightNodeXindex][rightCellYindex][0]*WrightNodeX*WrightCellY;
+		B.y += bunemanBy[rightCellXindex][rightNodeYindex][0]*WrightCellX*WrightNodeY;
+		B.z += bunemanBz[rightCellXindex][rightCellYindex][0]*WrightCellX*WrightCellY;
+		break;
+	case TWO_D_XZ:
+		E.x += bunemanEx[leftCellXindex][0][leftNodeZindex]*WleftCellX*WleftNodeZ;
+		E.y += bunemanEy[leftNodeXindex][0][leftNodeZindex]*WleftNodeX*WleftNodeZ;
+		E.z += bunemanEz[leftNodeXindex][0][leftCellZindex]*WleftNodeX*WleftCellZ;
+
+		B.x += bunemanBx[leftNodeXindex][0][leftCellZindex]*WleftNodeX*WleftCellZ;
+		B.y += bunemanBy[leftCellXindex][0][leftCellZindex]*WleftCellX*WleftCellZ;
+		B.z += bunemanBz[leftCellXindex][0][leftNodeZindex]*WleftCellX*WleftNodeZ;
+
+		E.x += bunemanEx[leftCellXindex][0][rightNodeZindex]*WleftCellX*WleftNodeZ;
+		E.y += bunemanEy[leftNodeXindex][0][rightNodeZindex]*WleftNodeX*WleftNodeZ;
+		E.z += bunemanEz[leftNodeXindex][0][rightCellZindex]*WleftNodeX*WleftCellZ;
+
+		B.x += bunemanBx[leftNodeXindex][0][rightCellZindex]*WleftNodeX*WrightCellZ;
+		B.y += bunemanBy[leftCellXindex][0][rightCellZindex]*WleftCellX*WrightCellZ;
+		B.z += bunemanBz[leftCellXindex][0][rightNodeZindex]*WleftCellX*WrightNodeZ;
+		///////////////////////////////
+		E.x += bunemanEx[rightCellXindex][0][leftNodeZindex]*WrightCellX*WleftNodeZ;
+		E.y += bunemanEy[rightNodeXindex][0][leftNodeZindex]*WrightNodeX*WleftNodeZ;
+		E.z += bunemanEz[rightNodeXindex][0][leftCellZindex]*WrightNodeX*WleftCellZ;
+
+		B.x += bunemanBx[rightNodeXindex][0][leftCellZindex]*WrightNodeX*WleftCellZ;
+		B.y += bunemanBy[rightCellXindex][0][leftCellZindex]*WrightCellX*WleftCellZ;
+		B.z += bunemanBz[rightCellXindex][0][leftNodeZindex]*WrightCellX*WleftNodeZ;
+
+		E.x += bunemanEx[rightCellXindex][0][rightNodeZindex]*WrightCellX*WleftNodeZ;
+		E.y += bunemanEy[rightNodeXindex][0][rightNodeZindex]*WrightNodeX*WleftNodeZ;
+		E.z += bunemanEz[rightNodeXindex][0][rightCellZindex]*WrightNodeX*WleftCellZ;
+
+		B.x += bunemanBx[rightNodeXindex][0][rightCellZindex]*WrightNodeX*WrightCellZ;
+		B.y += bunemanBy[rightCellXindex][0][rightCellZindex]*WrightCellX*WrightCellZ;
+		B.z += bunemanBz[rightCellXindex][0][rightNodeZindex]*WrightCellX*WrightNodeZ;
+		break;
+	case ONE_D:
+		E.x += bunemanEx[leftCellXindex][0][0]*WleftCellX;
+		E.y += bunemanEy[leftNodeXindex][0][0]*WleftNodeX;
+		E.z += bunemanEz[leftNodeXindex][0][0]*WleftNodeX;
+
+		B.x += bunemanBx[leftNodeXindex][0][0]*WleftNodeX;
+		B.y += bunemanBy[leftCellXindex][0][0]*WleftCellX;
+		B.z += bunemanBz[leftCellXindex][0][0]*WleftCellX;
+		////////////////////
+		E.x += bunemanEx[rightCellXindex][0][0]*WrightCellX;
+		E.y += bunemanEy[rightNodeXindex][0][0]*WrightNodeX;
+		E.z += bunemanEz[rightNodeXindex][0][0]*WrightNodeX;
+
+		B.x += bunemanBx[rightNodeXindex][0][0]*WrightNodeX;
+		B.y += bunemanBy[rightCellXindex][0][0]*WrightCellX;
+		B.z += bunemanBz[rightCellXindex][0][0]*WrightCellX;
+		break;
+	default:
+		printf("wrong dimension type\n");
+		MPI_Finalize();
+		exit(0);
+		break;
+	}
 }
 
 double Simulation::correlationWithBbin(Particle& particle, int i, int j, int k) {

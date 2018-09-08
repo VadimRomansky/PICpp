@@ -1050,6 +1050,8 @@ public:
 	Vector3d correlationBunemanGeneralEfield(Particle* particle, double*** fieldX, double*** fieldY, double*** fieldZ);
 
 	void correlationBunemanEBfields(Particle* particle, double*** Ex, double*** Ey, double*** Ez, double*** Bx, double*** By, double*** Bz, Vector3d& E, Vector3d& B);
+	void correlationBunemanEBfieldsWithoutMaps(Particle* particle, double*** Ex, double*** Ey, double*** Ez, double*** Bx,
+	                                           double*** By, double*** Bz, Vector3d& E, Vector3d& B);
 
 	double correlationWithBbin(Particle& particle, int i, int j, int k);
 

@@ -65,15 +65,16 @@ void Simulation::tristanUpdateFlux() {
 	if ((rank == 0) && (verbosity > 0)) printf("updating tristan flux\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("updating tristan flux\n");
 
-	for (int pcount = 0; pcount < particles.size(); ++pcount) {
-		Particle* particle = particles[pcount];
+	//for (int i = 0; i < particles.size(); ++i) {
+		//Particle* particle = particles[i];
+	for (auto particle : particles) {
 		addParticleFluxZigzag(particle);
 	}
 	//MPI_Barrier(cartComm);
 	if(verbosity > 2) printf("exchanging buneman flux rank = %d\n", rank);
 
 	exchangeBunemanFlux();
-
+	MPI_Barrier(cartComm);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
 		printf("evaluating electric flux time = %g sec\n", procTime / CLOCKS_PER_SEC);
@@ -169,7 +170,8 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 	double yr = (localCoordinates.y + prevLocalCoordinates.y)/2;
 	double zr = (localCoordinates.z + prevLocalCoordinates.z)/2;
 
-	if(dimensionType == THREE_D) {
+	switch(dimensionType){
+	case THREE_D:{ 
 		if(i != previ) {
 			xr = max2(xgrid[previ], xgrid[i]) - xgrid[0];
 		}
@@ -226,8 +228,9 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		bunemanJz[i][j+1][k] += Fz2*onemWx2*Wy2;
 		bunemanJz[i+1][j][k] += Fz2*Wx2*onemWy2;
 		bunemanJz[i+1][j+1][k] += Fz2*Wx2*Wy2;
-		
-	} else if(dimensionType == TWO_D_XY) {
+				 }
+		break;
+	case TWO_D_XY:{
 	
 		if(i != previ) {
 			xr = max2(xgrid[previ], xgrid[i]) - xgrid[0];
@@ -272,8 +275,10 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		bunemanJz[i][j+1][0] += Fz2*onemWx2*Wy2;
 		bunemanJz[i+1][j][0] += Fz2*Wx2*onemWy2;
 		bunemanJz[i+1][j+1][0] += Fz2*Wx2*Wy2;
+				  }
+		break;
 		
-	} else if(dimensionType == TWO_D_XZ) {
+	case TWO_D_XZ:{
 		if(i != previ) {
 			xr = max2(xgrid[previ], xgrid[i]) - xgrid[0];
 		}
@@ -316,7 +321,9 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 		bunemanJy[i][0][k+1] += Fy2*onemWx2*Wz2;
 		bunemanJy[i+1][0][k] += Fy2*Wx2*onemWz2;
 		bunemanJy[i+1][0][k+1] += Fy2*Wx2*Wz2;
-	} else if(dimensionType == ONE_D) {
+				  }
+		break;
+	case ONE_D:{
 		if(i != previ) {
 			xr = max2(xgrid[previ], xgrid[i]) - xgrid[0];
 		}
@@ -346,6 +353,12 @@ void Simulation::addParticleFluxZigzag(Particle* particle) {
 
 		bunemanJz[i][0][0] += Fz2*(1 - Wx2);
 		bunemanJz[i+1][0][0] += Fz2*Wx2;
+			   }
+		break;
+	default:
+		printf("wrong dimension type\n");
+		MPI_Finalize();
+		exit(0);
 	}
 }
 

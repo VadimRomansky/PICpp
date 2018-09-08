@@ -163,17 +163,22 @@ void Simulation::simulate() {
 		double procTime = 0;
 		if (solverType == BUNEMAN) {
 			tristanEvaluateBhalfStep();
-			//MPI_Barrier(cartComm);
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
-			//MPI_Barrier(cartComm);
+			/*if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock();
+			}
+			for(int i = 0; i < particles.size(); ++i) {
+				Particle* particle = particles[i];
+				updateBunemanCorrelationMaps(particle);
+			}
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock() - procTime;
+				printf("updating correlation maps = %g sec\n", procTime / CLOCKS_PER_SEC);
+			}*/
 			moveParticles();
-			//MPI_Barrier(cartComm);
 			tristanEvaluateBhalfStep();
-			//MPI_Barrier(cartComm);
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
-			//MPI_Barrier(cartComm);
 			tristanUpdateFlux();
-			//MPI_Barrier(cartComm);
 			////////////////////////////////
 			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 				procTime = clock();
@@ -181,18 +186,18 @@ void Simulation::simulate() {
 			for (int n = 0; n < smoothingCount; ++n) {
 				smoothBunemanEfieldGeneral(bunemanJx, bunemanJy, bunemanJz);
 			}
+			MPI_Barrier(cartComm);
 			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 				procTime = clock() - procTime;
 				printf("smoothing flux = %g sec\n", procTime / CLOCKS_PER_SEC);
 			}
-			//MPI_Barrier(cartComm);
 			//////////////////////////
 			tristanEvaluateE();
-			//MPI_Barrier(cartComm);
 			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 				procTime = clock();
 			}
 			exchangeBunemanEfield(bunemanEx, bunemanEy, bunemanEz);
+			MPI_Barrier(cartComm);
 			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 				procTime = clock() - procTime;
 				printf("exchange buneman E field = %g sec\n", procTime / CLOCKS_PER_SEC);
