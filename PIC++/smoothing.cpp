@@ -550,20 +550,21 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 
 	double smoothingmatrix[3][3][3];
 	createSmoothingMatrix(smoothingmatrix);
+
+	int jwidth = 1;
+	if(ynumberGeneral == 1) {
+		jwidth = 0;
+	}
+	int kwidth = 1;
+	if(znumberGeneral == 1) {
+		kwidth = 0;
+	}
 	////Ex
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
 			for (int k = minK; k < maxK; ++k) {
 				if (boundaryConditionTypeX == PERIODIC || i > 1 + additionalBinNumber && i < xnumberAdded - additionalBinNumber - 1) {
-					tempBunemanExParameter[i][j][k] = 0;
-					int jwidth = 1;
-					if(ynumberGeneral == 1) {
-						jwidth = 0;
-					}
-					int kwidth = 1;
-					if(znumberGeneral == 1) {
-						kwidth = 0;
-					}
+					tempBunemanExParameter[i][j][k] = 0;					
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
 							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
@@ -576,14 +577,6 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						tempBunemanExParameter[i][j][k] = fieldX[i][j][k];
 					} else {
 						tempBunemanExParameter[i][j][k] = 0;
-						int jwidth = 1;
-						if(ynumberGeneral == 1) {
-							jwidth = 0;
-						}
-						int kwidth = 1;
-						if(znumberGeneral == 1) {
-							kwidth = 0;
-						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
 							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
 								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
@@ -597,14 +590,6 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						tempBunemanExParameter[i][j][k] = fieldX[i][j][k];
 					} else {
 						tempBunemanExParameter[i][j][k] = 0;
-						int jwidth = 1;
-						if(ynumberGeneral == 1) {
-							jwidth = 0;
-						}
-						int kwidth = 1;
-						if(znumberGeneral == 1) {
-							kwidth = 0;
-						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
 							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
 								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
@@ -640,14 +625,6 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 			for (int k = minK; k < maxK; ++k) {
 				if (i > 1 + additionalBinNumber && i < xnumberAdded - 1 - additionalBinNumber) {
 					tempBunemanEyParameter[i][j][k] = 0;
-					int jwidth = 1;
-					if(ynumberGeneral == 1) {
-						jwidth = 0;
-					}
-					int kwidth = 1;
-					if(znumberGeneral == 1) {
-						kwidth = 0;
-					}
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
 							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
@@ -660,14 +637,6 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						tempBunemanEyParameter[i][j][k] = fieldY[i][j][k];
 					} else {
 						tempBunemanEyParameter[i][j][k] = 0;
-						int jwidth = 1;
-						if(ynumberGeneral == 1) {
-							jwidth = 0;
-						}
-						int kwidth = 1;
-						if(znumberGeneral == 1) {
-							kwidth = 0;
-						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
 							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
 								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
@@ -681,14 +650,6 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						tempBunemanEyParameter[i][j][k] = fieldY[i][j][k];
 					} else {
 						tempBunemanEyParameter[i][j][k] = 0;
-						int jwidth = 1;
-						if(ynumberGeneral == 1) {
-							jwidth = 0;
-						}
-						int kwidth = 1;
-						if(znumberGeneral == 1) {
-							kwidth = 0;
-						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
 							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
 								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
@@ -727,14 +688,6 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 			for (int k = minK; k < maxK; ++k) {
 				if (i > 1 + additionalBinNumber && i < xnumberAdded - 1 - additionalBinNumber) {
 					tempBunemanEzParameter[i][j][k] = 0;
-					int jwidth = 1;
-					if(ynumberGeneral == 1) {
-						jwidth = 0;
-					}
-					int kwidth = 1;
-					if(znumberGeneral == 1) {
-						kwidth = 0;
-					}
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
 							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
@@ -747,14 +700,6 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						tempBunemanEzParameter[i][j][k] = fieldZ[i][j][k];
 					} else {
 						tempBunemanEzParameter[i][j][k] = 0;
-						int jwidth = 1;
-						if(ynumberGeneral == 1) {
-							jwidth = 0;
-						}
-						int kwidth = 1;
-						if(znumberGeneral == 1) {
-							kwidth = 0;
-						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
 							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
 								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
@@ -768,14 +713,6 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						tempBunemanEzParameter[i][j][k] = fieldZ[i][j][k];
 					} else {
 						tempBunemanEzParameter[i][j][k] = 0;
-						int jwidth = 1;
-						if(ynumberGeneral == 1) {
-							jwidth = 0;
-						}
-						int kwidth = 1;
-						if(znumberGeneral == 1) {
-							kwidth = 0;
-						}
 						for (int tempI = -1; tempI <= 1; ++tempI) {
 							for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
 								for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {

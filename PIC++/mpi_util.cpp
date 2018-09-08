@@ -5295,12 +5295,12 @@ void collectOutDoubleParameters(std::vector < Particle* >& outParticles, double*
 		doubleBcount++;
 		outDoubleParticlesParameters[doubleBcount] = particle->dz;
 		doubleBcount++;
-		for (int j = 0; j < 3; ++j) {
+		/*for (int j = 0; j < 3; ++j) {
 			for (int k = 0; k < 3; ++k) {
 				outDoubleParticlesParameters[doubleBcount] = particle->rotationTensor.matrix[j][k];
 				doubleBcount++;
 			}
-		}
+		}*/
 	}
 }
 
@@ -5434,12 +5434,12 @@ void addParticlesFromParameters(std::vector < Particle* >& inParticles, std::vec
 		particle->prevMomentum.x = prevMomentumZ;
 		particle->crossBoundaryCount = crossBoundary;
 
-		for (int j = 0; j < 3; ++j) {
+		/*for (int j = 0; j < 3; ++j) {
 			for (int k = 0; k < 3; ++k) {
 				particle->rotationTensor.matrix[j][k] = inDoubleParticlesParameters[doubleBcount];
 				doubleBcount++;
 			}
-		}
+		}*/
 
 
 		inParticles.push_back(particle);
@@ -5603,7 +5603,7 @@ void sendLeftReceiveRightParticles(std::vector < Particle * >& outParticles, std
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 	const int numberOfIntegerParameters = 4;
-	const int numberOfDoubleParameters = 27;
+	const int numberOfDoubleParameters = 18;
 
 	int outParticlesNumber[1];
 	int inParticlesNumber[1];
@@ -5641,7 +5641,7 @@ void sendRightReceiveLeftParticles(std::vector < Particle * >& outParticles, std
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 	const int numberOfIntegerParameters = 4;
-	const int numberOfDoubleParameters = 27;
+	const int numberOfDoubleParameters = 18;
 
 	int outParticlesNumber[1];
 	int inParticlesNumber[1];
@@ -5682,7 +5682,7 @@ void sendFrontReceiveBackParticles(std::vector < Particle * >& outParticles, std
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 	const int numberOfIntegerParameters = 4;
-	const int numberOfDoubleParameters = 27;
+	const int numberOfDoubleParameters = 18;
 
 	int outParticlesNumber[1];
 	int inParticlesNumber[1];
@@ -5720,7 +5720,7 @@ void sendBackReceiveFrontParticles(std::vector < Particle * >& outParticles, std
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 	const int numberOfIntegerParameters = 4;
-	const int numberOfDoubleParameters = 27;
+	const int numberOfDoubleParameters = 18;
 
 	int outParticlesNumber[1];
 	int inParticlesNumber[1];
@@ -5761,7 +5761,7 @@ void sendBottomReceiveTopParticles(std::vector < Particle * >& outParticles, std
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 	const int numberOfIntegerParameters = 4;
-	const int numberOfDoubleParameters = 27;
+	const int numberOfDoubleParameters = 18;
 
 	int outParticlesNumber[1];
 	int inParticlesNumber[1];
@@ -5799,7 +5799,7 @@ void sendTopReceiveBottomParticles(std::vector < Particle * >& outParticles, std
 	int cartDim[MPI_dim];
 	MPI_Cart_get(cartComm, MPI_dim, cartDim, periods, cartCoord);
 	const int numberOfIntegerParameters = 4;
-	const int numberOfDoubleParameters = 27;
+	const int numberOfDoubleParameters = 18;
 
 	int outParticlesNumber[1];
 	int inParticlesNumber[1];

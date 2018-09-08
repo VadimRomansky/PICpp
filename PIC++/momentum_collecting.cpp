@@ -25,30 +25,42 @@ void Simulation::tristanUpdateFlux() {
 	//MPI_Barrier(cartComm);
 	if ((rank == 0) && (verbosity > 1)) printf("reseting tristan flux\n");
 	if ((rank == 0) && (verbosity > 1)) printLog("reseting tristan flux\n");
-	int particlePartsCount = 0;
-	for (int i = 0; i < xnumberAdded; ++i) {
-		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			for (int k = 0; k < znumberAdded + 1; ++k) {
-				bunemanJx[i][j][k] = 0;
+
+	int maxI = xnumberAdded;
+	int maxJ = ynumberAdded;
+	int maxK = znumberAdded;
+
+	for (int i = 0; i <= maxI; ++i) {
+		for (int j = 0; j <= maxJ; ++j) {
+			for (int k = 0; k <= maxK; ++k) {
+				if(i != maxI){
+					bunemanJx[i][j][k] = 0;
+				}
+				if(j != maxJ) {
+					bunemanJy[i][j][k] = 0;
+				}
+				if(k != maxK) {
+					bunemanJz[i][j][k] = 0;
+				}
 			}
 		}
 	}
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		for (int j = 0; j < ynumberAdded; ++j) {
-			for (int k = 0; k < znumberAdded + 1; ++k) {
+	/*for (int i = 0; i <= maxI; ++i) {
+		for (int j = 0; j < maxJ; ++j) {
+			for (int k = 0; k <= maxK; ++k) {
 				bunemanJy[i][j][k] = 0;
 			}
 		}
 	}
-	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			for (int k = 0; k < znumberAdded; ++k) {
+	for (int i = 0; i <= maxI; ++i) {
+		for (int j = 0; j <= maxJ; ++j) {
+			for (int k = 0; k < maxK; ++k) {
 				bunemanJz[i][j][k] = 0;
 			}
 		}
-	}
+	}*/
 
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 
 	if ((rank == 0) && (verbosity > 0)) printf("updating tristan flux\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("updating tristan flux\n");
@@ -57,7 +69,7 @@ void Simulation::tristanUpdateFlux() {
 		Particle* particle = particles[pcount];
 		addParticleFluxZigzag(particle);
 	}
-	MPI_Barrier(cartComm);
+	//MPI_Barrier(cartComm);
 	if(verbosity > 2) printf("exchanging buneman flux rank = %d\n", rank);
 
 	exchangeBunemanFlux();

@@ -26,22 +26,16 @@ void Simulation::moveParticles() {
 	//MPI_Barrier(cartComm);
 	if ((rank == 0) && (verbosity > 0)) printf("moving particles\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("moving particles\n");
-	int i = 0;
-
-	for (i = 0; i < particles.size(); ++i) {
-		if (i % 1000 == 0) {
-			if (verbosity > 2) {
-				printf("move particle number %d rank %d\n", i, rank);
-			}
-		}
-		if (solverType == BUNEMAN) {
+	if(solverType == BUNEMAN){
+		for (int i = 0; i < particles.size(); ++i) {
 			moveParticleTristan(particles[i]);
-		} else {
+		}
+	} else {
+		for (int i = 0; i < particles.size(); ++i) {
 			moveParticle(particles[i]);
 		}
-		//moveParticle(particles[i], 0, 10);
-		//particles[i]->momentum.x = 0;
 	}
+
 
 	//if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 	//removeEscapedParticles();
@@ -764,12 +758,12 @@ void Simulation::moveParticleTristan(Particle* particle) {
 			return;
 		}
 	}
-	if (particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
+	/*if (particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
 		escapedParticlesRight.push_back(particle);
 		particle->crossBoundaryCount++;
 		particle->escaped = true;
 		return;
-	}
+	}*/
 
 	if (ynumberGeneral > 1) {
 		if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {

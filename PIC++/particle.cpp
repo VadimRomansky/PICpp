@@ -215,19 +215,20 @@ double Particle::momentumAbs() const {
 
 Vector3d Particle::getVelocity() {
 	if (!velocityCashed) {
-		double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
+		//double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
 		//alertNaNOrInfinity(p2, "p2 = NaN in particle::getVelocity\n");
 		//if (p2 < relativisticPrecision * mass * mass * Simulation::speed_of_light_normalized_sqr) {
-		if (p2 < relativisticPrecision * mass * mass) {
-			velocity = momentum / mass;
-		} else {
+		//if (p2 < relativisticPrecision * mass * mass) {
+		//	velocity = momentum / mass;
+		//} else {
 			if (!gammaCashed) {
+				double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
 				//gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
 				gamma = sqrt(p2/(mc2*mc2) + 1.0);
 				gammaCashed = true;
 			}
 			velocity = momentum / (mass * gamma);
-		}
+		//}
 		velocityCashed = true;
 	}
 	return velocity;
@@ -237,12 +238,13 @@ double Particle::velocityX() {
 	if (velocityCashed) {
 		return velocity.x;
 	}
-	double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
+	//double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
 	//if (p2 < relativisticPrecision * mass * mass * Simulation::speed_of_light_normalized_sqr) {
-	if (p2 < relativisticPrecision * mass * mass) {
-		return momentum.x / mass;
-	}
+	//if (p2 < relativisticPrecision * mass * mass) {
+	//	return momentum.x / mass;
+	//}
 	if (!gammaCashed) {
+		double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
 		//gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
 		gamma = sqrt(p2/(mc2*mc2) + 1.0);
 		gammaCashed = true;
@@ -254,12 +256,13 @@ double Particle::velocityY() {
 	if (velocityCashed) {
 		return velocity.y;
 	}
-	double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
+	//double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
 	//if (p2 < relativisticPrecision * mass * mass * Simulation::speed_of_light_normalized_sqr) {
-	if (p2 < relativisticPrecision * mass * mass) {
-		return momentum.y / mass;
-	}
+	//if (p2 < relativisticPrecision * mass * mass) {
+	//	return momentum.y / mass;
+	//}
 	if (!gammaCashed) {
+		double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
 		//gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
 		gamma = sqrt(p2/(mc2*mc2) + 1.0);
 		gammaCashed = true;
@@ -271,12 +274,13 @@ double Particle::velocityZ() {
 	if (velocityCashed) {
 		return velocity.z;
 	}
-	double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
+	//double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
 	//if (p2 < relativisticPrecision * mass * mass * Simulation::speed_of_light_normalized_sqr) {
-	if (p2 < relativisticPrecision * mass * mass) {
-		return momentum.z / mass;
-	}
+	//if (p2 < relativisticPrecision * mass * mass) {
+	//	return momentum.z / mass;
+	//}
 	if (!gammaCashed) {
+		double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
 		//gamma = sqrt(p2 * Simulation::speed_of_light_normalized_sqr/(mc2*mc2) + 1.0);
 		gamma = sqrt(p2/(mc2*mc2) + 1.0);
 		gammaCashed = true;

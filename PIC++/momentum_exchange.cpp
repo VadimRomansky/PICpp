@@ -1819,46 +1819,46 @@ void Simulation::exchangeBunemanFlux() {
 
 void Simulation::sumBunemanJxAlongX() {
 	if (cartDim[0] > 1) {
-		double* inBufferRight = new double[(2 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1)];
-		double* outBufferRight = new double[(2 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1)];
-		double* inBufferLeft = new double[(2 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1)];
-		double* outBufferLeft = new double[(2 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1)];
+		//double* inBufferRight = new double[(2 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1)];
+		//double* outBufferRight = new double[(2 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1)];
+		//double* inBufferLeft = new double[(2 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1)];
+		//double* outBufferLeft = new double[(2 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded + 1)];
 
 		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendCellParametersToLeftReceiveFromRight(bunemanJx, outBufferLeft, tempBunemanJxRight, inBufferRight, xnumberAdded,
+			sendCellParametersToLeftReceiveFromRight(bunemanJx, leftOutMaximumBuffer, tempBunemanJxRight, rightInMaximumBuffer, xnumberAdded,
 			                                         ynumberAdded + 1, znumberAdded + 1, additionalBinNumber, cartComm, rank,
 			                                         leftRank, rightRank);
 		}
 		else if (cartCoord[0] == 0) {
-			receiveCellParametersRight(tempBunemanJxRight, inBufferRight, xnumberAdded, ynumberAdded + 1, znumberAdded + 1,
+			receiveCellParametersRight(tempBunemanJxRight, rightInMaximumBuffer, xnumberAdded, ynumberAdded + 1, znumberAdded + 1,
 			                           additionalBinNumber, cartComm, rank, rightRank);
 		}
 		else if (cartCoord[0] == cartDim[0] - 1) {
-			sendCellParametersLeft(bunemanJx, outBufferLeft, xnumberAdded, ynumberAdded + 1, znumberAdded + 1,
+			sendCellParametersLeft(bunemanJx, leftOutMaximumBuffer, xnumberAdded, ynumberAdded + 1, znumberAdded + 1,
 			                       additionalBinNumber, cartComm, rank, leftRank);
 		}
 
 		if (boundaryConditionTypeX == PERIODIC || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendCellParametersToRightReceiveFromLeft(bunemanJx, outBufferRight, tempBunemanJxLeft, inBufferLeft, xnumberAdded,
+			sendCellParametersToRightReceiveFromLeft(bunemanJx, rightOutMaximumBuffer, tempBunemanJxLeft, leftInMaximumBuffer, xnumberAdded,
 			                                         ynumberAdded + 1, znumberAdded + 1, additionalBinNumber, cartComm, rank,
 			                                         leftRank, rightRank);
 		}
 		else if (cartCoord[0] == 0) {
-			sendCellParametersRight(bunemanJx, outBufferRight, xnumberAdded, ynumberAdded + 1, znumberAdded + 1,
+			sendCellParametersRight(bunemanJx, rightOutMaximumBuffer, xnumberAdded, ynumberAdded + 1, znumberAdded + 1,
 			                        additionalBinNumber, cartComm, rank, rightRank);
 		}
 		else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveCellParametersLeft(tempBunemanJxLeft, inBufferLeft, xnumberAdded, ynumberAdded + 1, znumberAdded + 1,
+			receiveCellParametersLeft(tempBunemanJxLeft, leftInMaximumBuffer, xnumberAdded, ynumberAdded + 1, znumberAdded + 1,
 			                          additionalBinNumber, cartComm, rank, leftRank);
 		}
 
 		sumTempBunemanJxAlongX();
 
 
-		delete[] inBufferRight;
-		delete[] outBufferRight;
-		delete[] inBufferLeft;
-		delete[] outBufferLeft;
+		//delete[] inBufferRight;
+		//delete[] outBufferRight;
+		//delete[] inBufferLeft;
+		//delete[] outBufferLeft;
 
 	}
 	else {
@@ -1902,17 +1902,17 @@ void Simulation::sumBunemanJxAlongX() {
 
 void Simulation::sumBunemanJxAlongY() {
 	if (cartDim[1] > 1) {
-		double* inBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded) * (znumberAdded + 1)];
-		double* outBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded) * (znumberAdded + 1)];
-		double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded) * (znumberAdded + 1)];
-		double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded) * (znumberAdded + 1)];
+		//double* inBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded) * (znumberAdded + 1)];
+		//double* outBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded) * (znumberAdded + 1)];
+		//double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded) * (znumberAdded + 1)];
+		//double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded) * (znumberAdded + 1)];
 
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters y rank = %d\n", rank);
 
-		sendNodeParametersToFrontReceiveFromBack(bunemanJx, outBufferFront, tempBunemanJxBack, inBufferBack, xnumberAdded - 1,
+		sendNodeParametersToFrontReceiveFromBack(bunemanJx, frontOutMaximumBuffer, tempBunemanJxBack, backInMaximumBuffer, xnumberAdded - 1,
 		                                         ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, frontRank,
 		                                         backRank);
-		sendNodeParametersToBackReceiveFromFront(bunemanJx, outBufferBack, tempBunemanJxFront, inBufferFront,
+		sendNodeParametersToBackReceiveFromFront(bunemanJx, backOutMaximumBuffer, tempBunemanJxFront, frontInMaximumBuffer,
 		                                         xnumberAdded - 1, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
 		                                         rank, frontRank, backRank);
 
@@ -1922,10 +1922,10 @@ void Simulation::sumBunemanJxAlongY() {
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum node vector parameters y rank = %d\n", rank);
 
-		delete[] inBufferFront;
-		delete[] inBufferBack;
-		delete[] outBufferBack;
-		delete[] outBufferFront;
+		//delete[] inBufferFront;
+		//delete[] inBufferBack;
+		//delete[] outBufferBack;
+		//delete[] outBufferFront;
 
 	}
 	else {
@@ -1952,17 +1952,17 @@ void Simulation::sumBunemanJxAlongY() {
 
 void Simulation::sumBunemanJxAlongZ() {
 	if (cartDim[2] > 1) {
-		double* inBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded)];
-		double* outBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded)];
-		double* inBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded)];
-		double* outBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded)];
+		//double* inBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded)];
+		//double* outBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded)];
+		//double* inBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded)];
+		//double* outBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (xnumberAdded)];
 
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters z rank = %d\n", rank);
 
-		sendNodeParametersToBottomReceiveFromTop(bunemanJx, outBufferBottom, tempBunemanJxTop, inBufferTop, xnumberAdded - 1,
+		sendNodeParametersToBottomReceiveFromTop(bunemanJx, bottomOutMaximumBuffer, tempBunemanJxTop, topInMaximumBuffer, xnumberAdded - 1,
 		                                         ynumberAdded, znumberAdded, additionalBinNumber, cartComm, rank, bottomRank,
 		                                         topRank);
-		sendNodeParametersToTopReceiveFromBottom(bunemanJx, outBufferTop, tempBunemanJxBottom, inBufferBottom,
+		sendNodeParametersToTopReceiveFromBottom(bunemanJx, topOutMaximumBuffer, tempBunemanJxBottom, bottomInMaximumBuffer,
 		                                         xnumberAdded - 1, ynumberAdded, znumberAdded, additionalBinNumber, cartComm,
 		                                         rank, bottomRank, topRank);
 
@@ -1970,10 +1970,10 @@ void Simulation::sumBunemanJxAlongZ() {
 
 		if ((verbosity > 2)) printf("deleting buffer in sum node vector parameters z rank = %d\n", rank);
 
-		delete[] inBufferTop;
-		delete[] inBufferBottom;
-		delete[] outBufferBottom;
-		delete[] outBufferTop;
+		//delete[] inBufferTop;
+		//delete[] inBufferBottom;
+		//delete[] outBufferBottom;
+		//delete[] outBufferTop;
 
 	}
 	else {
@@ -2000,40 +2000,40 @@ void Simulation::sumBunemanJxAlongZ() {
 void Simulation::sumBunemanJyAlongX() {
 	if (cartDim[0] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum node vector parameters x\n");
-		double* inBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (znumberAdded + 1)];
-		double* outBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (znumberAdded + 1)];
-		double* inBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (znumberAdded + 1)];
-		double* outBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (znumberAdded + 1)];
+		//double* inBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (znumberAdded + 1)];
+		//double* outBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (znumberAdded + 1)];
+		//double* inBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (znumberAdded + 1)];
+		//double* outBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (znumberAdded + 1)];
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
 		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeParametersToLeftReceiveFromRight(bunemanJy, outBufferLeft, tempBunemanJyRight, inBufferRight, xnumberAdded,
+			sendNodeParametersToLeftReceiveFromRight(bunemanJy, leftOutMaximumBuffer, tempBunemanJyRight, rightInMaximumBuffer, xnumberAdded,
 			                                         ynumberAdded - 1, znumberAdded, additionalBinNumber, cartComm, rank,
 			                                         leftRank, rightRank);
 		}
 		else if (cartCoord[0] == 0) {
-			receiveNodeParametersRight(tempBunemanJyRight, inBufferRight, xnumberAdded, ynumberAdded - 1, znumberAdded,
+			receiveNodeParametersRight(tempBunemanJyRight, rightInMaximumBuffer, xnumberAdded, ynumberAdded - 1, znumberAdded,
 			                           additionalBinNumber, cartComm, rank, rightRank);
 		}
 		else if (cartCoord[0] == cartDim[0] - 1) {
-			sendNodeParametersLeft(bunemanJy, outBufferLeft, xnumberAdded, ynumberAdded - 1, znumberAdded, additionalBinNumber,
+			sendNodeParametersLeft(bunemanJy, leftOutMaximumBuffer, xnumberAdded, ynumberAdded - 1, znumberAdded, additionalBinNumber,
 			                       cartComm, rank, leftRank);
 		}
 
 		//MPI_Barrier(cartComm);
 
 		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeParametersToRightReceiveFromLeft(bunemanJy, outBufferRight, tempBunemanJyLeft, inBufferLeft, xnumberAdded,
+			sendNodeParametersToRightReceiveFromLeft(bunemanJy, rightOutMaximumBuffer, tempBunemanJyLeft, leftInMaximumBuffer, xnumberAdded,
 			                                         ynumberAdded - 1, znumberAdded, additionalBinNumber, cartComm, rank,
 			                                         leftRank, rightRank);
 		}
 		else if (cartCoord[0] == 0) {
-			sendNodeParametersRight(bunemanJy, outBufferRight, xnumberAdded, ynumberAdded - 1, znumberAdded, additionalBinNumber,
+			sendNodeParametersRight(bunemanJy, rightOutMaximumBuffer, xnumberAdded, ynumberAdded - 1, znumberAdded, additionalBinNumber,
 			                        cartComm, rank, rightRank);
 		}
 		else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveNodeParametersLeft(tempBunemanJyLeft, inBufferLeft, xnumberAdded, ynumberAdded - 1, znumberAdded,
+			receiveNodeParametersLeft(tempBunemanJyLeft, leftInMaximumBuffer, xnumberAdded, ynumberAdded - 1, znumberAdded,
 			                          additionalBinNumber, cartComm, rank, leftRank);
 		}
 
@@ -2043,10 +2043,10 @@ void Simulation::sumBunemanJyAlongX() {
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum node vector parameters x rank = %d\n", rank);
-		delete[] inBufferLeft;
-		delete[] inBufferRight;
-		delete[] outBufferLeft;
-		delete[] outBufferRight;
+		//delete[] inBufferLeft;
+		//delete[] inBufferRight;
+		//delete[] outBufferLeft;
+		//delete[] outBufferRight;
 	}
 	else {
 		if (boundaryConditionTypeX == PERIODIC) {
@@ -2064,15 +2064,15 @@ void Simulation::sumBunemanJyAlongX() {
 
 void Simulation::sumBunemanJyAlongY() {
 	if (cartDim[1] > 1) {
-		double* inBufferBack = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1)];
-		double* outBufferBack = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1)];
-		double* inBufferFront = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1)];
-		double* outBufferFront = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1)];
+		//double* inBufferBack = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1)];
+		//double* outBufferBack = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1)];
+		//double* inBufferFront = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1)];
+		//double* outBufferFront = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded + 1)];
 
-		sendCellParametersToFrontReceiveFromBack(bunemanJy, outBufferFront, tempBunemanJyBack, inBufferBack, xnumberAdded + 1,
+		sendCellParametersToFrontReceiveFromBack(bunemanJy, frontOutMaximumBuffer, tempBunemanJyBack, backInMaximumBuffer, xnumberAdded + 1,
 		                                         ynumberAdded, znumberAdded + 1, additionalBinNumber, cartComm, rank,
 		                                         frontRank, backRank);
-		sendCellParametersToBackReceiveFromFront(bunemanJy, outBufferBack, tempBunemanJyFront, inBufferFront,
+		sendCellParametersToBackReceiveFromFront(bunemanJy, backOutMaximumBuffer, tempBunemanJyFront, frontInMaximumBuffer,
 		                                         xnumberAdded + 1, ynumberAdded, znumberAdded + 1, additionalBinNumber,
 		                                         cartComm, rank, frontRank, backRank);
 
@@ -2081,10 +2081,10 @@ void Simulation::sumBunemanJyAlongY() {
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum charge density hat y rank = %d\n", rank);
-		delete[] inBufferFront;
-		delete[] outBufferFront;
-		delete[] inBufferBack;
-		delete[] outBufferBack;
+		//delete[] inBufferFront;
+		//delete[] outBufferFront;
+		//delete[] inBufferBack;
+		//delete[] outBufferBack;
 	}
 	else {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
@@ -2107,17 +2107,17 @@ void Simulation::sumBunemanJyAlongY() {
 
 void Simulation::sumBunemanJyAlongZ() {
 	if (cartDim[2] > 1) {
-		double* inBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (xnumberAdded + 1)];
-		double* outBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (xnumberAdded + 1)];
-		double* inBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (xnumberAdded + 1)];
-		double* outBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (xnumberAdded + 1)];
+		//double* inBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (xnumberAdded + 1)];
+		//double* outBufferTop = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (xnumberAdded + 1)];
+		//double* inBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (xnumberAdded + 1)];
+		//double* outBufferBottom = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded) * (xnumberAdded + 1)];
 
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters z rank = %d\n", rank);
 
-		sendNodeParametersToBottomReceiveFromTop(bunemanJy, outBufferBottom, tempBunemanJyTop, inBufferTop, xnumberAdded,
+		sendNodeParametersToBottomReceiveFromTop(bunemanJy, bottomOutMaximumBuffer, tempBunemanJyTop, topInMaximumBuffer, xnumberAdded,
 		                                         ynumberAdded - 1, znumberAdded, additionalBinNumber, cartComm, rank,
 		                                         bottomRank, topRank);
-		sendNodeParametersToTopReceiveFromBottom(bunemanJy, outBufferTop, tempBunemanJyBottom, inBufferBottom, xnumberAdded,
+		sendNodeParametersToTopReceiveFromBottom(bunemanJy, topOutMaximumBuffer, tempBunemanJyBottom, bottomInMaximumBuffer, xnumberAdded,
 		                                         ynumberAdded - 1, znumberAdded, additionalBinNumber, cartComm, rank,
 		                                         bottomRank, topRank);
 
@@ -2125,10 +2125,10 @@ void Simulation::sumBunemanJyAlongZ() {
 
 		if ((verbosity > 2)) printf("deleting buffer in sum node vector parameters z rank = %d\n", rank);
 
-		delete[] inBufferTop;
-		delete[] inBufferBottom;
-		delete[] outBufferBottom;
-		delete[] outBufferTop;
+		//delete[] inBufferTop;
+		//delete[] inBufferBottom;
+		//delete[] outBufferBottom;
+		//delete[] outBufferTop;
 
 	}
 	else {
@@ -2155,40 +2155,40 @@ void Simulation::sumBunemanJyAlongZ() {
 void Simulation::sumBunemanJzAlongX() {
 	if (cartDim[0] > 1) {
 		if ((verbosity > 2)) printf("crating buffer in sum node vector parameters x\n");
-		double* inBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded)];
-		double* outBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded)];
-		double* inBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded)];
-		double* outBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded)];
+		//double* inBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded)];
+		//double* outBufferRight = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded)];
+		//double* inBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded)];
+		//double* outBufferLeft = new double[(3 + 2 * additionalBinNumber) * (ynumberAdded + 1) * (znumberAdded)];
 
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters x rank = %d\n", rank);
 		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeParametersToLeftReceiveFromRight(bunemanJz, outBufferLeft, tempBunemanJzRight, inBufferRight, xnumberAdded,
+			sendNodeParametersToLeftReceiveFromRight(bunemanJz, leftOutMaximumBuffer, tempBunemanJzRight, rightInMaximumBuffer, xnumberAdded,
 			                                         ynumberAdded, znumberAdded - 1, additionalBinNumber, cartComm, rank,
 			                                         leftRank, rightRank);
 		}
 		else if (cartCoord[0] == 0) {
-			receiveNodeParametersRight(tempBunemanJzRight, inBufferRight, xnumberAdded, ynumberAdded, znumberAdded - 1,
+			receiveNodeParametersRight(tempBunemanJzRight, rightInMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded - 1,
 			                           additionalBinNumber, cartComm, rank, rightRank);
 		}
 		else if (cartCoord[0] == cartDim[0] - 1) {
-			sendNodeParametersLeft(bunemanJz, outBufferLeft, xnumberAdded, ynumberAdded, znumberAdded - 1, additionalBinNumber,
+			sendNodeParametersLeft(bunemanJz, leftOutMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded - 1, additionalBinNumber,
 			                       cartComm, rank, leftRank);
 		}
 
 		//MPI_Barrier(cartComm);
 
 		if ((boundaryConditionTypeX == PERIODIC) || (cartCoord[0] > 0 && cartCoord[0] < cartDim[0] - 1)) {
-			sendNodeParametersToRightReceiveFromLeft(bunemanJz, outBufferRight, tempBunemanJzLeft, inBufferLeft, xnumberAdded,
+			sendNodeParametersToRightReceiveFromLeft(bunemanJz, rightOutMaximumBuffer, tempBunemanJzLeft, leftInMaximumBuffer, xnumberAdded,
 			                                         ynumberAdded, znumberAdded - 1, additionalBinNumber, cartComm, rank,
 			                                         leftRank, rightRank);
 		}
 		else if (cartCoord[0] == 0) {
-			sendNodeParametersRight(bunemanJz, outBufferRight, xnumberAdded, ynumberAdded, znumberAdded - 1, additionalBinNumber,
+			sendNodeParametersRight(bunemanJz, rightOutMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded - 1, additionalBinNumber,
 			                        cartComm, rank, rightRank);
 		}
 		else if (cartCoord[0] == cartDim[0] - 1) {
-			receiveNodeParametersLeft(tempBunemanJzLeft, inBufferLeft, xnumberAdded, ynumberAdded, znumberAdded - 1,
+			receiveNodeParametersLeft(tempBunemanJzLeft, leftInMaximumBuffer, xnumberAdded, ynumberAdded, znumberAdded - 1,
 			                          additionalBinNumber, cartComm, rank, leftRank);
 		}
 
@@ -2196,10 +2196,10 @@ void Simulation::sumBunemanJzAlongX() {
 		sumTempBunemanJzAlongX();
 		//MPI_Barrier(cartComm);
 		if ((verbosity > 2)) printf("deleting buffer in sum node vector parameters x rank = %d\n", rank);
-		delete[] inBufferLeft;
-		delete[] inBufferRight;
-		delete[] outBufferLeft;
-		delete[] outBufferRight;
+		//delete[] inBufferLeft;
+		//delete[] inBufferRight;
+		//delete[] outBufferLeft;
+		//delete[] outBufferRight;
 	}
 	else {
 		if (boundaryConditionTypeX == PERIODIC) {
@@ -2217,17 +2217,17 @@ void Simulation::sumBunemanJzAlongX() {
 
 void Simulation::sumBunemanJzAlongY() {
 	if (cartDim[1] > 1) {
-		double* inBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded) ];
-		double* outBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded)];
-		double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded)];
-		double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded)];
+		//double* inBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded) ];
+		//double* outBufferFront = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded)];
+		//double* inBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded)];
+		//double* outBufferBack = new double[(3 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (znumberAdded)];
 
 		if ((verbosity > 2)) printf("sending left flux sum node vector parameters y rank = %d\n", rank);
 
-		sendNodeParametersToFrontReceiveFromBack(bunemanJz, outBufferFront, tempBunemanJzBack, inBufferBack, xnumberAdded,
+		sendNodeParametersToFrontReceiveFromBack(bunemanJz, frontOutMaximumBuffer, tempBunemanJzBack, backInMaximumBuffer, xnumberAdded,
 		                                         ynumberAdded, znumberAdded - 1, additionalBinNumber, cartComm, rank,
 		                                         frontRank, backRank);
-		sendNodeParametersToBackReceiveFromFront(bunemanJz, outBufferBack, tempBunemanJzFront, inBufferFront, xnumberAdded,
+		sendNodeParametersToBackReceiveFromFront(bunemanJz, backOutMaximumBuffer, tempBunemanJzFront, frontInMaximumBuffer, xnumberAdded,
 		                                         ynumberAdded, znumberAdded - 1, additionalBinNumber, cartComm, rank,
 		                                         frontRank, backRank);
 
@@ -2235,10 +2235,10 @@ void Simulation::sumBunemanJzAlongY() {
 
 		if ((verbosity > 2)) printf("deleting buffer in sum node vector parameters y rank = %d\n", rank);
 
-		delete[] inBufferFront;
-		delete[] inBufferBack;
-		delete[] outBufferBack;
-		delete[] outBufferFront;
+		//delete[] inBufferFront;
+		//delete[] inBufferBack;
+		//delete[] outBufferBack;
+		//delete[] outBufferFront;
 	}
 	else {
 		if (ynumberGeneral == 1) {
@@ -2263,25 +2263,25 @@ void Simulation::sumBunemanJzAlongY() {
 
 void Simulation::sumBunemanJzAlongZ() {
 	if (cartDim[2] > 1) {
-		double* inBufferTop = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1)];
-		double* outBufferTop = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1)];
-		double* inBufferBottom = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1)];
-		double* outBufferBottom = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1)];
+		//double* inBufferTop = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1)];
+		//double* outBufferTop = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1)];
+		//double* inBufferBottom = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1)];
+		//double* outBufferBottom = new double[(2 + 2 * additionalBinNumber) * (xnumberAdded + 1) * (ynumberAdded + 1)];
 
-		sendCellParametersToBottomReceiveFromTop(bunemanJz, outBufferBottom, tempBunemanJzTop, inBufferTop, xnumberAdded + 1,
+		sendCellParametersToBottomReceiveFromTop(bunemanJz, bottomOutMaximumBuffer, tempBunemanJzTop, topInMaximumBuffer, xnumberAdded + 1,
 		                                         ynumberAdded + 1, znumberAdded, additionalBinNumber, cartComm, rank,
 		                                         bottomRank, topRank);
-		sendCellParametersToTopReceiveFromBottom(bunemanJz, outBufferTop, tempBunemanJzBottom, inBufferBottom,
+		sendCellParametersToTopReceiveFromBottom(bunemanJz, topOutMaximumBuffer, tempBunemanJzBottom, bottomInMaximumBuffer,
 		                                         xnumberAdded + 1, ynumberAdded + 1, znumberAdded, additionalBinNumber,
 		                                         cartComm, rank, bottomRank, topRank);
 
 		sumTempBunemanJzAlongZ();
 
 		if ((verbosity > 2)) printf("deleting buffer in sum charge density hat z rank = %d\n", rank);
-		delete[] inBufferBottom;
-		delete[] outBufferBottom;
-		delete[] inBufferTop;
-		delete[] outBufferTop;
+		//delete[] inBufferBottom;
+		//delete[] outBufferBottom;
+		//delete[] inBufferTop;
+		//delete[] outBufferTop;
 	}
 	else {
 		for (int j = 0; j < ynumberAdded + 1; ++j) {

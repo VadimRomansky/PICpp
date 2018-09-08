@@ -163,11 +163,17 @@ void Simulation::simulate() {
 		double procTime = 0;
 		if (solverType == BUNEMAN) {
 			tristanEvaluateBhalfStep();
+			//MPI_Barrier(cartComm);
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
+			//MPI_Barrier(cartComm);
 			moveParticles();
+			//MPI_Barrier(cartComm);
 			tristanEvaluateBhalfStep();
+			//MPI_Barrier(cartComm);
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
+			//MPI_Barrier(cartComm);
 			tristanUpdateFlux();
+			//MPI_Barrier(cartComm);
 			////////////////////////////////
 			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 				procTime = clock();
@@ -179,9 +185,18 @@ void Simulation::simulate() {
 				procTime = clock() - procTime;
 				printf("smoothing flux = %g sec\n", procTime / CLOCKS_PER_SEC);
 			}
+			//MPI_Barrier(cartComm);
 			//////////////////////////
 			tristanEvaluateE();
+			//MPI_Barrier(cartComm);
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock();
+			}
 			exchangeBunemanEfield(bunemanEx, bunemanEy, bunemanEz);
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock() - procTime;
+				printf("exchange buneman E field = %g sec\n", procTime / CLOCKS_PER_SEC);
+			}
 		} else {
 			evaluateParticlesRotationTensor();
 

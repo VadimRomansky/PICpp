@@ -143,7 +143,7 @@ void Simulation::tristanEvaluateE() {
 	}
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		procTime = clock() - procTime;
-		printf("evaluating magnetic field time = %g sec\n", procTime / CLOCKS_PER_SEC);
+		printf("evaluating electric field time = %g sec\n", procTime / CLOCKS_PER_SEC);
 	}
 }
 

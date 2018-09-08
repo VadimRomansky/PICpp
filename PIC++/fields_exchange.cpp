@@ -3468,6 +3468,10 @@ void Simulation::exchangeBunemanEzAlongZ(double*** fieldZ) {
 }
 
 void Simulation::exchangeBunemanBfield(double*** fieldX, double*** fieldY, double*** fieldZ) {
+	double procTime;
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
 	exchangeBunemanBxAlongX(fieldX);
 	exchangeBunemanBxAlongY(fieldX);
 	exchangeBunemanBxAlongZ(fieldX);
@@ -3479,6 +3483,10 @@ void Simulation::exchangeBunemanBfield(double*** fieldX, double*** fieldY, doubl
 	exchangeBunemanBzAlongX(fieldZ);
 	exchangeBunemanBzAlongY(fieldZ);
 	exchangeBunemanBzAlongZ(fieldZ);
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("exchange buneman magnetic field = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}
 }
 
 void Simulation::exchangeBunemanBxAlongX(double*** fieldX) {
