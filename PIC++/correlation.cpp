@@ -566,25 +566,25 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 		B.y += bunemanBy[leftCellXindex][leftNodeYindex][leftCellZindex]*WleftCellX*WleftNodeY*WleftCellZ;
 		B.z += bunemanBz[leftCellXindex][leftCellYindex][leftNodeZindex]*WleftCellX*WleftCellY*WleftNodeZ;
 		////
-		E.x += bunemanEx[leftCellXindex][leftNodeYindex][rightNodeZindex]*WleftCellX*WleftNodeY*WleftNodeZ;
-		E.y += bunemanEy[leftNodeXindex][leftCellYindex][rightNodeZindex]*WleftNodeX*WleftCellY*WleftNodeZ;
-		E.z += bunemanEz[leftNodeXindex][leftNodeYindex][rightCellZindex]*WleftNodeX*WleftNodeY*WleftCellZ;
+		E.x += bunemanEx[leftCellXindex][leftNodeYindex][rightNodeZindex]*WleftCellX*WleftNodeY*WrightNodeZ;
+		E.y += bunemanEy[leftNodeXindex][leftCellYindex][rightNodeZindex]*WleftNodeX*WleftCellY*WrightNodeZ;
+		E.z += bunemanEz[leftNodeXindex][leftNodeYindex][rightCellZindex]*WleftNodeX*WleftNodeY*WrightCellZ;
 
 		B.x += bunemanBx[leftNodeXindex][leftCellYindex][rightCellZindex]*WleftNodeX*WleftCellY*WrightCellZ;
 		B.y += bunemanBy[leftCellXindex][leftNodeYindex][rightCellZindex]*WleftCellX*WleftNodeY*WrightCellZ;
 		B.z += bunemanBz[leftCellXindex][leftCellYindex][rightNodeZindex]*WleftCellX*WleftCellY*WrightNodeZ;
 		////
-		E.x += bunemanEx[leftCellXindex][rightNodeYindex][leftNodeZindex]*WleftCellX*WleftNodeY*WleftNodeZ;
-		E.y += bunemanEy[leftNodeXindex][rightCellYindex][leftNodeZindex]*WleftNodeX*WleftCellY*WleftNodeZ;
-		E.z += bunemanEz[leftNodeXindex][rightNodeYindex][leftCellZindex]*WleftNodeX*WleftNodeY*WleftCellZ;
+		E.x += bunemanEx[leftCellXindex][rightNodeYindex][leftNodeZindex]*WleftCellX*WrightNodeY*WleftNodeZ;
+		E.y += bunemanEy[leftNodeXindex][rightCellYindex][leftNodeZindex]*WleftNodeX*WrightCellY*WleftNodeZ;
+		E.z += bunemanEz[leftNodeXindex][rightNodeYindex][leftCellZindex]*WleftNodeX*WrightNodeY*WleftCellZ;
 
 		B.x += bunemanBx[leftNodeXindex][rightCellYindex][leftCellZindex]*WleftNodeX*WrightCellY*WleftCellZ;
 		B.y += bunemanBy[leftCellXindex][rightNodeYindex][leftCellZindex]*WleftCellX*WrightNodeY*WleftCellZ;
 		B.z += bunemanBz[leftCellXindex][rightCellYindex][leftNodeZindex]*WleftCellX*WrightCellY*WleftNodeZ;
 		/////
-		E.x += bunemanEx[leftCellXindex][rightNodeYindex][rightNodeZindex]*WleftCellX*WleftNodeY*WleftNodeZ;
-		E.y += bunemanEy[leftNodeXindex][rightCellYindex][rightNodeZindex]*WleftNodeX*WleftCellY*WleftNodeZ;
-		E.z += bunemanEz[leftNodeXindex][rightNodeYindex][rightCellZindex]*WleftNodeX*WleftNodeY*WleftCellZ;
+		E.x += bunemanEx[leftCellXindex][rightNodeYindex][rightNodeZindex]*WleftCellX*WrightNodeY*WrightNodeZ;
+		E.y += bunemanEy[leftNodeXindex][rightCellYindex][rightNodeZindex]*WleftNodeX*WrightCellY*WrightNodeZ;
+		E.z += bunemanEz[leftNodeXindex][rightNodeYindex][rightCellZindex]*WleftNodeX*WrightNodeY*WrightCellZ;
 
 		B.x += bunemanBx[leftNodeXindex][rightCellYindex][rightCellZindex]*WleftNodeX*WrightCellY*WrightCellZ;
 		B.y += bunemanBy[leftCellXindex][rightNodeYindex][rightCellZindex]*WleftCellX*WrightNodeY*WrightCellZ;
@@ -599,25 +599,25 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 		B.y += bunemanBy[rightCellXindex][leftNodeYindex][leftCellZindex]*WrightCellX*WleftNodeY*WleftCellZ;
 		B.z += bunemanBz[rightCellXindex][leftCellYindex][leftNodeZindex]*WrightCellX*WleftCellY*WleftNodeZ;
 		////
-		E.x += bunemanEx[rightCellXindex][leftNodeYindex][rightNodeZindex]*WrightCellX*WleftNodeY*WleftNodeZ;
-		E.y += bunemanEy[rightNodeXindex][leftCellYindex][rightNodeZindex]*WrightNodeX*WleftCellY*WleftNodeZ;
-		E.z += bunemanEz[rightNodeXindex][leftNodeYindex][rightCellZindex]*WrightNodeX*WleftNodeY*WleftCellZ;
+		E.x += bunemanEx[rightCellXindex][leftNodeYindex][rightNodeZindex]*WrightCellX*WleftNodeY*WrightNodeZ;
+		E.y += bunemanEy[rightNodeXindex][leftCellYindex][rightNodeZindex]*WrightNodeX*WleftCellY*WrightNodeZ;
+		E.z += bunemanEz[rightNodeXindex][leftNodeYindex][rightCellZindex]*WrightNodeX*WleftNodeY*WrightCellZ;
 
 		B.x += bunemanBx[rightNodeXindex][leftCellYindex][rightCellZindex]*WrightNodeX*WleftCellY*WrightCellZ;
 		B.y += bunemanBy[rightCellXindex][leftNodeYindex][rightCellZindex]*WrightCellX*WleftNodeY*WrightCellZ;
 		B.z += bunemanBz[rightCellXindex][leftCellYindex][rightNodeZindex]*WrightCellX*WleftCellY*WrightNodeZ;
 		////
-		E.x += bunemanEx[rightCellXindex][rightNodeYindex][leftNodeZindex]*WrightCellX*WleftNodeY*WleftNodeZ;
-		E.y += bunemanEy[rightNodeXindex][rightCellYindex][leftNodeZindex]*WrightNodeX*WleftCellY*WleftNodeZ;
-		E.z += bunemanEz[rightNodeXindex][rightNodeYindex][leftCellZindex]*WrightNodeX*WleftNodeY*WleftCellZ;
+		E.x += bunemanEx[rightCellXindex][rightNodeYindex][leftNodeZindex]*WrightCellX*WrightNodeY*WleftNodeZ;
+		E.y += bunemanEy[rightNodeXindex][rightCellYindex][leftNodeZindex]*WrightNodeX*WrightCellY*WleftNodeZ;
+		E.z += bunemanEz[rightNodeXindex][rightNodeYindex][leftCellZindex]*WrightNodeX*WrightNodeY*WleftCellZ;
 
 		B.x += bunemanBx[rightNodeXindex][rightCellYindex][leftCellZindex]*WrightNodeX*WrightCellY*WleftCellZ;
 		B.y += bunemanBy[rightCellXindex][rightNodeYindex][leftCellZindex]*WrightCellX*WrightNodeY*WleftCellZ;
 		B.z += bunemanBz[rightCellXindex][rightCellYindex][leftNodeZindex]*WrightCellX*WrightCellY*WleftNodeZ;
 		/////
-		E.x += bunemanEx[rightCellXindex][rightNodeYindex][rightNodeZindex]*WrightCellX*WleftNodeY*WleftNodeZ;
-		E.y += bunemanEy[rightNodeXindex][rightCellYindex][rightNodeZindex]*WrightNodeX*WleftCellY*WleftNodeZ;
-		E.z += bunemanEz[rightNodeXindex][rightNodeYindex][rightCellZindex]*WrightNodeX*WleftNodeY*WleftCellZ;
+		E.x += bunemanEx[rightCellXindex][rightNodeYindex][rightNodeZindex]*WrightCellX*WrightNodeY*WrightNodeZ;
+		E.y += bunemanEy[rightNodeXindex][rightCellYindex][rightNodeZindex]*WrightNodeX*WrightCellY*WrightNodeZ;
+		E.z += bunemanEz[rightNodeXindex][rightNodeYindex][rightCellZindex]*WrightNodeX*WrightNodeY*WrightCellZ;
 
 		B.x += bunemanBx[rightNodeXindex][rightCellYindex][rightCellZindex]*WrightNodeX*WrightCellY*WrightCellZ;
 		B.y += bunemanBy[rightCellXindex][rightNodeYindex][rightCellZindex]*WrightCellX*WrightNodeY*WrightCellZ;
@@ -633,9 +633,9 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 		B.y += bunemanBy[leftCellXindex][leftNodeYindex][0]*WleftCellX*WleftNodeY;
 		B.z += bunemanBz[leftCellXindex][leftCellYindex][0]*WleftCellX*WleftCellY;
 
-		E.x += bunemanEx[leftCellXindex][rightNodeYindex][0]*WleftCellX*WleftNodeY;
-		E.y += bunemanEy[leftNodeXindex][rightCellYindex][0]*WleftNodeX*WleftCellY;
-		E.z += bunemanEz[leftNodeXindex][rightNodeYindex][0]*WleftNodeX*WleftNodeY;
+		E.x += bunemanEx[leftCellXindex][rightNodeYindex][0]*WleftCellX*WrightNodeY;
+		E.y += bunemanEy[leftNodeXindex][rightCellYindex][0]*WleftNodeX*WrightCellY;
+		E.z += bunemanEz[leftNodeXindex][rightNodeYindex][0]*WleftNodeX*WrightNodeY;
 
 		B.x += bunemanBx[leftNodeXindex][rightCellYindex][0]*WleftNodeX*WrightCellY;
 		B.y += bunemanBy[leftCellXindex][rightNodeYindex][0]*WleftCellX*WrightNodeY;
@@ -649,9 +649,9 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 		B.y += bunemanBy[rightCellXindex][leftNodeYindex][0]*WrightCellX*WleftNodeY;
 		B.z += bunemanBz[rightCellXindex][leftCellYindex][0]*WrightCellX*WleftCellY;
 
-		E.x += bunemanEx[rightCellXindex][rightNodeYindex][0]*WrightCellX*WleftNodeY;
-		E.y += bunemanEy[rightNodeXindex][rightCellYindex][0]*WrightNodeX*WleftCellY;
-		E.z += bunemanEz[rightNodeXindex][rightNodeYindex][0]*WrightNodeX*WleftNodeY;
+		E.x += bunemanEx[rightCellXindex][rightNodeYindex][0]*WrightCellX*WrightNodeY;
+		E.y += bunemanEy[rightNodeXindex][rightCellYindex][0]*WrightNodeX*WrightCellY;
+		E.z += bunemanEz[rightNodeXindex][rightNodeYindex][0]*WrightNodeX*WrightNodeY;
 
 		B.x += bunemanBx[rightNodeXindex][rightCellYindex][0]*WrightNodeX*WrightCellY;
 		B.y += bunemanBy[rightCellXindex][rightNodeYindex][0]*WrightCellX*WrightNodeY;
@@ -666,9 +666,9 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 		B.y += bunemanBy[leftCellXindex][0][leftCellZindex]*WleftCellX*WleftCellZ;
 		B.z += bunemanBz[leftCellXindex][0][leftNodeZindex]*WleftCellX*WleftNodeZ;
 
-		E.x += bunemanEx[leftCellXindex][0][rightNodeZindex]*WleftCellX*WleftNodeZ;
-		E.y += bunemanEy[leftNodeXindex][0][rightNodeZindex]*WleftNodeX*WleftNodeZ;
-		E.z += bunemanEz[leftNodeXindex][0][rightCellZindex]*WleftNodeX*WleftCellZ;
+		E.x += bunemanEx[leftCellXindex][0][rightNodeZindex]*WleftCellX*WrightNodeZ;
+		E.y += bunemanEy[leftNodeXindex][0][rightNodeZindex]*WleftNodeX*WrightNodeZ;
+		E.z += bunemanEz[leftNodeXindex][0][rightCellZindex]*WleftNodeX*WrightCellZ;
 
 		B.x += bunemanBx[leftNodeXindex][0][rightCellZindex]*WleftNodeX*WrightCellZ;
 		B.y += bunemanBy[leftCellXindex][0][rightCellZindex]*WleftCellX*WrightCellZ;
@@ -682,9 +682,9 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 		B.y += bunemanBy[rightCellXindex][0][leftCellZindex]*WrightCellX*WleftCellZ;
 		B.z += bunemanBz[rightCellXindex][0][leftNodeZindex]*WrightCellX*WleftNodeZ;
 
-		E.x += bunemanEx[rightCellXindex][0][rightNodeZindex]*WrightCellX*WleftNodeZ;
-		E.y += bunemanEy[rightNodeXindex][0][rightNodeZindex]*WrightNodeX*WleftNodeZ;
-		E.z += bunemanEz[rightNodeXindex][0][rightCellZindex]*WrightNodeX*WleftCellZ;
+		E.x += bunemanEx[rightCellXindex][0][rightNodeZindex]*WrightCellX*WrightNodeZ;
+		E.y += bunemanEy[rightNodeXindex][0][rightNodeZindex]*WrightNodeX*WrightNodeZ;
+		E.z += bunemanEz[rightNodeXindex][0][rightCellZindex]*WrightNodeX*WrightCellZ;
 
 		B.x += bunemanBx[rightNodeXindex][0][rightCellZindex]*WrightNodeX*WrightCellZ;
 		B.y += bunemanBy[rightCellXindex][0][rightCellZindex]*WrightCellX*WrightCellZ;

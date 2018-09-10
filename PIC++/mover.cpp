@@ -721,10 +721,10 @@ void Simulation::moveParticleTristan(Particle* particle) {
 	Vector3d B;
 
 	//only for Bunman solver
-	updateBunemanCorrelationMaps(particle);
-	correlationBunemanEBfields(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
+	//updateBunemanCorrelationMaps(particle);
+	//correlationBunemanEBfields(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
 
-	//correlationBunemanEBfieldsWithoutMaps(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
+	correlationBunemanEBfieldsWithoutMaps(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
 
 	Vector3d dp = E * (particle->charge * deltaT * 0.5);
 	//Vector3d momentum = particle->getMomentum();
