@@ -23,6 +23,7 @@ znumber = 2;
 a = 0;
 b = fix(Nt/2);
 c = fix(Nt)-1;
+c = 8;
 
 Ex(1:Nx-1, 1:3) = 0;
 Ey(1:Nx-1, 1:3) = 0;

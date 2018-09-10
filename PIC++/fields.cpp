@@ -39,7 +39,7 @@ void Simulation::tristanEvaluateBhalfStep() {
 	}
 
 	//double cdtd2 = speed_of_light_normalized*deltaT/2.0;
-	double cdtd2 = deltaT/2.0;
+	double cdtd2 = speed_of_light_correction*deltaT/2.0;
 
 	for (int i = minI; i <= maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
@@ -101,7 +101,7 @@ void Simulation::tristanEvaluateE() {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
 				//bunemanEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBx(i, j, k) - four_pi * bunemanJx[i][j][k]) * deltaT;
-				bunemanEx[i][j][k] = bunemanEx[i][j][k] + (evaluateBunemanRotBx(i, j, k) - four_pi * bunemanJx[i][j][k]) * deltaT;
+				bunemanEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_correction*evaluateBunemanRotBx(i, j, k) - four_pi * bunemanJx[i][j][k]) * deltaT;
 			}
 		}
 	}
@@ -112,7 +112,7 @@ void Simulation::tristanEvaluateE() {
 		for (int j = minJ; j < maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
 				//bunemanEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBy(i, j, k) - four_pi *bunemanJy[i][j][k]) * deltaT;
-				bunemanEy[i][j][k] = bunemanEy[i][j][k] + (evaluateBunemanRotBy(i, j, k) - four_pi *bunemanJy[i][j][k]) * deltaT;
+				bunemanEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_correction*evaluateBunemanRotBy(i, j, k) - four_pi *bunemanJy[i][j][k]) * deltaT;
 				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
 					bunemanEy[i][j][k] = 0;
 				}
@@ -132,7 +132,7 @@ void Simulation::tristanEvaluateE() {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k < maxK; ++k) {
 				//bunemanEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBz(i, j, k) - four_pi * bunemanJz[i][j][k]) * deltaT;
-				bunemanEz[i][j][k] = bunemanEz[i][j][k] + (evaluateBunemanRotBz(i, j, k) - four_pi * bunemanJz[i][j][k]) * deltaT;
+				bunemanEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_correction*evaluateBunemanRotBz(i, j, k) - four_pi * bunemanJz[i][j][k]) * deltaT;
 				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
 					bunemanEz[i][j][k] = 0;
 				}

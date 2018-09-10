@@ -28,15 +28,15 @@ void Simulation::moveParticles() {
 	if ((rank == 0) && (verbosity > 0)) printLog("moving particles\n");
 	int a[10];
 	if(solverType == BUNEMAN){
-		//for (int i = 0; i < particles.size(); ++i) {
-		//Particle* particle = particles[i];
-		for (auto particle : particles) {
+		for (int i = 0; i < particles.size(); ++i) {
+			Particle* particle = particles[i];
+		//for (auto particle : particles) {
 			moveParticleTristan(particle);
 		}
 	} else {
-		//for (int i = 0; i < particles.size(); ++i) {
+		for (int i = 0; i < particles.size(); ++i) {
 		//Particle* particle = particles[i];
-		for (auto particle : particles) {
+		//for (auto particle : particles) {
 			moveParticle(particles[i]);
 		}
 	}
@@ -721,22 +721,22 @@ void Simulation::moveParticleTristan(Particle* particle) {
 	Vector3d B;
 
 	//only for Bunman solver
-	//updateBunemanCorrelationMaps(particle);
-	//correlationBunemanEBfields(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
+	updateBunemanCorrelationMaps(particle);
+	correlationBunemanEBfields(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
 
-	correlationBunemanEBfieldsWithoutMaps(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
+	//correlationBunemanEBfieldsWithoutMaps(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
 
 	Vector3d dp = E * (particle->charge * deltaT * 0.5);
-	Vector3d momentum = particle->getMomentum();
-	momentum += dp;
-	//particle->addMomentum(dp);
-	//double gamma = particle->gammaFactor();
-	double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
-	double gamma = sqrt(p2/(particle->mass*particle->mass) + 1.0);
+	//Vector3d momentum = particle->getMomentum();
+	//momentum += dp;
+	particle->addMomentum(dp);
+	double gamma = particle->gammaFactor();
+	//double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
+	//double gamma = sqrt(p2/(particle->mass*particle->mass) + 1.0);
 	//double beta = particle->charge * deltaT / (2.0 * particle->mass * speed_of_light_normalized);
 	double betaShift = particle->beta / gamma;
 	double f = 2.0 / sqrt(1.0 + betaShift * betaShift * B.norm2());
-	//Vector3d momentum = particle->getMomentum();
+	Vector3d momentum = particle->getMomentum();
 	Vector3d tempMomentum = momentum + momentum.vectorMult(B) * (betaShift);
 	momentum += tempMomentum.vectorMult(B) * (f * betaShift) + dp;
 	particle->setMomentum(momentum);

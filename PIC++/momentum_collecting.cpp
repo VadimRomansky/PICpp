@@ -65,9 +65,9 @@ void Simulation::tristanUpdateFlux() {
 	if ((rank == 0) && (verbosity > 0)) printf("updating tristan flux\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("updating tristan flux\n");
 
-	//for (int i = 0; i < particles.size(); ++i) {
-		//Particle* particle = particles[i];
-	for (auto particle : particles) {
+	for (int i = 0; i < particles.size(); ++i) {
+		Particle* particle = particles[i];
+	//for (auto particle : particles) {
 		addParticleFluxZigzag(particle);
 	}
 	//MPI_Barrier(cartComm);
