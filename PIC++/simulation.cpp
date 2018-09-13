@@ -1961,6 +1961,53 @@ void Simulation::updateAnisotropy() {
 
 void Simulation::resetNewTempFields() {
 	if(solverType == BUNEMAN) {
+		for(int i = 0; i < xnumberAdded; ++i) {
+			for(int j = 0; j <= ynumberAdded; ++j) {
+				for(int k = 0; k <= znumberAdded; ++k) {
+					bunemanNewEx[i][j][k] = bunemanEx[i][j][k];
+				}
+			}
+		}
+
+		for(int i = 0; i <= xnumberAdded; ++i) {
+			for(int j = 0; j < ynumberAdded; ++j) {
+				for(int k = 0; k <= znumberAdded; ++k) {
+					bunemanNewEy[i][j][k] = bunemanEy[i][j][k];
+				}
+			}
+		}
+
+		for(int i = 0; i <= xnumberAdded; ++i) {
+			for(int j = 0; j <= ynumberAdded; ++j) {
+				for(int k = 0; k <= znumberAdded; ++k) {
+					bunemanNewEz[i][j][k] = bunemanEz[i][j][k];
+				}
+			}
+		}
+
+		for(int i = 0; i <= xnumberAdded; ++i) {
+			for(int j = 0; j < ynumberAdded; ++j) {
+				for(int k = 0; k < znumberAdded; ++k) {
+					bunemanNewBx[i][j][k] = bunemanBx[i][j][k];
+				}
+			}
+		}
+
+		for(int i = 0; i < xnumberAdded; ++i) {
+			for(int j = 0; j <= ynumberAdded; ++j) {
+				for(int k = 0; k < znumberAdded; ++k) {
+					bunemanNewBy[i][j][k] = bunemanBy[i][j][k];
+				}
+			}
+		}
+
+		for(int i = 0; i < xnumberAdded; ++i) {
+			for(int j = 0; j < ynumberAdded; ++j) {
+				for(int k = 0; k <= znumberAdded; ++k) {
+					bunemanNewBz[i][j][k] = bunemanBz[i][j][k];
+				}
+			}
+		}
 		
 	} else {
 		for (int i = 0; i < xnumberAdded; ++i) {

@@ -792,6 +792,9 @@ public:
 	void smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, double*** fieldZ);
 	void smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, double*** fieldZ);
 
+	void fuckingStrangeSmoothingBunemanFields(double*** oldEx, double*** oldEy, double*** oldEz, double*** oldBx, double*** oldBy, double*** oldBz, double*** newEx,
+	                                         double*** newEy, double*** newEz, double*** newBx, double*** newBy, double*** newBz);
+
 
 	void evaluateMaxwellEquationMatrix();
 	void evaluateMagneticField();
@@ -996,6 +999,7 @@ public:
 	void removeEscapedParticles();
 	void moveParticle(Particle* particle);
 	void moveParticle(Particle* particle, int cur, int N);
+	
 	void moveParticleTristan(Particle* particle);
 	void exchangeParticles();
 	void collectMostAcceleratedParticles();

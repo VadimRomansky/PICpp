@@ -40,19 +40,21 @@ void Simulation::smoothCellParameter(double*** array) {
 	double smoothingmatrix[3][3][3];
 	createSmoothingMatrix(smoothingmatrix);
 
+	int jwidth = 1;
+	if(ynumberGeneral == 1) {
+		jwidth = 0;
+	}
+	int kwidth = 1;
+		if(znumberGeneral == 1) {
+			kwidth = 0;
+	}
+
 	for (int i = minI; i < maxI; ++i) {
 		for (int j = minJ; j < maxJ; ++j) {
 			for (int k = minJ; k < maxK; ++k) {
 				if (boundaryConditionTypeX == PERIODIC || ((i > 1 + additionalBinNumber) && (i < xnumberAdded - additionalBinNumber - 1))) {
 					tempCellParameter[i][j][k] = 0;
-					int jwidth = 1;
-					if(ynumberGeneral == 1) {
-						jwidth = 0;
-					}
-					int kwidth = 1;
-					if(znumberGeneral == 1) {
-						kwidth = 0;
-					}
+				
 					for (int tempI = -1; tempI <= 1; ++tempI) {
 						for (int tempJ = -jwidth; tempJ <= jwidth; ++tempJ) {
 							for (int tempK = -kwidth; tempK <= kwidth; ++tempK) {
@@ -573,7 +575,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == 1 + additionalBinNumber) {
-					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == 0) {
+					if (cartCoord[0] == 0) {
 						tempBunemanExParameter[i][j][k] = fieldX[i][j][k];
 					} else {
 						tempBunemanExParameter[i][j][k] = 0;
@@ -586,7 +588,7 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 						}
 					}
 				} else if (i == xnumberAdded - additionalBinNumber - 2) {
-					if (boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
+					if (cartCoord[0] == cartDim[0] - 1) {
 						tempBunemanExParameter[i][j][k] = fieldX[i][j][k];
 					} else {
 						tempBunemanExParameter[i][j][k] = 0;
@@ -1007,4 +1009,77 @@ void Simulation::smoothBunemanBfieldGeneral(double*** fieldX, double*** fieldY, 
 	}
 
 	exchangeBunemanBfield(fieldX, fieldY, fieldZ);
+}
+
+void Simulation::fuckingStrangeSmoothingBunemanFields(double*** oldEx, double*** oldEy, double*** oldEz, double*** oldBx, double*** oldBy,
+	double*** oldBz, double*** newEx, double*** newEy, double*** newEz, double*** newBx, double*** newBy, double*** newBz) {
+	for(int i = 0; i < xnumberAdded; ++i) {
+		for(int j = 0; j <= ynumberAdded; ++j) {
+			for(int k = 0; k <= znumberAdded; ++k) {
+				newEx[i][j][k] = oldEx[i][j][k];
+			}
+		}
+	}
+	for(int i = 0; i <= xnumberAdded; ++i) {
+		for(int j = 0; j < ynumberAdded; ++j) {
+			for(int k = 0; k <= znumberAdded; ++k) {
+				newEy[i][j][k] = oldEy[i][j][k];
+			}
+		}
+	}
+	for(int i = 0; i <= xnumberAdded; ++i) {
+		for(int j = 0; j <= ynumberAdded; ++j) {
+			for(int k = 0; k < znumberAdded; ++k) {
+				newEz[i][j][k] = oldEz[i][j][k];
+			}
+		}
+	}
+
+	for(int i = 0; i <= xnumberAdded; ++i) {
+		for(int j = 0; j < ynumberAdded; ++j) {
+			for(int k = 0; k < znumberAdded; ++k) {
+				newBx[i][j][k] = oldBx[i][j][k];
+			}
+		}
+	}
+	for(int i = 0; i < xnumberAdded; ++i) {
+		for(int j = 0; j <= ynumberAdded; ++j) {
+			for(int k = 0; k < znumberAdded; ++k) {
+				newBy[i][j][k] = oldBy[i][j][k];
+			}
+		}
+	}
+	for(int i = 0; i < xnumberAdded; ++i) {
+		for(int j = 0; j < ynumberAdded; ++j) {
+			for(int k = 0; k <= znumberAdded; ++k) {
+				newBz[i][j][k] = oldBz[i][j][k];
+			}
+		}
+	}
+
+
+	int minI = 1;
+	int maxI = xnumberAdded - 1;
+	int minJ = 1;
+	int maxJ = ynumberAdded - 1;
+	int minK = 1;
+	int maxK = znumberAdded - 1;
+
+	for(int i = minI; i < maxI; ++i) {
+		for(int j = minJ; j < maxJ; ++j) {
+			for(int k = 0; k < maxK; ++k) {
+				newBx[i][j][k] = (oldEx[i][j][k] + oldEx[i][j+1][k] + oldEx[i][j][k+1] + oldEx[i][j+1][k+1] +
+					oldEx[i-1][j][k] + oldEx[i-1][j+1][k] + oldEx[i-1][j][k+1] + oldEx[i-1][j+1][k+1])/8;
+			}
+		}
+	}
+
+	for(int i = minI; i < maxI; ++i) {
+		for(int j = minJ; j < maxJ; ++j) {
+			for(int k = 0; k < maxK; ++k) {
+				newEx[i][j][k] = (oldBx[i][j][k] + oldBx[i][j-1][k] + oldBx[i][j][k-1] + oldBx[i][j-1][k-1] +
+					oldBx[i+1][j][k] + oldBx[i+1][j-1][k] + oldBx[i+1][j][k-1] + oldBx[i+1][j-1][k-1])/8;
+			}
+		}
+	}
 }

@@ -85,6 +85,9 @@ void Simulation::tristanEvaluateE() {
 	}
 	int minI = 1 + additionalBinNumber;
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
+	if((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1)) {
+		maxI = xnumberAdded - 1 - additionalBinNumber - 2;
+	}
 	int minJ = 1 + additionalBinNumber;
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
 	int minK = 1 + additionalBinNumber;

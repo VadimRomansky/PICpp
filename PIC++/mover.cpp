@@ -26,8 +26,10 @@ void Simulation::moveParticles() {
 	//MPI_Barrier(cartComm);
 	if ((rank == 0) && (verbosity > 0)) printf("moving particles\n");
 	if ((rank == 0) && (verbosity > 0)) printLog("moving particles\n");
-	int a[10];
 	if(solverType == BUNEMAN){
+		/*resetNewTempFields();
+		smoothBunemanEfieldGeneral(bunemanNewEx, bunemanNewEy, bunemanNewEz);
+		smoothBunemanBfieldGeneral(bunemanNewBx, bunemanNewBy, bunemanNewBz);*/
 		for (int i = 0; i < particles.size(); ++i) {
 			Particle* particle = particles[i];
 		//for (auto particle : particles) {
@@ -721,12 +723,54 @@ void Simulation::moveParticleTristan(Particle* particle) {
 	Vector3d B;
 
 	//only for Bunman solver
+
+
+	//fuckingStrangeSmoothingBunemanFields(bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, bunemanNewEx, bunemanNewEy, bunemanNewEz, bunemanNewBx, bunemanNewBy, bunemanNewBz);
 	//updateBunemanCorrelationMaps(particle);
 	//correlationBunemanEBfields(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
 
+	//correlationBunemanEBfieldsWithoutMaps(particle, bunemanNewEx, bunemanNewEy, bunemanNewEz, bunemanNewBx, bunemanNewBy, bunemanNewBz, E, B);
+
 	correlationBunemanEBfieldsWithoutMaps(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
 
-	Vector3d dp = E * (particle->charge * deltaT * 0.5);
+	//without objective oriented
+	double Bx = B.x;
+	double By = B.y;
+	double Bz = B.z;
+
+	double Ex = E.x;
+	double Ey = E.y;
+	double Ez = E.z;
+
+	double qdt2 = particle->charge * deltaT * 0.5;
+
+	double dpx = Ex*qdt2;
+	double dpy = Ey*qdt2;
+	double dpz = Ez*qdt2;
+
+	Vector3d momentum = particle->getMomentum();
+
+	double px = momentum.x + dpx;
+	double py = momentum.y + dpy;
+	double pz = momentum.z + dpz;
+
+	double p2 = px * px + py * py + pz * pz;
+	double gamma = sqrt(p2/(particle->mass*particle->mass) + 1.0);
+
+	double betaShift = particle->beta / gamma;
+
+	double tempMomentumX = px + (py*Bz - pz*By)*betaShift;
+	double tempMomentumY = py + (pz*Bx - px*Bz)*betaShift;
+	double tempMomentumZ = pz + (px*By - py*Bx)*betaShift;
+
+	double f = 2.0 / sqrt(1.0 + betaShift * betaShift * B.norm2());
+
+	momentum.x = px + (tempMomentumY*Bz - tempMomentumZ*By)*(f*betaShift) + dpx;
+	momentum.y = py + (tempMomentumZ*Bx - tempMomentumX*Bz)*(f*betaShift) + dpy;
+	momentum.z = pz + (tempMomentumX*By - tempMomentumY*Bx)*(f*betaShift) + dpz;
+
+	/////with oop
+	/*Vector3d dp = E * (particle->charge * deltaT * 0.5);
 	//Vector3d momentum = particle->getMomentum();
 	//momentum += dp;
 	particle->addMomentum(dp);
@@ -738,7 +782,12 @@ void Simulation::moveParticleTristan(Particle* particle) {
 	double f = 2.0 / sqrt(1.0 + betaShift * betaShift * B.norm2());
 	Vector3d momentum = particle->getMomentum();
 	Vector3d tempMomentum = momentum + momentum.vectorMult(B) * (betaShift);
-	momentum += tempMomentum.vectorMult(B) * (f * betaShift) + dp;
+	momentum += tempMomentum.vectorMult(B) * (f * betaShift) + dp;*/
+
+
+
+
+
 	particle->setMomentum(momentum);
 	Vector3d velocity = particle->getVelocity();
 	particle->coordinates += velocity * deltaT;
