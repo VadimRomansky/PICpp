@@ -453,6 +453,19 @@ void Simulation::output() {
 	outputDistribution((outputDir + "distribution_positrons" + fileNumber + ".dat").c_str(), particles, POSITRON, scaleFactor,
 	                   plasma_period, verbosity, multiplyFileOutput);
 
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution protons\n");
+	outputDistributionByXgrid((outputDir + "distribution_protons_grid" + fileNumber + ".dat").c_str(), this, particles, PROTON, scaleFactor,
+	                   plasma_period, verbosity, multiplyFileOutput);
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution electrons\n");
+	outputDistributionByXgrid((outputDir + "distribution_electrons_grid" + fileNumber + ".dat").c_str(), this, particles, ELECTRON, scaleFactor,
+	                   plasma_period, verbosity, multiplyFileOutput);
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution alphas\n");
+	outputDistributionByXgrid((outputDir + "distribution_alphas_grid" + fileNumber + ".dat").c_str(), this, particles, ALPHA, scaleFactor,
+	                   plasma_period, verbosity, multiplyFileOutput);
+	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution positrons\n");
+	outputDistributionByXgrid((outputDir + "distribution_positrons_grid" + fileNumber + ".dat").c_str(), this, particles, POSITRON, scaleFactor,
+	                   plasma_period, verbosity, multiplyFileOutput);
+
 	Vector3d shockWaveV = V0 / 3;
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution protons shock wave\n");
@@ -471,7 +484,7 @@ void Simulation::output() {
 	outputDistributionShiftedSystem((outputDir + "distribution_positrons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
 	                                speed_of_light_normalized, POSITRON, scaleFactor,
 	                                plasma_period, verbosity, multiplyFileOutput);*/
-	outputDistributionShiftedSystem((outputDir + "distribution_protons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
+	/*outputDistributionShiftedSystem((outputDir + "distribution_protons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
 	                                1.0, PROTON, scaleFactor,
 	                                plasma_period, verbosity, multiplyFileOutput);
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution electrons shock wave\n");
@@ -485,7 +498,7 @@ void Simulation::output() {
 	if ((rank == 0) && (verbosity > 1)) printf("outputing distribution positrons shock wave\n");
 	outputDistributionShiftedSystem((outputDir + "distribution_positrons_sw" + fileNumber + ".dat").c_str(), particles, shockWaveV,
 	                                1.0, POSITRON, scaleFactor,
-	                                plasma_period, verbosity, multiplyFileOutput);
+	                                plasma_period, verbosity, multiplyFileOutput);*/
 
 	int coordX = getCartCoordWithAbsoluteIndexX(xnumberGeneral / 2);
 	int coordY = getCartCoordWithAbsoluteIndexY(ynumberGeneral / 2);

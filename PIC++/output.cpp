@@ -18,6 +18,177 @@
 #include "memory_util.h"
 #include "paths.h"
 
+void outputDistributionByXgrid(const char* outFileName, Simulation* simulation, std::vector < Particle * >& particles,
+                              int particleType,
+                              double gyroradius, double plasma_period, int verbosity, bool newFile) {
+	int rank;
+	int nprocs;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+	double minMomentum = 0; //todo something else
+	double maxMomentum = 0;
+	for (int i = 0; i < particles.size(); ++i) {
+		if (particles[i]->type == particleType) {
+			Vector3d momentum = particles[i]->getMomentum();
+			if (minMomentum <= 0) {
+				minMomentum = momentum.norm() * gyroradius / plasma_period;
+			}
+			if ((momentum.norm() * gyroradius / plasma_period < minMomentum) && (momentum.norm() > 0)) {
+				minMomentum = momentum.norm() * gyroradius / plasma_period;
+			} else {
+				if (momentum.norm() * gyroradius / plasma_period > maxMomentum) {
+					maxMomentum = momentum.norm() * gyroradius / plasma_period;
+				}
+			}
+		}
+	}
+
+	if(maxMomentum <= 0) {
+		maxMomentum = massProtonReal;
+		minMomentum = maxMomentum/2;
+	}
+
+	if ((rank == 0) && (verbosity > 2)) printf("send minmax p\n");
+	double minMaxP[2];
+	if (rank > 0) {
+		minMaxP[0] = minMomentum;
+		minMaxP[1] = maxMomentum;
+		MPI_Send(minMaxP, 2, MPI_DOUBLE, 0, MPI_SEND_DOUBLE_ALL_TO_FIRST, MPI_COMM_WORLD);
+	} else {
+		MPI_Status status;
+		for (int i = 1; i < nprocs; ++i) {
+			MPI_Recv(minMaxP, 2, MPI_DOUBLE, i, MPI_SEND_DOUBLE_ALL_TO_FIRST, MPI_COMM_WORLD, &status);
+			if (minMaxP[0] < minMomentum && minMaxP[0] > 0) {
+				minMomentum = minMaxP[0];
+			}
+			if (minMaxP[1] > maxMomentum) {
+				maxMomentum = minMaxP[1];
+			}
+		}
+
+		if (maxMomentum - minMomentum < 1E-8 * maxMomentum) {
+			maxMomentum = maxMomentum * 2;
+			minMomentum = minMomentum / 2;
+		}
+
+		minMaxP[0] = minMomentum;
+		minMaxP[1] = maxMomentum;
+	}
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	if ((rank == 0) && (verbosity > 2)) printf("bcast minmax p\n");
+
+	MPI_Bcast(minMaxP, 2, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	minMomentum = minMaxP[0];
+	maxMomentum = minMaxP[1];
+
+	if ((rank == 0) && (verbosity > 2)) printf("evaluate distribution\n");
+
+
+	double pgrid[pnumber + 1];
+	double logMinMomentum = log(minMomentum);
+	pgrid[0] = minMomentum;
+	double deltaLogP = (log(maxMomentum) - log(minMomentum)) / (pnumber);
+	for (int i = 1; i < pnumber; ++i) {
+		pgrid[i] = exp(logMinMomentum + i * deltaLogP);
+	}
+	pgrid[pnumber] = maxMomentum;
+
+	double** distribution = new double*[simulation->xnumberAdded];
+	double** tempDistribution = new double*[simulation->xnumberAdded];
+	for(int i = 0; i < simulation->xnumberAdded; ++i) {
+		distribution[i] = new double[pnumber];
+		tempDistribution[i] = new double[pnumber];
+		for(int p = 0; p < pnumber; ++p) {
+			distribution[i][p] = 0;
+			tempDistribution[i][p] = 0;
+		}
+	}
+
+	double weight[1];
+	double tempWeight[1];
+	weight[0] = 0;
+	tempWeight[0] = 0;
+
+	for (int i = 0; i < particles.size(); ++i) {
+		if (particles[i]->type == particleType) {
+			int j = (log(particles[i]->getMomentum().norm() * gyroradius / plasma_period) - logMinMomentum) / deltaLogP;
+			if (j >= 0 && j < pnumber) {
+				int xindex = floor((particles[i]->coordinates.x - simulation->xgrid[0])/simulation->deltaX);
+				distribution[xindex][j] += particles[i]->weight;
+				weight[0] += particles[i]->weight;
+			}
+		}
+	}
+
+	if ((rank == 0) && (verbosity > 2)) printf("send weight\n");
+
+	MPI_Allreduce(weight, tempWeight, 1, MPI_DOUBLE, MPI_SUM, simulation->cartComm);
+	weight[0] = tempWeight[0];
+	for(int i = 0; i < simulation->xnumberAdded; ++i) {
+		MPI_Allreduce(distribution[i], tempDistribution[i], pnumber, MPI_DOUBLE, MPI_SUM, simulation->cartCommYZ);
+	}
+
+	if ((rank == 0) && (verbosity > 2)) printf("write distribution\n");
+
+	FILE* outFile = NULL;
+	if(rank == 0){
+		if(newFile){
+			outFile = fopen(outFileName, "w");
+			fclose(outFile);
+		}
+	}
+	MPI_Barrier(simulation->cartComm);
+
+	for(int cartI = 0; cartI < simulation->cartDim[0]; ++cartI){
+		if(cartI == simulation->cartCoord[0]){
+			int minI = 2 + 2 * additionalBinNumber;
+			if (simulation->cartCoord[0] == 0) {
+				minI = 0;
+			}
+			int maxI = simulation->xnumberAdded - 1;
+			if (simulation->cartCoord[0] == simulation->cartDim[0] - 1) {
+				maxI = simulation->xnumberAdded - 1;
+			}
+			if(simulation->cartCoord[1] == 0 && simulation->cartCoord[2] == 0){
+				outFile = fopen(outFileName, "a");
+				if(cartI == 0) {
+					for (int p = 0; p < pnumber; ++p) {
+						fprintf(outFile, "%22.15g", (pgrid[p] + pgrid[p + 1]) / 2);
+					}
+					fprintf(outFile, "\n");
+				}
+				for(int i = minI; i <= maxI; ++i){
+					for (int p = 0; p < pnumber; ++p) {
+						if(weight[0] > 0){
+							distribution[i][p] = tempDistribution[i][p]/(weight[0]*(pgrid[p + 1] - pgrid[p]));
+						} else {
+							distribution[i][p] = 0;
+						}
+						//todo check
+						if (maxMomentum <= 0 || minMomentum <= 0) {
+							distribution[i][p] = 0;
+							//pgrid[p] = 0;
+						}
+						fprintf(outFile, " %22.15g", distribution[i][p]);
+					}
+					fprintf(outFile, "\n");
+				}
+				fclose(outFile);
+			}	
+		}
+		MPI_Barrier(simulation->cartComm);
+	}
+
+	for(int i = 0; i < simulation->xnumberAdded; ++i) {
+		delete[] distribution[i];
+		delete[] tempDistribution[i];
+	}
+	delete[] distribution;
+	delete[] tempDistribution;
+}
+
 void outputDistribution(const char* outFileName, std::vector < Particle * >& particles, int particleType,
                         double gyroradius,
                         double plasma_period, int verbosity, bool newFile) {
@@ -41,6 +212,11 @@ void outputDistribution(const char* outFileName, std::vector < Particle * >& par
 				}
 			}
 		}
+	}
+
+	if(maxMomentum <= 0) {
+		maxMomentum = massProtonReal;
+		minMomentum = maxMomentum/2;
 	}
 
 	if ((rank == 0) && (verbosity > 2)) printf("send minmax p\n");
@@ -141,11 +317,15 @@ void outputDistribution(const char* outFileName, std::vector < Particle * >& par
 
 	if (rank == 0) {
 		for (int i = 0; i < pnumber; ++i) {
+			if(weight[0] > 0){
 			distribution[i] /= (weight[0] * (pgrid[i + 1] - pgrid[i]));
+			} else {
+				distribution[i] = 0;
+			}
 			//todo check
 			if (maxMomentum <= 0 || minMomentum <= 0) {
 				distribution[i] = 0;
-				pgrid[i] = 0;
+				//pgrid[i] = 0;
 			}
 		}
 
@@ -187,6 +367,11 @@ void outputDistributionShiftedSystem(const char* outFileName, std::vector < Part
 				}
 			}
 		}
+	}
+
+	if(maxMomentum <= 0) {
+		maxMomentum = massProtonReal;
+		minMomentum = maxMomentum/2;
 	}
 
 	if ((rank == 0) && (verbosity > 2)) printf("send minmax p\n");

@@ -7426,6 +7426,27 @@ void Simulation::createFiles() {
 		distributionFileSilicon = fopen((outputDir + "distribution_silicon.dat").c_str(), "w");
 		fclose(distributionFileSilicon);
 
+		particlesTrajectoryFile = fopen((outputDir + "particlesTrajectories_grid.dat").c_str(), "w");
+		fclose(particlesTrajectoryFile);
+		particlesTrajectoryFile = fopen((outputDir + "electronsTrajectories_grid.dat").c_str(), "w");
+		fclose(particlesTrajectoryFile);
+		distributionFileProton = fopen((outputDir + "distribution_protons_grid.dat").c_str(), "w");
+		fclose(distributionFileProton);
+		distributionFileElectron = fopen((outputDir + "distribution_electrons_grid.dat").c_str(), "w");
+		fclose(distributionFileElectron);
+		distributionFileAlpha = fopen((outputDir + "distribution_alphas_grid.dat").c_str(), "w");
+		fclose(distributionFileAlpha);
+		distributionFilePositron = fopen((outputDir + "distribution_positrons_grid.dat").c_str(), "w");
+		fclose(distributionFilePositron);
+		distributionFileHelium3 = fopen((outputDir + "distribution_helium3_grid.dat").c_str(), "w");
+		fclose(distributionFileHelium3);
+		distributionFileDeuterium = fopen((outputDir + "distribution_deuterium_grid.dat").c_str(), "w");
+		fclose(distributionFileDeuterium);
+		distributionFileOxygen = fopen((outputDir + "distribution_oxygen_grid.dat").c_str(), "w");
+		fclose(distributionFileOxygen);
+		distributionFileSilicon = fopen((outputDir + "distribution_silicon_grid.dat").c_str(), "w");
+		fclose(distributionFileSilicon);
+
 		distributionFileProton = fopen((outputDir + "distribution_protons_sw.dat").c_str(), "w");
 		fclose(distributionFileProton);
 		distributionFileElectron = fopen((outputDir + "distribution_electrons_sw.dat").c_str(), "w");

@@ -11,6 +11,9 @@ class Particle;
 class Matrix3d;
 class MatrixElement;
 
+void outputDistributionByXgrid(const char *outFileName, Simulation* simulation, std::vector<Particle *> &particles, int particleType,
+                              double plasma_period, double gyroradius, int verbosity, bool newFile);
+
 void outputDistribution(const char *outFileName, std::vector<Particle *> &particles, int particleType, double plasma_period,
                         double gyroradius, int verbosity, bool newFile);
 void outputDistributionShiftedSystem(const char* outFileName, std::vector<Particle *>& particles, Vector3d& shiftV, const double& speed_of_light_normalized, int particleType, double gyroradius,
