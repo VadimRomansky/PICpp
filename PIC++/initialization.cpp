@@ -173,6 +173,12 @@ void Simulation::setSpaceForProc() {
 		znumberAdded = 1;
 	}
 
+	if(reflectingWallPoint >= xnumberAdded) {
+		printf("reflecting wall point > xnumberAdded\n");
+		MPI_Finalize();
+		exit(0);
+	}
+
 	xsize = xnumberAdded * xsizeGeneral / xnumberGeneral;
 	ysize = ynumberAdded * ysizeGeneral / ynumberGeneral;
 	zsize = znumberAdded * zsizeGeneral / znumberGeneral;
