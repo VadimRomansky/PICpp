@@ -719,6 +719,7 @@ public:
 	void initializeRingWeibel();
 	void initializeHomogenouseFlow();
 	void initializeKolmogorovSpectrum();
+	double evaluate_turbulent_b(int ki, int kj, int kk);
 	void initializeRandomModes(int number, int minNumber, double energyFraction);
 	void initializeFake();
 	void initializeHarris();

@@ -73,12 +73,10 @@ void Simulation::setSpaceForProc() {
 	if (znumberGeneral == 1) {
 		if (ynumberGeneral == 1) {
 			dimensionType = ONE_D;
-		}
-		else {
+		} else {
 			dimensionType = TWO_D_XY;
 		}
-	}
-	else {
+	} else {
 		if (ynumberGeneral == 1) {
 			dimensionType = TWO_D_XZ;
 		}
@@ -89,8 +87,7 @@ void Simulation::setSpaceForProc() {
 	if (cartCoord[0] >= cartDim[0] - modXnumber) {
 		xnumber = tempXnumber + 1;
 		firstAbsoluteXindex = xnumberGeneral - (xnumber) * (cartDim[0] - cartCoord[0]) - additionalBinNumber - 1;
-	}
-	else {
+	} else {
 		xnumber = tempXnumber;
 		firstAbsoluteXindex = (xnumber) * cartCoord[0] - additionalBinNumber - 1;
 	}
@@ -104,8 +101,7 @@ void Simulation::setSpaceForProc() {
 		if (ynumberGeneral > 1) {
 			firstAbsoluteYindex = firstAbsoluteYindex - additionalBinNumber - 1;
 		}
-	}
-	else {
+	} else {
 		ynumber = tempYnumber;
 		firstAbsoluteYindex = (ynumber) * cartCoord[1];
 		if (ynumberGeneral > 1) {
@@ -122,8 +118,7 @@ void Simulation::setSpaceForProc() {
 		if (znumberGeneral > 1) {
 			firstAbsoluteZindex = firstAbsoluteZindex - additionalBinNumber - 1;
 		}
-	}
-	else {
+	} else {
 		znumber = tempZnumber;
 		firstAbsoluteZindex = (znumber) * cartCoord[2];
 		if (znumberGeneral > 1) {
@@ -173,7 +168,7 @@ void Simulation::setSpaceForProc() {
 		znumberAdded = 1;
 	}
 
-	if(reflectingWallPoint >= xnumberAdded) {
+	if (reflectingWallPoint >= xnumberAdded) {
 		printf("reflecting wall point > xnumberAdded\n");
 		MPI_Finalize();
 		exit(0);
@@ -268,11 +263,9 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	reducedOutputDir = std::string(reducedOutputDirectory);
 	if (inputTypeV == 0) {
 		inputType = CGS;
-	}
-	else if (inputTypeV == 1) {
+	} else if (inputTypeV == 1) {
 		inputType = Theoretical;
-	}
-	else {
+	} else {
 		printf("input type must be 1 or 0\n");
 		fflush(stdout);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
@@ -465,8 +458,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 		zsizeGeneral /= scaleFactor;
 		if (rank == 0) printf("xsize/scaleFactor = %lf\n", xsize);
 		//fflush(stdout);
-	}
-	else {
+	} else {
 		B0 = B0 * (plasma_period * sqrt(scaleFactor));
 
 		rescaleConstants();
@@ -575,11 +567,9 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	reducedOutputDir = std::string(reducedOutputDirectory);
 	if (inputTypeV == 0) {
 		inputType = CGS;
-	}
-	else if (inputTypeV == 1) {
+	} else if (inputTypeV == 1) {
 		inputType = Theoretical;
-	}
-	else {
+	} else {
 		printf("input type must be 1 or 0\n");
 		fflush(stdout);
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
@@ -761,8 +751,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 		zsizeGeneral /= scaleFactor;
 		if (rank == 0) printf("xsize/scaleFactor = %lf\n", xsize);
 		//fflush(stdout);
-	}
-	else {
+	} else {
 		B0 = B0 * (plasma_period * sqrt(scaleFactor));
 
 		rescaleConstants();
@@ -1940,8 +1929,7 @@ void Simulation::initialize() {
 				trackedN[0] = trackedParticlesNumber;
 				MPI_Send(trackedN, 1, MPI_INT, i, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm);
 			}
-		}
-		else {
+		} else {
 			int trackedN[1];
 			MPI_Status status;
 			MPI_Recv(trackedN, 1, MPI_INT, 0, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm, &status);
@@ -1962,8 +1950,7 @@ void Simulation::initialize() {
 
 			delete[] tempNumbers;
 			delete[] tempTypes;
-		}
-		else {
+		} else {
 			MPI_Status status;
 			int* tempNumbers = new int[trackedParticlesNumber];
 			int* tempTypes = new int[trackedParticlesNumber];
@@ -1978,8 +1965,7 @@ void Simulation::initialize() {
 			delete[] tempNumbers;
 			delete[] tempTypes;
 		}
-	}
-	else {
+	} else {
 		trackedParticlesNumber = 20;
 		trackedParticlesNumbers = new int*[trackedParticlesNumber];
 		for (int i = 0; i < trackedParticlesNumber; ++i) {
@@ -2112,13 +2098,13 @@ void Simulation::initialize() {
 
 	createParticleTypes(concentrations, particlesPerBin);
 
-	if(verbosity > 3) printf("finish creating particle types rank = %d\n", rank);
+	if (verbosity > 3) printf("finish creating particle types rank = %d\n", rank);
 	int allTypesInBin = 0;
 	for (int t = 0; t < typesNumber; ++t) {
 		allTypesInBin += types[t].particlesPerBin;
 	}
 	particles.reserve(allTypesInBin * xnumber * ynumber * znumber);
-	if(verbosity > 3) printf("finish reserving memory for particle rank = %d\n", rank);
+	if (verbosity > 3) printf("finish reserving memory for particle rank = %d\n", rank);
 
 	//int maxParticles = fakeParticles.max_size();
 	//printf("rank = %d maxParticles = %d necessary paricles = %d\n", rank, maxParticles, allTypesInBin*xnumber*ynumber*znumber);
@@ -2153,11 +2139,11 @@ void Simulation::initialize() {
 	}
 	if (rank == 0)
 		//printf("omegaPlasmaElectron*xsize/speed_of_light_normalized = %g\n",omegaPlasmaElectron * xsize / speed_of_light_normalized);
-		printf("omegaPlasmaElectron*xsize/speed_of_light_normalized = %g\n",omegaPlasmaElectron * xsize);
+		printf("omegaPlasmaElectron*xsize/speed_of_light_normalized = %g\n", omegaPlasmaElectron * xsize);
 	fflush(stdout);
 	if (rank == 0)
 		//fprintf(informationFile, "omegaPlasmaElectron*xsize/speed_of_light_normalized = %g\n",omegaPlasmaElectron * xsize / speed_of_light_normalized);
-		fprintf(informationFile, "omegaPlasmaElectron*xsize/speed_of_light_normalized = %g\n",omegaPlasmaElectron * xsize);
+		fprintf(informationFile, "omegaPlasmaElectron*xsize/speed_of_light_normalized = %g\n", omegaPlasmaElectron * xsize);
 
 	//if (omegaPlasmaElectron * deltaX / speed_of_light_normalized > 1) {
 	if (omegaPlasmaElectron * deltaX > 1.0) {
@@ -2167,11 +2153,11 @@ void Simulation::initialize() {
 	}
 	if (rank == 0)
 		//printf("omegaPlasmaElectron*deltaX/speed_of_light_normalized = %g\n",omegaPlasmaElectron * deltaX / speed_of_light_normalized);
-		printf("omegaPlasmaElectron*deltaX/speed_of_light_normalized = %g\n",omegaPlasmaElectron * deltaX);
+		printf("omegaPlasmaElectron*deltaX/speed_of_light_normalized = %g\n", omegaPlasmaElectron * deltaX);
 	fflush(stdout);
 	if (rank == 0)
 		//fprintf(informationFile, "omegaPlasmaElectron*deltaX/speed_of_light_normalized = %g\n",omegaPlasmaElectron * deltaX / speed_of_light_normalized);
-		fprintf(informationFile, "omegaPlasmaElectron*deltaX/speed_of_light_normalized = %g\n",omegaPlasmaElectron * deltaX);
+		fprintf(informationFile, "omegaPlasmaElectron*deltaX/speed_of_light_normalized = %g\n", omegaPlasmaElectron * deltaX);
 	if (rank == 0) fclose(informationFile);
 
 	//checkDebyeParameter();
@@ -2204,7 +2190,7 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 	double E = B0.norm();
 	if (solverType == BUNEMAN) {
 		//double omega = speed_of_light_normalized * kw;
-		double omega =  kw;
+		double omega = kw;
 		for (int i = 0; i < xnumberAdded; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -2254,8 +2240,7 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 				}
 			}
 		}
-	}
-	else {
+	} else {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -2514,7 +2499,8 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		massProton + massElectron) + 16 * pi * concentration * sqr(
 		electron_charge_normalized) * (massProton + massElectron) / sqr(massProton);
 	//double a = (kw * kw * speed_of_light_normalized_sqr * massProton * massElectron + 4 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron)) / sqr(massProton);
-	double a = (kw * kw * massProton * massElectron + 4 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron)) / sqr(massProton);
+	double a = (kw * kw * massProton * massElectron + 4 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron)) /
+		sqr(massProton);
 
 	if (discriminant < 0) {
 		printf("discriminant < 0\n");
@@ -2571,7 +2557,7 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 			massProton) + sqr(massElectron));
 	a3 = a3 * cube(sqr(fakeOmega));
 	double a2 = sqr(sqr(kw) * massProton * massElectron)
-		+ 8 * pi* concentration * sqr(
+		+ 8 * pi * concentration * sqr(
 			kw * electron_charge_normalized) * massProton * massElectron * (massProton + massElectron)
 		+ 16 * sqr(pi * concentration * sqr(
 			electron_charge_normalized) * (massProton + massElectron))
@@ -2790,8 +2776,7 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 				}
 			}
 		}
-	}
-	else {
+	} else {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -3007,12 +2992,16 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "derivative Ey amplitude = %g\n",
 		        omegaAlfven * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		//fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",(speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
-		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",(kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
+		        (kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period *
+			        plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ez amplitude = %g\n",
 		        -omegaAlfven * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		//fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",(speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
-		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",(kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
+		        (kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period *
+			        plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "\n");
 
 		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) *
@@ -3021,7 +3010,8 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
 		//double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) /speed_of_light_normalized);
-		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)));
+		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((
+			VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)));
 		fprintf(informationFile, "dJy/dt amplitude = %g\n",
 		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period *
 			        plasma_period * sqrt(
@@ -3033,7 +3023,8 @@ void Simulation::initializeAlfvenWaveX(int wavesCount, double amplitudeRelation)
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
 		//double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) /speed_of_light_normalized);
-		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)));
+		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((
+			VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)));
 		fprintf(informationFile, "dJz/dt amplitude = %g\n",
 		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period *
 			        plasma_period * sqrt(
@@ -3178,7 +3169,8 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		massProton + massElectron) + 16 * pi * concentration * sqr(
 		electron_charge_normalized) * (massProton + massElectron) / sqr(massProton);
 	//double a = (kw * kw * speed_of_light_normalized_sqr * massProton * massElectron + 4 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron)) / sqr(massProton);
-	double a = (kw * kw * massProton * massElectron + 4 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron)) / sqr(massProton);
+	double a = (kw * kw * massProton * massElectron + 4 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron)) /
+		sqr(massProton);
 
 	if (discriminant < 0) {
 		printf("discriminant < 0\n");
@@ -3234,7 +3226,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 			massProton) + sqr(massElectron));
 	a3 = a3 * cube(sqr(fakeOmega));
 	double a2 = sqr(sqr(kw) * massProton * massElectron)
-		+ 8 * pi* concentration * sqr(
+		+ 8 * pi * concentration * sqr(
 			kw * electron_charge_normalized) * massProton * massElectron * (massProton + massElectron)
 		+ 16 * sqr(pi * concentration * sqr(
 			electron_charge_normalized) * (massProton + massElectron))
@@ -3312,7 +3304,7 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		//fclose(informationFile);
 		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		//if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n",omegaAlfven / (kw * speed_of_light_normalized));
-		if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n",omegaAlfven / kw);
+		if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n", omegaAlfven / kw);
 		if (rank == 0) fclose(errorLogFile);
 		//exit(0);
 	}
@@ -3653,12 +3645,16 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "derivative Ey amplitude = %g\n",
 		        omegaAlfven * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		//fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n", (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
-		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n", (kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
+		        (kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period *
+			        plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ez amplitude = %g\n",
 		        -omegaAlfven * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		//fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n", (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
-		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n", (kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
+		        (kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period *
+			        plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "\n");
 
 		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) *
@@ -3667,7 +3663,8 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
 		//double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) /speed_of_light_normalized);
-		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)));
+		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((
+			VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)));
 		fprintf(informationFile, "dJy/dt amplitude = %g\n",
 		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period *
 			        plasma_period * sqrt(
@@ -3679,7 +3676,8 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
 		//double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) /speed_of_light_normalized);
-		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)));
+		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((
+			VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)));
 		fprintf(informationFile, "dJz/dt amplitude = %g\n",
 		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period *
 			        plasma_period * sqrt(
@@ -3819,9 +3817,11 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 	//double b = speed_of_light_normalized * kw * (massProton - massElectron) / massProton;
 	double b = kw * (massProton - massElectron) / massProton;
 	//double discriminant = speed_of_light_normalized_sqr * kw * kw * sqr(massProton + massElectron) + 16 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron) / sqr(massProton);
-	double discriminant = kw * kw * sqr(massProton + massElectron) + 16 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron) / sqr(massProton);
+	double discriminant = kw * kw * sqr(massProton + massElectron) + 16 * pi * concentration * sqr(electron_charge_normalized) * (massProton +
+		massElectron) / sqr(massProton);
 	//double a = (kw * kw * speed_of_light_normalized_sqr * massProton * massElectron + 4 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron)) / sqr(massProton);
-	double a = (kw * kw * massProton * massElectron + 4 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron)) / sqr(massProton);
+	double a = (kw * kw * massProton * massElectron + 4 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron)) /
+		sqr(massProton);
 
 	if (discriminant < 0) {
 		printf("discriminant < 0\n");
@@ -3956,7 +3956,7 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		//fclose(informationFile);
 		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		//if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n",omegaAlfven / (kw * speed_of_light_normalized));
-		if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n",omegaAlfven / kw);
+		if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n", omegaAlfven / kw);
 		if (rank == 0) fclose(errorLogFile);
 		//exit(0);
 	}
@@ -4298,12 +4298,16 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		fprintf(informationFile, "derivative Ey amplitude = %g\n",
 		        omegaAlfven * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		//fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n", (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * ( VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
-		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n", (kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * ( VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
+		        (kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period *
+			        plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ez amplitude = %g\n",
 		        -omegaAlfven * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		//fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n", (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * ( VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
-		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n", (kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * ( VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
+		        (kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period *
+			        plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "\n");
 
 		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) *
@@ -4312,7 +4316,8 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
 		//double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) /speed_of_light_normalized);
-		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)));
+		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0.norm() * ((
+			VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)));
 		fprintf(informationFile, "dJy/dt amplitude = %g\n",
 		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period *
 			        plasma_period * sqrt(
@@ -4324,7 +4329,8 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
 		//double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) /speed_of_light_normalized);
-		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)));
+		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0.norm() * ((
+			VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)));
 		fprintf(informationFile, "dJz/dt amplitude = %g\n",
 		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period *
 			        plasma_period * sqrt(
@@ -4473,9 +4479,11 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 	//double b = speed_of_light_normalized * kw * (massProton - massElectron) / massProton;
 	double b = kw * (massProton - massElectron) / massProton;
 	//double discriminant = speed_of_light_normalized_sqr * kw * kw * sqr(massProton + massElectron) + 16 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron) / sqr(massProton);
-	double discriminant = kw * kw * sqr(massProton + massElectron) + 16 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron) / sqr(massProton);
+	double discriminant = kw * kw * sqr(massProton + massElectron) + 16 * pi * concentration * sqr(electron_charge_normalized) * (massProton +
+		massElectron) / sqr(massProton);
 	//double a = (kw * kw * speed_of_light_normalized_sqr * massProton * massElectron + 4 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron)) / sqr(massProton);
-	double a = (kw * kw * massProton * massElectron + 4 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron)) / sqr(massProton);
+	double a = (kw * kw * massProton * massElectron + 4 * pi * concentration * sqr(electron_charge_normalized) * (massProton + massElectron)) /
+		sqr(massProton);
 
 	if (discriminant < 0) {
 		printf("discriminant < 0\n");
@@ -4609,7 +4617,7 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		//fclose(informationFile);
 		if (rank == 0) errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		//if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n",omegaAlfven / (kw * speed_of_light_normalized));
-		if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n",omegaAlfven / kw);
+		if (rank == 0) fprintf(errorLogFile, "omegaAlfven/kc = %15.10g > 0.2\n", omegaAlfven / kw);
 		if (rank == 0) fclose(errorLogFile);
 		//exit(0);
 	}
@@ -4991,12 +4999,16 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		fprintf(informationFile, "derivative Ey amplitude = %g\n",
 		        omegaAlfven * Eyamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		//fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n", (speed_of_light_normalized * kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * ( VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
-		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n", (kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * ( VyamplitudeProton - VyamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "c*rotBy - 4*pi*Jy = %g\n",
+		        (kw * Bzamplitude - 4 * pi * concentration * electron_charge_normalized * (VyamplitudeProton - VyamplitudeElectron)) / (plasma_period *
+			        plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "\n");
 		fprintf(informationFile, "derivative Ez amplitude = %g\n",
 		        -omegaAlfven * Ezamplitude / (plasma_period * plasma_period * sqrt(scaleFactor)));
 		//fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n", (speed_of_light_normalized * kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
-		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n", (kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period * plasma_period * sqrt(scaleFactor)));
+		fprintf(informationFile, "c*rotBz - 4*pi*Jz = %g\n",
+		        (kw * Byamplitude - 4 * pi * concentration * electron_charge_normalized * (VzamplitudeProton - VzamplitudeElectron)) / (plasma_period *
+			        plasma_period * sqrt(scaleFactor)));
 		fprintf(informationFile, "\n");
 
 		double derivativJy = -electron_charge_normalized * concentration * (VyamplitudeProton - VyamplitudeElectron) *
@@ -5005,7 +5017,8 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		        derivativJy / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
 		//double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0norm * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)) / speed_of_light_normalized);
-		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0norm * ((VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)));
+		double derivativeVelocitiesY = electron_charge_normalized * ((Eyamplitude * ((1.0 / massProton) + (1.0 / massElectron))) + B0norm * ((
+			VzamplitudeProton / massProton) + (VzamplitudeElectron / massElectron)));
 		fprintf(informationFile, "dJy/dt amplitude = %g\n",
 		        electron_charge_normalized * concentration * derivativeVelocitiesY / (plasma_period * plasma_period *
 			        plasma_period * sqrt(
@@ -5017,7 +5030,8 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 		        derivativJz / (plasma_period * plasma_period * plasma_period * sqrt(scaleFactor)));
 
 		//double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0norm * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)) / speed_of_light_normalized);
-		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0norm * ((VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)));
+		double derivativeVelocitiesZ = electron_charge_normalized * ((Ezamplitude * ((1.0 / massProton) + (1.0 / massElectron))) - B0norm * ((
+			VyamplitudeProton / massProton) + (VyamplitudeElectron / massElectron)));
 		fprintf(informationFile, "dJz/dt amplitude = %g\n",
 		        electron_charge_normalized * concentration * derivativeVelocitiesZ / (plasma_period * plasma_period *
 			        plasma_period * sqrt(
@@ -5274,8 +5288,7 @@ void Simulation::initializeFluxFromRight() {
 				}
 			}
 		}
-	}
-	else {
+	} else {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -5340,8 +5353,7 @@ void Simulation::fieldsLorentzTransitionX(const double& v) {
 		if (prevI < 0) {
 			if (boundaryConditionTypeX == PERIODIC) {
 				prevI = xnumberAdded - 1;
-			}
-			else {
+			} else {
 				prevI = 0;
 			}
 		}
@@ -5355,7 +5367,8 @@ void Simulation::fieldsLorentzTransitionX(const double& v) {
 				if (prevK < 0) {
 					prevK = znumber - 1;
 				}
-				Vector3d middleB = (Bfield[prevI][prevJ][prevK] + Bfield[prevI][j][prevK] + Bfield[prevI][prevJ][k] + Bfield[prevI][j][k] + Bfield[i][prevJ][prevK] + Bfield[i][j][prevK] + Bfield[i][prevJ][k] + Bfield[i][j][k]) * 0.125;
+				Vector3d middleB = (Bfield[prevI][prevJ][prevK] + Bfield[prevI][j][prevK] + Bfield[prevI][prevJ][k] + Bfield[prevI][j][k] + Bfield[i][prevJ][prevK
+				] + Bfield[i][j][prevK] + Bfield[i][prevJ][k] + Bfield[i][j][k]) * 0.125;
 				//newEfield[i][j][k].y = gamma * (Efield[i][j][k].y - v * middleB.z / speed_of_light_normalized);
 				newEfield[i][j][k].y = gamma * (Efield[i][j][k].y - v * middleB.z);
 				//newEfield[i][j][k].z = gamma * (Efield[i][j][k].z + v * middleB.y / speed_of_light_normalized);
@@ -5366,7 +5379,8 @@ void Simulation::fieldsLorentzTransitionX(const double& v) {
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
 			for (int k = 0; k < znumberAdded; ++k) {
-				Vector3d middleE = (Efield[i][j][k] + Efield[i][j + 1][k] + Efield[i][j][k + 1] + Efield[i][j + 1][k + 1] + Efield[i + 1][j][k] + Efield[i + 1][j + 1][k] + Efield[i + 1][j][k + 1] + Efield[i + 1][j + 1][k + 1]) * 0.125;
+				Vector3d middleE = (Efield[i][j][k] + Efield[i][j + 1][k] + Efield[i][j][k + 1] + Efield[i][j + 1][k + 1] + Efield[i + 1][j][k] + Efield[i + 1][j
+					+ 1][k] + Efield[i + 1][j][k + 1] + Efield[i + 1][j + 1][k + 1]) * 0.125;
 				//newBfield[i][j][k].y = gamma * (Bfield[i][j][k].y + v * middleE.z / speed_of_light_normalized);
 				newBfield[i][j][k].y = gamma * (Bfield[i][j][k].y + v * middleE.z);
 				//newBfield[i][j][k].z = gamma * (Bfield[i][j][k].z - v * middleE.y / speed_of_light_normalized);
@@ -5426,8 +5440,7 @@ void Simulation::initializeShockWave() {
 			if (i < 3) {
 				shockWavePoint += 3;
 				localI = i + 3;
-			}
-			else {
+			} else {
 				localI = i;
 			}
 			if (localI < 10) {
@@ -5444,8 +5457,7 @@ void Simulation::initializeShockWave() {
 	}
 	if (rank > 0) {
 		MPI_Send(shockWaveRank, 1, MPI_INT, 0, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
-	}
-	else {
+	} else {
 		tempShockWaveRank[0] = shockWaveRank[0];
 		for (int i = 1; i < nprocs; ++i) {
 			MPI_Status status;
@@ -5491,7 +5503,9 @@ void Simulation::initializeShockWave() {
 	double alfvenV = B0.norm() / sqrt(4 * pi * density);
 
 	//RightPartIterativeEvaluator* evaluator = new InitializeShockRightPartEvaluator(downstreamVelocity, V0, downstreamB, B0, E0, deltaX, speed_of_light_normalized, bnorm, alfvenV, types, typesNumber,xnumberAdded, 1, 1, lnumber, rank, nprocs, cartComm, cartCoord, cartDim);
-	RightPartIterativeEvaluator* evaluator = new InitializeShockRightPartEvaluator(downstreamVelocity, V0, downstreamB, B0, E0, deltaX, 1.0, bnorm, alfvenV, types, typesNumber,xnumberAdded, 1, 1, lnumber, rank, nprocs, cartComm, cartCoord, cartDim);
+	RightPartIterativeEvaluator* evaluator = new InitializeShockRightPartEvaluator(downstreamVelocity, V0, downstreamB, B0, E0, deltaX, 1.0, bnorm,
+	                                                                               alfvenV, types, typesNumber, xnumberAdded, 1, 1, lnumber, rank,
+	                                                                               nprocs, cartComm, cartCoord, cartDim);
 
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -5566,11 +5580,11 @@ void Simulation::initializeShockWave() {
 	int maxI = xnumberAdded - additionalBinNumber - 1;
 	int maxJ = ynumberAdded - additionalBinNumber - 1;
 	int maxK = znumberAdded - additionalBinNumber - 1;
-	if(ynumberGeneral == 1) {
+	if (ynumberGeneral == 1) {
 		minJ = 0;
 		maxJ = 1;
 	}
-	if(znumberGeneral == 1) {
+	if (znumberGeneral == 1) {
 		minK = 0;
 		maxK = 1;
 	}
@@ -5596,8 +5610,7 @@ void Simulation::initializeShockWave() {
 							typeCounter] + outVector[i + 1][0][0][3 * typeCounter]));
 						localParticlesPerBin = types[typeCounter].particlesPerBin * V0.x / (0.5 * alfvenV * (outVector[i][0][0][3 *
 							typeCounter] + outVector[i + 1][0][0][3 * typeCounter]));
-					}
-					else {
+					} else {
 						localConcentration = 0;
 						localParticlesPerBin = 0;
 					}
@@ -5606,8 +5619,7 @@ void Simulation::initializeShockWave() {
 						localParticleDeltaX = deltaX / localParticlesPerBin;
 						localParticleDeltaY = deltaY / localParticlesPerBin;
 						localParticleDeltaZ = deltaZ / localParticlesPerBin;
-					}
-					else {
+					} else {
 						localParticleDeltaX = xsize;
 						localParticleDeltaY = ysize;
 						localParticleDeltaZ = zsize;
@@ -5795,8 +5807,7 @@ void Simulation::initializeKolmogorovSpectrum() {
 					if (kk + kj > 0) {
 						cosPhi = ky / kyz;
 						sinPhi = kz / kyz;
-					}
-					else {
+					} else {
 						cosPhi = 1.0;
 						sinPhi = 0.0;
 					}
@@ -5807,8 +5818,7 @@ void Simulation::initializeKolmogorovSpectrum() {
 						for (int j = 0; j <= ynumberAdded; ++j) {
 							for (int k = 0; k <= znumberAdded; ++k) {
 								if (i <= 1 + additionalBinNumber && cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
-								}
-								else {
+								} else {
 									double kmultr = kx * xgrid[i] + ky * ygrid[j] + kz * zgrid[k];
 									double localB1 = Bturbulent * sin(kmultr + phase1);
 									double localB2 = Bturbulent * sin(kmultr + phase2);
@@ -5856,38 +5866,65 @@ void Simulation::initializeKolmogorovSpectrum() {
 }
 
 
-void Simulation::initializeRandomModes(int number, int minNumber, double energyFraction) {
+void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turbulenceEnergyFraction) {
 	//use if defined shockWavePoint
 
-	double deltaK = 2 * pi / xsizeGeneral;
-	double minK = minNumber * deltaK;
-	double maxK = minK * number;
+	double deltaK = 2 * pi / (maxNumber * deltaX);
+	int kxcount = maxNumber / minNumber;
+	int kycount = maxNumber / minNumber;
+	if (ynumberGeneral == 1) {
+		kycount = 1;
+	}
+	int kzcount = maxNumber / minNumber;
+	if (znumberGeneral == 1) {
+		kzcount = 1;
+	}
 
-	double constFieldFraction = sqrt(1.0 - energyFraction);
+	double turbulenceFieldCorrection = 1.0;
+	double turbulenceEnergy = 0;
 
 
-	double energy = energyFraction * B0.scalarMult(B0);
-	double amplitude = sqrt(2 * energy / number);
+	for (int ki = 0; ki <= kxcount; ++ki) {
+		for (int kj = 0; kj <= kycount; ++kj) {
+			for (int kk = 0; kk <= kzcount; ++kk) {
 
-	double* phases = new double[2 * number];
-	double* amplitudes = new double[2 * number];
-	double* knumbers = new double[number];
-	double* omega = new double[number];
+				if ((ki + kj + kk) != 0) {
 
-	if (rank == 0) {
-		for (int i = 0; i < 2 * number; ++i) {
-			phases[i] = 2 * pi * uniformDistribution();
-			//phases[i] = 0;
+					//double phase1 = 2*pi*rand();
+					//double phase2 = 2*pi*rand();
+
+
+					double kx = ki * deltaK;
+					double ky = kj * deltaK;
+					double kz = kk * deltaK;
+
+					double kw = sqrt(kx * kx + ky * ky + kz * kz);
+					double kxy = sqrt(kx * kx + ky * ky);
+					double cosTheta = kz / kw;
+					double sinTheta = kxy / kw;
+					double cosPhi = 1.0;
+					double sinPhi = 0.0;
+					if (ki + kj != 0) {
+						cosPhi = kx / kxy;
+						sinPhi = ky / kxy;
+					} else {
+						cosPhi = 1.0;
+						sinPhi = 0.0;
+					}
+
+					double Bturbulent = evaluate_turbulent_b(ki, kj, kk);
+
+					turbulenceEnergy = turbulenceEnergy + Bturbulent * Bturbulent;
+				}
+			}
 		}
 	}
 
-
-	MPI_Barrier(cartComm);
-	MPI_Bcast(phases, number, MPI_DOUBLE, 0, cartComm);
-	MPI_Barrier(cartComm);
-
-	B0 = B0 * constFieldFraction;
-	E0 = E0 * constFieldFraction;
+	if (turbulenceEnergy > 0) {
+		turbulenceFieldCorrection = sqrt(turbulenceEnergyFraction * B0.norm2() / ((1.0 - turbulenceEnergyFraction) * turbulenceEnergy));
+	} else {
+		turbulenceFieldCorrection = 1.0;
+	}
 
 	for (int i = 0; i < xnumberAdded; ++i) {
 		for (int j = 0; j < ynumberAdded; ++j) {
@@ -5898,23 +5935,59 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 		}
 	}
 
-	for (int l = 0; l < number; ++l) {
-		double kw = minK + l * deltaK;
-		knumbers[l] = kw;
-		omega[l] = 0;
-		double Bamplitude = amplitude;
-		amplitudes[2 * l] = 0;
-		amplitudes[2 * l + 1] = amplitude;
-		///double phiY = 2 * pi * uniformDistribution();
-		//double phiZ = 2 * pi * uniformDistribution();
+	for (int ki = 0; ki <= kxcount; ++ki) {
+		for (int kj = 0; kj <= kycount; ++kj) {
+			for (int kk = 0; kk <= kzcount; ++kk) {
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					//Bfield[i][j][k].y += Bamplitude * sin(kw * middleXgrid[i] + phases[2 * harmCounter]);
-					Bfield[i][j][k].z += Bamplitude * sin(kw * middleXgrid[i] + phases[2 * l + 1]);
-					newBfield[i][j][k] = Bfield[i][j][k];
+				if ((ki + kj + kk) != 0) {
+
+					double phase1 = 2 * pi * rand();
+					double phase2 = 2 * pi * rand();
+
+
+					double kx = ki * deltaK;
+					double ky = kj * deltaK;
+					double kz = kk * deltaK;
+
+					double kw = sqrt(kx * kx + ky * ky + kz * kz);
+					double kxy = sqrt(kx * kx + ky * ky);
+					double cosTheta = kz / kw;
+					double sinTheta = kxy / kw;
+					double cosPhi = 1.0;
+					double sinPhi = 0.0;
+					if (ki + kj != 0) {
+						cosPhi = kx / kxy;
+						sinPhi = ky / kxy;
+					} else {
+						cosPhi = 1.0;
+						sinPhi = 0.0;
+					}
+
+					double Bturbulent = turbulenceFieldCorrection * evaluate_turbulent_b(ki, kj, kk);
+
+					for (int i = 0; i < xnumberAdded; ++i) {
+						for (int j = 0; j < ynumberAdded; ++j) {
+							for (int k = 0; k < znumberAdded; ++k) {
+								double kmultr = kx*middleXgrid[i] + ky*middleYgrid[j] + kz*middleZgrid[k];
+
+								double localB1 = Bturbulent*sin(kmultr + phase1);
+								double localB2 = Bturbulent*sin(kmultr + phase2);
+
+								Bfield[i][j][k].x += - localB1*cosTheta*cosPhi + localB2*sinPhi;
+								Bfield[i][j][k].y += - localB1*cosTheta*sinPhi - localB2*cosPhi;
+								Bfield[i][j][k].z += localB1*sinTheta;
+							}
+						}
+					}
 				}
+			}
+		}
+	}
+
+	for (int i = 0; i < xnumberAdded; ++i) {
+		for (int j = 0; j < ynumberAdded; ++j) {
+			for (int k = 0; k < znumberAdded; ++k) {
+				newBfield[i][j][k] = Bfield[i][j][k];
 			}
 		}
 	}
@@ -5926,7 +5999,7 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 				if (i > 0 && i < xnumberAdded && j < ynumberAdded && k < znumberAdded) {
 					Vector3d B = (Bfield[i - 1][j][k] + Bfield[i][j][k]) * 0.5;
 					//Efield[i][j][k] = V0.vectorMult(B) / (speed_of_light_normalized * speed_of_light_correction * (-1.0));
-					Efield[i][j][k] = V0.vectorMult(B) / (speed_of_light_correction * (-1.0));
+					Efield[i][j][k] = V0.vectorMult(B) / (-1.0);
 				}
 				if (boundaryConditionTypeX != PERIODIC) {
 					if (cartCoord[0] == 0 && i <= 1 + additionalBinNumber) {
@@ -5941,8 +6014,8 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 		}
 	}
 
-	//rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
-	//leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
+	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
+	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
 	/*rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers,
 	                                                                   omega,
 	                                                                   middleXgrid[xnumberAdded - additionalBinNumber],
@@ -5952,19 +6025,44 @@ void Simulation::initializeRandomModes(int number, int minNumber, double energyF
 	                                                                  xgrid[1 + additionalBinNumber],
 	                                                                  speed_of_light_normalized);*/
 
-		rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers,
+	/*rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, minNumber, amplitudes, phases, knumbers,
 	                                                                   omega,
 	                                                                   middleXgrid[xnumberAdded - additionalBinNumber],
 	                                                                   1.0);
-	leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers,
+	leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, minNumber, amplitudes, phases, knumbers,
 	                                                                  omega,
 	                                                                  xgrid[1 + additionalBinNumber],
-	                                                                  1.0);
+	                                                                  1.0);*/
+}
 
-	delete[] phases;
-	delete[] amplitudes;
-	delete[] knumbers;
-	delete[] omega;
+double Simulation::evaluate_turbulent_b(int ki, int kj, int kk){
+		double kw = sqrt(1.0*ki*ki + kj*kj + kk*kk);
+		double Bamplitude;
+		switch(dimensionType){
+case THREE_D:{
+	Bamplitude = 0.1*B0.norm()/sqrt(power(kw,(11.0/3.0)));
+			}
+			break;
+case TWO_D_XY:{
+	Bamplitude = 0.1*B0.norm()/sqrt(power(kw,(8.0/3.0)));
+			  }
+			break;
+case TWO_D_XZ:{
+	Bamplitude = 0.1*B0.norm()/sqrt(power(kw,(8.0/3.0)));
+			  }
+			break;
+case ONE_D:{
+	Bamplitude = 0.1*B0.norm()/sqrt(power(kw,(5.0/3.0)));
+		   }
+			break;
+default: {
+	printf("wrong dimension type\n");
+	MPI_Finalize();
+	exit(0);
+		 }
+
+}
+	return Bamplitude;
 }
 
 void Simulation::initializeTwoStream() {
@@ -6001,7 +6099,7 @@ void Simulation::initializeTwoStream() {
 	}
 	if (rank == 0)
 		//printf("xsize*omegaPlasmaElectron/speed_of_light_normalized = %g\n",xsize * omegaPlasmaElectron / speed_of_light_normalized);
-		printf("xsize*omegaPlasmaElectron/speed_of_light_normalized = %g\n",xsize * omegaPlasmaElectron);
+		printf("xsize*omegaPlasmaElectron/speed_of_light_normalized = %g\n", xsize * omegaPlasmaElectron);
 	fflush(stdout);
 	if (rank == 0)
 		//fprintf(informationFile, "xsize*omegaPlasmaElectron/speed_of_light_normalized = %g\n", xsize * omegaPlasmaElectron / speed_of_light_normalized);
@@ -6015,11 +6113,11 @@ void Simulation::initializeTwoStream() {
 	}
 	if (rank == 0)
 		//printf("deltaX*omegaPlasmaElectron/speed_of_light_normalized = %g\n",xsize * omegaPlasmaElectron / speed_of_light_normalized);
-		printf("deltaX*omegaPlasmaElectron/speed_of_light_normalized = %g\n",xsize * omegaPlasmaElectron);
+		printf("deltaX*omegaPlasmaElectron/speed_of_light_normalized = %g\n", xsize * omegaPlasmaElectron);
 	fflush(stdout);
 	if (rank == 0)
 		//fprintf(informationFile, "deltaX*omegaPlasmaElectron/speed_of_light_normalized = %g\n",xsize * omegaPlasmaElectron / speed_of_light_normalized);
-		fprintf(informationFile, "deltaX*omegaPlasmaElectron/speed_of_light_normalized = %g\n",xsize * omegaPlasmaElectron);
+		fprintf(informationFile, "deltaX*omegaPlasmaElectron/speed_of_light_normalized = %g\n", xsize * omegaPlasmaElectron);
 
 	if (kw > omegaPlasmaElectron / u) {
 		if (rank == 0) printf("k > omegaPlasmaElectron/u\n");
@@ -6070,8 +6168,7 @@ void Simulation::initializeTwoStream() {
 		if (particle->type == ELECTRON) {
 			if (electronCount % 2 == 0) {
 				particle->addVelocity(electronsVelocityPlus);
-			}
-			else {
+			} else {
 				particle->addVelocity(electronsVelocityMinus);
 			}
 			electronCount++;
@@ -6118,8 +6215,7 @@ void Simulation::initializeExternalFluxInstability() {
 			printf("omegaAlfven > cyclothron Omega Proton\n");
 			fflush(stdout);
 			fprintf(informationFile, "omegaAlfven > cyclothron Omega Proton\n");
-		}
-		else if (omega > cyclothronOmegaProton / 100.0) {
+		} else if (omega > cyclothronOmegaProton / 100.0) {
 			printf("omegaAlfven > cyclothrone Omega Proton/100\n");
 			fflush(stdout);
 			fprintf(informationFile, "omegaAlfven > cyclothron Omega Proton/100\n");
@@ -6356,8 +6452,9 @@ void Simulation::initializeWeibel() {
 		/*double k02 = (omegaPlasmaElectron * omegaPlasmaElectron / speed_of_light_normalized_sqr) * (alphaParallel /alphaNormal - 1)
 			* (McDonaldFunction(alphaParallel, 1) / McDonaldFunction(alphaParallel, 2) + McDonaldFunction(alphaParallel, 0) / (alphaParallel * McDonaldFunction(alphaParallel, 2)))
 			/ (1 + (alphaParallel / alphaNormal - 1) * McDonaldFunction(alphaParallel, 1) / (alphaParallel * McDonaldFunction(alphaParallel, 2)));*/
-		double k02 = (omegaPlasmaElectron * omegaPlasmaElectron) * (alphaParallel /alphaNormal - 1)
-			* (McDonaldFunction(alphaParallel, 1) / McDonaldFunction(alphaParallel, 2) + McDonaldFunction(alphaParallel, 0) / (alphaParallel * McDonaldFunction(alphaParallel, 2)))
+		double k02 = (omegaPlasmaElectron * omegaPlasmaElectron) * (alphaParallel / alphaNormal - 1)
+			* (McDonaldFunction(alphaParallel, 1) / McDonaldFunction(alphaParallel, 2) + McDonaldFunction(alphaParallel, 0) / (alphaParallel *
+				McDonaldFunction(alphaParallel, 2)))
 			/ (1 + (alphaParallel / alphaNormal - 1) * McDonaldFunction(alphaParallel, 1) / (alphaParallel * McDonaldFunction(alphaParallel, 2)));
 		double kmaxIncrement = sqrt(k02 / 3);
 		double length = 2 * pi / kmaxIncrement;
@@ -6376,9 +6473,12 @@ void Simulation::initializeWeibel() {
 		/*double temp = ((kmaxIncrement * kmaxIncrement / k02) * sqr(1 - kmaxIncrement * kmaxIncrement / k02) * (kBoltzman_normalized * types[0].temperatureX / (types[0].mass *speed_of_light_normalized)) * cube(
 			types[0].temperatureY / types[0].temperatureX - 1) * cube(alphaNormal * McDonaldFunction(alphaParallel, 2) + McDonaldFunction(alphaParallel, 0)) / 
 			cube(alphaNormal * McDonaldFunction(alphaParallel, 2) + McDonaldFunction(alphaParallel, 1))) * sqr(McDonaldFunction(alphaParallel, 2)) / sqr(integral);*/
-		double temp = ((kmaxIncrement * kmaxIncrement / k02) * sqr(1 - kmaxIncrement * kmaxIncrement / k02) * (kBoltzman_normalized * types[0].temperatureX / (types[0].mass)) * cube(
-			types[0].temperatureY / types[0].temperatureX - 1) * cube(alphaNormal * McDonaldFunction(alphaParallel, 2) + McDonaldFunction(alphaParallel, 0)) / 
-			cube(alphaNormal * McDonaldFunction(alphaParallel, 2) + McDonaldFunction(alphaParallel, 1))) * sqr(McDonaldFunction(alphaParallel, 2)) / sqr(integral);
+		double temp = ((kmaxIncrement * kmaxIncrement / k02) * sqr(1 - kmaxIncrement * kmaxIncrement / k02) * (kBoltzman_normalized * types[0].temperatureX
+					/ (types[0].mass)) * cube(
+					types[0].temperatureY / types[0].temperatureX - 1) * cube(alphaNormal * McDonaldFunction(alphaParallel, 2) + McDonaldFunction(alphaParallel, 0))
+				/
+				cube(alphaNormal * McDonaldFunction(alphaParallel, 2) + McDonaldFunction(alphaParallel, 1))) * sqr(McDonaldFunction(alphaParallel, 2)) /
+			sqr(integral);
 		double increment = omegaPlasmaElectron * sqrt(temp);
 		alertNaNOrInfinity(increment, "increment = NaN in weibel\n");
 
@@ -6469,12 +6569,12 @@ void Simulation::initializeRingWeibel() {
 
 
 		//double k02 = (omegaPlasmaElectron * omegaPlasmaElectron / (gamma * speed_of_light_normalized_sqr)) * ((betaNormal *betaNormal / (2 * betaParallel * betaParallel * (1 - betaParallel * betaParallel))) - G);
-		double k02 = (omegaPlasmaElectron * omegaPlasmaElectron / gamma) * ((betaNormal *betaNormal / (2 * betaParallel * betaParallel * (1 - betaParallel * betaParallel))) - G);
+		double k02 = (omegaPlasmaElectron * omegaPlasmaElectron / gamma) * ((betaNormal * betaNormal / (2 * betaParallel * betaParallel * (1 - betaParallel
+			* betaParallel))) - G);
 		if (k02 < 0) {
 			increment = 0;
 			length = 0;
-		}
-		else {
+		} else {
 
 			double a = omegaPlasmaElectron * omegaPlasmaElectron * betaNormal * betaNormal / (2 * gamma * betaParallel *
 				betaParallel);
@@ -6484,13 +6584,13 @@ void Simulation::initializeRingWeibel() {
 			/*double kmaxIncrement2 = ((speed_of_light_normalized_sqr * k02 - a - bParallel2 * (speed_of_light_normalized_sqr * k02+ a)) +
 					sqrt(a * sqr(bParallel2 + 1) * (bParallel2 * speed_of_light_normalized_sqr * k02 - speed_of_light_normalized_sqr * k02 + a))) /
 				sqr(speed_of_light_normalized * (betaParallel + 1) * (betaParallel - 1));*/
-			double kmaxIncrement2 = ((k02 - a - bParallel2 * (k02+ a)) +sqrt(a * sqr(bParallel2 + 1) * (bParallel2 * k02 - k02 + a))) /sqr((betaParallel + 1) * (betaParallel - 1));
+			double kmaxIncrement2 = ((k02 - a - bParallel2 * (k02 + a)) + sqrt(a * sqr(bParallel2 + 1) * (bParallel2 * k02 - k02 + a))) / sqr(
+				(betaParallel + 1) * (betaParallel - 1));
 
 			if (kmaxIncrement2 < 0) {
 				increment = 0;
 				length = 0;
-			}
-			else {
+			} else {
 
 				double kmaxIncrement = sqrt(kmaxIncrement2);
 				length = 2 * pi / kmaxIncrement;
@@ -6503,8 +6603,8 @@ void Simulation::initializeRingWeibel() {
 						bParallel2 * (k02 - kmaxIncrement2)) -
 					(speed_of_light_normalized_sqr * kmaxIncrement2 * bParallel2 + a - speed_of_light_normalized_sqr * (k02 -
 						kmaxIncrement2)));*/
-				increment = (1 / sqrt(2.0)) * sqrt(sqrt(sqr(kmaxIncrement2 * bParallel2 + a - (k02 -kmaxIncrement2)) + 4 * kmaxIncrement2 *
-					bParallel2 * (k02 - kmaxIncrement2)) -(kmaxIncrement2 * bParallel2 + a - (k02 - kmaxIncrement2)));
+				increment = (1 / sqrt(2.0)) * sqrt(sqrt(sqr(kmaxIncrement2 * bParallel2 + a - (k02 - kmaxIncrement2)) + 4 * kmaxIncrement2 *
+					bParallel2 * (k02 - kmaxIncrement2)) - (kmaxIncrement2 * bParallel2 + a - (k02 - kmaxIncrement2)));
 			}
 		}
 
@@ -6682,18 +6782,18 @@ void Simulation::createArrays() {
 	fflush(stdout);
 	//if(rank == 0) printLog("creating maxwell equation matrix arrays\n");
 
-	maxwellEquationMatrix = new std::vector<MatrixElement> ***[xnumberAdded];
+	maxwellEquationMatrix = new std::vector < MatrixElement > ***[xnumberAdded];
 	maxwellEquationRightPart = new double ***[xnumberAdded];
 	for (int i = 0; i < xnumberAdded; ++i) {
-		maxwellEquationMatrix[i] = new std::vector<MatrixElement> **[ynumberAdded];
+		maxwellEquationMatrix[i] = new std::vector < MatrixElement > **[ynumberAdded];
 		maxwellEquationRightPart[i] = new double **[ynumberAdded];
 		for (int j = 0; j < ynumberAdded; ++j) {
-			maxwellEquationMatrix[i][j] = new std::vector<MatrixElement> *[znumberAdded];
+			maxwellEquationMatrix[i][j] = new std::vector < MatrixElement > *[znumberAdded];
 			maxwellEquationRightPart[i][j] = new double *[znumberAdded];
 			for (int k = 0; k < znumberAdded; ++k) {
 				//if(rank == 0) printf("%d %d %d\n", i, j, k);
 				//if(rank == 0) fflush((stdout));
-				maxwellEquationMatrix[i][j][k] = new std::vector<MatrixElement>[maxwellEquationMatrixSize];
+				maxwellEquationMatrix[i][j][k] = new std::vector < MatrixElement >[maxwellEquationMatrixSize];
 				maxwellEquationRightPart[i][j][k] = new double[maxwellEquationMatrixSize];
 			}
 		}
@@ -6703,7 +6803,7 @@ void Simulation::createArrays() {
 	if (rank == 0) fflush(stdout);
 	//if(rank == 0) printLog("creating arrays for divergence\n");
 
-	divergenceCleanUpMatrix = new std::vector<MatrixElement> ***[xnumberAdded + 1];
+	divergenceCleanUpMatrix = new std::vector < MatrixElement > ***[xnumberAdded + 1];
 
 	divergenceCleanUpRightPart = create4array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1, 3);
 	divergenceCleaningField = create4array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1, 3);
@@ -6712,11 +6812,11 @@ void Simulation::createArrays() {
 	divergenceCleaningPotentialFourier = create3array(xnumberAdded, ynumberAdded, znumberAdded);
 
 	for (int i = 0; i < xnumberAdded + 1; ++i) {
-		divergenceCleanUpMatrix[i] = new std::vector<MatrixElement> **[ynumberAdded + 1];
+		divergenceCleanUpMatrix[i] = new std::vector < MatrixElement > **[ynumberAdded + 1];
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
-			divergenceCleanUpMatrix[i][j] = new std::vector<MatrixElement> *[znumberAdded + 1];
+			divergenceCleanUpMatrix[i][j] = new std::vector < MatrixElement > *[znumberAdded + 1];
 			for (int k = 0; k < znumberAdded + 1; ++k) {
-				divergenceCleanUpMatrix[i][j][k] = new std::vector<MatrixElement>[3];
+				divergenceCleanUpMatrix[i][j][k] = new std::vector < MatrixElement >[3];
 			}
 		}
 	}
@@ -6748,7 +6848,7 @@ void Simulation::createArrays() {
 	fflush(stdout);
 	//if(rank == 0) printLog("creating arrays for parameters\n");
 
-	mostAcceleratedParticlesNumbers = new std::list<std::pair<int, double>>[typesNumber];
+	mostAcceleratedParticlesNumbers = new std::list < std::pair < int, double > >[typesNumber];
 
 	particleConcentrations = new double ***[typesNumber];
 	particleEnergies = new double ***[typesNumber];
@@ -7347,8 +7447,7 @@ void Simulation::createParticleTypes(double* concentrations, int* particlesPerBi
 			types[i].particesDeltaX = deltaX / types[i].particlesPerBin;
 			types[i].particesDeltaY = deltaY / types[i].particlesPerBin;
 			types[i].particesDeltaZ = deltaZ / types[i].particlesPerBin;
-		}
-		else {
+		} else {
 			types[i].particesDeltaX = xsize;
 			types[i].particesDeltaY = ysize;
 			types[i].particesDeltaZ = zsize;
@@ -7611,8 +7710,7 @@ void Simulation::checkFrequency(double omega) {
 		if (rank == 0) printf("omegaAlfven > cyclothron Omega Proton\n");
 		fflush(stdout);
 		if (rank == 0) fprintf(informationFile, "omegaAlfven > cyclothron Omega Proton\n");
-	}
-	else if (omega > cyclothronOmegaProton / 100.0) {
+	} else if (omega > cyclothronOmegaProton / 100.0) {
 		if (rank == 0) printf("omegaAlfven > cyclothrone Omega Proton/100\n");
 		fflush(stdout);
 		if (rank == 0) fprintf(informationFile, "omegaAlfven > cyclothron Omega Proton/100\n");
@@ -7625,8 +7723,7 @@ void Simulation::checkFrequency(double omega) {
 		if (rank == 0) printf("omegaAlfven > omegaAlfven plasma\n");
 		fflush(stdout);
 		if (rank == 0) fprintf(informationFile, "omegaAlfven > omegaAlfven plasma\n");
-	}
-	else if (omega > 0.01) {
+	} else if (omega > 0.01) {
 		if (rank == 0) printf("omegaAlfven > omegaAlfven plasma/100\n");
 		fflush(stdout);
 		if (rank == 0) fprintf(informationFile, "omegaAlfven > omegaAlfven plasma/100\n");
@@ -7670,8 +7767,7 @@ void Simulation::checkDebyeParameter() {
 		if (rank == 0) printf("debye number < 1\n");
 		fflush(stdout);
 		if (rank == 0) fprintf(informationFile, "debye number < 1\n");
-	}
-	else if (debyeNumber < 100.0) {
+	} else if (debyeNumber < 100.0) {
 		if (rank == 0) printf("debye number < 100\n");
 		fflush(stdout);
 		if (rank == 0) fprintf(informationFile, "debye number < 100\n");
@@ -7775,7 +7871,7 @@ void Simulation::initializeBell() {
 	//double dzeta = protonCRconcentration * speed_of_light_normalized * sqrt(gammaCR * gammaCR - 1) / (types[1].concentration * Vsh.norm());
 	double dzeta = protonCRconcentration * sqrt(gammaCR * gammaCR - 1) / (types[1].concentration * Vsh.norm());
 	//double rCR = massProton * speed_of_light_normalized_sqr * sqrt(gammaCR * gammaCR - 1) / (electron_charge_normalized *B0.norm());
-	double rCR = massProton * sqrt(gammaCR * gammaCR - 1) / (electron_charge_normalized *B0.norm());
+	double rCR = massProton * sqrt(gammaCR * gammaCR - 1) / (electron_charge_normalized * B0.norm());
 	double kmax = dzeta * 0.5 * sqr(Vsh.norm() / alfvenV) / rCR;
 	double lambda = 2 * pi / kmax;
 	int wavesCount = xsizeGeneral / lambda;
@@ -7842,8 +7938,7 @@ void Simulation::initializeBell() {
 				}
 			}
 		}
-	}
-	else {
+	} else {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -7885,11 +7980,11 @@ void Simulation::initializeBell() {
 	int maxI = xnumberAdded - additionalBinNumber - 1;
 	int maxJ = ynumberAdded - additionalBinNumber - 1;
 	int maxK = znumberAdded - additionalBinNumber - 1;
-	if(ynumberGeneral == 1) {
+	if (ynumberGeneral == 1) {
 		minJ = 0;
 		maxJ = 1;
 	}
-	if(znumberGeneral == 1) {
+	if (znumberGeneral == 1) {
 		minK = 0;
 		maxK = 1;
 	}
@@ -8106,8 +8201,7 @@ void Simulation::initializeTestOneParticle() {
 				}
 			}
 		}
-	}
-	else {
+	} else {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
@@ -8132,10 +8226,10 @@ void Simulation::initializeTestOneParticle() {
 		int i = 1 + additionalBinNumber;
 		int j = 1 + additionalBinNumber;
 		int k = 1 + additionalBinNumber;
-		if(ynumberGeneral == 1) {
+		if (ynumberGeneral == 1) {
 			j = 0;
 		}
-		if(znumberGeneral == 1) {
+		if (znumberGeneral == 1) {
 			k = 0;
 		}
 		Particle* particle = createParticle(0, i, j, k,
@@ -8177,7 +8271,7 @@ void Simulation::createParticles() {
 	if (rank == 0) printLog("creating particles\n");
 	int n = 0;
 	int minI = 1 + additionalBinNumber;
-	if(cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
+	if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT) {
 		minI = reflectingWallPoint;
 	}
 	int minJ = 1 + additionalBinNumber;
@@ -8185,11 +8279,11 @@ void Simulation::createParticles() {
 	int maxI = xnumberAdded - additionalBinNumber - 1;
 	int maxJ = ynumberAdded - additionalBinNumber - 1;
 	int maxK = znumberAdded - additionalBinNumber - 1;
-	if(ynumberGeneral == 1) {
+	if (ynumberGeneral == 1) {
 		minJ = 0;
 		maxJ = 1;
 	}
-	if(znumberGeneral == 1) {
+	if (znumberGeneral == 1) {
 		minK = 0;
 		maxK = 1;
 	}
@@ -8481,8 +8575,7 @@ int Simulation::getParticleNumber(int n, const ParticleTypes& type) {
 
 	if (rank > 0) {
 		MPI_Send(tempParticleNumber, 1, MPI_INT, 0, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
-	}
-	else {
+	} else {
 		particleNumber = tempParticleNumber[0];
 		for (int i = 1; i < nprocs; ++i) {
 			MPI_Status status;
@@ -8538,16 +8631,15 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 		py = sqrt(mass * kBoltzman_normalized * localTemperatureY) * normalDistribution();
 		pz = sqrt(mass * kBoltzman_normalized * localTemperatureZ) * normalDistribution();
 		p = sqrt(px * px + py * py + pz * pz);
-	}
-	else if (localTemperatureX == localTemperatureY && localTemperatureX == localTemperatureZ) {
+	} else if (localTemperatureX == localTemperatureY && localTemperatureX == localTemperatureZ) {
 		//double theta1 = kBoltzman_normalized * temperature / (mass * speed_of_light_normalized_sqr);
 		double theta1 = kBoltzman_normalized * temperature / (mass);
 		if (theta1 < 2) {
 			//printf("create cold juttner particle\n");
 			//p = maxwellJuttnerMomentumColdDistribution(temperature, mass, speed_of_light_normalized, kBoltzman_normalized,typeContainer.juttnerFunction, typeContainer.juttnerValue,typeContainer.jutnerNumber);
-			p = maxwellJuttnerMomentumColdDistribution(temperature, mass, 1.0, kBoltzman_normalized,typeContainer.juttnerFunction, typeContainer.juttnerValue,typeContainer.jutnerNumber);
-		}
-		else {
+			p = maxwellJuttnerMomentumColdDistribution(temperature, mass, 1.0, kBoltzman_normalized, typeContainer.juttnerFunction, typeContainer.juttnerValue,
+			                                           typeContainer.jutnerNumber);
+		} else {
 			//printf("create hot juttner particle\n");
 			//p = maxwellJuttnerMomentumHotDistribution(temperature, mass, speed_of_light_normalized, kBoltzman_normalized);
 			p = maxwellJuttnerMomentumHotDistribution(temperature, mass, 1.0, kBoltzman_normalized);
@@ -8561,20 +8653,19 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 		double pnormal = sqrt(p * p - pz * pz);
 		px = pnormal * cos(phi);
 		py = pnormal * sin(phi);
-	}
-	else if (localTemperatureY == localTemperatureZ) {
+	} else if (localTemperatureY == localTemperatureZ) {
 		double momentumParallel;
 		double momentumNormal;
 		//anisotropicMaxwellJuttnerDistribution(momentumNormal, momentumParallel, types[typeContainer.number].alphaNormal, types[typeContainer.number].alphaParallel, mass * speed_of_light_normalized);
-		anisotropicMaxwellJuttnerDistribution(momentumNormal, momentumParallel, types[typeContainer.number].alphaNormal, types[typeContainer.number].alphaParallel, mass);
+		anisotropicMaxwellJuttnerDistribution(momentumNormal, momentumParallel, types[typeContainer.number].alphaNormal,
+		                                      types[typeContainer.number].alphaParallel, mass);
 
 
 		double sign = uniformDistribution() - 0.5;
 		double phi = 2 * pi * uniformDistribution();
 		if (sign > 0) {
 			px = momentumParallel;
-		}
-		else {
+		} else {
 			px = -momentumParallel;
 		}
 		py = momentumNormal * cos(phi);
@@ -8582,8 +8673,7 @@ Particle* Simulation::createParticle(int n, int i, int j, int k, const double& w
 		alertNaNOrInfinity(px, "px = NaN\n");
 		alertNaNOrInfinity(py, "py = NaN\n");
 		alertNaNOrInfinity(pz, "pz = NaN\n");
-	}
-	else {
+	} else {
 		errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "can not find electron number %d\n", n);
 		printf("can not find electron number %d\n", n);
@@ -8624,7 +8714,8 @@ void Simulation::evaluateParticleTypesAlpha() {
 				//double alphaNormal = types[i].mass * speed_of_light_normalized_sqr / (kBoltzman_normalized * types[i].temperatureY);
 				double alphaNormal = types[i].mass / (kBoltzman_normalized * types[i].temperatureY);
 				//TemperatureRelativisticMaxwellSolver solver = TemperatureRelativisticMaxwellSolver(alphaNormal,kBoltzman_normalized * types[i].temperatureX / (types[i].mass *speed_of_light_normalized_sqr));
-				TemperatureRelativisticMaxwellSolver solver = TemperatureRelativisticMaxwellSolver(alphaNormal,kBoltzman_normalized * types[i].temperatureX / types[i].mass);
+				TemperatureRelativisticMaxwellSolver solver = TemperatureRelativisticMaxwellSolver(
+					alphaNormal, kBoltzman_normalized * types[i].temperatureX / types[i].mass);
 				double tempValue = solver.function(alphaNormal);
 				double minAlpha;
 				double maxAlpha;
@@ -8635,8 +8726,7 @@ void Simulation::evaluateParticleTypesAlpha() {
 						minAlpha = maxAlpha;
 						maxAlpha = 2 * maxAlpha;
 					}
-				}
-				else {
+				} else {
 					maxAlpha = alphaNormal;
 					//minAlpha = 0.1 * types[i].mass * speed_of_light_normalized_sqr / (kBoltzman_normalized * types[i].temperatureX);
 					minAlpha = 0.1 * types[i].mass / (kBoltzman_normalized * types[i].temperatureX);
@@ -8646,8 +8736,7 @@ void Simulation::evaluateParticleTypesAlpha() {
 				double alphaParallel = solver.solve(minAlpha, maxAlpha);
 				types[i].alphaNormal = alphaNormal;
 				types[i].alphaParallel = alphaParallel;
-			}
-			else {
+			} else {
 				types[i].alphaNormal = 1.0;
 				types[i].alphaParallel = 1.0;
 			}
@@ -8675,8 +8764,7 @@ void Simulation::synchronizeParticleNumber() {
 		if (rank > 0) {
 			particleCount[0] = particles.size();
 			MPI_Send(particleCount, 1, MPI_INT, 0, MPI_SEND_INTEGER_ALL_TO_FIRST, cartComm);
-		}
-		else {
+		} else {
 			particlesNumber = particles.size();
 			for (int i = 1; i < nprocs; ++i) {
 				MPI_Status status;
@@ -8702,8 +8790,7 @@ void Simulation::synchronizeParticleNumber() {
 		if (rank < nprocs - 1) {
 			MPI_Send(particleCount, 1, MPI_INT, rank + 1, MPI_SEND_INTEGER_NUMBER_RIGHT, cartComm);
 		}
-	}
-	else {
+	} else {
 		particlesNumber = particles.size();
 		for (int p = 0; p < particles.size(); ++p) {
 			Particle* particle = particles[p];
@@ -8725,12 +8812,10 @@ int Simulation::getCartCoordWithAbsoluteIndexX(int i) {
 	if (i >= firstAbsoluteXindex + additionalBinNumber && i < firstAbsoluteXindex + xnumberAdded - 2 * additionalBinNumber
 		- 1) {
 		isInThread[0] = 1;
-	}
-	else {
+	} else {
 		if ((cartCoord[0] == 0) && (i < 0)) {
 			isInThread[0] = 1;
-		}
-		else if ((cartCoord[0] == cartDim[0] - 1) && (i >= firstAbsoluteXindex + xnumberAdded - 2 * additionalBinNumber - 1)
+		} else if ((cartCoord[0] == cartDim[0] - 1) && (i >= firstAbsoluteXindex + xnumberAdded - 2 * additionalBinNumber - 1)
 		) {
 			isInThread[0] = 1;
 		}
@@ -8753,8 +8838,7 @@ int Simulation::getCartCoordWithAbsoluteIndexX(int i) {
 				coordIn[0] = tempI;
 			}
 		}
-	}
-	else {
+	} else {
 		int firstRank = 0;
 		int tempCoord[3];
 		tempCoord[0] = 0;
@@ -8780,8 +8864,7 @@ int Simulation::getCartCoordWithAbsoluteIndexX(int i) {
 			MPI_Cart_rank(cartComm, tempCoord, &curRank);
 			MPI_Send(coordIn, 1, MPI_INT, curRank, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm);
 		}
-	}
-	else {
+	} else {
 		int firstRank = 0;
 		int tempCoord[3];
 		tempCoord[0] = 0;
@@ -8808,12 +8891,10 @@ int Simulation::getCartCoordWithAbsoluteIndexY(int j) {
 	if (j >= firstAbsoluteYindex + additionalBinNumber && j < firstAbsoluteYindex + ynumberAdded - 2 * additionalBinNumber
 		- 1) {
 		isInThread[0] = 1;
-	}
-	else {
+	} else {
 		if ((cartCoord[1] == 0) && (j < 0)) {
 			isInThread[0] = 1;
-		}
-		else if ((cartCoord[1] == cartDim[1] - 1) && (j >= firstAbsoluteYindex + ynumberAdded - 2 * additionalBinNumber - 1)
+		} else if ((cartCoord[1] == cartDim[1] - 1) && (j >= firstAbsoluteYindex + ynumberAdded - 2 * additionalBinNumber - 1)
 		) {
 			isInThread[0] = 1;
 		}
@@ -8836,8 +8917,7 @@ int Simulation::getCartCoordWithAbsoluteIndexY(int j) {
 				coordIn[0] = tempJ;
 			}
 		}
-	}
-	else {
+	} else {
 		int firstRank = 0;
 		int tempCoord[3];
 		tempCoord[1] = 0;
@@ -8863,8 +8943,7 @@ int Simulation::getCartCoordWithAbsoluteIndexY(int j) {
 			MPI_Cart_rank(cartComm, tempCoord, &curRank);
 			MPI_Send(coordIn, 1, MPI_INT, curRank, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm);
 		}
-	}
-	else {
+	} else {
 		int firstRank = 0;
 		int tempCoord[3];
 		tempCoord[1] = 0;
@@ -8891,12 +8970,10 @@ int Simulation::getCartCoordWithAbsoluteIndexZ(int k) {
 	if (k >= firstAbsoluteZindex + additionalBinNumber && k < firstAbsoluteZindex + znumberAdded - 2 * additionalBinNumber
 		- 1) {
 		isInThread[0] = 1;
-	}
-	else {
+	} else {
 		if ((cartCoord[2] == 0) && (k < 0)) {
 			isInThread[0] = 1;
-		}
-		else if ((cartCoord[2] == cartDim[2] - 1) && (k >= firstAbsoluteZindex + znumberAdded - 2 * additionalBinNumber - 1)
+		} else if ((cartCoord[2] == cartDim[2] - 1) && (k >= firstAbsoluteZindex + znumberAdded - 2 * additionalBinNumber - 1)
 		) {
 			isInThread[0] = 1;
 		}
@@ -8919,8 +8996,7 @@ int Simulation::getCartCoordWithAbsoluteIndexZ(int k) {
 				coordIn[0] = tempI;
 			}
 		}
-	}
-	else {
+	} else {
 		int firstRank = 0;
 		int tempCoord[3];
 		tempCoord[2] = 0;
@@ -8946,8 +9022,7 @@ int Simulation::getCartCoordWithAbsoluteIndexZ(int k) {
 			MPI_Cart_rank(cartComm, tempCoord, &curRank);
 			MPI_Send(coordIn, 1, MPI_INT, curRank, MPI_SEND_INTEGER_FIRST_TO_ALL, cartComm);
 		}
-	}
-	else {
+	} else {
 		int firstRank = 0;
 		int tempCoord[3];
 		tempCoord[2] = 0;
