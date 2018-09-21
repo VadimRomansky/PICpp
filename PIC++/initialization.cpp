@@ -5912,7 +5912,7 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 						sinPhi = 0.0;
 					}
 
-					double Bturbulent = evaluate_turbulent_b(ki, kj, kk);
+					double Bturbulent = evaluateTurbulentB(ki, kj, kk);
 
 					turbulenceEnergy = turbulenceEnergy + Bturbulent * Bturbulent;
 				}
@@ -5963,7 +5963,7 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 						sinPhi = 0.0;
 					}
 
-					double Bturbulent = turbulenceFieldCorrection * evaluate_turbulent_b(ki, kj, kk);
+					double Bturbulent = turbulenceFieldCorrection * evaluateTurbulentB(ki, kj, kk);
 
 					for (int i = 0; i < xnumberAdded; ++i) {
 						for (int j = 0; j < ynumberAdded; ++j) {
@@ -6035,33 +6035,32 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 	                                                                  1.0);*/
 }
 
-double Simulation::evaluate_turbulent_b(int ki, int kj, int kk){
+double Simulation::evaluateTurbulentB(int ki, int kj, int kk){
 		double kw = sqrt(1.0*ki*ki + kj*kj + kk*kk);
 		double Bamplitude;
 		switch(dimensionType){
-case THREE_D:{
-	Bamplitude = 0.1*B0.norm()/sqrt(power(kw,(11.0/3.0)));
-			}
-			break;
-case TWO_D_XY:{
-	Bamplitude = 0.1*B0.norm()/sqrt(power(kw,(8.0/3.0)));
-			  }
-			break;
-case TWO_D_XZ:{
-	Bamplitude = 0.1*B0.norm()/sqrt(power(kw,(8.0/3.0)));
-			  }
-			break;
-case ONE_D:{
-	Bamplitude = 0.1*B0.norm()/sqrt(power(kw,(5.0/3.0)));
-		   }
-			break;
-default: {
-	printf("wrong dimension type\n");
-	MPI_Finalize();
-	exit(0);
+			case THREE_D:{
+					Bamplitude = B0.norm()/sqrt(power(kw,(11.0/3.0)));
+				}
+				break;
+			case TWO_D_XY:{
+					Bamplitude = B0.norm()/sqrt(power(kw,(8.0/3.0)));
+				}
+				break;
+			case TWO_D_XZ:{
+					Bamplitude = B0.norm()/sqrt(power(kw,(8.0/3.0)));
+				}
+				break;
+			case ONE_D:{
+					Bamplitude = B0.norm()/sqrt(power(kw,(5.0/3.0)));
+				}
+				break;
+			default: {
+				printf("wrong dimension type\n");
+				MPI_Finalize();
+			exit(0);
 		 }
-
-}
+	}
 	return Bamplitude;
 }
 

@@ -719,7 +719,7 @@ public:
 	void initializeRingWeibel();
 	void initializeHomogenouseFlow();
 	void initializeKolmogorovSpectrum();
-	double evaluate_turbulent_b(int ki, int kj, int kk);
+	double evaluateTurbulentB(int ki, int kj, int kk);
 	void initializeRandomModes(int number, int minNumber, double energyFraction);
 	void initializeFake();
 	void initializeHarris();
@@ -945,6 +945,13 @@ public:
 	Vector3d getBunemanMagneticField(int i, int j, int k);
 
 	Vector3d getBunemanFlux(int i, int j, int k);
+
+
+	void interpolateBunemanToLapentaEfield(double*** Ex, double*** Ey, double*** Ez, Vector3d*** E);
+	void interpolateLapentaToBunemanEfield(double*** Ex, double*** Ey, double*** Ez, Vector3d*** E);
+
+	void interpolateBunemanToLapentaBfield(double*** Bx, double*** By, double*** Bz, Vector3d*** B);
+	void interpolateLapentaToBunemanBfield(double*** Bx, double*** By, double*** Bz, Vector3d*** B);
 
 	double evaluateTurbulenceFieldAmplitude(const double& kx, const double& ky, const double& kz);
 

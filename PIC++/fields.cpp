@@ -3550,3 +3550,113 @@ double Simulation::evaluateTurbulenceFieldAmplitude(const double& kx, const doub
 		return turbulenceAmplitude/power(kw, 11.0/6.0);
 	}
 }
+
+void Simulation::interpolateBunemanToLapentaEfield(double*** Ex, double*** Ey, double*** Ez, Vector3d*** E) {
+	for(int j = 0; j < ynumberAdded + 1; ++j) {
+		for(int k = 0; k < znumberAdded + 1; ++k) {
+			for(int i = 1; i < xnumberAdded; ++i) {
+				E[i][j][k].x = (Ex[i][j][k] + Ex[i-1][j][k])/2.0;
+			}
+			E[0][j][k].x = E[1][j][k].x;
+			E[xnumberAdded][j][k].x = E[xnumberAdded - 1][j][k].x;
+		}
+	}
+
+	for(int i = 0; i < xnumberAdded + 1; ++i) {
+		for(int k = 0; k < znumberAdded + 1; ++k) {
+			for(int j = 1; j < ynumberAdded; ++j) {
+				E[i][j][k].y = (Ey[i][j][k] + Ey[i][j-1][k])/2.0;
+			}
+			E[i][0][k].y = E[i][1][k].y;
+			E[i][ynumberAdded][k].y = E[i][ynumberAdded - 1][k].y;
+		}
+	}
+
+	for(int i = 0; i < xnumberAdded + 1; ++i) {
+		for(int j = 0; j < ynumberAdded + 1; ++j) {
+			for(int k = 1; k < znumberAdded; ++k) {
+				E[i][j][k].z = (Ez[i][j][k] + Ez[i][j][k-1])/2.0;
+			}
+			E[i][j][0].z = E[i][j][1].z;
+			E[i][j][znumberAdded].z = E[i][j][znumberAdded - 1].z;
+		}
+	}
+}
+
+void Simulation::interpolateLapentaToBunemanEfield(double*** Ex, double*** Ey, double*** Ez, Vector3d*** E) {
+	for(int i = 0; i < xnumberAdded; ++i) {
+		for(int j = 0; j < ynumberAdded+1; ++j) {
+			for(int k = 0; k < znumberAdded+1; ++k) {
+				Ex[i][j][k] = (E[i][j][k].x + E[i+1][j][k].x)/2;
+			}
+		}
+	}
+
+	for(int i = 0; i < xnumberAdded+1; ++i) {
+		for(int j = 0; j < ynumberAdded; ++j) {
+			for(int k = 0; k < znumberAdded+1; ++k) {
+				Ey[i][j][k] = (E[i][j][k].y + E[i][j+1][k].y)/2;
+			}
+		}
+	}
+
+	for(int i = 0; i < xnumberAdded+1; ++i) {
+		for(int j = 0; j < ynumberAdded+1; ++j) {
+			for(int k = 0; k < znumberAdded; ++k) {
+				Ez[i][j][k] = (E[i][j][k].z + E[i][j][k+1].z)/2;
+			}
+		}
+	}
+}
+
+void Simulation::interpolateBunemanToLapentaBfield(double*** Bx, double*** By, double*** Bz, Vector3d*** B) {
+	for(int j = 0; j < ynumberAdded; ++j) {
+		for(int k = 0; k < znumberAdded; ++k) {
+			for(int i = 0; i < xnumberAdded; ++i) {
+				B[i][j][k].x = (Bx[i][j][k] + Bx[i+1][j][k])/2.0;
+			}
+		}
+	}
+
+	for(int i = 0; i < xnumberAdded; ++i) {
+		for(int k = 0; k < znumberAdded ; ++k) {
+			for(int j = 1; j < ynumberAdded; ++j) {
+				B[i][j][k].y = (By[i][j][k] + By[i][j+1][k])/2.0;
+			}
+		}
+	}
+
+	for(int i = 0; i < xnumberAdded + 1; ++i) {
+		for(int j = 0; j < ynumberAdded + 1; ++j) {
+			for(int k = 1; k < znumberAdded; ++k) {
+				B[i][j][k].z = (Bz[i][j][k] + Bz[i][j][k+1])/2.0;
+			}
+		}
+	}
+}
+
+void Simulation::interpolateLapentaToBunemanBfield(double*** Bx, double*** By, double*** Bz, Vector3d*** B) {
+	for(int i = 0; i < xnumberAdded; ++i) {
+		for(int j = 0; j < ynumberAdded+1; ++j) {
+			for(int k = 0; k < znumberAdded+1; ++k) {
+				Bx[i][j][k] = (B[i][j][k].x + B[i+1][j][k].x)/2;
+			}
+		}
+	}
+
+	for(int i = 0; i < xnumberAdded+1; ++i) {
+		for(int j = 0; j < ynumberAdded; ++j) {
+			for(int k = 0; k < znumberAdded+1; ++k) {
+				Ey[i][j][k] = (E[i][j][k].y + E[i][j+1][k].y)/2;
+			}
+		}
+	}
+
+	for(int i = 0; i < xnumberAdded+1; ++i) {
+		for(int j = 0; j < ynumberAdded+1; ++j) {
+			for(int k = 0; k < znumberAdded; ++k) {
+				Ez[i][j][k] = (E[i][j][k].z + E[i][j][k+1].z)/2;
+			}
+		}
+	}
+}
