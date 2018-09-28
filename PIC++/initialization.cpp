@@ -5309,6 +5309,7 @@ void Simulation::initializeFluxFromRight() {
 
 	//turbulence
 	//initializeKolmogorovSpectrum();
+	initializeRandomModes(500, 25, 0.9);
 
 	//double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
 	double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0));
@@ -6016,6 +6017,10 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 
 	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
 	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
+	if(solverType == BUNEMAN) {
+		interpolateLapentaToBunemanBfield(bunemanBx, bunemanBy, bunemanBz, Bfield);
+		interpolateLapentaToBunemanEfield(bunemanEx, bunemanEy, bunemanEz, Efield);
+	}
 	/*rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers,
 	                                                                   omega,
 	                                                                   middleXgrid[xnumberAdded - additionalBinNumber],
