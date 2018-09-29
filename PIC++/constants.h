@@ -60,7 +60,7 @@ const int reduceStepY = 1;
 const int reduceStepZ = 1;
 const int splineOrder = 0; //never use higher for buneman
 const int additionalBinNumber = 1 + (splineOrder/2);
-//const int reflectionPoint = 1 + additionalBinNumber;
+//const int reflectingWallPoint = 1 + additionalBinNumber;
 const int reflectingWallPoint = 20;
 const int defaulResistiveLayerWidth = 20;
 

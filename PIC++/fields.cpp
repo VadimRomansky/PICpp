@@ -3581,6 +3581,8 @@ void Simulation::interpolateBunemanToLapentaEfield(double*** Ex, double*** Ey, d
 			E[i][j][znumberAdded].z = E[i][j][znumberAdded - 1].z;
 		}
 	}
+
+	exchangeGeneralEfield(E);
 }
 
 void Simulation::interpolateLapentaToBunemanEfield(double*** Ex, double*** Ey, double*** Ez, Vector3d*** E) {
@@ -3607,6 +3609,7 @@ void Simulation::interpolateLapentaToBunemanEfield(double*** Ex, double*** Ey, d
 			}
 		}
 	}
+	exchangeBunemanEfield(Ex, Ey, Ez);
 }
 
 void Simulation::interpolateBunemanToLapentaBfield(double*** Bx, double*** By, double*** Bz, Vector3d*** B) {
@@ -3633,36 +3636,40 @@ void Simulation::interpolateBunemanToLapentaBfield(double*** Bx, double*** By, d
 			}
 		}
 	}
+
+	exchangeGeneralBfield(B);
 }
 
 void Simulation::interpolateLapentaToBunemanBfield(double*** Bx, double*** By, double*** Bz, Vector3d*** B) {
 		for(int j = 0; j < ynumberAdded; ++j) {
 		for(int k = 0; k < znumberAdded; ++k) {
 			for(int i = 1; i < xnumberAdded; ++i) {
-				B[i][j][k].x = (Bx[i][j][k] + Bx[i-1][j][k])/2.0;
+				Bx[i][j][k] = (B[i][j][k].x + B[i-1][j][k].x)/2.0;
 			}
-			B[0][j][k].x = B[1][j][k].x;
-			B[xnumberAdded][j][k].x = B[xnumberAdded - 1][j][k].x;
+			Bx[0][j][k] = Bx[1][j][k];
+			Bx[xnumberAdded][j][k] = Bx[xnumberAdded - 1][j][k];
 		}
 	}
 
 	for(int i = 0; i < xnumberAdded; ++i) {
 		for(int k = 0; k < znumberAdded; ++k) {
 			for(int j = 1; j < ynumberAdded; ++j) {
-				B[i][j][k].y = (By[i][j][k] + By[i][j-1][k])/2.0;
+				By[i][j][k] = (B[i][j][k].y + B[i][j-1][k].y)/2.0;
 			}
-			B[i][0][k].y = B[i][1][k].y;
-			B[i][ynumberAdded][k].y = B[i][ynumberAdded - 1][k].y;
+			By[i][0][k] = By[i][1][k];
+			By[i][ynumberAdded][k] = By[i][ynumberAdded - 1][k];
 		}
 	}
 
 	for(int i = 0; i < xnumberAdded; ++i) {
 		for(int j = 0; j < ynumberAdded; ++j) {
 			for(int k = 1; k < znumberAdded; ++k) {
-				B[i][j][k].z = (Bz[i][j][k] + Bz[i][j][k-1])/2.0;
+				Bz[i][j][k] = (B[i][j][k].z + B[i][j][k-1].z)/2.0;
 			}
-			B[i][j][0].z = B[i][j][1].z;
-			B[i][j][znumberAdded].z = B[i][j][znumberAdded - 1].z;
+			Bz[i][j][0] = Bz[i][j][1];
+			Bz[i][j][znumberAdded] = Bz[i][j][znumberAdded - 1];
 		}
 	}
+
+	exchangeBunemanBfield(Bx, By, Bz);
 }
