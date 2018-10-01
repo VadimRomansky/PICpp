@@ -3946,6 +3946,9 @@ void outputGeneralInitialParameters(const char* outFileName, const char* outFile
 		fprintf(outFileWithText, "36 electron simulation mass = %g\n", simulation->massElectron);
 		fprintf(outFile, "%g\n", simulation->massElectron);
 
+		fprintf(outFileWithText, "37 initial random = %d\n", Simulation::initialRandom);
+		fprintf(outFile, "%d\n", Simulation::initialRandom);
+
 		fclose(outFile);
 		fclose(outFileWithText);
 	}
