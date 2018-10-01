@@ -3653,21 +3653,29 @@ void Simulation::interpolateLapentaToBunemanBfield(double*** Bx, double*** By, d
 
 	for(int i = 0; i < xnumberAdded; ++i) {
 		for(int k = 0; k < znumberAdded; ++k) {
+			if(ynumberGeneral > 1){
 			for(int j = 1; j < ynumberAdded; ++j) {
 				By[i][j][k] = (B[i][j][k].y + B[i][j-1][k].y)/2.0;
 			}
-			By[i][0][k] = By[i][1][k];
+				By[i][0][k] = By[i][1][k];
 			By[i][ynumberAdded][k] = By[i][ynumberAdded - 1][k];
+			} else {
+				By[i][0][k] = B[i][0][k].y;
+			}
 		}
 	}
 
 	for(int i = 0; i < xnumberAdded; ++i) {
 		for(int j = 0; j < ynumberAdded; ++j) {
-			for(int k = 1; k < znumberAdded; ++k) {
-				Bz[i][j][k] = (B[i][j][k].z + B[i][j][k-1].z)/2.0;
+			if(znumberGeneral> 1){
+				for(int k = 1; k < znumberAdded; ++k) {
+					Bz[i][j][k] = (B[i][j][k].z + B[i][j][k-1].z)/2.0;
+				}
+				Bz[i][j][0] = Bz[i][j][1];
+				Bz[i][j][znumberAdded] = Bz[i][j][znumberAdded - 1];
+			} else {
+				Bz[i][j][0] = B[i][j][0].z;
 			}
-			Bz[i][j][0] = Bz[i][j][1];
-			Bz[i][j][znumberAdded] = Bz[i][j][znumberAdded - 1];
 		}
 	}
 

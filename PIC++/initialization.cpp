@@ -5309,7 +5309,7 @@ void Simulation::initializeFluxFromRight() {
 
 	//turbulence
 	//initializeKolmogorovSpectrum();
-	initializeRandomModes(500, 25, 0.9);
+	initializeRandomModes(25, 500, 0.9);
 
 	//double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
 	double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0));
@@ -5878,7 +5878,7 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 	}
 	int kzcount = maxNumber / minNumber;
 	if (znumberGeneral == 1) {
-		kzcount = 1;
+		kzcount = 0;
 	}
 
 	double turbulenceFieldCorrection = 1.0;
@@ -6014,6 +6014,9 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 			}
 		}
 	}
+
+	exchangeGeneralBfield(Bfield);
+	exchangeGeneralEfield(Efield);
 
 	rightBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);
 	leftBoundaryFieldEvaluator = new ConstantBoundaryFieldEvaluator(E0, B0);

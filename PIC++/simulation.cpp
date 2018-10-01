@@ -68,6 +68,7 @@ void Simulation::simulate() {
 		//initializeFake();
 		//initializeTestOneParticle();
 	}
+	resetNewTempFields();
 	if (rank == 0) {
 		initializationTime = clock() - initializationTime;
 		printf("initialization time time = %g sec\n", initializationTime / CLOCKS_PER_SEC);

@@ -1,13 +1,13 @@
 clear;
-load distribution_protons.dat;
-load distribution_electrons.dat;
-load distribution_alphas.dat;
-load distribution_positrons.dat;
+load distribution_protons_20.dat;
+load distribution_electrons_20.dat;
+load distribution_alphas_20.dat;
+load distribution_positrons_20.dat;
 load initialParameters.dat;
 
 Np = 500;
 
-Nt = size(distribution_electrons, 1)/Np;
+Nt = size(distribution_electrons_20, 1)/Np;
 %Nt = 3;
 
 
@@ -33,37 +33,37 @@ T = 2*10^15;
 kB = 1.3806488*10^-16;
 theta = kB*T/(me*v*v);
 for i=1:Np,   
-   Pp(i,1) = distribution_protons(i + a*Np,1);
-   Pp(i,2) = distribution_protons(i + b*Np,1);
-   Pp(i,3) = distribution_protons(i + c*Np,1);
+   Pp(i,1) = distribution_protons_20(i + a*Np,1);
+   Pp(i,2) = distribution_protons_20(i + b*Np,1);
+   Pp(i,3) = distribution_protons_20(i + c*Np,1);
    
-   Fp(i,1) = distribution_protons(i + a*Np, 2)*Pp(i,1)*Pp(i,1);
-   Fp(i,2) = distribution_protons(i + b*Np, 2)*Pp(i,2)*Pp(i,2);
-   Fp(i,3) = distribution_protons(i + c*Np, 2)*Pp(i,3)*Pp(i,3);
+   Fp(i,1) = distribution_protons_20(i + a*Np, 2)*Pp(i,1)*Pp(i,1);
+   Fp(i,2) = distribution_protons_20(i + b*Np, 2)*Pp(i,2)*Pp(i,2);
+   Fp(i,3) = distribution_protons_20(i + c*Np, 2)*Pp(i,3)*Pp(i,3);
    
-   Pe(i,1) = distribution_electrons(i + a*Np,1);
-   Pe(i,2) = distribution_electrons(i + b*Np,1);
-   Pe(i,3) = distribution_electrons(i + c*Np,1);
+   Pe(i,1) = distribution_electrons_20(i + a*Np,1);
+   Pe(i,2) = distribution_electrons_20(i + b*Np,1);
+   Pe(i,3) = distribution_electrons_20(i + c*Np,1);
    
-   Fe(i,1) = distribution_electrons(i + a*Np, 2)*Pe(i,1)*Pe(i,1);
-   Fe(i,2) = distribution_electrons(i + b*Np, 2)*Pe(i,2)*Pe(i,2);
-   Fe(i,3) = distribution_electrons(i + c*Np, 2)*Pe(i,3)*Pe(i,3);
+   Fe(i,1) = distribution_electrons_20(i + a*Np, 2)*Pe(i,1)*Pe(i,1);
+   Fe(i,2) = distribution_electrons_20(i + b*Np, 2)*Pe(i,2)*Pe(i,2);
+   Fe(i,3) = distribution_electrons_20(i + c*Np, 2)*Pe(i,3)*Pe(i,3);
    
-   Pa(i,1) = distribution_alphas(i + a*Np,1);
-   Pa(i,2) = distribution_alphas(i + b*Np,1);
-   Pa(i,3) = distribution_alphas(i + c*Np,1);
+   Pa(i,1) = distribution_alphas_20(i + a*Np,1);
+   Pa(i,2) = distribution_alphas_20(i + b*Np,1);
+   Pa(i,3) = distribution_alphas_20(i + c*Np,1);
    
-   Fa(i,1) = distribution_alphas(i + a*Np, 2)*Pa(i,1)*Pa(i,1);
-   Fa(i,2) = distribution_alphas(i + b*Np, 2)*Pa(i,2)*Pa(i,2);
-   Fa(i,3) = distribution_alphas(i + c*Np, 2)*Pa(i,3)*Pa(i,3);
+   Fa(i,1) = distribution_alphas_20(i + a*Np, 2)*Pa(i,1)*Pa(i,1);
+   Fa(i,2) = distribution_alphas_20(i + b*Np, 2)*Pa(i,2)*Pa(i,2);
+   Fa(i,3) = distribution_alphas_20(i + c*Np, 2)*Pa(i,3)*Pa(i,3);
    
-   Ppos(i,1) = distribution_positrons(i + a*Np,1);
-   Ppos(i,2) = distribution_positrons(i + b*Np,1);
-   Ppos(i,3) = distribution_positrons(i + c*Np,1);
+   Ppos(i,1) = distribution_positrons_20(i + a*Np,1);
+   Ppos(i,2) = distribution_positrons_20(i + b*Np,1);
+   Ppos(i,3) = distribution_positrons_20(i + c*Np,1);
    
-   Fpos(i,1) = distribution_positrons(i + a*Np, 2)*Ppos(i,1)*Ppos(i,1);
-   Fpos(i,2) = distribution_positrons(i + b*Np, 2)*Ppos(i,2)*Ppos(i,2);
-   Fpos(i,3) = distribution_positrons(i + c*Np, 2)*Ppos(i,3)*Ppos(i,3);
+   Fpos(i,1) = distribution_positrons_20(i + a*Np, 2)*Ppos(i,1)*Ppos(i,1);
+   Fpos(i,2) = distribution_positrons_20(i + b*Np, 2)*Ppos(i,2)*Ppos(i,2);
+   Fpos(i,3) = distribution_positrons_20(i + c*Np, 2)*Ppos(i,3)*Ppos(i,3);
    
    exp1 = exp(-sqrt(1+Pe(i,1)*Pe(i,1)/(me*me*v*v))/theta);
    bes = besselk(2, 1/theta);
