@@ -47,6 +47,8 @@ public:
 	static double electron_charge_normalized;
 	static DimensionType dimensionType;
 
+	static int initialRandom;
+
 	int rank;
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];

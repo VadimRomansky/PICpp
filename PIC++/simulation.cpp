@@ -31,6 +31,8 @@ double Simulation::kBoltzman_normalized;
 double Simulation::electron_charge_normalized;
 DimensionType Simulation::dimensionType;
 
+int Simulation::initialRandom;
+
 void Simulation::simulate() {
 	MPI_Barrier(cartComm);
 	double initializationTime = 0;

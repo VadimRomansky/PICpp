@@ -5936,14 +5936,16 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 		}
 	}
 
+	srand(Simulation::initialRandom);
+
 	for (int ki = 0; ki <= kxcount; ++ki) {
 		for (int kj = 0; kj <= kycount; ++kj) {
 			for (int kk = 0; kk <= kzcount; ++kk) {
 
 				if ((ki + kj + kk) != 0) {
 
-					double phase1 = 2 * pi * rand();
-					double phase2 = 2 * pi * rand();
+					double phase1 = 2 * pi * uniformDistribution();
+					double phase2 = 2 * pi * uniformDistribution();
 
 
 					double kx = ki * deltaK;
@@ -6048,19 +6050,19 @@ double Simulation::evaluateTurbulentB(int ki, int kj, int kk){
 		double Bamplitude;
 		switch(dimensionType){
 			case THREE_D:{
-					Bamplitude = B0.norm()/sqrt(power(kw,(11.0/3.0)));
+					Bamplitude = B0.norm()/(power(kw,(11.0/6.0)));
 				}
 				break;
 			case TWO_D_XY:{
-					Bamplitude = B0.norm()/sqrt(power(kw,(8.0/3.0)));
+					Bamplitude = B0.norm()/(power(kw,(8.0/6.0)));
 				}
 				break;
 			case TWO_D_XZ:{
-					Bamplitude = B0.norm()/sqrt(power(kw,(8.0/3.0)));
+					Bamplitude = B0.norm()/(power(kw,(8.0/6.0)));
 				}
 				break;
 			case ONE_D:{
-					Bamplitude = B0.norm()/sqrt(power(kw,(5.0/3.0)));
+					Bamplitude = B0.norm()/(power(kw,(5.0/6.0)));
 				}
 				break;
 			default: {
