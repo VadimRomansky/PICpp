@@ -5,6 +5,7 @@ load Xfile.dat;
 load Yfile.dat;
 load Zfile.dat;
 set(0,'DefaultFigureColormap',feval('jet'));
+set(0, 'DefaultLineLineWidth', 2);
 Nx = size(Xfile, 1);
 Ny = size(Yfile, 1);
 Nz = size(Zfile, 1);

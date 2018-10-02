@@ -1,8 +1,8 @@
 clear;
-load distribution_protons_grid_20.dat;
-load distribution_electrons_grid_20.dat;
-load distribution_alphas_grid_20.dat;
-load distribution_positrons_grid_20.dat;
+load distribution_protons_grid.dat;
+load distribution_electrons_grid.dat;
+load distribution_alphas_grid.dat;
+load distribution_positrons_grid.dat;
 load initialParameters.dat;
 load Xfile.dat;
 
@@ -13,9 +13,7 @@ Nt = size(distribution_electrons_grid_20, 1)/(Nx + 1);
 %Nt = 3;
 
 
-a = 0;
-b = fix(Nt/2);
-c = Nt - 1;
+a = Nt - 1;
 
 Fp(1:Np) = 0;
 Fe(1:Np) = 0;
@@ -39,26 +37,26 @@ factor = 1;
 minX = 1;
 maxX = Nx;
 for i=1:Np,   
-   Pp(i) = distribution_protons_grid_20(1 + a*(Nx + 1),i)/(mp*v);
+   Pp(i) = distribution_protons_grid(1 + a*(Nx + 1),i)/(mp*v);
    
-   Pe(i) = distribution_electrons_grid_20(1 + a*(Nx + 1),i)/(me*v);
+   Pe(i) = distribution_electrons_grid(1 + a*(Nx + 1),i)/(me*v);
      
-   Pa(i) = distribution_alphas_grid_20(1 + a*(Nx + 1),i)/(ma*v);
+   Pa(i) = distribution_alphas_grid(1 + a*(Nx + 1),i)/(ma*v);
      
-   Ppos(i) = distribution_positrons_grid_20(1 + a*(Nx + 1),i)/(me*v);
+   Ppos(i) = distribution_positrons_grid(1 + a*(Nx + 1),i)/(me*v);
    
    for j=minX:maxX,
      factor = Pp(i)*Pp(i);
-     Fp(i) = Fp(i) + distribution_protons_grid_20(1 + j + a*(Nx + 1), i)*factor;
+     Fp(i) = Fp(i) + distribution_protons_grid(1 + j + a*(Nx + 1), i)*factor;
 
      factor = Pe(i)*Pe(i);
-     Fe(i) = Fe(i) + distribution_electrons_grid_20(1 + j + a*(Nx + 1), i)*factor;
+     Fe(i) = Fe(i) + distribution_electrons_grid(1 + j + a*(Nx + 1), i)*factor;
 
      factor = Pa(i)*Pa(i);
-     Fa(i) = Fa(i) + distribution_alphas_grid_20(1 + j + a*(Nx + 1), i)*factor;
+     Fa(i) = Fa(i) + distribution_alphas_grid(1 + j + a*(Nx + 1), i)*factor;
 
      factor = Ppos(i)*Ppos(i);
-     Fpos(i) = Fpos(i) + distribution_positrons_grid_20(1 + j + a*(Nx + 1), i)*factor;
+     Fpos(i) = Fpos(i) + distribution_positrons_grid(1 + j + a*(Nx + 1), i)*factor;
    end;
    exp1 = exp(-sqrt(1+Pe(i)*Pe(i)/(me*me*v*v))/theta);
    bes = besselk(2, 1/theta);
@@ -68,6 +66,7 @@ for i=1:Np,
 end;
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
+set(0, 'DefaultLineLineWidth', 2);
 figure(1);
 plot (Pp(1:Np),Fp(1:Np), 'red');
 title ('protons distribution function');

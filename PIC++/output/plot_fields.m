@@ -79,6 +79,7 @@ end;
 
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
+set(0, 'DefaultLineLineWidth', 2);
 
 figure(1);
 plot (Xgrid(1:Nx),Ex(1:Nx,1), 'red',Xgrid(1:Nx),Ex(1:Nx,2), 'green',Xgrid(1:Nx),Ex(1:Nx,3), 'blue');

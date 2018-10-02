@@ -42,6 +42,8 @@ for j = 1:Nz,
     middleZ(j) = 0.5*(Zfile(j) + Zfile(j+1));
 end;
 
+set(0, 'DefaultLineLineWidth', 2);
+
 cons(1:Nx, 1:Nz) = 0;
 for t = 1:Ntypes,
     if(particleTypes(t) > 0)

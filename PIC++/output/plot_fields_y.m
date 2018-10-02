@@ -72,6 +72,7 @@ end;
 
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
+set(0, 'DefaultLineLineWidth', 2);
 
 figure(1);
 plot (Ygrid(1:Ny),Ex(1:Ny,1), 'red',Ygrid(1:Ny),Ex(1:Ny,2), 'green',Ygrid(1:Ny),Ex(1:Ny,3), 'blue');

@@ -45,6 +45,8 @@ for j = 1:Ny,
     middleY(j) = (0.5*(Yfile(j) + Yfile(j+1)) - Yfile(2))*omegaElectron/cv;
 end;
 
+set(0, 'DefaultLineLineWidth', 2);
+
 figure(1)
 [X, Y] = meshgrid(middleY, middleX);
 surf(X, Y, divergenceError);

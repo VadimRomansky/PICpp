@@ -1,12 +1,12 @@
 clear;
-load distribution_protons_grid_20.dat;
-load distribution_electrons_grid_20.dat;
+load distribution_protons_grid_15.dat;
+load distribution_electrons_grid_15.dat;
 load initialParameters.dat;
 load Xfile.dat;
 
 directory_name = '../../../tristan-mp-pitp/output/';
 file_name = 'spect';
-file_number = '.020';
+file_number = '.015';
 full_name = strcat(directory_name, file_name, file_number);
 Np = 500;
 Nx = size(Xfile,1) - 1;
@@ -44,21 +44,21 @@ minX = 1;
 maxX = Nx/2;
 
 minXB = 1;
-maxXB = NxB;
+maxXB = NxB/2;
 
 a = 0;
 for i=1:Np,   
-   Pp(i) = distribution_protons_grid_20(1 + a*(Nx + 1),i)/(mp*v);
+   Pp(i) = distribution_protons_grid_15(1 + a*(Nx + 1),i)/(mp*v);
    
-   Pe(i) = distribution_electrons_grid_20(1 + a*(Nx + 1),i)/(me*v);
+   Pe(i) = distribution_electrons_grid_15(1 + a*(Nx + 1),i)/(me*v);
 
    
    for j=minX:maxX,
      factor = Pp(i)*Pp(i);
-     Fp(i) = Fp(i) + distribution_protons_grid_20(1 + j + a*(Nx + 1), i)*factor;
+     Fp(i) = Fp(i) + distribution_protons_grid_15(1 + j + a*(Nx + 1), i)*factor;
 
      factor = Pe(i)*Pe(i);
-     Fe(i) = Fe(i) + distribution_electrons_grid_20(1 + j + a*(Nx + 1), i)*factor;
+     Fe(i) = Fe(i) + distribution_electrons_grid_15(1 + j + a*(Nx + 1), i)*factor;
    end;
    exp1 = exp(-sqrt(1+Pe(i)*Pe(i)/(me*me*v*v))/theta);
    bes = besselk(2, 1/theta);
@@ -112,6 +112,7 @@ end;
 
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
+set(0, 'DefaultLineLineWidth', 2);
 figure(1);
 plot (Pp(1:Np),Fp(1:Np), 'red',PpB(1:NpB),FpB(1:NpB), 'blue');
 title ('protons distribution function');

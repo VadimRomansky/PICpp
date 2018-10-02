@@ -284,12 +284,12 @@ void Simulation::simulate() {
 		for (int i = 0; i < typesNumber; ++i) {
 			types[i].injectionLength += fabs(V0.x * deltaT);
 		}
-		/*if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX == FREE_BOTH) {
+		if (boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX == FREE_BOTH) {
 			injectNewParticles();
 		}
 		if (preserveChargeGlobal && (boundaryConditionTypeX != PERIODIC)) {
 			addToPreserveChargeGlobal();
-		}*/
+		}
 		//MPI_Barrier(cartComm);
 		if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 			procTime = clock() - procTime;

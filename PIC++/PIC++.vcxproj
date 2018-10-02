@@ -181,6 +181,7 @@
     <ClCompile Include="fields_filtering.cpp" />
     <ClCompile Include="fourier.cpp" />
     <ClCompile Include="initialization.cpp" />
+    <ClCompile Include="initializeFluxFromRight.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="intHarris.cpp" />
     <ClCompile Include="largeVectorBasis.cpp" />

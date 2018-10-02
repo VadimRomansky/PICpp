@@ -12,7 +12,7 @@ omega_plasma = 2*3.14159*generalAnisotropy(2,2)/generalAnisotropy(2,3);
 omega_gyro_a = 1.982193107*10^8;
 %gamma = 0.01*omega_gyro_a;
 gamma = 0.01*2*3.14159*omega_gyro_a/omega_plasma;
-
+set(0, 'DefaultLineLineWidth', 2);
 for i = 1:Ntypes,
     if(particleTypes(i) > 0)
         linearAnisotropy(1,i) = generalAnisotropy(1, 4 + 3*(i-1));

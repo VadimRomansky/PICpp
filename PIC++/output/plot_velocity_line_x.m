@@ -4,6 +4,7 @@ load particleTypes.dat;
 load Xfile.dat;
 load Yfile.dat;
 load Zfile.dat;
+set(0, 'DefaultLineLineWidth', 2);
 Nx = size(Xfile, 1)-1;
 Ny = size(Yfile, 1)-1;
 Nz = size(Zfile, 1)-1;

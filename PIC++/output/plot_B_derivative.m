@@ -41,6 +41,8 @@ for i=1:Nx,
    
 end;
 
+set(0, 'DefaultLineLineWidth', 2);
+
 figure(1);
 plot (Xfile(1:Nx,1),rotEx(1:Nx,1), 'red',Xfile(1:Nx,1),rotEx(1:Nx,2), 'green',Xfile(1:Nx,1),rotEx(1:Nx,3), 'blue');
 title ('rotEx');

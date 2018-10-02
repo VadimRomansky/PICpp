@@ -77,6 +77,7 @@ ypoint = fix(NyT/2) + 1;
 
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
+set(0, 'DefaultLineLineWidth', 2);
 
 fieldsFactorP = sqrt(Bx(Nx-1)*Bx(Nx-1) + By(Nx-1)*By(Nx-1) + Bz(Nx-1)*Bz(Nx-1));
 fieldsFactorT = sqrt(BxT(NxT-1, ypoint)*BxT(NxT-1, ypoint) + ByT(NxT-1, ypoint)*ByT(NxT-1, ypoint) + BzT(NxT-1, ypoint)*BzT(NxT-1, ypoint));

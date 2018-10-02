@@ -63,6 +63,8 @@ for t = 1:Ntypes,
     end;
 end;
 
+set(0, 'DefaultLineLineWidth', 2);
+
 figure(1);
 colormap Jet;
 [X, Y] = meshgrid(1:Ny, 1:Nx);

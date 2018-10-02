@@ -51,6 +51,8 @@ for i=1:Nx,
    charge_density_hat(i, 3) = concentrations(Nz*Ny*(i-1) + Nz*(ynumber-1) + znumber + c*N, 2);
 end;
 
+set(0, 'DefaultLineLineWidth', 2);
+
 for t = 1:Ntypes,
     if(particleTypes(t) > 0)
     figure(t);
@@ -61,6 +63,7 @@ for t = 1:Ntypes,
     grid ;    
     end;
 end;
+
 
 figure(Ntypes + 1);
 plot (middleX(1:Nx),charge_density(1:Nx, 1), 'red', middleX(1:Nx), charge_density(1:Nx, 2), 'green', middleX(1:Nx), charge_density(1:Nx, 3), 'blue');

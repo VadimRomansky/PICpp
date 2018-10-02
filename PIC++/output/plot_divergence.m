@@ -43,6 +43,8 @@ for i=1:Nx,
    divergenceB(i, 3) = divergence_error((Nz*Ny*(i-1) + Nz*(ynumber-1) + znumber) + c*N, 4);
 end;
 
+set(0, 'DefaultLineLineWidth', 2);
+
 figure(1);
 plot (middleX(1:Nx),divergenceError(1:Nx, 1), 'red', middleX(1:Nx), divergenceError(1:Nx, 2), 'green', middleX(1:Nx), divergenceError(1:Nx, 3), 'blue');
 title ('divergence error');

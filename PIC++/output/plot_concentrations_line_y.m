@@ -6,6 +6,8 @@ load Yfile.dat;
 load Zfile.dat;
 load initialParameters.dat;
 
+set(0, 'DefaultLineLineWidth', 2);
+
 Nx = size(Xfile, 1)-1;
 Ny = size(Yfile, 1)-1;
 Nz = size(Zfile, 1)-1;

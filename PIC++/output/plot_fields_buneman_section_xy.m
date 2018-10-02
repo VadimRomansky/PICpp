@@ -71,6 +71,8 @@ for j = 1:Ny-1,
    middleY(j) = (0.5*(Yfile(j) + Yfile(j+1)) - Yfile(2));
 end;
 
+set(0, 'DefaultLineLineWidth', 2);
+
 figure(1)
 [X, Y] = meshgrid(Ygrid, Xgrid);
 surf(X, Y, Ex);

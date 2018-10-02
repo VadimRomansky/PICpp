@@ -75,6 +75,8 @@ for i=1:Nx-1,
     helium3Anis(i, 3) = anisotropy_helium3(((Nz-1)*(Ny-1)*(i-1) + (Nz-1)*(ynumber-1) + znumber) + c*NB, 1);    
 end;
 
+set(0, 'DefaultLineLineWidth', 2);
+
 if(N1 > 0)
     figure(1);
     plot (middleX(1:Nx-1),electronsAnis(1:Nx-1, 1), 'red', middleX(1:Nx-1),electronsAnis(1:Nx-1, 2), 'green', middleX(1:Nx-1),electronsAnis(1:Nx-1, 3), 'blue');

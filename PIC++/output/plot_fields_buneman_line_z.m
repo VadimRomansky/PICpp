@@ -72,6 +72,7 @@ end;
 
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
+set(0, 'DefaultLineLineWidth', 2);
 
 figure(1);
 plot (Zgrid(1:Nz-1),Ex(1:Nz-1,1), 'red',Zgrid(1:Nz-1),Ex(1:Nz-1,2), 'green',Zgrid(1:Nz-1),Ex(1:Nz-1,3), 'blue');

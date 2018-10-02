@@ -48,6 +48,8 @@ for i=1:Nz,
    %extJz(i,2) = flux(Nz*Ny*(i-1) + Nz*(ynumber-1) + znumber + b*NE, 6);
    %extJz(i,3) = flux(Nz*Ny*(i-1) + Nz*(ynumber-1) + znumber + c*NE, 6);
 end;
+set(0, 'DefaultLineLineWidth', 2);
+
 figure(1);
 plot (Zfile(1:Nz,1),Jx(1:Nz,1), 'red',Zfile(1:Nz,1),Jx(1:Nz,2), 'green',Zfile(1:Nz,1),Jx(1:Nz,3), 'blue');
 title ('Jx');

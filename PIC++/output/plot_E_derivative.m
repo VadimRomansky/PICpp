@@ -67,6 +67,8 @@ for i=1:Nx,
    derEz(i,3) = EderivativeFile((Nz)*(Ny)*(i-1) + (Nz)*(ynumber-1) + znumber + c*NE, 3);
 end;
 
+set(0, 'DefaultLineLineWidth', 2);
+
 figure(1);
 plot (Xfile(1:Nx,1),Jx(1:Nx,1), 'red',Xfile(1:Nx,1),Jx(1:Nx,2), 'green',Xfile(1:Nx,1),Jx(1:Nx,3), 'blue');
 title ('4*pi*x');

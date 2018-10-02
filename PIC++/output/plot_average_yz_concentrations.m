@@ -74,6 +74,8 @@ for i=1:Nx,
    charge_density_hat(i, 3) = charge_density_hat(i, 3)/((Ny-1)*(Nz-1));
 end;
 
+set(0, 'DefaultLineLineWidth', 2);
+
 for t = 1:Ntypes,
     if(particleTypes(t) > 0)
     figure(t);

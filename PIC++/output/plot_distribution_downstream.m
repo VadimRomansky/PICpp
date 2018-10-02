@@ -34,6 +34,8 @@ for i=1:Np,
    Fe(i,3) = distribution_electrons_downstream(i + c*Np, 2)*Pe(i,3)*Pe(i,3);
 end;
 
+set(0, 'DefaultLineLineWidth', 2);
+
 figure(1);
 plot (Pp(1:Np,1),Fp(1:Np,1), 'red',Pp(1:Np,2),Fp(1:Np,2), 'green',Pp(1:Np,3),Fp(1:Np,3), 'blue');
 title ('protons distinution function');

@@ -92,6 +92,7 @@ for i=1:Np,
 end;
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
+set(0, 'DefaultLineLineWidth', 2);
 figure(1);
 plot (Gp(1:Np,1)-1,Fp(1:Np,1), 'red',Gp(1:Np,2)-1,Fp(1:Np,2), 'green',Gp(1:Np,3)-1,Fp(1:Np,3), 'blue');
 title ('protons distribution function');

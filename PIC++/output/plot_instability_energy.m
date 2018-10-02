@@ -50,6 +50,7 @@ end
 
 set(0,'DefaultAxesFontSize',16,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',16,'DefaultTextFontName','Times New Roman'); 
+set(0, 'DefaultLineLineWidth', 2);
 
 figure(1);
 plot (general(2:N2,3)*gamma, normalMagneticEnergy(2:N2), 'green', general(1:N2,3)*gamma, parallelMagneticEnergy(1:N2), 'blue', general(1:N2, 3)*gamma, deltaParallelMagneticEnergy(1:N2), 'black', general(1:N2, 3)*gamma, normalElectricEnergy(1:N2), 'red', general(1:N2, 3)*gamma, parallelElectricEnergy(1:N2), 'yellow', general(1:Nsaturation, 2)*gamma, linearMagneticEnergy(1:Nsaturation),'cyan', general(1:N2,3)*gamma, energyDeviation(1:N2), 'magenta');
