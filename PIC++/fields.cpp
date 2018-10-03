@@ -26,6 +26,9 @@ void Simulation::tristanEvaluateBhalfStep() {
 	int minI = 1 + additionalBinNumber;
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
 	int minJ = 1 + additionalBinNumber;
+	if((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1)) {
+		maxI = xnumberAdded - 1 - additionalBinNumber - 2;
+	}
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
 	if(ynumberGeneral == 1) {
 		minJ = 0;
@@ -119,7 +122,7 @@ void Simulation::tristanEvaluateE() {
 				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
 					bunemanEy[i][j][k] = 0;
 				}
-				if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC && i >= maxI) {
+				if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC && i > maxI) {
 					bunemanEy[i][j][k] = E0.y;
 				}
 			}
@@ -139,7 +142,7 @@ void Simulation::tristanEvaluateE() {
 				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
 					bunemanEz[i][j][k] = 0;
 				}
-				if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC && i >= maxI) {
+				if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC && i > maxI) {
 					bunemanEz[i][j][k] = E0.z;
 				}
 			}

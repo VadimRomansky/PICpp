@@ -5811,6 +5811,13 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 
 	srand(Simulation::initialRandom);
 
+	int maxI = xnumberAdded;
+	if((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1)){
+		maxI = xnumberAdded - 1 - additionalBinNumber - 1;
+	}
+	int maxJ = ynumberAdded;
+	int maxK = znumberAdded;
+
 	for (int ki = 0; ki <= kxcount; ++ki) {
 		for (int kj = 0; kj <= kycount; ++kj) {
 			for (int kk = 0; kk <= kzcount; ++kk) {
@@ -5841,9 +5848,9 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 
 					double Bturbulent = turbulenceFieldCorrection * evaluateTurbulentB(ki, kj, kk);
 
-					for (int i = 0; i < xnumberAdded; ++i) {
-						for (int j = 0; j < ynumberAdded; ++j) {
-							for (int k = 0; k < znumberAdded; ++k) {
+					for (int i = 0; i < maxI; ++i) {
+						for (int j = 0; j < maxJ; ++j) {
+							for (int k = 0; k < maxK; ++k) {
 								double kmultr = kx*middleXgrid[i] + ky*middleYgrid[j] + kz*middleZgrid[k];
 
 								double localB1 = Bturbulent*sin(kmultr + phase1);

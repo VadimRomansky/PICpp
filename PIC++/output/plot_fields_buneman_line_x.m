@@ -1,11 +1,14 @@
 clear;
-load EfieldX_1.dat;
-load BfieldX_1.dat;
+load EfieldX.dat;
+load BfieldX.dat;
 load Xfile.dat;
 
 load Yfile.dat;
 load Zfile.dat;
 load initialParameters.dat;
+
+Efield = EfieldX;
+Bfield = BfieldX;
 
 Nx = size(Xfile, 1);
 Ny = size(Yfile, 1);
@@ -13,10 +16,10 @@ Nz = size(Zfile, 1);
 
 NE = Nx-1;
 NB = (Nx-1);
-Nt = (size(EfieldX_1, 1)/NE);
+Nt = (size(Efield, 1)/NE);
 %Nt=2;
 %Nt = 6;
-NtB = (size(BfieldX_1, 1)/NB);
+NtB = (size(Bfield, 1)/NB);
 ynumber = 2;
 znumber = 2;
 %Nt = 10;
@@ -46,15 +49,15 @@ omegaElectron = initialParameters(20);
 for i=1:Nx-1,
    Xgrid(i) = (Xfile(i) - Xfile(2))*omega/cv;
    %Xgrid(i) = (Xfile(i) - Xfile(2));
-   Ex(i,1) = EfieldX_1((i) + a*NE, 1);
-   Ex(i,2) = EfieldX_1((i) + b*NE, 1);
-   Ex(i,3) = EfieldX_1((i) + c*NE, 1);
-   Ey(i,1) = EfieldX_1((i) + a*NE, 2);
-   Ey(i,2) = EfieldX_1((i) + b*NE, 2);
-   Ey(i,3) = EfieldX_1((i) + c*NE, 2);
-   Ez(i,1) = EfieldX_1((i) + a*NE, 3);
-   Ez(i,2) = EfieldX_1((i) + b*NE, 3);
-   Ez(i,3) = EfieldX_1((i) + c*NE, 3);
+   Ex(i,1) = Efield((i) + a*NE, 1);
+   Ex(i,2) = Efield((i) + b*NE, 1);
+   Ex(i,3) = Efield((i) + c*NE, 1);
+   Ey(i,1) = Efield((i) + a*NE, 2);
+   Ey(i,2) = Efield((i) + b*NE, 2);
+   Ey(i,3) = Efield((i) + c*NE, 2);
+   Ez(i,1) = Efield((i) + a*NE, 3);
+   Ez(i,2) = Efield((i) + b*NE, 3);
+   Ez(i,3) = Efield((i) + c*NE, 3);
 end;
 %ynumber = 1;
 %znumber = 1;
@@ -62,15 +65,15 @@ for i = 1:Nx-1,
     
    middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2))*omega/cv;
    %middleX(i) = (0.5*(Xfile(i) + Xfile(i+1)) - Xfile(2));
-   Bx(i, 1) = BfieldX_1(i + a*NB, 1);
-   Bx(i, 2) = BfieldX_1(i + b*NB, 1);
-   Bx(i, 3) = BfieldX_1(i + c*NB, 1);
-   By(i, 1) = BfieldX_1(i + a*NB, 2);
-   By(i, 2) = BfieldX_1(i + b*NB, 2);
-   By(i, 3) = BfieldX_1(i + c*NB, 2);
-   Bz(i, 1) = BfieldX_1(i + a*NB, 3);
-   Bz(i, 2) = BfieldX_1(i + b*NB, 3);
-   Bz(i, 3) = BfieldX_1(i + c*NB, 3);
+   Bx(i, 1) = Bfield(i + a*NB, 1);
+   Bx(i, 2) = Bfield(i + b*NB, 1);
+   Bx(i, 3) = Bfield(i + c*NB, 1);
+   By(i, 1) = Bfield(i + a*NB, 2);
+   By(i, 2) = Bfield(i + b*NB, 2);
+   By(i, 3) = Bfield(i + c*NB, 2);
+   Bz(i, 1) = Bfield(i + a*NB, 3);
+   Bz(i, 2) = Bfield(i + b*NB, 3);
+   Bz(i, 3) = Bfield(i + c*NB, 3);
    Bnorm(i, 1) = sqrt(By(i,1)*By(i,1) + Bz(i,1)*Bz(i,1))/B0;
    Bnorm(i, 2) = sqrt(By(i,2)*By(i,2) + Bz(i,2)*Bz(i,2))/B0;
    Bnorm(i, 3) = sqrt(By(i,3)*By(i,3) + Bz(i,3)*Bz(i,3))/B0;
@@ -81,7 +84,7 @@ end;
 
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
-set(0, 'DefaultLineLineWidth', 2);
+set(0, 'DefaultLineLineWidth', 1);
 
 figure(1);
 plot (Xgrid(1:Nx-1),Ex(1:Nx-1,1), 'red',Xgrid(1:Nx-1),Ex(1:Nx-1,2), 'green',Xgrid(1:Nx-1),Ex(1:Nx-1,3), 'blue');
