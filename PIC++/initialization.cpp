@@ -2304,6 +2304,11 @@ void Simulation::initializeSimpleElectroMagneticWaveY() {
 			}
 		}
 	}
+
+	if(solverType == BUNEMAN){
+		interpolateLapentaToBunemanBfield(bunemanBx, bunemanBy, bunemanBz, Bfield);
+		interpolateLapentaToBunemanEfield(bunemanEx, bunemanEy, bunemanEz, Efield);
+	}
 }
 
 void Simulation::initializeSimpleElectroMagneticWaveZ() {
@@ -2344,6 +2349,11 @@ void Simulation::initializeSimpleElectroMagneticWaveZ() {
 				newBfield[i][j][k] = Bfield[i][j][k];
 			}
 		}
+	}
+
+	if(solverType == BUNEMAN){
+		interpolateLapentaToBunemanBfield(bunemanBz, bunemanBy, bunemanBz, Bfield);
+		interpolateLapentaToBunemanEfield(bunemanEz, bunemanEy, bunemanEz, Efield);
 	}
 }
 
@@ -2402,6 +2412,11 @@ void Simulation::initializeRotatedSimpleElectroMagneticWave(int waveCountX, int 
 				newBfield[i][j][k] = Bfield[i][j][k];
 			}
 		}
+	}
+
+	if(solverType == BUNEMAN){
+		interpolateLapentaToBunemanBfield(bunemanBz, bunemanBy, bunemanBz, Bfield);
+		interpolateLapentaToBunemanEfield(bunemanEz, bunemanEy, bunemanEz, Efield);
 	}
 }
 
@@ -3410,6 +3425,8 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 		}
 	}
 
+
+
 	/*if (nprocs == 1) {
 		for (int k = 0; k < znumber; ++k) {
 			for (int j = 0; j < ynumber; ++j) {
@@ -3451,6 +3468,11 @@ void Simulation::initializeAlfvenWaveY(int wavesCount, double amplitudeRelation)
 				newBfield[i][j][k] = Bfield[i][j][k];
 			}
 		}
+	}
+
+	if(solverType == BUNEMAN){
+		interpolateLapentaToBunemanBfield(bunemanBx, bunemanBy, bunemanBz, Bfield);
+		interpolateLapentaToBunemanEfield(bunemanEx, bunemanEy, bunemanEz, Efield);
 	}
 
 	//if (fabs(VzamplitudeProton) > speed_of_light_normalized) {
@@ -4103,6 +4125,11 @@ void Simulation::initializeAlfvenWaveZ(int wavesCount, double amplitudeRelation)
 				newBfield[i][j][k] = Bfield[i][j][k];
 			}
 		}
+	}
+
+	if(solverType == BUNEMAN){
+		interpolateLapentaToBunemanBfield(bunemanBx, bunemanBy, bunemanBz, Bfield);
+		interpolateLapentaToBunemanEfield(bunemanEx, bunemanEy, bunemanEz, Efield);
 	}
 
 	//if (fabs(VzamplitudeProton) > speed_of_light_normalized) {
@@ -4784,6 +4811,11 @@ void Simulation::initializeRotatedAlfvenWave(int waveCountX, int waveCountY, int
 				newBfield[i][j][k] = Bfield[i][j][k];
 			}
 		}
+	}
+
+	if(solverType == BUNEMAN){
+		interpolateLapentaToBunemanBfield(bunemanBx, bunemanBy, bunemanBz, Bfield);
+		interpolateLapentaToBunemanEfield(bunemanEx, bunemanEy, bunemanEz, Efield);
 	}
 
 	//if (fabs(VzamplitudeProton) > speed_of_light_normalized) {

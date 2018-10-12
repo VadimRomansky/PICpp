@@ -1,10 +1,10 @@
 0                       input type - cgs or in omega_e and skin depth units
-5000 1 1                 grid numbers
+100 100 1                 grid numbers
 5E7         		grid step
 5E8                     temperature
 0 0 0       velocity (in c always)
 0.03                    magnetization
-0                      B theta in grad  Bx = B cos theta, By = B sin theta cos phi, Bz = B sin theta sin phi
+90                      B theta in grad  Bx = B cos theta, By = B sin theta cos phi, Bz = B sin theta sin phi
 0                      B phi
 0 0 0                   Electric field
 1E-4                    total electron concentration (always in cgs)
@@ -18,6 +18,7 @@
 10                      write particle step
 4			smothing iterations
 0.5                     smothing parameter
+1                       write each iteration in different file
 0.05    	        electron mass (in units of proton mass)
 8                       particle types number
 1 10                	electrons relative concentration and particles per bin

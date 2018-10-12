@@ -537,6 +537,9 @@ void Simulation::smoothNewBfield() {
 void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, double*** fieldZ) {
 	int minI = 1 + additionalBinNumber;
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
+	/*if((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1)) {
+		maxI = xnumberAdded - 1 - additionalBinNumber - 20;
+	}*/
 	int minJ = 1 + additionalBinNumber;
 	int maxJ = ynumberAdded - additionalBinNumber - 1 ;
 	int minK = 1 + additionalBinNumber;
@@ -616,6 +619,9 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	///Ey
 	minI = 1 + additionalBinNumber;
 	maxI = xnumberAdded - 1 - additionalBinNumber;
+	/*if((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1)) {
+		maxI = xnumberAdded - 1 - additionalBinNumber - 20;
+	}*/
 
 	maxJ = ynumberAdded - additionalBinNumber - 1;
 	if(ynumberGeneral == 1) {
@@ -676,6 +682,9 @@ void Simulation::smoothBunemanEfieldGeneral(double*** fieldX, double*** fieldY, 
 	////Ez
 	minI = 1 + additionalBinNumber;
 	maxI = xnumberAdded - 1 - additionalBinNumber;
+	/*if((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1)) {
+		maxI = xnumberAdded - 1 - additionalBinNumber - 20;
+	}*/
 	maxJ = ynumberAdded - additionalBinNumber - 1;
 	if(ynumberGeneral == 1) {
 		maxJ = 0;

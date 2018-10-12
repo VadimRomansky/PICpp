@@ -27,7 +27,7 @@ void Simulation::tristanEvaluateBhalfStep() {
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
 	int minJ = 1 + additionalBinNumber;
 	if((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1)) {
-		maxI = xnumberAdded - 1 - additionalBinNumber - 2;
+		maxI = xnumberAdded - 1 - additionalBinNumber - 20;
 	}
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
 	if(ynumberGeneral == 1) {
@@ -89,7 +89,7 @@ void Simulation::tristanEvaluateE() {
 	int minI = 1 + additionalBinNumber;
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
 	if((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1)) {
-		maxI = xnumberAdded - 1 - additionalBinNumber - 2;
+		maxI = xnumberAdded - 1 - additionalBinNumber - 20;
 	}
 	int minJ = 1 + additionalBinNumber;
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
