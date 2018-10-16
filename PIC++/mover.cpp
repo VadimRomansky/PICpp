@@ -733,8 +733,13 @@ void Simulation::moveParticleTristan(Particle* particle) {
 
 	correlationBunemanEBfieldsWithoutMaps(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
 
+	//stupid
+	Vector3d momentum = particle->getMomentum();
+	momentum = momentum + (E + particle->getVelocity().vectorMult(B))*particle->charge*deltaT;
+
+
 	//without objective oriented
-	double Bx = B.x;
+	/*double Bx = B.x;
 	double By = B.y;
 	double Bz = B.z;
 
@@ -765,9 +770,10 @@ void Simulation::moveParticleTristan(Particle* particle) {
 
 	double f = 2.0 / sqrt(1.0 + betaShift * betaShift * B.norm2());
 
-	momentum.x = px + (tempMomentumY*Bz - tempMomentumZ*By)*(f*betaShift) + dpx;
-	momentum.y = py + (tempMomentumZ*Bx - tempMomentumX*Bz)*(f*betaShift) + dpy;
-	momentum.z = pz + (tempMomentumX*By - tempMomentumY*Bx)*(f*betaShift) + dpz;
+	double fBetaShift = f*betaShift;
+	momentum.x = px + (tempMomentumY*Bz - tempMomentumZ*By)*fBetaShift + dpx;
+	momentum.y = py + (tempMomentumZ*Bx - tempMomentumX*Bz)*fBetaShift + dpy;
+	momentum.z = pz + (tempMomentumX*By - tempMomentumY*Bx)*fBetaShift + dpz;*/
 
 	/////with oop
 	/*Vector3d dp = E * (particle->charge * deltaT * 0.5);

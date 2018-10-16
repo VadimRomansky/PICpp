@@ -11,8 +11,8 @@ Nz = size(Zfile, 1);
 NE = (Nx-1)*(Ny-1)*(Nz-1);
 Nt = fix(size(flux,1)/NE);
 
-ynumber = 2;
-znumber = 2;
+ynumber = 1;
+znumber = 1;
 
 a = 0;
 b = fix(Nt/2);
@@ -48,7 +48,7 @@ for i=1:Nx-1,
    %extJz(i,2) = flux(Nz*Ny*(i-1) + Nz*(ynumber-1) + znumber + b*NE, 6);
    %extJz(i,3) = flux(Nz*Ny*(i-1) + Nz*(ynumber-1) + znumber + c*NE, 6);
 end;
-set(0, 'DefaultLineLineWidth', 2);
+set(0, 'DefaultLineLineWidth', 1);
 
 figure(1);
 plot (Xfile(1:Nx-1,1),Jx(1:Nx-1,1), 'red',Xfile(1:Nx-1,1),Jx(1:Nx-1,2), 'green',Xfile(1:Nx-1,1),Jx(1:Nx-1,3), 'blue');

@@ -107,6 +107,7 @@ void Simulation::tristanEvaluateE() {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
 				//bunemanEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBx(i, j, k) - four_pi * bunemanJx[i][j][k]) * deltaT;
+				double rotBx = evaluateBunemanRotBx(i, j, k);
 				bunemanEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_correction*evaluateBunemanRotBx(i, j, k) - four_pi * bunemanJx[i][j][k]) * deltaT;
 			}
 		}
