@@ -1011,6 +1011,7 @@ public:
 	void moveParticle(Particle* particle, int cur, int N);
 	
 	void moveParticleTristan(Particle* particle);
+	void moveParticleVay(Particle* particle);
 	void exchangeParticles();
 	void collectMostAcceleratedParticles();
 
