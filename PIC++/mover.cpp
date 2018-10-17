@@ -738,59 +738,100 @@ void Simulation::moveParticleTristan(Particle* particle) {
 	momentum = momentum + (E + particle->getVelocity().vectorMult(B))*particle->charge*deltaT;
 
 
-	//without objective oriented
-	/*double Bx = B.x;
-	double By = B.y;
-	double Bz = B.z;
 
-	double Ex = E.x;
-	double Ey = E.y;
-	double Ez = E.z;
 
-	double qdt2 = particle->charge * deltaT * 0.5;
 
-	double dpx = Ex*qdt2;
-	double dpy = Ey*qdt2;
-	double dpz = Ez*qdt2;
 
+	particle->setMomentum(momentum);
+	Vector3d velocity = particle->getVelocity();
+	particle->coordinates += velocity * deltaT;
+
+	if ((boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT || boundaryConditionTypeX == FREE_MIRROR_BOTH) && (cartCoord[0] == 0) && particle->coordinates.x < xgrid[reflectingWallPoint]) {
+		particle->coordinates.x = 2 * xgrid[reflectingWallPoint] - particle->coordinates.x;
+		particle->reflectMomentumX();
+		theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+		//return;
+	} else {
+		if (particle->coordinates.x < xgrid[1 + additionalBinNumber]) {
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+			escapedParticlesLeft.push_back(particle);
+			return;
+		}
+	}
+	if (particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
+		if ((boundaryConditionTypeX == FREE_MIRROR_BOTH) && cartCoord[0] == cartDim[0] - 1) {
+			particle->coordinates.x = 2 * xgrid[xnumberAdded - 1 - additionalBinNumber] - particle->coordinates.x;
+			particle->reflectMomentumX();
+			theoreticalMomentum.x += particle->getMomentum().x * (2 * particle->weight * scaleFactor / plasma_period);
+			//return;
+		} else {
+			particle->escaped = true;
+			particle->crossBoundaryCount++;
+			escapedParticlesRight.push_back(particle);
+			return;
+		}
+	}
+	/*if (particle->coordinates.x > xgrid[xnumberAdded - 1 - additionalBinNumber]) {
+		escapedParticlesRight.push_back(particle);
+		particle->crossBoundaryCount++;
+		particle->escaped = true;
+		return;
+	}*/
+
+	if (ynumberGeneral > 1) {
+		if (particle->coordinates.y < ygrid[1 + additionalBinNumber]) {
+			escapedParticlesFront.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+			return;
+		}
+
+		if (particle->coordinates.y > ygrid[ynumberAdded - 1 - additionalBinNumber]) {
+			escapedParticlesBack.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+			return;
+		}
+	}
+	if (znumberGeneral > 1) {
+		if (particle->coordinates.z < zgrid[1 + additionalBinNumber]) {
+			escapedParticlesBottom.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+			return;
+		}
+
+		if (particle->coordinates.z > zgrid[znumberAdded - 1 - additionalBinNumber]) {
+			escapedParticlesTop.push_back(particle);
+			particle->crossBoundaryCount++;
+			particle->escaped = true;
+		}
+	}
+}
+
+void Simulation::moveParticleVay(Particle* particle) {
+
+	Vector3d E;
+	Vector3d B;
+
+	//only for Bunman solver
+
+
+	//fuckingStrangeSmoothingBunemanFields(bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, bunemanNewEx, bunemanNewEy, bunemanNewEz, bunemanNewBx, bunemanNewBy, bunemanNewBz);
+	//updateBunemanCorrelationMaps(particle);
+	//correlationBunemanEBfields(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
+
+	//correlationBunemanEBfieldsWithoutMaps(particle, bunemanNewEx, bunemanNewEy, bunemanNewEz, bunemanNewBx, bunemanNewBy, bunemanNewBz, E, B);
+
+	correlationBunemanEBfieldsWithoutMaps(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
+
+	//stupid
 	Vector3d momentum = particle->getMomentum();
-
-	double px = momentum.x + dpx;
-	double py = momentum.y + dpy;
-	double pz = momentum.z + dpz;
-
-	double p2 = px * px + py * py + pz * pz;
-	double gamma = sqrt(p2/(particle->mass*particle->mass) + 1.0);
-
-	double betaShift = particle->beta / gamma;
-
-	double tempMomentumX = px + (py*Bz - pz*By)*betaShift;
-	double tempMomentumY = py + (pz*Bx - px*Bz)*betaShift;
-	double tempMomentumZ = pz + (px*By - py*Bx)*betaShift;
-
-	double f = 2.0 / sqrt(1.0 + betaShift * betaShift * B.norm2());
-
-	double fBetaShift = f*betaShift;
-	momentum.x = px + (tempMomentumY*Bz - tempMomentumZ*By)*fBetaShift + dpx;
-	momentum.y = py + (tempMomentumZ*Bx - tempMomentumX*Bz)*fBetaShift + dpy;
-	momentum.z = pz + (tempMomentumX*By - tempMomentumY*Bx)*fBetaShift + dpz;*/
-
-	/////with oop
-	/*Vector3d dp = E * (particle->charge * deltaT * 0.5);
-	//Vector3d momentum = particle->getMomentum();
-	//momentum += dp;
-	particle->addMomentum(dp);
-	double gamma = particle->gammaFactor();
-	//double p2 = momentum.x * momentum.x + momentum.y * momentum.y + momentum.z * momentum.z;
-	//double gamma = sqrt(p2/(particle->mass*particle->mass) + 1.0);
-	//double beta = particle->charge * deltaT / (2.0 * particle->mass * speed_of_light_normalized);
-	double betaShift = particle->beta / gamma;
-	double f = 2.0 / sqrt(1.0 + betaShift * betaShift * B.norm2());
-	Vector3d momentum = particle->getMomentum();
-	Vector3d tempMomentum = momentum + momentum.vectorMult(B) * (betaShift);
-	momentum += tempMomentum.vectorMult(B) * (f * betaShift) + dp;*/
+	momentum = momentum + (E + particle->getVelocity().vectorMult(B))*particle->charge*deltaT;
 
 
+	
 
 
 
