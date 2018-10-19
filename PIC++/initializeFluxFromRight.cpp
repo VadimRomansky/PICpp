@@ -114,7 +114,7 @@ void Simulation::initializeFluxFromRight() {
 	}
 
 	//turbulence
-	//initializeRandomModes(25, 500, 0.9);
+	initializeRandomModes(25, 2500, 0.9);
 
 	//double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
 	double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0));
