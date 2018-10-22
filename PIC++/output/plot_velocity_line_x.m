@@ -1,5 +1,5 @@
 clear;
-load velocityX.dat;
+load velocityX_1.dat;
 load particleTypes.dat;
 load Xfile.dat;
 load Yfile.dat;
@@ -8,6 +8,8 @@ set(0, 'DefaultLineLineWidth', 2);
 Nx = size(Xfile, 1)-1;
 Ny = size(Yfile, 1)-1;
 Nz = size(Zfile, 1)-1;
+
+velocityX = velocityX_1;
 
 N = Nx;
 Nt = size(velocityX, 1)/N;

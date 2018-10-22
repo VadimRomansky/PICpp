@@ -948,21 +948,21 @@ void Simulation::output() {
 	}
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing divergence\n");
-	outputDivergenceError((outputDir + "divergence_error" + fileNumber + ".dat").c_str(), this, plasma_period, scaleFactor, multiplyFileOutput);
+	//outputDivergenceError((outputDir + "divergence_error" + fileNumber + ".dat").c_str(), this, plasma_period, scaleFactor, multiplyFileOutput);
 
 	double rotBscale = 1.0 / (plasma_period * plasma_period * sqrt(scaleFactor));
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing rotB\n");
-	outputVectorNodeArray((outputDir + "rotBFile" + fileNumber + ".dat").c_str(), rotB, xnumberAdded, ynumberAdded, znumberAdded,
-	                      additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);
+	//outputVectorNodeArray((outputDir + "rotBFile" + fileNumber + ".dat").c_str(), rotB, xnumberAdded, ynumberAdded, znumberAdded,
+	//                      additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing Ederivative\n");
-	outputVectorNodeArray((outputDir + "EderivativeFile" + fileNumber + ".dat").c_str(), Ederivative, xnumberAdded, ynumberAdded,
-	                      znumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);
+	//outputVectorNodeArray((outputDir + "EderivativeFile" + fileNumber + ".dat").c_str(), Ederivative, xnumberAdded, ynumberAdded,
+	//                      znumberAdded, additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);
 
 	if ((rank == 0) && (verbosity > 1)) printf("outputing rotE\n");
-	outputVectorCellArray((outputDir + "rotEFile" + fileNumber + ".dat").c_str(), rotE, xnumberAdded, ynumberAdded, znumberAdded,
-	                      additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);
+	//outputVectorCellArray((outputDir + "rotEFile" + fileNumber + ".dat").c_str(), rotE, xnumberAdded, ynumberAdded, znumberAdded,
+	//                      additionalBinNumber, cartComm, cartCoord, cartDim, rotBscale);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		tempTime = clock() - tempTime;
 		printf("outputing derivatives time = %g sec\n", tempTime / CLOCKS_PER_SEC);
@@ -995,7 +995,7 @@ void Simulation::output() {
 	fclose(maxwellMatrixFile);*/
 
 	//if (rank == 0) outputGeneral((outputDir + "general.dat").c_str(), this);
-	if (rank == 0) outputGeneralAnisotropy((outputDir + "generalAnisotropy" + fileNumber + ".dat").c_str(), this);
+	//if (rank == 0) outputGeneralAnisotropy((outputDir + "generalAnisotropy" + fileNumber + ".dat").c_str(), this);
 	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
 		tempTime = clock() - tempTime;
 		printf("outputing general anisotropy time = %g sec\n", tempTime / CLOCKS_PER_SEC);

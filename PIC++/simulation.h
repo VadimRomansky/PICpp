@@ -344,10 +344,6 @@ public:
 
 	double*** divergenceCleaningPotentialFourier;
 
-	Complex*** fourierInput;
-	Complex*** fourierImage;
-	Complex*** fourierOutput;
-
 	double* leftOutMaximumBuffer;
 	double* rightOutMaximumBuffer;
 	double* leftInMaximumBuffer;
@@ -594,19 +590,23 @@ public:
 	double**** sBiconjugateMaxwell;
 	double**** tBiconjugateMaxwell;
 
-	Complex*** fourierScalarInput;
-	Complex*** fourierScalarOutput;
-	Complex*** fourierScalarTempOutput;
-	Complex*** fourierScalarTempOutput1;
+	//Complex*** fourierInput;
+	//Complex*** fourierImage;
+	//Complex*** fourierOutput;
 
-	Complex*** fourierScalarMirrorInput;
-	Complex*** fourierScalarMirrorOutput;
-	Complex*** fourierScalarMirrorTempOutput;
-	Complex*** fourierScalarMirrorTempOutput1;
+	//Complex*** fourierScalarInput;
+	//Complex*** fourierScalarOutput;
+	//Complex*** fourierScalarTempOutput;
+	//Complex*** fourierScalarTempOutput1;
 
-	Complex* localFactorX;
-	Complex* localFactorY;
-	Complex* localFactorZ;
+	//Complex*** fourierScalarMirrorInput;
+	//Complex*** fourierScalarMirrorOutput;
+	//Complex*** fourierScalarMirrorTempOutput;
+	//Complex*** fourierScalarMirrorTempOutput1;
+
+	//Complex* localFactorX;
+	//Complex* localFactorY;
+	//Complex* localFactorZ;
 
 	int derExPoint;
 	int derConcentrationPoint;

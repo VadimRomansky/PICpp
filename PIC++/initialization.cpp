@@ -1278,37 +1278,42 @@ Simulation::~Simulation() {
 			delete[] trackedParticlesNumbers[i];
 		}
 		delete[] trackedParticlesNumbers;
-		delete gmresMaxwellBasis;
+		if(solverType != BUNEMAN){
+			delete gmresMaxwellBasis;
+		}
 		delete gmresCleanupBasis;
 		delete[] types;
 		delete[] concentrations;
 		delete[] particlesPerBin;
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					delete[] gmresOutput[i][j][k];
+		if(solverType != BUNEMAN){
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						delete[] gmresOutput[i][j][k];
+					}
+					delete[] gmresOutput[i][j];
 				}
-				delete[] gmresOutput[i][j];
+				delete[] gmresOutput[i];
 			}
-			delete[] gmresOutput[i];
-		}
-		delete[] gmresOutput;
+			delete[] gmresOutput;
+		
 
-		for (int i = 0; i < xnumberAdded; ++i) {
-			for (int j = 0; j < ynumberAdded; ++j) {
-				for (int k = 0; k < znumberAdded; ++k) {
-					delete[] maxwellEquationMatrix[i][j][k];
-					delete[] maxwellEquationRightPart[i][j][k];
+			for (int i = 0; i < xnumberAdded; ++i) {
+				for (int j = 0; j < ynumberAdded; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						delete[] maxwellEquationMatrix[i][j][k];
+						delete[] maxwellEquationRightPart[i][j][k];
+					}
+					delete[] maxwellEquationMatrix[i][j];
+					delete[] maxwellEquationRightPart[i][j];
 				}
-				delete[] maxwellEquationMatrix[i][j];
-				delete[] maxwellEquationRightPart[i][j];
+				delete[] maxwellEquationMatrix[i];
+				delete[] maxwellEquationRightPart[i];
 			}
-			delete[] maxwellEquationMatrix[i];
-			delete[] maxwellEquationRightPart[i];
+			delete[] maxwellEquationMatrix;
+			delete[] maxwellEquationRightPart;
 		}
-		delete[] maxwellEquationMatrix;
-		delete[] maxwellEquationRightPart;
 
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
@@ -1352,23 +1357,23 @@ Simulation::~Simulation() {
 		}
 		delete[] divergenceCleaningPotentialFourier;
 
-		delete3complexArray(fourierInput, xnumberAdded, ynumberAdded, znumberAdded);
-		delete3complexArray(fourierImage, xnumberAdded, ynumberAdded, znumberAdded);
-		delete3complexArray(fourierOutput, xnumberAdded, ynumberAdded, znumberAdded);
+		//delete3complexArray(fourierInput, xnumberAdded, ynumberAdded, znumberAdded);
+		//delete3complexArray(fourierImage, xnumberAdded, ynumberAdded, znumberAdded);
+		//delete3complexArray(fourierOutput, xnumberAdded, ynumberAdded, znumberAdded);
 
-		delete3complexArray(fourierScalarInput, xnumberAdded, ynumberAdded, znumberAdded);
-		delete3complexArray(fourierScalarOutput, xnumberAdded, ynumberAdded, znumberAdded);
-		delete3complexArray(fourierScalarTempOutput, xnumberAdded, ynumberAdded, znumberAdded);
-		delete3complexArray(fourierScalarTempOutput1, xnumberAdded, ynumberAdded, znumberAdded);
+		//delete3complexArray(fourierScalarInput, xnumberAdded, ynumberAdded, znumberAdded);
+		//delete3complexArray(fourierScalarOutput, xnumberAdded, ynumberAdded, znumberAdded);
+		//delete3complexArray(fourierScalarTempOutput, xnumberAdded, ynumberAdded, znumberAdded);
+		//delete3complexArray(fourierScalarTempOutput1, xnumberAdded, ynumberAdded, znumberAdded);
 
-		delete3complexArray(fourierScalarMirrorInput, 2 * xnumberAdded, ynumberAdded, znumberAdded);
-		delete3complexArray(fourierScalarMirrorOutput, 2 * xnumberAdded, ynumberAdded, znumberAdded);
-		delete3complexArray(fourierScalarMirrorTempOutput, 2 * xnumberAdded, ynumberAdded, znumberAdded);
-		delete3complexArray(fourierScalarMirrorTempOutput1, 2 * xnumberAdded, ynumberAdded, znumberAdded);
+		//delete3complexArray(fourierScalarMirrorInput, 2 * xnumberAdded, ynumberAdded, znumberAdded);
+		//delete3complexArray(fourierScalarMirrorOutput, 2 * xnumberAdded, ynumberAdded, znumberAdded);
+		//delete3complexArray(fourierScalarMirrorTempOutput, 2 * xnumberAdded, ynumberAdded, znumberAdded);
+		//delete3complexArray(fourierScalarMirrorTempOutput1, 2 * xnumberAdded, ynumberAdded, znumberAdded);
 
-		delete[] localFactorX;
-		delete[] localFactorY;
-		delete[] localFactorZ;
+		//delete[] localFactorX;
+		//delete[] localFactorY;
+		//delete[] localFactorZ;
 
 		delete[] rightMeanElevel;
 
@@ -1380,7 +1385,9 @@ Simulation::~Simulation() {
 		delete3vectorArray(Ederivative, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 		delete3array(tempNodeParameter, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 		delete3vectorArray(tempNodeVectorParameter, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
-		delete3matrixArray(tempNodeMatrixParameter, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		if(solverType != BUNEMAN){
+			delete3matrixArray(tempNodeMatrixParameter, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+		}
 
 		delete3vectorArray(electricFlux, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 		delete3vectorArray(electricFluxMinus, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
@@ -1388,6 +1395,7 @@ Simulation::~Simulation() {
 		delete3vectorArray(divPressureTensor, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 		delete3vectorArray(divPressureTensorMinus, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 		delete3matrixArray(dielectricTensor, xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	
 
 		for (int j = 0; j < ynumberAdded + 1; ++j) {
 			delete[] leftElevel[j];
@@ -1413,7 +1421,9 @@ Simulation::~Simulation() {
 		delete3array(chargeDensityHat, xnumberAdded, ynumberAdded, znumberAdded);
 		delete3array(tempCellParameter, xnumberAdded, ynumberAdded, znumberAdded);
 		delete3vectorArray(tempCellVectorParameter, xnumberAdded, ynumberAdded, znumberAdded);
-		delete3matrixArray(tempCellMatrixParameter, xnumberAdded, ynumberAdded, znumberAdded);
+		if(solverType != BUNEMAN){
+			delete3matrixArray(tempCellMatrixParameter, xnumberAdded, ynumberAdded, znumberAdded);
+		}
 		delete3vectorArray(rotE, xnumberAdded, ynumberAdded, znumberAdded);
 		delete3vectorArray(Bderivative, xnumberAdded, ynumberAdded, znumberAdded);
 
@@ -6661,9 +6671,10 @@ void Simulation::createArrays() {
 	if (rank == 0) printf("creating gmresOutput arrays\n");
 	if (rank == 0) fflush(stdout);
 
-	gmresOutput = create4array(xnumberAdded, ynumberAdded, znumberAdded, maxwellEquationMatrixSize);
-
-	gmresMaxwellBasis = new LargeVectorBasis(20, xnumberAdded, ynumberAdded, znumberAdded, 3);
+	if(solverType != BUNEMAN){
+		gmresOutput = create4array(xnumberAdded, ynumberAdded, znumberAdded, maxwellEquationMatrixSize);	
+		gmresMaxwellBasis = new LargeVectorBasis(20, xnumberAdded, ynumberAdded, znumberAdded, 3);
+	}
 	gmresCleanupBasis = new LargeVectorBasis(20, xnumberAdded, ynumberAdded, znumberAdded, 1);
 
 	if (rank == 0) printf("creating fields arrays\n");
@@ -6676,7 +6687,9 @@ void Simulation::createArrays() {
 	explicitEfield = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 	tempNodeParameter = create3array(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 	tempNodeVectorParameter = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
-	tempNodeMatrixParameter = create3matrixArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	if(solverType != BUNEMAN){
+		tempNodeMatrixParameter = create3matrixArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
+	}
 	rotB = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 	Ederivative = create3vectorArray(xnumberAdded + 1, ynumberAdded + 1, znumberAdded + 1);
 
@@ -6686,7 +6699,9 @@ void Simulation::createArrays() {
 	Bderivative = create3vectorArray(xnumberAdded, ynumberAdded, znumberAdded);
 	tempCellParameter = create3array(xnumberAdded, ynumberAdded, znumberAdded);
 	tempCellVectorParameter = create3vectorArray(xnumberAdded, ynumberAdded, znumberAdded);
-	tempCellMatrixParameter = create3matrixArray(xnumberAdded, ynumberAdded, znumberAdded);
+	if(solverType != BUNEMAN){
+		tempCellMatrixParameter = create3matrixArray(xnumberAdded, ynumberAdded, znumberAdded);
+	}
 
 	leftElevel = new Vector3d*[ynumberAdded + 1];
 	rightElevel = new Vector3d*[ynumberAdded + 1];
@@ -6703,19 +6718,21 @@ void Simulation::createArrays() {
 	fflush(stdout);
 	//if(rank == 0) printLog("creating maxwell equation matrix arrays\n");
 
-	maxwellEquationMatrix = new std::vector < MatrixElement > ***[xnumberAdded];
-	maxwellEquationRightPart = new double ***[xnumberAdded];
-	for (int i = 0; i < xnumberAdded; ++i) {
-		maxwellEquationMatrix[i] = new std::vector < MatrixElement > **[ynumberAdded];
-		maxwellEquationRightPart[i] = new double **[ynumberAdded];
-		for (int j = 0; j < ynumberAdded; ++j) {
-			maxwellEquationMatrix[i][j] = new std::vector < MatrixElement > *[znumberAdded];
-			maxwellEquationRightPart[i][j] = new double *[znumberAdded];
-			for (int k = 0; k < znumberAdded; ++k) {
-				//if(rank == 0) printf("%d %d %d\n", i, j, k);
-				//if(rank == 0) fflush((stdout));
-				maxwellEquationMatrix[i][j][k] = new std::vector < MatrixElement >[maxwellEquationMatrixSize];
-				maxwellEquationRightPart[i][j][k] = new double[maxwellEquationMatrixSize];
+	if(solverType != BUNEMAN){
+		maxwellEquationMatrix = new std::vector < MatrixElement > ***[xnumberAdded];
+		maxwellEquationRightPart = new double ***[xnumberAdded];
+		for (int i = 0; i < xnumberAdded; ++i) {
+			maxwellEquationMatrix[i] = new std::vector < MatrixElement > **[ynumberAdded];
+			maxwellEquationRightPart[i] = new double **[ynumberAdded];
+			for (int j = 0; j < ynumberAdded; ++j) {
+				maxwellEquationMatrix[i][j] = new std::vector < MatrixElement > *[znumberAdded];
+				maxwellEquationRightPart[i][j] = new double *[znumberAdded];
+				for (int k = 0; k < znumberAdded; ++k) {
+					//if(rank == 0) printf("%d %d %d\n", i, j, k);
+					//if(rank == 0) fflush((stdout));
+					maxwellEquationMatrix[i][j][k] = new std::vector < MatrixElement >[maxwellEquationMatrixSize];
+					maxwellEquationRightPart[i][j][k] = new double[maxwellEquationMatrixSize];
+				}
 			}
 		}
 	}
@@ -6742,23 +6759,23 @@ void Simulation::createArrays() {
 		}
 	}
 
-	fourierInput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
-	fourierImage = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
-	fourierOutput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	//fourierInput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	//fourierImage = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	//fourierOutput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
 
-	fourierScalarInput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
-	fourierScalarOutput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
-	fourierScalarTempOutput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
-	fourierScalarTempOutput1 = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	//fourierScalarInput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	//fourierScalarOutput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	//fourierScalarTempOutput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	//fourierScalarTempOutput1 = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
 
-	fourierScalarMirrorInput = create3complexArray(2 * xnumberAdded, ynumberAdded, znumberAdded);
-	fourierScalarMirrorOutput = create3complexArray(2 * xnumberAdded, ynumberAdded, znumberAdded);
-	fourierScalarMirrorTempOutput = create3complexArray(2 * xnumberAdded, ynumberAdded, znumberAdded);
-	fourierScalarMirrorTempOutput1 = create3complexArray(2 * xnumberAdded, ynumberAdded, znumberAdded);
+	//fourierScalarMirrorInput = create3complexArray(2 * xnumberAdded, ynumberAdded, znumberAdded);
+	//fourierScalarMirrorOutput = create3complexArray(2 * xnumberAdded, ynumberAdded, znumberAdded);
+	//fourierScalarMirrorTempOutput = create3complexArray(2 * xnumberAdded, ynumberAdded, znumberAdded);
+	//fourierScalarMirrorTempOutput1 = create3complexArray(2 * xnumberAdded, ynumberAdded, znumberAdded);
 
-	localFactorX = new Complex[2 * (xnumberAdded + 1)];
-	localFactorY = new Complex[ynumberAdded + 1];
-	localFactorZ = new Complex[znumberAdded + 1];
+	//localFactorX = new Complex[2 * (xnumberAdded + 1)];
+	//localFactorY = new Complex[ynumberAdded + 1];
+	//localFactorZ = new Complex[znumberAdded + 1];
 
 	rightMeanElevel = new Vector3d[xnumberAdded + 1];
 
