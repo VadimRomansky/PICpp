@@ -8264,9 +8264,9 @@ void Simulation::createParticles() {
 
 	synchronizeParticleNumber();
 
-	if (rank == 0) {
-		printf("finish creating particles\n");
-	}
+	//if (rank == 0) {
+		printf("finish creating particles rank = %d\n", rank);
+	//}
 
 	//printf("rank = %d p0 = %d p1 = %d p2 = %d e0 = %d e1 = %d e2 = %d Np = %d\n", rank, protonNumber, protonNumber1, protonNumber2, electronNumber, electronNumber1, electronNumber2, particlesNumber);
 
