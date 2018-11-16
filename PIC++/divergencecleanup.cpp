@@ -254,7 +254,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 				}
 			}
 		}*/
-		int* xabsoluteIndex = new int[xnumber];
+		/*int* xabsoluteIndex = new int[xnumber];
 		int* yabsoluteIndex = new int[ynumber];
 		int* zabsoluteIndex = new int[znumber];
 
@@ -371,7 +371,7 @@ void Simulation::cleanupDivergence(Vector3d*** field, double*** density) {
 
 		delete[] xabsoluteIndex;
 		delete[] yabsoluteIndex;
-		delete[] zabsoluteIndex;
+		delete[] zabsoluteIndex;*/
 	}
 	double a = cleanUpRightPart(4, 2, 2, field, density);
 	Vector3d E1 = newEfield[4][2][2];

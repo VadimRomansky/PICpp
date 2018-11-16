@@ -178,7 +178,6 @@
     <ClCompile Include="divergencecleanup_buneman.cpp" />
     <ClCompile Include="fields.cpp" />
     <ClCompile Include="fields_exchange.cpp" />
-    <ClCompile Include="fields_filtering.cpp" />
     <ClCompile Include="fourier.cpp" />
     <ClCompile Include="initialization.cpp" />
     <ClCompile Include="initializeFluxFromRight.cpp" />
