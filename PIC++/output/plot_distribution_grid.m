@@ -1,8 +1,8 @@
 clear;
 load distribution_protons_grid.dat;
 load distribution_electrons_grid.dat;
-load distribution_alphas_grid.dat;
-load distribution_positrons_grid.dat;
+%load distribution_alphas_grid.dat;
+%load distribution_positrons_grid.dat;
 load initialParameters.dat;
 load Xfile.dat;
 
@@ -37,7 +37,7 @@ kB = 1.3806488*10^-16;
 theta = kB*T/(me*v*v);
 factor = 1;
 minX = 1;
-maxX = Nx;
+maxX = Nx/4;
 for i=1:Np,   
    Pp(i,1) = distribution_protons_grid(1 + a*(Nx + 1),i);
    Pp(i,2) = distribution_protons_grid(1 + b*(Nx + 1),i);
@@ -47,13 +47,13 @@ for i=1:Np,
    Pe(i,2) = distribution_electrons_grid(1 + b*(Nx + 1),i);
    Pe(i,3) = distribution_electrons_grid(1 + c*(Nx + 1),i);
      
-   Pa(i,1) = distribution_alphas_grid(1 + a*(Nx + 1),i);
-   Pa(i,2) = distribution_alphas_grid(1 + b*(Nx + 1),i);
-   Pa(i,3) = distribution_alphas_grid(1 + c*(Nx + 1),i);
+   %Pa(i,1) = distribution_alphas_grid(1 + a*(Nx + 1),i);
+   %Pa(i,2) = distribution_alphas_grid(1 + b*(Nx + 1),i);
+   %Pa(i,3) = distribution_alphas_grid(1 + c*(Nx + 1),i);
      
-   Ppos(i,1) = distribution_positrons_grid(1 + a*(Nx + 1),i);
-   Ppos(i,2) = distribution_positrons_grid(1 + b*(Nx + 1),i);
-   Ppos(i,3) = distribution_positrons_grid(1 + c*(Nx + 1),i);
+   %Ppos(i,1) = distribution_positrons_grid(1 + a*(Nx + 1),i);
+   %Ppos(i,2) = distribution_positrons_grid(1 + b*(Nx + 1),i);
+   %Ppos(i,3) = distribution_positrons_grid(1 + c*(Nx + 1),i);
    
    for j=minX:maxX,
      factor = Pp(i,1)*Pp(i,1);
@@ -70,19 +70,19 @@ for i=1:Np,
      factor = Pe(i,3)*Pe(i,3);
      Fe(i,3) = Fe(i,3) + distribution_electrons_grid(1 + j + c*(Nx + 1), i)*factor;
    
-     factor = Pa(i,1)*Pa(i,1);
-     Fa(i,1) = Fa(i,1) + distribution_alphas_grid(1 + j + a*(Nx + 1), i)*factor;
-     factor = Pa(i,2)*Pa(i,2);
-     Fa(i,2) = Fa(i,1) + distribution_alphas_grid(1 + j + b*(Nx + 1), i)*factor;
-     factor = Pa(i,3)*Pa(i,3);
-     Fa(i,3) = Fa(i,1) + distribution_alphas_grid(1 + j + c*(Nx + 1), i)*factor;
+     %factor = Pa(i,1)*Pa(i,1);
+     %Fa(i,1) = Fa(i,1) + distribution_alphas_grid(1 + j + a*(Nx + 1), i)*factor;
+     %factor = Pa(i,2)*Pa(i,2);
+     %Fa(i,2) = Fa(i,1) + distribution_alphas_grid(1 + j + b*(Nx + 1), i)*factor;
+     %factor = Pa(i,3)*Pa(i,3);
+     %Fa(i,3) = Fa(i,1) + distribution_alphas_grid(1 + j + c*(Nx + 1), i)*factor;
    
-     factor = Ppos(i,1)*Ppos(i,1);
-     Fpos(i,1) = Fpos(i,1) + distribution_positrons_grid(1 + j + a*(Nx + 1), i)*factor;
-     factor = Ppos(i,2)*Ppos(i,2);
-     Fpos(i,2) = Fpos(i,2) + distribution_positrons_grid(1 + j + b*(Nx + 1), i)*factor;
-     factor = Ppos(i,3)*Ppos(i,3);
-     Fpos(i,3) = Fpos(i,3) + distribution_positrons_grid(1 + j + c*(Nx + 1), i)*factor;
+     %factor = Ppos(i,1)*Ppos(i,1);
+     %Fpos(i,1) = Fpos(i,1) + distribution_positrons_grid(1 + j + a*(Nx + 1), i)*factor;
+     %factor = Ppos(i,2)*Ppos(i,2);
+     %Fpos(i,2) = Fpos(i,2) + distribution_positrons_grid(1 + j + b*(Nx + 1), i)*factor;
+     %factor = Ppos(i,3)*Ppos(i,3);
+     %Fpos(i,3) = Fpos(i,3) + distribution_positrons_grid(1 + j + c*(Nx + 1), i)*factor;
    end;
    exp1 = exp(-sqrt(1+Pe(i,1)*Pe(i,1)/(me*me*v*v))/theta);
    bes = besselk(2, 1/theta);
@@ -92,7 +92,7 @@ for i=1:Np,
 end;
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
-set(0, 'DefaultLineLineWidth', 2);
+set(0, 'DefaultLineLineWidth', 1);
 figure(1);
 plot (Gp(1:Np,1)-1,Fp(1:Np,1), 'red',Gp(1:Np,2)-1,Fp(1:Np,2), 'green',Gp(1:Np,3)-1,Fp(1:Np,3), 'blue');
 title ('protons distribution function');
@@ -110,18 +110,18 @@ ylabel ('F_e({\gamma}) ({\gamma}-1)');
 legend('t=0','t=T/2','t=T','Location','southeast');
 grid ;
 
-figure(3);
-plot (Ga(1:Np,1)-1,Fa(1:Np,1), 'red',Ga(1:Np,2)-1,Fa(1:Np,2), 'green',Ga(1:Np,3)-1,Fa(1:Np,3), 'blue');
-title ('alphas distribution function');
-xlabel ('{\gamma}-1');
-ylabel ('F_alpha({\gamma}) ({\gamma}-1)');
-legend('t=0','t=T/2','t=T','Location','southeast');
-grid ;
+%figure(3);
+%plot (Ga(1:Np,1)-1,Fa(1:Np,1), 'red',Ga(1:Np,2)-1,Fa(1:Np,2), 'green',Ga(1:Np,3)-1,Fa(1:Np,3), 'blue');
+%title ('alphas distribution function');
+%xlabel ('{\gamma}-1');
+%ylabel ('F_alpha({\gamma}) ({\gamma}-1)');
+%legend('t=0','t=T/2','t=T','Location','southeast');
+%grid ;
 
-figure(4);
-plot (Gpos(1:Np,1)-1,Fpos(1:Np,1), 'red',Gpos(1:Np,2)-1,Fpos(1:Np,2), 'green',Gpos(1:Np,3)-1,Fpos(1:Np,3), 'blue');
-title ('positrons distribution function');
-xlabel ('{\gamma}-1');
-ylabel ('F_{e+}({\gamma}) ({\gamma}-1)');
-legend('t=0','t=T/2','t=T','Location','southeast');
-grid ;
+%figure(4);
+%plot (Gpos(1:Np,1)-1,Fpos(1:Np,1), 'red',Gpos(1:Np,2)-1,Fpos(1:Np,2), 'green',Gpos(1:Np,3)-1,Fpos(1:Np,3), 'blue');
+%title ('positrons distribution function');
+%xlabel ('{\gamma}-1');
+%ylabel ('F_{e+}({\gamma}) ({\gamma}-1)');
+%legend('t=0','t=T/2','t=T','Location','southeast');
+%grid ;
