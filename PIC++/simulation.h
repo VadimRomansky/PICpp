@@ -482,7 +482,6 @@ public:
 	double* bottomInBunemanBzBuffer;
 	double* topInBunemanBzBuffer;
 
-	std::vector<Particle> fakeParticles; //only to know possible size;
 	std::vector<Particle*> particles;
 	std::vector<Particle*> tempParticles;
 
