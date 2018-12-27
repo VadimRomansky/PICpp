@@ -337,8 +337,6 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 
 	setSpaceForProc();
 
-	temperature = temp;
-
 	maxIteration = maxIterations;
 	maxTime = maxTimeV;
 
@@ -370,6 +368,8 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	massHelium3 = massHelium3Real;
 	massOxygen = massOxygenReal;
 	massSilicon = massSiliconReal;
+
+	temperature = temp*massProton*speed_of_light*speed_of_light/kBoltzman;
 
 	density = 0;
 
@@ -638,8 +638,6 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 
 	setSpaceForProc();
 
-	temperature = temp;
-
 	maxIteration = maxIterations;
 	maxTime = maxTimeV;
 
@@ -671,6 +669,8 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	massHelium3 = massHelium3Real;
 	massOxygen = massOxygenReal;
 	massSilicon = massSiliconReal;
+
+	temperature = temp*massProton*speed_of_light*speed_of_light/kBoltzman;
 
 	density = 0;
 

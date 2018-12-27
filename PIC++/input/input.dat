@@ -1,7 +1,7 @@
 1                       input type - cgs or in omega_e and skin depth units
 10000 1 1              grid numbers
 0.2         		grid step
-5E-8                     temperature
+1E-4                     temperature (in units mp*c*c/k)
 -0.7453559925 0 0       velocity (in c always)
 1.0                    magnetization
 90                      B theta in grad  Bx = B cos theta, By = B sin theta cos phi, Bz = B sin theta sin phi
