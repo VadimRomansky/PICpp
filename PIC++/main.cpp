@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 	//Simulation::initialRandom = 0;
 	//srand(Simulation::initialRandom);
 	if(rank == 0) printf("initial random = %d\n", Simulation::initialRandom);
-	srand(initialRandom + rank);
+	srand(Simulation::initialRandom + rank);
 
 
 	bool startNew = true;

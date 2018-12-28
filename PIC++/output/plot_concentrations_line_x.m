@@ -1,5 +1,5 @@
 clear;
-load concentrationsX_1.dat;
+load concentrationsX_2.dat;
 load particleTypes.dat;
 load Xfile.dat;
 load Yfile.dat;
@@ -8,7 +8,7 @@ load initialParameters.dat;
 
 set(0, 'DefaultLineLineWidth', 1);
 
-concentrations = concentrationsX_1;
+concentrations = concentrationsX_2;
 
 Nx = size(Xfile, 1)-1;
 Ny = size(Yfile, 1)-1;

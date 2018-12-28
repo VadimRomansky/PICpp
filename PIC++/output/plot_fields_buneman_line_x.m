@@ -1,14 +1,14 @@
 clear;
-load EfieldX_0.dat;
-load BfieldX_0.dat;
+load EfieldX_2.dat;
+load BfieldX_2.dat;
 load Xfile.dat;
 
 load Yfile.dat;
 load Zfile.dat;
 load initialParameters.dat;
 
-Efield = EfieldX_0;
-Bfield = BfieldX_0;
+Efield = EfieldX_2;
+Bfield = BfieldX_2;
 
 Nx = size(Xfile, 1);
 Ny = size(Yfile, 1);
