@@ -81,10 +81,10 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 		fscanf(inputFile, "%c", &ch);
 	}
 
-	double temperature;
-	fscanf(inputFile, "%lf", &temperature);
+	double dgamma;
+	fscanf(inputFile, "%lf", &dgamma);
 
-	if (temperature < 0) {
+	if (dgamma < 0) {
 		printf("temperature must be > 0\n");
 		FILE* errorLogFile = fopen((outputDir + "errorLog.dat").c_str(), "w");
 		fprintf(errorLogFile, "v/c > 1 in setMomentumByV\n");
@@ -334,7 +334,7 @@ Simulation readInput(FILE* inputFile, MPI_Comm& comm) {
 
 
 	printf("finish read input\n");
-	return Simulation(xnumber, ynumber, znumber, dx, temperature, Vx, Vy, Vz, sigma, Btheta, Bphi, Ex, Ey, Ez, initialElectronConcentration,
+	return Simulation(xnumber, ynumber, znumber, dx, dgamma, Vx, Vy, Vz, sigma, Btheta, Bphi, Ex, Ey, Ez, initialElectronConcentration,
 	                  maxIterations, maxTime, writeIterationParameter, writeGeneralParameter, writeTrajectoryParameter, writeParticleStep, smoothingCount, smoothingParameter, multiplyFileOutput, typesNumber, particlesPerBin, relativeConcentrations, inputType, nprocs, verbocity,
 	                  preferedTimeStep, massElectronInput, comm);
 }

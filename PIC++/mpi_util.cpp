@@ -65,7 +65,7 @@ void sendInput(Simulation& simulation, int nprocs) {
 		doubleData[1] = simulation.ysizeGeneral;
 		doubleData[2] = simulation.zsizeGeneral;
 		doubleData[3] = simulation.deltaX;
-		doubleData[4] = simulation.temperature;
+		doubleData[4] = simulation.deltaGamma;
 		doubleData[5] = simulation.concentrations[0];
 		doubleData[6] = simulation.concentrations[1];
 		doubleData[7] = simulation.concentrations[2];
@@ -162,7 +162,7 @@ Simulation recieveInput(MPI_Comm cartComm) {
 		double ysize = doubleData[1];
 		double zsize = doubleData[2];
 		double deltaX = doubleData[3];
-		double temperature = doubleData[4];
+		double dgamma = doubleData[4];
 		concentrations[0] = doubleData[5];
 		concentrations[1] = doubleData[6];
 		concentrations[2] = doubleData[7];
@@ -187,7 +187,7 @@ Simulation recieveInput(MPI_Comm cartComm) {
 		double electronMassInput = doubleData[26];
 		double plasma_period = doubleData[27];
 		double scaleFactor = doubleData[28];
-		return Simulation(xnumber, ynumber, znumber, deltaX, temperature, V0x, V0y, V0z, initialMagnetization, Btheta, Bphi, E0x, E0y, E0z, initialElectronConcentration,
+		return Simulation(xnumber, ynumber, znumber, deltaX, dgamma, V0x, V0y, V0z, initialMagnetization, Btheta, Bphi, E0x, E0y, E0z, initialElectronConcentration,
 	                  maxIteration, maxTime, writeParameter, writeGeneralParameter, writeTrajectoryNumber, writeParticleNumber, smoothingCount, smoothingParameter, multiplyFileOutput, typesNumber, particlesPerBin, concentrations, inputType, nprocs, verbosity,
 	                  preferedDeltaT, electronMassInput, plasma_period, scaleFactor, solverTypev, cartComm);
 	}

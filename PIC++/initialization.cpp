@@ -202,7 +202,7 @@ void Simulation::setSpaceForProc() {
 	constMeanElevelPoint = 0;
 }
 
-Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double Vx,
+Simulation::Simulation(int xn, int yn, int zn, double dxv, double dgamma, double Vx,
                        double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y,
                        double E0z,
                        double initialElectronConcentrationV,
@@ -369,7 +369,8 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	massOxygen = massOxygenReal;
 	massSilicon = massSiliconReal;
 
-	temperature = temp*massProton*speed_of_light*speed_of_light/kBoltzman;
+	deltaGamma = dgamma;
+	temperature = deltaGamma*massProton*speed_of_light*speed_of_light/kBoltzman;
 
 	density = 0;
 
@@ -501,7 +502,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	//fflush(stdout);
 }
 
-Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double Vx,
+Simulation::Simulation(int xn, int yn, int zn, double dxv, double dgamma, double Vx,
                        double Vy, double Vz, double sigmav, double Bthetav, double Bphiv, double E0x, double E0y,
                        double E0z,
                        double initialElectronConcentrationV,
@@ -670,7 +671,8 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	massOxygen = massOxygenReal;
 	massSilicon = massSiliconReal;
 
-	temperature = temp*massProton*speed_of_light*speed_of_light/kBoltzman;
+	deltaGamma = dgamma;
+	temperature = deltaGamma*massProton*speed_of_light*speed_of_light/kBoltzman;
 
 	density = 0;
 
@@ -795,7 +797,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	//fflush(stdout);
 }
 
-/*Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
+/*Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double dgamma, double Vx,
                        double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                        int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
                        double* concentrationsV, int inType, int nprocsV, int verbosityV, double preferedTimeStepV,
@@ -1062,7 +1064,7 @@ Simulation::Simulation(int xn, int yn, int zn, double dxv, double temp, double V
 	//fflush(stdout);
 }*/
 
-/*Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double temp, double Vx,
+/*Simulation::Simulation(int xn, int yn, int zn, double xsizev, double ysizev, double zsizev, double dgamma, double Vx,
                        double Vy, double Vz, double Ex, double Ey, double Ez, double Bx, double By, double Bz,
                        int maxIterations, double maxTimeV, int typesNumberV, int* particlesPerBinV,
                        double* concentrationsV, int inType, int nprocsV, int verbosityV, double preferedTimeStepV,
@@ -1832,7 +1834,7 @@ Simulation::~Simulation() {
 			delete3array(tempBunemanBzParameter, xnumberAdded, ynumberAdded, znumberAdded + 1);
 			delete3array(bunemanDivCleaningBz, xnumberAdded, ynumberAdded, znumberAdded + 1);
 
-			//// temp buneman j
+			//// dgamma buneman j
 			// left right
 			delete3array(tempBunemanJxLeft, 2 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);
 			delete3array(tempBunemanJxRight, 2 + 2 * additionalBinNumber, ynumberAdded + 1, znumberAdded + 1);

@@ -118,7 +118,7 @@ void Simulation::initializeFluxFromRight() {
 	if(rank == 0) {
 		printf("start initialize turbulence\n");
 	}
-	//initializeRandomModes(25, 2500, 0.9);
+	initializeRandomModes(25, 100, 0.5);
 
 	//double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0) / speed_of_light_normalized_sqr);
 	double gamma = 1.0 / sqrt(1 - V0.scalarMult(V0));

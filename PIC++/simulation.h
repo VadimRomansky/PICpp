@@ -106,6 +106,7 @@ public:
 
 	double density;
 	double temperature;
+	double deltaGamma;// it is input, be careful;
 
 	double plasma_period;
 	double plasma_period2;
