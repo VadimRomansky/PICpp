@@ -1,5 +1,4 @@
 clear;
-load concentrationsZ.dat;
 load particleTypes.dat;
 load Xfile.dat;
 load Yfile.dat;
@@ -7,6 +6,8 @@ load Zfile.dat;
 load initialParameters.dat;
 
 set(0, 'DefaultLineLineWidth', 2);
+
+concentrations = importdata('concentrationsZ_5.dat');
 
 Nx = size(Xfile, 1)-1;
 Ny = size(Yfile, 1)-1;

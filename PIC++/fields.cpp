@@ -27,7 +27,7 @@ void Simulation::tristanEvaluateBhalfStep() {
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
 	int minJ = 1 + additionalBinNumber;
 	if((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1)) {
-		maxI = xnumberAdded - 1 - additionalBinNumber - 20;
+		maxI = xnumberAdded - 1 - additionalBinNumber;
 	}
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
 	if(ynumberGeneral == 1) {
@@ -58,6 +58,12 @@ void Simulation::tristanEvaluateBhalfStep() {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k < maxK; ++k) {
 				bunemanBy[i][j][k] = bunemanBy[i][j][k] - evaluateBunemanRotEy(i, j, k) * cdtd2;
+				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
+					bunemanBy[i][j][k] = leftBoundaryFieldEvaluator->evaluateBfield(time, j, k).y;
+				}
+				if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC && i >= maxI - 1) {
+					bunemanBy[i][j][k] = rightBoundaryFieldEvaluator->evaluateBfield(time, j, k).y;
+				}
 			}
 		}
 	}
@@ -71,6 +77,12 @@ void Simulation::tristanEvaluateBhalfStep() {
 		for (int j = minJ; j < maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
 				bunemanBz[i][j][k] = bunemanBz[i][j][k] - evaluateBunemanRotEz(i, j, k) * cdtd2;
+				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
+					bunemanBz[i][j][k] = leftBoundaryFieldEvaluator->evaluateBfield(time, j, k).z;
+				}
+				if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC && i >= maxI - 1) {
+					bunemanBz[i][j][k] = rightBoundaryFieldEvaluator->evaluateBfield(time, j, k).z;
+				}
 			}
 		}
 	}
@@ -89,7 +101,7 @@ void Simulation::tristanEvaluateE() {
 	int minI = 1 + additionalBinNumber;
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
 	if((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1)) {
-		maxI = xnumberAdded - 1 - additionalBinNumber - 20;
+		maxI = xnumberAdded - 1 - additionalBinNumber;
 	}
 	int minJ = 1 + additionalBinNumber;
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
@@ -107,7 +119,7 @@ void Simulation::tristanEvaluateE() {
 		for (int j = minJ; j <= maxJ; ++j) {
 			for (int k = minK; k <= maxK; ++k) {
 				//bunemanEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBx(i, j, k) - four_pi * bunemanJx[i][j][k]) * deltaT;
-				double rotBx = evaluateBunemanRotBx(i, j, k);
+				//double rotBx = evaluateBunemanRotBx(i, j, k);
 				bunemanEx[i][j][k] = bunemanEx[i][j][k] + (speed_of_light_correction*evaluateBunemanRotBx(i, j, k) - four_pi * bunemanJx[i][j][k]) * deltaT;
 			}
 		}
@@ -121,10 +133,10 @@ void Simulation::tristanEvaluateE() {
 				//bunemanEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBy(i, j, k) - four_pi *bunemanJy[i][j][k]) * deltaT;
 				bunemanEy[i][j][k] = bunemanEy[i][j][k] + (speed_of_light_correction*evaluateBunemanRotBy(i, j, k) - four_pi *bunemanJy[i][j][k]) * deltaT;
 				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
-					bunemanEy[i][j][k] = 0;
+					bunemanEy[i][j][k] = leftBoundaryFieldEvaluator->evaluateEfield(time, j, k).y;
 				}
 				if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC && i > maxI) {
-					bunemanEy[i][j][k] = E0.y;
+					bunemanEy[i][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time, j, k).y;
 				}
 			}
 		}
@@ -141,12 +153,21 @@ void Simulation::tristanEvaluateE() {
 				//bunemanEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_normalized * evaluateBunemanRotBz(i, j, k) - four_pi * bunemanJz[i][j][k]) * deltaT;
 				bunemanEz[i][j][k] = bunemanEz[i][j][k] + (speed_of_light_correction*evaluateBunemanRotBz(i, j, k) - four_pi * bunemanJz[i][j][k]) * deltaT;
 				if (cartCoord[0] == 0 && boundaryConditionTypeX == SUPER_CONDUCTOR_LEFT && i <= minI) {
-					bunemanEz[i][j][k] = 0;
+					bunemanEz[i][j][k] = leftBoundaryFieldEvaluator->evaluateEfield(time, j, k).z;
 				}
 				if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC && i > maxI) {
-					bunemanEz[i][j][k] = E0.z;
+					bunemanEz[i][j][k] = leftBoundaryFieldEvaluator->evaluateEfield(time, j, k).z;
 				}
 			}
+		}
+	}
+
+	if(boundaryConditionTypeX != PERIODIC) {
+		if(cartCoord[0] == 0) {
+			
+		}
+		if(cartCoord[0] == cartDim[0] - 1) {
+			
 		}
 	}
 	MPI_Barrier(cartComm);

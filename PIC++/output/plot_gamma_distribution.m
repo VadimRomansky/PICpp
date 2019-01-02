@@ -1,8 +1,8 @@
 clear;
-load distribution_protons.dat;
-load distribution_electrons.dat;
-load distribution_alphas.dat;
-load distribution_positrons.dat;
+distribution_protons = importdata('distribution_protons_5.dat');
+distribution_electrons = importdata('distribution_electrons_5.dat');
+distribution_alphas = importdata('distribution_alphas_5.dat');
+distribution_positrons = importdata('distribution_positrons_5.dat');
 load initialParameters.dat;
 
 Np = 500;

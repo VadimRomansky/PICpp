@@ -1,6 +1,8 @@
 clear;
-load distribution_protons_downstream.dat;
-load distribution_electrons_downstream.dat;
+distribution_protons_downstream = importdata('distribution_protons_downstream_5.dat');
+distribution_electrons_downstream = importdata('distribution_electrons_downstream_5.dat');
+distribution_alphas_downstream = importdata('distribution_alphas_downstream_5.dat');
+distribution_positrons_downstream = importdata('distribution_positrons_downstream_5.dat');
 
 Np = 500;
 

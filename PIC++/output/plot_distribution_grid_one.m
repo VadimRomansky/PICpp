@@ -1,15 +1,15 @@
 clear;
-load distribution_protons_grid_1.dat;
-load distribution_electrons_grid_1.dat;
-load distribution_alphas_grid_1.dat;
-load distribution_positrons_grid_1.dat;
+distribution_protons_grid = importdata('distribution_protons_grid_5.dat');
+distribution_electrons_grid = importdata('distribution_electrons_grid_5.dat');
+distribution_alphas_grid = importdata('distribution_alphas_grid_5.dat');
+distribution_positrons_grid = importdata('distribution_positrons_grid_5.dat');
 load initialParameters.dat;
 load Xfile.dat;
 
 Np = 500;
 
 Nx = size(Xfile,1) - 1;
-Nt = size(distribution_electrons_grid_1, 1)/(Nx + 1);
+Nt = size(distribution_electrons_grid, 1)/(Nx + 1);
 %Nt = 3;
 
 
@@ -37,26 +37,26 @@ factor = 1;
 minX = 1;
 maxX = Nx;
 for i=1:Np,   
-   Pp(i) = distribution_protons_grid_1(1 + a*(Nx + 1),i)/(mp*v);
+   Pp(i) = distribution_protons_grid(1 + a*(Nx + 1),i)/(mp*v);
    
-   Pe(i) = distribution_electrons_grid_1(1 + a*(Nx + 1),i)/(me*v);
+   Pe(i) = distribution_electrons_grid(1 + a*(Nx + 1),i)/(me*v);
      
-   Pa(i) = distribution_alphas_grid_1(1 + a*(Nx + 1),i)/(ma*v);
+   Pa(i) = distribution_alphas_grid(1 + a*(Nx + 1),i)/(ma*v);
      
-   Ppos(i) = distribution_positrons_grid_1(1 + a*(Nx + 1),i)/(me*v);
+   Ppos(i) = distribution_positrons_grid(1 + a*(Nx + 1),i)/(me*v);
    
    for j=minX:maxX,
      factor = Pp(i)*Pp(i);
-     Fp(i) = Fp(i) + distribution_protons_grid_1(1 + j + a*(Nx + 1), i)*factor;
+     Fp(i) = Fp(i) + distribution_protons_grid(1 + j + a*(Nx + 1), i)*factor;
 
      factor = Pe(i)*Pe(i);
-     Fe(i) = Fe(i) + distribution_electrons_grid_1(1 + j + a*(Nx + 1), i)*factor;
+     Fe(i) = Fe(i) + distribution_electrons_grid(1 + j + a*(Nx + 1), i)*factor;
 
      factor = Pa(i)*Pa(i);
-     Fa(i) = Fa(i) + distribution_alphas_grid_1(1 + j + a*(Nx + 1), i)*factor;
+     Fa(i) = Fa(i) + distribution_alphas_grid(1 + j + a*(Nx + 1), i)*factor;
 
      factor = Ppos(i)*Ppos(i);
-     Fpos(i) = Fpos(i) + distribution_positrons_grid_1(1 + j + a*(Nx + 1), i)*factor;
+     Fpos(i) = Fpos(i) + distribution_positrons_grid(1 + j + a*(Nx + 1), i)*factor;
    end;
    exp1 = exp(-sqrt(1+Pe(i)*Pe(i)/(me*me*v*v))/theta);
    bes = besselk(2, 1/theta);

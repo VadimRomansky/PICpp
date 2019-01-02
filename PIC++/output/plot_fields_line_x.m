@@ -1,6 +1,6 @@
 clear;
-load EfieldX.dat;
-load BfieldX.dat;
+Efield = importdata('EfieldX_5.dat');
+Bfield = importdata('BfieldX_5.dat');
 load Xfile.dat;
 
 load Yfile.dat;
@@ -10,9 +10,6 @@ load initialParameters.dat;
 Nx = size(Xfile, 1);
 Ny = size(Yfile, 1);
 Nz = size(Zfile, 1);
-
-Efield = EfieldX;
-Bfield = BfieldX;
 
 NE = Nx;
 NB = (Nx-1);

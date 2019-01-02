@@ -1,11 +1,13 @@
 clear;
-load concentrationsYZ.dat;
 load particleTypes.dat;
 load Xfile.dat;
 load Yfile.dat;
 load Zfile.dat;
 set(0,'DefaultFigureColormap',feval('jet'));
 set(0, 'DefaultLineLineWidth', 2);
+
+concentrations = importdata('concentrationsYZ_5.dat');
+
 Nx = size(Xfile, 1)-1;
 Ny = size(Yfile, 1)-1;
 Nz = size(Zfile, 1)-1;

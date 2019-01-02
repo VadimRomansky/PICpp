@@ -1,6 +1,6 @@
 clear;
-load EfieldZ.dat;
-load BfieldZ.dat;
+EfieldZ = importdata('EfieldZ_5.dat');
+BfieldZ = inportdata('BfieldZ_5.dat');
 load Xfile.dat;
 load Yfile.dat;
 load Zfile.dat;

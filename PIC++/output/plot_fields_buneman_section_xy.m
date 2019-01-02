@@ -1,6 +1,6 @@
 clear;
-Efield = importdata('EfieldXY_20.dat');
-Bfield = importdata('BfieldXY_20.dat');
+EfieldXY = importdata('EfieldXY_20.dat');
+BfieldXY = importdata('BfieldXY_20.dat');
 load Xfile.dat;
 load Yfile.dat;
 load Zfile.dat;

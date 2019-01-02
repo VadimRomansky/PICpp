@@ -1,10 +1,11 @@
 clear;
-load concentrations.dat;
 load particleTypes.dat;
 load Xfile.dat;
 load Yfile.dat;
 load Zfile.dat;
 load initialParameters.dat;
+
+concentratins = importdata('concentrations.dat');
 
 Nx = size(Xfile, 1)-1;
 Ny = size(Yfile, 1)-1;

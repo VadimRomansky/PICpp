@@ -165,6 +165,10 @@ void Simulation::simulate() {
 		/////////////////////////////////////////////////////
 		double procTime = 0;
 		if (solverType == BUNEMAN) {
+			leftBoundaryFieldEvaluator->prepareB(time);
+			leftBoundaryFieldEvaluator->prepareE(time);
+			rightBoundaryFieldEvaluator->prepareB(time);
+			rightBoundaryFieldEvaluator->prepareE(time);
 			tristanEvaluateBhalfStep();
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
 			/*if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {

@@ -1,8 +1,8 @@
 clear;
-load distribution_protons_grid.dat;
-load distribution_electrons_grid.dat;
-load distribution_alphas_grid.dat;
-load distribution_positrons_grid.dat;
+distribution_protons_grid = importdata('distribution_protons_grid_5.dat');
+distribution_electrons_grid = importdata('distribution_electrons_grid_5.dat');
+distribution_alphas_grid = importdata('distribution_alphas_grid_5.dat');
+distribution_positrons_grid = importdata('distribution_positrons_grid_5.dat');
 load initialParameters.dat;
 load Xfile.dat;
 

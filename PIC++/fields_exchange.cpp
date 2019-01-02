@@ -2652,7 +2652,7 @@ void Simulation::exchangeBunemanExAlongX(double*** fieldX) {
 						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldX[i][j][k] = fieldX[additionalBinNumber + 1][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
+						fieldX[xnumberAdded - 2 - i][j][k] = fieldX[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -2976,7 +2976,7 @@ void Simulation::exchangeBunemanEyAlongX(double*** fieldY) {
 						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldY[i][j][k] = fieldY[additionalBinNumber][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
+						fieldY[xnumberAdded - 1 - i][j][k] = fieldY[xnumberAdded - 1 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -3285,7 +3285,7 @@ void Simulation::exchangeBunemanEzAlongX(double*** fieldZ) {
 						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldZ[i][j][k] = fieldZ[additionalBinNumber][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
+						fieldZ[xnumberAdded - 1 - i][j][k] = fieldZ[xnumberAdded - 1 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -3617,7 +3617,7 @@ void Simulation::exchangeBunemanBxAlongX(double*** fieldX) {
 						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldX[i][j][k] = fieldX[additionalBinNumber][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 1 - additionalBinNumber][j][k];
+						fieldX[xnumberAdded - 1 - i][j][k] = fieldX[xnumberAdded - 1 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -3905,7 +3905,7 @@ void Simulation::exchangeBunemanByAlongX(double*** fieldY) {
 						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldY[i][j][k] = fieldY[additionalBinNumber + 1][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
+						fieldY[xnumberAdded - 2 - i][j][k] = fieldY[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -4205,7 +4205,7 @@ void Simulation::exchangeBunemanBzAlongX(double*** fieldZ) {
 						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldZ[i][j][k] = fieldZ[additionalBinNumber + 1][j][k];
 						}
-						//field[xnumberAdded - 1 - i][j][k] = field[xnumberAdded - 2 - additionalBinNumber][j][k];
+						fieldZ[xnumberAdded - 2 - i][j][k] = fieldZ[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}

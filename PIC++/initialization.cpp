@@ -5950,14 +5950,9 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 		interpolateLapentaToBunemanBfield(bunemanBx, bunemanBy, bunemanBz, Bfield);
 		interpolateLapentaToBunemanEfield(bunemanEx, bunemanEy, bunemanEz, Efield);
 	}
-	/*rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers,
-	                                                                   omega,
-	                                                                   middleXgrid[xnumberAdded - additionalBinNumber],
-	                                                                   speed_of_light_normalized);
-	leftBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, number, amplitudes, phases, knumbers,
-	                                                                  omega,
-	                                                                  xgrid[1 + additionalBinNumber],
-	                                                                  speed_of_light_normalized);*/
+	//rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(Simulation::initialRandom, minNumber, maxNumber, minNumber, maxNumber, minNumber, maxNumber, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
+	//leftBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(Simulation::initialRandom, minNumber, maxNumber, minNumber, maxNumber, minNumber, maxNumber, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
+
 
 	/*rightBoundaryFieldEvaluator = new TurbulenceBoundaryFieldEvaluator(E0, B0, V0, minNumber, amplitudes, phases, knumbers,
 	                                                                   omega,
