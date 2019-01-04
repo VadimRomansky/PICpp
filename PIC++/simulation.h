@@ -76,6 +76,8 @@ public:
 	int firstAbsoluteXindex;
 	int firstAbsoluteYindex;
 	int firstAbsoluteZindex;
+	int leftBoundaryXindex;
+	int rightBoundaryXindex;
 	double leftX;
 	double rightX;
 	double leftY;
