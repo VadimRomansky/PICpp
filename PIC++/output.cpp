@@ -3412,25 +3412,46 @@ void outputGeneral(const char* outFileName, Simulation* simulation) {
 	double omega = sqrt(omega2 / (gamma * gamma * gamma));
 	fprintf(outFile,
 	        "%d %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d %15.10g %15.10g %15.10g %15.10g ",
-	        simulation->currentIteration, simulation->time, simulation->time * simulation->plasma_period,
-	        simulation->particleEnergy,
-	        simulation->electricFieldEnergy, simulation->magneticFieldEnergy, simulation->energy,
-	        simulation->globalMomentum.x, simulation->globalMomentum.y, simulation->globalMomentum.z,
-	        simulation->generalTheoreticalEnergy, simulation->generalTheoreticalMomentum.x,
-	        simulation->generalTheoreticalMomentum.y,
-	        simulation->generalTheoreticalMomentum.z, simulation->maxEfield.norm() / fieldFactor,
-	        simulation->maxBfield.norm() / fieldFactor, simulation->deltaT, particlesCount, simulation->shockWaveX,
-	        simulation->meanSquaredEfield[0] / fieldFactor, simulation->meanSquaredEfield[1] / fieldFactor,
-	        simulation->meanSquaredEfield[2] / fieldFactor);
+	        simulation->currentIteration, //1
+			simulation->time,  //2
+			simulation->time * simulation->plasma_period, //3
+	        simulation->particleEnergy, //4
+	        simulation->electricFieldEnergy,  //5
+			simulation->magneticFieldEnergy, //6
+			simulation->energy, //7
+	        simulation->globalMomentum.x, //8
+			simulation->globalMomentum.y, //9
+			simulation->globalMomentum.z, //10
+	        simulation->generalTheoreticalEnergy, //11
+			simulation->generalTheoreticalMomentum.x, //12
+	        simulation->generalTheoreticalMomentum.y, //13
+	        simulation->generalTheoreticalMomentum.z, //14
+			simulation->maxEfield.norm() / fieldFactor, //15
+	        simulation->maxBfield.norm() / fieldFactor, //16
+			simulation->deltaT, //17
+			particlesCount, //18
+			simulation->shockWaveX, //19
+	        simulation->meanSquaredEfield[0] / fieldFactor,  //20
+			simulation->meanSquaredEfield[1] / fieldFactor, //21
+	        simulation->meanSquaredEfield[2] / fieldFactor); //22
 	fprintf(outFile,
 	        "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d %15.10g %d %15.10g\n",
-	        simulation->electricFieldEnergyX, simulation->electricFieldEnergyY, simulation->electricFieldEnergyZ,
-	        simulation->magneticFieldEnergyX, simulation->magneticFieldEnergyY, simulation->magneticFieldEnergyZ,
-	        simulation->electromagneticMomentum.x, simulation->electromagneticMomentum.y,
-	        simulation->electromagneticMomentum.z, simulation->particleMomentum.x, simulation->particleMomentum.y,
-	        simulation->particleMomentum.z, simulation->derExPoint,
-	        simulation->derExPoint * simulation->deltaX * simulation->scaleFactor, simulation->constMeanElevelPoint,
-	        simulation->derConcentrationPoint * simulation->deltaX * simulation->scaleFactor);
+	        simulation->electricFieldEnergyX, //23
+			simulation->electricFieldEnergyY, //24
+			simulation->electricFieldEnergyZ, //25
+	        simulation->magneticFieldEnergyX, //26
+			simulation->magneticFieldEnergyY, //27
+			simulation->magneticFieldEnergyZ, //28
+	        simulation->electromagneticMomentum.x, //29 
+			simulation->electromagneticMomentum.y, //30
+	        simulation->electromagneticMomentum.z, //31
+			simulation->particleMomentum.x, //32
+			simulation->particleMomentum.y, //33
+	        simulation->particleMomentum.z, //34
+			simulation->derExPoint, //35
+	        simulation->derExPoint * simulation->deltaX * simulation->scaleFactor, //36
+			simulation->constMeanElevelPoint, //37
+	        simulation->derConcentrationPoint * simulation->deltaX * simulation->scaleFactor); //38
 	fclose(outFile);
 }
 

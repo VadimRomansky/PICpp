@@ -7,7 +7,7 @@ load initialParameters.dat;
 
 set(0, 'DefaultLineLineWidth', 1);
 
-concentrations = importdata('concentrationsX_5.dat');
+concentrations = importdata('concentrationsX.dat');
 
 Nx = size(Xfile, 1)-1;
 Ny = size(Yfile, 1)-1;

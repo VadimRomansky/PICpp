@@ -44,7 +44,7 @@ set(0,'DefaultTextFontSize',16,'DefaultTextFontName','Times New Roman');
 set(0, 'DefaultLineLineWidth', 1);
 figure(1);
 %plot (general(1:N2,3)*omega_plasma, general(1:N2,4), 'green', general(1:N2,3)*omega_plasma, general(1:N2,5), 'blue', general(1:N2, 3)*omega_plasma, general(1:N2,6), 'black', general(1:N2, 3)*omega_plasma, general(1:N2,7), 'red', general(1:N2, 3)*omega_plasma, general(1:N2,11), 'yellow');
-plot (general(1:N2,3)*omega_plasma, general(1:N2,4), 'green', general(1:N2,3)*omega_plasma, general(1:N2,5), 'blue', general(1:N2, 3)*omega_plasma, general(1:N2,27) + general(1:N2,28), 'black', general(1:N2, 3)*omega_plasma, general(1:N2,7), 'red', general(1:N2, 3)*omega_plasma, general(1:N2,11), 'yellow', general(1:Nsaturation, 3)*omega_plasma, linearMagneticEnergy(1:Nsaturation),'cyan');
+plot (general(1:N2,3)*omega_plasma, general(1:N2,4), 'green', general(1:N2,3)*omega_plasma, general(1:N2,5), 'blue', general(1:N2, 3)*omega_plasma, general(1:N2,6), 'black', general(1:N2, 3)*omega_plasma, general(1:N2,7), 'red', general(1:N2, 3)*omega_plasma, general(1:N2,11), 'yellow', general(1:Nsaturation, 3)*omega_plasma, linearMagneticEnergy(1:Nsaturation),'cyan');
 
 xlabel ('{{t {\omega}_p}}');
 ylabel ('E/E_0');

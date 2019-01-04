@@ -4,8 +4,8 @@ load Yfile.dat;
 load Zfile.dat;
 load initialParameters.dat;
 
-Efield = importdata('EfieldX_5.dat');
-Bfield = importdata('BfieldX_5.dat');
+Efield = importdata('EfieldX.dat');
+Bfield = importdata('BfieldX.dat');
 
 Nx = size(Xfile, 1);
 Ny = size(Yfile, 1);

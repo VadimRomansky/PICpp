@@ -1,30 +1,30 @@
 1                       input type - cgs or in omega_e and skin depth units
-500 50 1              grid numbers
-0.2         		grid step
-1E-4                     temperature
--0.7453559925 0 0       velocity (in c always)
-0.003                    magnetization
-90                      B theta in grad  Bx = B cos theta, By = B sin theta cos phi, Bz = B sin theta sin phi
+500 10 1              grid numbers
+0.1         		grid step
+2E-4                     temperature (in units mp*c*c/k)
+-0.052 0 0       velocity (in c always)
+0.0077                    magnetization
+13                      B theta in grad  Bx = B cos theta, By = B sin theta cos phi, Bz = B sin theta sin phi
 90                      B phi
 0 0 0                   Electric field
 1.0                    total electron concentration (always in cgs)
-10000000                max iterations
+1000001                max iterations
 1E100                   max time
 1                  	prefered time step
 0                  	log verbocity level
-100                      write iteration parameter (for output fields)
+10000                      write iteration parameter (for output fields)
 10                      write general parameter (for output energy)
-100                      write trajectory parameter
+1000                     write trajectory parameter
 100                      write particle step
 16			smothing iterations
 0.5                     smothing parameter
 1                       write each iteration in different file
 0.05    	        electron mass (in units of proton mass)
 8                       particle types number
-1 10                	electrons relative concentration and particles per bin
-1 10                	protons relative  concentration and particles per bin
+1 10               	electrons relative concentration and particles per bin
+0.86 8               	protons relative  concentration and particles per bin
 0 0                 	positrons relative  concentration and particles per bin
-0 0                     alpha  relative   concentration and particles per bin
+0.07 2                     alpha  relative   concentration and particles per bin
 0 0                     deuterium  relative  concentration and particles per bin
 0 0                     helium3  relative per concentration and particles bin Note that neutrality is om your own responsibility!
 0 0                     oxygen+3 relative  concentration and particles per bin
