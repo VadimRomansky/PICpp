@@ -1,5 +1,5 @@
 1                       input type - cgs or in omega_e and skin depth units
-500 50 1              grid numbers
+1000 20 1              grid numbers
 0.2         		grid step
 1E-4                     temperature (in units mp*c*c/k)
 -0.7453559925 0 0       velocity (in c always)
@@ -8,7 +8,7 @@
 90                      B phi
 0 0 0                   Electric field
 1E-4                    total electron concentration (always in cgs)
-1001                max iterations
+11                max iterations
 1E100                   max time
 1                  	prefered time step
 0                  	log verbocity level

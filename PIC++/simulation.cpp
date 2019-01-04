@@ -165,10 +165,18 @@ void Simulation::simulate() {
 		/////////////////////////////////////////////////////
 		double procTime = 0;
 		if (solverType == BUNEMAN) {
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock();
+			}
 			leftBoundaryFieldEvaluator->prepareB(time);
 			leftBoundaryFieldEvaluator->prepareE(time);
 			rightBoundaryFieldEvaluator->prepareB(time);
 			rightBoundaryFieldEvaluator->prepareE(time);
+			MPI_Barrier(cartComm);
+			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+				procTime = clock() - procTime;
+				printf("boundary evaluator preparation time = %g sec\n", procTime / CLOCKS_PER_SEC);
+			}
 			tristanEvaluateBhalfStep();
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
 			/*if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
