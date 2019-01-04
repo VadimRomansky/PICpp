@@ -2625,7 +2625,7 @@ void Simulation::exchangeBunemanExAlongX(double*** fieldX) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
-						fieldX[xnumberAdded - 1 - additionalBinNumber + i][j][k] = fieldX[xnumberAdded - 1 - additionalBinNumber][j][k];
+						fieldX[xnumberAdded - 1 - additionalBinNumber + i][j][k] = fieldX[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -2652,7 +2652,7 @@ void Simulation::exchangeBunemanExAlongX(double*** fieldX) {
 						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldX[i][j][k] = fieldX[additionalBinNumber + 1][j][k];
 						}
-						fieldX[xnumberAdded - 1 - additionalBinNumber + i][j][k] = fieldX[xnumberAdded - 1 - additionalBinNumber][j][k];
+						fieldX[xnumberAdded - 1 - additionalBinNumber + i][j][k] = fieldX[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -2947,7 +2947,7 @@ void Simulation::exchangeBunemanEyAlongX(double*** fieldY) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
-						fieldY[xnumberAdded - additionalBinNumber + i][j][k] = fieldY[xnumberAdded - additionalBinNumber][j][k];
+						fieldY[xnumberAdded - additionalBinNumber + i][j][k] = fieldY[xnumberAdded - 1 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -2976,7 +2976,7 @@ void Simulation::exchangeBunemanEyAlongX(double*** fieldY) {
 						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldY[i][j][k] = fieldY[additionalBinNumber][j][k];
 						}
-						fieldY[xnumberAdded - additionalBinNumber + i][j][k] = fieldY[xnumberAdded - additionalBinNumber][j][k];
+						fieldY[xnumberAdded - additionalBinNumber + i][j][k] = fieldY[xnumberAdded - 1 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -3257,7 +3257,7 @@ void Simulation::exchangeBunemanEzAlongX(double*** fieldZ) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
-						fieldZ[xnumberAdded - additionalBinNumber + i][j][k] = fieldZ[xnumberAdded - additionalBinNumber][j][k];
+						fieldZ[xnumberAdded - additionalBinNumber + i][j][k] = fieldZ[xnumberAdded - 1 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -3285,7 +3285,7 @@ void Simulation::exchangeBunemanEzAlongX(double*** fieldZ) {
 						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldZ[i][j][k] = fieldZ[additionalBinNumber][j][k];
 						}
-						fieldZ[xnumberAdded - additionalBinNumber + i][j][k] = fieldZ[xnumberAdded - additionalBinNumber][j][k];
+						fieldZ[xnumberAdded - additionalBinNumber + i][j][k] = fieldZ[xnumberAdded - 1 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -3589,7 +3589,7 @@ void Simulation::exchangeBunemanBxAlongX(double*** fieldX) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
-						fieldX[xnumberAdded - additionalBinNumber + i][j][k] = fieldX[xnumberAdded - additionalBinNumber][j][k];
+						fieldX[xnumberAdded - additionalBinNumber + i][j][k] = fieldX[xnumberAdded - 1 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -3617,7 +3617,7 @@ void Simulation::exchangeBunemanBxAlongX(double*** fieldX) {
 						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldX[i][j][k] = fieldX[additionalBinNumber][j][k];
 						}
-						fieldX[xnumberAdded - additionalBinNumber + i][j][k] = fieldX[xnumberAdded - additionalBinNumber][j][k];
+						fieldX[xnumberAdded - additionalBinNumber + i][j][k] = fieldX[xnumberAdded - 1 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -3878,7 +3878,7 @@ void Simulation::exchangeBunemanByAlongX(double*** fieldY) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
 				for (int k = 0; k < znumberAdded; ++k) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
-						fieldY[xnumberAdded - 1 - additionalBinNumber + i][j][k] = fieldY[xnumberAdded - 1 - additionalBinNumber][j][k];
+						fieldY[xnumberAdded - 1 - additionalBinNumber + i][j][k] = fieldY[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -3905,7 +3905,7 @@ void Simulation::exchangeBunemanByAlongX(double*** fieldY) {
 						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldY[i][j][k] = fieldY[additionalBinNumber + 1][j][k];
 						}
-						fieldY[xnumberAdded - 1 - additionalBinNumber + i][j][k] = fieldY[xnumberAdded - 1 - additionalBinNumber][j][k];
+						fieldY[xnumberAdded - 1 - additionalBinNumber + i][j][k] = fieldY[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -4178,7 +4178,7 @@ void Simulation::exchangeBunemanBzAlongX(double*** fieldZ) {
 			for (int j = 0; j < ynumberAdded; ++j) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
 					for (int i = 0; i <= additionalBinNumber; ++i) {
-						fieldZ[xnumberAdded - 1 - additionalBinNumber + i][j][k] = fieldZ[xnumberAdded - 1 - additionalBinNumber][j][k];
+						fieldZ[xnumberAdded - 1 - additionalBinNumber + i][j][k] = fieldZ[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}
@@ -4205,7 +4205,7 @@ void Simulation::exchangeBunemanBzAlongX(double*** fieldZ) {
 						} else if (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH) {
 							fieldZ[i][j][k] = fieldZ[additionalBinNumber + 1][j][k];
 						}
-						fieldZ[xnumberAdded - 1 - additionalBinNumber + i][j][k] = fieldZ[xnumberAdded - 1 - additionalBinNumber][j][k];
+						fieldZ[xnumberAdded - 1 - additionalBinNumber + i][j][k] = fieldZ[xnumberAdded - 2 - additionalBinNumber][j][k];
 					}
 				}
 			}

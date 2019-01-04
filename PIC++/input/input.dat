@@ -8,7 +8,7 @@
 90                      B phi
 0 0 0                   Electric field
 1E-4                    total electron concentration (always in cgs)
-11                max iterations
+1001                max iterations
 1E100                   max time
 1                  	prefered time step
 0                  	log verbocity level
@@ -18,7 +18,7 @@
 10                      write particle step
 0			smothing iterations
 0.5                     smothing parameter
-1                       write each iteration in different file
+0                       write each iteration in different file
 0.05    	        electron mass (in units of proton mass)
 8                       particle types number
 1 10               	electrons relative concentration and particles per bin

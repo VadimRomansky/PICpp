@@ -25,10 +25,11 @@ void Simulation::tristanEvaluateBhalfStep() {
 	}
 	int minI = 1 + additionalBinNumber;
 	int maxI = xnumberAdded - 1 - additionalBinNumber;
-	int minJ = 1 + additionalBinNumber;
 	if((boundaryConditionTypeX != PERIODIC) && (cartCoord[0] == cartDim[0] - 1)) {
 		maxI = xnumberAdded - 1 - additionalBinNumber;
 	}
+
+	int minJ = 1 + additionalBinNumber;
 	int maxJ = ynumberAdded - 1 - additionalBinNumber;
 	if(ynumberGeneral == 1) {
 		minJ = 0;
@@ -53,7 +54,7 @@ void Simulation::tristanEvaluateBhalfStep() {
 				//bunemanBx[leftBoundaryXindex - 1][j][k] = leftBoundaryFieldEvaluator->evaluateBfield(time, j, k).x;
 			}
 			if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
-				bunemanBx[rightBoundaryXindex + 1][j][k] = rightBoundaryFieldEvaluator->evaluateBfield(time, j, k).x;
+				bunemanBx[rightBoundaryXindex][j][k] = rightBoundaryFieldEvaluator->evaluateBfield(time, j, k).x;
 			}
 		}
 	}
@@ -70,7 +71,7 @@ void Simulation::tristanEvaluateBhalfStep() {
 					//bunemanBy[leftBoundaryXindex - 1][j][k] = leftBoundaryFieldEvaluator->evaluateBfield(time, j, k).y;
 				}
 				if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
-					bunemanBy[rightBoundaryXindex][j][k] = rightBoundaryFieldEvaluator->evaluateBfield(time, j, k).y;
+					bunemanBy[rightBoundaryXindex - 1][j][k] = rightBoundaryFieldEvaluator->evaluateBfield(time, j, k).y;
 				}
 		}
 	}
@@ -89,7 +90,7 @@ void Simulation::tristanEvaluateBhalfStep() {
 					//bunemanBz[leftBoundaryXindex][j][k] = leftBoundaryFieldEvaluator->evaluateBfield(time, j, k).z;
 				}
 				if(cartCoord[0] == cartDim[0] - 1 && boundaryConditionTypeX != PERIODIC) {
-					bunemanBz[rightBoundaryXindex][j][k] = rightBoundaryFieldEvaluator->evaluateBfield(time, j, k).z;
+					bunemanBz[rightBoundaryXindex - 1][j][k] = rightBoundaryFieldEvaluator->evaluateBfield(time, j, k).z;
 				}
 		}
 	}
@@ -131,7 +132,7 @@ void Simulation::tristanEvaluateE() {
 				//bunemanEx[leftBoundaryXindex - 1][j][k] = leftBoundaryFieldEvaluator->evaluateEfield(time, j, k).x;
 			}
 			if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
-				bunemanEx[rightBoundaryXindex][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time, j, k).x;
+				bunemanEx[rightBoundaryXindex - 1][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time, j, k).x;
 			}
 		}
 	}
@@ -150,7 +151,7 @@ void Simulation::tristanEvaluateE() {
 				//bunemanEy[leftBoundaryXindex - 1][j][k] = leftBoundaryFieldEvaluator->evaluateEfield(time, j, k).y;
 			}
 			if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
-				bunemanEy[rightBoundaryXindex + 1][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time, j, k).y;
+				bunemanEy[rightBoundaryXindex][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time, j, k).y;
 			}
 		}
 	}
@@ -172,7 +173,7 @@ void Simulation::tristanEvaluateE() {
 				//bunemanEz[leftBoundaryXindex - 1][j][k] = leftBoundaryFieldEvaluator->evaluateEfield(time, j, k).z;
 			}
 			if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1) {
-				bunemanEz[rightBoundaryXindex + 1][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time, j, k).z;
+				bunemanEz[rightBoundaryXindex][j][k] = rightBoundaryFieldEvaluator->evaluateEfield(time, j, k).z;
 			}
 		}
 	}
@@ -3711,4 +3712,20 @@ void Simulation::interpolateLapentaToBunemanBfield(double*** Bx, double*** By, d
 	}
 
 	exchangeBunemanBfield(Bx, By, Bz);
+}
+
+void Simulation::prepareEvaluators(double t) {
+	double procTime;
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock();
+	}
+	leftBoundaryFieldEvaluator->prepareB(t);
+	leftBoundaryFieldEvaluator->prepareE(t);
+	rightBoundaryFieldEvaluator->prepareB(t);
+	rightBoundaryFieldEvaluator->prepareE(t);
+	MPI_Barrier(cartComm);
+	if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
+		procTime = clock() - procTime;
+		printf("boundary evaluator preparation time = %g sec\n", procTime / CLOCKS_PER_SEC);
+	}
 }

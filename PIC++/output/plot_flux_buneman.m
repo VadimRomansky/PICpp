@@ -1,5 +1,5 @@
 clear;
-load flux.dat;
+flux = importdata('flux_8.dat');
 load Xfile.dat;
 load Yfile.dat;
 load Zfile.dat;

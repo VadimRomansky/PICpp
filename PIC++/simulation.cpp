@@ -165,18 +165,7 @@ void Simulation::simulate() {
 		/////////////////////////////////////////////////////
 		double procTime = 0;
 		if (solverType == BUNEMAN) {
-			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-				procTime = clock();
-			}
-			leftBoundaryFieldEvaluator->prepareB(time);
-			leftBoundaryFieldEvaluator->prepareE(time);
-			rightBoundaryFieldEvaluator->prepareB(time);
-			rightBoundaryFieldEvaluator->prepareE(time);
-			MPI_Barrier(cartComm);
-			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
-				procTime = clock() - procTime;
-				printf("boundary evaluator preparation time = %g sec\n", procTime / CLOCKS_PER_SEC);
-			}
+			prepareEvaluators(time + deltaT/2.0);
 			tristanEvaluateBhalfStep();
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
 			/*if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {
@@ -191,6 +180,7 @@ void Simulation::simulate() {
 				printf("updating correlation maps = %g sec\n", procTime / CLOCKS_PER_SEC);
 			}*/
 			moveParticles();
+			prepareEvaluators(time + deltaT);
 			tristanEvaluateBhalfStep();
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
 			tristanUpdateFlux();

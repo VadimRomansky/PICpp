@@ -177,6 +177,19 @@ void RandomTurbulenceBoundaryFieldEvaluator::prepareB(const double& t) {
 	int maxKynumber = maxLengthY / minLengthY;
 	int maxKznumber = maxLengthZ / minLengthZ;
 
+	int minJ = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - 1 - additionalBinNumber;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 1;
+	}
+	int minK = 1 + additionalBinNumber;
+	int maxK = znumberAdded - 1 - additionalBinNumber;
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 1;
+	}
+
 	if (ynumberGeneral == 1) {
 		maxKynumber = 1;
 	}
@@ -200,27 +213,27 @@ void RandomTurbulenceBoundaryFieldEvaluator::prepareB(const double& t) {
 					double phase2 = 2 * pi * uniformDistribution();
 
 					double kw = sqrt(kx * kx + ky * ky + kz * kz);
-					double kyz = sqrt(ky * ky + kz * kz);
-					double cosTheta = kx / kw;
-					double sinTheta = kyz / kw;
-					double cosPhi;
-					double sinPhi;
-					if (kk + kj > 0) {
-						cosPhi = ky / kyz;
-						sinPhi = kz / kyz;
-					}
-					else {
+					double kxy = sqrt(kx * kx + ky * ky);
+					double cosTheta = kz / kw;
+					double sinTheta = kxy / kw;
+					double cosPhi = 1.0;
+					double sinPhi = 0.0;
+					if (ki + kj != 0) {
+						cosPhi = kx / kxy;
+						sinPhi = ky / kxy;
+					} else {
 						cosPhi = 1.0;
 						sinPhi = 0.0;
 					}
-					double Bturbulent = simulation->evaluateTurbulenceFieldAmplitude(kx, ky, kz);
-					for(int j = 1 + additionalBinNumber; j < ynumberAdded - 1 - additionalBinNumber; ++j) {
-						for(int k = 1 + additionalBinNumber; k < znumberAdded -1 - additionalBinNumber; ++k){
+					double Bturbulent = simulation->turbulenceFieldCorrection*simulation->evaluateTurbulentB(kx, ky, kz);
+					for(int j = minJ; j < maxJ; ++j) {
+						for(int k = minK; k < maxK; ++k){
 							double kmultr = kx * (x - 0.5 * deltaX - V.x * t) + ky * (simulation->middleYgrid[j] - V.y * t) + kz * (simulation->middleZgrid[k] - V.z * t);
+							//double kmultr = kx * (x - 0.5 * deltaX) + ky * (simulation->middleYgrid[j]) + kz * (simulation->middleZgrid[k]) - 1.0*speed_of_light_correction*kw*t;
 							double localB1 = Bturbulent * sin(kmultr + phase1);
 							double localB2 = Bturbulent * sin(kmultr + phase2);
-							Vector3d localB = Vector3d(-sinTheta * localB1, cosTheta * cosPhi * localB1 - sinTheta * localB2,
-					                           cosTheta * sinPhi * localB1 - cosTheta * localB2);
+							Vector3d localB = Vector3d(- localB1*cosTheta*cosPhi + localB2*sinPhi, - localB1*cosTheta*sinPhi - localB2*cosPhi,
+					                           localB1*sinTheta);
 							Bfield[j][k] = Bfield[j][k] + localB;
 						}
 					}
@@ -235,6 +248,19 @@ void RandomTurbulenceBoundaryFieldEvaluator::prepareE(const double& t) {
 	int maxKxnumber = maxLengthX / minLengthX;
 	int maxKynumber = maxLengthY / minLengthY;
 	int maxKznumber = maxLengthZ / minLengthZ;
+
+	int minJ = 1 + additionalBinNumber;
+	int maxJ = ynumberAdded - 1 - additionalBinNumber;
+	if(ynumberGeneral == 1) {
+		minJ = 0;
+		maxJ = 1;
+	}
+	int minK = 1 + additionalBinNumber;
+	int maxK = znumberAdded - 1 - additionalBinNumber;
+	if(znumberGeneral == 1) {
+		minK = 0;
+		maxK = 1;
+	}
 
 	if (ynumberGeneral == 1) {
 		maxKynumber = 1;
@@ -259,29 +285,29 @@ void RandomTurbulenceBoundaryFieldEvaluator::prepareE(const double& t) {
 					double phase2 = 2 * pi * uniformDistribution();
 
 					double kw = sqrt(kx * kx + ky * ky + kz * kz);
-					double kyz = sqrt(ky * ky + kz * kz);
-					double cosTheta = kx / kw;
-					double sinTheta = kyz / kw;
-					double cosPhi;
-					double sinPhi;
-					if (kk + kj > 0) {
-						cosPhi = ky / kyz;
-						sinPhi = kz / kyz;
-					}
-					else {
+					double kxy = sqrt(kx * kx + ky * ky);
+					double cosTheta = kz / kw;
+					double sinTheta = kxy / kw;
+					double cosPhi = 1.0;
+					double sinPhi = 0.0;
+					if (ki + kj != 0) {
+						cosPhi = kx / kxy;
+						sinPhi = ky / kxy;
+					} else {
 						cosPhi = 1.0;
 						sinPhi = 0.0;
 					}
 
-					double Bturbulent = simulation->evaluateTurbulenceFieldAmplitude(kx, ky, kz);
+					double Bturbulent = simulation->turbulenceFieldCorrection*simulation->evaluateTurbulentB(kx, ky, kz);
 
-					for(int j = 1 + additionalBinNumber; j < ynumberAdded - additionalBinNumber; ++j) {
-						for(int k = 1 + additionalBinNumber; k < znumberAdded - additionalBinNumber; ++k) {
+					for(int j = minJ; j < maxJ; ++j) {
+						for(int k = minK; k < maxK; ++k) {
 							double kmultr = kx * (x - V.x * t) + ky * (simulation->ygrid[j] - V.y * t) + kz * (simulation->zgrid[k] - V.z * t);
+							//double kmultr = kx * (x) + ky * (simulation->middleYgrid[j]) + kz * (simulation->middleZgrid[k]) - 1.0*speed_of_light_correction*kw*t;
 							double localB1 = Bturbulent * sin(kmultr + phase1);
 							double localB2 = Bturbulent * sin(kmultr + phase2);
-							Vector3d localB = Vector3d(-sinTheta * localB1, cosTheta * cosPhi * localB1 - sinTheta * localB2,
-					                           cosTheta * sinPhi * localB1 - cosTheta * localB2);
+							Vector3d localB = Vector3d(- localB1*cosTheta*cosPhi + localB2*sinPhi, - localB1*cosTheta*sinPhi - localB2*cosPhi,
+					                           localB1*sinTheta);
 							//Efield[j][k] = Efield[j][k] - V.vectorMult(localB) / (simulation->speed_of_light_normalized);
 							Efield[j][k] = Efield[j][k] - V.vectorMult(localB);
 						}

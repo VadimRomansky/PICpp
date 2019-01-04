@@ -5662,7 +5662,7 @@ double Simulation::evaluatePressureByTemperature(double& temperature) {
 	return pressure;
 }
 
-void Simulation::initializeKolmogorovSpectrum() {
+/*void Simulation::initializeKolmogorovSpectrum() {
 	turbulenceRandomSeed = rand();
 	int temp[1];
 	temp[0] = turbulenceRandomSeed;
@@ -5775,7 +5775,7 @@ void Simulation::initializeKolmogorovSpectrum() {
 	if ((cartCoord[0] == cartDim[0] - 1) && (boundaryConditionTypeX != PERIODIC)) {
 		rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(
 			turbulenceRandomSeed, minTurbulenceLengthX, maxTurbulenceLengthX, minTurbulenceLengthY, maxTurbulenceLengthY,
-			minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX,
+			minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber] - deltaX/2, deltaX,
 			deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
 	}
 	if ((cartCoord[0] == 0) && (boundaryConditionTypeX == FREE_BOTH || boundaryConditionTypeX == FREE_MIRROR_BOTH)) {
@@ -5784,7 +5784,7 @@ void Simulation::initializeKolmogorovSpectrum() {
 			minTurbulenceLengthZ, maxTurbulenceLengthZ, this, V0, E0, B0, xgrid[1 + additionalBinNumber], deltaX, deltaY, deltaZ,
 			xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
 	}
-}
+}*/
 
 
 void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turbulenceEnergyFraction) {
@@ -5801,7 +5801,7 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 		kzcount = 0;
 	}
 
-	double turbulenceFieldCorrection = 1.0;
+	turbulenceFieldCorrection = 1.0;
 	double turbulenceEnergy = 0;
 
 
@@ -5833,7 +5833,7 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 						sinPhi = 0.0;
 					}
 
-					double Bturbulent = evaluateTurbulentB(ki, kj, kk);
+					double Bturbulent = evaluateTurbulentB(kx, ky, kz);
 
 					turbulenceEnergy = turbulenceEnergy + Bturbulent * Bturbulent;
 				}
@@ -5893,7 +5893,7 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 						sinPhi = 0.0;
 					}
 
-					double Bturbulent = turbulenceFieldCorrection * evaluateTurbulentB(ki, kj, kk);
+					double Bturbulent = turbulenceFieldCorrection * evaluateTurbulentB(kx, ky, kz);
 
 					for (int i = 0; i < maxI; ++i) {
 						for (int j = 0; j < maxJ; ++j) {
@@ -5953,7 +5953,7 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 		interpolateLapentaToBunemanBfield(bunemanBx, bunemanBy, bunemanBz, Bfield);
 		interpolateLapentaToBunemanEfield(bunemanEx, bunemanEy, bunemanEz, Efield);
 	}
-	rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(Simulation::initialRandom, minNumber, maxNumber, minNumber, maxNumber, minNumber, maxNumber, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber] + deltaX/2, deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
+	rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(Simulation::initialRandom, minNumber, maxNumber, minNumber, maxNumber, minNumber, maxNumber, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber] - deltaX/2, deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
 	//leftBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(Simulation::initialRandom, minNumber, maxNumber, minNumber, maxNumber, minNumber, maxNumber, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
 
 
@@ -5967,8 +5967,8 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 	                                                                  1.0);*/
 }
 
-double Simulation::evaluateTurbulentB(int ki, int kj, int kk){
-		double kw = sqrt(1.0*ki*ki + kj*kj + kk*kk);
+double Simulation::evaluateTurbulentB(double ki, double kj, double kk){
+		double kw = sqrt(ki*ki + kj*kj + kk*kk);
 		double Bamplitude;
 		switch(dimensionType){
 			case THREE_D:{
@@ -6225,7 +6225,7 @@ void Simulation::initializeAnisotropic() {
 	if (rank == 0) printf("omegaAlfven plasma/gyro omegaAlfven electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 	fflush(stdout);
 
-	initializeKolmogorovSpectrum();
+	//initializeKolmogorovSpectrum();
 
 	//double omegaGyroHelium = B0.norm() * electron_charge_normalized / (massHelium3 * speed_of_light_normalized);
 	double omegaGyroHelium = B0.norm() * electron_charge_normalized / (massHelium3);
@@ -6301,7 +6301,7 @@ void Simulation::initializeAnisotropicSilicon() {
 	double vthermalProton = sqrt(kBoltzman_normalized * types[1].temperatureX / massProton);
 
 
-	initializeKolmogorovSpectrum();
+	//initializeKolmogorovSpectrum();
 
 	if (rank == 0) {
 		double increment = 0.011 * omegaGyroSilicon;
@@ -6371,7 +6371,7 @@ void Simulation::initializeWeibel() {
 	if (rank == 0) printf("omegaAlfven plasma/gyro omegaAlfven protons = %g\n", omegaPlasmaProton / omegaGyroProton);
 	if (rank == 0) printf("omegaAlfven plasma/gyro omegaAlfven electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 
-	initializeKolmogorovSpectrum();
+	//initializeKolmogorovSpectrum();
 
 	if (rank == 0) printf("evaluating increment\n");
 	if (rank == 0) {
@@ -6461,7 +6461,7 @@ void Simulation::initializeRingWeibel() {
 	if (rank == 0) printf("omegaAlfven plasma/gyro omegaAlfven electrons = %g\n", omegaPlasmaElectron / omegaGyroElectron);
 	fflush(stdout);
 
-	initializeKolmogorovSpectrum();
+	//initializeKolmogorovSpectrum();
 
 	//double pNormal = 20 * massElectron * speed_of_light_normalized;
 	double pNormal = 20 * massElectron;

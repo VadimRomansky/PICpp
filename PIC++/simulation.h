@@ -48,6 +48,7 @@ public:
 	static DimensionType dimensionType;
 
 	static int initialRandom;
+	void prepareEvaluators(double t);
 
 	int rank;
 	int cartCoord[MPI_dim];
@@ -235,6 +236,7 @@ public:
 	double turbulenceAmplitude;
 	double turbulenceFraction;
 	int turbulenceRandomSeed;
+	double turbulenceFieldCorrection;
 
 	int minTurbulenceLengthX, maxTurbulenceLengthX;
 	int minTurbulenceLengthY, maxTurbulenceLengthY;
@@ -722,8 +724,8 @@ public:
 	void initializeWeibel();
 	void initializeRingWeibel();
 	void initializeHomogenouseFlow();
-	void initializeKolmogorovSpectrum();
-	double evaluateTurbulentB(int ki, int kj, int kk);
+	//void initializeKolmogorovSpectrum();
+	double evaluateTurbulentB(double ki, double kj, double kk);
 	void initializeRandomModes(int number, int minNumber, double energyFraction);
 	void initializeFake();
 	void initializeHarris();
