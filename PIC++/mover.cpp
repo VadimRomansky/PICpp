@@ -874,7 +874,12 @@ void Simulation::moveParticleVay(Particle* particle) {
 
 	//correlationBunemanEBfieldsWithoutMaps(particle, bunemanNewEx, bunemanNewEy, bunemanNewEz, bunemanNewBx, bunemanNewBy, bunemanNewBz, E, B);
 
-	correlationBunemanEBfieldsWithoutMaps(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
+	if(boundaryConditionTypeX != PERIODIC && cartCoord[0] == cartDim[0] - 1 && (particle->coordinates.x > xgrid[rightBoundaryXindex - 10])) {
+		E = E0;
+		B = B0;
+	} else {
+		correlationBunemanEBfieldsWithoutMaps(particle, bunemanEx, bunemanEy, bunemanEz, bunemanBx, bunemanBy, bunemanBz, E, B);
+	}
 
 	//stupid
 	Vector3d momentum = particle->getMomentum();

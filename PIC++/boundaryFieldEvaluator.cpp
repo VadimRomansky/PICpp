@@ -228,13 +228,25 @@ void RandomTurbulenceBoundaryFieldEvaluator::prepareB(const double& t) {
 					double Bturbulent = simulation->turbulenceFieldCorrection*simulation->evaluateTurbulentB(kx, ky, kz);
 					for(int j = minJ; j < maxJ; ++j) {
 						for(int k = minK; k < maxK; ++k){
-							double kmultr = kx * (x - 0.5 * deltaX - V.x * t) + ky * (simulation->middleYgrid[j] - V.y * t) + kz * (simulation->middleZgrid[k] - V.z * t);
+							//Bx 
+							double kmultr = kx * (x - V.x * t) + ky * (simulation->middleYgrid[j] - V.y * t) + kz * (simulation->middleZgrid[k] - V.z * t);
 							//double kmultr = kx * (x - 0.5 * deltaX) + ky * (simulation->middleYgrid[j]) + kz * (simulation->middleZgrid[k]) - 1.0*speed_of_light_correction*kw*t;
 							double localB1 = Bturbulent * sin(kmultr + phase1);
 							double localB2 = Bturbulent * sin(kmultr + phase2);
 							Vector3d localB = Vector3d(- localB1*cosTheta*cosPhi + localB2*sinPhi, - localB1*cosTheta*sinPhi - localB2*cosPhi,
 					                           localB1*sinTheta);
-							Bfield[j][k] = Bfield[j][k] + localB;
+							Bfield[j][k].x = Bfield[j][k].x - localB1*cosTheta*cosPhi + localB2*sinPhi;
+
+							//By
+							kmultr = kx * (x - deltaX/2 - V.x * t) + ky * (simulation->ygrid[j] - V.y * t) + kz * (simulation->middleZgrid[k] - V.z * t);
+							localB1 = Bturbulent * sin(kmultr + phase1);
+							localB2 = Bturbulent * sin(kmultr + phase2);
+							Bfield[j][k].y = Bfield[j][k].y - localB1*cosTheta*sinPhi - localB2*cosPhi;
+							//Bz
+							kmultr = kx * (x - deltaX/2 - V.x * t) + ky * (simulation->middleYgrid[j] - V.y * t) + kz * (simulation->zgrid[k] - V.z * t);
+							localB1 = Bturbulent * sin(kmultr + phase1);
+							localB2 = Bturbulent * sin(kmultr + phase2);
+							Bfield[j][k].z = Bfield[j][k].z + localB1*sinTheta;
 						}
 					}
 				}
@@ -302,14 +314,32 @@ void RandomTurbulenceBoundaryFieldEvaluator::prepareE(const double& t) {
 
 					for(int j = minJ; j < maxJ; ++j) {
 						for(int k = minK; k < maxK; ++k) {
-							double kmultr = kx * (x - V.x * t) + ky * (simulation->ygrid[j] - V.y * t) + kz * (simulation->zgrid[k] - V.z * t);
+							double kmultr = kx * (x - deltaX/2 - V.x * t) + ky * (simulation->ygrid[j] - V.y * t) + kz * (simulation->zgrid[k] - V.z * t);
 							//double kmultr = kx * (x) + ky * (simulation->middleYgrid[j]) + kz * (simulation->middleZgrid[k]) - 1.0*speed_of_light_correction*kw*t;
 							double localB1 = Bturbulent * sin(kmultr + phase1);
 							double localB2 = Bturbulent * sin(kmultr + phase2);
 							Vector3d localB = Vector3d(- localB1*cosTheta*cosPhi + localB2*sinPhi, - localB1*cosTheta*sinPhi - localB2*cosPhi,
 					                           localB1*sinTheta);
 							//Efield[j][k] = Efield[j][k] - V.vectorMult(localB) / (simulation->speed_of_light_normalized);
-							Efield[j][k] = Efield[j][k] - V.vectorMult(localB);
+							Efield[j][k].x = Efield[j][k].x - (V.vectorMult(localB)).x;
+
+							kmultr = kx * (x - V.x * t) + ky * (simulation->middleYgrid[j] - V.y * t) + kz * (simulation->zgrid[k] - V.z * t);
+							//double kmultr = kx * (x) + ky * (simulation->middleYgrid[j]) + kz * (simulation->middleZgrid[k]) - 1.0*speed_of_light_correction*kw*t;
+							localB1 = Bturbulent * sin(kmultr + phase1);
+							localB2 = Bturbulent * sin(kmultr + phase2);
+							localB = Vector3d(- localB1*cosTheta*cosPhi + localB2*sinPhi, - localB1*cosTheta*sinPhi - localB2*cosPhi,
+					                           localB1*sinTheta);
+							//Efield[j][k] = Efield[j][k] - V.vectorMult(localB) / (simulation->speed_of_light_normalized);
+							Efield[j][k].y = Efield[j][k].y - (V.vectorMult(localB)).y;
+
+							kmultr = kx * (x - V.x * t) + ky * (simulation->ygrid[j] - V.y * t) + kz * (simulation->middleZgrid[k] - V.z * t);
+							//double kmultr = kx * (x) + ky * (simulation->middleYgrid[j]) + kz * (simulation->middleZgrid[k]) - 1.0*speed_of_light_correction*kw*t;
+							localB1 = Bturbulent * sin(kmultr + phase1);
+							localB2 = Bturbulent * sin(kmultr + phase2);
+							localB = Vector3d(- localB1*cosTheta*cosPhi + localB2*sinPhi, - localB1*cosTheta*sinPhi - localB2*cosPhi,
+					                           localB1*sinTheta);
+							//Efield[j][k] = Efield[j][k] - V.vectorMult(localB) / (simulation->speed_of_light_normalized);
+							Efield[j][k].z = Efield[j][k].z - (V.vectorMult(localB)).z;
 						}
 					}
 				}

@@ -5953,7 +5953,7 @@ void Simulation::initializeRandomModes(int minNumber, int maxNumber, double turb
 		interpolateLapentaToBunemanBfield(bunemanBx, bunemanBy, bunemanBz, Bfield);
 		interpolateLapentaToBunemanEfield(bunemanEx, bunemanEy, bunemanEz, Efield);
 	}
-	rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(Simulation::initialRandom, minNumber, maxNumber, minNumber, maxNumber, minNumber, maxNumber, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber] - deltaX/2, deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
+	rightBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(Simulation::initialRandom, minNumber, maxNumber, minNumber, maxNumber, minNumber, maxNumber, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
 	//leftBoundaryFieldEvaluator = new RandomTurbulenceBoundaryFieldEvaluator(Simulation::initialRandom, minNumber, maxNumber, minNumber, maxNumber, minNumber, maxNumber, this, V0, E0, B0, xgrid[xnumberAdded - 1 - additionalBinNumber], deltaX, deltaY, deltaZ, xnumberGeneral, ynumberGeneral, znumberGeneral, xnumberAdded, ynumberAdded, znumberAdded);
 
 
