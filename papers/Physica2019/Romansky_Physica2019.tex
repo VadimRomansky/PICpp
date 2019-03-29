@@ -32,13 +32,20 @@
 \ead{romanskyvadim@gmail.com}
 
 \begin{abstract}
-	Modern observations of supernova remnants radio in radio ??? with high angle resolution show that there exists type of objects, expanding with velocities close to speed of light. Model of electron acceleration is necessary for reasonable interpretation of this observations. In this paper we present numerical Particle-in-Cell simulation of relativistic shock wave propagating in turbulent medium.
+	Modern observations with high angle resolution of radio emission in supernova remnants show that there exists type of objects, expanding with velocities close to speed of light. Model of electron acceleration is necessary for reasonable interpretation of this observations. In this paper we present numerical Particle-in-Cell simulation of relativistic shock wave propagating in turbulent medium.
 \end{abstract}
 \section{Introduction}
 
 
 \section{Numerical setup}
+We studied evolution of quasi-perpendicular trans-relativistic shock, propagating in turbulent medium, and spectra of accelerated particles. The simulation is two dimensional, with three dimensional velocities and fields. Plasma flows into the simulation region through the right boundary, and reflects on the super-conducting wall at the left boundary. We used following parameters for setup: the initial flow Lorentz factor $\gamma = 1.5$, magnetization $\sigma = \frac{B^2}{4\pi\gamma (n_p m_p + n_e m_e) c^2} = 0.04$, in turbulent case $B^2$ means mean square field. The temperature $T = 5\cdot10^8 \rm{K}$ and proton mass is reduced to $m_p = 25 m_e$. Size of simulation region along x axis is $Lx = 8000\frac{c}{\omega_p}$ and in transverse direction $Ly = 200\frac{c}{\omega_p}$, where $\omega_p$ is plasma frequency $\omega_p = \sqrt{\frac{4\pi q^2 n}{\gamma m_e}}$. This sizes correspond to $80000$ and $2000$ grid points respectively. Also, $2000$ grid points corresponds to approximately $10$ gyroradii of upstream protons.
+We initialize turbulent field via following formula: 
+\begin{equation}
+B_{turb} (x) = \sum_{i=0}^{n}\sum_{j=0}^{n}\sum_{p=1,2}B(k_x(i),k_y(j)) \textbf{e}_{p} sin(k_x(i) + k_y(j) + \phi (i,j,p))
+\end{equation}
+where $B(k_x(i),k_y(j))$ is amplitude of turbulent mode, usually we choose $B \propto k^{-5/3}$ and normalized to fixed fraction of total magnetic energy, $\eta$. $\textbf{e}_{p}$ are vectors corresponding to two different field polarizations and $\phi (i,j,p)$ is randomly generated phase for each mode. Wave vectors $k$ are distributed on uniform grid, $k_x = i \Delta k, k_y = j \Delta k$ and $\Delta k \approx \frac{2 \pi}{10 r_g}$ where $r_g$ is upstream proton gyroradius. And the maximum wavevector $k_{max} \approx \frac{2 \pi}{r_g}$. This equations are evaluated in plasma rest frame and then magnetic field is transformed to the downstream frame.
 
+In this work we used setups with different turbulence scales, fraction of turbulent energy and regular field orientation and studied how this parameters influence on accelerated particles spectra.
 \section{Results}
 
 \section{Conclusions}
