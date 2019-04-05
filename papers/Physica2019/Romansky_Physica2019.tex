@@ -35,7 +35,7 @@
 	Modern observations with high angle resolution of radio emission in supernova remnants show that there exists type of objects, expanding with velocities close to speed of light. Model of electron acceleration is necessary for reasonable interpretation of this observations. In this paper we present numerical Particle-in-Cell simulation of relativistic shock wave propagating in turbulent medium.
 \end{abstract}
 \section{Introduction}
-
+Shock waves in supernova remnants are possible sources of cosmic rays. The process of acceleration on the shock front is nonlinear problem and it's efficiency depends on large number of factors. In this work we studied the trans-relativistic shocks because they are probably the most effective. Energy that particle gains when crosses the shock front increases with shock velocity, but in ultra-relativistic shocks only small fraction of particles can return from downstream and efficiency is relatively low. In trans-relativistis shocks, with Lorentz-factor about 1.5, energy is high and particles still can return from downstream and cross shock many times. Another problem is that due to Lorentz transformation perpendicular component of magnetic field growths and shock wave becomes quasi-perpendicular for majority of fields inclination angles. Quasi-perpendicular shock waves are very weak sources of accelerated particles as shown in . We introduce turbulent field in plasma medium to make shock wave quasi-parallel in some regions and make acceleration process more efficient.
 
 \section{Numerical setup}
 We studied evolution of quasi-perpendicular trans-relativistic shock, propagating in turbulent medium, and spectra of accelerated particles. The simulation is two dimensional, with three dimensional velocities and fields. Plasma flows into the simulation region through the right boundary, and reflects on the super-conducting wall at the left boundary. We used following parameters for setup: the initial flow Lorentz factor $\gamma = 1.5$, magnetization $\sigma = \frac{B^2}{4\pi\gamma (n_p m_p + n_e m_e) c^2} = 0.04$, in turbulent case $B^2$ means mean square field. The temperature $T = 5\cdot10^8 \rm{K}$ and proton mass is reduced to $m_p = 25 m_e$. Size of simulation region along x axis is $Lx = 8000\frac{c}{\omega_p}$ and in transverse direction $Ly = 200\frac{c}{\omega_p}$, where $\omega_p$ is plasma frequency $\omega_p = \sqrt{\frac{4\pi q^2 n}{\gamma m_e}}$. This sizes correspond to $80000$ and $2000$ grid points respectively. Also, $2000$ grid points corresponds to approximately $10$ gyroradii of upstream protons.
@@ -47,6 +47,33 @@ where $B(k_x(i),k_y(j))$ is amplitude of turbulent mode, usually we choose $B \p
 
 In this work we used setups with different turbulence scales, fraction of turbulent energy and regular field orientation and studied how this parameters influence on accelerated particles spectra.
 \section{Results}
+
+
+Simulation shows that structure of shock wave and velocity of it's propagation depends on properties of turbulence in upstream flow. On Figures \ref{regularB}, \ref{turbulentB} one can see relation of magnetic field in shock wave to upstream regular field. In case of strong turbulence in upstream, in downstream also exists strong turbulence. Shock front moves slowly and seems to be coorugated.
+
+\begin{figure}[h!]
+	\centering
+	\begin{minipage}{0.49\textwidth}
+		\centering
+		\includegraphics[width=0.98\textwidth]{fig/regular_field.eps} 
+		\caption{Magnetic field in shock wave without turbulence.}
+		\label{regularB}
+	\end{minipage}\hfill
+	\begin{minipage}{0.49\textwidth}
+		\centering
+		\includegraphics[width=0.98\textwidth]{fig/turbulent_field.eps} 
+		\caption{Magnetic field in shock wave with 90\% turbulence.}
+		\label{turbulentB}
+	\end{minipage}
+\end{figure}
+Spectrum of accelerated electrons shows strong dependence on fraction of turbulent magnetic field, as shown on in Figure \ref{spectrum}. When half of energy is in turbulence, spectrum becomes significantly different from spectrum in regular field. Fraction of accelerated electrons highly increases with growth of turbulent energy fraction. 
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.8\textwidth]{fig/spectrum.eps} 
+	\caption{Distribution of electrons in the relativistic shock wave with different turbulence fractions.}
+	\label{spectrum}
+\end{figure} 
 
 \section{Conclusions}
 
@@ -68,5 +95,9 @@ The numerical results presented here were obtained using computational resources
 	\bibitem{Pelletier2017} Pelletier G, Bykov A M, Ellison D C and Lemoine M 2017 \textit{Space Science Reviews} \textbf{207} Issue 1-4, pp. 319-360
 	\bibitem{Sironi2011} Sironi L and Spitkovsky A 2011 \textit{ApJ} \textbf{741} Issue 1, 39
 	\bibitem{Iwamoto2017} Iwamoto M, Amano T, Hoshino M and Matsumoto Y 2017 \textit{ApJ} \textbf{840} Issue 1 article id. 52, 14 pp.
+	\bibitem{Margutti} Margutti R et al. 2014 \textit{ApJ}. \textbf{797} Issue 2, article id. 107 8 pp.
+	\bibitem{Buneman} Buneman O 1993 \textit{Computer Space Plasma Physics} Terra Scientific Tokyo  67 p.
+	\bibitem{Crumley} Crumley P, Caprioli D, Markoff S and Spitkovsky A \textit{MNRAS} \textbf{485} Issue 4, pp. 5105-5119
+	
 \end{thebibliography}
 \end{document}
