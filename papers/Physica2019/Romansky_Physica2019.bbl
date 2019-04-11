@@ -1,0 +1,96 @@
+\providecommand{\newblock}{}
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{{\tt #1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+% Bibliography created with iopart-num v2.0
+% /biblio/bibtex/contrib/iopart-num
+
+\bibitem{GS64}
+{Ginzburg} V~L and {Syrovatskii} S~I 1964 {\em {The Origin of Cosmic Rays, New
+  York: Macmillan}\/}
+
+\bibitem{Helder12}
+{Helder} E~A, {Vink} J, {Bykov} A~M, {Ohira} Y, {Raymond} J~C and {Terrier} R
+  2012 {\em \ssr\/} {\bf 173} 369--431 (\textit{Preprint} \eprint{1206.1593})
+
+\bibitem{2010Natur.463..513S}
+{Soderberg} A~M, {Chakraborti} S, {Pignata} G, {Chevalier} R~A, {Chandra} P,
+  {Ray} A, {Wieringa} M~H, {Copete} A, {Chaplin} V, {Connaughton} V,
+  {Barthelmy} S~D, {Bietenholz} M~F, {Chugai} N, {Stritzinger} M~D, {Hamuy} M,
+  {Fransson} C, {Fox} O, {Levesque} E~M, {Grindlay} J~E, {Challis} P, {Foley}
+  R~J, {Kirshner} R~P, {Milne} P~A and {Torres} M~A~P 2010 {\em \nat\/} {\bf
+  463} 513--515 (\textit{Preprint} \eprint{0908.2817})
+
+\bibitem{Margutti2014}
+{Margutti} R, {Milisavljevic} D, {Soderberg} A~M, {Guidorzi} C, {Morsony} B~J,
+  {Sanders} N, {Chakraborti} S, {Ray} A, {Kamble} A, {Drout} M, {Parrent} J,
+  {Zauderer} A and {Chomiuk} L 2014 {\em \apj\/} {\bf 797} 107
+  (\textit{Preprint} \eprint{1402.6344})
+
+\bibitem{2016ApJ...832..108M}
+{Modjaz} M, {Liu} Y~Q, {Bianco} F~B and {Graur} O 2016 {\em \apj\/} {\bf 832}
+  108 (\textit{Preprint} \eprint{1509.07124})
+
+\bibitem{1998ApJ...499..810C}
+{Chevalier} R~A 1998 {\em \apj\/} {\bf 499} 810--819
+
+\bibitem{2007PhRvD..76h3009W}
+{Wang} X~Y, {Razzaque} S, {M{\'e}sz{\'a}ros} P and {Dai} Z~G 2007 {\em \prd\/}
+  {\bf 76} 083009 (\textit{Preprint} \eprint{0705.0027})
+
+\bibitem{2011NatCo...2E.175C}
+{Chakraborti} S, {Ray} A, {Soderberg} A~M, {Loeb} A and {Chandra} P 2011 {\em
+  Nature Communications\/} {\bf 2} 175 (\textit{Preprint} \eprint{1012.0850})
+
+\bibitem{2008ApJ...673..928B}
+{Budnik} R, {Katz} B, {MacFadyen} A and {Waxman} E 2008 {\em \apj\/} {\bf 673}
+  928--933 (\textit{Preprint} \eprint{0705.0041})
+
+\bibitem{2013ApJ...776...46E}
+{Ellison} D~C, {Warren} D~C and {Bykov} A~M 2013 {\em \apj\/} {\bf 776} 46
+  (\textit{Preprint} \eprint{1308.5114})
+
+\bibitem{BEMO18}
+{Bykov} A~M, {Ellison} D~C, {Marcowith} A and {Osipov} S~M 2018 {\em \ssr\/}
+  {\bf 214} 41 (\textit{Preprint} \eprint{1801.08890})
+
+\bibitem{Bell78}
+{Bell} A~R 1978 {\em \mnras\/} {\bf 182} 147--156
+
+\bibitem{Blandford78}
+{Blandford} R~D and {Ostriker} J~P 1978 {\em \apjl\/} {\bf 221} L29--L32
+
+\bibitem{Sironi2011}
+{Sironi} L and {Spitkovsky} A 2011 {\em \apj\/} {\bf 726} 75 (\textit{Preprint}
+  \eprint{1009.0024})
+
+\bibitem{Romansky18}
+{Romansky} V~I, {Bykov} A~M and {Osipov} S~M 2018 {\em Journal of Physics
+  Conference Series\/} ({\em Journal of Physics Conference Series\/} vol 1038)
+  p 012022
+
+\bibitem{Crumley2019}
+{Crumley} P, {Caprioli} D, {Markoff} S and {Spitkovsky} A 2019 {\em \mnras\/}
+  {\bf 485} 5105--5119 (\textit{Preprint} \eprint{1809.10809})
+
+\bibitem{Buneman93}
+{Buneman} O, {Nishikawa} K~I and {Neubert} T 1993 {\em Plasma Physics and
+  Controlled Nuclear Fusion (ITC-4)\/} ed {Guyenne} H~T~D and {Hunt} J~J
+
+\bibitem{Spitkovsky2005}
+{Spitkovsky} A 2005 {\em Astrophysical Sources of High Energy Particles and
+  Radiation\/} ({\em American Institute of Physics Conference Series\/} vol
+  801) ed {Bulik} T, {Rudak} B and {Madejski} G pp 345--350 (\textit{Preprint}
+  \eprint{astro-ph/0603211})
+
+\bibitem{Matthaeus1990}
+{Matthaeus} W~H, {Goldstein} M~L and {Roberts} D~A 1990 {\em \jgr\/} {\bf 95}
+  20673--20683
+
+\bibitem{2016ApJ...827...44L}
+{Lemoine} M, {Ramos} O and {Gremillet} L 2016 {\em \apj\/} {\bf 827} 44
+  (\textit{Preprint} \eprint{1607.00768})
+
+\end{thebibliography}

@@ -21,88 +21,109 @@
 %\newcommand{\ascm}[1]{{\color{green}\;AS: #1}}
 %------------------------------------------------------
 
+\def\apj{ApJ}
+\def\mnras{MNRAS}
+\def\nat{Nat}
+\def\prd{Phys. Rev. D}
+\def\araa{ARA\&A}                % "Ann. Rev. Astron. Astrophys."
+\def\aap{A\&A}                   % "Astron. Astrophys."
+\def\aaps{A\&AS}                 % "Astron. Astrophys. Suppl. Ser."
+\def\aj{AJ}                      % "Astron. J."
+\def\apjs{ApJS}                  % "Astrophys. J. Suppl. Ser."
+\def\pasp{PASP}                  % "Publ. Astron. Soc. Pac."
+\def\apjl{ApJ}                   % letter at ApJ
+\def\pasj{PASJ}
+\def\apss{Astroph. Space Sci.}
+\def\aplett{Astroph. Lett}
+\def\ssr{Space Sci. Rev.}
+\def\aapr{Astron. Astroph. Reviews}
+\def\physrep{Phys. Reports}
+\def\memsai{Mem. Societa Astronom. Italiana}
+\def\jgr{JGR}
+
+
 \begin{document}
 \title{Modelling of electron acceleration in relativistic supernovae}
 
 \author{V I Romansky$^{1}$, A M Bykov$^{1,2}$ and S M Osipov$^1$}
 
 \address{$^1$ Ioffe Institute, 26 Politekhnicheskaya st., St. Petersburg 194021, Russia}
-\address{$^2$ Peter the Great St.~Petersburg Polytechnic University, 29 Politekhnicheskaya st., St. Petersburg 195251, Russia}
+\address{$^2$ Peter the Great St. Petersburg Polytechnic University, 29 Politekhnicheskaya st., St. Petersburg 195251, Russia}
 
 \ead{romanskyvadim@gmail.com}
 
 \begin{abstract}
-	Modern observations with high angle resolution of radio emission in supernova remnants show that there exists type of objects, expanding with velocities close to speed of light \cite{Margutti}. Model of electron acceleration is necessary for reasonable interpretation of this observations. In this paper we present numerical Particle-in-Cell simulation of relativistic shock wave propagating in turbulent medium.
+Radio and X-ray observations revealed a rare but a very interesting class of supernovae (SNe) with a sizeable fraction of the kinetic  energy of ejecta moving with a trans-relativistic speed.  These relativistic SNe are comprising a population of the objects intermediate between the numerous core collapse SNe expanding with non-relativistic velocities and the gamma-ray bursts with highly relativistic ejecta.  An interpretation of the observed non-thermal emission from relativistic SNe requires a model of electron acceleration in trans-relativistic shocks. In this paper we present numerical Particle-in-Cell (PIC) simulation of electron spectra in trans-relativistic shock waves propagating in clumped stellar winds of the SN progenitors. It is shown here that the presence of background magnetic fluctuations has a drastical effect on the electron acceleration by the trans-relativistic shocks propagating transverse to the regular magnetic field in the clumped wind of a massive progenitor star. 
 \end{abstract}
 \section{Introduction}
-Shock waves in supernova remnants are possible sources of cosmic rays \cite{Bell1978}, \cite{Blandford1978}. The process of acceleration on the shock front is nonlinear problem and it's efficiency depends on large number of factors. In this work we studied the trans-relativistic shocks because they are probably the most effective. Energy that particle gains when crosses the shock front increases with shock velocity, but in ultra-relativistic shocks only small fraction of particles can return from downstream and efficiency is relatively low. In trans-relativistis shocks, with Lorentz-factor about 1.5, energy is high and particles still can return from downstream and cross shock many times. Another problem is that due to Lorentz transformation perpendicular component of magnetic field growths and shock wave becomes quasi-perpendicular for majority of fields inclination angles. Quasi-perpendicular shock waves are very weak sources of accelerated particles as shown in . We introduce turbulent field in plasma medium to make shock wave quasi-parallel in some regions and make acceleration process more efficient.
+
+
+Shock waves of young galactic supernova remnants (SNRs) are known for long time as the efficient electron accelerators producing synchrotron radiation observed from the radio to X-rays \cite{GS64,Helder12}. While most of the SNe both thermonuclear and core collapsed are ejecting most of their kinetic energy in the shell moving with typical speed below 10,000 km/s, there are a few SNe 
+where apparently a sizeable part of the kinetic energy was in the form of trans-relativistic outflow with the 4-speed $\gamma \beta \sim$ 1.5. Extragalactic supernova SN2009bb \cite{2010Natur.463..513S}  apparently representing the class of relativistic SNe. These SNe are of especial interest since they may provide a connection between the bulk population of supernovae and the gamma-ray bursts and shed a light on the nature of the central engine producing the relativistic outflows \cite{Margutti2014,2016ApJ...832..108M}. To model the observed non-thermal radiation from SNe  \cite{1998ApJ...499..810C} the knowledge 
+of relativistic electrons distribution is needed.   
+
+
+Moreover, the relativistic SNe we proposed as the possible sources of very high energy CRs \cite{2007PhRvD..76h3009W,2011NatCo...2E.175C,2008ApJ...673..928B,2013ApJ...776...46E,BEMO18}. Diffusive shock acceleration \cite{Bell78}, \cite{Blandford78} in SNRs is considered as the most likely mechanism of cosmic ray production in a wide range of energies below EeV \cite{BEMO18}. The process of acceleration at the shock front is nonlinear problem and it's efficiency depends on a number of factors. In this work we studied the trans-relativistic shocks because they are probably the most effective particle accelerators. Energy that particle gains when crosses the shock front increases with shock velocity, but in ultra-relativistic shocks only small fraction of particles can return from downstream and efficiency is relatively low. In trans-relativistic shocks, with Lorentz-factor about 1.5, energy, gained in every crossing of the the front, is large but the accelerated particles  can still return from the downstream and they cross shock a few times. This was demonstrated in the case of quasi-parallel trans-relativistic shocks in Monte Carlo simulations \cite{2013ApJ...776...46E,BEMO18}. However, the regular magnetic fields in the winds of rotating stars at the distances of interest are usually dominated by the azimuthal field component. Therefore the SN shock waves propagating through the progenitor star winds are expected to be quasi-perpendicular.  The quasi-perpendicular shock waves are found to be weak sources of accelerated particles in both  relativistic PIC simulations \cite{Sironi2011} as well as in the trans-relativistic cases \cite{Romansky18,Crumley2019}. In this paper we study the effect of the presence of  background magnetic field fluctuations in the clumped stellar wind on the electron acceleration by trans-relativistic shock propagating transverse to the regular magnetic field.   
 
 \section{Numerical setup}
-We studied evolution of quasi-perpendicular trans-relativistic shock, propagating in turbulent medium, and spectra of accelerated particles. The simulation is two dimensional, with three dimensional velocities and fields. For numerical simulation we use Tristan-mp code, working with explicit scheme, developed bu Buneman \cite{Buneman}, and improved by Spitkovsky and others \cite{Sironi2011}.
+We simulated a structure of a quasi-perpendicular trans-relativistic shock propagating in a clumped (turbulent) wind and the particle distribution function. The simulation is two dimensional with three dimensional velocities and fields. For numerical simulation we used Tristan-mp code with the explicit numerical scheme developed by Buneman \cite{Buneman93} and  Spitkovsky\cite{Spitkovsky2005}.
 
-Shock wave is initialized by plasma flowing into the simulation region through the right boundary and reflecting on the super-conducting wall at the left boundary. We used following parameters for setup: the initial flow Lorentz factor $\gamma = 1.5$, magnetization $\sigma = \frac{B^2}{4\pi\gamma (n_p m_p + n_e m_e) c^2} = 0.04$, in turbulent case $B^2$ means mean square field. The temperature $T = 5\cdot10^8 \rm{K}$ and proton mass is reduced to $m_p = 25 m_e$. Size of simulation region along x axis is $Lx = 8000\frac{c}{\omega_p}$ and in transverse direction $Ly = 200\frac{c}{\omega_p}$, where $\omega_p$ is plasma frequency $\omega_p = \sqrt{\frac{4\pi q^2 n}{\gamma m_e}}$. This sizes correspond to $80000$ and $2000$ grid points respectively. Also, $2000$ grid points corresponds to approximately $10$ gyroradii of upstream protons.
+Shock wave is initialized by plasma flowing into the simulation region through the right boundary and reflecting on the super-conducting wall at the left boundary. We used following parameters for setup: the initial flow Lorentz factor $\gamma = 1.5$, magnetization $\sigma = \frac{B^2}{4\pi\gamma (n_p m_p + n_e m_e) c^2} = 0.04$, in turbulent case $B^2$ means mean square field. The dimensionless thermal energy $\Delta \gamma = \frac{k T}{m_p c^2}$ is equal $10^{-4}$ and proton mass is reduced to $m_p = 25 m_e$. Size of simulation region along x axis is $L_x = 8000\frac{c}{\omega_p}$ and in transverse direction $L_y = 200\frac{c}{\omega_p}$, where $\omega_p$ is plasma frequency $\omega_p = \sqrt{\frac{4\pi q^2 n}{\gamma m_e}}$. This sizes correspond to $80000$ and $2000$ grid points respectively. Also, $2000$ grid points corresponds to approximately $10$ gyroradius of upstream protons.
 We initialize turbulent field via following formula: 
 \begin{equation}
 B_{turb} (x,y) = \sum_{i=0}^{n}\sum_{j=0}^{n}\sum_{p=1,2}B(k_x(i),k_y(j)) \textbf{e}_{p} sin(k_x(i) x + k_y(j) y  + \phi (i,j,p))
 \end{equation}
-where $B(k_x(i),k_y(j))$ is amplitude of turbulent mode, usually we choose $B \propto k^{-5/3}$ and normalized to fixed fraction of total magnetic energy, $\eta$. $\textbf{e}_{p}$ are vectors corresponding to two different field polarizations and $\phi (i,j,p)$ is randomly generated phase for each mode. Wave vectors $k$ are distributed on uniform grid, $k_x = i \Delta k, k_y = j \Delta k$ and $\Delta k \approx \frac{2 \pi}{10 r_g}$ where $r_g$ is upstream proton gyroradius. And the maximum wave vector $k_{max} \approx \frac{2 \pi}{r_g}$. This equations are evaluated in plasma rest frame and then magnetic field is transformed to the downstream frame.
+where $B(k_x(i),k_y(j))$ is amplitude of turbulent mode, usually we choose $B \propto k^{-11/6}$ to imitate Kolmogorov's spectrum, where $B^2 k^2 \propto k^{-5/3}$ and normalized to fixed fraction of total magnetic energy, $\eta$. $\textbf{e}_{p}$ are vectors perpendicular to wave vector $\textbf{k}$ corresponding to two different field polarizations and $\phi (i,j,p)$ is randomly generated phase for each mode. Wave vectors $\textbf{k}$ are distributed on uniform grid, $k_x = i \Delta k, k_y = j \Delta k$ and $\Delta k \approx \frac{2 \pi}{10 r_g}$ where $r_g$ is upstream proton gyroradius. And the maximum wave vector $k_{max} \approx \frac{2 \pi}{r_g}$. This equations are evaluated in plasma rest frame and then magnetic field is transformed to the downstream frame. Regular magnetic field is perpendicular to the plane of simulation. Such turbulent field structure is similar to so-called 2d-turbulence which is observed in solar wind\cite{Matthaeus1990}. Density and velocity of plasma flow is uniform and electric field is set to compensate Lorentz force in every point.
 
-In this work we used setups with different turbulence scales, fraction of turbulent energy  and studied how this parameters influence on accelerated particles spectra.
+In this work we used setups with different magnetic turbulence scales and also vary the partial fraction of the energy density in the magnetic fluctuations to study how these parameters influence on the accelerated particles spectra.
+
 \section{Results}
-
-
-Simulation shows that structure of shock wave and velocity of it's propagation depends on properties of turbulence in upstream flow. On Figures \ref{regularB}, \ref{turbulentB} one can see relation of magnetic field in shock wave to upstream regular field. In case of strong turbulence in upstream, in downstream also exists strong turbulence. Shock front moves slowly and seems to be corrugated.
+Simulation shows that structure of shock wave and velocity of it's propagation depends on properties of turbulence in upstream flow. In Figures \ref{regularB}, \ref{turbulentB} one can see the relation of magnetic field in shock wave to upstream regular field. In the case of strong turbulence in upstream, in downstream also exists strong turbulence. Shock front moves more slowly and seems to be corrugated (cf \cite{2016ApJ...827...44L}).
 
 \begin{figure}[h!]
-	\centering
-	\begin{minipage}{0.49\textwidth}
 		\centering
-		\includegraphics[width=0.98\textwidth]{fig/regular_field.eps} 
+		\includegraphics[width=0.7\textwidth]{fig/regular_field.eps} 
 		\caption{Magnetic field in shock wave without turbulence.}
 		\label{regularB}
-	\end{minipage}\hfill
-	\begin{minipage}{0.49\textwidth}
+\end{figure}
+\begin{figure}[h!]
 		\centering
-		\includegraphics[width=0.98\textwidth]{fig/turbulent_field.eps} 
+		\includegraphics[width=0.7\textwidth]{fig/turbulent_field.eps} 
 		\caption{Magnetic field in shock wave with 90\% turbulence.}
 		\label{turbulentB}
-	\end{minipage}
 \end{figure}
-Spectrum of accelerated electrons shows strong dependence on fraction of turbulent magnetic field, as shown on in Figure \ref{spectrum}. When half of energy is in turbulence, spectrum becomes significantly different from spectrum in regular field. Fraction of accelerated electrons highly increases with growth of turbulent energy fraction. 
-
+Spectrum of accelerated electrons shows strong dependence on the fraction of turbulent magnetic field energy density in the wind, as shown in Figure \ref{spectrum}. When half of the magnetic field energy density is in magnetic turbulence the particle spectrum becomes significantly different from the spectrum in regular field. Fraction of accelerated electrons highly increases with growth of turbulent energy fraction. The quantity showing how much upstream flow kinetic energy goes to the accelerated electrons $\epsilon_e$ is defined as in paper \cite{Crumley2019}
+\begin{equation}
+\epsilon_e = \frac{\int_{p_{inj}}^{\infty}E(p)F(p)dp}{\int_{0}^{\infty}E(p)F(p)dp }\frac{m_e(\langle \gamma \rangle - 1)}{m_p (\gamma_0 - 1)}
+\end{equation}
+where $F(p)$ is electrons distribution function, $E(p)$ energy of particle with momentum $p$ and $\langle \gamma \rangle$ is average Lorentz-factor. $p_{inj}$ is injection momentum, showing that particle is non-thermal and we consider it equal to $2 \gamma_0 \beta_0 m_p c$. For simulation with the strongest turbulence, $\epsilon_e$ is equal to $2\cdot10^{-3}$, and it is several times more then for quasi-parallel shock wave.
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.8\textwidth]{fig/spectrum.eps} 
+	\includegraphics[width=0.7\textwidth]{fig/spectrum.eps} 
 	\caption{Distribution of electrons in the relativistic shock wave with different turbulence fractions.}
 	\label{spectrum}
 \end{figure} 
 
-Also, spectrum of accelerated electrons depends on scale of turbulence. We tested setups with different maximum wave length of turbulent modes, corresponding to minimum wave vector $k_{min} = 2 \pi / 5 r_g$, $2 \pi / 10 r_g$ and $ 2 \pi /20 r_g$. For smaller scales acceleration efficiency is less then for larger, but this dependence is weak and with further growths of scales, spectrum changes insignificantly.
+Also, the spectrum of accelerated electrons depends on the scales of magnetic turbulence. We tested setups with different maximum wave length of the magnetic turbulent modes, corresponding to minimum wave vector $k_{min} = 2 \pi / 5 r_g$, $2 \pi / 10 r_g$ and $ 2 \pi /20 r_g$. As it is shown in Figure \ref{spectrum_length} the acceleration efficiency is somewhat higher for larger scales of fluctuations, but this dependence is weak and the spectrum changes not very significantly.
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.8\textwidth]{fig/spectrum_length.eps} 
+	\includegraphics[width=0.7\textwidth]{fig/spectrum_length.eps} 
 	\caption{Distribution of electrons in the relativistic shock wave with different turbulence length.}
 	\label{spectrum_length}
 \end{figure} 
 
 \section{Conclusions}
+In this paper we presented results of particle-in-cell simulation of electron acceleration in trans-relativistic shock propagating in a clumped  wind of a massive star. Simulations show that the presence  of background  magnetic turbulence in the clumped wind has strong impact on particle acceleration and the acceleration is efficient for high enough level of the magnetic turbulence. The electron acceleration is highly suppressed in the case of  trans-relativistic shock propagating quasi-perpendicular to a regular magnetic field in the wind without the background magnetic turbulence. However, with the PIC simulations we demonstrated here that the presence of magnetic fluctuations in the background wind results in efficient electron acceleration by the quasi-perpendicular trans-relativistic shocks. We found that the scales and amplitudes of the magnetic turbulent field are important for this process. Further PIC simulations with a wide dynamical range will allow to study the effect of turbulent wind on particle acceleration in detail.
 
 \ack
+Authors acknowledges support from RSF grant 16-12-10225.
 
-The numerical results presented here were obtained using computational resources of Peter the Great Saint-Petersburg Polytechnic University Supercomputing Center (http://www.scc.spbstu.ru). 
+
+%\newpage
 
 \section*{References}
-\begin{thebibliography}{20}
-	\bibitem{Bell1978} Bell A R 1978 \textit{MNRAS} \textbf{182} 147
-	\bibitem{Blandford1978} Blandford R D and Ostriker J P 1978 \textit{ApJ} \textbf{221} L29 
-	\bibitem{Buneman} Buneman O 1993 \textit{Computer Space Plasma Physics} Terra Scientific Tokyo  67 p.
-	\bibitem{Bykov2014} Bykov A M, Ellison D C, Osipov S M and Vladimirov A E 2014 \textit{ApJ} \textbf{789} Issue 2, 137
-	\bibitem{Crumley} Crumley P, Caprioli D, Markoff S and Spitkovsky A 2018 \textit{MNRAS} \textbf{485} Issue 4, pp. 5105-5119
-	\bibitem{Margutti} Margutti R et al. 2014 \textit{ApJ}. \textbf{797} Issue 2, article id. 107 8 pp.
-	\bibitem{Romansky} Romansky V I, Bykov A M and Osipov S M 2018 \textit{Journal of Physics: CS} \textbf{1038} Issue 1, article id. 012022
-	\bibitem{Sironi2011} Sironi L and Spitkovsky A 2011 \textit{ApJ} \textbf{726} Issue 2, 75
-	\bibitem{Spitkovsky} Spitkovsky A 2005 \textit{AIP Conf. Ser.} \textbf{801},  pp 345-350
-	
-\end{thebibliography}
+
+\bibliographystyle{iopart-num}
+\bibliography{bibliogr}
 \end{document}
