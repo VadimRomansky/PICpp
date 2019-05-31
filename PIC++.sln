@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fourier", "Fourier\Fourier.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FieldGenerator", "FieldGenerator\FieldGenerator.vcxproj", "{967E148D-7F22-4943-930E-29EB61F77840}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Radiation", "Radiation\Radiation.vcxproj", "{83ABFAC6-98BE-4F17-9053-DD67FBD20649}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -105,6 +107,16 @@ Global
 		{967E148D-7F22-4943-930E-29EB61F77840}.Release|Win32.ActiveCfg = Release|Win32
 		{967E148D-7F22-4943-930E-29EB61F77840}.Release|Win32.Build.0 = Release|Win32
 		{967E148D-7F22-4943-930E-29EB61F77840}.Release|x64.ActiveCfg = Release|Win32
+		{83ABFAC6-98BE-4F17-9053-DD67FBD20649}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{83ABFAC6-98BE-4F17-9053-DD67FBD20649}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{83ABFAC6-98BE-4F17-9053-DD67FBD20649}.Debug|Win32.ActiveCfg = Debug|Win32
+		{83ABFAC6-98BE-4F17-9053-DD67FBD20649}.Debug|Win32.Build.0 = Debug|Win32
+		{83ABFAC6-98BE-4F17-9053-DD67FBD20649}.Debug|x64.ActiveCfg = Debug|Win32
+		{83ABFAC6-98BE-4F17-9053-DD67FBD20649}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{83ABFAC6-98BE-4F17-9053-DD67FBD20649}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{83ABFAC6-98BE-4F17-9053-DD67FBD20649}.Release|Win32.ActiveCfg = Release|Win32
+		{83ABFAC6-98BE-4F17-9053-DD67FBD20649}.Release|Win32.Build.0 = Release|Win32
+		{83ABFAC6-98BE-4F17-9053-DD67FBD20649}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
