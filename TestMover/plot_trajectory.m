@@ -23,3 +23,10 @@ title ('tv');
 xlabel ('t');
 ylabel ('v');
 grid ;
+
+figure(4);
+plot (trajectory(1:Nt,8),1:Nt, 'red');
+title ('x shift t');
+xlabel ('x');
+ylabel ('t');
+grid ;

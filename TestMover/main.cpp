@@ -7,11 +7,12 @@ const double c = 2.99792458E10;
 const double m = 0.910938291E-27;
 const double q = 4.803529695E-10;
 const double pi = 4*atan(1.0);
-const double gamma = 10;
+const double gamma = 100;
 const double Bmeansqr = 1.0;
 const double turbulenceFraction = 0.9;
 const int randomParameter = 1024;
 double turbulenceLength;
+int randomSeed;
 
 double uniformDistribution() {
 	return (rand() % randomParameter + 0.5) / randomParameter;
@@ -33,8 +34,7 @@ double evaluateTurbulentB(const double& kx, const double& ky, const double& kz){
 }
 
 void getBfield(const double& x, const double& y, const double& z, double& Bx, double& By, double& Bz, double& B0x, double& B0y, double& B0z){
-	int randomseed = 239;
-	srand(randomseed);
+	srand(randomSeed);
 	int Nx = 4;
 	int Ny = 4;
 	double dk = 2*pi/turbulenceLength;
@@ -160,6 +160,8 @@ int main(int argc, char** argv){
 	B0z = Bmeansqr*sqrt(1.0 - turbulenceFraction);
 
 	double v = c*sqrt(1.0 - 1.0/(gamma*gamma));
+	double gammaFrame = 1.5;
+	double vframe = c*sqrt(1.0 -1.0/(gammaFrame*gammaFrame));
 	//double Bmean = sqrt((B0x*B0x + B0y*B0y + B0z*B0z)/(1.0 - turbulenceFraction));
 	double omega = Bmeansqr*q/(gamma*m*c);
 	double rg = v/omega;
@@ -171,6 +173,9 @@ int main(int argc, char** argv){
 	srand(time(NULL));
 	double theta = pi*uniformDistribution();
 	double phi = 2*pi*uniformDistribution();
+	randomSeed = rand();
+
+	
 
 	vx = v*cos(theta);
 	vy = v*sin(theta)*cos(phi);
@@ -184,6 +189,7 @@ int main(int argc, char** argv){
 	fprintf(information, "omega = %g\n", omega);
 	fprintf(information, "dt = %g\n", dt);
 	fprintf(information, "lambda/rg = %g\n", turbulenceLength/rg);
+	fprintf(information, "randomSeed = %d\n", randomSeed);
 	fclose(information);
 
 	FILE* out = fopen("trajectory.dat","w");
@@ -195,7 +201,8 @@ int main(int argc, char** argv){
 		}
 		v = c*sqrt(1.0 - 1.0/(gamma*gamma));
 		if(i%writeParameter == 0){
-			fprintf(out, "%g %g %g %g %g %g %g\n", x, y, z, vx, vy, vz, v);
+			double xshift = (x - vframe*i*dt)*gammaFrame;
+			fprintf(out, "%g %g %g %g %g %g %g %g\n", x, y, z, vx, vy, vz, v, xshift);
 		}
 		getBfield(x, y, z, Bx, By, Bz, B0x, B0y, B0z);
 		move(x, y, z, vx, vy, vz, Bx, By, Bz, dt);
@@ -203,11 +210,11 @@ int main(int argc, char** argv){
 
 	fclose(out);
 
-	FILE* field = fopen("field.dat","w");
+	/*FILE* field = fopen("field.dat","w");
 
 	double dx = rg/10;
 	int Nx = 500;
-	int Ny =500;
+	int Ny = 500;
 	for(int i = 0; i < Nx; ++i){
 		for(int j = 0; j< Ny; ++j){
 			x = i*dx;
@@ -218,7 +225,7 @@ int main(int argc, char** argv){
 		}
 	}
 
-	fclose(field);
+	fclose(field);*/
 
 	return 0;
 }
