@@ -35,8 +35,8 @@ double evaluateTurbulentB(const double& kx, const double& ky, const double& kz){
 
 void getBfield(const double& x, const double& y, const double& z, double& Bx, double& By, double& Bz, double& B0x, double& B0y, double& B0z){
 	srand(randomSeed);
-	int Nx = 4;
-	int Ny = 4;
+	int Nx = 40;
+	int Ny = 40;
 	double dk = 2*pi/turbulenceLength;
 	Bx = B0x;
 	By = B0y;
@@ -45,7 +45,7 @@ void getBfield(const double& x, const double& y, const double& z, double& Bx, do
 	double Bsqr = 0;
 	double turbulentFieldCorrection = 1.0;
 	for(int i = 0; i <= Nx; ++i){
-		for(int j = 0; j <= Nx; ++j){
+		for(int j = 0; j <= Ny; ++j){
 			if((i + j) > 0){
 				double kx = i*dk;
 				double ky = j*dk;
