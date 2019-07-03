@@ -35,8 +35,8 @@ double evaluateTurbulentB(const double& kx, const double& ky, const double& kz){
 
 void getBfield(const double& x, const double& y, const double& z, double& Bx, double& By, double& Bz, double& B0x, double& B0y, double& B0z){
 	srand(randomSeed);
-	int Nx = 40;
-	int Ny = 40;
+	int Nx = 4;
+	int Ny = 4;
 	double dk = 2*pi/turbulenceLength;
 	Bx = B0x;
 	By = B0y;
@@ -146,8 +146,10 @@ void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, c
 }
 
 int main(int argc, char** argv){
-	const int Nt = 1000000;
+	const int Nt = 10000;
+	const int chch = 1000;
 	double dt;
+	
 
 
 	double vx, vy, vz;
@@ -169,20 +171,13 @@ int main(int argc, char** argv){
 
 	turbulenceLength = 10*rg;
 
-	
-	srand(time(NULL));
-	double theta = pi*uniformDistribution();
-	double phi = 2*pi*uniformDistribution();
-	randomSeed = rand();
+	double* meanSqrX = new double[Nt];
+
+	for(int i = 0; i < Nt; ++i) {
+		meanSqrX[i] = 0;
+	}
 
 	
-
-	vx = v*cos(theta);
-	vy = v*sin(theta)*cos(phi);
-	vz = v*sin(theta)*sin(phi);
-	x = 0;
-	y = 0;
-	z = 0;
 
 	FILE* information = fopen("information.dat","w");
 	fprintf(information, "rg = %g\n", rg);
@@ -192,23 +187,53 @@ int main(int argc, char** argv){
 	fprintf(information, "randomSeed = %d\n", randomSeed);
 	fclose(information);
 
-	FILE* out = fopen("trajectory.dat","w");
-	int writeParameter = 1;
+	//FILE* out = fopen("trajectory.dat","w");
+	int writeParameter = 10;
 
-	for(int i = 0; i < Nt; ++i){
-		if(i%1000 == 0){
-			printf("interation %d\n", i);
+	srand(time(NULL));
+	randomSeed = rand();
+
+	FILE* outTrajectory = fopen("trajectories.dat", "w");
+	for(int pcount = 0; pcount < chch; ++pcount){
+		printf("particle %d\n", pcount);
+		srand(time(NULL));
+		double theta = pi*uniformDistribution();
+		double phi = 2*pi*uniformDistribution();
+		printf("theta = %g, phi = %g\n", theta, phi);
+
+	
+
+		vx = v*cos(theta);
+		vy = v*sin(theta)*cos(phi);
+		vz = v*sin(theta)*sin(phi);
+		x = 0;
+		y = 0;
+		z = 0;
+		for(int i = 0; i < Nt; ++i){
+			meanSqrX[i] += x*x/chch;
+			//if(i%1000 == 0){
+			//	printf("interation %d\n", i);
+			//}
+			v = c*sqrt(1.0 - 1.0/(gamma*gamma));
+			if(i%writeParameter == 0){
+				double xshift = (x - vframe*i*dt)*gammaFrame;
+				fprintf(outTrajectory, "%g ", x);
+			}
+			getBfield(x, y, z, Bx, By, Bz, B0x, B0y, B0z);
+			move(x, y, z, vx, vy, vz, Bx, By, Bz, dt);
 		}
-		v = c*sqrt(1.0 - 1.0/(gamma*gamma));
-		if(i%writeParameter == 0){
-			double xshift = (x - vframe*i*dt)*gammaFrame;
-			fprintf(out, "%g %g %g %g %g %g %g %g\n", x, y, z, vx, vy, vz, v, xshift);
-		}
-		getBfield(x, y, z, Bx, By, Bz, B0x, B0y, B0z);
-		move(x, y, z, vx, vy, vz, Bx, By, Bz, dt);
+		fprintf(outTrajectory, "\n");
 	}
 
+	fclose(outTrajectory);
+	//fclose(out);
+
+	FILE* out = fopen("meanx.dat","w");
+	for(int i = 0; i < chch; ++i) {
+		fprintf(out, "%g %g\n", dt*i, meanSqrX[i]);
+	}
 	fclose(out);
+	delete[] meanSqrX;
 
 	/*FILE* field = fopen("field.dat","w");
 
