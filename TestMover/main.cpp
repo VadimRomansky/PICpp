@@ -33,10 +33,8 @@ double evaluateTurbulentB(const double& kx, const double& ky, const double& kz){
 
 }
 
-void getBfield(const double& x, const double& y, const double& z, double& Bx, double& By, double& Bz, double& B0x, double& B0y, double& B0z){
-	srand(randomSeed);
-	int Nx = 4;
-	int Ny = 4;
+void getBfield(const double& x, const double& y, const double& z, double& Bx, double& By, double& Bz, double& B0x, double& B0y, double& B0z, const int Nxmodes, const int Nymodes, double*** phases){
+	//srand(randomSeed);
 	double dk = 2*pi/turbulenceLength;
 	Bx = B0x;
 	By = B0y;
@@ -44,8 +42,8 @@ void getBfield(const double& x, const double& y, const double& z, double& Bx, do
 	double B0sqr = B0x*B0x + B0y*B0y + B0z*B0z;
 	double Bsqr = 0;
 	double turbulentFieldCorrection = 1.0;
-	for(int i = 0; i <= Nx; ++i){
-		for(int j = 0; j <= Ny; ++j){
+	for(int i = 0; i <= Nxmodes; ++i){
+		for(int j = 0; j <= Nymodes; ++j){
 			if((i + j) > 0){
 				double kx = i*dk;
 				double ky = j*dk;
@@ -58,16 +56,16 @@ void getBfield(const double& x, const double& y, const double& z, double& Bx, do
 	if(Bsqr > 0){
 		turbulentFieldCorrection = sqrt(turbulenceFraction*B0sqr/(Bsqr*(1.0 - turbulenceFraction)));
 	}
-	for(int i = 0; i <= Nx; ++i){
-		for(int j = 0; j <= Nx; ++j){
+	for(int i = 0; i <= Nxmodes; ++i){
+		for(int j = 0; j <= Nxmodes; ++j){
 			if((i + j) > 0){
 				double kx = i*dk;
 				double ky = j*dk;
 				double kz = 0;
 				double B = evaluateTurbulentB(kx, ky, kz)*turbulentFieldCorrection;
 				
-				double phase1 = 2*pi*uniformDistribution();
-				double phase2 = 2*pi*uniformDistribution();
+				//double phase1 = 2*pi*uniformDistribution();
+				//double phase2 = 2*pi*uniformDistribution();
 
 				double kw = sqrt(kx*kx + ky*ky + kz*kz);
 				double kyz = sqrt(ky*ky + kz*kz);
@@ -84,8 +82,8 @@ void getBfield(const double& x, const double& y, const double& z, double& Bx, do
 				}
 
 				double kmultr = kx*x + ky*y + kz*z;
-				double localB1 = B*sin(kmultr + phase1);
-				double localB2 = B*sin(kmultr + phase2);
+				double localB1 = B*sin(kmultr + phases[i][j][0]);
+				double localB2 = B*sin(kmultr + phases[i][j][1]);
 
 				Bx = Bx - localB1*sinTheta;
 				By = By + (localB1*cosTheta*cosPhi - localB2*sinPhi);
@@ -148,6 +146,9 @@ void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, c
 int main(int argc, char** argv){
 	const int Nt = 10000;
 	const int chch = 1000;
+
+	const int Nxmodes = 4;
+	const int Nymodes = 4;
 	double dt;
 	
 
@@ -169,12 +170,22 @@ int main(int argc, char** argv){
 	double rg = v/omega;
 	dt = 0.1/omega;
 
-	turbulenceLength = 10*rg;
+	turbulenceLength = 0.1*rg;
 
 	double* meanSqrX = new double[Nt];
 
 	for(int i = 0; i < Nt; ++i) {
 		meanSqrX[i] = 0;
+	}
+
+	double*** phases = new double**[Nxmodes+1];
+	for(int i = 0; i <= Nxmodes; ++i) {
+		phases[i] = new double*[Nymodes+1];
+		for(int j = 0; j <= Nymodes; ++j) {
+			phases[i][j] = new double[2];
+			phases[i][j][0] = 0;
+			phases[i][j][1] = 0;
+		}
 	}
 
 	
@@ -188,15 +199,21 @@ int main(int argc, char** argv){
 	fclose(information);
 
 	//FILE* out = fopen("trajectory.dat","w");
-	int writeParameter = 10;
+	int writeParameter = 1;
 
 	srand(time(NULL));
 	randomSeed = rand();
 
+	for(int i = 0; i <= Nxmodes; ++i) {
+		for(int j = 0; j <= Nymodes; ++j) {
+			phases[i][j][0] = 2*pi*uniformDistribution();
+			phases[i][j][1] = 2*pi*uniformDistribution();
+		}
+	}
+
 	FILE* outTrajectory = fopen("trajectories.dat", "w");
 	for(int pcount = 0; pcount < chch; ++pcount){
 		printf("particle %d\n", pcount);
-		srand(time(NULL));
 		double theta = pi*uniformDistribution();
 		double phi = 2*pi*uniformDistribution();
 		printf("theta = %g, phi = %g\n", theta, phi);
@@ -219,7 +236,7 @@ int main(int argc, char** argv){
 				double xshift = (x - vframe*i*dt)*gammaFrame;
 				fprintf(outTrajectory, "%g ", x);
 			}
-			getBfield(x, y, z, Bx, By, Bz, B0x, B0y, B0z);
+			getBfield(x, y, z, Bx, By, Bz, B0x, B0y, B0z, Nxmodes, Nymodes, phases);
 			move(x, y, z, vx, vy, vz, Bx, By, Bz, dt);
 		}
 		fprintf(outTrajectory, "\n");
@@ -234,6 +251,14 @@ int main(int argc, char** argv){
 	}
 	fclose(out);
 	delete[] meanSqrX;
+
+	for(int i = 0; i <= Nxmodes; ++i) {
+		for(int j = 0; j <= Nymodes; ++j) {
+			delete[] phases[i][j];
+		}
+		delete[] phases[i];
+	}
+	delete[] phases;
 
 	/*FILE* field = fopen("field.dat","w");
 
