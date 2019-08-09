@@ -17,6 +17,7 @@ const double massElectron = massElectronReal;
 
 const int Napprox  = 40;
 
+const double McDonaldValue[Napprox] = {3.08E8, 2.11E7, 6.65E6, 4.55E5, 1.43E4, 9802, 3087, 670, 211, 107, 66.3, 33.6, 20.7, 14.1, 11.0, 10.3, 6.26, 4.2, 3.01, 2.25, 1.73, 1.37, 1.10, 0.737, 0.514, 0.368, 0.269, 0.2, 0.0994, 0.0518, 0.0278, 0.0152, 0.00846, 0.00475, 0.00154, 0.000511, 0.000172, 0.0000589, 0.0000203, 0.00000246};
 const double UvarovValue[Napprox] = {
 		0.0461, 0.0791, 0.0995, 0.169, 0.213, 0.358, 0.445, 0.583, 0.702, 0.772, 0.818, 0.874,0.904, 0.917, 0.918, 0.918, 0.901, 0.872, 0.832, 0.788, 
 		0.742, 0.694, 0.655, 0.566, 0.486, 0.414, 0.354, 0.301, 0.200, 0.130, 0.0845, 0.0541, 0.0339, 0.0214, 0.0085, 0.0033, 0.0013, 0.00050, 0.00019, 0.0000282};
@@ -32,7 +33,7 @@ double criticalNu(const double& E, const double& sinhi, const double& H) {
 	return 3*electron_charge*H*sinhi*E*E/(4*pi*massElectron*massElectron*massElectron*speed_of_light*speed_of_light4);
 }
 
-double evaluateIntegral(const double& nu) {
+double evaluateMcDonaldIntegral(const double& nu) {
 	int curIndex = 0;
 	if(nu < UvarovX[0]) {
 		return 0;
@@ -55,6 +56,29 @@ double evaluateIntegral(const double& nu) {
 	return result;
 }
 
+double evaluateMcDonaldFunction(const double& nu) {
+	int curIndex = 0;
+	if(nu < UvarovX[0]) {
+		return 0;
+	}
+	if(nu > UvarovX[Napprox - 1]) {
+		return 0;
+	}
+	for(int i = 1; i < Napprox; ++i) {
+		if(nu < UvarovX[i]) {
+			curIndex = i;
+			break;
+		}
+	}
+
+	//double result = (UvarovValue[curIndex]*(nu - UvarovX[curIndex - 1]) + UvarovValue[curIndex - 1]*(UvarovX[curIndex] - nu))/(UvarovX[curIndex] - UvarovX[curIndex - 1]);
+	double result = McDonaldValue[curIndex-1]*exp(log(McDonaldValue[curIndex]/McDonaldValue[curIndex-1])*((nu - UvarovX[curIndex-1])/(UvarovX[curIndex] - UvarovX[curIndex - 1])));
+	if(result < 0) {
+		printf("result < 0\n");
+	}
+	return result;
+}
+
 int main(int argc, char** argv){
 
 	int Np = 200;
@@ -68,8 +92,19 @@ int main(int argc, char** argv){
 	int Nnu = 100;
 	double* nu = new double[Nnu];
 	double* Inu = new double[Nnu];
+	double* Anu = new double[Nnu];
 
-	double Bmean = 1.0;
+	double sigma = 0.36;
+	double gamma0 = 1.5;
+	double concentration = 1;
+	double B0 = sqrt(sigma*4*pi*gamma0*concentration*massProtonReal*speed_of_light2);
+	double size = 1E16;
+
+	double Bmean = 4*B0;
+
+	Bmean = 0.1;
+
+	concentration = 1;
 
 
 	for(int i = 0; i < Np; ++i) {
@@ -87,6 +122,14 @@ int main(int argc, char** argv){
 
 	fclose(inputPe);
 	fclose(inputFe);
+
+	double norm = 0;
+	for(int i = 1; i < Np; ++i) {
+		norm = norm + Fe[i]*(Ee[i] - Ee[i-1]);
+	}
+	for(int i = 0; i < Np; ++i) {
+		Fe[i] = Fe[i]/norm;
+	}
 
 	double minEnergy = 10*massElectron*speed_of_light2;
 	//double minEnergy = Ee[0];
@@ -115,24 +158,54 @@ int main(int argc, char** argv){
 
 	nu[0] = minNu;
 	Inu[0] = 0;
+	Anu[0] = 0;
 	for(int i = 1; i < Nnu; ++i) {
 		nu[i] = nu[i-1]*factor;
 		Inu[i] = 0;
+		Anu[i] = 0;
 	}
 
-	double coef = sqrt(3.0)*electron_charge*electron_charge*electron_charge/(massElectron*speed_of_light2);
+	double coef = concentration*sqrt(3.0)*electron_charge*electron_charge*electron_charge/(massElectron*speed_of_light2);
+	double coefAbsorb = concentration*16*pi*pi*electron_charge/(3*sqrt(3.0)*Bmean*sinhi);
+
 
 	for(int i = 0; i < Nnu; ++i) {
 		printf("i = %d\n", i);
 		for(int j = startElectronIndex; j < Np; ++j) {
 			double nuc = criticalNu(Ee[j], sinhi, Bmean);
-			Inu[i] = Inu[i] + coef*Fe[j]*(Ee[j] - Ee[j-1])*Bmean*sinhi*evaluateIntegral(nu[i]/nuc);
+			double gamma = Ee[j]/(massElectron*speed_of_light2);
+			double x = nu[i]/nuc;
+			Inu[i] = Inu[i] + coef*Fe[j]*(Ee[j] - Ee[j-1])*Bmean*sinhi*evaluateMcDonaldIntegral(nu[i]/nuc);
+			Anu[i] = Anu[i] + coefAbsorb*Fe[j]*(Ee[j] - Ee[j-1])*evaluateMcDonaldFunction(nu[i]/nuc)/(gamma*gamma*gamma*gamma*gamma);
 		}
 	}
 
+	int absorbtionIndex = 0;
+	for(int i = 0; i < Nnu; ++i) {
+		if(Anu[i]*size < 1) {
+			absorbtionIndex = i;
+			break;
+		}
+	}
+
+	/*for(int i = 0; i < absorbtionIndex; ++i) {
+		Inu[i] = Inu[absorbtionIndex]*power(nu[i]/nu[absorbtionIndex], 5.0/2.0);
+	}*/
+
+	for(int i = 0; i < Nnu; ++i){
+		Inu[i] = Inu[i]*(1 - exp(-Anu[i]*size))/(Anu[i]*size);
+	}
+
+	double totalFlux = 0;
+	for(int i = 1; i < Nnu; ++i) {
+		totalFlux += Inu[i]*(nu[i] - nu[i-1])*size*size*size;
+	}
+
+
+	double nuc = criticalNu(minEnergy, sinhi, Bmean);
 	FILE* output = fopen("../../tristan-mp-pitp/radiation.dat", "w");
 	for(int i = 0; i < Nnu; ++i) {
-		fprintf(output, "%g %g\n", nu[i], Inu[i]);
+		fprintf(output, "%g %g %g\n", nu[i], Inu[i], Anu[i]*size);
 	}
 	
 	fclose(output);
@@ -143,4 +216,5 @@ int main(int argc, char** argv){
 
 	delete[] nu;
 	delete[] Inu;
+	delete[] Anu;
 }
