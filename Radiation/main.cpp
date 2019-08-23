@@ -80,7 +80,7 @@ double evaluateMcDonaldFunction(const double& nu) {
 		}
 	}
 
-	//double result = (UvarovValue[curIndex]*(nu - UvarovX[curIndex - 1]) + UvarovValue[curIndex - 1]*(UvarovX[curIndex] - nu))/(UvarovX[curIndex] - UvarovX[curIndex - 1]);
+	//double result = (McDonaldValue[curIndex]*(nu - UvarovX[curIndex - 1]) + McDonaldValue[curIndex - 1]*(UvarovX[curIndex] - nu))/(UvarovX[curIndex] - UvarovX[curIndex - 1]);
 	double result = McDonaldValue[curIndex - 1] * exp(
 		log(McDonaldValue[curIndex] / McDonaldValue[curIndex - 1]) * ((nu - UvarovX[curIndex - 1]) / (UvarovX[curIndex] - UvarovX[curIndex - 1])));
 	if (result < 0) {
@@ -132,9 +132,9 @@ int main(int argc, char** argv) {
 	n[3] = n3;
 	size[3] = L3;
 
-	time[1] = 2800000;
-	time[2] = 5600000;
-	time[3] = 10400000;
+	time[1] = 2760000;
+	time[2] = 5270400;
+	time[3] = 10700000;
 
 	for(int i = 2; i >= 0; --i) {
 		size[i] = size[3] - v*(time[3] - time[i]);
@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
 
 	/*Fe[0] = 1.0;
 	for(int i = 1; i < Np; ++i) {
-		Fe[i] = Fe[0]*power(Ee[0]/Ee[i],2);
+		Fe[i] = Fe[0]*power(Ee[0]/Ee[i],3);
 	}*/
 
 	fclose(inputPe);
@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
 		double concentration = n[k];
 
 
-		double minNu = 0.1 * criticalNu(minEnergy, sinhi, Bmean);
+		double minNu = 0.001 * criticalNu(minEnergy, sinhi, Bmean);
 		double maxNu = 10 * criticalNu(maxEnergy, sinhi, Bmean);
 		double meanNu = criticalNu(meanE, sinhi, Bmean);
 
