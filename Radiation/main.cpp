@@ -168,6 +168,38 @@ void findMaxNu(int& nuMaxIndex, double* Inu, int Nnu) {
 	}
 }
 
+double findEmissivityAt(double* nu, double* Inu, double currentNu, int Nnu) {
+	if(currentNu <= nu[0]) {
+		return Inu[0];
+	}
+	if(currentNu >= nu[Nnu - 1]) {
+		return Inu[Nnu - 1];
+	}
+	for(int i = 1; i < Nnu; ++i) {
+		if(currentNu < nu[i]) {
+			return Inu[i - 1] * exp(log(Inu[i] / Inu[i - 1]) * ((currentNu - nu[i-1]) / (nu[i] - nu[i - 1])));
+		}
+	}
+	return 0;
+}
+
+void evaluateDoplerSpectrum(double* doplerInu, double* nu, double* Inu, double gamma0, int Nnu) {
+	for(int i = 0; i < Nnu; ++i) {
+		doplerInu[i] = 0;
+	}
+	double beta = sqrt(1.0 - 1.0/(gamma0*gamma0));
+	int Nmu = 20;
+	for(int j = 0; j < Nmu; ++j) {
+		double mu = -1.0 + (2*j + 1.0)/Nmu;
+		double D = 1.0/(gamma0*(1 - beta*mu));
+		for(int i = 0; i < Nnu; ++i) {
+			double tempNu = nu[i]/D;
+			double tempI = findEmissivityAt(nu, Inu, tempNu, Nnu);
+			doplerInu[i] = doplerInu[i] + D*D*tempI*(2.0/Nmu);
+		}
+	}
+}
+
 int main(int argc, char** argv) {
 
 	int Np = 200;
@@ -181,6 +213,7 @@ int main(int argc, char** argv) {
 	int Nnu = 100;
 	double* nu = new double[Nnu];
 	double* Inu = new double[Nnu];
+	double* doplerInu = new double[Nnu];
 	double* Anu = new double[Nnu];
 
 	double sigma = 0.36;
@@ -194,7 +227,7 @@ int main(int argc, char** argv) {
 	double L0 = 1E16;
 
 	double L3 = 2.16E17;
-	double n3 = 1;
+	double n3 = 3;
 	double B3 = 0.1;
 
 	double B3min = 0.01;
@@ -327,6 +360,8 @@ int main(int argc, char** argv) {
 
 		evaluateSpectrum(nu, Inu, Anu, Nnu, Ee, Fe, Np, minEnergy, maxEnergy, startElectronIndex, sinhi, Bmean, localConcentration, localSize);
 
+		evaluateDoplerSpectrum(doplerInu, nu, Inu, gamma0, Nnu);
+
 		double totalFlux = 0;
 		for (int i = 1; i < Nnu; ++i) {
 			totalFlux += Inu[i] * (nu[i] - nu[i - 1]) * localSize * localSize * localSize;
@@ -341,8 +376,9 @@ int main(int argc, char** argv) {
 		FILE* output = fopen((fileName + fileNumber + ".dat").c_str(), "w");
 		delete[] number;
 		for (int i = 0; i < Nnu; ++i) {
-			double totalInu = Inu[i]*localSize*localSize*localSize/(size[3]*size[3]*size[3]);
-			fprintf(output, "%g %g %g %g %g %g\n", nu[i]/1E9, Inu[i], Anu[i] * localSize, totalInu, Inu[i]*factor, totalInu*factor);
+			double sizeFactor = localSize*localSize*localSize/(size[3]*size[3]*size[3]);
+			double totalInu = Inu[i]*sizeFactor;
+			fprintf(output, "%g %g %g %g %g %g %g %g\n", nu[i]/1E9, Inu[i], Anu[i] * localSize, totalInu, Inu[i]*factor, totalInu*factor, doplerInu[i]*factor, doplerInu[i]*sizeFactor*factor);
 		}
 
 		fclose(output);
@@ -354,5 +390,6 @@ int main(int argc, char** argv) {
 
 	delete[] nu;
 	delete[] Inu;
+	delete[] doplerInu;
 	delete[] Anu;
 }
