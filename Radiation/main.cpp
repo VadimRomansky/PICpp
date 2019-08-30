@@ -195,7 +195,7 @@ void evaluateDoplerSpectrum(double* doplerInu, double* nu, double* Inu, double g
 		for(int i = 0; i < Nnu; ++i) {
 			double tempNu = nu[i]/D;
 			double tempI = findEmissivityAt(nu, Inu, tempNu, Nnu);
-			doplerInu[i] = doplerInu[i] + D*D*tempI*(2.0/Nmu);
+			doplerInu[i] = doplerInu[i] + D*D*tempI*(2.0/Nmu)/2;
 		}
 	}
 }
@@ -217,7 +217,7 @@ int main(int argc, char** argv) {
 	double* Anu = new double[Nnu];
 
 	double sigma = 0.36;
-	double gamma0 = 1.2;
+	double gamma0 = 1.3;
 	double v = speed_of_light * sqrt(1 - 1 / (gamma0 * gamma0));
 	const int Npoints = 4;
 
@@ -329,12 +329,16 @@ int main(int argc, char** argv) {
 			rightB = localB;
 			localB = (leftB + rightB)/2;
 			evaluateSpectrum(nu, Inu, Anu, Nnu, Ee, Fe, Np, minEnergy, maxEnergy, startElectronIndex, sinhi, localB, localConcentration, localSize);
+			evaluateDoplerSpectrum(doplerInu, nu, Inu, gamma0, Nnu);
 			findMaxNu(nuMaxIndex, Inu, Nnu);
+			//findMaxNu(nuMaxIndex, doplerInu, Nnu);
 		} else {
 			leftB = localB;
 			localB = (leftB + rightB)/2;
 			evaluateSpectrum(nu, Inu, Anu, Nnu, Ee, Fe, Np, minEnergy, maxEnergy, startElectronIndex, sinhi, localB, localConcentration, localSize);
+			evaluateDoplerSpectrum(doplerInu, nu, Inu, gamma0, Nnu);
 			findMaxNu(nuMaxIndex, Inu, Nnu);
+			//findMaxNu(nuMaxIndex, doplerInu, Nnu);
 		}
 		nuMax = nu[nuMaxIndex];
 		if((rightB - leftB) < 0.0001) {
@@ -342,6 +346,7 @@ int main(int argc, char** argv) {
 		}
 	}
 	factor = augmaxy/Inu[nuMaxIndex];
+	//factor = augmaxy/doplerInu[nuMaxIndex];
 
 	printf("B august = %g\n", localB);
 	B[3] = localB;
