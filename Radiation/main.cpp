@@ -152,13 +152,7 @@ void evaluateSpectrum(double* nu, double* Inu, double* Anu, int Nnu, double* Ee,
 			Anu[i] = Anu[i] + coefAbsorb * Fe[j] * (Ee[j] - Ee[j - 1]) * evaluateMcDonaldFunction(nu[i] / nuc) / (gamma * gamma * gamma * gamma * gamma);
 		}
 	}
-	int absorbtionIndex = 0;
-	for (int i = 0; i < Nnu; ++i) {
-		if (Anu[i] * localSize < 1) {
-			absorbtionIndex = i;
-			break;
-		}
-	}
+
 
 	for (int i = 0; i < Nnu; ++i) {
 		Inu[i] = Inu[i] * (1 - exp(-Anu[i] * localSize)) / (Anu[i] * localSize);
