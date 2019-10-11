@@ -220,6 +220,10 @@ double evaluateOptimizationFunction(double B, double A, double* Ee, double* Fe, 
 	return I1*I1 + I2*I2;
 }
 
+double evaluateConcentrationFromB(double B, double gamma0, double sigma) {
+	return (B*B/16)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
+}
+
 void findMinParameters(const double& B, const double& A, double& b, double& a, double minLambda, double maxLambda, double gradB, double gradA, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double concentration, double localSize, double gamma0, double sigma) {
 	if(maxLambda - minLambda < 0.0000001*maxLambda) {
 		a = a - maxLambda*gradA;
@@ -235,8 +239,8 @@ void findMinParameters(const double& B, const double& A, double& b, double& a, d
 	double a2 = a - lambda2*gradA;
 	double b2 = b - lambda2*gradB;
 
-	double concentration1 = (B*b1*B*b1/16)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
-	double concentration2 = (B*b2*B*b2/16)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
+	double concentration1 = evaluateConcentrationFromB(B*b1, gamma0, sigma);
+	double concentration2 = evaluateConcentrationFromB(B*b2, gamma0, sigma);
 
 	double f1 = evaluateOptimizationFunction(B*b1, A*a1, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, concentration1, localSize);
 	double f2 = evaluateOptimizationFunction(B*b2, A*a2, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, concentration2, localSize);
@@ -261,15 +265,16 @@ void optimizeParameters(double& B, double& A, double* Ee, double* Fe, int Np, in
 	double b = 1.0;
 	//todo
 	for(int i = 0; i < 10; ++i) {
+		double dx = 0.0000001;
 		printf("optimiztion i = %d\n",i);
-		double concentration1 = (B*(b + 0.00000001)*B*(b + 0.00000001)/16)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
-		double concentration2 = (B*b*B*b/16)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
-		double Fb = evaluateOptimizationFunction(B*(b + 0.00000001), A*a, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, concentration1, localSize);
-		double Fa = evaluateOptimizationFunction(B*b, A*(a + 0.00000001), Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, concentration2, localSize);
-		double gradB = (Fb - currentF)/0.00000001;
-		double gradA = (Fa - currentF)/0.00000001;
+		double concentration1 = evaluateConcentrationFromB(B*(b + dx), gamma0, sigma);
+		double concentration2 = evaluateConcentrationFromB(B*b, gamma0, sigma);
+		double Fb = evaluateOptimizationFunction(B*(b + dx), A*a, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, concentration1, localSize);
+		double Fa = evaluateOptimizationFunction(B*b, A*(a + dx), Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, concentration2, localSize);
+		double gradB = (Fb - currentF)/dx;
+		double gradA = (Fa - currentF)/dx;
 		findMinParameters(B, A, b, a, gradB, gradA, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, concentration, localSize, gamma0, sigma);
-		concentration2 = (B*b*B*b/16)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
+		concentration2 = evaluateConcentrationFromB(B*b, gamma0, sigma);
 		currentF = evaluateOptimizationFunction(B*b, A*a, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, concentration2, localSize);
 	}
 	B = B*b;
@@ -407,7 +412,7 @@ int main(int argc, char** argv) {
 	double localConcentration = n[3];
 	double localSize = size[3];
 	double localB = (leftB + rightB)/2;
-	localConcentration = (localB*localB/16)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
+	localConcentration = evaluateConcentrationFromB(localB, gamma0, sigma);
 	evaluateSpectrum(nu, Inu, Anu, Nnu, Ee, Fe, Np, minEnergy, maxEnergy, startElectronIndex, sinhi, localB, localConcentration, localSize);
 	double nuMax = 0;
 	int nuMaxIndex = 0;
@@ -420,7 +425,7 @@ int main(int argc, char** argv) {
 		if(nuMax > augmaxx*1E9) {
 			rightB = localB;
 			localB = (leftB + rightB)/2;
-			localConcentration = (localB*localB/16)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
+			localConcentration = evaluateConcentrationFromB(localB, gamma0, sigma);
 			evaluateSpectrum(nu, Inu, Anu, Nnu, Ee, Fe, Np, minEnergy, maxEnergy, startElectronIndex, sinhi, localB, localConcentration, localSize);
 			evaluateDoplerSpectrum(doplerInu, nu, Inu, gamma0, Nnu);
 			findMaxNu(nuMaxIndex, Inu, Nnu);
@@ -428,7 +433,7 @@ int main(int argc, char** argv) {
 		} else {
 			leftB = localB;
 			localB = (leftB + rightB)/2;
-			localConcentration = (localB*localB/16)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
+			localConcentration = evaluateConcentrationFromB(localB, gamma0, sigma);
 			evaluateSpectrum(nu, Inu, Anu, Nnu, Ee, Fe, Np, minEnergy, maxEnergy, startElectronIndex, sinhi, localB, localConcentration, localSize);
 			evaluateDoplerSpectrum(doplerInu, nu, Inu, gamma0, Nnu);
 			findMaxNu(nuMaxIndex, Inu, Nnu);
@@ -441,7 +446,7 @@ int main(int argc, char** argv) {
 	}
 	factor = augmaxy/Inu[nuMaxIndex];
 	B[3] = localB;
-	n[3] = localConcentration;
+	n[3] = evaluateConcentrationFromB(localB, gamma0, sigma);
 
 
 	//todo gradients
@@ -456,7 +461,7 @@ int main(int argc, char** argv) {
 
 	printf("B august = %g\n", localB);
 	B[3] = localB;
-	n[3] = localConcentration;
+	n[3] = evaluateConcentrationFromB(localB, gamma0, sigma);
 
 
 	//todo gradients
