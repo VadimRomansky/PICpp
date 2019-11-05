@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestMover", "TestMover\Test
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Radiation", "Radiation\Radiation.vcxproj", "{2BA48224-4D4C-4EAC-AA43-72A799911ECB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RoeOsherSpherical", "RoeOsherSpherical\RoeOsherSpherical.vcxproj", "{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -117,6 +119,16 @@ Global
 		{2BA48224-4D4C-4EAC-AA43-72A799911ECB}.Release|Win32.ActiveCfg = Release|Win32
 		{2BA48224-4D4C-4EAC-AA43-72A799911ECB}.Release|Win32.Build.0 = Release|Win32
 		{2BA48224-4D4C-4EAC-AA43-72A799911ECB}.Release|x64.ActiveCfg = Release|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Debug|Win32.Build.0 = Debug|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Debug|x64.ActiveCfg = Debug|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|Win32.ActiveCfg = Release|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|Win32.Build.0 = Release|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
