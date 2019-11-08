@@ -36,7 +36,7 @@ void Simulation::simulate(){
 	fclose(outTempGrid);
 	FILE* outShockWave = fopen("./output/shock_wave.dat",suffix);
 	fclose(outShockWave);
-	FILE* outFile = fopen("./output/tamc_radial_profile.dat",suffix);
+	FILE* outFile = fopen("./output/tamc_radial_profile",suffix);
 	output(outFile,this);
 	fclose(outFile);
 	FILE* outDistribution;
