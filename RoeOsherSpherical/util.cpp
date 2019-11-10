@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 #include <math.h>
 #include "util.h"
 #include "constants.h"
@@ -73,4 +74,24 @@ double findExpLevel(double y, int N, double min, double max){
 	} else {
 		return findExpLevel(y, N, middle, max);
 	}
+}
+
+std::string convertIntToString(int a) {
+	if (a == 0) {
+		std::string result = "0";
+		return result;
+	}
+	if (a > 0) {
+		std::string result = "";
+		while (a > 0) {
+			int last = a % 10;
+			a = a / 10;
+			char c = last + '0';
+			result = c + result;
+		}
+		return result;
+	}
+	a = -a;
+	std::string result = "-";
+	return result + convertIntToString(a);
 }

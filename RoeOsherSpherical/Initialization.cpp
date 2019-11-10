@@ -373,6 +373,7 @@ void Simulation::initializeArrays(){
 
 	for(int i = 0; i <= rgridNumber; i ++){
 		cosmicRayPressure[i] = 0;
+		cosmicRayConcentration[i] = 0;
 		distributionFunction[i] = new double[pgridNumber];
 		tempDistributionFunction[i] = new double[pgridNumber];
 		for(int j = 0; j < pgridNumber; ++j){

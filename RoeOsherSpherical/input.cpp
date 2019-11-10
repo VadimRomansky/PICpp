@@ -8,14 +8,50 @@ Simulation* readInput(){
 		char* s = NULL;
 		Simulation* simulation = new Simulation();
 		fscanf(infile,"%d",&simulation->iterationNumber);
+		char ch = ' ';
+		while (ch != '\n') {
+			fscanf(infile, "%c", &ch);
+		}
         fscanf(infile,"%d",&simulation->particlesNumber);
+		ch = ' ';
+		while (ch != '\n') {
+			fscanf(infile, "%c", &ch);
+		}
 		fscanf(infile,"%lf",&simulation->U0);
+		ch = ' ';
+		while (ch != '\n') {
+			fscanf(infile, "%c", &ch);
+		}
 		fscanf(infile,"%lf",&simulation->density0);
+		ch = ' ';
+		while (ch != '\n') {
+			fscanf(infile, "%c", &ch);
+		}
         fscanf(infile,"%lf",&simulation->B0);
+		ch = ' ';
+		while (ch != '\n') {
+			fscanf(infile, "%c", &ch);
+		}
         fscanf(infile,"%lf",&simulation->temperature);
+		ch = ' ';
+		while (ch != '\n') {
+			fscanf(infile, "%c", &ch);
+		}
 		fscanf(infile,"%lf",&simulation->upstreamR);
+		ch = ' ';
+		while (ch != '\n') {
+			fscanf(infile, "%c", &ch);
+		}
 		fscanf(infile,"%d",&simulation->rgridNumber);
+		ch = ' ';
+		while (ch != '\n') {
+			fscanf(infile, "%c", &ch);
+		}
 		fscanf(infile,"%d",&simulation->simulationType);
+		ch = ' ';
+		while (ch != '\n') {
+			fscanf(infile, "%c", &ch);
+		}
 		fscanf(infile,"%lf",&simulation->maxTime);
 		fclose(infile);
 		return simulation;

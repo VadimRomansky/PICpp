@@ -1,5 +1,5 @@
 clear;
-load tamc_radial_profile.dat;
+load tamc_radial_profile_2.dat;
 load xfile.dat
 
 Nx = size(xfile,1);

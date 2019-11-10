@@ -1,7 +1,8 @@
 #include <list>
 #include <time.h>
-#include "math.h"
-#include "stdio.h"
+#include <string>
+#include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
 #include "simulation.h"
@@ -28,35 +29,39 @@ void Simulation::simulate(){
 	updateTimeStep();
 
 	printf("creating files\n");
+	std::string fileNumber = "";
+	int currentWriteNumber = 0;
+	fileNumber = std::string("_") + convertIntToString(currentWriteNumber);
+	std::string outputDir = "./output/";
 	FILE* outIteration = fopen("./output/iterations.dat",suffix);
 	fclose(outIteration);
 	FILE* outExtraIteration = fopen("./output/extra_iterations.dat",suffix);
 	fclose(outExtraIteration);
-	FILE* outTempGrid = fopen("./output/temp_grid.dat",suffix);
+	FILE* outTempGrid = fopen((outputDir + "temp_grid" + fileNumber + ".dat").c_str(),suffix);
 	fclose(outTempGrid);
 	FILE* outShockWave = fopen("./output/shock_wave.dat",suffix);
 	fclose(outShockWave);
-	FILE* outFile = fopen("./output/tamc_radial_profile",suffix);
+	FILE* outFile = fopen((outputDir + "temp_radial_profile" + fileNumber + ".dat").c_str(),suffix);
 	output(outFile,this);
 	fclose(outFile);
 	FILE* outDistribution;
 	FILE* outFullDistribution;
 	FILE* outCoordinateDistribution;
-	outDistribution  = fopen("./output/distribution.dat",suffix);
-	outFullDistribution  = fopen("./output/fullDistribution.dat",suffix);
-	outCoordinateDistribution  = fopen("./output/coordinateDistribution.dat",suffix);
+	outDistribution  = fopen((outputDir + "distribution" + fileNumber + ".dat").c_str(),suffix);
+	outFullDistribution  = fopen((outputDir + "fullDistribution" + fileNumber + ".dat").c_str(),suffix);
+	outCoordinateDistribution  = fopen((outputDir + "coordinateDistribution" + fileNumber + ".dat").c_str(),suffix);
 	outputDistributionP3(outDistribution, outFullDistribution, outCoordinateDistribution, this);
 	//outputDistributionP3(outDistribution, outFullDistribution, outCoordinateDistribution, this);
 	fclose(outCoordinateDistribution);
 	fclose(outFullDistribution);
 	fclose(outDistribution);
-	FILE* outField = fopen("./output/field.dat",suffix);
+	FILE* outField = fopen((outputDir + "field" + fileNumber + ".dat").c_str(),suffix);
 	fclose(outField);
-	FILE* coordinateField = fopen("./output/coordinate_field.dat",suffix);
+	FILE* coordinateField = fopen((outputDir + "coordinate_field" + fileNumber + ".dat").c_str(),suffix);
 	fclose(coordinateField);
-	FILE* outFullField = fopen("./output/full_field.dat",suffix);
+	FILE* outFullField = fopen((outputDir + "full_field" + fileNumber + ".dat").c_str(),suffix);
 	fclose(outFullField);
-	FILE* outCoef = fopen("./output/diff_coef.dat",suffix);
+	FILE* outCoef = fopen((outputDir + "diff_coef" + fileNumber + ".dat").c_str(),suffix);
 	fclose(outCoef);
 	FILE* xFile = fopen("./output/xfile.dat",suffix);
 	fclose(xFile);
@@ -115,10 +120,11 @@ void Simulation::simulate(){
 		updateTimeStep();
 		deltaT = min2(minT, deltaT);
 		if(currentIteration % writeParameter == 0){
+			fileNumber = std::string("_") + convertIntToString(currentWriteNumber);
 			//вывод на некоторых итерациях
 			printf("outputing\n");
 			printf("iteration %d\n", currentIteration);
-			outFile = fopen("./output/tamc_radial_profile.dat","a");
+			outFile = fopen((outputDir + "temp_radial_profile" + fileNumber + ".dat").c_str(),"w");
 			output(outFile, this);
 			fclose(outFile);
 
@@ -133,9 +139,9 @@ void Simulation::simulate(){
 			fprintf(outShockWave, "%d %lf %d %lf %lf %lf\n", currentIteration, myTime, shockWavePoint, shockWaveR, shockWaveSpeed, gasSpeed);
 			fclose(outShockWave);
 
-			outDistribution = fopen("./output/distribution.dat","a");
-			outFullDistribution = fopen("./output/fullDistribution.dat","a");
-			outCoordinateDistribution = fopen("./output/coordinateDistribution.dat","a");
+			outDistribution = fopen((outputDir + "distribution" + fileNumber + ".dat").c_str(),"w");
+			outFullDistribution = fopen((outputDir + "fullDistribution" + fileNumber + ".dat").c_str(),"w");
+			outCoordinateDistribution = fopen((outputDir + "coordinateDistribution" + fileNumber + ".dat").c_str(),"w");
 
 			outputDistributionP3(outDistribution, outFullDistribution, outCoordinateDistribution, this);
 			//outputDistribution(outDistribution, outFullDistribution, outCoordinateDistribution, this);
@@ -152,14 +158,14 @@ void Simulation::simulate(){
 			fprintf(outExtraIteration, "%d %g %g %g %g %g %g %g %g %g %g %g %g\n", currentIteration, myTime, mass, totalMomentum, totalEnergy, totalKineticEnergy, totalTermalEnergy, totalParticleEnergy, totalMagneticEnergy, injectedParticles, totalParticles, injectedEnergy, uGradPEnergy);
 			fclose(outExtraIteration);
 
-			outTempGrid = fopen("./output/temp_grid.dat","a");
+			outTempGrid = fopen((outputDir + "temp_grid" + fileNumber + ".dat").c_str(),"w");
 			outputNewGrid(outTempGrid, this);
 			fclose(outTempGrid);
 
-			outFullField = fopen("./output/full_field.dat","w");
-			coordinateField = fopen("./output/coordinate_field.dat","a");
-			outField = fopen("./output/field.dat","a");
-			outCoef = fopen("./output/diff_coef.dat","a");
+			outFullField = fopen((outputDir + "full_field" + fileNumber + ".dat").c_str(),"w");
+			coordinateField = fopen((outputDir + "coordinate_field" + fileNumber + ".dat").c_str(),"w");
+			outField = fopen((outputDir + "field" + fileNumber + ".dat").c_str(),"w");
+			outCoef = fopen((outputDir + "diff_coef" + fileNumber + ".dat").c_str(),"w");
 			xFile = fopen("./output/xfile.dat","w");
 			kFile = fopen("./output/kfile.dat","w");
 			pFile = fopen("./output/pfile.dat","w");
@@ -171,6 +177,8 @@ void Simulation::simulate(){
 			fclose(xFile);
 			fclose(kFile);
 			fclose(pFile);
+
+			currentWriteNumber++;
 		}
 
 		if(currentIteration % serializeParameter == 0){

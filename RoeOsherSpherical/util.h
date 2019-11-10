@@ -11,5 +11,6 @@ void alertNaNOrInfinity(double value, const char* s);
 void alertNotPositive(double value, const char* s);
 void alertNegative(double value, const char* s);
 double findExpLevel(double y, int N, double min, double max);
+std::string convertIntToString(int a);
 
 #endif
