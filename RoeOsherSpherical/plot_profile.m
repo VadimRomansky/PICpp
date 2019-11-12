@@ -1,6 +1,6 @@
 clear;
-load tamc_radial_profile_2.dat;
-load xfile.dat
+tamc_radial_profile = importdata('./output/tamc_radial_profile_25.dat');
+xfile = importdata('./output/xfile.dat');
 
 Nx = size(xfile,1);
 Nt = size(tamc_radial_profile,1)/Nx;

@@ -1,0 +1,11 @@
+2000000 iterations
+20 particles number
+3E8 velocity
+1.6E-24 density
+3E-6 magnetic field
+1234 temperature
+3E18 radius
+1000 grid number
+4 simulation type
+5E10
+ max time

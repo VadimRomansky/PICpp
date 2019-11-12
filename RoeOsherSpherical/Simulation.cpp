@@ -124,7 +124,7 @@ void Simulation::simulate(){
 			//вывод на некоторых итерациях
 			printf("outputing\n");
 			printf("iteration %d\n", currentIteration);
-			outFile = fopen((outputDir + "temp_radial_profile" + fileNumber + ".dat").c_str(),"w");
+			outFile = fopen((outputDir + "tamc_radial_profile" + fileNumber + ".dat").c_str(),"w");
 			output(outFile, this);
 			fclose(outFile);
 
