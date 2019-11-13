@@ -177,7 +177,6 @@ void Simulation::simulate(){
 			fclose(xFile);
 			fclose(kFile);
 			fclose(pFile);
-
 			currentWriteNumber++;
 		}
 
@@ -748,6 +747,7 @@ void Simulation::updateParameters(){
 				dr = middleGrid[i] - middleGrid[i-1];
 			}
 			totalParticles += distributionFunction[i][j]*volume(i)*deltaLogP;
+			//totalParticles += distributionFunction[i][j]*volume(i)*dp;
 			if(j > goodMomentum){
 				totalParticleEnergy += speed_of_light*distributionFunction[i][j]*volume(i)*dp;
 			}
