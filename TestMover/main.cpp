@@ -4,6 +4,7 @@
 #include "math.h"
 
 const double c = 2.99792458E10;
+const double c2 = c*c;
 const double m = 0.910938291E-27;
 const double q = 4.803529695E-10;
 const double pi = 4*atan(1.0);
@@ -94,6 +95,11 @@ void getBfield(const double& x, const double& y, const double& z, double& Bx, do
 	}
 }
 
+
+void getEandBfield(const double& x, const double& y, const double& z, double& Ex, double& Ey, double& Ez, double& Bx, double& By, double& Bz){
+	
+}
+
 void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, const double& Bx, const double& By, const double& Bz, const double& dt){
 	double	Bnorm = sqrt(Bx*Bx + By*By + Bz*Bz);
 	x = x + vx*dt;
@@ -143,6 +149,50 @@ void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, c
 	}
 }
 
+void moveBoris(double& x, double& y, double& z, double& vx, double& vy, double& vz, const double& Bx, const double& By, const double& Bz, const double& Ex, const double& Ey, const double& Ez, const double& dt){
+	double qdt2 = q * dt * 0.5;
+
+	double dpx = Ex*qdt2;
+	double dpy = Ey*qdt2;
+	double dpz = Ez*qdt2;
+
+	double v2 = vx*vx + vy*vy + vz*vz;
+	double gamma = 1.0/sqrt(1 - v2/c2);
+
+	double px = m*vx*gamma + dpx;
+	double py = m*vy*gamma + dpy;
+	double pz = m*vz*gamma + dpz;
+
+	double p2 = px * px + py * py + pz * pz;
+
+	double beta  = q*dt/(2*m*c);//todo???
+
+	double betaShift = beta / gamma;
+	double B2 = sqrt(Bx*Bx + By*By + Bz*Bz);
+	double f = 2.0 / sqrt(1.0 + betaShift * betaShift * B2);
+
+	double tempMomentumX = px + (py*Bz - pz*By)*betaShift;
+	double tempMomentumY = py + (pz*Bx - px*Bz)*betaShift;
+	double tempMomentumZ = pz + (px*By - py*Bx)*betaShift;
+
+
+	double fBetaShift = f*betaShift;
+	px = px + (tempMomentumY*Bz - tempMomentumZ*By)*fBetaShift + dpx;
+	py = py + (tempMomentumZ*Bx - tempMomentumX*Bz)*fBetaShift + dpy;
+	pz = pz + (tempMomentumX*By - tempMomentumY*Bx)*fBetaShift + dpz;
+
+	p2 = px * px + py * py + pz * pz;
+	gamma = sqrt(p2/(m*m*c2) + 1);
+
+	vx = px/(m*gamma);
+	vy = py/(m*gamma);
+	vz = pz/(m*gamma);
+
+	x = x + vx*dt;
+	y = y + vy*dt;
+	z = z + vz*dt;
+}
+
 int main(int argc, char** argv){
 	const int Nt = 10000;
 	const int chch = 1000;
@@ -151,7 +201,19 @@ int main(int argc, char** argv){
 	const int Nymodes = 4;
 	double dt;
 	
+	double*** middleB;
+	double*** middleE;
+	double*** upstreamB;
+	double*** upstreamE;
+	double*** downstreamB;
+	double*** downstreamE;
 
+	int Ny;
+	int middleNx;
+	int upstreamNx;
+	int downstreamNx;
+
+	double dx;
 
 	double vx, vy, vz;
 	double x, y, z;
@@ -236,8 +298,11 @@ int main(int argc, char** argv){
 				double xshift = (x - vframe*i*dt)*gammaFrame;
 				fprintf(outTrajectory, "%g ", x);
 			}
-			getBfield(x, y, z, Bx, By, Bz, B0x, B0y, B0z, Nxmodes, Nymodes, phases);
-			move(x, y, z, vx, vy, vz, Bx, By, Bz, dt);
+			double Ex, Ey, Ez;
+			//getBfield(x, y, z, Bx, By, Bz, B0x, B0y, B0z, Nxmodes, Nymodes, phases);
+			getEandBfield(x, y, z, Ex, Ey, Ez, Bx, By, Bz);
+			//move(x, y, z, vx, vy, vz, Bx, By, Bz, dt);
+			moveBoris(x, y, z, vx, vy, vz, Bx, By, Bz, Ex, Ey, Ez, dt);
 		}
 		fprintf(outTrajectory, "\n");
 	}

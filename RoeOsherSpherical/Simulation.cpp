@@ -757,6 +757,7 @@ void Simulation::updateParameters(){
 		}
 	}
 	mass -= myTime*(0 - middleDensity[rgridNumber-1]*middleVelocity[rgridNumber-1]);
+	totalParticles +=mass/massProton;
 	totalMomentum -=  myTime*(middlePressure[0] - middleDensity[rgridNumber-1]*sqr(middleVelocity[rgridNumber-1]) - middlePressure[rgridNumber-1]);
 	for(int k = 0; k < kgridNumber; ++k){
 		totalMagneticEnergy -=  myTime*(0 - magneticField[rgridNumber-1][k]*middleVelocity[rgridNumber-1])*kgrid[k]*deltaLogK;

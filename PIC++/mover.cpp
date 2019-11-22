@@ -761,12 +761,12 @@ void Simulation::moveParticleTristan(Particle* particle) {
 	double gamma = sqrt(p2/(particle->mass*particle->mass) + 1.0);
 
 	double betaShift = particle->beta / gamma;
+	double f = 2.0 / sqrt(1.0 + betaShift * betaShift * B.norm2());
 
 	double tempMomentumX = px + (py*Bz - pz*By)*betaShift;
 	double tempMomentumY = py + (pz*Bx - px*Bz)*betaShift;
 	double tempMomentumZ = pz + (px*By - py*Bx)*betaShift;
 
-	double f = 2.0 / sqrt(1.0 + betaShift * betaShift * B.norm2());
 
 	double fBetaShift = f*betaShift;
 	momentum.x = px + (tempMomentumY*Bz - tempMomentumZ*By)*fBetaShift + dpx;
