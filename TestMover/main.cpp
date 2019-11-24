@@ -2,25 +2,41 @@
 #include <stdlib.h>
 #include <time.h>
 #include "math.h"
+#include <string>
 
-const double c = 2.99792458E10;
-const double c2 = c*c;
-const double m = 0.910938291E-27;
+#include "constants.h"
+#include "output.h"
+#include "distribution.h"
+
 const double q = 4.803529695E-10;
-const double pi = 4*atan(1.0);
 const double gamma = 100;
 const double Bmeansqr = 1.0;
 const double turbulenceFraction = 0.9;
-const int randomParameter = 1024;
 double turbulenceLength;
 int randomSeed;
 
-double uniformDistribution() {
-	return (rand() % randomParameter + 0.5) / randomParameter;
-}
-
 double power(const double& v, const double& p) {
 	return exp(p * log(v));
+}
+
+std::string convertIntToString(int a) {
+	if (a == 0) {
+		std::string result = "0";
+		return result;
+	}
+	if (a > 0) {
+		std::string result = "";
+		while (a > 0) {
+			int last = a % 10;
+			a = a / 10;
+			char c = last + '0';
+			result = c + result;
+		}
+		return result;
+	}
+	a = -a;
+	std::string result = "-";
+	return result + convertIntToString(a);
 }
 
 double evaluateTurbulentB(const double& kx, const double& ky, const double& kz){
@@ -96,11 +112,53 @@ void getBfield(const double& x, const double& y, const double& z, double& Bx, do
 }
 
 
-void getEandBfield(const double& x, const double& y, const double& z, double& Ex, double& Ey, double& Ez, double& Bx, double& By, double& Bz){
-	
+void getEandBfield(const double& x, const double& y, const double& z, double& Ex, double& Ey, double& Ez, double& Bx, double& By, double& Bz, double*** downstreamE, double*** downstreamB, double*** middleE, double*** middleB, double*** upstreamE, double*** upstreamB, int downstreamNx, int middleNx, int upstreamNx, int Ny, double dx){
+	double tempy = y;
+	double tempx = x;
+	double Ly = Ny*dx;
+	if(y > Ly){
+		tempy = fmod(y, Ly);
+	} else if(y < 0){
+		tempy = Ly - fmod(-y,Ly);
+	}
+
+	int indexy = int(tempy/dx);
+
+	double upstreamLx = upstreamNx*dx;
+	double middleLx = middleNx*dx;
+	double downstreamLx = downstreamNx*dx;
+
+	if(x > middleLx){
+		tempx = fmod(x - middleLx,upstreamLx);
+		int indexx = int(tempx/dx);
+		Ex = upstreamE[indexx][indexy][0];
+		Ey = upstreamE[indexx][indexy][1];
+		Ez = upstreamE[indexx][indexy][2];
+		Bx = upstreamB[indexx][indexy][0];
+		By = upstreamB[indexx][indexy][1];
+		Bz = upstreamB[indexx][indexy][2];
+	} else if(x >= 0){
+		int indexx = int(x/dx);
+		Ex = middleE[indexx][indexy][0];
+		Ey = middleE[indexx][indexy][1];
+		Ez = middleE[indexx][indexy][2];
+		Bx = middleB[indexx][indexy][0];
+		By = middleB[indexx][indexy][1];
+		Bz = middleB[indexx][indexy][2];
+	} else {
+		tempx = downstreamLx - fmod(-x,downstreamLx);
+		int indexx = int(tempx/dx);
+		Ex = downstreamE[indexx][indexy][0];
+		Ey = downstreamE[indexx][indexy][1];
+		Ez = downstreamE[indexx][indexy][2];
+		Bx = downstreamB[indexx][indexy][0];
+		By = downstreamB[indexx][indexy][1];
+		Bz = downstreamB[indexx][indexy][2];
+	}
+
 }
 
-void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, const double& Bx, const double& By, const double& Bz, const double& dt){
+void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, const double& Bx, const double& By, const double& Bz, const double& dt, double m){
 	double	Bnorm = sqrt(Bx*Bx + By*By + Bz*Bz);
 	x = x + vx*dt;
 	y = y + vy*dt;
@@ -149,21 +207,21 @@ void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, c
 	}
 }
 
-void moveBoris(double& x, double& y, double& z, double& vx, double& vy, double& vz, const double& Bx, const double& By, const double& Bz, const double& Ex, const double& Ey, const double& Ez, const double& dt){
+void moveBoris(double& x, double& y, double& z, double& px, double& py, double& pz, const double& Bx, const double& By, const double& Bz, const double& Ex, const double& Ey, const double& Ez, const double& dt, double m){
 	double qdt2 = q * dt * 0.5;
 
 	double dpx = Ex*qdt2;
 	double dpy = Ey*qdt2;
 	double dpz = Ez*qdt2;
 
-	double v2 = vx*vx + vy*vy + vz*vz;
-	double gamma = 1.0/sqrt(1 - v2/c2);
 
-	double px = m*vx*gamma + dpx;
-	double py = m*vy*gamma + dpy;
-	double pz = m*vz*gamma + dpz;
+	px = px + dpx;
+	py = py + dpy;
+	pz = pz + dpz;
 
 	double p2 = px * px + py * py + pz * pz;
+
+	double gamma = sqrt(1 + p2/(m*m*c*c));
 
 	double beta  = q*dt/(2*m*c);//todo???
 
@@ -182,11 +240,11 @@ void moveBoris(double& x, double& y, double& z, double& vx, double& vy, double& 
 	pz = pz + (tempMomentumX*By - tempMomentumY*Bx)*fBetaShift + dpz;
 
 	p2 = px * px + py * py + pz * pz;
-	gamma = sqrt(p2/(m*m*c2) + 1);
+	gamma = sqrt(p2/(m*m*c*c) + 1);
 
-	vx = px/(m*gamma);
-	vy = py/(m*gamma);
-	vz = pz/(m*gamma);
+	double vx = px/(m*gamma);
+	double vy = py/(m*gamma);
+	double vz = pz/(m*gamma);
 
 	x = x + vx*dt;
 	y = y + vy*dt;
@@ -195,12 +253,14 @@ void moveBoris(double& x, double& y, double& z, double& vx, double& vy, double& 
 
 int main(int argc, char** argv){
 	const int Nt = 10000;
-	const int chch = 1000;
+	const int chch = 10000;
 
 	const int Nxmodes = 4;
 	const int Nymodes = 4;
 	double dt;
 	
+	double*** B;
+	double*** E;
 	double*** middleB;
 	double*** middleE;
 	double*** upstreamB;
@@ -208,12 +268,15 @@ int main(int argc, char** argv){
 	double*** downstreamB;
 	double*** downstreamE;
 
+	double* juttnerValue;
+	double* juttnerFunction;
+	int juttnerN = 100;
+
 	int Ny;
+	int Nx;
 	int middleNx;
 	int upstreamNx;
 	int downstreamNx;
-
-	double dx;
 
 	double vx, vy, vz;
 	double x, y, z;
@@ -228,11 +291,141 @@ int main(int argc, char** argv){
 	double gammaFrame = 1.5;
 	double vframe = c*sqrt(1.0 -1.0/(gammaFrame*gammaFrame));
 	//double Bmean = sqrt((B0x*B0x + B0y*B0y + B0z*B0z)/(1.0 - turbulenceFraction));
-	double omega = Bmeansqr*q/(gamma*m*c);
+	double omega = Bmeansqr*q/(gamma*massElectron*c);
 	double rg = v/omega;
 	dt = 0.1/omega;
+	double dx = 1E6;
 
 	turbulenceLength = 0.1*rg;
+
+	Nx = 5000;
+	Ny = 100;
+	downstreamNx = 1000;
+	middleNx = 1000;
+	upstreamNx = 1000;
+	int startDownstreamIndex = 100;
+	int startMiddleIndex = startDownstreamIndex + downstreamNx;
+	int startUpstreamIndex = startMiddleIndex + middleNx;
+
+
+	B = new double**[Nx];
+	E = new double**[Nx];
+	for(int i = 0; i < Nx; ++i){
+		B[i] = new double*[Ny];
+		E[i] = new double*[Ny];
+		for(int j = 0; j < Ny; ++j){
+			B[i][j] = new double[3];
+			E[i][j] = new double[3];
+			for(int k = 0; k < 3; ++k){
+				B[i][j][k] = 0;
+				E[i][j][k] = 0;
+			}
+		}
+	}
+
+	printf("reading input\n");
+
+	double fieldScale = 1.0;
+
+	FILE* Bxfile = fopen("Bx.dat","r");
+	for(int i = 0; i < Nx; ++i){
+		for(int j = 0; j < Ny; ++j){
+			fscanf(Bxfile,"%lf",&B[i][j][0]);
+			B[i][j][0] *= fieldScale;
+		}
+	}
+	fclose(Bxfile);
+	FILE* Byfile = fopen("By.dat","r");
+	for(int i = 0; i < Nx; ++i){
+		for(int j = 0; j < Ny; ++j){
+			fscanf(Byfile,"%lf",&B[i][j][1]);
+			B[i][j][1] *= fieldScale;
+		}
+	}
+	fclose(Byfile);
+	FILE* Bzfile = fopen("Bz.dat","r");
+	for(int i = 0; i < Nx; ++i){
+		for(int j = 0; j < Ny; ++j){
+			fscanf(Bzfile,"%lf",&B[i][j][2]);
+			B[i][j][2] *= fieldScale;
+		}
+	}
+	fclose(Bzfile);
+
+	FILE* Exfile = fopen("Ex.dat","r");
+	for(int i = 0; i < Nx; ++i){
+		for(int j = 0; j < Ny; ++j){
+			fscanf(Exfile,"%lf",&E[i][j][0]);
+			E[i][j][0] *= fieldScale;
+		}
+	}
+	fclose(Exfile);
+	FILE* Eyfile = fopen("Ey.dat","r");
+	for(int i = 0; i < Nx; ++i){
+		for(int j = 0; j < Ny; ++j){
+			fscanf(Eyfile,"%lf",&E[i][j][1]);
+			E[i][j][1] *= fieldScale;
+		}
+	}
+	fclose(Eyfile);
+	FILE* Ezfile = fopen("Ez.dat","r");
+	for(int i = 0; i < Nx; ++i){
+		for(int j = 0; j < Ny; ++j){
+			fscanf(Ezfile,"%lf",&E[i][j][2]);
+			E[i][j][2] *= fieldScale;
+		}
+	}
+	fclose(Ezfile);
+
+	printf("initializing fields\n");
+
+	upstreamB = new double**[upstreamNx];
+	upstreamE = new double**[upstreamNx];
+	for(int i = 0; i < upstreamNx; ++i){
+		upstreamB[i] = new double*[Ny];
+		upstreamE[i] = new double*[Ny];
+		for(int j = 0; j < Ny; ++j){
+			upstreamB[i][j] = new double[3];
+			upstreamE[i][j] = new double[3];
+			for(int k = 0; k < 3; ++k){
+				upstreamB[i][j][k] = B[startUpstreamIndex + i][j][k];
+				upstreamE[i][j][k] = E[startUpstreamIndex + i][j][k];
+			}
+		}
+	}
+
+	downstreamB = new double**[downstreamNx];
+	downstreamE = new double**[downstreamNx];
+	for(int i = 0; i < downstreamNx; ++i){
+		downstreamB[i] = new double*[Ny];
+		downstreamE[i] = new double*[Ny];
+		for(int j = 0; j < Ny; ++j){
+			downstreamB[i][j] = new double[3];
+			downstreamE[i][j] = new double[3];
+			for(int k = 0; k < 3; ++k){
+				downstreamB[i][j][k] = B[startDownstreamIndex + i][j][k];
+				downstreamE[i][j][k] = E[startDownstreamIndex + i][j][k];
+			}
+		}
+	}
+
+	middleB = new double**[middleNx];
+	middleE = new double**[middleNx];
+	for(int i = 0; i < middleNx; ++i){
+		middleB[i] = new double*[Ny];
+		middleE[i] = new double*[Ny];
+		for(int j = 0; j < Ny; ++j){
+			middleB[i][j] = new double[3];
+			middleE[i][j] = new double[3];
+			for(int k = 0; k < 3; ++k){
+				middleB[i][j][k] = B[startMiddleIndex + i][j][k];
+				middleE[i][j][k] = E[startMiddleIndex + i][j][k];
+			}
+		}
+	}
+
+	outputField("outBx.dat","outBy.dat","outBz.dat", downstreamB, middleB, upstreamB, downstreamNx, middleNx, upstreamNx, Ny);
+	outputField("outEx.dat","outEy.dat","outEz.dat", downstreamE, middleE, upstreamE, downstreamNx, middleNx, upstreamNx, Ny);
 
 	double* meanSqrX = new double[Nt];
 
@@ -261,10 +454,13 @@ int main(int argc, char** argv){
 	fclose(information);
 
 	//FILE* out = fopen("trajectory.dat","w");
-	int writeParameter = 1;
+	int writeParameter = 100;
 
 	srand(time(NULL));
 	randomSeed = rand();
+	//randomSeed = 4935;
+	printf("random seed = %d\n",randomSeed);
+	srand(randomSeed);
 
 	for(int i = 0; i <= Nxmodes; ++i) {
 		for(int j = 0; j <= Nymodes; ++j) {
@@ -273,22 +469,74 @@ int main(int argc, char** argv){
 		}
 	}
 
+	double temperature = 10*massElectron*c*c/kBoltzman;
+	juttnerValue = new double[juttnerN];
+	juttnerFunction = new double[juttnerN];
+	for(int i = 0; i < juttnerN; ++i){
+		juttnerValue[i] = 0;
+		juttnerFunction[i] = 0;
+	}
+	evaluateJuttnerFunction(juttnerValue, juttnerFunction, temperature, massElectron, juttnerN);
+
+	double** coordinates = new double*[chch];
+	double** momentum = new double*[chch];
+	for(int i = 0; i < chch; ++i){
+		coordinates[i] = new double[3];
+		momentum[i] = new double[3];
+		for(int j = 0; j < 3; ++j){
+			coordinates[i][j] = 0;
+			momentum[i][j] = 0;
+		}
+	}
+
 	FILE* outTrajectory = fopen("trajectories.dat", "w");
 	for(int pcount = 0; pcount < chch; ++pcount){
 		printf("particle %d\n", pcount);
-		double theta = pi*uniformDistribution();
-		double phi = 2*pi*uniformDistribution();
-		printf("theta = %g, phi = %g\n", theta, phi);
 
-	
-
-		vx = v*cos(theta);
-		vy = v*sin(theta)*cos(phi);
-		vz = v*sin(theta)*sin(phi);
-		x = 0;
-		y = 0;
+		x = uniformDistribution()*middleNx*dx;
+		y = uniformDistribution()*Ny*dx;
 		z = 0;
-		for(int i = 0; i < Nt; ++i){
+
+		double px = 0;
+		double py = 0;
+		double pz = 0;
+
+		createParticle(px, py, pz, temperature, massElectron, juttnerValue, juttnerFunction, juttnerN);
+
+		double p2 = px*px + py*py + pz*pz;
+		double gamma = sqrt(1 + p2/(massElectron*massElectron*c*c));
+
+		vx = px/(gamma*massElectron);
+		vy = py/(gamma*massElectron);
+		vz = pz/(gamma*massElectron);
+
+		coordinates[pcount][0] = x;
+		coordinates[pcount][1] = y;
+		coordinates[pcount][2] = z;
+		momentum[pcount][0] = px;
+		momentum[pcount][1] = py;
+		momentum[pcount][2] = pz;
+	}
+
+	int currentWriteNumber = 0;
+	
+	for(int i = 0; i < Nt; ++i){
+		printf("iteration %d\n", i);
+		if(i%writeParameter == 0){
+			printf("outputing %d\n",currentWriteNumber);
+			std::string fileNumber = std::string("_") + convertIntToString(currentWriteNumber);
+			outputDistribution(("distribution" + fileNumber + ".dat").c_str(), momentum, chch);
+			currentWriteNumber++;
+		}
+		for(int pcount = 0; pcount < chch; ++pcount){
+
+			x = coordinates[pcount][0];
+			y = coordinates[pcount][1];
+			z = coordinates[pcount][2];
+			double px = momentum[pcount][0];
+			double py = momentum[pcount][1];
+			double pz = momentum[pcount][2];
+
 			meanSqrX[i] += x*x/chch;
 			//if(i%1000 == 0){
 			//	printf("interation %d\n", i);
@@ -300,9 +548,17 @@ int main(int argc, char** argv){
 			}
 			double Ex, Ey, Ez;
 			//getBfield(x, y, z, Bx, By, Bz, B0x, B0y, B0z, Nxmodes, Nymodes, phases);
-			getEandBfield(x, y, z, Ex, Ey, Ez, Bx, By, Bz);
-			//move(x, y, z, vx, vy, vz, Bx, By, Bz, dt);
-			moveBoris(x, y, z, vx, vy, vz, Bx, By, Bz, Ex, Ey, Ez, dt);
+			getEandBfield(x, y, z, Ex, Ey, Ez, Bx, By, Bz, downstreamE, downstreamB, middleE, middleB, upstreamE, upstreamB, downstreamNx, middleNx, upstreamNx, Ny, dx);
+			//move(x, y, z, vx, vy, vz, Bx, By, Bz, dt, massElectron);
+
+			moveBoris(x, y, z, px, py, pz, Bx, By, Bz, Ex, Ey, Ez, dt,massElectron);
+
+			coordinates[pcount][0] = x;
+			coordinates[pcount][1] = y;
+			coordinates[pcount][2] = z;
+			momentum[pcount][0] = px;
+			momentum[pcount][1] = py;
+			momentum[pcount][2] = pz;
 		}
 		fprintf(outTrajectory, "\n");
 	}
@@ -317,6 +573,13 @@ int main(int argc, char** argv){
 	fclose(out);
 	delete[] meanSqrX;
 
+	for(int i = 0;i < chch; ++i){
+		delete[] coordinates[i];
+		delete[] momentum[i];
+	}
+	delete[] coordinates;
+	delete[] momentum;
+
 	for(int i = 0; i <= Nxmodes; ++i) {
 		for(int j = 0; j <= Nymodes; ++j) {
 			delete[] phases[i][j];
@@ -324,6 +587,53 @@ int main(int argc, char** argv){
 		delete[] phases[i];
 	}
 	delete[] phases;
+
+	delete[] juttnerValue;
+	delete[] juttnerFunction;
+
+	for(int i = 0; i < Nx; ++i){
+		for(int j = 0; j < Ny; ++j){
+			delete[] B[i][j];
+			delete[] E[i][j];
+		}
+		delete[] B[i];
+		delete[] E[i];
+	}
+	delete[] B;
+	delete[] E;
+
+	for(int i = 0; i < upstreamNx; ++i){
+		for(int j = 0; j < Ny; ++j){
+			delete[] upstreamB[i][j];
+			delete[] upstreamE[i][j];
+		}
+		delete[] upstreamB[i];
+		delete[] upstreamE[i];
+	}
+	delete[] upstreamB;
+	delete[] upstreamE;
+
+	for(int i = 0; i < downstreamNx; ++i){
+		for(int j = 0; j < Ny; ++j){
+			delete[] downstreamB[i][j];
+			delete[] downstreamE[i][j];
+		}
+		delete[] downstreamB[i];
+		delete[] downstreamE[i];
+	}
+	delete[] downstreamB;
+	delete[] downstreamE;
+
+	for(int i = 0; i < middleNx; ++i){
+		for(int j = 0; j < Ny; ++j){
+			delete[] middleB[i][j];
+			delete[] middleE[i][j];
+		}
+		delete[] middleB[i];
+		delete[] middleE[i];
+	}
+	delete[] middleB;
+	delete[] middleE;
 
 	/*FILE* field = fopen("field.dat","w");
 
