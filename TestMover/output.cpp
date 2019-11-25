@@ -86,15 +86,18 @@ void outputField(const char* fileNameX, const char* fileNameY, const char* fileN
 	FILE* outFileX = fopen(fileNameX, "w");
 	FILE* outFileY = fopen(fileNameY, "w");
 	FILE* outFileZ = fopen(fileNameZ, "w");
-	for(int i = 0; i < downstreamNx; ++i){
-		for(int j = 0; j < Ny; ++j){
-			fprintf(outFileX,"%g ", downstreamField[i][j][0]);
-			fprintf(outFileY,"%g ", downstreamField[i][j][1]);
-			fprintf(outFileZ,"%g ", downstreamField[i][j][2]);
+	int maxK = 3;
+	for(int k = 0; k < maxK; ++k){
+		for(int i = 0; i < downstreamNx; ++i){
+			for(int j = 0; j < Ny; ++j){
+				fprintf(outFileX,"%g ", downstreamField[i][j][0]);
+				fprintf(outFileY,"%g ", downstreamField[i][j][1]);
+				fprintf(outFileZ,"%g ", downstreamField[i][j][2]);
+			}
+			fprintf(outFileX,"\n");
+			fprintf(outFileY,"\n");
+			fprintf(outFileZ,"\n");
 		}
-		fprintf(outFileX,"\n");
-		fprintf(outFileY,"\n");
-		fprintf(outFileZ,"\n");
 	}
 	for(int i = 0; i < middleNx; ++i){
 		for(int j = 0; j < Ny; ++j){
@@ -106,15 +109,17 @@ void outputField(const char* fileNameX, const char* fileNameY, const char* fileN
 		fprintf(outFileY,"\n");
 		fprintf(outFileZ,"\n");
 	}
-	for(int i = 0; i < upstreamNx; ++i){
-		for(int j = 0; j < Ny; ++j){
-			fprintf(outFileX,"%g ", upstreamField[i][j][0]);
-			fprintf(outFileY,"%g ", upstreamField[i][j][1]);
-			fprintf(outFileZ,"%g ", upstreamField[i][j][2]);
+	for(int k = 0; k < maxK; ++k){
+		for(int i = 0; i < upstreamNx; ++i){
+			for(int j = 0; j < Ny; ++j){
+				fprintf(outFileX,"%g ", upstreamField[i][j][0]);
+				fprintf(outFileY,"%g ", upstreamField[i][j][1]);
+				fprintf(outFileZ,"%g ", upstreamField[i][j][2]);
+			}
+			fprintf(outFileX,"\n");
+			fprintf(outFileY,"\n");
+			fprintf(outFileZ,"\n");
 		}
-		fprintf(outFileX,"\n");
-		fprintf(outFileY,"\n");
-		fprintf(outFileZ,"\n");
 	}
 	fclose(outFileX);
 	fclose(outFileY);

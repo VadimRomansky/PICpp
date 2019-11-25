@@ -8,11 +8,6 @@
 #include "output.h"
 #include "distribution.h"
 
-const double q = 4.803529695E-10;
-const double gamma = 100;
-const double Bmeansqr = 1.0;
-const double turbulenceFraction = 0.9;
-double turbulenceLength;
 int randomSeed;
 
 double power(const double& v, const double& p) {
@@ -52,6 +47,9 @@ double evaluateTurbulentB(const double& kx, const double& ky, const double& kz){
 
 void getBfield(const double& x, const double& y, const double& z, double& Bx, double& By, double& Bz, double& B0x, double& B0y, double& B0z, const int Nxmodes, const int Nymodes, double*** phases){
 	//srand(randomSeed);
+	double turbulenceLength = 1.0;////todo!!
+	double turbulenceFraction = 0.9;
+
 	double dk = 2*pi/turbulenceLength;
 	Bx = B0x;
 	By = B0y;
@@ -163,6 +161,7 @@ void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, c
 	x = x + vx*dt;
 	y = y + vy*dt;
 	z = z + vz*dt;
+	double gamma = 1.0/sqrt(1 - (vx*vx + vy*vy + vz*vz)/(c*c));
 	double tempvx = vx;
 	double tempvy = vy;
 	double tempvz = vz;
@@ -171,7 +170,7 @@ void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, c
 		double ey = By/Bnorm;
 		double ez = Bz/Bnorm;
 
-		double dphi = -q*Bnorm*dt/(gamma*m*c);
+		double dphi = -electron_charge*Bnorm*dt/(gamma*m*c);
 				
 		double sindphi = sin(dphi);
 		double cosdphi = cos(dphi);
@@ -208,7 +207,7 @@ void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, c
 }
 
 void moveBoris(double& x, double& y, double& z, double& px, double& py, double& pz, const double& Bx, const double& By, const double& Bz, const double& Ex, const double& Ey, const double& Ez, const double& dt, double m){
-	double qdt2 = q * dt * 0.5;
+	double qdt2 = -electron_charge * dt * 0.5;
 
 	double dpx = Ex*qdt2;
 	double dpy = Ey*qdt2;
@@ -223,7 +222,7 @@ void moveBoris(double& x, double& y, double& z, double& px, double& py, double& 
 
 	double gamma = sqrt(1 + p2/(m*m*c*c));
 
-	double beta  = q*dt/(2*m*c);//todo???
+	double beta  = -electron_charge*dt/(2*m*c);//todo???
 
 	double betaShift = beta / gamma;
 	double B2 = sqrt(Bx*Bx + By*By + Bz*Bz);
@@ -252,12 +251,11 @@ void moveBoris(double& x, double& y, double& z, double& px, double& py, double& 
 }
 
 int main(int argc, char** argv){
-	const int Nt = 10000;
-	const int chch = 10000;
+	const int Nt = 100000;
+	const int chch = 50000;
 
 	const int Nxmodes = 4;
 	const int Nymodes = 4;
-	double dt;
 	
 	double*** B;
 	double*** E;
@@ -283,26 +281,28 @@ int main(int argc, char** argv){
 	double Bx, By, Bz;
 	double B0x, B0y, B0z;
 
-	B0x = 0;
-	B0y = 0;
-	B0z = Bmeansqr*sqrt(1.0 - turbulenceFraction);
-
-	double v = c*sqrt(1.0 - 1.0/(gamma*gamma));
+	double sigma = 4.0;
 	double gammaFrame = 1.5;
+	double n = 1;
+	double ntristan = 2;//0.5*ppc0
+	double ctristan = 0.45;
+	double metristan = 1.0;
+	double omega_pe = sqrt(4*pi*n*electron_charge*electron_charge/(gammaFrame*massElectron));
 	double vframe = c*sqrt(1.0 -1.0/(gammaFrame*gammaFrame));
-	//double Bmean = sqrt((B0x*B0x + B0y*B0y + B0z*B0z)/(1.0 - turbulenceFraction));
-	double omega = Bmeansqr*q/(gamma*massElectron*c);
-	double rg = v/omega;
-	dt = 0.1/omega;
-	double dx = 1E6;
+	double Bmeansqr = sqrt(gammaFrame*n*(1+massElectron/massProtonReal)*c*c*(massElectron)*sigma);
+	double omega_ce = Bmeansqr*electron_charge/(gammaFrame*massElectron*c);
+	double fieldScale = sqrt(4*pi*(n/ntristan)*(massElectron/metristan)*c*c/(0.45*0.45));
 
-	turbulenceLength = 0.1*rg;
+	double dx = 0.2*c/omega_pe;
+
+	double dt = 0.45*0.2/omega_pe;
+
 
 	Nx = 5000;
 	Ny = 100;
-	downstreamNx = 1000;
+	downstreamNx = 300;
 	middleNx = 1000;
-	upstreamNx = 1000;
+	upstreamNx = 2000;
 	int startDownstreamIndex = 100;
 	int startMiddleIndex = startDownstreamIndex + downstreamNx;
 	int startUpstreamIndex = startMiddleIndex + middleNx;
@@ -324,8 +324,6 @@ int main(int argc, char** argv){
 	}
 
 	printf("reading input\n");
-
-	double fieldScale = 1.0;
 
 	FILE* Bxfile = fopen("Bx.dat","r");
 	for(int i = 0; i < Nx; ++i){
@@ -446,15 +444,12 @@ int main(int argc, char** argv){
 	
 
 	FILE* information = fopen("information.dat","w");
-	fprintf(information, "rg = %g\n", rg);
-	fprintf(information, "omega = %g\n", omega);
 	fprintf(information, "dt = %g\n", dt);
-	fprintf(information, "lambda/rg = %g\n", turbulenceLength/rg);
 	fprintf(information, "randomSeed = %d\n", randomSeed);
 	fclose(information);
 
 	//FILE* out = fopen("trajectory.dat","w");
-	int writeParameter = 100;
+	int writeParameter = 10000;
 
 	srand(time(NULL));
 	randomSeed = rand();
@@ -541,7 +536,6 @@ int main(int argc, char** argv){
 			//if(i%1000 == 0){
 			//	printf("interation %d\n", i);
 			//}
-			v = c*sqrt(1.0 - 1.0/(gamma*gamma));
 			if(i%writeParameter == 0){
 				double xshift = (x - vframe*i*dt)*gammaFrame;
 				fprintf(outTrajectory, "%g ", x);
