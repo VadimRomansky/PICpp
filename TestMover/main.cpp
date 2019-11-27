@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "math.h"
+#include <omp.h>
 #include <string>
 
 #include "constants.h"
@@ -207,6 +208,7 @@ void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, c
 }
 
 void moveBoris(double& x, double& y, double& z, double& px, double& py, double& pz, const double& Bx, const double& By, const double& Bz, const double& Ex, const double& Ey, const double& Ez, const double& dt, double m){
+	
 	double qdt2 = -electron_charge * dt * 0.5;
 
 	double dpx = Ex*qdt2;
@@ -250,9 +252,32 @@ void moveBoris(double& x, double& y, double& z, double& px, double& py, double& 
 	z = z + vz*dt;
 }
 
+void LorentzTransformationFields(double*** E, double*** B, double u, int Nx, int Ny){
+	double gamma = 1.0/sqrt(1 - u*u/(c*c));
+	for(int i = 0; i < Nx; ++i){
+		for(int j = 0; j < Ny; ++j){
+			double tempBx = B[i][j][0];
+			double tempBy = gamma*(B[i][j][1] + u*E[i][j][2]/c);
+			double tempBz = gamma*(B[i][j][2] - u*E[i][j][1]/c);
+
+			double tempEx = E[i][j][0];
+			double tempEy = gamma*(E[i][j][1] - u*B[i][j][2]/c);
+			double tempEz = gamma*(E[i][j][2] + u*B[i][j][1]/c);
+
+			B[i][j][0] = tempBx;
+			B[i][j][1] = tempBy;
+			B[i][j][2] = tempBz;
+
+			E[i][j][0] = tempEx;
+			E[i][j][1] = tempEy;
+			E[i][j][2] = tempEz;
+		}
+	}
+}
+
 int main(int argc, char** argv){
-	const int Nt = 100000;
-	const int chch = 50000;
+	const int Nt = 1000000;
+	const int chch = 200000;
 
 	const int Nxmodes = 4;
 	const int Nymodes = 4;
@@ -377,6 +402,8 @@ int main(int argc, char** argv){
 
 	printf("initializing fields\n");
 
+	LorentzTransformationFields(E, B, 0.206*c, Nx, Ny);
+
 	upstreamB = new double**[upstreamNx];
 	upstreamE = new double**[upstreamNx];
 	for(int i = 0; i < upstreamNx; ++i){
@@ -486,7 +513,9 @@ int main(int argc, char** argv){
 
 	FILE* outTrajectory = fopen("trajectories.dat", "w");
 	for(int pcount = 0; pcount < chch; ++pcount){
-		printf("particle %d\n", pcount);
+		if(pcount%100 == 0){
+			printf("particle %d\n", pcount);
+		}
 
 		x = uniformDistribution()*middleNx*dx;
 		y = uniformDistribution()*Ny*dx;
@@ -523,7 +552,9 @@ int main(int argc, char** argv){
 			outputDistribution(("distribution" + fileNumber + ".dat").c_str(), momentum, chch);
 			currentWriteNumber++;
 		}
-		for(int pcount = 0; pcount < chch; ++pcount){
+		int pcount = 0;
+		#pragma omp parallel for private(pcount)
+		for(pcount = 0; pcount < chch; ++pcount){
 
 			x = coordinates[pcount][0];
 			y = coordinates[pcount][1];
@@ -546,6 +577,10 @@ int main(int argc, char** argv){
 			//move(x, y, z, vx, vy, vz, Bx, By, Bz, dt, massElectron);
 
 			moveBoris(x, y, z, px, py, pz, Bx, By, Bz, Ex, Ey, Ez, dt,massElectron);
+			/*if(x < -downstreamNx*dx){
+				px = fabs(px);
+				x = -2*downstreamNx*dx - x;
+			}*/
 
 			coordinates[pcount][0] = x;
 			coordinates[pcount][1] = y;

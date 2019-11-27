@@ -1,5 +1,5 @@
 clear;
-distribution = importdata('distribution_99.dat');
+distribution = importdata('distribution_1.dat');
 
 Np = size(distribution,1);
 mp = 1.67262177E-24;
