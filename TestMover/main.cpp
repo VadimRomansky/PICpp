@@ -276,8 +276,9 @@ void LorentzTransformationFields(double*** E, double*** B, double u, int Nx, int
 }
 
 int main(int argc, char** argv){
+	//omp_set_num_threads(28);
 	const int Nt = 1000000;
-	const int chch = 200000;
+	const int chch = 100000;
 
 	const int Nxmodes = 4;
 	const int Nymodes = 4;
@@ -311,7 +312,7 @@ int main(int argc, char** argv){
 	double n = 1;
 	double ntristan = 2;//0.5*ppc0
 	double ctristan = 0.45;
-	double metristan = 1.0;
+	double metristan = 6.01485092E-03;//whyyyyy?
 	double omega_pe = sqrt(4*pi*n*electron_charge*electron_charge/(gammaFrame*massElectron));
 	double vframe = c*sqrt(1.0 -1.0/(gammaFrame*gammaFrame));
 	double Bmeansqr = sqrt(gammaFrame*n*(1+massElectron/massProtonReal)*c*c*(massElectron)*sigma);
@@ -322,7 +323,7 @@ int main(int argc, char** argv){
 
 	double dt = 0.45*0.2/omega_pe;
 
-
+	printf("start\n");
 	Nx = 5000;
 	Ny = 100;
 	downstreamNx = 300;
@@ -331,6 +332,8 @@ int main(int argc, char** argv){
 	int startDownstreamIndex = 100;
 	int startMiddleIndex = startDownstreamIndex + downstreamNx;
 	int startUpstreamIndex = startMiddleIndex + middleNx;
+
+	printf("init array Nx = %d Ny = %d\n", Nx, Ny);
 
 
 	B = new double**[Nx];
@@ -449,8 +452,8 @@ int main(int argc, char** argv){
 		}
 	}
 
-	outputField("outBx.dat","outBy.dat","outBz.dat", downstreamB, middleB, upstreamB, downstreamNx, middleNx, upstreamNx, Ny);
-	outputField("outEx.dat","outEy.dat","outEz.dat", downstreamE, middleE, upstreamE, downstreamNx, middleNx, upstreamNx, Ny);
+	outputField("./output/outBx.dat","./output/outBy.dat","./output/outBz.dat", downstreamB, middleB, upstreamB, downstreamNx, middleNx, upstreamNx, Ny);
+	outputField("./output/outEx.dat","./output/outEy.dat","./output/outEz.dat", downstreamE, middleE, upstreamE, downstreamNx, middleNx, upstreamNx, Ny);
 
 	double* meanSqrX = new double[Nt];
 
@@ -470,7 +473,7 @@ int main(int argc, char** argv){
 
 	
 
-	FILE* information = fopen("information.dat","w");
+	FILE* information = fopen("./output/information.dat","w");
 	fprintf(information, "dt = %g\n", dt);
 	fprintf(information, "randomSeed = %d\n", randomSeed);
 	fclose(information);
@@ -511,7 +514,7 @@ int main(int argc, char** argv){
 		}
 	}
 
-	FILE* outTrajectory = fopen("trajectories.dat", "w");
+	FILE* outTrajectory = fopen("./output/trajectories.dat", "w");
 	for(int pcount = 0; pcount < chch; ++pcount){
 		if(pcount%100 == 0){
 			printf("particle %d\n", pcount);
@@ -549,7 +552,7 @@ int main(int argc, char** argv){
 		if(i%writeParameter == 0){
 			printf("outputing %d\n",currentWriteNumber);
 			std::string fileNumber = std::string("_") + convertIntToString(currentWriteNumber);
-			outputDistribution(("distribution" + fileNumber + ".dat").c_str(), momentum, chch);
+			outputDistribution(("./output/distribution" + fileNumber + ".dat").c_str(), momentum, chch);
 			currentWriteNumber++;
 		}
 		int pcount = 0;
@@ -595,7 +598,7 @@ int main(int argc, char** argv){
 	fclose(outTrajectory);
 	//fclose(out);
 
-	FILE* out = fopen("meanx.dat","w");
+	FILE* out = fopen("./output/meanx.dat","w");
 	for(int i = 0; i < chch; ++i) {
 		fprintf(out, "%g %g\n", dt*i, meanSqrX[i]);
 	}

@@ -1,10 +1,10 @@
 clear;
-Bx =  importdata('outBx.dat');
-By =  importdata('outBy.dat');
-Bz =  importdata('outBz.dat');
-Ex =  importdata('outEx.dat');
-Ey =  importdata('outEy.dat');
-Ez =  importdata('outEz.dat');
+Bx =  importdata('./output/outBx.dat');
+By =  importdata('./output/outBy.dat');
+Bz =  importdata('./output/outBz.dat');
+Ex =  importdata('./output/outEx.dat');
+Ey =  importdata('./output/outEy.dat');
+Ez =  importdata('./output/outEz.dat');
 
 Nx = size(Bx,1);
 Ny = size(Bx,2);
