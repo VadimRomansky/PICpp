@@ -40,6 +40,16 @@ void createParticle(double& px, double& py, double& pz, double temperature, doub
 	}
 }
 
+void createFastParticle(double& px, double& py, double& pz, double mass, double gamma){
+	double p = mass*c*sqrt(gamma*gamma - 1.0);
+
+	pz = p * (2 * uniformDistribution() - 1);
+	double phi = 2 * pi * uniformDistribution();
+	double pnormal = sqrt(p * p - pz * pz);
+	px = pnormal * cos(phi);
+	py = pnormal * sin(phi);
+}
+
 double uniformDistribution() {
 	return (rand() % randomParameter + 0.5) / randomParameter;
 }

@@ -278,7 +278,8 @@ void LorentzTransformationFields(double*** E, double*** B, double u, int Nx, int
 int main(int argc, char** argv){
 	//omp_set_num_threads(28);
 	const int Nt = 1000000;
-	const int chch = 100000;
+	const int chch = 500000;
+	const int writeParameter = 10000;
 
 	const int Nxmodes = 4;
 	const int Nymodes = 4;
@@ -312,12 +313,14 @@ int main(int argc, char** argv){
 	double n = 1;
 	double ntristan = 2;//0.5*ppc0
 	double ctristan = 0.45;
-	double metristan = 6.01485092E-03;//whyyyyy?
+	double comp = 5;
+	double omp = ctristan/comp;
+	double metristan = omp*omp*gammaFrame/(ntristan*(1 + massElectron/massProtonReal));
 	double omega_pe = sqrt(4*pi*n*electron_charge*electron_charge/(gammaFrame*massElectron));
-	double vframe = c*sqrt(1.0 -1.0/(gammaFrame*gammaFrame));
+	double vframe = c*sqrt(1.0 - 1.0/(gammaFrame*gammaFrame));
 	double Bmeansqr = sqrt(gammaFrame*n*(1+massElectron/massProtonReal)*c*c*(massElectron)*sigma);
 	double omega_ce = Bmeansqr*electron_charge/(gammaFrame*massElectron*c);
-	double fieldScale = sqrt(4*pi*(n/ntristan)*(massElectron/metristan)*c*c/(0.45*0.45));
+	double fieldScale = sqrt(4*pi*(n/ntristan)*(massElectron/metristan)*c*c/(ctristan*ctristan));
 
 	double dx = 0.2*c/omega_pe;
 
@@ -479,7 +482,6 @@ int main(int argc, char** argv){
 	fclose(information);
 
 	//FILE* out = fopen("trajectory.dat","w");
-	int writeParameter = 10000;
 
 	srand(time(NULL));
 	randomSeed = rand();
@@ -529,6 +531,7 @@ int main(int argc, char** argv){
 		double pz = 0;
 
 		createParticle(px, py, pz, temperature, massElectron, juttnerValue, juttnerFunction, juttnerN);
+		//createFastParticle(px,py,pz, massElectron, 500);
 
 		double p2 = px*px + py*py + pz*pz;
 		double gamma = sqrt(1 + p2/(massElectron*massElectron*c*c));
@@ -546,6 +549,25 @@ int main(int argc, char** argv){
 	}
 
 	int currentWriteNumber = 0;
+
+	const int partWrite = 10;
+	int numbers[partWrite];
+	numbers[0] = 0;
+	numbers[1] = 10;
+	numbers[2] = 100;
+	numbers[3] = 1000;
+	numbers[4] = 2000;
+	numbers[5] = 3000;
+	numbers[6] = 4000;
+	numbers[7] = 5000;
+	numbers[8] = 10000;
+	numbers[9] = 20000;
+
+	for(int k = 0; k < partWrite; ++k){
+		std::string fileNumber = std::string("_") + convertIntToString(k);
+		FILE* file = fopen(("./output/trajectory" + fileNumber + ".dat").c_str(),"w");
+		fclose(file);
+	}
 	
 	for(int i = 0; i < Nt; ++i){
 		printf("iteration %d\n", i);
@@ -565,6 +587,17 @@ int main(int argc, char** argv){
 			double px = momentum[pcount][0];
 			double py = momentum[pcount][1];
 			double pz = momentum[pcount][2];
+
+			if(i %100 == 0){
+				for(int k = 0; k < partWrite; ++k){
+					if(pcount == numbers[k]){
+						std::string fileNumber = std::string("_") + convertIntToString(k);
+						FILE* file = fopen(("./output/trajectory" + fileNumber + ".dat").c_str(),"a");
+						fprintf(file, "%d %g %g %g %g %g %g\n", i, x, y, z, px, py, pz);
+						fclose(file);
+					}
+				}
+			}
 
 			meanSqrX[i] += x*x/chch;
 			//if(i%1000 == 0){

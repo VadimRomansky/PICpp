@@ -2,6 +2,7 @@
 #define DISTRIBUTION_H
 
 void createParticle(double& px, double& py, double& pz, double temperature, double mass, double* juttnerValue, double* juttnerFunction, int juttnerN);
+void createFastParticle(double& px, double& py, double& pz, double mass, double gamma);
 double uniformDistribution();
 double normalDistribution();
 double maxwellDistribution(const double& temperature, const double& k);
