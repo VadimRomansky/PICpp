@@ -277,8 +277,8 @@ void LorentzTransformationFields(double*** E, double*** B, double u, int Nx, int
 
 int main(int argc, char** argv){
 	//omp_set_num_threads(28);
-	const int Nt = 1000000;
-	const int chch = 500000;
+	const int Nt = 5000000;
+	const int chch = 50000;
 	const int writeParameter = 10000;
 
 	const int Nxmodes = 4;
@@ -408,7 +408,7 @@ int main(int argc, char** argv){
 
 	printf("initializing fields\n");
 
-	LorentzTransformationFields(E, B, 0.206*c, Nx, Ny);
+	LorentzTransformationFields(E, B, 0.22*c, Nx, Ny);
 
 	upstreamB = new double**[upstreamNx];
 	upstreamE = new double**[upstreamNx];
@@ -476,16 +476,17 @@ int main(int argc, char** argv){
 
 	
 
-	FILE* information = fopen("./output/information.dat","w");
-	fprintf(information, "dt = %g\n", dt);
-	fprintf(information, "randomSeed = %d\n", randomSeed);
-	fclose(information);
+
 
 	//FILE* out = fopen("trajectory.dat","w");
 
 	srand(time(NULL));
 	randomSeed = rand();
 	//randomSeed = 4935;
+	FILE* information = fopen("./output/information.dat","w");
+	fprintf(information, "dt = %g\n", dt);
+	fprintf(information, "randomSeed = %d\n", randomSeed);
+	fclose(information);
 	printf("random seed = %d\n",randomSeed);
 	srand(randomSeed);
 
@@ -576,6 +577,7 @@ int main(int argc, char** argv){
 			std::string fileNumber = std::string("_") + convertIntToString(currentWriteNumber);
 			outputDistribution(("./output/distribution" + fileNumber + ".dat").c_str(), momentum, chch);
 			currentWriteNumber++;
+			writeMaxParticles(("./output/numbers" + fileNumber + ".dat").c_str(), momentum, chch);
 		}
 		int pcount = 0;
 		#pragma omp parallel for private(pcount)

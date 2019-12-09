@@ -82,6 +82,63 @@ void outputDistribution(const char* outFileName, double** momentum, int chch){
 	fclose(outFile);
 }
 
+void writeMaxParticles(const char* fileName, double** momentum, int N){
+	FILE* outFile = fopen(fileName, "w");
+	const int Nwrite = 10;
+	int numbers[Nwrite];
+	for(int i = 0; i < Nwrite; ++i){
+		numbers[i] = i;
+	}
+	for(int i = 0; i < Nwrite - 1; ++i){
+		for(int j = 0; j < Nwrite - i - 1; ++j){
+			double p1 = momentum[numbers[Nwrite - i - 1]][0]*momentum[numbers[Nwrite - i - 1]][0]+
+				momentum[numbers[Nwrite - i - 1]][1]*momentum[numbers[Nwrite - i - 1]][1]+
+				momentum[numbers[Nwrite - i - 1]][2]*momentum[numbers[Nwrite - i - 1]][2];
+			double p2 = momentum[numbers[j]][0]*momentum[numbers[j]][0]+
+				momentum[numbers[j]][1]*momentum[numbers[j]][1]+
+				momentum[numbers[j]][2]*momentum[numbers[j]][2];
+			if(p2 > p1){
+				int temp = numbers[Nwrite - i - 1];
+				numbers[Nwrite - i - 1] = numbers[j];
+				numbers[j] = temp;
+			}
+		}
+	}
+
+	for(int k = Nwrite; k < N; ++k){
+		double p1 = momentum[k][0]*momentum[k][0]+
+				momentum[k][1]*momentum[k][1]+
+				momentum[k][2]*momentum[k][2];
+		double p2 = momentum[numbers[0]][0]*momentum[numbers[0]][0]+
+				momentum[numbers[0]][1]*momentum[numbers[0]][1]+
+				momentum[numbers[0]][2]*momentum[numbers[0]][2];
+		if(p1 > p2){
+			numbers[0] = k;
+			for(int i = 0; i < Nwrite - 1; ++i){
+				p1 = momentum[numbers[i]][0]*momentum[numbers[i]][0]+
+					momentum[numbers[i]][1]*momentum[numbers[i]][1]+
+					momentum[numbers[i]][2]*momentum[numbers[i]][2];
+				p2 = momentum[numbers[i+1]][0]*momentum[numbers[i+1]][0]+
+					momentum[numbers[i+1]][1]*momentum[numbers[i+1]][1]+
+					momentum[numbers[i+1]][2]*momentum[numbers[i+1]][2];
+				if(p1 > p2){
+					int temp = numbers[i];
+					numbers[i] = numbers[i+1];
+					numbers[i+1] = temp;
+				}
+			}
+		}
+	}
+
+	for(int i = 0; i < Nwrite; ++i){
+		double p1 = momentum[numbers[i]][0]*momentum[numbers[i]][0]+
+				momentum[numbers[i]][1]*momentum[numbers[i]][1]+
+				momentum[numbers[i]][2]*momentum[numbers[i]][2];
+		fprintf(outFile, "%d %g\n",numbers[i], sqrt(p1));
+	}
+	fclose(outFile);
+}
+
 void outputField(const char* fileNameX, const char* fileNameY, const char* fileNameZ, double*** downstreamField, double*** middleField, double*** upstreamField, int downstreamNx, int middleNx, int upstreamNx, int Ny){
 	FILE* outFileX = fopen(fileNameX, "w");
 	FILE* outFileY = fopen(fileNameY, "w");
