@@ -277,7 +277,7 @@ void LorentzTransformationFields(double*** E, double*** B, double u, int Nx, int
 
 int main(int argc, char** argv){
 	//omp_set_num_threads(28);
-	const int Nt = 5000000;
+	const int Nt = 10000000;
 	const int chch = 50000;
 	const int writeParameter = 10000;
 
@@ -408,7 +408,7 @@ int main(int argc, char** argv){
 
 	printf("initializing fields\n");
 
-	LorentzTransformationFields(E, B, 0.22*c, Nx, Ny);
+	LorentzTransformationFields(E, B, 0.18*c, Nx, Ny);
 
 	upstreamB = new double**[upstreamNx];
 	upstreamE = new double**[upstreamNx];
@@ -482,6 +482,7 @@ int main(int argc, char** argv){
 
 	srand(time(NULL));
 	randomSeed = rand();
+	srand(randomSeed);
 	//randomSeed = 4935;
 	FILE* information = fopen("./output/information.dat","w");
 	fprintf(information, "dt = %g\n", dt);
@@ -531,8 +532,8 @@ int main(int argc, char** argv){
 		double py = 0;
 		double pz = 0;
 
-		createParticle(px, py, pz, temperature, massElectron, juttnerValue, juttnerFunction, juttnerN);
-		//createFastParticle(px,py,pz, massElectron, 500);
+		//createParticle(px, py, pz, temperature, massElectron, juttnerValue, juttnerFunction, juttnerN);
+		createFastParticle(px,py,pz, massElectron, 100);
 
 		double p2 = px*px + py*py + pz*pz;
 		double gamma = sqrt(1 + p2/(massElectron*massElectron*c*c));
@@ -563,6 +564,18 @@ int main(int argc, char** argv){
 	numbers[7] = 5000;
 	numbers[8] = 10000;
 	numbers[9] = 20000;
+
+	bool readNumbers = false;
+	if(readNumbers){
+		FILE* file = fopen("numbers_10.dat","r");
+		int n;
+		double p;
+		for(int i = 0; i < partWrite; ++i){
+			fscanf(file, "%d %lf", &n, &p); 
+			numbers[i] = n;
+		}
+		fclose(file);
+	}
 
 	for(int k = 0; k < partWrite; ++k){
 		std::string fileNumber = std::string("_") + convertIntToString(k);

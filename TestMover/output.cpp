@@ -22,6 +22,7 @@ void outputDistribution(const char* outFileName, double** momentum, int chch){
 			}
 		}
 	}
+	maxMomentum = maxMomentum*1.1;
 
 	if(maxMomentum <= 0) {
 		maxMomentum = massElectron*c;

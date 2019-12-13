@@ -1,5 +1,5 @@
 clear;
-trajectory = importdata('./output/trajectory_3.dat');
+trajectory = importdata('./output/trajectory_9.dat');
 
 Nt = size(trajectory,1);
 
