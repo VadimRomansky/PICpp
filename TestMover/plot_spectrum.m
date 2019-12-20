@@ -1,6 +1,5 @@
 clear;
-distribution = importdata('./output/distribution_116.dat');
-
+distribution = importdata('./output/distribution_85.dat');
 Np = size(distribution,1);
 mp = 1.67262177E-24;
 me = mp/100;

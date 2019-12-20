@@ -111,6 +111,22 @@ void getBfield(const double& x, const double& y, const double& z, double& Bx, do
 }
 
 
+void getDipoleField(const double& x, const double& y, const double& z, double& Bx, double& By, double& Bz, const double& mux, const double& muy, const double& muz){
+	double r = sqrt(x*x + y*y + z*z);
+	double nx = x/r;
+	double ny = y/r;
+	double nz = z/r;
+
+	double mun = nx*mux + ny*muy + nz*muz;
+
+	double r3 = r*r*r;
+	
+	Bx = (3*mun*nx - mux)/r3;
+	By = (3*mun*ny - muy)/r3;
+	Bz = (3*mun*nz - muz)/r3;
+}
+
+
 void getEandBfield(const double& x, const double& y, const double& z, double& Ex, double& Ey, double& Ez, double& Bx, double& By, double& Bz, double*** downstreamE, double*** downstreamB, double*** middleE, double*** middleB, double*** upstreamE, double*** upstreamB, int downstreamNx, int middleNx, int upstreamNx, int Ny, double dx){
 	double tempy = y;
 	double tempx = x;
@@ -155,14 +171,24 @@ void getEandBfield(const double& x, const double& y, const double& z, double& Ex
 		Bz = downstreamB[indexx][indexy][2];
 	}
 
+	/*Ex = 0.0;
+	Ey = 0;
+	Ez = 0;
+	Bx = 0;
+	By = 0;
+	Bz = 1.0;*/
 }
 
-void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, const double& Bx, const double& By, const double& Bz, const double& dt, double m){
+void move(double& x, double& y, double& z, double& px, double& py, double& pz, const double& Bx, const double& By, const double& Bz, const double& dt, double m){
 	double	Bnorm = sqrt(Bx*Bx + By*By + Bz*Bz);
+	double p2 = px*px + py*py + pz*pz;
+	double gamma = sqrt(1.0 + p2/(m*m*c*c));
+	double vx = px/(m*gamma);
+	double vy = py/(m*gamma);
+	double vz = pz/(m*gamma);
 	x = x + vx*dt;
 	y = y + vy*dt;
 	z = z + vz*dt;
-	double gamma = 1.0/sqrt(1 - (vx*vx + vy*vy + vz*vz)/(c*c));
 	double tempvx = vx;
 	double tempvy = vy;
 	double tempvz = vz;
@@ -205,6 +231,10 @@ void move(double& x, double& y, double& z, double& vx, double& vy, double& vz, c
 	if(v > c){
 		printf("v > c\n");
 	}
+
+	px = vx*m*gamma;
+	py = vy*m*gamma;
+	pz = vz*m*gamma;
 }
 
 void moveBoris(double& x, double& y, double& z, double& px, double& py, double& pz, const double& Bx, const double& By, const double& Bz, const double& Ex, const double& Ey, const double& Ez, const double& dt, double m){
@@ -222,7 +252,7 @@ void moveBoris(double& x, double& y, double& z, double& px, double& py, double& 
 
 	double p2 = px * px + py * py + pz * pz;
 
-	double gamma = sqrt(1 + p2/(m*m*c*c));
+	double gamma = sqrt(1.0 + p2/(m*m*c*c));
 
 	double beta  = -electron_charge*dt/(2*m*c);//todo???
 
@@ -241,7 +271,7 @@ void moveBoris(double& x, double& y, double& z, double& px, double& py, double& 
 	pz = pz + (tempMomentumX*By - tempMomentumY*Bx)*fBetaShift + dpz;
 
 	p2 = px * px + py * py + pz * pz;
-	gamma = sqrt(p2/(m*m*c*c) + 1);
+	gamma = sqrt(p2/(m*m*c*c) + 1.0);
 
 	double vx = px/(m*gamma);
 	double vy = py/(m*gamma);
@@ -277,8 +307,8 @@ void LorentzTransformationFields(double*** E, double*** B, double u, int Nx, int
 
 int main(int argc, char** argv){
 	//omp_set_num_threads(28);
-	const int Nt = 10000000;
-	const int chch = 50000;
+	const int Nt = 100000;
+	const int chch = 500;
 	const int writeParameter = 10000;
 
 	const int Nxmodes = 4;
@@ -322,9 +352,11 @@ int main(int argc, char** argv){
 	double omega_ce = Bmeansqr*electron_charge/(gammaFrame*massElectron*c);
 	double fieldScale = sqrt(4*pi*(n/ntristan)*(massElectron/metristan)*c*c/(ctristan*ctristan));
 
+	int sampling = 20;
 	double dx = 0.2*c/omega_pe;
 
-	double dt = 0.45*0.2/omega_pe;
+	double dt = 0.1*0.2/omega_pe;
+	dt = 1E-5;
 
 	printf("start\n");
 	Nx = 5000;
@@ -482,8 +514,8 @@ int main(int argc, char** argv){
 
 	srand(time(NULL));
 	randomSeed = rand();
+	randomSeed = 4935;
 	srand(randomSeed);
-	//randomSeed = 4935;
 	FILE* information = fopen("./output/information.dat","w");
 	fprintf(information, "dt = %g\n", dt);
 	fprintf(information, "randomSeed = %d\n", randomSeed);
@@ -524,8 +556,10 @@ int main(int argc, char** argv){
 			printf("particle %d\n", pcount);
 		}
 
-		x = uniformDistribution()*middleNx*dx;
-		y = uniformDistribution()*Ny*dx;
+		x = uniformDistribution()*middleNx*dx*sampling;
+		y = uniformDistribution()*Ny*dx*sampling;
+		x = 1E10;
+		y = 0;
 		z = 0;
 
 		double px = 0;
@@ -533,10 +567,11 @@ int main(int argc, char** argv){
 		double pz = 0;
 
 		//createParticle(px, py, pz, temperature, massElectron, juttnerValue, juttnerFunction, juttnerN);
-		createFastParticle(px,py,pz, massElectron, 100);
+		createFastParticle(px,py,pz, massElectron, 2.0);
+		pz = px;
 
 		double p2 = px*px + py*py + pz*pz;
-		double gamma = sqrt(1 + p2/(massElectron*massElectron*c*c));
+		double gamma = sqrt(1.0 + p2/(massElectron*massElectron*c*c));
 
 		vx = px/(gamma*massElectron);
 		vy = py/(gamma*massElectron);
@@ -553,17 +588,18 @@ int main(int argc, char** argv){
 	int currentWriteNumber = 0;
 
 	const int partWrite = 10;
+	int writePartNumber = 50;
 	int numbers[partWrite];
 	numbers[0] = 0;
-	numbers[1] = 10;
-	numbers[2] = 100;
-	numbers[3] = 1000;
-	numbers[4] = 2000;
-	numbers[5] = 3000;
-	numbers[6] = 4000;
-	numbers[7] = 5000;
-	numbers[8] = 10000;
-	numbers[9] = 20000;
+	numbers[1] = 1;
+	numbers[2] = 2;
+	numbers[3] = 3;
+	numbers[4] = 4;
+	numbers[5] = 5;
+	numbers[6] = 6;
+	numbers[7] = 7;
+	numbers[8] = 8;
+	numbers[9] = 9;
 
 	bool readNumbers = false;
 	if(readNumbers){
@@ -603,31 +639,49 @@ int main(int argc, char** argv){
 			double py = momentum[pcount][1];
 			double pz = momentum[pcount][2];
 
-			if(i %100 == 0){
-				for(int k = 0; k < partWrite; ++k){
-					if(pcount == numbers[k]){
-						std::string fileNumber = std::string("_") + convertIntToString(k);
-						FILE* file = fopen(("./output/trajectory" + fileNumber + ".dat").c_str(),"a");
-						fprintf(file, "%d %g %g %g %g %g %g\n", i, x, y, z, px, py, pz);
-						fclose(file);
-					}
-				}
-			}
-
 			meanSqrX[i] += x*x/chch;
 			//if(i%1000 == 0){
 			//	printf("interation %d\n", i);
 			//}
+			
+			double Ex, Ey, Ez;
+			//getBfield(x, y, z, Bx, By, Bz, B0x, B0y, B0z, Nxmodes, Nymodes, phases);
+			//getEandBfield(x, y, z, Ex, Ey, Ez, Bx, By, Bz, downstreamE, downstreamB, middleE, middleB, upstreamE, upstreamB, downstreamNx, middleNx, upstreamNx, Ny, dx*sampling);
+			getDipoleField(x, y, z, Bx, By, Bz, 0, 0, 1E27);
+
+			double p2 = px*px + py*py + pz*pz;
+			double gamma = sqrt(1.0 + p2/(massElectron*massElectron*c*c));
+			double p = sqrt(p2);
+			double B = sqrt(Bx*Bx + By*By + Bz*Bz);
+
+			double rg = p*c/(electron_charge*B);
+			double r = sqrt(x*x + y*y + z*z);
+			double relation = rg/r;
+			double omega = electron_charge*B/(gamma*massElectron*c);
+			double timeRelation = dt*omega;
+
+			if(i %writePartNumber == 0){
+				for(int k = 0; k < partWrite; ++k){
+					if(pcount == numbers[k]){
+						std::string fileNumber = std::string("_") + convertIntToString(k);
+						FILE* file = fopen(("./output/trajectory" + fileNumber + ".dat").c_str(),"a");
+						double pb = px*Bx + py*By + pz*Bz;
+						double adiabaticInvariant = (p2 - (pb*pb/(B*B)))/B;
+						fprintf(file, "%d %g %g %g %g %g %g %g %g %g %g\n", i, x, y, z, px, py, pz, gamma, p2, B, adiabaticInvariant);
+						fclose(file);
+					}
+				}
+			}
 			if(i%writeParameter == 0){
 				double xshift = (x - vframe*i*dt)*gammaFrame;
 				fprintf(outTrajectory, "%g ", x);
 			}
-			double Ex, Ey, Ez;
-			//getBfield(x, y, z, Bx, By, Bz, B0x, B0y, B0z, Nxmodes, Nymodes, phases);
-			getEandBfield(x, y, z, Ex, Ey, Ez, Bx, By, Bz, downstreamE, downstreamB, middleE, middleB, upstreamE, upstreamB, downstreamNx, middleNx, upstreamNx, Ny, dx);
-			//move(x, y, z, vx, vy, vz, Bx, By, Bz, dt, massElectron);
 
-			moveBoris(x, y, z, px, py, pz, Bx, By, Bz, Ex, Ey, Ez, dt,massElectron);
+			//moveBoris(x, y, z, px, py, pz, Bx, By, Bz, Ex, Ey, Ez, dt,massElectron);
+			move(x, y, z, px, py, pz, Bx, By, Bz, dt, massElectron);
+			Ex = 0;
+			Ey = 0;
+			Ez = 0;
 			/*if(x < -downstreamNx*dx){
 				px = fabs(px);
 				x = -2*downstreamNx*dx - x;
