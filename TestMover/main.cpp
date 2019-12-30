@@ -282,6 +282,32 @@ void moveBoris(double& x, double& y, double& z, double& px, double& py, double& 
 	z = z + vz*dt;
 }
 
+void moveSimple(double& x, double& y, double& z, double& px, double& py, double& pz, const double& Bx, const double& By, const double& Bz, const double& Ex, const double& Ey, const double& Ez, const double& dt, double m){
+	
+	double qdt = -electron_charge * dt;
+	double p2 = px * px + py * py + pz * pz;
+
+	double gamma = sqrt(1.0 + p2/(m*m*c*c));
+
+	double vx = px/(m*gamma);
+	double vy = py/(m*gamma);
+	double vz = pz/(m*gamma);
+
+	double dpx = (Ex + (vy*Bz - vz*By)/c)*qdt;
+	double dpy = (Ey + (vz*Bx - vx*Bz)/c)*qdt;
+	double dpz = (Ez + (vx*By - vy*Bx)/c)*qdt;
+
+
+	px = px + dpx;
+	py = py + dpy;
+	pz = pz + dpz;
+
+
+	x = x + vx*dt;
+	y = y + vy*dt;
+	z = z + vz*dt;
+}
+
 void LorentzTransformationFields(double*** E, double*** B, double u, int Nx, int Ny){
 	double gamma = 1.0/sqrt(1 - u*u/(c*c));
 	for(int i = 0; i < Nx; ++i){
@@ -645,6 +671,9 @@ int main(int argc, char** argv){
 			//}
 			
 			double Ex, Ey, Ez;
+			Ex = 0;
+			Ey = 0;
+			Ez = 0;
 			//getBfield(x, y, z, Bx, By, Bz, B0x, B0y, B0z, Nxmodes, Nymodes, phases);
 			//getEandBfield(x, y, z, Ex, Ey, Ez, Bx, By, Bz, downstreamE, downstreamB, middleE, middleB, upstreamE, upstreamB, downstreamNx, middleNx, upstreamNx, Ny, dx*sampling);
 			getDipoleField(x, y, z, Bx, By, Bz, 0, 0, 1E27);
@@ -672,16 +701,14 @@ int main(int argc, char** argv){
 					}
 				}
 			}
-			if(i%writeParameter == 0){
+			/*if(i%writeParameter == 0){
 				double xshift = (x - vframe*i*dt)*gammaFrame;
 				fprintf(outTrajectory, "%g ", x);
-			}
+			}*/
 
 			//moveBoris(x, y, z, px, py, pz, Bx, By, Bz, Ex, Ey, Ez, dt,massElectron);
-			move(x, y, z, px, py, pz, Bx, By, Bz, dt, massElectron);
-			Ex = 0;
-			Ey = 0;
-			Ez = 0;
+			moveSimple(x, y, z, px, py, pz, Bx, By, Bz, Ex, Ey, Ez, dt,massElectron);
+			//move(x, y, z, px, py, pz, Bx, By, Bz, dt, massElectron);
 			/*if(x < -downstreamNx*dx){
 				px = fabs(px);
 				x = -2*downstreamNx*dx - x;
