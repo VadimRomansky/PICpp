@@ -68,8 +68,8 @@ int main()
 	double LmaxSlab = 1E7;
 	double Lmax2d = 1E7;
 
-	int Nslab = 100;
-	int N2d = 100;
+	int Nslab = 2000;
+	int N2d = 2000;
 
 	double integralSlab = (powerSlab + 1.0)*(-power(2*pi/LmaxSlab,powerSlab + 1.0) + power(2*pi*Nslab/LmaxSlab, powerSlab + 1.0));
 	double integral2d = (power2d + 1.0)*(-power(2*pi/Lmax2d,power2d + 1.0) + power(2*pi*N2d/Lmax2d, power2d + 1.0));
@@ -105,7 +105,7 @@ int main()
 	}
 	fclose(outFile);
 
-	FILE* outBx = fopen("Bx.dat","w");
+	/*FILE* outBx = fopen("Bx.dat","w");
 	FILE* outBy = fopen("By.dat","w");
 	FILE* outBz = fopen("Bz.dat","w");
 	FILE* outTheta = fopen("Theta.dat","w");
@@ -124,6 +124,9 @@ int main()
 			evaluateTurbulence(x, y, z, Lbox, Cslab, LmaxSlab, powerSlab, Nslab, C2d, Lmax2d, power2d, N2d, Bx, By, Bz);
 			Bz = Bz + B0;
 			double theta = acos(Bx/sqrt(Bx*Bx + By*By + Bz*Bz))*180/pi;
+			if(theta > 90.0){
+				theta = 180 - theta;
+			}
 			fprintf(outBx, "%lf ", Bx);
 			fprintf(outBy, "%lf ", By);
 			fprintf(outBz, "%lf ", Bz);
@@ -134,7 +137,10 @@ int main()
 		fprintf(outBz, "\n");
 		fprintf(outTheta, "\n");
 	}
-	fclose(outFile);
+	fclose(outBx);
+	fclose(outBy);
+	fclose(outBz);
+	fclose(outTheta);*/
 
 	return 0;
 }

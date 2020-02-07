@@ -5,7 +5,7 @@ load 'By.dat'
 load 'Bz.dat'
 load 'Theta.dat'
 
-Nx = size(Bx,2);
+Nx = size(Bx,1);
 Ny = size(Bx,2);
 
 figure(1);

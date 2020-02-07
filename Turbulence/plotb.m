@@ -1,8 +1,16 @@
 clear;
 
-load 'B.dat'
+B = importdata('B.dat');
 
 N = size(B,1);
+
+Ngood = 0;
+for i = 1:N,
+    if((B(i,4) < 30) || (B(i,4) > 150))
+        Ngood = Ngood + 1;
+    end;
+end;
+fractionGood = Ngood/N;
 
 figure(1);
 hold on;
