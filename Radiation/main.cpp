@@ -297,6 +297,8 @@ int main(int argc, char** argv) {
 	double* doplerInu = new double[Nnu];
 	double* Anu = new double[Nnu];
 
+	double distance = 40*3*1E24;
+
 	double sigma = 0.04;
 	double gamma0 = 1.5;
 	double v = speed_of_light * sqrt(1 - 1 / (gamma0 * gamma0));
@@ -414,12 +416,12 @@ int main(int argc, char** argv) {
 	double localB = (leftB + rightB)/2;
 	localConcentration = evaluateConcentrationFromB(localB, gamma0, sigma);
 	evaluateSpectrum(nu, Inu, Anu, Nnu, Ee, Fe, Np, minEnergy, maxEnergy, startElectronIndex, sinhi, localB, localConcentration, localSize);
-	double nuMax = 0;
+	double factor = 1;
+	/*double nuMax = 0;
 	int nuMaxIndex = 0;
 	findMaxNu(nuMaxIndex, Inu, Nnu);
 	nuMax = nu[nuMaxIndex];
 	int iterations = 0;
-	double factor = 1;
 	while(!converges) {
 		iterations++;
 		if(nuMax > augmaxx*1E9) {
@@ -461,10 +463,15 @@ int main(int argc, char** argv) {
 
 	printf("B august = %g\n", localB);
 	B[3] = localB;
-	n[3] = evaluateConcentrationFromB(localB, gamma0, sigma);
+	//B[3] = 1.0;
+	n[3] = evaluateConcentrationFromB(localB, gamma0, sigma);*/
 
 
 	//todo gradients
+
+
+	n[3] = 10.33;
+	B[3] = 0.46;
 
 	for (int i = 0; i < Npoints-1; ++i) {
 		B[i] = B[3] * size[3] / size[i];
@@ -497,10 +504,11 @@ int main(int argc, char** argv) {
 		std::string fileNumber = std::string(number);
 		FILE* output = fopen((fileName + fileNumber + ".dat").c_str(), "w");
 		delete[] number;
+		factor = localSize*localSize*localSize*1E26/(distance*distance);
 		for (int i = 0; i < Nnu; ++i) {
 			double sizeFactor = power(localSize/size[3], 2.75);
 			double totalInu = Inu[i]*sizeFactor;
-			fprintf(output, "%g %g %g %g %g %g %g %g\n", nu[i]/1E9, Inu[i], Anu[i] * localSize, totalInu, Inu[i]*factor, totalInu*factor, doplerInu[i]*factor, doplerInu[i]*sizeFactor*factor);
+			fprintf(output, "%g %g %g %g %g %g %g %g %g\n", nu[i]/1E9, Inu[i], Anu[i] * localSize, totalInu, Inu[i]*factor, totalInu*factor, doplerInu[i]*factor, doplerInu[i]*sizeFactor*factor, Inu[i]*localSize*localSize*localSize*1E26/(distance*distance));
 		}
 
 		fclose(output);
