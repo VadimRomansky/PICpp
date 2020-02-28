@@ -15,6 +15,7 @@ const double massProtonReal = 1.67262177E-24;
 const double massRatio = 25;
 //const double massElectron = massProtonReal/massRatio;
 const double massElectron = massElectronReal;
+const double fractionSize = 0.2;
 
 const int Napprox = 40;
 
@@ -63,6 +64,10 @@ double min(double a, double b) {
 	} else {
 		return b;
 	}
+}
+
+double uniformDistribution() {
+	return (rand() % 1024 + 0.5) / 1024;
 }
 
 double power(const double& v, const double& p) {
@@ -153,7 +158,6 @@ void evaluateSpectrum(double* nu, double* Inu, double* Anu, int Nnu, double* Ee,
 		}
 	}
 
-	double fractionSize = 0.2;
 	for (int i = 0; i < Nnu; ++i) {
 		Inu[i] = Inu[i] * (1 - exp(-Anu[i] * fractionSize * localSize)) / (Anu[i] * fractionSize * localSize);
 	}
@@ -210,14 +214,18 @@ double evaluateOptimizationFunction(double B, double n, double* Ee, double* Fe, 
 
 	evaluateSpectrum(nu, Inu, Anu, Nnu, Ee, Fe, Np, minEnergy, maxEnergy, startElectronIndex, sinhi, B, n, localSize);
 
+	double I0 = normFactor*findEmissivityAt(nu, Inu, augx[0]*1E9, Nnu) - augy[0];
 	double I1 = normFactor*findEmissivityAt(nu, Inu, augx[1]*1E9, Nnu) - augy[1];
 	double I2 = normFactor*findEmissivityAt(nu, Inu, augx[2]*1E9, Nnu) - augy[2];
+	double I3 = normFactor*findEmissivityAt(nu, Inu, augx[3]*1E9, Nnu) - augy[3];
+	double I4 = normFactor*findEmissivityAt(nu, Inu, augx[4]*1E9, Nnu) - augy[4];
 
 	delete[] Inu;
 	delete[] Anu;
 	delete[] nu;
 
-	return I1*I1 + I2*I2;
+	return I0*I0 + I1*I1 + I2*I2 + I3*I3 + I4*I4;
+	//return I1*I1 + I2*I2;
 }
 
 double evaluateConcentrationFromB(double B, double gamma0, double sigma) {
@@ -242,8 +250,8 @@ void findMinParameters(const double& B, const double& N, double& b, double& n, d
 	//double concentration1 = evaluateConcentrationFromB(B*b1, gamma0, sigma);
 	//double concentration2 = evaluateConcentrationFromB(B*b2, gamma0, sigma);
 
-	double f1 = evaluateOptimizationFunction(B*b1, N*n, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
-	double f2 = evaluateOptimizationFunction(B*b2, N*n, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+	double f1 = evaluateOptimizationFunction(B*b1, N*n1, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+	double f2 = evaluateOptimizationFunction(B*b2, N*n2, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 	if(f1 < f2) {
 		findMinParameters(B, N, b, n, minLambda, lambda2, gradB, gradn, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 	} else {
@@ -253,9 +261,15 @@ void findMinParameters(const double& B, const double& N, double& b, double& n, d
 
 void findMinParameters(const double& B, const double& N, double& b, double& n, double gradB, double gradN, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
 	double minLambda = 0;
-	double lambdaB = fabs(1/gradB);
-	double lambdaN = fabs(1/gradN);
-	double maxLambda = min(lambdaN, lambdaB);
+	double lambdaB = fabs(b/gradB);
+	double lambdaN = fabs(n/gradN);
+	double maxLambda = 1.0*min(lambdaN, lambdaB);
+	if(n - maxLambda*gradN < 0 ){
+		maxLambda = n/gradN;
+	}
+	if(b - maxLambda*gradB < 0 ){
+		maxLambda = b/gradB;
+	}
 	findMinParameters(B, N, b, n, minLambda, maxLambda, gradB, gradN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 }
 
@@ -264,8 +278,8 @@ void optimizeParameters(double& B, double& N, double* Ee, double* Fe, int Np, in
 	double b = 1.0;
 	double n = 1.0;
 	//todo
-	for(int i = 0; i < 10; ++i) {
-		double dx = 0.0000001;
+	for(int i = 0; i < 100; ++i) {
+		double dx = 0.0001;
 		printf("optimiztion i = %d\n",i);
 		double Fb = evaluateOptimizationFunction(B*(b + dx), N*n, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 		double Fn = evaluateOptimizationFunction(B*b, N*(n + dx), Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
@@ -273,6 +287,18 @@ void optimizeParameters(double& B, double& N, double* Ee, double* Fe, int Np, in
 		double gradN = (Fn - currentF)/dx;
 		findMinParameters(B, N, b, n, gradB, gradN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 		currentF = evaluateOptimizationFunction(B*b, N*n, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		//random
+		/*for(int j = 0; j < 10; ++j){
+			double tempB = 5*b*uniformDistribution();
+			double tempN = 5*n*uniformDistribution();
+			double tempF = evaluateOptimizationFunction(B*tempB, N*tempN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+			if(tempF < currentF){
+				printf("random step\n");
+				currentF = tempF;
+				b = tempB;
+				n = tempN;
+			}
+		}*/
 	}
 	B = B*b;
 	N = N*n;
@@ -325,9 +351,12 @@ int main(int argc, char** argv) {
 	double size[Npoints];
 	double B[Npoints];
 	double n[Npoints];
-	double time[Npoints];
+	double times[Npoints];
 
-	time[0] = 0;
+	//srand(time(NULL));
+	srand(11);
+
+	times[0] = 0;
 	//B[0] = B0;
 	//n[0] = n0;
 	//size[0] = L0;
@@ -336,13 +365,13 @@ int main(int argc, char** argv) {
 	n[3] = n3;
 	size[3] = L3;
 
-	time[1] = 2760000;
-	time[2] = 5270400;
-	time[3] = 10700000;
+	times[1] = 2760000;
+	times[2] = 5270400;
+	times[3] = 10700000;
 
 	for(int i = 2; i >= 0; --i) {
 		//size[i] = size[3] - v*(time[3] - time[i]);
-		size[i] = size[3] - realv*(time[3] - time[i]);
+		size[i] = size[3] - realv*(times[3] - times[i]);
 		if(size[i] < 0) {
 			printf("aaaa, size < 0!!!");
 			exit(0);
@@ -447,7 +476,7 @@ int main(int argc, char** argv) {
 	B[3] = localB*100;
 	n[3] = evaluateConcentrationFromB(localB, gamma0, sigma);
 
-	factor = 4*pi*size[3]*size[3]*size[3]*1E26/(3*distance*distance);
+	factor = 4*pi*localSize*localSize*localSize*(1.0 - fractionSize*fractionSize*fractionSize)*1E26/(3*distance*distance);
 	//todo gradients
 
 	for (int i = 0; i < Npoints-1; ++i) {
@@ -504,7 +533,7 @@ int main(int argc, char** argv) {
 		std::string fileNumber = std::string(number);
 		FILE* output = fopen((fileName + fileNumber + ".dat").c_str(), "w");
 		delete[] number;
-		factor = 4*pi*localSize*localSize*localSize*1E26/(3*distance*distance);
+		factor = 4*pi*localSize*localSize*localSize*(1.0 - fractionSize*fractionSize*fractionSize)*1E26/(3*distance*distance);
 		for (int i = 0; i < Nnu; ++i) {
 			fprintf(output, "%g %g %g %g %g %g %g %g %g\n", nu[i]/1E9, Inu[i], Anu[i] * localSize, 0.0, Inu[i]*factor, 0.0, doplerInu[i]*factor, 0.0, Inu[i]*factor);
 		}
