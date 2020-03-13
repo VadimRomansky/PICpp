@@ -15,7 +15,7 @@ const double massProtonReal = 1.67262177E-24;
 const double massRatio = 25;
 //const double massElectron = massProtonReal/massRatio;
 const double massElectron = massElectronReal;
-const double fractionSize = 0.2;
+const double fractionSize = 0.5;
 
 const int Napprox = 40;
 
@@ -57,6 +57,11 @@ const double apry[4] ={0.993, 13.9, 17.1, 5.11};
 
 const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
+
+const double minB = 0.01;
+const double maxB = 1.0;
+const double minN = 0.01;
+const double maxN = 10;
 
 double min(double a, double b) {
 	if(a < b) {
@@ -150,11 +155,13 @@ void evaluateSpectrum(double* nu, double* Inu, double* Anu, int Nnu, double* Ee,
 	for (int i = 0; i < Nnu; ++i) {
 		//printf("i = %d\n", i);
 		for (int j = startElectronIndex; j < Np; ++j) {
-			double nuc = criticalNu(Ee[j], sinhi, Bmean);
-			double gamma = Ee[j] / (massElectron * speed_of_light2);
-			double x = nu[i] / nuc;
-			Inu[i] = Inu[i] + coef * Fe[j] * (Ee[j] - Ee[j - 1]) * Bmean * sinhi * evaluateMcDonaldIntegral(nu[i] / nuc);
-			Anu[i] = Anu[i] + coefAbsorb * Fe[j] * (Ee[j] - Ee[j - 1]) * evaluateMcDonaldFunction(nu[i] / nuc) / (gamma * gamma * gamma * gamma * gamma);
+			//if(Ee[j] < 100*massElectron*speed_of_light2){
+				double nuc = criticalNu(Ee[j], sinhi, Bmean);
+				double gamma = Ee[j] / (massElectron * speed_of_light2);
+				double x = nu[i] / nuc;
+				Inu[i] = Inu[i] + coef * Fe[j] * (Ee[j] - Ee[j - 1]) * Bmean * sinhi * evaluateMcDonaldIntegral(nu[i] / nuc);
+				Anu[i] = Anu[i] + coefAbsorb * Fe[j] * (Ee[j] - Ee[j - 1]) * evaluateMcDonaldFunction(nu[i] / nuc) / (gamma * gamma * gamma * gamma * gamma);
+			//}
 		}
 	}
 
@@ -224,8 +231,8 @@ double evaluateOptimizationFunction(double B, double n, double* Ee, double* Fe, 
 	delete[] Anu;
 	delete[] nu;
 
-	return I0*I0 + I1*I1 + I2*I2 + I3*I3 + I4*I4;
-	//return I1*I1 + I2*I2;
+	//return I0*I0 + I1*I1 + I2*I2 + I3*I3 + I4*I4;
+	return I1*I1 + I2*I2;
 }
 
 double evaluateConcentrationFromB(double B, double gamma0, double sigma) {
@@ -233,7 +240,7 @@ double evaluateConcentrationFromB(double B, double gamma0, double sigma) {
 }
 
 void findMinParameters(const double& B, const double& N, double& b, double& n, double minLambda, double maxLambda, double gradB, double gradn, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
-	if(maxLambda - minLambda < 0.0000001*maxLambda) {
+	if(maxLambda - minLambda < 0.001*maxLambda) {
 		n = n - maxLambda*gradn;
 		b = b - maxLambda*gradB;
 		return;
@@ -250,6 +257,7 @@ void findMinParameters(const double& B, const double& N, double& b, double& n, d
 	//double concentration1 = evaluateConcentrationFromB(B*b1, gamma0, sigma);
 	//double concentration2 = evaluateConcentrationFromB(B*b2, gamma0, sigma);
 
+	double f = evaluateOptimizationFunction(B*b, N*n, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 	double f1 = evaluateOptimizationFunction(B*b1, N*n1, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 	double f2 = evaluateOptimizationFunction(B*b2, N*n2, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 	if(f1 < f2) {
@@ -261,8 +269,8 @@ void findMinParameters(const double& B, const double& N, double& b, double& n, d
 
 void findMinParameters(const double& B, const double& N, double& b, double& n, double gradB, double gradN, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
 	double minLambda = 0;
-	double lambdaB = fabs(b/gradB);
-	double lambdaN = fabs(n/gradN);
+	double lambdaB = fabs(maxB/gradB);
+	double lambdaN = fabs(maxN/gradN);
 	double maxLambda = 1.0*min(lambdaN, lambdaB);
 	if(n - maxLambda*gradN < 0 ){
 		maxLambda = n/gradN;
@@ -275,10 +283,20 @@ void findMinParameters(const double& B, const double& N, double& b, double& n, d
 
 void optimizeParameters(double& B, double& N, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
 	double currentF = evaluateOptimizationFunction(B, N, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+	/*for(int i = 0; i < 100; ++i){
+		double tempB = minB + (maxB - minB)*uniformDistribution();
+		double tempN = minN + (maxN - minN)*uniformDistribution();
+		double tempF = evaluateOptimizationFunction(tempB, tempN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		if(tempF < currentF){
+			currentF = tempF;
+			B = tempB;
+			N = tempN;
+		}
+	}*/
 	double b = 1.0;
 	double n = 1.0;
 	//todo
-	for(int i = 0; i < 100; ++i) {
+	for(int i = 0; i < 10; ++i) {
 		double dx = 0.0001;
 		printf("optimiztion i = %d\n",i);
 		double Fb = evaluateOptimizationFunction(B*(b + dx), N*n, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
@@ -327,13 +345,13 @@ int main(int argc, char** argv) {
 	double v = speed_of_light * sqrt(1 - 1 / (gamma0 * gamma0));
 	double beta = v/speed_of_light;
 	const int Npoints = 4;
-	double theta = 0*pi/2;
-	double sintheta = sin(theta);
-	double costheta = cos(theta);
+	//double theta = 0*pi/2;
+	//double sintheta = sin(theta);
+	//double costheta = cos(theta);
 
-	double realBeta = (sqrt(costheta*costheta + 4*sintheta*sintheta*beta*beta) - costheta)/(2*sintheta*sintheta*beta);
-	double realv = realBeta*speed_of_light;
-	double realgamma = 1.0/sqrt(1 - realBeta*realBeta);
+	//double realBeta = (sqrt(costheta*costheta + 4*sintheta*sintheta*beta*beta) - costheta)/(2*sintheta*sintheta*beta);
+	//double realv = realBeta*speed_of_light;
+	//double realgamma = 1.0/sqrt(1 - realBeta*realBeta);
 
 	double B0 = 0.4;
 	double n0 = 5;
@@ -369,15 +387,15 @@ int main(int argc, char** argv) {
 	times[2] = 5270400;
 	times[3] = 10700000;
 
-	for(int i = 2; i >= 0; --i) {
+	/*for(int i = 2; i >= 0; --i) {
 		//size[i] = size[3] - v*(time[3] - time[i]);
 		size[i] = size[3] - realv*(times[3] - times[i]);
 		if(size[i] < 0) {
 			printf("aaaa, size < 0!!!");
 			exit(0);
 		}
-	}
-
+	}*/
+	
 	size[3] = 2.30E17;
 	size[2] = 1.10E17;
 	size[1] = 6.8E16;
@@ -398,7 +416,8 @@ int main(int argc, char** argv) {
 		Pe[i] = Pe[i] * massElectron * speed_of_light;
 		Ee[i] = sqrt(Pe[i] * Pe[i] * speed_of_light2 + massElectron * massElectron * speed_of_light4);
 		fscanf(inputFe, "%lf", &Fe[i]);
-		Fe[i] = Fe[i] * Ee[i] / (Pe[i] * Pe[i] * Pe[i] * speed_of_light2);
+		//Fe[i] = Fe[i] * Ee[i] / (Pe[i] * Pe[i] * Pe[i] * speed_of_light2);
+		Fe[i] = Fe[i] * Ee[i] * massElectron / (Pe[i] * Pe[i] * Pe[i] * speed_of_light);
 	}
 
 	/*Fe[0] = 1.0;
@@ -476,7 +495,7 @@ int main(int argc, char** argv) {
 	B[3] = localB*100;
 	n[3] = evaluateConcentrationFromB(localB, gamma0, sigma);
 
-	factor = 4*pi*localSize*localSize*localSize*(1.0 - fractionSize*fractionSize*fractionSize)*1E26/(3*distance*distance);
+	factor = 4*pi*localSize*localSize*localSize*(1.0 - (1.0 - fractionSize)*(1.0 - fractionSize)*(1.0 - fractionSize))*1E26/(3*distance*distance);
 	//todo gradients
 
 	for (int i = 0; i < Npoints-1; ++i) {
@@ -487,7 +506,6 @@ int main(int argc, char** argv) {
 
 	optimizeParameters(localB, n[3], Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, size[3], factor);
 
-	printf("B august = %g\n", localB);
 	B[3] = localB;
 	//B[3] = 1.0;
 	//n[3] = evaluateConcentrationFromB(localB, gamma0, sigma);
@@ -506,6 +524,15 @@ int main(int argc, char** argv) {
 		B[i] = B[3] * size[3] / size[i];
 		n[i] = n[3] * size[3] * size[3] / (size[i] * size[i]);
 	}
+
+	double localsigma = B[3]*B[3]/(4*pi*gamma0*n[3]*massProtonReal*speed_of_light*speed_of_light);
+
+	printf("sigma = %g\n", localsigma);
+
+	printf("B apr = %g, n apr = %g\n", B[0], n[0]);
+	printf("B may = %g, n may = %g\n", B[1], n[1]);
+	printf("B july = %g, n july = %g\n", B[2], n[2]);
+	printf("B aug = %g, n aug = %g\n", B[3], n[3]);
 
 
 	for (int k = 0; k < Npoints; ++k) {
@@ -533,7 +560,7 @@ int main(int argc, char** argv) {
 		std::string fileNumber = std::string(number);
 		FILE* output = fopen((fileName + fileNumber + ".dat").c_str(), "w");
 		delete[] number;
-		factor = 4*pi*localSize*localSize*localSize*(1.0 - fractionSize*fractionSize*fractionSize)*1E26/(3*distance*distance);
+		factor = 4*pi*localSize*localSize*localSize*(1.0 - (1.0 - fractionSize)*(1.0 - fractionSize)*(1.0 - fractionSize))*1E26/(3*distance*distance);
 		for (int i = 0; i < Nnu; ++i) {
 			fprintf(output, "%g %g %g %g %g %g %g %g %g\n", nu[i]/1E9, Inu[i], Anu[i] * localSize, 0.0, Inu[i]*factor, 0.0, doplerInu[i]*factor, 0.0, Inu[i]*factor);
 		}
