@@ -68,8 +68,8 @@ int main()
 	double LmaxSlab = 1E7;
 	double Lmax2d = 1E7;
 
-	int Nslab = 2000;
-	int N2d = 2000;
+	int Nslab = 200;
+	int N2d = 200;
 
 	double integralSlab = (powerSlab + 1.0)*(-power(2*pi/LmaxSlab,powerSlab + 1.0) + power(2*pi*Nslab/LmaxSlab, powerSlab + 1.0));
 	double integral2d = (power2d + 1.0)*(-power(2*pi/Lmax2d,power2d + 1.0) + power(2*pi*N2d/Lmax2d, power2d + 1.0));
@@ -90,7 +90,10 @@ int main()
 	srand(time(NULL));
 	seed = rand();
 
-	FILE* outFile = fopen("B.dat","w");
+	FILE* outBx = fopen("Bx.dat","w");
+	FILE* outBy = fopen("By.dat","w");
+	FILE* outBz = fopen("Bz.dat","w");
+	FILE* outTheta = fopen("Theta.dat","w");
 
 	for(int i = 0; i < Nx; ++i){
 		printf("%d\n",i);
@@ -101,9 +104,15 @@ int main()
 		evaluateTurbulence(x, y, z, Lbox, Cslab, LmaxSlab, powerSlab, Nslab, C2d, Lmax2d, power2d, N2d, Bx, By, Bz);
 		Bz = Bz + B0;
 		double theta = acos(Bx/sqrt(Bx*Bx + By*By + Bz*Bz))*180/pi;
-		fprintf(outFile, "%lf %lf %lf %lf\n",Bx, By, Bz, theta);
+		fprintf(outBx, "%lf ", Bx);
+		fprintf(outBy, "%lf ", By);
+		fprintf(outBz, "%lf ", Bz);
+		fprintf(outTheta, "%lf ", theta);
 	}
-	fclose(outFile);
+	fclose(outBx);
+	fclose(outBy);
+	fclose(outBz);
+	fclose(outTheta);
 
 	/*FILE* outBx = fopen("Bx.dat","w");
 	FILE* outBy = fopen("By.dat","w");

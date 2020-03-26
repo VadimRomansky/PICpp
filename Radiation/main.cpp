@@ -15,7 +15,7 @@ const double massProtonReal = 1.67262177E-24;
 const double massRatio = 25;
 //const double massElectron = massProtonReal/massRatio;
 const double massElectron = massElectronReal;
-const double fractionSize = 0.5;
+const double fractionSize = 0.9;
 
 const int Napprox = 40;
 
@@ -232,79 +232,129 @@ double evaluateOptimizationFunction(double B, double n, double* Ee, double* Fe, 
 	delete[] nu;
 
 	//return I0*I0 + I1*I1 + I2*I2 + I3*I3 + I4*I4;
-	return I1*I1 + I2*I2;
+	return fabs(I1) + fabs(I2);
+}
+
+double evaluateOptimizationFunction1(double B, double n, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
+	double* Inu = new double[Nnu];
+	double* Anu = new double[Nnu];
+	double* nu = new double[Nnu];
+
+	evaluateSpectrum(nu, Inu, Anu, Nnu, Ee, Fe, Np, minEnergy, maxEnergy, startElectronIndex, sinhi, B, n, localSize);
+
+	double I0 = normFactor*findEmissivityAt(nu, Inu, augx[0]*1E9, Nnu) - augy[0];
+	double I1 = normFactor*findEmissivityAt(nu, Inu, augx[1]*1E9, Nnu) - augy[1];
+	double I2 = normFactor*findEmissivityAt(nu, Inu, augx[2]*1E9, Nnu) - augy[2];
+	double I3 = normFactor*findEmissivityAt(nu, Inu, augx[3]*1E9, Nnu) - augy[3];
+	double I4 = normFactor*findEmissivityAt(nu, Inu, augx[4]*1E9, Nnu) - augy[4];
+
+	delete[] Inu;
+	delete[] Anu;
+	delete[] nu;
+
+	return I1*I1;
+}
+
+double evaluateOptimizationFunction2(double B, double n, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
+	double* Inu = new double[Nnu];
+	double* Anu = new double[Nnu];
+	double* nu = new double[Nnu];
+
+	evaluateSpectrum(nu, Inu, Anu, Nnu, Ee, Fe, Np, minEnergy, maxEnergy, startElectronIndex, sinhi, B, n, localSize);
+
+	double I0 = normFactor*findEmissivityAt(nu, Inu, augx[0]*1E9, Nnu) - augy[0];
+	double I1 = normFactor*findEmissivityAt(nu, Inu, augx[1]*1E9, Nnu) - augy[1];
+	double I2 = normFactor*findEmissivityAt(nu, Inu, augx[2]*1E9, Nnu) - augy[2];
+	double I3 = normFactor*findEmissivityAt(nu, Inu, augx[3]*1E9, Nnu) - augy[3];
+	double I4 = normFactor*findEmissivityAt(nu, Inu, augx[4]*1E9, Nnu) - augy[4];
+
+	delete[] Inu;
+	delete[] Anu;
+	delete[] nu;
+
+	return I2*I2;
 }
 
 double evaluateConcentrationFromB(double B, double gamma0, double sigma) {
 	return (B*B/16)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
 }
 
-void findMinParameters(const double& B, const double& N, double& b, double& n, double minLambda, double maxLambda, double gradB, double gradn, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
-	if(maxLambda - minLambda < 0.001*maxLambda) {
-		n = n - maxLambda*gradn;
-		b = b - maxLambda*gradB;
+void findMinParameters(double& B, double& N, double minLambda, double maxLambda, double gradB, double gradn, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
+	if(maxLambda - minLambda < 0.00001*maxLambda) {
+		N = N - maxLambda*gradn;
+		B = B - maxLambda*gradB;
 		return;
 	}
 	double lambda1 = minLambda + (maxLambda - minLambda)/3.0;
 	double lambda2 = minLambda + (maxLambda - minLambda)*2.0/3.0;
 
-	double n1 = n - lambda1*gradn;
-	double b1 = b - lambda1*gradB;
+	double N1 = N - lambda1*gradn;
+	double B1 = B - lambda1*gradB;
 
-	double n2 = n - lambda2*gradn;
-	double b2 = b - lambda2*gradB;
+	double N2 = N - lambda2*gradn;
+	double B2 = B - lambda2*gradB;
 
 	//double concentration1 = evaluateConcentrationFromB(B*b1, gamma0, sigma);
 	//double concentration2 = evaluateConcentrationFromB(B*b2, gamma0, sigma);
 
-	double f = evaluateOptimizationFunction(B*b, N*n, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
-	double f1 = evaluateOptimizationFunction(B*b1, N*n1, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
-	double f2 = evaluateOptimizationFunction(B*b2, N*n2, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+	double f = evaluateOptimizationFunction(B, N, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+	double f1 = evaluateOptimizationFunction(B1, N1, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+	double f2 = evaluateOptimizationFunction(B2, N2, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 	if(f1 < f2) {
-		findMinParameters(B, N, b, n, minLambda, lambda2, gradB, gradn, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		findMinParameters(B, N, minLambda, lambda2, gradB, gradn, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 	} else {
-		findMinParameters(B, N, b, n, lambda1, maxLambda, gradB, gradn, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		findMinParameters(B, N, lambda1, maxLambda, gradB, gradn, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 	}
 }
 
-void findMinParameters(const double& B, const double& N, double& b, double& n, double gradB, double gradN, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
+void findMinParameters(double& B, double& N, double gradB, double gradN, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
 	double minLambda = 0;
 	double lambdaB = fabs(maxB/gradB);
 	double lambdaN = fabs(maxN/gradN);
 	double maxLambda = 1.0*min(lambdaN, lambdaB);
-	if(n - maxLambda*gradN < 0 ){
-		maxLambda = n/gradN;
+	if(N - maxLambda*gradN < 0 ){
+		maxLambda = N/gradN;
 	}
-	if(b - maxLambda*gradB < 0 ){
-		maxLambda = b/gradB;
+	if(B - maxLambda*gradB < 0 ){
+		maxLambda = B/gradB;
 	}
-	findMinParameters(B, N, b, n, minLambda, maxLambda, gradB, gradN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+	findMinParameters(B, N, minLambda, maxLambda, gradB, gradN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 }
 
 void optimizeParameters(double& B, double& N, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
 	double currentF = evaluateOptimizationFunction(B, N, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 	/*for(int i = 0; i < 100; ++i){
+		double dx = 0.0001;
 		double tempB = minB + (maxB - minB)*uniformDistribution();
 		double tempN = minN + (maxN - minN)*uniformDistribution();
-		double tempF = evaluateOptimizationFunction(tempB, tempN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
-		if(tempF < currentF){
+		double temp1 = evaluateOptimizationFunction1(tempB, tempN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		double temp2 = evaluateOptimizationFunction2(tempB, tempN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		double Fb1 = evaluateOptimizationFunction1(tempB + dx, tempN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		double Fb2 = evaluateOptimizationFunction2(tempB + dx, tempN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		double Fn1 = evaluateOptimizationFunction1(tempB, tempN + dx, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		double Fn2 = evaluateOptimizationFunction2(tempB, tempN + dx, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		double grad11 = (Fb1 - temp1)/dx;
+		double grad12 = (Fn1 - temp1)/dx;
+		double grad21 = (Fb2 - temp2)/dx;
+		double grad22 = (Fn2 - temp2)/dx;
+		double det = grad11*grad22 - grad12*grad21;
+		printf("combination = %g\n", det);
+		/*if(tempF < currentF){
 			currentF = tempF;
 			B = tempB;
 			N = tempN;
 		}
 	}*/
-	double b = 1.0;
-	double n = 1.0;
 	//todo
-	for(int i = 0; i < 10; ++i) {
-		double dx = 0.0001;
+	for(int i = 0; i < 20; ++i) {
+		double dx = min(B, N)/100;
 		printf("optimiztion i = %d\n",i);
-		double Fb = evaluateOptimizationFunction(B*(b + dx), N*n, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
-		double Fn = evaluateOptimizationFunction(B*b, N*(n + dx), Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		double Fb = evaluateOptimizationFunction(B + dx, N, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		double Fn = evaluateOptimizationFunction(B, N + dx, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 		double gradB = (Fb - currentF)/dx;
 		double gradN = (Fn - currentF)/dx;
-		findMinParameters(B, N, b, n, gradB, gradN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
-		currentF = evaluateOptimizationFunction(B*b, N*n, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		findMinParameters(B, N, gradB, gradN, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
+		currentF = evaluateOptimizationFunction(B, N, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
 		//random
 		/*for(int j = 0; j < 10; ++j){
 			double tempB = 5*b*uniformDistribution();
@@ -318,8 +368,6 @@ void optimizeParameters(double& B, double& N, double* Ee, double* Fe, int Np, in
 			}
 		}*/
 	}
-	B = B*b;
-	N = N*n;
 }
 
 int main(int argc, char** argv) {
@@ -371,8 +419,8 @@ int main(int argc, char** argv) {
 	double n[Npoints];
 	double times[Npoints];
 
-	//srand(time(NULL));
-	srand(11);
+	srand(time(NULL));
+	//srand(11);
 
 	times[0] = 0;
 	//B[0] = B0;
@@ -492,7 +540,7 @@ int main(int argc, char** argv) {
 		}
 	}
 	factor = augmaxy/Inu[nuMaxIndex];
-	B[3] = localB*100;
+	B[3] = localB;
 	n[3] = evaluateConcentrationFromB(localB, gamma0, sigma);
 
 	factor = 4*pi*localSize*localSize*localSize*(1.0 - (1.0 - fractionSize)*(1.0 - fractionSize)*(1.0 - fractionSize))*1E26/(3*distance*distance);
@@ -538,9 +586,12 @@ int main(int argc, char** argv) {
 	for (int k = 0; k < Npoints; ++k) {
 
 		double Bmean = B[k];
+		//double Bmean = B[3];
 
 		localConcentration = n[k];
+		//localConcentration = n[3]*(k+1)/(Npoints);
 		localSize = size[k];
+		//localSize = size[3];
 
 
 		evaluateSpectrum(nu, Inu, Anu, Nnu, Ee, Fe, Np, minEnergy, maxEnergy, startElectronIndex, sinhi, Bmean, localConcentration, localSize);
