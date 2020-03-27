@@ -235,7 +235,7 @@ double evaluateOptimizationFunction(double B, double n, double* Ee, double* Fe, 
 	return fabs(I1) + fabs(I2);
 }
 
-double evaluateOptimizationFunction1(double B, double n, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
+/*double evaluateOptimizationFunction1(double B, double n, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
 	double* Inu = new double[Nnu];
 	double* Anu = new double[Nnu];
 	double* nu = new double[Nnu];
@@ -273,7 +273,7 @@ double evaluateOptimizationFunction2(double B, double n, double* Ee, double* Fe,
 	delete[] nu;
 
 	return I2*I2;
-}
+}*/
 
 double evaluateConcentrationFromB(double B, double gamma0, double sigma) {
 	return (B*B/16)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
@@ -346,7 +346,7 @@ void optimizeParameters(double& B, double& N, double* Ee, double* Fe, int Np, in
 		}
 	}*/
 	//todo
-	for(int i = 0; i < 20; ++i) {
+	for(int i = 0; i < 10; ++i) {
 		double dx = min(B, N)/100;
 		printf("optimiztion i = %d\n",i);
 		double Fb = evaluateOptimizationFunction(B + dx, N, Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, localSize, normFactor);
@@ -418,6 +418,8 @@ int main(int argc, char** argv) {
 	double B[Npoints];
 	double n[Npoints];
 	double times[Npoints];
+
+	double strangeFactor = 1;
 
 	srand(time(NULL));
 	//srand(11);
@@ -543,7 +545,7 @@ int main(int argc, char** argv) {
 	B[3] = localB;
 	n[3] = evaluateConcentrationFromB(localB, gamma0, sigma);
 
-	factor = 4*pi*localSize*localSize*localSize*(1.0 - (1.0 - fractionSize)*(1.0 - fractionSize)*(1.0 - fractionSize))*1E26/(3*distance*distance);
+	factor = strangeFactor*4*pi*localSize*localSize*localSize*(1.0 - (1.0 - fractionSize)*(1.0 - fractionSize)*(1.0 - fractionSize))*1E26/(3*distance*distance);
 	//todo gradients
 
 	for (int i = 0; i < Npoints-1; ++i) {
@@ -611,7 +613,7 @@ int main(int argc, char** argv) {
 		std::string fileNumber = std::string(number);
 		FILE* output = fopen((fileName + fileNumber + ".dat").c_str(), "w");
 		delete[] number;
-		factor = 4*pi*localSize*localSize*localSize*(1.0 - (1.0 - fractionSize)*(1.0 - fractionSize)*(1.0 - fractionSize))*1E26/(3*distance*distance);
+		factor = strangeFactor*4*pi*localSize*localSize*localSize*(1.0 - (1.0 - fractionSize)*(1.0 - fractionSize)*(1.0 - fractionSize))*1E26/(3*distance*distance);
 		for (int i = 0; i < Nnu; ++i) {
 			fprintf(output, "%g %g %g %g %g %g %g %g %g\n", nu[i]/1E9, Inu[i], Anu[i] * localSize, 0.0, Inu[i]*factor, 0.0, doplerInu[i]*factor, 0.0, Inu[i]*factor);
 		}
