@@ -17,21 +17,24 @@ const double massRatio = 25;
 const double massElectron = massElectronReal;
 const double fractionSize = 0.9;
 
-const int Napprox = 40;
+const int Napprox = 52;
 
-const double McDonaldValue[Napprox] = {
+///      K5/3(x)
+const double McDonaldValue[Napprox] = { 1.43E15, 9.8E13, 3.09E13, 2.11E12, 6.65E11, 4.55E10, 1.43E10, 9.8E8,
 	3.08E8, 2.11E7, 6.65E6, 4.55E5, 1.43E4, 9802, 3087, 670, 211, 107, 66.3, 33.6, 20.7, 14.1, 11.0, 10.3, 6.26, 4.2, 3.01, 2.25, 1.73, 1.37, 1.10,
-	0.737, 0.514, 0.368, 0.269, 0.2, 0.0994, 0.0518, 0.0278, 0.0152, 0.00846, 0.00475, 0.00154, 0.000511, 0.000172, 0.0000589, 0.0000203, 0.00000246
+	0.737, 0.514, 0.368, 0.269, 0.2, 0.0994, 0.0518, 0.0278, 0.0152, 0.00846, 0.00475, 0.00154, 0.000511, 0.000172, 0.0000589, 0.0000203, 0.00000246, 3.04E-7, 3.81E-8, 4.82E-9, 6.14E-10
 };
-const double UvarovValue[Napprox] = {
+////     x*int from x to inf K5/3(t)dt
+const double UvarovValue[Napprox] = {0.0021495, 0.00367, 0.00463, 0.00792, 0.00997, 0.017, 0.0215, 0.0367,
 	0.0461, 0.0791, 0.0995, 0.169, 0.213, 0.358, 0.445, 0.583, 0.702, 0.772, 0.818, 0.874,0.904, 0.917, 0.918, 0.918, 0.901, 0.872, 0.832, 0.788,
 	0.742, 0.694, 0.655, 0.566, 0.486, 0.414, 0.354, 0.301, 0.200, 0.130, 0.0845, 0.0541, 0.0339, 0.0214, 0.0085, 0.0033, 0.0013, 0.00050, 0.00019,
-	0.0000282
+	0.0000282, 0.00000409, 5.89E-7, 8.42E-8, 1.19E-8
 };
-const double UvarovX[Napprox] = {
+///// x
+const double UvarovX[Napprox] = {1.0E-9, 5.0E-9, 1.0E-8, 5.0E-8, 1.0E-7, 5.0E-7, 1.0E-6, 5.0E-6,
 	0.00001, 0.00005, 0.0001 ,0.0005, 0.001, 0.005, 0.01, 0.025, 0.050, 0.075, 0.10, 0.15,
 	0.20, 0.25, 0.29, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0, 1.2, 1.4, 1.6,
-	1.8, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0
+	1.8, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0
 };
 
 const double augx[5] = {0.335, 0.625, 1.46, 4.92, 8.57};
@@ -86,9 +89,11 @@ double criticalNu(const double& E, const double& sinhi, const double& H) {
 double evaluateMcDonaldIntegral(const double& nu) {
 	int curIndex = 0;
 	if (nu < UvarovX[0]) {
+		//printf("x < UvarovX[0]\n");
 		return 0;
 	}
 	if (nu > UvarovX[Napprox - 1]) {
+		//printf("x > UvarovX[Napprox - 1]\n");
 		return 0;
 	}
 	for (int i = 1; i < Napprox; ++i) {
@@ -133,7 +138,7 @@ double evaluateMcDonaldFunction(const double& nu) {
 
 void evaluateSpectrum(double* nu, double* Inu, double* Anu, int Nnu, double* Ee, double* Fe, int Np, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double Bmean, double concentration, double localSize) {
 	double minNu = 0.001 * criticalNu(minEnergy, sinhi, Bmean);
-	double maxNu = 10 * criticalNu(maxEnergy, sinhi, Bmean);
+	double maxNu = 100 * criticalNu(maxEnergy, sinhi, Bmean);
 
 	double temp = maxNu / minNu;
 
@@ -190,8 +195,8 @@ double findEmissivityAt(double* nu, double* Inu, double currentNu, int Nnu) {
 	}
 	for(int i = 1; i < Nnu; ++i) {
 		if(currentNu < nu[i]) {
-			return Inu[i - 1] * exp(log(Inu[i] / Inu[i - 1]) * ((currentNu - nu[i-1]) / (nu[i] - nu[i - 1])));
-			//return (Inu[i - 1] *(nu[i] - currentNu) + Inu[i]*(currentNu - nu[i-1]))/ (nu[i] - nu[i - 1]);
+			//return Inu[i - 1] * exp(log(Inu[i] / Inu[i - 1]) * ((currentNu - nu[i-1]) / (nu[i] - nu[i - 1])));
+			return (Inu[i - 1] *(nu[i] - currentNu) + Inu[i]*(currentNu - nu[i-1]))/ (nu[i] - nu[i - 1]);
 		}
 	}
 	return 0;
@@ -232,7 +237,7 @@ double evaluateOptimizationFunction(double B, double n, double* Ee, double* Fe, 
 	delete[] nu;
 
 	//return I0*I0 + I1*I1 + I2*I2 + I3*I3 + I4*I4;
-	return fabs(I1) + fabs(I2);
+	return fabs(I2) + fabs(I1) + fabs(I3);
 }
 
 /*double evaluateOptimizationFunction1(double B, double n, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
@@ -461,18 +466,31 @@ int main(int argc, char** argv) {
 		n[i] = n[3] * size[3] * size[3] / (size[i] * size[i]);
 	}
 
+	double minEnergy = 1.1 * massElectron * speed_of_light2;
+	//double minEnergy = Ee[0];
+	double maxEnergy = Ee[Np - 1];
+
 	for (int i = 0; i < Np; ++i) {
 		fscanf(inputPe, "%lf", &Pe[i]);
-		Pe[i] = Pe[i] * massElectron * speed_of_light;
-		Ee[i] = sqrt(Pe[i] * Pe[i] * speed_of_light2 + massElectron * massElectron * speed_of_light4);
 		fscanf(inputFe, "%lf", &Fe[i]);
-		//Fe[i] = Fe[i] * Ee[i] / (Pe[i] * Pe[i] * Pe[i] * speed_of_light2);
-		Fe[i] = Fe[i] * Ee[i] * massElectron / (Pe[i] * Pe[i] * Pe[i] * speed_of_light);
+		Pe[i] = Pe[i] * massElectron * speed_of_light;
+		if( Pe[i] < 20000*massElectron*speed_of_light){
+			Ee[i] = sqrt(Pe[i] * Pe[i] * speed_of_light2 + massElectron * massElectron * speed_of_light4);
+			maxEnergy = Ee[i];
+			Fe[i] = Fe[i] * Ee[i] * massElectron / (Pe[i] * Pe[i] * Pe[i] * speed_of_light);
+		} else {
+			Fe[i] = 0;
+		}
+		
 	}
 
 	/*Fe[0] = 1.0;
 	for(int i = 1; i < Np; ++i) {
-		Fe[i] = Fe[0]*power(Ee[0]/Ee[i],3);
+		if(i > 0){
+			Fe[i] = Fe[0]*power(Ee[0]/Ee[i],3);
+		} else {
+			Fe[i] = 0;
+		}
 	}*/
 
 	fclose(inputPe);
@@ -486,11 +504,8 @@ int main(int argc, char** argv) {
 		Fe[i] = Fe[i] / norm;
 	}
 
-	double minEnergy = 2 * massElectron * speed_of_light2;
-	//double minEnergy = Ee[0];
-	double maxEnergy = Ee[Np - 1];
 
-	double meanE = 200 * massElectron * speed_of_light2;
+	//double meanE = 200 * massElectron * speed_of_light2;
 
 	int startElectronIndex = 0;
 	for (int i = 0; i < Np; ++i) {
@@ -553,7 +568,8 @@ int main(int argc, char** argv) {
 		n[i] = n[3] * size[3] * size[3] / (size[i] * size[i]);
 	}
 	//factor = augmaxy/doplerInu[nuMaxIndex];
-
+	//localB = 1.0;
+	//n[3] = 1.0;
 	optimizeParameters(localB, n[3], Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, size[3], factor);
 
 	B[3] = localB;
@@ -588,12 +604,14 @@ int main(int argc, char** argv) {
 	for (int k = 0; k < Npoints; ++k) {
 
 		double Bmean = B[k];
-		//double Bmean = B[3];
+		//double Bmean = B[3]*10*uniformDistribution();
 
 		localConcentration = n[k];
+		//localConcentration = n[3]*10*uniformDistribution();
 		//localConcentration = n[3]*(k+1)/(Npoints);
 		localSize = size[k];
-		//localSize = size[3];
+		//localSize = size[1];
+		//double localFractionSize = fractionSize*(k+1)/Npoints;
 
 
 		evaluateSpectrum(nu, Inu, Anu, Nnu, Ee, Fe, Np, minEnergy, maxEnergy, startElectronIndex, sinhi, Bmean, localConcentration, localSize);
@@ -613,6 +631,7 @@ int main(int argc, char** argv) {
 		std::string fileNumber = std::string(number);
 		FILE* output = fopen((fileName + fileNumber + ".dat").c_str(), "w");
 		delete[] number;
+		//factor = strangeFactor*4*pi*localSize*localSize*localSize*(1.0 - (1.0 - fractionSize)*(1.0 - fractionSize)*(1.0 - fractionSize))*1E26/(3*distance*distance);
 		factor = strangeFactor*4*pi*localSize*localSize*localSize*(1.0 - (1.0 - fractionSize)*(1.0 - fractionSize)*(1.0 - fractionSize))*1E26/(3*distance*distance);
 		for (int i = 0; i < Nnu; ++i) {
 			fprintf(output, "%g %g %g %g %g %g %g %g %g\n", nu[i]/1E9, Inu[i], Anu[i] * localSize, 0.0, Inu[i]*factor, 0.0, doplerInu[i]*factor, 0.0, Inu[i]*factor);

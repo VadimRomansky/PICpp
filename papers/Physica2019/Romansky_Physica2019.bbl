@@ -4,7 +4,7 @@
   \def\url#1{{\tt #1}}\fi
 \expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
 \providecommand{\eprint}[2][]{\url{#2}}
-% Bibliography created with iopart-num v2.0
+% Bibliography created with iopart-num v2.1
 % /biblio/bibtex/contrib/iopart-num
 
 \bibitem{GS64}
@@ -75,14 +75,16 @@
   {\bf 485} 5105--5119 (\textit{Preprint} \eprint{1809.10809})
 
 \bibitem{Buneman93}
-{Buneman} O, {Nishikawa} K~I and {Neubert} T 1993 {\em Plasma Physics and
+{Buneman} O, {Nishikawa} K~I and {Neubert} T 1993 {Solar wind-magnetosphere
+  interaction as simulated by a 3D, EM particle code} {\em Plasma Physics and
   Controlled Nuclear Fusion (ITC-4)\/} ed {Guyenne} H~T~D and {Hunt} J~J
 
 \bibitem{Spitkovsky2005}
-{Spitkovsky} A 2005 {\em Astrophysical Sources of High Energy Particles and
-  Radiation\/} ({\em American Institute of Physics Conference Series\/} vol
-  801) ed {Bulik} T, {Rudak} B and {Madejski} G pp 345--350 (\textit{Preprint}
-  \eprint{astro-ph/0603211})
+{Spitkovsky} A 2005 {Simulations of relativistic collisionless shocks: shock
+  structure and particle acceleration} {\em Astrophysical Sources of High
+  Energy Particles and Radiation\/} ({\em American Institute of Physics
+  Conference Series\/} vol 801) ed {Bulik} T, {Rudak} B and {Madejski} G pp
+  345--350 (\textit{Preprint} \eprint{astro-ph/0603211})
 
 \bibitem{Matthaeus1990}
 {Matthaeus} W~H, {Goldstein} M~L and {Roberts} D~A 1990 {\em \jgr\/} {\bf 95}
