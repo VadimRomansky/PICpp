@@ -237,7 +237,7 @@ double evaluateOptimizationFunction(double B, double n, double* Ee, double* Fe, 
 	delete[] nu;
 
 	//return I0*I0 + I1*I1 + I2*I2 + I3*I3 + I4*I4;
-	return fabs(I2) + fabs(I1) + fabs(I3);
+	return fabs(I2) + fabs(I3);
 }
 
 /*double evaluateOptimizationFunction1(double B, double n, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
@@ -474,7 +474,7 @@ int main(int argc, char** argv) {
 		fscanf(inputPe, "%lf", &Pe[i]);
 		fscanf(inputFe, "%lf", &Fe[i]);
 		Pe[i] = Pe[i] * massElectron * speed_of_light;
-		if( Pe[i] < 20000*massElectron*speed_of_light){
+		if( Pe[i] < 3000*massElectron*speed_of_light){
 			Ee[i] = sqrt(Pe[i] * Pe[i] * speed_of_light2 + massElectron * massElectron * speed_of_light4);
 			maxEnergy = Ee[i];
 			Fe[i] = Fe[i] * Ee[i] * massElectron / (Pe[i] * Pe[i] * Pe[i] * speed_of_light);
