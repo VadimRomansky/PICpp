@@ -6,10 +6,15 @@
 #include <time.h>
 #include <cmath>
 #include <string>
+#include <omp.h>
 
-const std::string outputfileName = "../../tristan-mp-pitp/radiation.dat";
-const std::string fileNameP = "../../tristan-mp-pitp/Pe";
-const std::string fileNameF = "../../tristan-mp-pitp/Fe";
+const std::string outputfileName = "radiation.dat";
+//const std::string fileNameP = "../../tristan-mp-pitp/Pe";
+//const std::string fileNameF = "../../tristan-mp-pitp/Fe";
+const std::string fileNameP = "Pe";
+const std::string fileNameF = "Fe";
+const std::string logFileName = "log.dat";
+const std::string BFileName = "B.dat";
 
 const int randomParameter = 1024;
 const double atomicUnionMass = 1.66053904E-24;
@@ -83,8 +88,8 @@ const double apry[4] ={0.993, 13.9, 17.1, 5.11};
 const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
 
-const double minB = 0.01;
-const double maxB = 10.0;
+const double minB = 0.05;
+const double maxB = 3.0;
 const double minN = 0.01;
 const double maxN = 10;
 
@@ -124,6 +129,17 @@ std::string convertIntToString(int a) {
 	return result + convertIntToString(a);
 }
 
+void findMaxNu(int& nuMaxIndex, double* Inu, int Nnu) {
+	double Imax = 0;
+	nuMaxIndex = 0;
+	for(int i = 0; i < Nnu; ++i) {
+		if(Inu[i] > Imax) {
+			Imax = Inu[i];
+			nuMaxIndex = i;
+		}
+	}
+}
+
 double evaluateTurbB(const double& kx, const double& ky, const double& kz, const double turbNorm){
 	double k = sqrt(kx*kx + ky*ky + kz*kz);
 	return turbNorm/pow(k, 11.0/3.0);
@@ -159,14 +175,18 @@ double evaluateMcDonaldIntegral(const double& nu) {
 		//printf("x > UvarovX[Napprox - 1]\n");
 		return 0;
 	}
-	for (int i = 1; i < Napprox; ++i) {
-		if (nu < UvarovX[i]) {
-			curIndex = i;
-			break;
+	int leftIndex = 0;
+	int rightIndex = Napprox-1;
+	while(rightIndex - leftIndex > 1){
+		int currentIndex = (rightIndex + leftIndex)/2;
+		if(UvarovX[currentIndex] > nu){
+			rightIndex = currentIndex;
+		} else { 
+			leftIndex = currentIndex;
 		}
 	}
 
-	double result = (UvarovValue[curIndex]*(nu - UvarovX[curIndex - 1]) + UvarovValue[curIndex - 1]*(UvarovX[curIndex] - nu))/(UvarovX[curIndex] - UvarovX[curIndex - 1]);
+	double result = (UvarovValue[rightIndex]*(nu - UvarovX[leftIndex]) + UvarovValue[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
 	//double result = UvarovValue[curIndex - 1] * exp(
 	//	log(UvarovValue[curIndex] / UvarovValue[curIndex - 1]) * ((nu - UvarovX[curIndex - 1]) / (UvarovX[curIndex] - UvarovX[curIndex - 1])));
 	if (result < 0) {
@@ -183,14 +203,18 @@ double evaluateMcDonaldFunction(const double& nu) {
 	if (nu > UvarovX[Napprox - 1]) {
 		return 0;
 	}
-	for (int i = 1; i < Napprox; ++i) {
-		if (nu < UvarovX[i]) {
-			curIndex = i;
-			break;
+	int leftIndex = 0;
+	int rightIndex = Napprox-1;
+	while(rightIndex - leftIndex > 1){
+		int currentIndex = (rightIndex + leftIndex)/2;
+		if(UvarovX[currentIndex] > nu){
+			rightIndex = currentIndex;
+		} else { 
+			leftIndex = currentIndex;
 		}
 	}
 
-	double result = (McDonaldValue[curIndex]*(nu - UvarovX[curIndex - 1]) + McDonaldValue[curIndex - 1]*(UvarovX[curIndex] - nu))/(UvarovX[curIndex] - UvarovX[curIndex - 1]);
+	double result = (McDonaldValue[rightIndex]*(nu - UvarovX[leftIndex]) + McDonaldValue[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
 	//double result = McDonaldValue[curIndex - 1] * exp(
 	//	log(McDonaldValue[curIndex] / McDonaldValue[curIndex - 1]) * ((nu - UvarovX[curIndex - 1]) / (UvarovX[curIndex] - UvarovX[curIndex - 1])));
 	if (result < 0) {
@@ -230,12 +254,12 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 				//here Fe is (Fe[j] / (4*pi)) * (Ee[j] - Ee[j - 1])
 				Inu[i] = Inu[i] + coef * Fe[j] * B * sinhi * evaluateMcDonaldIntegral(nu[i] / nuc);
 				Anu[i] = Anu[i] + coefAbsorb * Fe[j] * evaluateMcDonaldFunction(nu[i] / nuc) / (gamma * gamma * gamma * gamma * gamma);
-				if(Inu[i] != Inu[i]){
+				/*if(Inu[i] != Inu[i]){
 					printf("Inu NaN\n");
 				}
 				if(Anu[i] != Anu[i]){
 					printf("Anu Nan\n");
-				}
+				}*/
 			//}
 		}
 	}
@@ -245,13 +269,15 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 	//}
 }
 
-void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double** Ee, double** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double concentration, double Bfactor, double* X, double* Y, double* Z, double rmax){
-	for(int i = 0; i < Nx; ++i){
+void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double** Ee, double** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double* X, double* Y, double* Z, double rmax){
+	int i = 0;
+	#pragma omp parallel for shared(nu, Inu, Anu, Nnu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentration, Bfactor, X, Y, Z, rmax) private(i)
+	for(i = 0; i < Nx; ++i){
 		for(int j = 0; j < Ny; ++j){
 			for(int k = 0; k < Nz; ++k){
 				double r = sqrt(X[i]*X[i] + Y[j]*Y[j] + Z[k]*Z[k]);
 				if(r < rmax){
-					evaluateLocalEmissivityAndAbsorption(nu, Inu[i][j][k], Anu[i][j][k], Nnu, Ee[thetaIndex[i][j][k]], Fe[thetaIndex[i][j][k]], Np, sintheta[i][j][k], Bn[i][j][k]*Bfactor, concentration);
+					evaluateLocalEmissivityAndAbsorption(nu, Inu[i][j][k], Anu[i][j][k], Nnu, Ee[thetaIndex[i][j][k]], Fe[thetaIndex[i][j][k]], Np, sintheta[i][j][k], Bn[i][j][k]*Bfactor, concentration*concentrations[i][j][k]);
 				} else {
 					for(int l = 0; l < Nnu; ++l){
 						Inu[i][j][k][l] = 0;
@@ -292,17 +318,14 @@ void evaluateOrientationParameters(double*** B, double*** sintheta, int*** theta
 					theta2 = pi - theta2;
 				}
 
-				/*double theta = acos(cosTheta);
-				if(theta >= pi/2){
-					theta = pi - theta;
-				}*/
-
 				thetaIndex[i][j][k] = floor(theta2 / (pi/(2*Nd))); 
 				if(thetaIndex[i][j][k] == Nd){
 					printf("thetaIndex == Nd\n");
 					printf("%lf\n", By[i][j][k]);
 					thetaIndex[i][j][k] = Nd - 1;
 				}
+				//for debug
+				thetaIndex[i][j][k] = 3;
 			}
 		}
 	}
@@ -329,13 +352,18 @@ double findEmissivityAt(double* nu, double* Inu, double currentNu, int Nnu) {
 	if(currentNu >= nu[Nnu - 1]) {
 		return Inu[Nnu - 1];
 	}
-	for(int i = 1; i < Nnu; ++i) {
-		if(currentNu < nu[i]) {
-			//return Inu[i - 1] * exp(log(Inu[i] / Inu[i - 1]) * ((currentNu - nu[i-1]) / (nu[i] - nu[i - 1])));
-			return (Inu[i - 1] *(nu[i] - currentNu) + Inu[i]*(currentNu - nu[i-1]))/ (nu[i] - nu[i - 1]);
+	int leftIndex = 0;
+	int rightIndex = Nnu-1;
+	while(rightIndex - leftIndex > 1){
+		int currentIndex = (rightIndex + leftIndex)/2;
+		if(nu[currentIndex] > currentNu){
+			rightIndex = currentIndex;
+		} else { 
+			leftIndex = currentIndex;
 		}
 	}
-	return 0;
+	//return Inu[i - 1] * exp(log(Inu[i] / Inu[i - 1]) * ((currentNu - nu[i-1]) / (nu[i] - nu[i - 1])));
+	return (Inu[leftIndex] *(nu[rightIndex] - currentNu) + Inu[rightIndex]*(currentNu - nu[leftIndex]))/ (nu[rightIndex] - nu[leftIndex]);
 }
 
 void evaluateSpectrum(double* nu, double* totalInu, double**** Inu, double**** Anu, double distance, int Nnu, double* X, double* Y, double* Z, double rmax){
@@ -365,22 +393,22 @@ void evaluateSpectrum(double* nu, double* totalInu, double**** Inu, double**** A
 	}
 }
 
-double evaluateOptimizationFunction(double Bfactor, double n, double* nu, double** Ee, double** Fe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double distance, double**** Inu, double**** Anu, double* X, double* Y, double* Z, double rmax) {
+double evaluateOptimizationFunction(double Bfactor, double n, double* nu, double** Ee, double** Fe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double distance, double**** Inu, double**** Anu, double* X, double* Y, double* Z, double rmax) {
 	double* totalInu = new double[Nnu];
-	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, n, Bfactor, X, Y, Z, rmax);
+	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, n, Bfactor, X, Y, Z, rmax);
 	evaluateSpectrum(nu, totalInu, Inu, Anu, distance, Nnu, X, Y, Z, rmax);
 
-	double I0 = findEmissivityAt(nu, totalInu, augx[0]*1E9, Nnu) - augy[0];
+	//double I0 = findEmissivityAt(nu, totalInu, augx[0]*1E9, Nnu) - augy[0];
 	double I1 = findEmissivityAt(nu, totalInu, augx[1]*1E9, Nnu) - augy[1];
 	double I2 = findEmissivityAt(nu, totalInu, augx[2]*1E9, Nnu) - augy[2];
 	double I3 = findEmissivityAt(nu, totalInu, augx[3]*1E9, Nnu) - augy[3];
-	double I4 = findEmissivityAt(nu, totalInu, augx[4]*1E9, Nnu) - augy[4];
+	//double I4 = findEmissivityAt(nu, totalInu, augx[4]*1E9, Nnu) - augy[4];
 
 	//return I0*I0 + I1*I1 + I2*I2 + I3*I3 + I4*I4;
-	return fabs(I2) + fabs(I3);
+	return fabs(I2) + fabs(I3) + fabs(I1);
 }
 
-void findMinParameters(double& Bfactor, double& N, double minLambda, double maxLambda, double gradB, double gradn, double* nu, double** Ee, double** Fe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double distance, double**** Inu, double**** Anu, double* X, double* Y, double* Z, double rmax) {
+void findMinParameters(double& Bfactor, double& N, double minLambda, double maxLambda, double gradB, double gradn, double* nu, double** Ee, double** Fe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double distance, double**** Inu, double**** Anu, double* X, double* Y, double* Z, double rmax) {
 	if(maxLambda - minLambda < 0.01*maxLambda) {
 		N = N - maxLambda*gradn;
 		Bfactor = Bfactor - maxLambda*gradB;
@@ -399,16 +427,16 @@ void findMinParameters(double& Bfactor, double& N, double minLambda, double maxL
 	//double concentration2 = evaluateConcentrationFromB(B*b2, gamma0, sigma);
 
 	//double f = evaluateOptimizationFunction(Bfactor, N, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, distance, Inu, Anu, X, Y, Z, rmax);
-	double f1 = evaluateOptimizationFunction(B1, N1, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, distance, Inu, Anu, X, Y, Z, rmax);
-	double f2 = evaluateOptimizationFunction(B2, N2, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, distance, Inu, Anu, X, Y, Z, rmax);
+	double f1 = evaluateOptimizationFunction(B1, N1, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax);
+	double f2 = evaluateOptimizationFunction(B2, N2, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax);
 	if(f1 < f2) {
-		findMinParameters(Bfactor, N, minLambda, lambda2, gradB, gradn, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, distance, Inu, Anu, X, Y, Z, rmax);
+		findMinParameters(Bfactor, N, minLambda, lambda2, gradB, gradn, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax);
 	} else {
-		findMinParameters(Bfactor, N, lambda1, maxLambda, gradB, gradn, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, distance, Inu, Anu, X, Y, Z, rmax);
+		findMinParameters(Bfactor, N, lambda1, maxLambda, gradB, gradn, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax);
 	}
 }
 
-void findMinParameters(double& Bfactor, double& N, double gradB, double gradN, double* nu, double** Ee, double** Fe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double distance, double**** Inu, double**** Anu, double* X, double* Y, double* Z, double rmax) {
+void findMinParameters(double& Bfactor, double& N, double gradB, double gradN, double* nu, double** Ee, double** Fe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double distance, double**** Inu, double**** Anu, double* X, double* Y, double* Z, double rmax) {
 	double minLambda = 0;
 	double lambdaB = fabs(maxB/gradB);
 	double lambdaN = fabs(maxN/gradN);
@@ -419,21 +447,23 @@ void findMinParameters(double& Bfactor, double& N, double gradB, double gradN, d
 	if(Bfactor - maxLambda*gradB < 0 ){
 		maxLambda = Bfactor/gradB;
 	}
-	findMinParameters(Bfactor, N, minLambda, maxLambda, gradB, gradN, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, distance, Inu, Anu, X, Y, Z, rmax);
+	findMinParameters(Bfactor, N, minLambda, maxLambda, gradB, gradN, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax);
 }
 
-void optimizeParameters(double& Bfactor, double& N, double* nu, double** Ee, double** Fe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double distance, double**** Inu, double**** Anu, double* X, double* Y, double* Z, double rmax) {
-	double currentF = evaluateOptimizationFunction(Bfactor, N, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, distance, Inu, Anu, X, Y, Z, rmax);
+void optimizeParameters(double& Bfactor, double& N, double* nu, double** Ee, double** Fe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double distance, double**** Inu, double**** Anu, double* X, double* Y, double* Z, double rmax, FILE* logFile) {
+	double currentF = evaluateOptimizationFunction(Bfactor, N, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax);
 
 	for(int i = 0; i < 10; ++i) {
 		double dx = min(Bfactor, N)/100;
 		printf("optimiztion i = %d\n",i);
-		double Fb = evaluateOptimizationFunction(Bfactor + dx, N, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, distance, Inu, Anu, X, Y, Z, rmax);
-		double Fn = evaluateOptimizationFunction(Bfactor, N + dx, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, distance, Inu, Anu, X, Y, Z, rmax);
+		fprintf(logFile, "optimiztion i = %d\n",i);
+		fflush(logFile);
+		double Fb = evaluateOptimizationFunction(Bfactor + dx, N, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax);
+		double Fn = evaluateOptimizationFunction(Bfactor, N + dx, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax);
 		double gradB = (Fb - currentF)/dx;
 		double gradN = (Fn - currentF)/dx;
-		findMinParameters(Bfactor, N, gradB, gradN, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, distance, Inu, Anu, X, Y, Z, rmax);
-		currentF = evaluateOptimizationFunction(Bfactor, N, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, distance, Inu, Anu, X, Y, Z, rmax);
+		findMinParameters(Bfactor, N, gradB, gradN, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax);
+		currentF = evaluateOptimizationFunction(Bfactor, N, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax);
 		//random
 		/*for(int j = 0; j < 10; ++j){
 			double tempB = 5*b*uniformDistribution();
@@ -449,6 +479,51 @@ void optimizeParameters(double& Bfactor, double& N, double* nu, double** Ee, dou
 	}
 }
 
+void evaluateFirstBapprox(double& Bfactor, double& concentration, double* nu, double** Ee, double** dFe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double distance, double**** Inu, double**** Anu, double* X, double* Y, double* Z, double rmax, FILE* logFile){
+	double* totalInu = new double[Nnu];
+	
+	double leftB = minB;
+	double rightB = maxB;
+	double localB = (leftB + rightB)/2;
+
+	double nuMax = 0;
+	int nuMaxIndex = 0;
+
+	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, Ee, dFe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, concentration, localB, X, Y, Z, rmax);
+	evaluateSpectrum(nu, totalInu, Inu, Anu, distance, Nnu, X, Y, Z, rmax);
+
+	findMaxNu(nuMaxIndex, totalInu, Nnu);
+	nuMax = nu[nuMaxIndex];
+	int iterations = 0;
+	bool converges = false;
+	while(!converges) {
+		iterations++;
+		if(nuMax > augmaxx*1E9) {
+			rightB = localB;
+			localB = (leftB + rightB)/2;
+			evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, Ee, dFe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, concentration, localB, X, Y, Z, rmax);
+			evaluateSpectrum(nu, totalInu, Inu, Anu, distance, Nnu, X, Y, Z, rmax);
+			findMaxNu(nuMaxIndex, totalInu, Nnu);
+			//findMaxNu(nuMaxIndex, doplerInu, Nnu);
+		} else {
+			leftB = localB;
+			localB = (leftB + rightB)/2;
+			evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, Ee, dFe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, concentration, localB, X, Y, Z, rmax);
+			evaluateSpectrum(nu, totalInu, Inu, Anu, distance, Nnu, X, Y, Z, rmax);
+			findMaxNu(nuMaxIndex, totalInu, Nnu);
+			//findMaxNu(nuMaxIndex, doplerInu, Nnu);
+		}
+		nuMax = nu[nuMaxIndex];
+		if((rightB - leftB) < 0.01) {
+			converges = true;
+		}
+	}
+
+	Bfactor = localB;
+
+	delete[] totalInu;
+}
+
 
 int main()
 {
@@ -456,11 +531,13 @@ int main()
 	double*** By;
 	double*** Bz;
 
+	double*** concentrations;
+
 	double*** B;
 	double*** sintheta;
 	int*** thetaIndex;
 
-	double thetaObserv = 0;
+	double thetaObserv = 45;
 	double cosThetaObserv = cos(thetaObserv);
 	double sinThetaObserv = sin(thetaObserv);
 
@@ -500,18 +577,24 @@ int main()
 
 	double dx = 2*rmax/Nx;
 
-	double rmin = dx/2;
+	//double rmin = dx*sqrt(3.0)/2;
+	double rmin = 1E13;
 
-
+	//double B0 = 1000;
 	double B0 = 1.0;
 
-	double rcorot = rmax/10;
+	double rcorot = rmax/5;
+
+	FILE* logFile = fopen(logFileName.c_str(), "w");
 
 	printf("initialization\n");
+	fprintf(logFile, "initialization\n");
 
 	Bx = new double**[Nx];
 	By = new double**[Nx];
 	Bz = new double**[Nx];
+
+	concentrations = new double**[Nx];
 
 	B = new double**[Nx];
 	sintheta = new double**[Nx];
@@ -523,6 +606,7 @@ int main()
 		Bx[i] = new double*[Ny];
 		By[i] = new double*[Ny];
 		Bz[i] = new double*[Ny];
+		concentrations[i] = new double*[Ny];
 		B[i] = new double*[Ny];
 		sintheta[i] = new double*[Ny];
 		thetaIndex[i] = new int*[Ny];
@@ -532,27 +616,34 @@ int main()
 			Bx[i][j] = new double[Nz];
 			By[i][j] = new double[Nz];
 			Bz[i][j] = new double[Nz];
+			concentrations[i][j] = new double[Nz];
 			B[i][j] = new double[Nz];
 			sintheta[i][j] = new double[Nz];
 			thetaIndex[i][j] = new int[Nz];
-			double sinphi = y/sqrt(x*x + y*y);
-			double cosphi = x/sqrt(x*x + y*y);
 			for(int k = 0; k < Nz; ++k){
 				double z = dx/2 - rmax + k*dx;
 				Z[k] = z;
 				double r = sqrt(x*x + y*y + z*z);
+
+				concentrations[i][j][k] = 1.0;
+				//todo
+				double adiab = 5.0/3.0;
+				concentrations[i][j][k] = pow(r/rmax, 3.0/(adiab - 1.0));
 
 				double y1 = y;
 				double z1 = z*cosThetaObserv + x*sinThetaObserv;
 				double x1 = x*cosThetaObserv - z*sinThetaObserv;
 
 
-				double theta = z1/r;
-				double sintheta = sin(theta);
-				double costheta = cos(theta);
+				double costheta = z1/r;
+				double sintheta = sqrt(1.0 - costheta*costheta);
+
+				double sinphi = y1/sqrt(x1*x1 + y1*y1);
+				double cosphi = x1/sqrt(x1*x1 + y1*y1);
 
 				double Br = B0*costheta*sqr(rmin/r);
 				double Bphi = B0*costheta*((r - rmin)/rcorot)*sqr(rmin/r)*sintheta;
+				//double Bphi = 0;
 
 				double Bx1 = Br*sintheta*cosphi - Bphi*sinphi;
 				double By1 = Br*sintheta*sinphi + Bphi*cosphi;
@@ -568,51 +659,8 @@ int main()
 		}
 	}
 
-	evaluateOrientationParameters(B, sintheta, thetaIndex, Bx, By, Bz, X, Y, Z, Nd);
-
-	printf("reading input\n");
-
-	Fe = new double*[Nd];
-	dFe = new double*[Nd];
-	Ee = new double*[Nd];
-	for(int j = 0; j < Nd; ++j){
-		std::string fileNumber = convertIntToString(j);
-		FILE* inputPe = fopen((fileNameP + fileNumber + ".dat").c_str(), "r");
-		FILE* inputFe = fopen((fileNameF + fileNumber + ".dat").c_str(), "r");
-		Fe[j] = new double[Np];
-		dFe[j] = new double[Np];
-		Ee[j] = new double[Np];
-		double u;
-		fscanf(inputPe, "%lf", &u);
-		fscanf(inputFe, "%lf", &Fe[j][0]);
-		Ee[j][0] = massElectron*speed_of_light2;
-		Fe[j][0] = 0;
-		dFe[j][0] = 0;
-		for (int i = 1; i < Np; ++i) {
-			fscanf(inputPe, "%lf", &u);
-			fscanf(inputFe, "%lf", &Fe[j][i]);
-
-			//if( u < 3000){
-				Ee[j][i] = sqrt(u * u  + 1)*massElectron*speed_of_light2;
-				//maxEnergy = Ee[i];
-				Fe[j][i] = Fe[j][i] * Ee[j][i]/ (u * u * u * speed_of_light4 *massElectron*massElectron);
-				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
-			//} else {
-			//	Fe[i] = 0;
-			//}
-		
-		}
-
-		double norm = 0;
-		for (int i = 1; i < Np; ++i) {
-			norm = norm + Fe[j][i] * (Ee[j][i] - Ee[j][i - 1]);
-		}
-		for (int i = 0; i < Np; ++i) {
-			Fe[j][i] = Fe[j][i] / norm;
-		}
-	}
-
-	printf("evaluationg turbulent field\n");
+	printf("evaluating turbulent field\n");
+	fprintf(logFile, "evaluating turbulent field\n");
 
 	srand(time(NULL));
 
@@ -670,7 +718,63 @@ int main()
 		}
 	}*/
 
+	FILE* bFile = fopen(BFileName.c_str(), "w");
+	for(int i = 0; i < Nx; ++i){
+		for(int j = 0; j < Ny; ++j){
+			for(int k = 0; k < Nz; ++k){
+				fprintf(bFile, "%g %g %g\n", Bx[i][j][k], By[i][j][k], Bz[i][j][k]);
+			}
+		}
+	}
+	fclose(bFile);
+
+	evaluateOrientationParameters(B, sintheta, thetaIndex, Bx, By, Bz, X, Y, Z, Nd);
+
+	printf("reading input\n");
+	fprintf(logFile, "reading input\n");
+
+	Fe = new double*[Nd];
+	dFe = new double*[Nd];
+	Ee = new double*[Nd];
+	for(int j = 0; j < Nd; ++j){
+		std::string fileNumber = convertIntToString(j);
+		FILE* inputPe = fopen((fileNameP + fileNumber + ".dat").c_str(), "r");
+		FILE* inputFe = fopen((fileNameF + fileNumber + ".dat").c_str(), "r");
+		Fe[j] = new double[Np];
+		dFe[j] = new double[Np];
+		Ee[j] = new double[Np];
+		double u;
+		fscanf(inputPe, "%lf", &u);
+		fscanf(inputFe, "%lf", &Fe[j][0]);
+		Ee[j][0] = massElectron*speed_of_light2;
+		Fe[j][0] = 0;
+		dFe[j][0] = 0;
+		for (int i = 1; i < Np; ++i) {
+			fscanf(inputPe, "%lf", &u);
+			fscanf(inputFe, "%lf", &Fe[j][i]);
+
+			//if( u < 3000){
+				Ee[j][i] = sqrt(u * u  + 1)*massElectron*speed_of_light2;
+				//maxEnergy = Ee[i];
+				Fe[j][i] = Fe[j][i] * Ee[j][i]/ (u * u * u * speed_of_light4 *massElectron*massElectron);
+				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
+			//} else {
+			//	Fe[i] = 0;
+			//}
+		
+		}
+
+		double norm = 0;
+		for (int i = 1; i < Np; ++i) {
+			norm = norm + Fe[j][i] * (Ee[j][i] - Ee[j][i - 1]);
+		}
+		for (int i = 0; i < Np; ++i) {
+			Fe[j][i] = Fe[j][i] / norm;
+		}
+	}
+
 	printf("evaluating local emissivity\n");
+	fprintf(logFile, "evaluating local emissivity\n");
 
 	nu = new double[Nnu];
 	Inu = new double***[Nx];
@@ -694,20 +798,30 @@ int main()
 	/////////////////
 	//todo concentration!!
 	double concentration = 1.0;
-	double Bfactor = 1.0;
+	double Bfactor = 0.15;
 	////////////////////
 	printf("optimizing parameters\n");
-	optimizeParameters(Bfactor, concentration, nu, Ee, dFe, Np, Nnu, Nd, B, sintheta, thetaIndex, distance, Inu, Anu, X, Y, Z, rmax);
+	fprintf(logFile, "optimizing parameters\n");
+	fflush(logFile);
+	evaluateFirstBapprox(Bfactor, concentration, nu, Ee, dFe, Np, Nnu, Nd, B, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax, logFile);
+	optimizeParameters(Bfactor, concentration, nu, Ee, dFe, Np, Nnu, Nd, B, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax, logFile);
 	///////////////////
-	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, Ee, dFe, Np, Nd, B, sintheta, thetaIndex, concentration, Bfactor, X, Y, Z, rmax);
+	//concentration = 1.0;
+	//Bfactor = 0.15;
+	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, Ee, dFe, Np, Nd, B, sintheta, thetaIndex, concentrations, concentration, Bfactor, X, Y, Z, rmax);
 
 	printf("integrating fields\n");
+	fprintf(logFile, "integrating Fields\n");
 	double* totalInu = new double[Nnu];
+	printf("Bfactor = %g, n = %g\n", Bfactor, concentration);
+	fprintf(logFile, "Bfactor = %g, n = %g\n", Bfactor, concentration);
+	fflush(logFile);
 
 	evaluateSpectrum(nu, totalInu, Inu, Anu, distance, Nnu, X, Y, Z, rmax);
 
 	//////////
 	printf("outputing\n");
+	fprintf(logFile, "ooutputing\n");
 	//char* number = new char[100];
 	//itoa(0, number, 10);
 	//delete[] number;
@@ -722,6 +836,7 @@ int main()
 	////////////////////
 
 	printf("deleting arrays\n");
+	fprintf(logFile, "deleting arrays\n");
 	delete[] totalInu;
 
 	for(int j = 0; j < Nd; ++j){
@@ -742,6 +857,7 @@ int main()
 			delete[] Bx[i][j];
 			delete[] By[i][j];
 			delete[] Bz[i][j];
+			delete[] concentrations[i][j];
 			delete[] B[i][j];
 			delete[] sintheta[i][j];
 			delete[] thetaIndex[i][j];
@@ -751,6 +867,7 @@ int main()
 		delete[] Bx[i];
 		delete[] By[i];
 		delete[] Bz[i];
+		delete[] concentrations[i];
 		delete[] B[i];
 		delete[] sintheta[i];
 		delete[] thetaIndex[i];
@@ -760,10 +877,12 @@ int main()
 	delete[] Bx;
 	delete[] By;
 	delete[] Bz;
+	delete[] concentrations;
 	delete[] B;
 	delete[] sintheta;
 	delete[] thetaIndex;
 	
+	fclose(logFile);
 
 	return 0;
 }
