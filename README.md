@@ -3,7 +3,9 @@ Particle in cell code
 
 This code is designed for simulation of processes in astrophysical colisionless plasma. 
 Two optional numerical schemes are implemented:
+
 -implicit scheme developed by G. Lapenta, J. Brackbill, S. Markidis, K. Noguchi, M. Innocenti and others.
+
 -explicit scheme developed by O. Buneman, A. Spitkovsky and others
 
 we suggest that our code can be more suitable for special astrophysical tasks than original codes, becuause allows to use a lot of different particle types
