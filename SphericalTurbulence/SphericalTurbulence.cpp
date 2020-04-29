@@ -37,32 +37,56 @@ const double four_pi = 4*pi;
 const double fractionSize = 0.5;
 
 const double emissivityCoef = sqrt(3.0) * electron_charge * electron_charge * electron_charge / (massElectron * speed_of_light2);
-const double absorpCoef = 16 * pi * pi * electron_charge / (3 * sqrt(3.0));
+const double absorpCoef = 40.0*electron_charge /(9*pow(2, 4.0/3.0));
+const double absorpCoef2 = 2.0 * electron_charge / 3.0 ;
 const double criticalNuCoef = 3 * electron_charge / (4 * pi * massElectron * massElectron * massElectron * speed_of_light * speed_of_light4);
 
-const int Nx = 10;
-const int Ny = 10;
+const int Nx = 2;
+const int Ny = 2;
 const int Nz = 2;
-const int Nk = 20;
+const int Nk = 10;
 
-const int Napprox = 52;
+const int Napprox = 55;
 
-///      K5/3(x)
-const double McDonaldValue[Napprox] = { 1.43E15, 9.8E13, 3.09E13, 2.11E12, 6.65E11, 4.55E10, 1.43E10, 9.8E8,
-	3.08E8, 2.11E7, 6.65E6, 4.55E5, 1.43E4, 9802, 3087, 670, 211, 107, 66.3, 33.6, 20.7, 14.1, 11.0, 10.3, 6.26, 4.2, 3.01, 2.25, 1.73, 1.37, 1.10,
-	0.737, 0.514, 0.368, 0.269, 0.2, 0.0994, 0.0518, 0.0278, 0.0152, 0.00846, 0.00475, 0.00154, 0.000511, 0.000172, 0.0000589, 0.0000203, 0.00000246, 3.04E-7, 3.81E-8, 4.82E-9, 6.14E-10
-};
-////     x*int from x to inf K5/3(t)dt
-const double UvarovValue[Napprox] = {0.0021495, 0.00367, 0.00463, 0.00792, 0.00997, 0.017, 0.0215, 0.0367,
-	0.0461, 0.0791, 0.0995, 0.169, 0.213, 0.358, 0.445, 0.583, 0.702, 0.772, 0.818, 0.874,0.904, 0.917, 0.918, 0.918, 0.901, 0.872, 0.832, 0.788,
-	0.742, 0.694, 0.655, 0.566, 0.486, 0.414, 0.354, 0.301, 0.200, 0.130, 0.0845, 0.0541, 0.0339, 0.0214, 0.0085, 0.0033, 0.0013, 0.00050, 0.00019,
-	0.0000282, 0.00000409, 5.89E-7, 8.42E-8, 1.19E-8
-};
 ///// x
 const double UvarovX[Napprox] = {1.0E-9, 5.0E-9, 1.0E-8, 5.0E-8, 1.0E-7, 5.0E-7, 1.0E-6, 5.0E-6,
 	0.00001, 0.00005, 0.0001 ,0.0005, 0.001, 0.005, 0.01, 0.025, 0.050, 0.075, 0.10, 0.15,
-	0.20, 0.25, 0.29, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0, 1.2, 1.4, 1.6,
-	1.8, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0
+	0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0, 1.2, 1.4, 1.6,
+	1.8, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0,
+	25.0, 30.0, 40.0, 50.0
+};
+
+///      K1/3(x)
+const double McDonaldValue1_3[Napprox] = { 1687, 986.9, 783.3, 458.08, 363.58, 212.6, 168.7, 98.66,
+	78.29, 45.74, 36.28, 21.134, 16.715, 9.5937, 7.486, 5.3015, 3.991, 3.3296, 2.8998, 2.3428, 1.9793, 1.71449, 1.509, 1.20576, 0.9890, 0.82509, 0.69653, 0.59318, 0.50859, 0.438,
+	0.3298, 0.25132, 0.19324, 0.149649, 0.1165, 0.06354, 0.0353059, 0.01987, 0.011299, 0.006472, 0.003728, 0.0012547, 0.000427968, 0.000147, 0.00005118, 0.00001787, 0.00000221, 2.7719E-7, 3.511E-8, 4.4822E-9, 5.7568E-10,
+	3.4717E-12, 2.13636E-14, 8.40438E-19, 3.4139E-23
+};
+///      K2/3(x)
+const double McDonaldValue2_3[Napprox] = { 1.0747E6, 3.675E5, 2.315E5, 79189, 49886, 17060, 10747, 3675,
+	2315, 791.89, 498.85, 170.6, 107.46, 36.72, 23.098, 12.468, 7.7619, 5.84349, 4.7529, 3.51287, 2.80179, 2.3289, 1.9866, 1.5171, 1.2059, 0.98283, 0.81478, 0.68387, 0.57938, 0.494,
+	0.36618, 0.2756, 0.2099, 0.16132, 0.1248, 0.06725, 0.037057, 0.02073, 0.01173, 0.00669, 0.00384, 0.001287, 0.0004376, 0.0001503, 0.00005208, 0.00001816, 0.00000224, 2.80406E-7, 3.5469E-8, 4.5227E-9, 5.8038E-10,
+	3.49449E-12, 2.14807E-14, 8.43904E-19, 3.4252E-23
+};
+///      K4/3(x)
+const double McDonaldValue4_3[Napprox] = { 1.125E12, 1.3159E11, 5.222E10, 6.107E9, 2.4239E9, 2.835E8, 1.125E8, 1.315E7,
+	5.222E6, 6.107E5, 2.4239E5, 28350, 11250.8, 1315.88, 522.179, 153.84, 60.97, 35.44, 24.085, 13.925, 9.39959, 6.90088, 5.34, 3.5267, 2.5246, 1.8996, 1.478, 1.178188, 0.9561, 0.78676,
+	0.5494, 0.3953, 0.29044, 0.2167, 0.16368, 0.08419, 0.0449028, 0.0245, 0.01361, 0.00765, 0.00434, 0.0014269, 0.000478, 0.0001626, 0.00005587, 0.0000193, 0.000002363, 2.93606E-7, 3.693E-8, 4.6888E-9, 5.9957E-10,
+	3.58707E-12, 2.19555E-14, 8.579119E-19, 3.47072E-23
+};
+
+///      K5/3(x)
+const double McDonaldValue5_3[Napprox] = { 1.43E15, 9.8E13, 3.09E13, 2.11E12, 6.65E11, 4.55E10, 1.43E10, 9.8E8,
+	3.08E8, 2.11E7, 6.65E6, 4.55E5, 1.43E4, 9802, 3087, 670, 211, 107, 66.3, 33.6, 20.7, 14.13, 10.338, 6.2628, 4.2048, 3.00916, 2.2484, 1.73296, 1.3669, 1.0977,
+	0.73675, 0.513823, 0.36818, 0.269146, 0.1997, 0.0994, 0.051775, 0.02777, 0.0152, 0.008455, 0.004754, 0.0015408, 0.000511, 0.00017249, 0.00005889, 0.0000203, 0.00000246, 3.039E-7, 3.8068E-8, 4.817E-9, 6.1437E-10,
+	3.658E-12, 2.2318E-14, 8.68568E-19, 3.50526E-23
+};
+////     x*int from x to inf K5/3(t)dt
+const double UvarovValue[Napprox] = {0.0021495, 0.00367, 0.00463, 0.00792, 0.00997, 0.017, 0.0215, 0.0367,
+	0.0461, 0.0791, 0.0995, 0.169, 0.213, 0.358, 0.445, 0.583, 0.702, 0.772, 0.818, 0.874,0.904, 0.917, 0.918, 0.901, 0.872, 0.832, 0.788,
+	0.742, 0.694, 0.655, 0.566, 0.486, 0.414, 0.354, 0.301, 0.200, 0.130, 0.0845, 0.0541, 0.0339, 0.0214, 0.0085, 0.0033, 0.0013, 0.00050, 0.00019,
+	0.00002822, 0.00000409, 5.89E-7, 8.42E-8, 1.19E-8,
+	8.9564E-11, 6.58079E-13, 3.42988E-17, 1.73478E-21
 };
 
 const int Ntheta = 10;
@@ -201,10 +225,10 @@ double evaluateMcDonaldIntegral(const double& nu) {
 	return result;
 }
 
-double evaluateMcDonaldFunction(const double& nu) {
+double evaluateMcDonaldFunction5_3(const double& nu) {
 	int curIndex = 0;
 	if (nu < UvarovX[0]) {
-		return 0;
+		return McDonaldValue5_3[0];
 	}
 	if (nu > UvarovX[Napprox - 1]) {
 		return 0;
@@ -220,13 +244,46 @@ double evaluateMcDonaldFunction(const double& nu) {
 		}
 	}
 
-	double result = (McDonaldValue[rightIndex]*(nu - UvarovX[leftIndex]) + McDonaldValue[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
+	double result = (McDonaldValue5_3[rightIndex]*(nu - UvarovX[leftIndex]) + McDonaldValue5_3[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
 	//double result = McDonaldValue[curIndex - 1] * exp(
 	//	log(McDonaldValue[curIndex] / McDonaldValue[curIndex - 1]) * ((nu - UvarovX[curIndex - 1]) / (UvarovX[curIndex] - UvarovX[curIndex - 1])));
 	if (result < 0) {
 		printf("result < 0\n");
 	}
 	return result;
+}
+
+void evaluateMcDonaldFunctions(const double& nu, double& K1_3, double& K2_3, double& K4_3, double& K5_3) {
+	int curIndex = 0;
+	if (nu < UvarovX[0]) {
+		K1_3 = McDonaldValue1_3[0];
+		K2_3 = McDonaldValue2_3[0];
+		K4_3 = McDonaldValue4_3[0];
+		K5_3 = McDonaldValue5_3[0];
+		return;
+	}
+	if (nu > UvarovX[Napprox - 1]) {
+		K1_3 = 0;
+		K2_3 = 0;
+		K4_3 = 0;
+		K5_3 = 0;
+		return;
+	}
+	int leftIndex = 0;
+	int rightIndex = Napprox-1;
+	while(rightIndex - leftIndex > 1){
+		int currentIndex = (rightIndex + leftIndex)/2;
+		if(UvarovX[currentIndex] > nu){
+			rightIndex = currentIndex;
+		} else { 
+			leftIndex = currentIndex;
+		}
+	}
+
+	K1_3 = (McDonaldValue1_3[rightIndex]*(nu - UvarovX[leftIndex]) + McDonaldValue1_3[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
+	K1_3 = (McDonaldValue2_3[rightIndex]*(nu - UvarovX[leftIndex]) + McDonaldValue2_3[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
+	K4_3 = (McDonaldValue4_3[rightIndex]*(nu - UvarovX[leftIndex]) + McDonaldValue4_3[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
+	K5_3 = (McDonaldValue5_3[rightIndex]*(nu - UvarovX[leftIndex]) + McDonaldValue5_3[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
 }
 
 double criticalNu(const double& E, const double& sinhi, const double& H) {
@@ -246,7 +303,9 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 	}
 
 	double coef = concentration * emissivityCoef;
-	double coefAbsorb = concentration * absorpCoef/B;
+	//double coefAbsorb = concentration * absorpCoef/B;
+	//todo what if < 0?
+	double coshi = sqrt(1.0 - sinhi*sinhi);
 
 
 	for (int i = 0; i < Nnu; ++i) {
@@ -256,23 +315,65 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 			if(Fe[j] > 0){
 				double nuc = criticalNu(Ee[j], sinhi, B);
 				double gamma = Ee[j] / (massElectron * speed_of_light2);
-				double x = nu[i] / nuc;
+				double gamma4 = gamma*gamma*gamma*gamma;
+				//double x = nu[i] / nuc;
 				//todo!!! 4pi!!
 				//here Fe is (Fe[j] / (4*pi)) * (Ee[j] - Ee[j - 1])
 				Inu[i] = Inu[i] + coef * Fe[j] * B * sinhi * evaluateMcDonaldIntegral(nu[i] / nuc);
 				// integral for sigma
 				double sigmaInt = 0;
-				for(int l = 0; l < Ntheta; ++l){
-					double localNuc = criticalNu(Ee[j], sinThetaValue[l], B);
-					sigmaInt = sigmaInt + 2*2*pi*evaluateMcDonaldFunction(nu[i] / localNuc)*dtheta; 
+				double psimax = 2*pi/gamma;
+				int Npsi = Ntheta;
+				int Nphi = Ntheta;
+				double dpsi = psimax/Npsi;
+				double dphi = 2*pi/Nphi;
+				for(int l = 0; l < Npsi; ++l){
+					double psi = dpsi*(0.5 + l);
+					double cospsi = cos(psi);
+					double sinpsi = sin(psi);
+					for(int m = 0; m < Nphi; ++m){
+						double phi = dphi*(0.5 + m);
+						double cosphi = cos(phi);
+						double sinphi = sin(phi);
+						double costheta = coshi*cospsi + sinhi*sinpsi*cosphi;
+						if(fabs(costheta) > 1.0){
+							printf("costheta > 1\n");
+							costheta = 1.0;
+						}
+						double sintheta = sqrt(1.0 - costheta*costheta);
+
+						double localNuc = criticalNu(Ee[j], sintheta, B);
+						double x = nu[i]/localNuc;
+
+						double t = gamma*gamma*psi*psi;
+						double y = 0.5*x*pow(1.0 + t, 1.5); 
+
+						if((x < 0.1) && (t < 0.01)){
+							sigmaInt = sigmaInt + (concentration*absorpCoef*Fe[j]/(B*gamma4*sintheta*sintheta*pow(x,4.0/3.0)))*sinpsi*dpsi*dphi;
+							if(sigmaInt != sigmaInt){
+								printf("sigmaInt Nan\n");
+							}
+						} else {
+							double K1_3 = 0;
+							double K2_3 = 0;
+							double K4_3 = 0;
+							double K5_3 = 0;
+							evaluateMcDonaldFunctions(y, K1_3, K2_3, K4_3, K5_3);
+
+							sigmaInt = sigmaInt + ((concentration*absorpCoef2*Fe[j]/(B*gamma4*sintheta*sintheta*pow(x,4.0/3.0)))*sinpsi*dpsi*dphi)*(K2_3*K2_3*(13*t - 1)*(t + 1)/3 + K1_3*K1_3*t*(11*t-1)/3 -2*y*(t-2)*((1 + t)*K2_3*K5_3 + t*K1_3*K4_3));
+							if(sigmaInt != sigmaInt){
+								printf("sigmaInt Nan\n");
+							}
+						}
+					}
 				}
-				Anu[i] = Anu[i] + coefAbsorb * Fe[j] * sigmaInt / (gamma * gamma * gamma * gamma * gamma);
-				/*if(Inu[i] != Inu[i]){
+				Anu[i] = Anu[i] + sigmaInt;
+				if(Inu[i] != Inu[i]){
 					printf("Inu NaN\n");
 				}
 				if(Anu[i] != Anu[i]){
 					printf("Anu Nan\n");
-				}*/
+				}
 			}
 		}
 	}
@@ -311,10 +412,14 @@ void evaluateOrientationParameters(double*** B, double*** sintheta, int*** theta
 				B[i][j][k] = sqrt(Bz[i][j][k]*Bz[i][j][k] + Bx[i][j][k]*Bx[i][j][k] + By[i][j][k]*By[i][j][k]);
 				double cosTheta = Bz[i][j][k]/B[i][j][k];
 				double sinTheta = Bxy/B[i][j][k];
+				if(sinTheta != sinTheta){
+					printf("sintheta NaN\n");
+				}
 				sintheta[i][j][k] = sinTheta;
 
 				double cosTheta1 = Z[k]/r;
 				double sinTheta1 = sqrt(X[i]*X[i] + Y[j]*Y[j])/r;
+				
 				double cosPhi1 = X[i]/sqrt(X[i]*X[i] + Y[j]*Y[j]);
 				double sinPhi1 = Y[i]/sqrt(X[i]*X[i] + Y[j]*Y[j]);
 
@@ -338,7 +443,7 @@ void evaluateOrientationParameters(double*** B, double*** sintheta, int*** theta
 					thetaIndex[i][j][k] = Nd - 1;
 				}
 				//for debug
-				//thetaIndex[i][j][k] = 3;
+				thetaIndex[i][j][k] = 3;
 			}
 		}
 	}
@@ -531,7 +636,7 @@ void optimizeParameters(double& Bfactor, double& N, double* nu, double** Ee, dou
 	fprintf(logFile, "optimization function = %g\n", currentF);
 	printf("Bfactor = %g n = %g\n", Bfactor, N);
 	fprintf(logFile, "Bfactor = %g n = %g\n", Bfactor, N);
-	for(int i = 0; i < 20; ++i) {
+	for(int i = 0; i < 5; ++i) {
 		///randomization;
 		for(int j = 0; j < 5; ++j){
 			double tempN = N + 0.2*N*(uniformDistribution() - 1.0);
@@ -827,8 +932,8 @@ int main()
 	thetaIndex = new int**[Nx];
 
 	for(int i = 0; i < Nx; ++i){
-		//double x = dx/2 - rmax + i*dx;
-		double x = i*dx;
+		double x = dx/2 - rmax + i*dx;
+		//double x = i*dx;
 		X[i] = x;
 		Bx[i] = new double*[Ny];
 		By[i] = new double*[Ny];
@@ -838,8 +943,8 @@ int main()
 		sintheta[i] = new double*[Ny];
 		thetaIndex[i] = new int*[Ny];
 		for(int j = 0; j < Ny; ++j){
-			//double y = dx/2 - rmax + j*dx;
-			double y = j*dx;
+			double y = dx/2 - rmax + j*dx;
+			//double y = j*dx;
 			Y[j] = y;
 			Bx[i][j] = new double[Nz];
 			By[i][j] = new double[Nz];
@@ -880,28 +985,12 @@ int main()
 				Bx[i][j][k] = Bx1*cosThetaObserv + Bz1*sinThetaObserv;
 				By[i][j][k] = By1;
 				Bz[i][j][k] = Bz1*cosThetaObserv - Bx1*sinThetaObserv;
-				/*Bx[i][j][k] = B0;
+				Bx[i][j][k] = B0;
 				By[i][j][k] = 0;
-				Bz[i][j][k] = 0;*/
-				if(r > 2*rmax){
-					Bx[i][j][k] = 0;
-					By[i][j][k] = 0;
-					Bz[i][j][k] = 0;
-				}
-				if(r < 1.2*rmax){
-					Bx[i][j][k] = 0;
-					By[i][j][k] = 0;
-					Bz[i][j][k] = 0;
-				}
+				Bz[i][j][k] = 0;
 			}
 		}
 	}
-	Bx[0][0][0] = 0;
-	By[0][0][0] = 0;
-	Bz[0][0][0] = 0;
-	Bx[0][0][1] = 0;
-	By[0][0][1] = 0;
-	Bz[0][0][1] = 0;
 	//////////////////////////////////////
 
 	printf("evaluating turbulent field\n");
@@ -914,7 +1003,7 @@ int main()
 	double kmax = Nk*dk;
 	double turbNorm = evaluateTurbNorm(kmax, Nk, Bx[0][Ny-1][1], 0.9);
 
-	for(int ki = 0; ki < Nk; ++ki){
+	/*for(int ki = 0; ki < Nk; ++ki){
 		printf("%d\n", ki);
 		for(int kj = 0; kj < Nk; ++kj){
 			for(int kk = 0; kk < Nk; ++kk){
@@ -979,7 +1068,7 @@ int main()
 					}
 				}
 			}
-		}
+		}*/
 
 	FILE* bFile = fopen(BFileName.c_str(), "w");
 	for(int i = 0; i < Nx; ++i){
