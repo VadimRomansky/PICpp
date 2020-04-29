@@ -1,6 +1,6 @@
 clear;
 
-load radiation.dat;
+radiation = importdata('radiation.dat');
 
 N = size(radiation,1);
 
@@ -10,12 +10,14 @@ augx(2) = 0.625;
 augx(3) = 1.46;
 augx(4) = 4.92;
 augx(5) = 8.57;
+augx(6) = 85.7;
 augy(1:5) = 0;
 augy(1) = 3.29;
 augy(2) = 7.77;
 augy(3) = 8.53;
 augy(4) = 2.42;
 augy(5) = 1.06;
+augy(6) = 0.106;
 
 augmax = 0.886;
 augmaxy = 11.2;
@@ -70,7 +72,8 @@ xlabel ('{\nu} GHz');
 ylabel ('mJy');
 
 plot(radiation(1:N,1),radiation(1:N,2),'red');
-plot(augx(1:5),augy(1:5),'--o');
+
+plot(augx(1:6),augy(1:6),'--o');
 
 legend('August theory', 'August observation');
 

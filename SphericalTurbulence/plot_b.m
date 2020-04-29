@@ -2,11 +2,11 @@ clear;
 
 load B.dat;
 
-Nx = 20;
-Ny = 20;
-Nz = 20;
+Nx = 10;
+Ny = 10;
+Nz = 2;
 
-zpoint = 5;
+zpoint = 2;
 
 Bx(1:Nx, 1:Ny) = 0;
 By(1:Nx, 1:Ny) = 0;
@@ -22,12 +22,12 @@ end;
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
 
-figure(1);
+figure(2);
 hold on;
 title ('B');
 xlabel ('x');
 ylabel ('y');
 
-quiver(1:Nx, 1:Ny, By, Bx);
+quiver((1:Nx) - 1, (1:Ny) - 1, By, Bx);
 
 grid ;
