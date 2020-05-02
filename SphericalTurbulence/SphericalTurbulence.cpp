@@ -90,9 +90,17 @@ const double UvarovValue[Napprox] = {0.0021495, 0.00367, 0.00463, 0.00792, 0.009
 };
 
 const int Ntheta = 10;
+
 const double dtheta = (pi/2)/Ntheta;
 const double thetaValue[Ntheta] = {dtheta/2, 3*dtheta/2, 5*dtheta/2, 7*dtheta/2, 9*dtheta/2, 11*dtheta/2, 13*dtheta/2, 15*dtheta/2, 17*dtheta/2, 19*dtheta/2};
 const double sinThetaValue[Ntheta] = {sin(dtheta/2), sin(3*dtheta/2), sin(5*dtheta/2), sin(7*dtheta/2), sin(9*dtheta/2), sin(11*dtheta/2), sin(13*dtheta/2), sin(15*dtheta/2), sin(17*dtheta/2), sin(19*dtheta/2)};
+
+const int Npsi = 6;
+const int Nphi = 6;
+const double dphi = (pi/2)/Nphi;
+const double phiValue[Nphi] = {dphi/2, 3*dphi/2, 5*dphi/2, 7*dphi/2, 9*dphi/2, 11*dphi/2};
+const double sinPhiValue[Ntheta] = {sin(dphi/2), sin(3*dphi/2), sin(5*dphi/2), sin(7*dphi/2), sin(9*dphi/2), sin(11*dphi/2)};
+const double cosPhiValue[Ntheta] = {cos(dphi/2), cos(3*dphi/2), cos(5*dphi/2), cos(7*dphi/2), cos(9*dphi/2), cos(11*dphi/2)};
 
 const double augx[6] = {0.335, 0.625, 1.46, 4.92, 8.57, 85.7};
 const double augy[6] = {3.29, 7.77, 8.53, 2.42, 1.06, 0.106};
@@ -281,7 +289,7 @@ void evaluateMcDonaldFunctions(const double& nu, double& K1_3, double& K2_3, dou
 	}
 
 	K1_3 = (McDonaldValue1_3[rightIndex]*(nu - UvarovX[leftIndex]) + McDonaldValue1_3[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
-	K1_3 = (McDonaldValue2_3[rightIndex]*(nu - UvarovX[leftIndex]) + McDonaldValue2_3[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
+	K2_3 = (McDonaldValue2_3[rightIndex]*(nu - UvarovX[leftIndex]) + McDonaldValue2_3[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
 	K4_3 = (McDonaldValue4_3[rightIndex]*(nu - UvarovX[leftIndex]) + McDonaldValue4_3[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
 	K5_3 = (McDonaldValue5_3[rightIndex]*(nu - UvarovX[leftIndex]) + McDonaldValue5_3[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
 }
@@ -310,12 +318,14 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 
 	for (int i = 0; i < Nnu; ++i) {
 		//printf("i = %d\n", i);
+		double oldA = 0;
 		for (int j = 1; j < Np; ++j) {
 			//if(Ee[j] < 100*massElectron*speed_of_light2){
 			if(Fe[j] > 0){
 				double nuc = criticalNu(Ee[j], sinhi, B);
 				double gamma = Ee[j] / (massElectron * speed_of_light2);
 				double gamma4 = gamma*gamma*gamma*gamma;
+				double sigmaCoef = concentration*Fe[j]/(B*gamma4);
 				//double x = nu[i] / nuc;
 				//todo!!! 4pi!!
 				//here Fe is (Fe[j] / (4*pi)) * (Ee[j] - Ee[j - 1])
@@ -323,8 +333,7 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 				// integral for sigma
 				double sigmaInt = 0;
 				double psimax = 2*pi/gamma;
-				int Npsi = Ntheta;
-				int Nphi = Ntheta;
+				int Nphi = Npsi;
 				double dpsi = psimax/Npsi;
 				double dphi = 2*pi/Nphi;
 				for(int l = 0; l < Npsi; ++l){
@@ -332,9 +341,8 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 					double cospsi = cos(psi);
 					double sinpsi = sin(psi);
 					for(int m = 0; m < Nphi; ++m){
-						double phi = dphi*(0.5 + m);
-						double cosphi = cos(phi);
-						double sinphi = sin(phi);
+						double cosphi = cosPhiValue[m];
+						double sinphi = sinPhiValue[m];
 						double costheta = coshi*cospsi + sinhi*sinpsi*cosphi;
 						if(fabs(costheta) > 1.0){
 							printf("costheta > 1\n");
@@ -349,7 +357,7 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 						double y = 0.5*x*pow(1.0 + t, 1.5); 
 
 						if((x < 0.1) && (t < 0.01)){
-							sigmaInt = sigmaInt + (concentration*absorpCoef*Fe[j]/(B*gamma4*sintheta*sintheta*pow(x,4.0/3.0)))*sinpsi*dpsi*dphi;
+							sigmaInt = sigmaInt + (sigmaCoef*absorpCoef/(sintheta*sintheta*pow(x,4.0/3.0)))*sinpsi*dpsi*dphi;
 							if(sigmaInt != sigmaInt){
 								printf("sigmaInt Nan\n");
 							}
@@ -360,7 +368,7 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 							double K5_3 = 0;
 							evaluateMcDonaldFunctions(y, K1_3, K2_3, K4_3, K5_3);
 
-							sigmaInt = sigmaInt + ((concentration*absorpCoef2*Fe[j]/(B*gamma4*sintheta*sintheta*pow(x,4.0/3.0)))*sinpsi*dpsi*dphi)*(K2_3*K2_3*(13*t - 1)*(t + 1)/3 + K1_3*K1_3*t*(11*t-1)/3 -2*y*(t-2)*((1 + t)*K2_3*K5_3 + t*K1_3*K4_3));
+							sigmaInt = sigmaInt + ((sigmaCoef*absorpCoef2/(sintheta*sintheta))*sinpsi*dpsi*dphi)*(K2_3*K2_3*(13*t - 1)*(t + 1)/3 + K1_3*K1_3*t*(11*t-1)/3 -2*y*(t-2)*((1 + t)*K2_3*K5_3 + t*K1_3*K4_3));
 							if(sigmaInt != sigmaInt){
 								printf("sigmaInt Nan\n");
 							}
@@ -368,6 +376,7 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 					}
 				}
 				Anu[i] = Anu[i] + sigmaInt;
+				oldA = oldA + (16*pi*pi*electron_charge/(3.0*sqrt(3.0)))*Fe[j]*evaluateMcDonaldFunction5_3(nu[i]/nuc)/(gamma*gamma*gamma*gamma*gamma*B*sinhi);
 				if(Inu[i] != Inu[i]){
 					printf("Inu NaN\n");
 				}
@@ -497,15 +506,14 @@ void evaluateSpectrum(double* nu, double* totalInu, double**** Inu, double**** A
 				double localInu = 0;
 				for(int k = 0; k < Nz; ++k){
 					double r = sqrt(X[i]*X[i] + Y[j]*Y[j] + Z[k]*Z[k]);
-					/*if(r < rmax){
-						printf("aaa\n");
-					}*/
-					double c = Anu[i][j][k][l]*localInu/(Inu[i][j][k][l]*dx*dx) - 1.0;
-					localInu = localInu + Inu[i][j][k][l]*dx*dx*dx;
-					if( Anu[i][j][k][l]*dx > 0.01){
-						localInu = Inu[i][j][k][l]*dx*dx*(1.0 + c*exp(-Anu[i][j][k][l]*dx))/(Anu[i][j][k][l]);
-					} else {
-						localInu = localInu*(1.0 - Anu[i][j][k][l]*dx);
+					if((r < rmax) && (r > rmax*(1.0 - fractionSize))){
+						double c = Anu[i][j][k][l]*localInu/(Inu[i][j][k][l]*dx*dx) - 1.0;
+						localInu = localInu + Inu[i][j][k][l]*dx*dx*dx;
+						if( Anu[i][j][k][l]*dx > 0.01){
+							localInu = Inu[i][j][k][l]*dx*dx*(1.0 + c*exp(-Anu[i][j][k][l]*dx))/(Anu[i][j][k][l]);
+						} else {
+							localInu = localInu*(1.0 - Anu[i][j][k][l]*dx);
+						}
 					}
 				}
 				totalInu[l] = totalInu[l] + localInu;
@@ -904,7 +912,7 @@ int main()
 	times[2] = 5270400;
 	times[3] = 10700000;
 
-	double rmax = size[3]*3;
+	double rmax = size[3];
 
 	double dx = 2*rmax/Nx;
 
@@ -998,7 +1006,7 @@ int main()
 
 	srand(time(NULL));
 
-	double kmin = 2*pi*Nx*2.37/rmax;
+	double kmin = 2*pi*Nx/rmax;
 	double dk = kmin;
 	double kmax = Nk*dk;
 	double turbNorm = evaluateTurbNorm(kmax, Nk, Bx[0][Ny-1][1], 0.9);
@@ -1192,7 +1200,7 @@ int main()
 	/////////////////
 	//todo concentration!!
 	double concentration = 1.0;
-	double Bfactor = 1.0;
+	double Bfactor = 1.5;
 	////////////////////
 	printf("initial optimizing parameters\n");
 	fprintf(logFile, "initial optimizing parameters\n");
@@ -1201,7 +1209,7 @@ int main()
 	//evaluateFirstBapprox(Bfactor, concentration, nu, Ee, dFe, Np, Nnu, Nd, B, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax, logFile, minB, maxB);
 	printf("optimizing parameters\n");
 	fprintf(logFile, "optimizing parameters\n");
-	optimizeParameters(Bfactor, concentration, nu1, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, distance, Inu1, Anu1, X, Y, Z, rmax, logFile);
+	//optimizeParameters(Bfactor, concentration, nu1, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, distance, Inu1, Anu1, X, Y, Z, rmax, logFile);
 	///////////////////
 	//concentration = 1.0;
 	//Bfactor = 0.15;
