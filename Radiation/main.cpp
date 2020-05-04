@@ -281,7 +281,7 @@ double evaluateOptimizationFunction2(double B, double n, double* Ee, double* Fe,
 }*/
 
 double evaluateConcentrationFromB(double B, double gamma0, double sigma) {
-	return (B*B/16)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
+	return (B*B)/(gamma0*4*pi*speed_of_light2*sigma*massProtonReal);
 }
 
 void findMinParameters(double& B, double& N, double minLambda, double maxLambda, double gradB, double gradn, double* Ee, double* Fe, int Np, int Nnu, double minEnergy, double maxEnergy, int startElectronIndex, double sinhi, double localSize, double normFactor) {
@@ -375,11 +375,11 @@ void optimizeParameters(double& B, double& N, double* Ee, double* Fe, int Np, in
 	}
 }
 
-int main(int argc, char** argv) {
+int main() {
 
 	int Np = 200;
-	FILE* inputPe = fopen("../../tristan-mp-pitp/Pe.dat", "r");
-	FILE* inputFe = fopen("../../tristan-mp-pitp/Fe.dat", "r");
+	FILE* inputPe = fopen("../../tristan-mp-pitp/Pe3.dat", "r");
+	FILE* inputFe = fopen("../../tristan-mp-pitp/Fe3.dat", "r");
 
 	double* Pe = new double[Np];
 	double* Fe = new double[Np];
@@ -532,7 +532,7 @@ int main(int argc, char** argv) {
 	findMaxNu(nuMaxIndex, Inu, Nnu);
 	nuMax = nu[nuMaxIndex];
 	int iterations = 0;
-	while(!converges) {
+	/*while(!converges) {
 		iterations++;
 		if(nuMax > augmaxx*1E9) {
 			rightB = localB;
@@ -555,8 +555,9 @@ int main(int argc, char** argv) {
 		if((rightB - leftB) < 0.0001) {
 			converges = true;
 		}
-	}
+	}*/
 	factor = augmaxy/Inu[nuMaxIndex];
+	localB = 1.0;
 	B[3] = localB;
 	n[3] = evaluateConcentrationFromB(localB, gamma0, sigma);
 
@@ -570,7 +571,7 @@ int main(int argc, char** argv) {
 	//factor = augmaxy/doplerInu[nuMaxIndex];
 	//localB = 1.0;
 	//n[3] = 1.0;
-	optimizeParameters(localB, n[3], Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, size[3], factor);
+	//optimizeParameters(localB, n[3], Ee, Fe, Np, Nnu, minEnergy, maxEnergy, startElectronIndex, sinhi, size[3], factor);
 
 	B[3] = localB;
 	//B[3] = 1.0;

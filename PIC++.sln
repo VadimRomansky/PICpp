@@ -31,6 +31,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Adiabata", "Adiabata\Adiaba
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SphericalTurbulence", "SphericalTurbulence\SphericalTurbulence.vcxproj", "{8C05402F-3971-4287-A5F4-A65F7A808C76}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestMonteCarlo", "TestMonteCarlo\TestMonteCarlo.vcxproj", "{06AF505F-168C-4932-9F6A-21BFFF26C607}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -189,6 +191,16 @@ Global
 		{8C05402F-3971-4287-A5F4-A65F7A808C76}.Release|Win32.ActiveCfg = Release|Win32
 		{8C05402F-3971-4287-A5F4-A65F7A808C76}.Release|Win32.Build.0 = Release|Win32
 		{8C05402F-3971-4287-A5F4-A65F7A808C76}.Release|x64.ActiveCfg = Release|Win32
+		{06AF505F-168C-4932-9F6A-21BFFF26C607}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{06AF505F-168C-4932-9F6A-21BFFF26C607}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{06AF505F-168C-4932-9F6A-21BFFF26C607}.Debug|Win32.ActiveCfg = Debug|Win32
+		{06AF505F-168C-4932-9F6A-21BFFF26C607}.Debug|Win32.Build.0 = Debug|Win32
+		{06AF505F-168C-4932-9F6A-21BFFF26C607}.Debug|x64.ActiveCfg = Debug|Win32
+		{06AF505F-168C-4932-9F6A-21BFFF26C607}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{06AF505F-168C-4932-9F6A-21BFFF26C607}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{06AF505F-168C-4932-9F6A-21BFFF26C607}.Release|Win32.ActiveCfg = Release|Win32
+		{06AF505F-168C-4932-9F6A-21BFFF26C607}.Release|Win32.Build.0 = Release|Win32
+		{06AF505F-168C-4932-9F6A-21BFFF26C607}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
