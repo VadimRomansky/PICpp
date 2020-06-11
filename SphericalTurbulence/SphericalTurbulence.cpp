@@ -40,7 +40,7 @@ const double absorpCoef = 40.0*electron_charge /(9*pow(2, 4.0/3.0));
 const double absorpCoef2 = 2.0 * electron_charge / 3.0 ;
 const double criticalNuCoef = 3 * electron_charge / (4 * pi * massElectron * massElectron * massElectron * speed_of_light * speed_of_light4);
 
-const int Niterations = 10;
+const int Niterations = 100;
 const int Npoints = 4;
 const int Nmontecarlo = 100000;
 
@@ -50,7 +50,7 @@ const double times[Npoints] = {0, 2760000, 5270400, 10700000};
 
 const double distance = 40*3*1.0E24;
 
-const int Nr = 1;
+const int Nr = 10;
 const int Nphi = 2;
 const int Nz = 2*Nr;
 const int Nk = 10;
@@ -149,6 +149,8 @@ const double minB = 0.01;
 const double maxB = 100.0;
 const double minN = 0.01;
 const double maxN = 10000;
+const double minFraction = 0.001;
+const double maxFraction = 1.0;
 
 double uniformDistribution() {
 	return (rand() % randomParameter + 0.5) / randomParameter;
@@ -590,25 +592,25 @@ void evaluateVolumeAndLength(double*** area, double*** length, double* Rho, doub
 			} else {
 
 				//conus approximation
-				if(rmin < r1){
+				if(rmin <= r1){
 					vmin = 0;
 					smin = 0;
-				} else if(rmin > r4){
+				} else if(rmin >= r4){
 					vmin = vtotal;
 					smin = stotal;
 				} else {
-					if((rmin < r2) && (rmin < r3)){
+					if((rmin <= r2) && (rmin <= r3)){
 						double h = sqrt(rmin*rmin - minRho*minRho) - minz;
 						double rho = sqrt(rmin*rmin - minz*minz);
 						vmin = dphi*(h/3.0)*(minRho*rho + rho*rho - 2.0*minRho*minRho/3.0);
 						smin = 0;
-					} else if(rmin < r2){
+					} else if(rmin <= r2){
 						double h1 = sqrt(rmin*rmin - maxRho*maxRho) - minz;
 						double h2 = sqrt(rmin*rmin - minRho*minRho) - minz;
 						vmin = dphi*((h2 - h1)/3.0)*(minRho*maxRho + maxRho*maxRho - 2.0*minRho*minRho/3.0) +
 							dphi*h1*(maxRho*maxRho - minRho*minRho);
 						smin = 0;
-					} else if(rmin < r3){
+					} else if(rmin <= r3){
 						double rho1 = sqrt(rmin*rmin - minz*minz);
 						double rho2 = sqrt(rmin*rmin - maxz*maxz);
 						vmin = dphi*(dz/3.0)*(rho1*rho1 + rho1*rho2 + rho2*rho2 - 3.0*minRho*minRho);
@@ -617,30 +619,31 @@ void evaluateVolumeAndLength(double*** area, double*** length, double* Rho, doub
 						//rmin > r2 rmin > r3
 						double h = sqrt(rmin*rmin - maxRho*maxRho) - minz;
 						double rho = sqrt(rmin*rmin - maxz*maxz);
-						vmin = dphi*((dz - h)/3.0)*(maxRho*maxRho + maxRho*rho - 2.0*rho*rho/3.0);
+						vmin = dphi*((dz - h)/3.0)*(maxRho*maxRho + maxRho*rho + rho*rho - 3.0*minRho*minRho) +
+							dphi*h*(maxRho*maxRho - minRho*minRho);
 						smin = dphi*(rho*rho - minRho*minRho);
 					}
 				}
 
-				if(rmax < r1){
+				if(rmax <= r1){
 					vmax = vtotal;
 					smax = stotal;
-				} else if(rmax > r4){
+				} else if(rmax >= r4){
 					vmax = 0;
 					smax = 0;
 				} else {
-					if((rmax < r2) && (rmax < r3)){
+					if((rmax <= r2) && (rmax <= r3)){
 						double h = sqrt(rmax*rmax - minRho*minRho) - minz;
 						double rho = sqrt(rmax*rmax - minz*minz);
 						vmax = vtotal - dphi*(h/3.0)*(minRho*rho + rho*rho - 2.0*minRho*minRho/3.0);
 						smax = dphi*(maxRho*maxRho - rho*rho);
-					} else if(rmax < r2){
+					} else if(rmax <= r2){
 						double h1 = sqrt(rmax*rmax - maxRho*maxRho) - minz;
 						double h2 = sqrt(rmax*rmax - minRho*minRho) - minz;
 						vmax = vtotal - dphi*((h2 - h1)/3.0)*(minRho*maxRho + maxRho*maxRho - 2.0*minRho*minRho/3.0) -
 							dphi*h1*(maxRho*maxRho - minRho*minRho);
 						smax = 0;
-					} else if(rmax < r3){
+					} else if(rmax <= r3){
 						double rho1 = sqrt(rmax*rmax - minz*minz);
 						double rho2 = sqrt(rmax*rmax - maxz*maxz);
 						vmax = vtotal - dphi*(dz/3.0)*(rho1*rho1 + rho1*rho2 + rho2*rho2 - 3.0*minRho*minRho);
@@ -649,7 +652,8 @@ void evaluateVolumeAndLength(double*** area, double*** length, double* Rho, doub
 						//rmax > r2 rmax > r3
 						double h = sqrt(rmax*rmax - maxRho*maxRho) - minz;
 						double rho = sqrt(rmax*rmax - maxz*maxz);
-						vmax = vtotal - dphi*((dz - h)/3.0)*(maxRho*maxRho + maxRho*rho - 2.0*rho*rho/3.0);
+						vmax = vtotal - dphi*((dz - h)/3.0)*(maxRho*maxRho + maxRho*rho + rho*rho - 3.0*minRho*minRho) -
+							dphi*h*(maxRho*maxRho - minRho*minRho);
 						smax = 0;
 					}
 				}
@@ -772,7 +776,7 @@ double evaluateOptimizationFunction(double Bfactor, double n, double fractionSiz
 	//double I3 = log(totalInu[3]) - log(augy[3]);
 	//double I4 = log(totalInu[4]) - log(augy[4]);
 
-	return I0*I0 + I1*I1 + I2*I2 + I3*I3 + I4*I4;
+	return I0*I0 + I1*I1 + 100*I2*I2 + 100*I3*I3 + I4*I4;
 	//return fabs(I0) + fabs(I1) + fabs(I2) + fabs(I3) + fabs(I4);
 	//return fabs(I1);
 }
@@ -1030,28 +1034,8 @@ void findMinParameters3(double& Bfactor, double& N, double& fractionSize, double
 }
 
 void findMinParameters3(double& Bfactor, double& N, double& fractionSize, double gradB, double gradN, double gradS, double* nu, double** Ee, double** Fe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double**** Inu, double**** Anu, double*** area, double*** length, double* Rho, double* Phi, double* Z, double& currentF, double* totalInu) {
-	double minLambda = 0;
-	double lambdaB = fabs(maxB/gradB);
-	double lambdaN = fabs(maxN/gradN);
-	double lambdaS = fabs(1.0/gradS);
-	double maxLambda = 1.0*min3(lambdaN, lambdaB, lambdaS);
-	if(N - maxLambda*gradN < 0 ){
-		maxLambda = N/gradN;
-	}
-	if(Bfactor - maxLambda*gradB < 0 ){
-		maxLambda = Bfactor/gradB;
-	}
-	if(fractionSize - maxLambda*gradS < 0 ){
-		maxLambda = fractionSize/gradS;
-	}
 
-	if(gradS < 0){
-		if(fractionSize - maxLambda*gradS > 1.0 ){
-			maxLambda = (fractionSize - 1.0)/gradS;
-		}
-	}
-
-	double step = 0.4*min4(fabs(Bfactor/gradB), fabs(N/gradN), fabs(fractionSize/gradS), fabs((1.0 - fractionSize)/gradS));
+	double step = 0.4*min4(fabs(Bfactor/gradB), fabs(N/gradN), fabs((fractionSize - minFraction)/gradS), fabs((maxFraction - fractionSize)/gradS));
 	double B1 = Bfactor - gradB*step;
 	double N1 = N - gradN*step;
 	double S1 = fractionSize - gradS*step;
@@ -1059,13 +1043,13 @@ void findMinParameters3(double& Bfactor, double& N, double& fractionSize, double
 		printf("1 Nan\n");
 		exit(0);
 	}
-	if(S1 > 1.0){
-		S1 = 1.0;
-		printf("S1 > 1\n");
+	if(S1 > maxFraction){
+		S1 = maxFraction;
+		//printf("S1 > 1\n");
 	}
-	if(S1 <= 0){
-		S1 = 1E-9;
-		printf("S1 < 0\n");
+	if(S1 <= minFraction){
+		S1 = minFraction;
+		//printf("S1 < 0\n");
 	}
 	double f1 = evaluateOptimizationFunction(B1, N1, S1, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, Rho, Phi, Z, totalInu);
 	if(f1 > currentF){
@@ -1078,13 +1062,13 @@ void findMinParameters3(double& Bfactor, double& N, double& fractionSize, double
 				printf("B1 Nan\n");
 				exit(0);
 			}
-			if(S1 > 1.0){
-				printf("S1 > 1\n");
-				S1 = 1.0;
+			if(S1 > maxFraction){
+				//printf("S1 > 1\n");
+				S1 = maxFraction;
 			}
-			if(S1 <= 0){
-				printf("S1 < 0\n");
-				S1 = 1E-9;
+			if(S1 <= minFraction){
+				//printf("S1 < 0\n");
+				S1 = minFraction;
 			}
 			f1 = evaluateOptimizationFunction(B1, N1, S1, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, Rho, Phi, Z, totalInu);
 		}
@@ -1101,6 +1085,13 @@ void findMinParameters3(double& Bfactor, double& N, double& fractionSize, double
 		printf("B2 Nan\n");
 		exit(0);
 	}
+	if(S2 > maxFraction){
+		printf("S2 > 1\n");
+		S2 = maxFraction;
+	}
+	if(S2 < minFraction){
+		S2 = minFraction;
+	}
 	double f2 = evaluateOptimizationFunction(B2, N2, S2, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, Rho, Phi, Z, totalInu);
 	int iterations = 0;
 	while(f2 < f1){
@@ -1116,14 +1107,14 @@ void findMinParameters3(double& Bfactor, double& N, double& fractionSize, double
 			printf("B2 Nan\n");
 			exit(0);
 		}
-		if(S2 > 1.0){
+		if(S2 > maxFraction){
 			printf("S2 > 1\n");
-			S2 = 1.0;
+			S2 = maxFraction;
 			return;
 		}
-		if(S2 < 0){
-			S2 = 1E-9;
-			printf("S2 < 0\n");
+		if(S2 < minFraction){
+			S2 = minFraction;
+			//printf("S2 < 0\n");
 			return;
 		}
 		f1 = f2;
@@ -1143,9 +1134,9 @@ void optimizeParameters3(double& Bfactor, double& N, double& fractionSize, doubl
 	for(int i = 0; i < Niterations; ++i) {
 		///randomization;
 		for(int j = 0; j < 5; ++j){
-			double tempN = N + 0.2*N*(uniformDistribution() - 1.0);
+			double tempN = N + 0.2*N*(uniformDistribution() - 0.5);
 			double tempB = Bfactor + 0.2*Bfactor*(uniformDistribution() - 0.5);
-			double tempS  = fractionSize + 0.2*fractionSize*(uniformDistribution() - 0.5);
+			double tempS  = min(max(minFraction,fractionSize + 0.2*fractionSize*(uniformDistribution() - 0.5)), maxFraction);
 			double tempF = evaluateOptimizationFunction(tempB, tempN, tempS, nu, Ee, Fe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, Rho, Phi, Z, totalInu);
 			if(tempF < currentF){
 				currentF = tempF;
