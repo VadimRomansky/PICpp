@@ -372,11 +372,11 @@ int main()
 				Ee[j][i] = sqrt(u * u  + 1)*massElectron*speed_of_light2;
 				//maxEnergy = Ee[i];
 				Fe[j][i] = Fe[j][i] * Ee[j][i]/ (u * u * u * speed_of_light4 *massElectron*massElectron);
-				if(gamma >= 1.0){
+				/*if(gamma >= 1.0){
 					Fe[j][i] = 1.0/pow(Ee[j][i],3);
 				} else {
 					Fe[j][i] = 0;
-				}
+				}*/
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			//} else {
 			//	Fe[i] = 0;
@@ -450,7 +450,7 @@ int main()
 	double tempConcentration = sqr(B[Ntheta/2][0])/(sigma*4*pi*massProtonReal*speed_of_light2);
 	double concentration = 1.0*tempConcentration;
 	concentration = 3300;
-	double Bfactor = 0.48;
+	double Bfactor = 0.048;
 	//double fractionSize = 1.0 - pow((3.0/(4.0*pi))*(1 - 0.5),1.0/3.0);
 	double fractionSize = 0.61;
 	double V0 = speed_of_light;
@@ -463,9 +463,9 @@ int main()
 	printf("optimizing parameters\n");
 	fprintf(logFile, "optimizing parameters\n");
 	//optimizeParameters(Bfactor, concentration, fractionSize, nu1, rmax, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
-	optimizeParameters4(1.0, 2000, 3.4E16, Bfactor, concentration, fractionSize, rmax, nu1, Ee, dFe, Np, Nnu1, Ndist, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
+	//optimizeParameters4(1.0, 2000, 3.4E16, Bfactor, concentration, fractionSize, rmax, nu1, Ee, dFe, Np, Nnu1, Ndist, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters4(Bfactor, concentration, fractionSize,rmax, nu1, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
-	//optimizeParameters5(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, Ee, Fe, Np, Ndist, 1.0, 3, logFile);
+	optimizeParameters5(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, Ee, dFe, Np, Ndist, 1.0, 8, logFile);
 	///////////////////
 	//concentration = 1.0;
 	//Bfactor = 1.0;
@@ -476,7 +476,7 @@ int main()
 	double* totalInu = new double[Nnu];
 	double finalSigma = sqr(B[Ntheta/2][0]*Bfactor)/(4*pi*concentration*concentrations[Ntheta/2][0]*massProtonReal*speed_of_light2);
 	printf("Bfactor = %g, n = %g\n fraction = %g rmax = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, finalSigma);
-	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g rmax = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, finalSigma);
+	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g rmax = %g v/c = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, v/speed_of_light, finalSigma);
 	fflush(logFile);
 
 	double** tempTotalInu = new double*[4];
@@ -490,12 +490,12 @@ int main()
 
 		tempTotalInu[l] = new double[Nnu];
 
-		evaluateVolumeAndLength(area, length, r, Rho, Phi, fractionSize);
-		evaluateAllEmissivityAndAbsorption1(nu, Inu, Anu, Nnu, Ee, dFe, Np, Ndist, B, sintheta, thetaIndex, concentrations, locN, locB, fractionSize);
-		evaluateSpectrum(nu, tempTotalInu[l], Inu, Anu, area, length, Nnu, r, Rho, Phi);
+		//evaluateVolumeAndLength(area, length, r, Rho, Phi, fractionSize);
+		//evaluateAllEmissivityAndAbsorption1(nu, Inu, Anu, Nnu, Ee, dFe, Np, Ndist, B, sintheta, thetaIndex, concentrations, locN, locB, fractionSize);
+		//evaluateSpectrum(nu, tempTotalInu[l], Inu, Anu, area, length, Nnu, r, Rho, Phi);
 
-		//evaluateEmissivityAndAbsorptionFlat(nu, Inuflat, Anuflat, Ee[3], dFe[3], Np, Nnu, 1.0, locB, locN);
-		//evaluateSpectrumFlat(nu, tempTotalInu[l], Inuflat, Anuflat, Nnu, r, fractionSize);
+		evaluateEmissivityAndAbsorptionFlat(nu, Inuflat, Anuflat, Ee[8], dFe[8], Np, Nnu, 1.0, locB, locN);
+		evaluateSpectrumFlat(nu, tempTotalInu[l], Inuflat, Anuflat, Nnu, r, fractionSize);
 	}
 
 	//////////
@@ -521,6 +521,8 @@ int main()
 	fprintf(outputParam, "%g\n", Bfactor);
 	fprintf(outputParam, "%g\n", concentration);
 	fprintf(outputParam, "%g\n", fractionSize);
+	fprintf(outputParam, "%g\n", rmax);
+	fprintf(outputParam, "%g\n", v/speed_of_light);
 	fclose(outputParam);
 
 	////////////////////
