@@ -94,6 +94,87 @@ void evaluateOrientationParameters(double** B, double** sintheta, int** thetaInd
 	}
 }
 
+void evaluateOrientationParameters3d(double*** B, double*** sintheta, int*** thetaIndex, double*** Bx, double*** By, double*** Bz, int Nd){
+	for(int i = 0; i < Nrho; ++i){
+		for(int j = 0; j < Nphi; ++j){
+			for(int k = 0; k < Nz; ++k){
+				//double r = rmax;
+				double Bxy = sqrt(Bx[i][j][k]*Bx[i][j][k] + By[i][j][k]*By[i][j][k]);
+				B[i][j][k] = sqrt(Bz[i][j][k]*Bz[i][j][k] + Bx[i][j][k]*Bx[i][j][k] + By[i][j][k]*By[i][j][k]);
+				double cosTheta = Bz[i][j][k]/B[i][j][k];
+				double sinTheta = Bxy/B[i][j][k];
+				if(sinTheta != sinTheta){
+					printf("sintheta NaN\n");
+				}
+				sintheta[i][j][k] = sinTheta;
+
+				double r = sqrt((i+0.5)*(i+0.5) + (k + 0.5 - Nz/2.0)*(k + 0.5 - Nz/2.0));
+				double z = k + 0.5 - Nz/2.0;
+
+				double cosTheta1 = z/r;
+				double sinTheta1 = sqrt(1.0 - cosTheta1*cosTheta1);
+				
+				double cosPhi1 = cosPhiValue[j];
+				double sinPhi1 = sinPhiValue[j];
+
+				double Br = Bx[i][j][k]*sinTheta1*cosPhi1 + 
+						    By[i][j][k]*sinTheta1*sinPhi1 +
+							Bz[i][j][k]*cosTheta1;
+
+				double cosTheta2 = Br/B[i][j][k];
+				//double sinTheta2 = sqrt(1.0 - cosTheta2*cosTheta2);
+
+
+				double theta2 = acos(cosTheta2);
+				if(theta2 >= pi/2){
+					theta2 = pi - theta2;
+				}
+
+				thetaIndex[i][j][k] = floor(theta2 / (pi/(2*Nd))); 
+				if(thetaIndex[i][j][k] == Nd){
+					printf("thetaIndex == Nd\n");
+					printf("%lf\n", By[j][k]);
+					thetaIndex[i][j][k] = Nd - 1;
+				}
+				//for debug
+				//thetaIndex[i][j][k] = 9;
+			}
+		}
+	}
+}
+
+void evaluateOrientationParameters3dflat(double*** B, double*** sintheta, int*** thetaIndex, double*** Bx, double*** By, double*** Bz, int Nd){
+	for(int i = 0; i < Nrho; ++i){
+		for(int j = 0; j < Nphi; ++j){
+			for(int k = 0; k < Nz; ++k){
+				//double r = rmax;
+				double Bxy = sqrt(Bx[i][j][k]*Bx[i][j][k] + By[i][j][k]*By[i][j][k]);
+				B[i][j][k] = sqrt(Bz[i][j][k]*Bz[i][j][k] + Bx[i][j][k]*Bx[i][j][k] + By[i][j][k]*By[i][j][k]);
+				double cosTheta = Bz[i][j][k]/B[i][j][k];
+				double sinTheta = Bxy/B[i][j][k];
+				if(sinTheta != sinTheta){
+					printf("sintheta NaN\n");
+				}
+
+
+				double theta2 = acos(cosTheta);
+				if(theta2 >= pi/2){
+					theta2 = pi - theta2;
+				}
+
+				thetaIndex[i][j][k] = floor(theta2 / (pi/(2*Nd))); 
+				if(thetaIndex[i][j][k] == Nd){
+					printf("thetaIndex == Nd\n");
+					printf("%lf\n", By[j][k]);
+					thetaIndex[i][j][k] = Nd - 1;
+				}
+				//for debug
+				//thetaIndex[i][j][k] = 9;
+			}
+		}
+	}
+}
+
 void createNu(double* nu, int Nnu, double minNu, double maxNu){
 	double temp = maxNu / minNu;
 
@@ -110,6 +191,55 @@ void evaluateNu(double* nu, int Nnu, double minEnergy, double maxEnergy, double 
 	double maxNu = 100 * criticalNu(maxEnergy, 1.0, Bmean);
 
 	createNu(nu, Nnu, minNu, maxNu);
+}
+
+void initializeParker(double*** Bx, double*** By, double*** Bz){
+	double thetaObserv = 0;
+	double sinThetaObserv = sin(thetaObserv);
+	double cosThetaObserv = cos(thetaObserv);
+	double rcorot = Nrho/10.0;
+	double rmin = Nrho/2.0;
+	double Br1 = sqr(rmin/Nrho)*sqrt(0.5);
+	double Bphi1 = ((Nrho - rmin)/rcorot)*sqr(rmin/Nrho)*0.5;
+	//norm to 1;
+	double B0 = 1.0/sqrt(Br1*Br1 + Bphi1*Bphi1);
+	for(int i = 0; i < Nrho; ++i){
+		double rho = i + 0.5;
+		for(int j = 0; j < Nphi; ++j){
+			for(int k = 0; k < Nz; ++k){
+				double z = k + 0.5 - Nz/2.0;
+				double r = sqrt(rho*rho + z*z);
+
+				double x = rho*cosPhiValue[j];
+				double y = rho*sinPhiValue[j];
+
+				double y1 = y;
+				double z1 = z*cosThetaObserv + x*sinThetaObserv;
+				double x1 = x*cosThetaObserv - z*sinThetaObserv;
+
+				double costheta = z1/r;
+				double sintheta = sqrt(1.0 - costheta*costheta);
+
+				double sinphi = y1/sqrt(x1*x1 + y1*y1);
+				double cosphi = x1/sqrt(x1*x1 + y1*y1);
+
+				double Br = B0*costheta*sqr(rmin/r);
+				double Bphi = B0*costheta*((r - rmin)/rcorot)*sqr(rmin/r)*sintheta;
+
+				double Bx1 = Br*sintheta*cosphi - Bphi*sinphi;
+				double By1 = Br*sintheta*sinphi + Bphi*cosphi;
+				double Bz1 = Br*costheta;
+
+				Bx[i][j][k] = Bx1*cosThetaObserv + Bz1*sinThetaObserv;
+				By[i][j][k] = By1;
+				Bz[i][j][k] = Bz1*cosThetaObserv - Bx1*sinThetaObserv;
+
+				if(Bx[i][j][k] != Bx[i][j][k]){
+					printf("Bx = NaN\n");
+				}
+			}
+		}
+	}
 }
 
 
@@ -307,7 +437,9 @@ int main()
 		}
 	}
 
-	for(int i = 0; i < Nrho; ++i){
+	initializeParker(Bx3d, By3d, Bz3d);
+
+	/*for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
 			for(int k = 0; k < Nz; ++k){
 				double Bxy = sqrt(Bx3d[i][j][k]*Bx3d[i][j][k] + By3d[i][j][k]*By3d[i][j][k]);
@@ -321,10 +453,10 @@ int main()
 					thetaIndex3d[i][j][k] = Ndist - 1;
 				}
 				//for debug
-				thetaIndex3d[i][j][k] = 3;
+				//thetaIndex3d[i][j][k] = 3;
 			}
 		}
-	}
+	}*/
 
 	//////////////////////////////////////
 
@@ -346,7 +478,7 @@ int main()
 	double turbulenceFraction = 0.9;
 	double turbNorm = evaluateTurbNorm(kmax, Nk, 1.0, turbulenceFraction);
 
-	for(int i = 0; i < Nrho; ++i){
+	/*for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
 			for(int k = 0; k < Nz; ++k){
 				Bx3d[i][j][k] = Bx3d[i][j][k]*sqrt(1.0 - turbulenceFraction);
@@ -408,9 +540,12 @@ int main()
 
 			}
 		}
-	}
+	}*/
 
-	for(int i = 0; i < Nrho; ++i){
+	evaluateOrientationParameters3d(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
+	//evaluateOrientationParameters3dflat(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
+
+	/*for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
 			for(int k = 0; k < Nz; ++k){
 				double Bxy = sqrt(Bx3d[i][j][k]*Bx3d[i][j][k] + By3d[i][j][k]*By3d[i][j][k]);
@@ -424,10 +559,10 @@ int main()
 					thetaIndex3d[i][j][k] = Ndist - 1;
 				}
 				//for debug
-				//thetaIndex3d[i][j][k] = 3;
+				thetaIndex3d[i][j][k] = 3;
 			}
 		}
-	}
+	}*/
 
 	
 
@@ -585,14 +720,14 @@ int main()
 	Numonth[2][3] = junx[3]*1E9;
 	Fmonth[2][3] = juny[3];
 
-	Numonth[3][0] = aprx[1]*1E9;
-	Fmonth[3][0] = apry[1];
-	Numonth[3][1] = aprx[2]*1E9;
-	Fmonth[3][1] = apry[2];
-	Numonth[3][2] = aprx[3]*1E9;
-	Fmonth[3][2] = apry[3];
-	Numonth[3][3] = aprx[4]*1E9;
-	Fmonth[3][3] = apry[4];
+	Numonth[3][0] = augx[1]*1E9;
+	Fmonth[3][0] = augy[1];
+	Numonth[3][1] = augx[2]*1E9;
+	Fmonth[3][1] = augy[2];
+	Numonth[3][2] = augx[3]*1E9;
+	Fmonth[3][2] = augy[3];
+	Numonth[3][3] = augx[4]*1E9;
+	Fmonth[3][3] = augy[4];
 
 	//todo chose B
 	/*double meanB = 0;
@@ -622,9 +757,9 @@ int main()
 	double tempConcentration = sqr(B[Ntheta/2][0])/(sigma*4*pi*massProtonReal*speed_of_light2);
 	double concentration = 1.0*tempConcentration;
 	concentration = 3000;
-	double Bfactor = 0.065;
+	double Bfactor = 0.55;
 	//double fractionSize = 1.0 - pow((3.0/(4.0*pi))*(1 - 0.5),1.0/3.0);
-	double fractionSize = 0.47;
+	double fractionSize = 0.5;
 	double V0 = speed_of_light;
 	double v = 0.75*speed_of_light;
 	rmax = 3.4E16;
@@ -635,15 +770,78 @@ int main()
 	printf("optimizing parameters\n");
 	fprintf(logFile, "optimizing parameters\n");
 	fflush(logFile);
+	Bfactor = 1.0;
+	concentration = 2900;
+	fractionSize = 0.5;
+	rmax = 3.4E16;
+	v = 0.75*speed_of_light;
 	//optimizeParameters(Bfactor, concentration, fractionSize, nu1, rmax, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters4(1.0, 2000, 3.4E16, Bfactor, concentration, fractionSize, rmax, nu1, Ee, dFe, Np, Nnu1, Ndist, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters4(Bfactor, concentration, fractionSize,rmax, nu1, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, Ee, dFe, Np, Ndist, 1.0, 8, logFile);
 	optimizeParameters5(1.0, 2000, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
+	double error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+
+	const int NstartB = 4;
+	const int NstartN = 5;
+	double startB[NstartB] = {0.1, 0.5, 1.0, 5.0};
+	double startN[NstartN] = {100, 500, 1000, 2000, 5000};
+		for(int i = 0; i < NstartB; ++i){
+			for(int j = 0; j < NstartN; ++j){
+			double tempBfactor = startB[i];
+			double tempconcentration = startN[j];
+			double tempfractionSize = 0.5;
+			double temprmax = 3.4E16;
+			double tempv = 0.75*speed_of_light;
+			optimizeParameters5(1.0, 2000, 3.4E16,V0, tempBfactor, tempconcentration, tempfractionSize, temprmax, tempv, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
+			double tempError = evaluateOptimizationFunction5(tempBfactor, tempconcentration, tempfractionSize, temprmax, tempv, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+			printf("temperror = %g\n", tempError);
+			fprintf(logFile, "tempError = %g\n", tempError);
+			if(tempError < error){
+				Bfactor = tempBfactor;
+				concentration = tempconcentration;
+				fractionSize = tempfractionSize;
+				rmax = temprmax;
+				v = tempv;
+				error = tempError;
+			}
+		}
+	}
 	///////////////////
 	//concentration = 1.0;
 	//Bfactor = 1.0;
 	//fractionSize = 0.1;
+	/*const int Nbp = 10;
+	const int Nnp = 12;
+	double Bpoints[Nbp] = {0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0};
+	double npoints[Nnp] = {2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
+	FILE* errorFile = fopen("error.dat","w");
+	FILE* Bp = fopen("Bpoints.dat","w");
+	FILE* np = fopen("Npoints.dat","w");
+	for(int i = 0; i < Nbp; ++i){
+		fprintf(Bp, "%g\n", Bpoints[i]);
+	}
+	for(int i = 0; i < Nnp; ++i){
+		fprintf(np, "%g\n", npoints[i]);
+	}
+	fclose(Bp);
+	fclose(np);
+	for(int i = 0; i < Nbp; ++i){
+		Bfactor = Bpoints[i];
+		for(int j = 0; j < Nnp; ++j){
+			concentration = npoints[j];
+			fractionSize = 0.1;
+			rmax = 3E16;
+			v = 0.75*speed_of_light;
+			optimizeParameters5(1.0, 2000, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
+			double error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+			fprintf(errorFile, "%g ", error);
+		}
+		fprintf(errorFile, "\n");
+	}
+	fclose(errorFile);*/
+
+	error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 
 	printf("integrating fields\n");
 	fprintf(logFile, "integrating Fields\n");
@@ -651,7 +849,9 @@ int main()
 	double* totalInu = new double[Nnu];
 	double finalSigma = sqr(Bfactor)/(4*pi*concentration*massProtonReal*speed_of_light2);
 	printf("Bfactor = %g, n = %g\n fraction = %g rmax = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, finalSigma);
+	printf("error = &g\n", error);
 	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g rmax = %g v/c = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, v/speed_of_light, finalSigma);
+	fprintf(logFile, "error = %g\n", error);
 	fflush(logFile);
 
 	double** tempTotalInu = new double*[Nmonth];
