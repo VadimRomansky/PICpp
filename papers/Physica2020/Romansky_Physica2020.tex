@@ -108,35 +108,36 @@
 	In this study we performed simulations of a perpendicular relativistic shock  varying the magnetization, Lorentz-factor and the fraction of the turbulent field. 
 	The simulation domain is two-dimensional with three-dimensional velocities and fields. To perform such computation we employed the publicly available Tristan-mp code with the explicit numerical scheme developed by Buneman \cite{Buneman93} and  Spitkovsky\cite{Spitkovsky2005}.
 	
-	A shock wave is initialized in an electron-proton plasma which is flowing into the simulation box through its right boundary and then is reflecting from the super-conducting wall at the left boundary.  The typical simulation parameters are : the initial flow Lorentz factor $\Gamma = 1.5$, the flow magnetization $\sigma = \frac{B^2}{4\pi\Gamma (n_p m_p + n_e m_e) c^2}$ was choosen to be  0.004 and 0.0004  (in the turbulent case $B^2$ is the mean square field). The dimensionless thermal energy $\Delta \gamma = \frac{k T}{m_p c^2}$ is equal to $10^{-4}$ and the electron mass is increased up to $m_e = \frac{m_p}{100}$. The size of the simulation box along the $x$ axis is $L_x = 30000\frac{c}{\omega_p}$ and in the transverse direction $L_y = 400\frac{c}{\omega_p}$, where $\omega_p = \sqrt{\frac{4\pi q^2 n}{\Gamma m_e}}$ is the plasma frequency. These scales correspond to $150000$ and $2000$ grid points in $x$ and $y$ directions, respectively. Also, $2000$ grid points correspond to approximately $10$ gyroradii of the upstream protons.
+	A shock wave is initialized in an electron-proton plasma which is flowing into the simulation box through its right boundary and then is reflecting from the super-conducting wall at the left boundary.  The typical simulation parameters are : the initial flow Lorentz factor $\Gamma = 1.5$, the flow magnetization $\sigma = \frac{B^2}{4\pi\Gamma (n_p m_p + n_e m_e) c^2}$ was choosen to be  0.004 and 0.0004  (in the turbulent case $B^2$ is the mean square field). The dimensionless thermal energy $\Delta \gamma = \frac{k T}{m_p c^2}$ is equal to $10^{-4}$ and the electron mass is increased up to $m_e = \frac{m_p}{100}$. The size of the simulation box along the $x$ axis is $L_x = 30000\frac{c}{\omega_p}$ and in the transverse direction $L_y = 400\frac{c}{\omega_p}$, where $\omega_p = \sqrt{\frac{4\pi q^2 n}{\Gamma m_e}}$ is the plasma frequency. These scales correspond to $150000$ and $2000$ grid points in $x$ and $y$ directions, respectively. For 3d setup transverse sizes are reduced to $40$ grid points. Also, $2000$ grid points correspond to approximately $10$ gyroradii of the upstream protons.
 	In simulations with turbulent fields, we initialized it as  summ of harmonic modes with Kolmogorov's spectum, as described in detail in\cite{Romansky2019}. The ratio of the energy density of the turbulent field to the total magnetic energy density is denoted as $\eta$ , which varied from 0 percent to 90 percent in our simulations. The regular magnetic field is normal to the $x$ axis and is rotated by the angle $\phi$ about $x$ axis: the value $\phi = 0$ corresponds to the out-of-plane orientation of magnetic field and $\phi = 90$ corresponds to the in-plane orientation.
 	
 	
 	
 	\section{Results}
 	We used several parameter sets, listed in table \ref{setups}, with different magnetization, Lorentz-factors and the fraction of turbulent field. Also, we investigated differences between 2D and 3D cases.
+	\renewcommand{\arraystretch}{1.1}
 	\begin{table}[h!]
 		\label{setups}
+		\caption{Parameters of different setups. }
 		\begin{center}
-			\begin{tabular}{|c | c| c | c| c| c| c| c| c| c| c| c| c|}
+			\begin{tabular}{|c | c| c| c| c| c| c| c| c| c|}
 				\hline
-				Setup & Nx & Ny & Nz & $\phi$ & $\sigma$ & $\Gamma$ & $\eta$ & $\frac{v_{sh}}{c}$ & $\hat{\gamma}$ & $T \ 10^{12} K$ & $T_p\ 10^{12}K$ & $T_e \ 10^{12}K$\\
+				Setup & $\phi$ & $\sigma$ & $\Gamma$ & $\eta$ & $\frac{v_{sh}}{c}$ & $\hat{\gamma}$ & $T \ 10^{12} K$ & $T_p\ 10^{12}K$ & $T_e \ 10^{12}K$\\
 				\hline
-				reg1 & 150000 & 2000 & 1 & 0 & 0.004 & 1.5 & 0 & 0.355 & 1.51 & 3.5 & 2.5 & 0.23\\
-				reg2 & 150000 & 2000 & 1 & 90 & 0.004 & 1.5 & 0 & 0.240 & 1.53 & 2.9 & 2.2 & 0.28\\
-				reg3 & 150000 & 2000 & 1 & 0 & 0.0004 & 1.5 & 0 & 0.339 & 1.52 & 3.4 &2.4 & 0.38\\
-				reg4 & 150000 & 2000 & 1 & 90 & 0.0004 & 1.5 & 0 & 0.228 & 1.53 & 2.8 &1.7 & 0.37\\
-				turb1 & 150000 & 2000 & 1 & 0 & 0.004 & 1.5 & 90 & 0.309 & 1.52 & 3.3 & 2.1 & 0.41\\
-				turb2 & 150000 & 2000 & 1 & 0 & 0.004 & 1.5 & 30 & 0.348 & 1.51 & 3.5 & 2.4 & 0.35\\
-				gam1 & 150000 & 2000 & 1 & 0 & 0.004 & 2 & 0 & 0.412 & 1.46 & 6.3 & 4.2 & 0.62\\
-				gam2 & 150000 & 2000 & 1 & 0 & 0.004 & 5 & 0 & 0.479 & 1.39 & 20.5 & 7.3 & 11.0\\
-				gam3 & 150000 & 2000 & 1 & 0 & 0.004 & 10 & 0 & 0.504 & 1.36 & 42.6 & 16.8 & 21.3\\
-				reg3d & 80000 & 40 & 40 & 0 & 0.004 & 1.5 & 0 & 0.313 & 1.52 & 3.3 & 3.0 & 0.21\\
+				reg1  & 0 & 0.004 & 1.5 & 0 & 0.355 & 1.51 & 3.5 & 2.5 & 0.23\\
+				reg2  & 90 & 0.004 & 1.5 & 0 & 0.240 & 1.53 & 2.9 & 2.2 & 0.28\\
+				reg3 & 0 & 0.0004 & 1.5 & 0 & 0.339 & 1.52 & 3.4 &2.4 & 0.38\\
+				reg4  & 90 & 0.0004 & 1.5 & 0 & 0.228 & 1.53 & 2.8 &1.7 & 0.37\\
+				turb1  & 0 & 0.004 & 1.5 & 90 & 0.309 & 1.52 & 3.3 & 2.1 & 0.41\\
+				turb2  & 0 & 0.004 & 1.5 & 30 & 0.348 & 1.51 & 3.5 & 2.4 & 0.35\\
+				gam1  & 0 & 0.004 & 2 & 0 & 0.412 & 1.46 & 6.3 & 4.2 & 0.62\\
+				gam2  & 0 & 0.004 & 5 & 0 & 0.479 & 1.39 & 20.5 & 7.3 & 11.0\\
+				gam3  & 0 & 0.004 & 10 & 0 & 0.504 & 1.36 & 42.6 & 16.8 & 21.3\\
+				reg3d & 0 & 0.004 & 1.5 & 0 & 0.313 & 1.52 & 3.3 & 3.0 & 0.21\\
 				
 				\hline
 			\end{tabular}
 		\end{center}
-		\caption{Parameters of different setups. }
 	\end{table}
 	
 	Using the density profiles of the simulated shock waves, we determined magnetohydrodynamic parameters of plasma, solving the jump conditions (\ref{hugoniot}). The density averaged in transversal directions has clear jump as shown in figures \ref{density_noturb} and \ref{density_turb}, which is indicating the position of the shock front. So we can evaluate the shock velocity from results of simulations, and then solve jump conditions for the adiabatic index and the downstream temperature, using the iterative method. 
@@ -162,7 +163,7 @@
 	
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[width=0.65\textwidth]{fig/shock_x.png} 
+		\includegraphics[width=0.64\textwidth]{fig/shock_x.png} 
 		\caption{Evolution of the shock front position for various parameter sets.}
 		\label{shock_x}
 	\end{figure}
@@ -171,14 +172,14 @@
 	
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[width=0.65\textwidth]{fig/electrons_at_points.png} 
+		\includegraphics[width=0.64\textwidth]{fig/electrons_at_points.png} 
 		\caption{The distribution functions of electrons at different positions in the shock vicinity (indicated at the insert) within the simulation box for the  turbulent parameter set (turb1). Note that the strong departures from the Maxwell-Juttner distributions and the formation of the non-thermal tails are due to the presence of the external turbulence in the shock upstream.}
 		\label{points}
 	\end{figure}
 	
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[width=0.65\textwidth]{fig/temperature_fit.png} 
+		\includegraphics[width=0.64\textwidth]{fig/temperature_fit.png} 
 		\caption{The simulated distribution functions of electrons at far downstream. The red curve is for the shock propagating transverse to a regular magnetic field. The green curve is for the case of the turbulent upstream magnetic field (the turb1 parameter set). The Maxwell-Juttner fits for the both distributions are shown in the blue and black curves respectively.}
 		\label{temp_fit}
 	\end{figure}
