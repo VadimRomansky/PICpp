@@ -430,14 +430,14 @@ int main()
 				By3d[i][j][k] = 0.0;
 				Bz3d[i][j][k] = 0.0;
 				concentrations3d[i][j][k] = 1.0;
-				concentrations3d[i][j][k] = 1.0*sqr(rmax/r);
+				//concentrations3d[i][j][k] = 1.0*sqr(rmax/r);
 				sintheta3d[i][j][k] = 1.0;
 				thetaIndex3d[i][j][k] = 3;
 			}
 		}
 	}
 
-	initializeParker(Bx3d, By3d, Bz3d);
+	//initializeParker(Bx3d, By3d, Bz3d);
 
 	/*for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
@@ -542,8 +542,8 @@ int main()
 		}
 	}*/
 
-	evaluateOrientationParameters3d(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
-	//evaluateOrientationParameters3dflat(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
+	//evaluateOrientationParameters3d(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
+	evaluateOrientationParameters3dflat(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
 
 	/*for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
@@ -588,6 +588,9 @@ int main()
 	fprintf(logFile, "reading input\n");
 	fflush(logFile);
 
+	double Te = (2.0/sqrt(18.0))*1E11;
+	double thetae = kBoltzman*Te/(massElectron*speed_of_light2);
+
 	Fe = new double*[Ndist];
 	dFe = new double*[Ndist];
 	Ee = new double*[Ndist];
@@ -623,7 +626,8 @@ int main()
 			//} else {
 			//	Fe[i] = 0;
 			//}
-		
+				Fe[j][i] = exp(-gamma/thetae)*gamma*u;
+				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 		}
 
 		fclose(inputPe);
@@ -775,17 +779,21 @@ int main()
 	fractionSize = 0.5;
 	rmax = 3.4E16;
 	v = 0.75*speed_of_light;
+	sigma = 0.02;
+	concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
+	double N0 = sqr(1.0)/(sigma*4*pi*massProtonReal*speed_of_light2);
 	//optimizeParameters(Bfactor, concentration, fractionSize, nu1, rmax, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters4(1.0, 2000, 3.4E16, Bfactor, concentration, fractionSize, rmax, nu1, Ee, dFe, Np, Nnu1, Ndist, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters4(Bfactor, concentration, fractionSize,rmax, nu1, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, Ee, dFe, Np, Ndist, 1.0, 8, logFile);
 	optimizeParameters5(1.0, 2000, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
+	//optimizeParameters5sigma(sigma, 1.0, N0, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
 	double error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 
-	const int NstartB = 4;
-	const int NstartN = 5;
+	/*const int NstartB = 4;
+	const int NstartN = 4;
 	double startB[NstartB] = {0.1, 0.5, 1.0, 5.0};
-	double startN[NstartN] = {100, 500, 1000, 2000, 5000};
+	double startN[NstartN] = {500, 1000, 2000, 5000};
 		for(int i = 0; i < NstartB; ++i){
 			for(int j = 0; j < NstartN; ++j){
 			double tempBfactor = startB[i];
@@ -806,7 +814,7 @@ int main()
 				error = tempError;
 			}
 		}
-	}
+	}*/
 	///////////////////
 	//concentration = 1.0;
 	//Bfactor = 1.0;
@@ -849,7 +857,7 @@ int main()
 	double* totalInu = new double[Nnu];
 	double finalSigma = sqr(Bfactor)/(4*pi*concentration*massProtonReal*speed_of_light2);
 	printf("Bfactor = %g, n = %g\n fraction = %g rmax = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, finalSigma);
-	printf("error = &g\n", error);
+	printf("error = %g\n", error);
 	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g rmax = %g v/c = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, v/speed_of_light, finalSigma);
 	fprintf(logFile, "error = %g\n", error);
 	fflush(logFile);
