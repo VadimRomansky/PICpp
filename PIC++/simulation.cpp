@@ -56,14 +56,14 @@ void Simulation::simulate() {
 		//initializeAnisotropicSilicon();
 		//initializeWeibel();
 		//initializeRingWeibel();
-		initializeFluxFromRight();
+		//initializeFluxFromRight();
 		//initializeHarris();
 		//initializeBell();
 		//initializeSimpleElectroMagneticWave();
 		//initializeSimpleElectroMagneticWaveY();
 		//initializeSimpleElectroMagneticWaveZ();
 		//initializeRotatedSimpleElectroMagneticWave(1, 1, 0);
-		//initializeHomogenouseFlow();
+		initializeHomogenouseFlow();
 		//initializeLangmuirWave();
 		//createParticles();
 		//initializeShockWave();

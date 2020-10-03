@@ -179,6 +179,7 @@
     <ClCompile Include="fields.cpp" />
     <ClCompile Include="fields_exchange.cpp" />
     <ClCompile Include="fourier.cpp" />
+    <ClCompile Include="fourier_filter.cpp" />
     <ClCompile Include="initialization.cpp" />
     <ClCompile Include="initializeFluxFromRight.cpp" />
     <ClCompile Include="input.cpp" />

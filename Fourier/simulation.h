@@ -13,6 +13,12 @@ public:
 	int cartCoord[MPI_dim];
 	int cartDim[MPI_dim];
 	MPI_Comm cartComm;
+	MPI_Comm cartCommX;
+	MPI_Comm cartCommY;
+	MPI_Comm cartCommZ;
+	MPI_Comm cartCommXY;
+	MPI_Comm cartCommYZ;
+	MPI_Comm cartCommXZ;
 	int nprocs;
 	int leftRank;
 	int rightRank;
@@ -24,10 +30,6 @@ public:
 	int xnumber;
 	int ynumber;
 	int znumber;
-
-	int xnumberAdded;
-	int ynumberAdded;
-	int znumberAdded;
 
 	double deltaX;
 	double deltaY;
@@ -69,6 +71,8 @@ public:
 	int firstAbsoluteZindex;
 
 	Complex*** function;
+	Complex*** fourierTempX;
+	Complex*** fourierTempXY;
 	Complex*** fourierImage;
 	Complex*** result;
 

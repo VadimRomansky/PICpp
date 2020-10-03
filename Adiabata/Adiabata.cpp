@@ -74,7 +74,7 @@ int main()
 		Rtot_new_b=8.0;     
 		Rtot_new=(Rtot_new_a+Rtot_new_b)/2.0;
 		for (i=1; i <= 100; ++i){
-			P_w2=P_w0*pow(gamma_sh,alpha_W)*pow(sqr(Rtot_new)-sqr(betta0),3.0/4.0);
+			P_w2=P_w0*pow(gamma_sh,alpha_W)*pow(sqr(Rtot_new)-sqr(betta0),1.0);
 			P2_Pxx=(1.0/(Gam2/((Gam2-1.0)*sqr(gamma_sh)*(sqr(Rtot_new)-sqr(betta0)))+ 
               1.0/(sqr(gamma_sh)*sqr(betta0))))* 
               (1.0-1.0/(gamma_sh*sqrt(sqr(Rtot_new)-sqr(betta0)))+Qesc_Pxx+ 

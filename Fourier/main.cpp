@@ -32,6 +32,8 @@ int main(int argc, char **argv){
 
 	Simulation* simulation = new Simulation(comm);
 	simulation->randomSimulation();
+	printf("end, press enter\n");
+	getchar();
 	//simulation->poissonSolving();
 
 	MPI_Finalize();

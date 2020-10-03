@@ -28,17 +28,17 @@ const char* const outputDirectory = "C:/users/Vadim/Documents/Visual Studio 2010
 const int randomSeed = 1024;
 const double pi = 3.1415926535897932384626433832795028841971693993751;
 
-const int xnumberGeneral = 8;
+const int xnumberGeneral = 1024;
 const int ynumberGeneral = 1;
 const int znumberGeneral = 1;
 
-const double xsizeGeneral = 8;
+const double xsizeGeneral = 1024;
 const double ysizeGeneral = 1;
 const double zsizeGeneral = 1;
 
 const int additionalBinNumber = 1;
 
-const int MPI_nx = 1;
+const int MPI_nx = 2;
 const int MPI_ny = 1;
 const int MPI_nz = 1;
 const int MPI_dim = 3;

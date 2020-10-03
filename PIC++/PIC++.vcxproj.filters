@@ -117,6 +117,9 @@
     <ClCompile Include="initializeFluxFromRight.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="fourier_filter.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h">
