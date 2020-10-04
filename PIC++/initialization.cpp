@@ -1362,9 +1362,11 @@ Simulation::~Simulation() {
 		}
 		delete[] divergenceCleaningPotentialFourier;
 
-		//delete3complexArray(fourierInput, xnumberAdded, ynumberAdded, znumberAdded);
-		//delete3complexArray(fourierImage, xnumberAdded, ynumberAdded, znumberAdded);
-		//delete3complexArray(fourierOutput, xnumberAdded, ynumberAdded, znumberAdded);
+		delete3complexArray(fourierInput, xnumber, ynumber, znumber);
+		delete3complexArray(fourierImage, xnumber, ynumber, znumber);
+		delete3complexArray(tempFourier1, xnumber, ynumber, znumber);
+		delete3complexArray(tempFourier2, xnumber, ynumber, znumber);
+		delete3complexArray(fourierOutput, xnumber, ynumber, znumber);
 
 		//delete3complexArray(fourierScalarInput, xnumberAdded, ynumberAdded, znumberAdded);
 		//delete3complexArray(fourierScalarOutput, xnumberAdded, ynumberAdded, znumberAdded);
@@ -1438,6 +1440,9 @@ Simulation::~Simulation() {
 		delete[] middleYgrid;
 		delete[] zgrid;
 		delete[] middleZgrid;
+		delete[] xabsoluteIndex;
+		delete[] yabsoluteIndex;
+		delete[] zabsoluteIndex;
 
 		/*delete[] rightOutNodeBuffer;
 		delete[] rightInNodeBuffer;
@@ -1993,9 +1998,11 @@ void Simulation::initialize() {
 	if (verbosity > 2) printf("initialize grid rank = %d\n", rank);
 
 	xgrid[0] = leftX;
+	xabsoluteIndex[0] = firstAbsoluteXindex;
 
 	for (int i = 1; i <= xnumberAdded; ++i) {
 		xgrid[i] = xgrid[0] + i * deltaX;
+		xabsoluteIndex[i] = xabsoluteIndex[0] + i;
 	}
 
 	//xgrid[xnumberAdded-1] = rightX;
@@ -2005,14 +2012,18 @@ void Simulation::initialize() {
 	//printf("xgrid[0] = %lf xgrid[xnumber] = %lf\n", xgrid[0], xgrid[xnumber]);
 
 	ygrid[0] = leftY;
+	yabsoluteIndex[0] = firstAbsoluteYindex;
 	for (int j = 0; j <= ynumberAdded; ++j) {
 		ygrid[j] = ygrid[0] + j * deltaY;
+		yabsoluteIndex[j] = yabsoluteIndex[0] + j;
 	}
 	//ygrid[ynumber] = 2 * ysize;
 
 	zgrid[0] = leftZ;
+	zabsoluteIndex[0] = firstAbsoluteZindex;
 	for (int k = 0; k <= znumberAdded; ++k) {
 		zgrid[k] = zgrid[0] + k * deltaZ;
+		zabsoluteIndex[k] = zabsoluteIndex[0] + k;
 	}
 	//zgrid[znumber] = 2 * zsize;
 
@@ -6664,6 +6675,10 @@ void Simulation::createArrays() {
 	ygrid = new double[ynumberAdded + 1];
 	zgrid = new double[znumberAdded + 1];
 
+	xabsoluteIndex = new int[xnumberAdded+1];
+	yabsoluteIndex = new int[ynumberAdded+1];
+	zabsoluteIndex = new int[znumberAdded+1];
+
 	middleXgrid = new double[xnumberAdded];
 	middleYgrid = new double[ynumberAdded];
 	middleZgrid = new double[znumberAdded];
@@ -6759,9 +6774,11 @@ void Simulation::createArrays() {
 		}
 	}
 
-	//fourierInput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
-	//fourierImage = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
-	//fourierOutput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
+	fourierInput = create3complexArray(xnumber, ynumber, znumber);
+	fourierImage = create3complexArray(xnumber, ynumber, znumber);
+	tempFourier1 = create3complexArray(xnumber, ynumber, znumber);
+	tempFourier2 = create3complexArray(xnumber, ynumber, znumber);
+	fourierOutput = create3complexArray(xnumber, ynumber, znumber);
 
 	//fourierScalarInput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);
 	//fourierScalarOutput = create3complexArray(xnumberAdded, ynumberAdded, znumberAdded);

@@ -183,6 +183,7 @@ void Simulation::simulate() {
 			prepareEvaluators(time + deltaT);
 			tristanEvaluateBhalfStep();
 			exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
+			filterFields(8);
 			tristanUpdateFlux();
 			////////////////////////////////
 			if (timing && (rank == 0) && (currentIteration % writeParameter == 0)) {

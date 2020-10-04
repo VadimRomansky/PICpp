@@ -307,7 +307,7 @@ void filterHighHarmonic(Complex*** fourierImage, int xnumber, int ynumber, int z
 
 				if(ynumberGeneral > 1){
 					if(ky < middley){
-						if(kx > cutNumber){
+						if(ky > cutNumber){
 							fourierImage[i][j][k] = Complex(0,0);
 						}
 					} else {

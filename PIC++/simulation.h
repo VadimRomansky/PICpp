@@ -79,6 +79,9 @@ public:
 	int firstAbsoluteZindex;
 	int leftBoundaryXindex;
 	int rightBoundaryXindex;
+	int* xabsoluteIndex;
+	int* yabsoluteIndex;
+	int* zabsoluteIndex;
 	double leftX;
 	double rightX;
 	double leftY;
@@ -594,9 +597,11 @@ public:
 	double**** sBiconjugateMaxwell;
 	double**** tBiconjugateMaxwell;
 
-	//Complex*** fourierInput;
-	//Complex*** fourierImage;
-	//Complex*** fourierOutput;
+	Complex*** fourierInput;
+	Complex*** fourierImage;
+	Complex*** tempFourier1;
+	Complex*** tempFourier2;
+	Complex*** fourierOutput;
 
 	//Complex*** fourierScalarInput;
 	//Complex*** fourierScalarOutput;
@@ -975,6 +980,20 @@ public:
 
 	void filterFieldsLocal(int cutWaveNumber);
 	void filterFieldGeneralLocal(Vector3d*** field, int cutWaveNumber);
+
+	void translateBunemanBxToArray(double*** Bx, Complex*** output);
+	void translateBunemanByToArray(double*** By, Complex*** output);
+	void translateBunemanBzToArray(double*** Bz, Complex*** output);
+	void translateBunemanExToArray(double*** Ex, Complex*** output);
+	void translateBunemanEyToArray(double*** Ey, Complex*** output);
+	void translateBunemanEzToArray(double*** Ez, Complex*** output);
+
+	void translateComplexArrayToBunemanBx(double*** Bx, Complex*** input);
+	void translateComplexArrayToBunemanBy(double*** By, Complex*** input);
+	void translateComplexArrayToBunemanBz(double*** Bz, Complex*** input);
+	void translateComplexArrayToBunemanEx(double*** Ex, Complex*** input);
+	void translateComplexArrayToBunemanEy(double*** Ey, Complex*** input);
+	void translateComplexArrayToBunemanEz(double*** Ez, Complex*** input);
 
 	void updateMaxEderivativePoint();
 	void updateMaxConcentrationDerivativePoint();
