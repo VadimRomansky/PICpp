@@ -1878,6 +1878,22 @@ void Simulation::updateParameters() {
 				}
 			}
 		}
+
+		meanSquaredBfield[0] = 0;
+		meanSquaredBfield[1] = 0;
+		meanSquaredBfield[2] = 0;
+		for (int i = minI; i < maxI; ++i) {
+			for (int j = minJ; j < maxJ; ++j) {
+				for (int k = minK; k < maxK; ++k) {
+					Vector3d tempE = Vector3d(bunemanBx[i][j][k], bunemanBy[i][j][k], bunemanBz[i][j][k]);
+
+					meanSquaredBfield[0] += bunemanBx[i][j][k] * bunemanBx[i][j][k];
+					meanSquaredBfield[1] += bunemanBy[i][j][k] * bunemanBy[i][j][k];
+					meanSquaredBfield[2] += bunemanBz[i][j][k] * bunemanBz[i][j][k];
+					//}
+				}
+			}
+		}
 	} else {
 		maxBfield = Bfield[0][0][0] - B0;
 		maxEfield = Efield[0][0][0];
@@ -1941,6 +1957,12 @@ void Simulation::updateParameters() {
 	meanSquaredEfield[0] = sqrt(tempEsquared[0] / (xnumberGeneral * ynumberGeneral * znumberGeneral));
 	meanSquaredEfield[1] = sqrt(tempEsquared[1] / (xnumberGeneral * ynumberGeneral * znumberGeneral));
 	meanSquaredEfield[2] = sqrt(tempEsquared[2] / (xnumberGeneral * ynumberGeneral * znumberGeneral));
+
+	MPI_Allreduce(meanSquaredBfield, tempEsquared, 3, MPI_DOUBLE, MPI_SUM, cartComm);
+
+	meanSquaredBfield[0] = sqrt(tempEsquared[0] / (xnumberGeneral * ynumberGeneral * znumberGeneral));
+	meanSquaredBfield[1] = sqrt(tempEsquared[1] / (xnumberGeneral * ynumberGeneral * znumberGeneral));
+	meanSquaredBfield[2] = sqrt(tempEsquared[2] / (xnumberGeneral * ynumberGeneral * znumberGeneral));
 	MPI_Barrier(cartComm);
 	double temp[7];
 	temp[0] = maxBfield.x;

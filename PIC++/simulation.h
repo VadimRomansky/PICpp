@@ -215,6 +215,7 @@ public:
 	Vector3d maxEfield;
 	Vector3d maxBfield;
 	double meanSquaredEfield[3];
+	double meanSquaredBfield[3];
 
 	Vector3d V0;
 

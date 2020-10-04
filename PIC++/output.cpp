@@ -3451,7 +3451,10 @@ void outputGeneral(const char* outFileName, Simulation* simulation) {
 			simulation->derExPoint, //35
 	        simulation->derExPoint * simulation->deltaX * simulation->scaleFactor, //36
 			simulation->constMeanElevelPoint, //37
-	        simulation->derConcentrationPoint * simulation->deltaX * simulation->scaleFactor); //38
+	        simulation->derConcentrationPoint * simulation->deltaX * simulation->scaleFactor, //38
+			simulation->meanSquaredBfield[0] / fieldFactor,  //39
+			simulation->meanSquaredBfield[1] / fieldFactor, //40
+	        simulation->meanSquaredBfield[2] / fieldFactor); //41
 	fclose(outFile);
 }
 
