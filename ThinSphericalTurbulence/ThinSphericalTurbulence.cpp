@@ -588,7 +588,7 @@ int main()
 	fprintf(logFile, "reading input\n");
 	fflush(logFile);
 
-	double Te = (2.0/sqrt(18.0))*1E11;
+	double Te = (1.5/sqrt(18.0))*1E11;
 	double thetae = kBoltzman*Te/(massElectron*speed_of_light2);
 
 	Fe = new double*[Ndist];
@@ -786,7 +786,7 @@ int main()
 	//optimizeParameters4(1.0, 2000, 3.4E16, Bfactor, concentration, fractionSize, rmax, nu1, Ee, dFe, Np, Nnu1, Ndist, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters4(Bfactor, concentration, fractionSize,rmax, nu1, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, Ee, dFe, Np, Ndist, 1.0, 8, logFile);
-	optimizeParameters5(1.0, 2000, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
+	optimizeParameters5(1.0, 1000, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
 	//optimizeParameters5sigma(sigma, 1.0, N0, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
 	double error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 

@@ -1,6 +1,6 @@
 clear;
-distribution_protons_grid = importdata('distribution_protons_grid_5.dat');
-distribution_electrons_grid = importdata('distribution_electrons_grid_5.dat');
+distribution_protons_grid = importdata('distribution_protons_grid_0.dat');
+distribution_electrons_grid = importdata('distribution_electrons_grid_0.dat');
 %distribution_alphas_grid = importdata('distribution_alphas_grid_5.dat');
 %distribution_positrons_grid = importdata('distribution_positrons_grid_5.dat');
 load initialParameters.dat;
@@ -36,16 +36,16 @@ T = 2*10^15;
 kB = 1.3806488*10^-16;
 theta = kB*T/(me*v*v);
 factor = 1;
-minX = 1;
-maxX = Nx/4;
+minX = 10;
+maxX = 80;
 for i=1:Np,   
-   Pp(i,1) = distribution_protons_grid(1 + a*(Nx + 1),i);
-   Pp(i,2) = distribution_protons_grid(1 + b*(Nx + 1),i);
-   Pp(i,3) = distribution_protons_grid(1 + c*(Nx + 1),i);
+   Pp(i,1) = distribution_protons_grid(1 + a*(Nx + 1),i)/(mp*v);
+   Pp(i,2) = distribution_protons_grid(1 + b*(Nx + 1),i)/(mp*v);
+   Pp(i,3) = distribution_protons_grid(1 + c*(Nx + 1),i)/(mp*v);
    
-   Pe(i,1) = distribution_electrons_grid(1 + a*(Nx + 1),i);
-   Pe(i,2) = distribution_electrons_grid(1 + b*(Nx + 1),i);
-   Pe(i,3) = distribution_electrons_grid(1 + c*(Nx + 1),i);
+   Pe(i,1) = distribution_electrons_grid(1 + a*(Nx + 1),i)/(me*v);
+   Pe(i,2) = distribution_electrons_grid(1 + b*(Nx + 1),i)/(me*v);
+   Pe(i,3) = distribution_electrons_grid(1 + c*(Nx + 1),i)/(me*v);
      
    %Pa(i,1) = distribution_alphas_grid(1 + a*(Nx + 1),i);
    %Pa(i,2) = distribution_alphas_grid(1 + b*(Nx + 1),i);
@@ -84,7 +84,7 @@ for i=1:Np,
      %factor = Ppos(i,3)*Ppos(i,3);
      %Fpos(i,3) = Fpos(i,3) + distribution_positrons_grid(1 + j + c*(Nx + 1), i)*factor;
    end;
-   exp1 = exp(-sqrt(1+Pe(i,1)*Pe(i,1)/(me*me*v*v))/theta);
+   exp1 = exp(-sqrt(1+Pe(i,1)*Pe(i,1))/theta);
    bes = besselk(2, 1/theta);
    p = Pe(i,1);
    p3 = (p/(me*v))^3;
@@ -94,7 +94,7 @@ set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
 set(0, 'DefaultLineLineWidth', 1);
 figure(1);
-plot (Gp(1:Np,1)-1,Fp(1:Np,1), 'red',Gp(1:Np,2)-1,Fp(1:Np,2), 'green',Gp(1:Np,3)-1,Fp(1:Np,3), 'blue');
+plot (Pp(1:Np,1),Fp(1:Np,1), 'red',Pp(1:Np,2),Fp(1:Np,2), 'green',Pp(1:Np,3),Fp(1:Np,3), 'blue');
 title ('protons distribution function');
 xlabel ('{\gamma}-1');
 ylabel ('F_p({\gamma}) ({\gamma}-1)');
@@ -102,7 +102,7 @@ legend('t=0','t=T/2','t=T','Location','southeast');
 grid ;
 
 figure(2);
-plot (Ge(1:Np,1)-1,Fe(1:Np,1), 'red',Ge(1:Np,2)-1,Fe(1:Np,2), 'green',Ge(1:Np,3)-1,Fe(1:Np,3), 'blue');
+plot (Pe(1:Np,1),Fe(1:Np,1), 'red',Pe(1:Np,2),Fe(1:Np,2), 'green',Pe(1:Np,3),Fe(1:Np,3), 'blue');
 %plot (Pe(1:Np,1)/(me*v),Fe(1:Np,1), 'red',Pe(1:Np,2)/(me*v),Fe(1:Np,2), 'green',Pe(1:Np,3)/(me*v),Fe(1:Np,3), 'blue', Pe(1:Np,1)/(me*v), Pejuttner(1:Np), 'black');
 title ('electrons distribution function');
 xlabel ('{\gamma}-1');

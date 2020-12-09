@@ -886,7 +886,7 @@ void Simulation::moveParticleVay(Particle* particle) {
 	Vector3d velocity = particle->getVelocity();
 	Vector3d Tau = B*particle->beta;
 
-	momentum = momentum + (E + particle->getVelocity().vectorMult(B)*0.5)*particle->charge*deltaT;
+	momentum = momentum + (E + velocity.vectorMult(B)*0.5)*particle->charge*deltaT;
 
 	double ustar = (momentum.scalarMult(Tau))/particle->mass;
 	double gammaPrime = sqrt(1.0 + momentum.norm2()/(particle->mass*particle->mass));

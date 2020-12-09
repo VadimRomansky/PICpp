@@ -39,6 +39,9 @@ for i = 2:N2,
 end
 shockWave(2) = 0;
 
+E1= (general(1,5) + general(1,6))/general(1,4);
+E2= general(1,6)/general(1,4);
+
 set(0,'DefaultAxesFontSize',16,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',16,'DefaultTextFontName','Times New Roman'); 
 set(0, 'DefaultLineLineWidth', 1);

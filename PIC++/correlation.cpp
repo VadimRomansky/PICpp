@@ -468,8 +468,10 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 	double WrightNodeZ;
 	int leftNodeZindex = 0;
 	int rightNodeZindex = 0;
+
+	double localX = particle->coordinates.x - xgrid[0];
 	
-	int xcount = floor((particle->coordinates.x - xgrid[0]) / deltaX);
+	int xcount = floor(localX / deltaX);
 	if(particle->coordinates.x < middleXgrid[xcount]) {
 		leftCellXindex = xcount - 1;
 		rightCellXindex = xcount;
@@ -482,7 +484,7 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 		WrightCellX = 1.0 - WleftCellX;
 	}
 
-	xcount = floor(((particle->coordinates.x - xgrid[0]) / deltaX) + 0.5);
+	xcount = floor((localX / deltaX) + 0.5);
 
 	if(particle->coordinates.x < xgrid[xcount]) {
 		leftNodeXindex = xcount - 1;
@@ -497,7 +499,8 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 	}
 
 	if(ynumberGeneral > 1) {
-		int ycount = floor((particle->coordinates.y - ygrid[0]) / deltaY);
+		double localY = particle->coordinates.y - ygrid[0];
+		int ycount = floor(localY / deltaY);
 		if(particle->coordinates.y < middleYgrid[ycount]) {
 			leftCellYindex = ycount - 1;
 			rightCellYindex = ycount;
@@ -510,7 +513,7 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 			WrightCellY = 1.0 - WleftCellY;
 		}
 
-		ycount = floor(((particle->coordinates.y - ygrid[0]) / deltaY) + 0.5);
+		ycount = floor((localY / deltaY) + 0.5);
 	
 		if(particle->coordinates.y < ygrid[ycount]) {
 			leftNodeYindex = ycount - 1;
@@ -526,7 +529,8 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 	}
 
 	if(znumberGeneral > 1) {
-		int zcount = floor((particle->coordinates.z - zgrid[0]) / deltaZ);
+		double localZ = particle->coordinates.z - zgrid[0];
+		int zcount = floor(localZ / deltaZ);
 		if(particle->coordinates.z < middleZgrid[zcount]) {
 			leftCellZindex = zcount - 1;
 			rightCellZindex = zcount;
@@ -539,7 +543,7 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 			WrightCellZ = 1.0 - WleftCellZ;
 		}
 
-		zcount = floor(((particle->coordinates.z - zgrid[0]) / deltaZ) + 0.5);
+		zcount = floor((localZ / deltaZ) + 0.5);
 
 		if(particle->coordinates.z < zgrid[zcount]) {
 			leftNodeZindex = zcount - 1;
@@ -554,8 +558,12 @@ void Simulation::correlationBunemanEBfieldsWithoutMaps(Particle* particle, doubl
 		}
 	}
 
-	E = Vector3d(0, 0, 0);
-	B = Vector3d(0, 0, 0);
+	E.x = 0;
+	E.y = 0;
+	E.z = 0;
+	B.x = 0;
+	B.y = 0;
+	B.z = 0;
 	switch (Simulation::dimensionType){
 	case THREE_D:
 		E.x += bunemanEx[leftCellXindex][leftNodeYindex][leftNodeZindex]*WleftCellX*WleftNodeY*WleftNodeZ;
