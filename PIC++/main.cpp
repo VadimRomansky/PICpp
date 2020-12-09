@@ -76,6 +76,7 @@ int main(int argc, char** argv) {
 	tempr[0] = rand()%randomParameter;
 	MPI_Bcast(tempr, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	Simulation::initialRandom = tempr[0];
+	Simulation::initialRandom = 100;
 	//Simulation::initialRandom = 0;
 	//srand(Simulation::initialRandom);
 	if(rank == 0) printf("initial random = %d\n", Simulation::initialRandom);

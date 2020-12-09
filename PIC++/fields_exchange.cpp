@@ -2730,24 +2730,20 @@ void Simulation::exchangeBunemanExAlongY(double*** fieldX) {
 		if (ynumberGeneral == 1) {
 			for (int i = 0; i < xnumberAdded; ++i) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-					fieldX[i][1][k] = fieldX[i][0][k];
+					for (int j = 0; j <= ynumberAdded; ++j) {
+						fieldX[i][j][k] = fieldX[i][0][k];
+					}
 				}
 			}
 
 		} else {
 			for (int i = 0; i < xnumberAdded; ++i) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-					if (ynumberGeneral == 1) {
-						for (int j = 0; j < ynumberAdded + 1; ++j) {
-							fieldX[i][j][k] = fieldX[i][1 + additionalBinNumber][k];
-						}
-					} else {
-						for (int j = 0; j <= additionalBinNumber; ++j) {
-							fieldX[i][ynumberAdded - additionalBinNumber + j][k] = fieldX[i][2 + additionalBinNumber + j][k];
-							fieldX[i][j][k] = fieldX[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
-						}
-						fieldX[i][ynumberAdded - additionalBinNumber - 1][k] = fieldX[i][1 + additionalBinNumber][k];
+					for (int j = 0; j <= additionalBinNumber; ++j) {
+						fieldX[i][ynumberAdded - additionalBinNumber + j][k] = fieldX[i][2 + additionalBinNumber + j][k];
+						fieldX[i][j][k] = fieldX[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
 					}
+					fieldX[i][ynumberAdded - additionalBinNumber - 1][k] = fieldX[i][1 + additionalBinNumber][k];
 				}
 			}
 		}
@@ -2825,23 +2821,19 @@ void Simulation::exchangeBunemanExAlongZ(double*** fieldX) {
 		if (znumberGeneral == 1) {
 			for (int i = 0; i < xnumberAdded; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
-					fieldX[i][j][1] = fieldX[i][j][0];
+					for (int k = 0; k <= znumberAdded; ++k) {
+						fieldX[i][j][k] = fieldX[i][j][0];
+					}
 				}
 			}
 		} else {
 			for (int i = 0; i < xnumberAdded; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
-					if (znumberGeneral == 1) {
-						for (int k = 0; k < znumberAdded + 1; ++k) {
-							fieldX[i][j][k] = fieldX[i][j][1 + additionalBinNumber];
-						}
-					} else {
-						for (int k = 0; k <= additionalBinNumber; ++k) {
-							fieldX[i][j][znumberAdded - additionalBinNumber + k] = fieldX[i][j][2 + additionalBinNumber + k];
-							fieldX[i][j][k] = fieldX[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
-						}
-						fieldX[i][j][znumberAdded - additionalBinNumber - 1] = fieldX[i][j][1 + additionalBinNumber];
+					for (int k = 0; k <= additionalBinNumber; ++k) {
+						fieldX[i][j][znumberAdded - additionalBinNumber + k] = fieldX[i][j][2 + additionalBinNumber + k];
+						fieldX[i][j][k] = fieldX[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
 					}
+					fieldX[i][j][znumberAdded - additionalBinNumber - 1] = fieldX[i][j][1 + additionalBinNumber];
 				}
 			}
 		}
@@ -3045,18 +3037,19 @@ void Simulation::exchangeBunemanEyAlongY(double*** fieldY) {
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
 		if (ynumberGeneral == 1) {
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int k = 0; k < znumberAdded + 1; ++k) {
+					for (int j = 0; j < ynumberAdded; ++j) {
+						fieldY[i][j][k] = fieldY[i][0][k];
+					}
+				}
+			}
 		} else {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
 				for (int k = 0; k < znumberAdded + 1; ++k) {
-					if (ynumberGeneral == 1) {
-						for (int j = 0; j < ynumberAdded; ++j) {
-							fieldY[i][j][k] = fieldY[i][1 + additionalBinNumber][k];
-						}
-					} else {
-						for (int j = 0; j <= additionalBinNumber; ++j) {
-							fieldY[i][ynumberAdded - 1 - additionalBinNumber + j][k] = fieldY[i][1 + additionalBinNumber + j][k];
-							fieldY[i][j][k] = fieldY[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
-						}
+					for (int j = 0; j <= additionalBinNumber; ++j) {
+						fieldY[i][ynumberAdded - 1 - additionalBinNumber + j][k] = fieldY[i][1 + additionalBinNumber + j][k];
+						fieldY[i][j][k] = fieldY[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
 					}
 				}
 			}
@@ -3135,23 +3128,19 @@ void Simulation::exchangeBunemanEyAlongZ(double*** fieldY) {
 		if (znumberGeneral == 1) {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
-					fieldY[i][j][1] = fieldY[i][j][0];
+					for (int k = 0; k <= znumberAdded; ++k) {
+						fieldY[i][j][k] = fieldY[i][j][0];
+					}
 				}
 			}
 		} else {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
 				for (int j = 0; j < ynumberAdded; ++j) {
-					if (znumberGeneral == 1) {
-						for (int k = 0; k < znumberAdded + 1; ++k) {
-							fieldY[i][j][k] = fieldY[i][j][1 + additionalBinNumber];
-						}
-					} else {
-						for (int k = 0; k <= additionalBinNumber; ++k) {
-							fieldY[i][j][znumberAdded - additionalBinNumber + k] = fieldY[i][j][2 + additionalBinNumber + k];
-							fieldY[i][j][k] = fieldY[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
-						}
-						fieldY[i][j][znumberAdded - additionalBinNumber - 1] = fieldY[i][j][1 + additionalBinNumber];
+					for (int k = 0; k <= additionalBinNumber; ++k) {
+						fieldY[i][j][znumberAdded - additionalBinNumber + k] = fieldY[i][j][2 + additionalBinNumber + k];
+						fieldY[i][j][k] = fieldY[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
 					}
+					fieldY[i][j][znumberAdded - additionalBinNumber - 1] = fieldY[i][j][1 + additionalBinNumber];
 				}
 			}
 		}
@@ -3363,23 +3352,19 @@ void Simulation::exchangeBunemanEzAlongY(double*** fieldZ) {
 		if (ynumberGeneral == 1) {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
 				for (int k = 0; k < znumberAdded; ++k) {
-					fieldZ[i][1][k] = fieldZ[i][0][k];
+					for (int j = 0; j <= ynumberAdded; ++j) {
+						fieldZ[i][j][k] = fieldZ[i][0][k];
+					}
 				}
 			}
 		} else {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
 				for (int k = 0; k < znumberAdded; ++k) {
-					if (ynumberGeneral == 1) {
-						for (int j = 0; j < ynumberAdded + 1; ++j) {
-							fieldZ[i][j][k] = fieldZ[i][1 + additionalBinNumber][k];
-						}
-					} else {
-						for (int j = 0; j <= additionalBinNumber; ++j) {
-							fieldZ[i][ynumberAdded - additionalBinNumber + j][k] = fieldZ[i][2 + additionalBinNumber + j][k];
-							fieldZ[i][j][k] = fieldZ[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
-						}
-						fieldZ[i][ynumberAdded - additionalBinNumber - 1][k] = fieldZ[i][1 + additionalBinNumber][k];
+					for (int j = 0; j <= additionalBinNumber; ++j) {
+						fieldZ[i][ynumberAdded - additionalBinNumber + j][k] = fieldZ[i][2 + additionalBinNumber + j][k];
+						fieldZ[i][j][k] = fieldZ[i][ynumberAdded - 2 - 2 * additionalBinNumber + j][k];
 					}
+					fieldZ[i][ynumberAdded - additionalBinNumber - 1][k] = fieldZ[i][1 + additionalBinNumber][k];
 				}
 			}
 		}
@@ -3447,19 +3432,19 @@ void Simulation::exchangeBunemanEzAlongZ(double*** fieldZ) {
 		if (verbosity > 2) printf("finish exchanging E field rank = %d\n", rank);
 	} else {
 		if (znumberGeneral == 1) {
-
+			for (int i = 0; i < xnumberAdded + 1; ++i) {
+				for (int j = 0; j < ynumberAdded + 1; ++j) {
+					for (int k = 0; k < znumberAdded; ++k) {
+						fieldZ[i][j][k] = fieldZ[i][j][0];
+					}
+				}
+			}
 		} else {
 			for (int i = 0; i < xnumberAdded + 1; ++i) {
 				for (int j = 0; j < ynumberAdded + 1; ++j) {
-					if (znumberGeneral == 1) {
-						for (int k = 0; k < znumberAdded; ++k) {
-							fieldZ[i][j][k] = fieldZ[i][j][1 + additionalBinNumber];
-						}
-					} else {
-						for (int k = 0; k <= additionalBinNumber; ++k) {
-							fieldZ[i][j][znumberAdded - 1 - additionalBinNumber + k] = fieldZ[i][j][1 + additionalBinNumber + k];
-							fieldZ[i][j][k] = fieldZ[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
-						}
+					for (int k = 0; k <= additionalBinNumber; ++k) {
+						fieldZ[i][j][znumberAdded - 1 - additionalBinNumber + k] = fieldZ[i][j][1 + additionalBinNumber + k];
+						fieldZ[i][j][k] = fieldZ[i][j][znumberAdded - 2 - 2 * additionalBinNumber + k];
 					}
 				}
 			}

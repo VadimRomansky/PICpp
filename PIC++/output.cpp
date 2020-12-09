@@ -3435,7 +3435,7 @@ void outputGeneral(const char* outFileName, Simulation* simulation) {
 			simulation->meanSquaredEfield[1] / fieldFactor, //21
 	        simulation->meanSquaredEfield[2] / fieldFactor); //22
 	fprintf(outFile,
-	        "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d %15.10g %d %15.10g\n",
+	        "%15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %15.10g %d %15.10g %d %15.10g  %15.10g  %15.10g  %15.10g\n",
 	        simulation->electricFieldEnergyX, //23
 			simulation->electricFieldEnergyY, //24
 			simulation->electricFieldEnergyZ, //25

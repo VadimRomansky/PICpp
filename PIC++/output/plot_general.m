@@ -124,23 +124,23 @@ grid ;
 
 figure(10);
 plot (general(1:N2,3)*omega_plasma,general(1:N2, 20), 'red');
-title ('mean E');
+title ('mean squared E');
 xlabel ('{{t \omega_p}/{2\pi}}');
-ylabel ('mean Ex');
+ylabel ('mean squared Ex');
 grid ;
 
 figure(11);
 plot (general(1:N2,3)*omega_plasma,general(1:N2, 21), 'red');
-title ('mean E');
+title ('mean squared E');
 xlabel ('{{t \omega_p}/{2\pi}}');
-ylabel ('mean Ey');
+ylabel ('mean squared Ey');
 grid ;
 
 figure(12);
 plot (general(1:N2,3)*omega_plasma,general(1:N2, 22), 'red');
-title ('mean E');
+title ('mean squared E');
 xlabel ('{{t \omega_p}/{2\pi}}');
-ylabel ('mean Ez');
+ylabel ('mean squared Ez');
 grid ;
 
 figure(13);
@@ -167,3 +167,24 @@ title ('const mean level point');
 xlabel ('{{t \omega_p}/{2\pi}}');
 ylabel ('x cm');
 grid ;
+
+%figure(16);
+%plot (general(1:N2,3)*omega_plasma,general(1:N2, 39), 'red');
+%title ('mean squared B');
+%xlabel ('{{t \omega_p}/{2\pi}}');
+%ylabel ('mean squared Bx');
+%grid ;
+
+%figure(17);
+%plot (general(1:N2,3)*omega_plasma,general(1:N2, 40), 'red');
+%title ('mean squared B');
+%xlabel ('{{t \omega_p}/{2\pi}}');
+%ylabel ('mean squared By');
+%grid ;
+
+%figure(18);
+%plot (general(1:N2,3)*omega_plasma,general(1:N2, 41), 'red');
+%title ('mean squared B');
+%xlabel ('{{t \omega_p}/{2\pi}}');
+%ylabel ('mean squared Bz');
+%grid ;

@@ -2266,6 +2266,8 @@ void Simulation::initializeSimpleElectroMagneticWave() {
 				}
 			}
 		}
+		exchangeBunemanBfield(bunemanBx, bunemanBy, bunemanBz);
+		exchangeBunemanEfield(bunemanEx, bunemanEy, bunemanEz);
 	} else {
 		for (int i = 0; i < xnumberAdded + 1; ++i) {
 			for (int j = 0; j < ynumberAdded + 1; ++j) {
