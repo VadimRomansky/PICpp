@@ -318,8 +318,8 @@ void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu,
 void evaluateAllEmissivityAndAbsorption(double* nu, double*** Inu, double*** Anu, int Nnu, double** Ee, double** Fe, int Np, int Nd, double** Bn, double** sintheta, int** thetaIndex, double** concentrations, double concentration, double Bfactor, double fractionSize){
 	int i = 0;
 	#pragma omp parallel for shared(nu, Inu, Anu, Nnu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentration, Bfactor, fractionSize) private(i)
-	for(int j = 0; j < Ntheta; ++j){
-		for(int k = 0; k < Nphi; ++k){
+	for(int j = 0; j < Nphi; ++j){
+		for(int k = 0; k < Nz; ++k){
 			evaluateLocalEmissivityAndAbsorption(nu, Inu[j][k], Anu[j][k], Nnu, Ee[thetaIndex[j][k]], Fe[thetaIndex[j][k]], Np, sintheta[j][k], Bn[j][k]*Bfactor, concentration*concentrations[j][k], fractionSize);
 		}
 	}
@@ -328,8 +328,8 @@ void evaluateAllEmissivityAndAbsorption(double* nu, double*** Inu, double*** Anu
 void evaluateAllEmissivityAndAbsorption1(double* nu, double*** Inu, double*** Anu, int Nnu, double** Ee, double** Fe, int Np, int Nd, double** Bn, double** sintheta, int** thetaIndex, double** concentrations, double concentration, double Bfactor, double fractionSize){
 	int i = 0;
 	#pragma omp parallel for shared(nu, Inu, Anu, Nnu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentration, Bfactor, fractionSize) private(i)
-	for(int j = 0; j < Ntheta; ++j){
-		for(int k = 0; k < Nphi; ++k){
+	for(int j = 0; j < Nphi; ++j){
+		for(int k = 0; k < Nz; ++k){
 			evaluateLocalEmissivityAndAbsorption1(nu, Inu[j][k], Anu[j][k], Nnu, Ee[thetaIndex[j][k]], Fe[thetaIndex[j][k]], Np, sintheta[j][k], Bn[j][k]*Bfactor, concentration*concentrations[j][k], fractionSize);
 		}
 	}
@@ -488,7 +488,7 @@ void evaluateSpectrum(double* nu, double* I, double**** Inu, double**** Anu, dou
 }
 
 //spherical
-/*void evaluateSpectrum(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength){
+void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength){
 	int tempNr = 100;
 	double tempRmax = rmax*rfactor;
 	double tempRmin = (1.0 - fractionLength)*tempRmax;
@@ -571,10 +571,10 @@ void evaluateSpectrum(double* nu, double* I, double**** Inu, double**** Anu, dou
 	for(int l = 0; l < Nnu; ++l){
 		I[l] = I[l]*1E26/(distance*distance);
 	}
-}*/
+}
 
 //flat
-void evaluateSpectrum(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength){
+void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength){
 	double tempRmax = rmax*rfactor;
 	double tempRmin = (1.0 - fractionLength)*tempRmax;
 	double tempdr = tempRmax/Nrho;

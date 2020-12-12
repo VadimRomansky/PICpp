@@ -17,7 +17,8 @@ void evaluateSpectrumFlatSimple(double* nu, double* totalInu, double* Inu, doubl
 void evaluateVolumeAndLength(double*** area, double*** length, double rmax, double fractionSize);
 void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double** Ee, double** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor);
 void evaluateSpectrum(double* nu, double* I, double**** Inu, double**** Anu, double*** area, double*** length, int Nnu, double rfactor);
-void evaluateSpectrum(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength);
+void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength);
+void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength);
 
 //for simple flat disk
 void evaluateSpectrumAtNuSimple(double nu, double& totalInu, double Inu, double Anu, double rmax, double fraction);

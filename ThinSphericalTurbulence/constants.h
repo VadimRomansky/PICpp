@@ -31,8 +31,8 @@ const double criticalNuCoef = 3 * electron_charge / (4 * pi * massElectron * mas
 const std::string outputfileName = "radiation.dat";
 //const std::string fileNameP = "../../tristan-mp-pitp/Pe";
 //const std::string fileNameF = "../../tristan-mp-pitp/Fe";
-const std::string fileNameP = "Pe";
-const std::string fileNameF = "Fe";
+const std::string fileNameP = "Ee";
+const std::string fileNameF = "Fs";
 const std::string logFileName = "log.dat";
 const std::string BFileName = "B.dat";
 
@@ -154,5 +154,11 @@ const double maxSigma = 10.0;
 const double minEta = 0;
 const double maxEta = 0.8*pi/2;
 const double maxV = 0.95*speed_of_light;
+
+enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
+const Geometry geometry = Geometry::FLAT;
+
+enum Input {TRISTAN, SMILEI};
+const Input input = Input::SMILEI;
 
 #endif

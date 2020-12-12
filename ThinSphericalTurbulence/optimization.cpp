@@ -951,8 +951,14 @@ double evaluateOptimizationFunction5(double Bfactor, double n, double fractionSi
 		r = rmax + v*times[i];
 		double rfactor = r/rmax;
 		evaluateAllEmissivityAndAbsorption(nu[i], Inu[i], Anu[i], Nnu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, n, Bfactor, rfactor);
+		//
 		//evaluateSpectrum(nu[i], totalInu, Inu[i], Anu[i], area, length, Nnu, rfactor);
-		evaluateSpectrum(nu[i], totalInu, Inu[i], Anu[i], rmax, Nnu, rfactor, fractionSize);
+		//
+		if(geometry == SPHERICAL){
+			evaluateSpectrumSpherical(nu[i], totalInu, Inu[i], Anu[i], rmax, Nnu, rfactor, fractionSize);
+		} else {
+			evaluateSpectrumFlat(nu[i], totalInu, Inu[i], Anu[i], rmax, Nnu, rfactor, fractionSize);
+		}
 		for(int j = 0; j < Nnu; ++j){
 			double err1 = sqr(totalInu[j] - F[i][j]);
 			err = err + err1;
