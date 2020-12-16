@@ -161,4 +161,7 @@ const Geometry geometry = Geometry::FLAT;
 enum Input {TRISTAN, SMILEI};
 const Input input = Input::SMILEI;
 
+enum Scale {LINEAR, LOG};
+const Scale scale = Scale::LOG;
+
 #endif

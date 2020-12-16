@@ -960,7 +960,12 @@ double evaluateOptimizationFunction5(double Bfactor, double n, double fractionSi
 			evaluateSpectrumFlat(nu[i], totalInu, Inu[i], Anu[i], rmax, Nnu, rfactor, fractionSize);
 		}
 		for(int j = 0; j < Nnu; ++j){
-			double err1 = sqr(totalInu[j] - F[i][j]);
+			double err1 = 0;
+			if(scale == LINEAR){
+				err1 = sqr(totalInu[j] - F[i][j]);
+			} else {
+				err1 = sqr(log(totalInu[j]) - log(F[i][j]));
+			}
 			err = err + err1;
 		}
 	}
