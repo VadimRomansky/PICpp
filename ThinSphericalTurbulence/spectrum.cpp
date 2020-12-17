@@ -555,7 +555,10 @@ void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double****
 					if(length[k] > 0){
 						double Q = Inu[l][rhoindex][j][k]*s;
 						double tau = Anu[l][rhoindex][j][k]*length[k];
-						double S = Q/Anu[l][rhoindex][j][k];
+						double S = 0;
+						if(Q > 0){
+							S = Q/Anu[l][rhoindex][j][k];
+						}
 
 						localI = S + (I0 - S)*exp(-tau);
 					}
@@ -614,9 +617,15 @@ void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu,
 					if(length[k] > 0){
 						double Q = Inu[l][i][j][k]*s;
 						double tau = Anu[l][i][j][k]*length[k];
-						double S = Q/Anu[l][i][j][k];
+						double S = 0;
+						if(Q > 0){
+							S = Q/Anu[l][i][j][k];
+						}
 
 						localI = S + (I0 - S)*exp(-tau);
+						if(localI != localI){
+							printf("localI = NaN\n");
+						}
 					}
 				}
 				I[l] += localI;

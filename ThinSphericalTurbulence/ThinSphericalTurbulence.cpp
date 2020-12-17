@@ -313,9 +313,6 @@ int main()
 
 	double rcorot = rmax/5;
 
-	bool parker = false;
-	bool turbulence = false;
-
 	FILE* logFile = fopen(logFileName.c_str(), "w");
 
 	printf("initialization\n");
@@ -788,12 +785,14 @@ int main()
 	fprintf(logFile, "error = %lf\n", error);
 	const int Nbp = 10;
 	const int Nnp = 12;
-	const int Nfp = 5;
+	const int Nfp = 7;
 	const int Nvp = 5;
+	const int Nrp = 5;
 	double Bpoints[Nbp] = {0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0};
 	double npoints[Nnp] = {2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
-	double fpoints[Nfp] = {0.3, 0.4, 0.5, 0.6, 0.7};
+	double fpoints[Nfp] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7};
 	double vpoints[Nvp] = { 0.5*speed_of_light, 0.6*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
+	double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
 	for(int i = 0; i < Nbp; ++i){
 		double tempBfactor = Bpoints[i];
 		for(int j = 0; j < Nnp; ++j){
@@ -802,19 +801,21 @@ int main()
 				double tempFractionSize = fpoints[k];
 				for(int l = 0; l < Nvp; ++l){
 					double tempV = vpoints[l];
-					double tempRmax = 3E16;
-					double tempError = evaluateOptimizationFunction5(tempBfactor, tempConcentration, tempFractionSize, tempRmax, tempV, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
-					//printf("tempError = %lf\n", tempError);
-					//fprintf(logFile, "tempError = %lf\n", tempError);
-					if(tempError < error){
-						error = tempError;
-						Bfactor = tempBfactor;
-						concentration = tempConcentration;
-						fractionSize = tempFractionSize;
-						rmax = tempRmax;
-						v = tempV;
-						fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
-						printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
+					for(int m = 0; m < Nrp; ++m){
+						double tempRmax = rpoints[m];
+						double tempError = evaluateOptimizationFunction5(tempBfactor, tempConcentration, tempFractionSize, tempRmax, tempV, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+						//printf("tempError = %lf\n", tempError);
+						//fprintf(logFile, "tempError = %lf\n", tempError);
+						if(tempError < error){
+							error = tempError;
+							Bfactor = tempBfactor;
+							concentration = tempConcentration;
+							fractionSize = tempFractionSize;
+							rmax = tempRmax;
+							v = tempV;
+							fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
+							printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
+						}
 					}
 				}
 			}
@@ -832,66 +833,10 @@ int main()
 	//optimizeParameters5sigma(sigma, 1.0, N0, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
 	error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 
-	/*const int NstartB = 4;
-	const int NstartN = 4;
-	double startB[NstartB] = {0.1, 0.5, 1.0, 5.0};
-	double startN[NstartN] = {500, 1000, 2000, 5000};
-		for(int i = 0; i < NstartB; ++i){
-			for(int j = 0; j < NstartN; ++j){
-			double tempBfactor = startB[i];
-			double tempconcentration = startN[j];
-			double tempfractionSize = 0.5;
-			double temprmax = 3.4E16;
-			double tempv = 0.75*speed_of_light;
-			optimizeParameters5(1.0, 2000, 3.4E16,V0, tempBfactor, tempconcentration, tempfractionSize, temprmax, tempv, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
-			double tempError = evaluateOptimizationFunction5(tempBfactor, tempconcentration, tempfractionSize, temprmax, tempv, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
-			printf("temperror = %g\n", tempError);
-			fprintf(logFile, "tempError = %g\n", tempError);
-			if(tempError < error){
-				Bfactor = tempBfactor;
-				concentration = tempconcentration;
-				fractionSize = tempfractionSize;
-				rmax = temprmax;
-				v = tempv;
-				error = tempError;
-			}
-		}
-	}*/
 	///////////////////
-	//concentration = 1.0;
-	//Bfactor = 1.0;
-	//fractionSize = 0.1;
-	/*const int Nbp = 10;
-	const int Nnp = 12;
-	double Bpoints[Nbp] = {0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0};
-	double npoints[Nnp] = {2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
-	FILE* errorFile = fopen("error.dat","w");
-	FILE* Bp = fopen("Bpoints.dat","w");
-	FILE* np = fopen("Npoints.dat","w");
-	for(int i = 0; i < Nbp; ++i){
-		fprintf(Bp, "%g\n", Bpoints[i]);
-	}
-	for(int i = 0; i < Nnp; ++i){
-		fprintf(np, "%g\n", npoints[i]);
-	}
-	fclose(Bp);
-	fclose(np);
-	for(int i = 0; i < Nbp; ++i){
-		Bfactor = Bpoints[i];
-		for(int j = 0; j < Nnp; ++j){
-			concentration = npoints[j];
-			fractionSize = 0.1;
-			rmax = 3E16;
-			v = 0.75*speed_of_light;
-			optimizeParameters5(1.0, 2000, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
-			double error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
-			fprintf(errorFile, "%g ", error);
-		}
-		fprintf(errorFile, "\n");
-	}
-	fclose(errorFile);*/
 
-	error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+
+	//error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 
 	printf("integrating fields\n");
 	fprintf(logFile, "integrating Fields\n");
@@ -946,6 +891,28 @@ int main()
 
 		//evaluateSpectrumFlatSimple(nu, tempTotalInu[l], Inuflat, Anuflat, Nnu, r, fractionSize);
 	}
+
+	FILE* errorFile = fopen("error.dat","w");
+	FILE* Bp = fopen("Bpoints.dat","w");
+	FILE* np = fopen("Npoints.dat","w");
+	for(int i = 0; i < Nbp; ++i){
+		fprintf(Bp, "%g\n", Bpoints[i]);
+	}
+	for(int i = 0; i < Nnp; ++i){
+		fprintf(np, "%g\n", npoints[i]);
+	}
+	fclose(Bp);
+	fclose(np);
+	for(int i = 0; i < Nbp; ++i){
+		Bfactor = Bpoints[i];
+		for(int j = 0; j < Nnp; ++j){
+			concentration = npoints[j];
+			double tempError = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+			fprintf(errorFile, "%g ", tempError);
+		}
+		fprintf(errorFile, "\n");
+	}
+	fclose(errorFile);
 
 	//////////
 	printf("outputing\n");
