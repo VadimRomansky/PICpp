@@ -284,7 +284,6 @@ int main()
 	double* Rho;
 	double* Phi;
 
-	int Nmonth = 4;
 	int Nnum = 4;
 
 	double***** Inumonth;
@@ -607,7 +606,8 @@ int main()
 				fscanf(inputPe, "%lf", &u);
 				fscanf(inputFe, "%lf", &Fe[j][i]);
 
-				double gamma = u + 1;
+				//todo massSpectrumFactor?
+				double gamma = u*massSpectrumFactor + 1;
 				//if( u < 3000){
 				Ee[j][i] = gamma*massElectron*speed_of_light2;
 					//maxEnergy = Ee[i];
@@ -732,6 +732,24 @@ int main()
 	Numonth[3][3] = augx[4]*1E9;
 	Fmonth[3][3] = augy[4];
 
+	Numonth[4][0] = octx[0]*1E9;
+	Fmonth[4][0] = octy[0];
+	Numonth[4][1] = octx[0]*1E9;
+	Fmonth[4][1] = octy[0];
+	Numonth[4][2] = octx[1]*1E9;
+	Fmonth[4][2] = octy[1];
+	Numonth[4][3] = octx[2]*1E9;
+	Fmonth[4][3] = octy[2];
+
+	Numonth[5][0] = decx[0]*1E9;
+	Fmonth[5][0] = decy[0];
+	Numonth[5][1] = decx[0]*1E9;
+	Fmonth[5][1] = decy[0];
+	Numonth[5][2] = decx[1]*1E9;
+	Fmonth[5][2] = decy[1];
+	Numonth[5][3] = decx[2]*1E9;
+	Fmonth[5][3] = decy[2];
+
 	//todo chose B
 	/*double meanB = 0;
 	int ncells = 0;
@@ -773,13 +791,13 @@ int main()
 	printf("optimizing parameters\n");
 	fprintf(logFile, "optimizing parameters\n");
 	fflush(logFile);
-	Bfactor = 1.0;
-	concentration = 2900;
-	fractionSize = 0.5;
-	rmax = 3.4E16;
-	v = 0.75*speed_of_light;
+	Bfactor = 0.82;
+	concentration = 11;
+	fractionSize = 0.37;
+	rmax = 3.7E16;
+	v = 0.68*speed_of_light;
 	sigma = 0.02;
-	concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
+	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
 	double error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 	printf("error = %lf\n", error);
 	fprintf(logFile, "error = %lf\n", error);
@@ -828,7 +846,7 @@ int main()
 	if(geometry == FLAT_SIMPLE){
 		optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, Ee, dFe, Np, Ndist, 1.0, 8, logFile);
 	} else {
-		optimizeParameters5(1.0, 1000, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
+		optimizeParameters5(1.0, 2000, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
 	}
 	//optimizeParameters5sigma(sigma, 1.0, N0, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
 	error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);

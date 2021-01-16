@@ -31,18 +31,18 @@ const double criticalNuCoef = 3 * electron_charge / (4 * pi * massElectron * mas
 const std::string outputfileName = "radiation.dat";
 //const std::string fileNameP = "../../tristan-mp-pitp/Pe";
 //const std::string fileNameF = "../../tristan-mp-pitp/Fe";
-const std::string fileNameP = "Pe";
-const std::string fileNameF = "Fe";
+const std::string fileNameP = "Ee";
+const std::string fileNameF = "Fs";
 const std::string logFileName = "log.dat";
 const std::string BFileName = "B.dat";
 
 const int Niterations = 20;
-const int Npoints = 4;
+const int Nmonth = 6;
 const int Nmontecarlo = 100000;
 
-const double size[Npoints] = {3.4E16, 6.8E16, 1.06E17, 2.4E17};
+const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17, 4.6E17, 14E17};
 
-const double times[Npoints] = {0, 2760000, 5270400, 10700000};
+const double times[Nmonth] = {0, 2760000, 5270400, 10700000, 19000000, 56100000};
 
 const double distance = 40*3*1.0E24;
 
@@ -120,6 +120,12 @@ const double alphaValue[Nalpha] = {dalpha/2, 3*dalpha/2, 5*dalpha/2, 7*dalpha/2,
 const double sinAlphaValue[Nalpha] = {sin(dalpha/2), sin(3*dalpha/2), sin(5*dalpha/2), sin(7*dalpha/2), sin(9*dalpha/2), sin(11*dalpha/2)};
 const double cosAlphaValue[Nalpha] = {cos(dalpha/2), cos(3*dalpha/2), cos(5*dalpha/2), cos(7*dalpha/2), cos(9*dalpha/2), cos(11*dalpha/2)};
 
+const double decx[3]= {0.325, 0.61, 1.28};
+const double decy[3] = {6.1, 1.9, 0.9};
+
+const double octx[3]= {0.325, 0.61, 1.28};
+const double octy[3] = {12.0, 6.3, 4.4};
+
 const double augx[6] = {0.332, 0.617, 1.43, 4.86, 8.46, 84.6};
 const double augy[6] = {3.3, 7.9, 8.68, 2.47, 1.084, 0.1084};
 
@@ -162,7 +168,7 @@ enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
 const Geometry geometry = Geometry::FLAT;
 
 enum Input {TRISTAN, SMILEI};
-const Input input = Input::TRISTAN;
+const Input input = Input::SMILEI;
 
 enum Scale {LINEAR, LOG};
 const Scale scale = Scale::LINEAR;
