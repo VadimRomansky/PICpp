@@ -947,7 +947,7 @@ int main()
 				tempTotalInu[j][i] = 0;
 			}
 		}
-		fprintf(output, "%g %g %g %g %g\n", nu[i]/1E9, tempTotalInu[0][i], tempTotalInu[1][i] , tempTotalInu[2][i], tempTotalInu[3][i]);
+		fprintf(output, "%g %g %g %g %g %g %g\n", nu[i]/1E9, tempTotalInu[0][i], tempTotalInu[1][i] , tempTotalInu[2][i], tempTotalInu[3][i], tempTotalInu[4][i], tempTotalInu[5][i]);
 	}
 
 	fclose(output);
