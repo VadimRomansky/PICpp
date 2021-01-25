@@ -150,13 +150,13 @@ const double apry[4] ={1.3, 12.86, 17.57, 5.2};
 const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
 
-const double minB = 0.01;
-const double maxB = 100.0;
+const double minB = 0.001;
+const double maxB = 20.0;
 const double minN = 0.01;
-const double maxN = 10000;
+const double maxN = 200;
 const double minFraction = 0.001;
 const double maxFraction = 1.0;
-const double maxSigma = 10.0;
+const double maxSigma = 2.0;
 const double minEta = 0;
 const double maxEta = 0.8*pi/2;
 const double maxV = 0.95*speed_of_light;

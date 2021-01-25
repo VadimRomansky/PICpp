@@ -807,7 +807,7 @@ int main()
 	const int Nvp = 5;
 	const int Nrp = 5;
 	double Bpoints[Nbp] = {0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0};
-	double npoints[Nnp] = {2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
+	double npoints[Nnp] = {0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200};
 	double fpoints[Nfp] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7};
 	double vpoints[Nvp] = { 0.5*speed_of_light, 0.6*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
