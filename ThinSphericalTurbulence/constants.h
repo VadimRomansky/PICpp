@@ -151,16 +151,12 @@ const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
 
 const double minB = 0.001;
-<<<<<<< HEAD
 const double maxB = 0.2;
-=======
-const double maxB = 20.0;
->>>>>>> 1f4d127cc5d0e06dc74e160d68f0e1146b7bc696
 const double minN = 0.01;
-const double maxN = 200;
+const double maxN = 10000;
 const double minFraction = 0.001;
 const double maxFraction = 1.0;
-const double maxSigma = 2.0;
+const double maxSigma = 10.0;
 const double minEta = 0;
 const double maxEta = 0.8*pi/2;
 const double maxV = 0.95*speed_of_light;
