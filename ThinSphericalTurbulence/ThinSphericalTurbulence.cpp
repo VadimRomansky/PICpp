@@ -556,9 +556,6 @@ int main()
 	fprintf(logFile, "reading input\n");
 	fflush(logFile);
 
-	double Te = (1.5/sqrt(18.0))*1E11;
-	double thetae = kBoltzman*Te/(massElectron*speed_of_light2);
-
 	Fe = new double*[Ndist];
 	dFe = new double*[Ndist];
 	Ee = new double*[Ndist];
@@ -601,7 +598,7 @@ int main()
 				//Fe[j][i] = exp(-gamma/thetae)*gamma*u;
 				//dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
-		} else {
+		} else if(input == SMILEI){
 			for (int i = 1; i < Np; ++i) {
 				fscanf(inputPe, "%lf", &u);
 				fscanf(inputFe, "%lf", &Fe[j][i]);
@@ -625,6 +622,23 @@ int main()
 
 				//Fe[j][i] = exp(-gamma/thetae)*gamma*u;
 				//dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
+			}
+		} else if(input == MAXWELL){
+			for (int i = 1; i < Np; ++i) {
+				fscanf(inputPe, "%lf", &u);
+				fscanf(inputFe, "%lf", &Fe[j][i]);
+
+				double Te = (1.6*massSpectrumFactor)*1E10;
+				//double Te = 1.6*1E10;
+				double thetae = kBoltzman*Te/(massElectron*speed_of_light2);
+
+				//todo massSpectrumFactor?
+				double gamma = u*massSpectrumFactor + 1;
+				Ee[j][i] = gamma*massElectron*speed_of_light2;
+
+
+				Fe[j][i] = exp(-gamma/thetae)*gamma*u;
+				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
 		}
 
@@ -777,8 +791,8 @@ int main()
 	double sigma = 0.004;
 	double tempConcentration = sqr(B3d[Ntheta/2][0][0])/(sigma*4*pi*massProtonReal*speed_of_light2);
 	double concentration = 1.0*tempConcentration;
-	concentration = 3000;
-	double Bfactor = 0.55;
+	concentration = 11;
+	double Bfactor = 0.1;
 	//double fractionSize = 1.0 - pow((3.0/(4.0*pi))*(1 - 0.5),1.0/3.0);
 	double fractionSize = 0.5;
 	double V0 = speed_of_light;
@@ -791,7 +805,7 @@ int main()
 	printf("optimizing parameters\n");
 	fprintf(logFile, "optimizing parameters\n");
 	fflush(logFile);
-	Bfactor = 0.82;
+	Bfactor = 0.1;
 	concentration = 11;
 	fractionSize = 0.37;
 	rmax = 3.7E16;
@@ -806,7 +820,7 @@ int main()
 	const int Nfp = 7;
 	const int Nvp = 5;
 	const int Nrp = 5;
-	double Bpoints[Nbp] = {0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0};
+	double Bpoints[Nbp] = {0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
 	double npoints[Nnp] = {2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
 	double fpoints[Nfp] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7};
 	double vpoints[Nvp] = { 0.5*speed_of_light, 0.6*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};

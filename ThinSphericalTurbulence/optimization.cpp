@@ -369,6 +369,9 @@ void optimizeParameters5(const double& B0, const double& N0, const double& R0, c
 		//gradN = 0;
 
 		double gradNorm = sqrt(gradB*gradB + gradN*gradN + gradS*gradS + gradR*gradR + gradV*gradV);
+		if(gradNorm <= 0){
+			printf("gradNorm <= 0\n");
+		}
 		if(gradNorm != gradNorm){
 			printf("gradNorm = NaN\n");
 			exit(0);

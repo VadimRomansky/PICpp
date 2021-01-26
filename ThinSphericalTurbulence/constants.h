@@ -150,8 +150,8 @@ const double apry[4] ={1.3, 12.86, 17.57, 5.2};
 const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
 
-const double minB = 0.01;
-const double maxB = 100.0;
+const double minB = 0.001;
+const double maxB = 0.2;
 const double minN = 0.01;
 const double maxN = 10000;
 const double minFraction = 0.001;
@@ -167,7 +167,7 @@ const bool turbulence = false;
 enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
 const Geometry geometry = Geometry::FLAT;
 
-enum Input {TRISTAN, SMILEI};
+enum Input {TRISTAN, SMILEI, MAXWELL};
 const Input input = Input::SMILEI;
 
 enum Scale {LINEAR, LOG};
