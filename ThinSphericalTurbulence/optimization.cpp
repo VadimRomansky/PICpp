@@ -256,12 +256,33 @@ void optimizeParameters5(const double& B0, const double& N0, const double& R0, c
 		///randomization;
 		for(int j = 0; j < 5; ++j){
 			double tempN = N + 0.2*N*(uniformDistribution() - 0.5);
+			if(tempN < minN){
+				tempN = minN;
+			}
+			if(tempN > maxN){
+				tempN = maxN;
+			}
 			//tempN = N;
 			double tempB = Bfactor + 0.2*Bfactor*(uniformDistribution() - 0.5);
+			if(tempB < minB){
+				tempB = minB;
+			}
+			if(tempB > maxB){
+				tempB = maxB;
+			}
 			//tempB = Bfactor;
 			double tempS  = min(max(minFraction,fractionSize + 0.2*fractionSize*(uniformDistribution() - 0.5)), maxFraction);
+			if(tempS < minFraction){
+				tempS = minFraction;
+			}
+			if(tempS > maxFraction){
+				tempS = maxFraction;
+			}
 			double tempR = rmax + 0.2*rmax*(uniformDistribution() - 0.5);
 			double tempV = 0.2*speed_of_light + (maxV - 0.2*speed_of_light)*uniformDistribution();
+			if(tempV > maxV){
+				tempV = maxV;
+			}
 			double tempF = evaluateOptimizationFunction5(tempB, tempN, tempS, tempR, tempV, nu, F, Ee, Fe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 			if(tempF < currentF){
 				currentF = tempF;
