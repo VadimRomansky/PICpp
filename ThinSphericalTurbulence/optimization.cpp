@@ -55,11 +55,23 @@ double evaluateOptimizationFunction5(double Bfactor, double n, double fractionSi
 
 void findMinParameters5(const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v, double gradB, double gradN, double gradS, double gradR, double gradV, double** nu, double** F, double** Ee, double** Fe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, double& currentF){
 	double step = 0.4;
-	if(fabs(gradB) > 0){
+	/*if(fabs(gradB) > 0){
 		step = 0.4*fabs(Bfactor/(B0*gradB));
+	}*/
+	if(gradB > 0){
+		step = 0.4*fabs((Bfactor-minB)/(B0*gradB));
 	}
-	if(fabs(gradN) > 0){
+	if(gradB < 0){
+		step = 0.4*fabs((maxB - Bfactor)/(B0*gradB));
+	}
+	/*if(fabs(gradN) > 0){
 		step = min(step, 0.4*fabs(N/(N0*gradN)));
+	}*/
+	if(gradN > 0){
+		step = min(step, 0.4*fabs((N-minN/(N0*gradN))));
+	}
+	if(gradN < 0){
+		step = min(step, 0.4*fabs((maxN - N/(N0*gradN))));
 	}
 	if(gradS < 0){
 		step = min(step, 0.4*fabs((maxFraction - fractionSize)/gradS));
