@@ -89,7 +89,7 @@ void evaluateOrientationParameters(double** B, double** sintheta, int** thetaInd
 					thetaIndex[j][k] = Nd - 1;
 				}
 				//for debug
-				thetaIndex[j][k] = 3;
+				//thetaIndex[j][k] = 3;
 		}
 	}
 }
@@ -133,7 +133,7 @@ void evaluateOrientationParameters3d(double*** B, double*** sintheta, int*** the
 				thetaIndex[i][j][k] = floor(theta2 / (pi/(2*Nd))); 
 				if(thetaIndex[i][j][k] == Nd){
 					printf("thetaIndex == Nd\n");
-					printf("%lf\n", By[j][k]);
+					printf("%lf\n", By[i][j][k]);
 					thetaIndex[i][j][k] = Nd - 1;
 				}
 				//for debug
@@ -165,7 +165,7 @@ void evaluateOrientationParameters3dflat(double*** B, double*** sintheta, int***
 				thetaIndex[i][j][k] = floor(theta2 / (pi/(2*Nd))); 
 				if(thetaIndex[i][j][k] == Nd){
 					printf("thetaIndex == Nd\n");
-					printf("%lf\n", By[j][k]);
+					printf("%lf\n", By[i][j][k]);
 					thetaIndex[i][j][k] = Nd - 1;
 				}
 				//for debug
@@ -821,11 +821,11 @@ int main()
 	const int Nvp = 5;
 	const int Nrp = 5;
 	double Bpoints[Nbp] = {0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
-	double npoints[Nnp] = {2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
+	double npoints[Nnp] = {0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200};
 	double fpoints[Nfp] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7};
 	double vpoints[Nvp] = { 0.5*speed_of_light, 0.6*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
-	for(int i = 0; i < Nbp; ++i){
+	/*for(int i = 0; i < Nbp; ++i){
 		double tempBfactor = Bpoints[i];
 		for(int j = 0; j < Nnp; ++j){
 			double tempConcentration = npoints[j];
@@ -852,7 +852,12 @@ int main()
 				}
 			}
 		}
-	}
+	}*/
+	Bfactor = 0.2;
+	concentration = 100;
+	fractionSize = 0.6;
+	rmax = 3E16;
+	v = 0.75*speed_of_light;
 
 	//optimizeParameters(Bfactor, concentration, fractionSize, nu1, rmax, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters4(1.0, 2000, 3.4E16, Bfactor, concentration, fractionSize, rmax, nu1, Ee, dFe, Np, Nnu1, Ndist, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);

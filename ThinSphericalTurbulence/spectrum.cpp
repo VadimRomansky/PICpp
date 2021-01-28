@@ -106,6 +106,7 @@ double criticalNu(const double& E, const double& sinhi, const double& H) {
 }
 
 void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, int Nnu, double* Ee, double* Fe, int Np, double sinhi, double B, double concentration, double fractionSize) {
+	//Anu from quantum cross-section from??
 	Inu[0] = 0;
 	Anu[0] = 0;
 	for (int i = 1; i < Nnu; ++i) {
@@ -137,6 +138,11 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 				//todo!!! 4pi!!
 				//here Fe is (Fe[j] / (4*pi)) * (Ee[j] - Ee[j - 1])
 				Inu[i] = Inu[i] + coef * Fe[j] * B * sinhi * evaluateMcDonaldIntegral(nu[i] / nuc);
+				if(Inu[i] < 0){
+					printf("Inu[i] < 0\n");
+					printf("Fe[j] = %g\n", Fe[j]);
+					exit(0);
+				}
 				// integral for sigma
 				double sigmaInt = 0;
 				//smallAngles
@@ -253,6 +259,7 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 }
 
 void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu, int Nnu, double* Ee, double* Fe, int Np, double sinhi, double B, double concentration, double fractionSize) {
+	//Anu from ghiselini simple
 	Inu[0] = 0;
 	Anu[0] = 0;
 	for (int i = 1; i < Nnu; ++i) {
@@ -284,6 +291,12 @@ void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu,
 				//todo!!! 4pi!!
 				//here Fe is (Fe[j] / (4*pi)) * (Ee[j] - Ee[j - 1])
 				Inu[i] = Inu[i] + coef * Fe[j] * B * sinhi * evaluateMcDonaldIntegral(nu[i] / nuc);
+
+				if(Inu[i] < 0){
+					printf("Inu[i] < 0\n");
+					printf("Fe[j] = %g\n", Fe[j]);
+					exit(0);
+				}
 
 				double tempP = gamma*gamma*coef * B * sinhi * evaluateMcDonaldIntegral(nu[i] / nuc);
 				double dg = 0.1*gamma;
@@ -331,6 +344,19 @@ void evaluateAllEmissivityAndAbsorption1(double* nu, double*** Inu, double*** An
 	for(int j = 0; j < Nphi; ++j){
 		for(int k = 0; k < Nz; ++k){
 			evaluateLocalEmissivityAndAbsorption1(nu, Inu[j][k], Anu[j][k], Nnu, Ee[thetaIndex[j][k]], Fe[thetaIndex[j][k]], Np, sintheta[j][k], Bn[j][k]*Bfactor, concentration*concentrations[j][k], fractionSize);
+		}
+	}
+}
+
+void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double** Ee, double** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor){
+#pragma omp parallel for shared(nu, Inu, Anu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, concentration, Bfactor, rfactor)	
+for(int i = 0; i < Nrho; ++i){
+		for(int j = 0; j < Nphi; ++j){
+			for(int k = 0; k < Nz; ++k){
+				for(int l = 0; l < Nnu; ++l){
+					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee[thetaIndex[i][j][k]], Fe[thetaIndex[i][j][k]], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/rfactor, concentration*concentrations[i][j][k]/(rfactor*rfactor));
+				}
+			}
 		}
 	}
 }
@@ -448,19 +474,6 @@ void evaluateVolumeAndLength(double*** area, double*** length, double rmax, doub
 
 				length[i][j][k] = l;
 				area[i][j][k] = s;
-			}
-		}
-	}
-}
-
-void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double** Ee, double** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor){
-#pragma omp parallel for shared(nu, Inu, Anu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, concentration, Bfactor, rfactor)	
-for(int i = 0; i < Nrho; ++i){
-		for(int j = 0; j < Nphi; ++j){
-			for(int k = 0; k < Nz; ++k){
-				for(int l = 0; l < Nnu; ++l){
-					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee[thetaIndex[i][j][k]], Fe[thetaIndex[i][j][k]], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/rfactor, concentration*concentrations[i][j][k]/(rfactor*rfactor));
-				}
 			}
 		}
 	}
@@ -616,7 +629,15 @@ void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu,
 					double I0 = localI;
 					if(length[k] > 0){
 						double Q = Inu[l][i][j][k]*s;
+						if(Inu[l][i][j][k] != Inu[l][i][j][k]){
+							printf("Inu[l][i][j][k] = NaN\n");
+							exit(0);
+						}
 						double tau = Anu[l][i][j][k]*length[k];
+						if(Anu[l][i][j][k] != Anu[l][i][j][k]){
+							printf("Anu[l][i][j][k] = NaN\n");
+							exit(0);
+						}
 						double S = 0;
 						if(Q > 0){
 							S = Q/Anu[l][i][j][k];
@@ -624,7 +645,9 @@ void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu,
 
 						localI = S + (I0 - S)*exp(-tau);
 						if(localI != localI){
+							printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[l][i][j][k], Inu[l][i][j][k], Q, s, length[k],tau, I0);
 							printf("localI = NaN\n");
+							exit(0);
 						}
 					}
 				}
@@ -764,6 +787,7 @@ void evaluateSpectrumAtNuSimple(double nu, double& totalInu, double Inu, double 
 }
 
 void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& Anu, double* Ee, double* Fe, int Np, double sinhi, double B, double concentration){
+	//Anu from ghiselini simple
 	Inu = 0;
 	Anu = 0;
 
@@ -786,6 +810,11 @@ void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& A
 			double sigmaCoef = concentration*Fe[j]/(B*gamma4);
 
 			Inu = Inu + coef * Fe[j] * B * sinhi * evaluateMcDonaldIntegral(nu / nuc);
+			if(Inu < 0){
+				printf("Inu < 0\n");
+				printf("Fe[j] = %g\n", Fe[j]);
+				exit(0);
+			}
 
 			double tempP = gamma*gamma*coef * B * sinhi * evaluateMcDonaldIntegral(nu / nuc);
 			double dg = 0.1*gamma;
@@ -797,6 +826,11 @@ void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& A
 				
 
 			Anu = Anu + (1.0/(2*massElectron*nu*nu))*Fe[j]*Pder/(gamma*gamma);
+			if(Anu < 0){
+				printf("Anu < 0\n");
+				printf("Fe[j] = %g\n", Fe[j]);
+				exit(0);
+			}
 			oldA = oldA + (16*pi*pi*electron_charge/(3.0*sqrt(3.0)))*Fe[j]*evaluateMcDonaldFunction5_3(nu/nuc)/(gamma*gamma*gamma*gamma*gamma*B*sinhi);
 			if(Inu != Inu){
 				printf("Inu NaN\n");

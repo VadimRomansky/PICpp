@@ -150,7 +150,7 @@ const double apry[4] ={1.3, 12.86, 17.57, 5.2};
 const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
 
-const double minB = 0.001;
+const double minB = 0.0001;
 const double maxB = 0.2;
 const double minN = 0.01;
 const double maxN = 200;
@@ -168,7 +168,7 @@ enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
 const Geometry geometry = Geometry::FLAT;
 
 enum Input {TRISTAN, SMILEI, MAXWELL};
-const Input input = Input::SMILEI;
+const Input input = Input::MAXWELL;
 
 enum Scale {LINEAR, LOG};
 const Scale scale = Scale::LINEAR;
