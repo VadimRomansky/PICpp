@@ -159,7 +159,7 @@ const double maxFraction = 1.0;
 const double maxSigma = 10.0;
 const double minEta = 0;
 const double maxEta = 0.8*pi/2;
-const double maxV = 0.95*speed_of_light;
+const double maxV = 0.9*speed_of_light;
 
 const bool parker = false;
 const bool turbulence = false;
@@ -167,8 +167,8 @@ const bool turbulence = false;
 enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
 const Geometry geometry = Geometry::FLAT;
 
-enum Input {TRISTAN, SMILEI, MAXWELL};
-const Input input = Input::MAXWELL;
+enum Input {TRISTAN, SMILEI, MAXWELL, POWERLAW};
+const Input input = Input::SMILEI;
 
 enum Scale {LINEAR, LOG};
 const Scale scale = Scale::LINEAR;

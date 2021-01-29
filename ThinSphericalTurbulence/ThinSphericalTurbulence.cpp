@@ -640,6 +640,23 @@ int main()
 				Fe[j][i] = exp(-gamma/thetae)*gamma*u;
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
+		} else if(input == POWERLAW) {
+			for (int i = 1; i < Np; ++i) {
+				fscanf(inputPe, "%lf", &u);
+				fscanf(inputFe, "%lf", &Fe[j][i]);
+
+				double gamma = u*massSpectrumFactor + 1;
+				Ee[j][i] = gamma*massElectron*speed_of_light2;
+
+				double minGamma = 2;
+				double power = 3;
+
+				if(gamma >= minGamma){
+					Fe[j][i] = 1.0/pow(Ee[j][i],power);
+				} else {
+					Fe[j][i] = 0;
+				}
+			}
 		}
 
 
@@ -825,7 +842,7 @@ int main()
 	double fpoints[Nfp] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7};
 	double vpoints[Nvp] = { 0.5*speed_of_light, 0.6*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
-	/*for(int i = 0; i < Nbp; ++i){
+	for(int i = 0; i < Nbp; ++i){
 		double tempBfactor = Bpoints[i];
 		for(int j = 0; j < Nnp; ++j){
 			double tempConcentration = npoints[j];
@@ -852,12 +869,12 @@ int main()
 				}
 			}
 		}
-	}*/
-	Bfactor = 0.2;
+	}
+	/*Bfactor = 0.2;
 	concentration = 100;
 	fractionSize = 0.6;
 	rmax = 3E16;
-	v = 0.75*speed_of_light;
+	v = 0.75*speed_of_light;*/
 
 	//optimizeParameters(Bfactor, concentration, fractionSize, nu1, rmax, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters4(1.0, 2000, 3.4E16, Bfactor, concentration, fractionSize, rmax, nu1, Ee, dFe, Np, Nnu1, Ndist, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);

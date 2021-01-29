@@ -105,7 +105,7 @@ double criticalNu(const double& E, const double& sinhi, const double& H) {
 	return criticalNuCoef * H * sinhi * E * E;
 }
 
-void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, int Nnu, double* Ee, double* Fe, int Np, double sinhi, double B, double concentration, double fractionSize) {
+void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, int Nnu, double* Ee, double* dFe, int Np, double sinhi, double B, double concentration, double fractionSize) {
 	//Anu from quantum cross-section from??
 	Inu[0] = 0;
 	Anu[0] = 0;
@@ -129,18 +129,18 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 		double oldA = 0;
 		for (int j = 1; j < Np; ++j) {
 			//if(Ee[j] < 100*massElectron*speed_of_light2){
-			if(Fe[j] > 0){
+			if(dFe[j] > 0){
 				double nuc = criticalNu(Ee[j], sinhi, B);
 				double gamma = Ee[j] / (massElectron * speed_of_light2);
 				double gamma4 = gamma*gamma*gamma*gamma;
-				double sigmaCoef = concentration*Fe[j]/(B*gamma4);
+				double sigmaCoef = concentration*dFe[j]/(B*gamma4);
 				//double x = nu[i] / nuc;
 				//todo!!! 4pi!!
-				//here Fe is (Fe[j] / (4*pi)) * (Ee[j] - Ee[j - 1])
-				Inu[i] = Inu[i] + coef * Fe[j] * B * sinhi * evaluateMcDonaldIntegral(nu[i] / nuc);
+				//here dFe is (dFe[j] / (4*pi)) * (Ee[j] - Ee[j - 1])
+				Inu[i] = Inu[i] + coef * dFe[j] * B * sinhi * evaluateMcDonaldIntegral(nu[i] / nuc);
 				if(Inu[i] < 0){
 					printf("Inu[i] < 0\n");
-					printf("Fe[j] = %g\n", Fe[j]);
+					printf("dFe[j] = %g\n", dFe[j]);
 					exit(0);
 				}
 				// integral for sigma
@@ -238,7 +238,7 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 				}
 
 				Anu[i] = Anu[i] + sigmaInt;
-				oldA = oldA + (16*pi*pi*electron_charge/(3.0*sqrt(3.0)))*Fe[j]*evaluateMcDonaldFunction5_3(nu[i]/nuc)/(gamma*gamma*gamma*gamma*gamma*B*sinhi);
+				oldA = oldA + (16*pi*pi*electron_charge/(3.0*sqrt(3.0)))*dFe[j]*evaluateMcDonaldFunction5_3(nu[i]/nuc)/(gamma*gamma*gamma*gamma*gamma*B*sinhi);
 				if(Inu[i] != Inu[i]){
 					printf("Inu NaN\n");
 					exit(0);
@@ -258,7 +258,7 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 	//}
 }
 
-void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu, int Nnu, double* Ee, double* Fe, int Np, double sinhi, double B, double concentration, double fractionSize) {
+void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu, int Nnu, double* Ee, double* dFe, int Np, double sinhi, double B, double concentration, double fractionSize) {
 	//Anu from ghiselini simple
 	Inu[0] = 0;
 	Anu[0] = 0;
@@ -282,33 +282,35 @@ void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu,
 		double oldA = 0;
 		for (int j = 1; j < Np; ++j) {
 			//if(Ee[j] < 100*massElectron*speed_of_light2){
-			if(Fe[j] > 0){
+			if(dFe[j] > 0){
 				double nuc = criticalNu(Ee[j], sinhi, B);
 				double gamma = Ee[j] / (massElectron * speed_of_light2);
 				double gamma4 = gamma*gamma*gamma*gamma;
-				double sigmaCoef = concentration*Fe[j]/(B*gamma4);
+				double sigmaCoef = concentration*dFe[j]/(B*gamma4);
 				//double x = nu[i] / nuc;
 				//todo!!! 4pi!!
-				//here Fe is (Fe[j] / (4*pi)) * (Ee[j] - Ee[j - 1])
-				Inu[i] = Inu[i] + coef * Fe[j] * B * sinhi * evaluateMcDonaldIntegral(nu[i] / nuc);
+				//here dFe is (dFe[j] / (4*pi)) * (Ee[j] - Ee[j - 1])
+				Inu[i] = Inu[i] + coef * dFe[j] * B * sinhi * evaluateMcDonaldIntegral(nu[i] / nuc);
 
 				if(Inu[i] < 0){
 					printf("Inu[i] < 0\n");
-					printf("Fe[j] = %g\n", Fe[j]);
+					printf("dFe[j] = %g\n", dFe[j]);
 					exit(0);
 				}
 
-				double tempP = gamma*gamma*coef * B * sinhi * evaluateMcDonaldIntegral(nu[i] / nuc);
-				double dg = 0.1*gamma;
+				double tempP = gamma*gamma*coef * B*dFe[j] * sinhi * evaluateMcDonaldIntegral(nu / nuc);
+				double dg = 0.01*gamma;
+
 				double tempGamma = gamma + dg;
 				double tempnuc = criticalNu(massElectron*speed_of_light2*tempGamma, sinhi, B);
-				double tempP2 = tempGamma*tempGamma*coef * B * sinhi * evaluateMcDonaldIntegral(nu[i] / tempnuc);
+				double nextdFe = evaluateNextdFe(Ee, dFe, dg, j, Np);
+				double tempP2 = tempGamma*tempGamma*coef * B*nextdFe * sinhi * evaluateMcDonaldIntegral(nu / tempnuc);
 				double Pder = (tempP2 - tempP)/dg;
 
 				
 
-				Anu[i] = Anu[i] + (1.0/(2*massElectron*nu[i]*nu[i]))*Fe[j]*Pder/(gamma*gamma);
-				oldA = oldA + (16*pi*pi*electron_charge/(3.0*sqrt(3.0)))*Fe[j]*evaluateMcDonaldFunction5_3(nu[i]/nuc)/(gamma*gamma*gamma*gamma*gamma*B*sinhi);
+				Anu = Anu + (1.0/(2*massElectron*nu*nu))*Pder/(gamma*gamma);
+				oldA = oldA + (16*pi*pi*electron_charge/(3.0*sqrt(3.0)))*dFe[j]*evaluateMcDonaldFunction5_3(nu[i]/nuc)/(gamma*gamma*gamma*gamma*gamma*B*sinhi);
 				if(Inu[i] != Inu[i]){
 					printf("Inu NaN\n");
 					exit(0);
@@ -786,7 +788,34 @@ void evaluateSpectrumAtNuSimple(double nu, double& totalInu, double Inu, double 
 	totalInu = totalInu*1E26/(distance*distance);
 }
 
-void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& Anu, double* Ee, double* Fe, int Np, double sinhi, double B, double concentration){
+double evaluateNextdFe(double* Ee, double* dFe, double dg, int j, int Np) {
+	double gamma = Ee[j] / (massElectron * speed_of_light2);
+	double nextGamma = gamma + dg;
+	double nextdFe = dFe[j];
+	if(j == 0) {
+		double tempE = (gamma + dg)*massElectron*speed_of_light2;
+		double F = 0;
+		double nextF = dFe[j+1]/(Ee[j+1]-Ee[j]);
+		nextdFe = F*(Ee[j+1] - tempE) + nextF*(tempE - Ee[j]);
+	} else if(j == Np-1){
+		double tempE = (gamma + dg)*massElectron*speed_of_light2;
+		double dE = Ee[j] - Ee[j-1];
+		double F = dFe[j]/dE;
+		double prevF = dFe[j-1]/(Ee[j-1]-Ee[j-2]);
+		nextdFe = prevF*(Ee[j] - tempE) + F*(tempE - Ee[j-1]);
+	} else {
+		double tempE = (gamma + dg)*massElectron*speed_of_light2;
+		double dE = Ee[j] - Ee[j-1];
+		double F = dFe[j]/dE;
+		double nextF = dFe[j+1]/(Ee[j+1]-Ee[j]);
+		nextdFe = (F*(Ee[j+1] - tempE) + nextF*(tempE - Ee[j]))/(Ee[j+1]-Ee[j]);
+		nextdFe *= dE;
+	}
+
+	return nextdFe;
+}
+
+void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& Anu, double* Ee, double* dFe, int Np, double sinhi, double B, double concentration){
 	//Anu from ghiselini simple
 	Inu = 0;
 	Anu = 0;
@@ -803,35 +832,37 @@ void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& A
 
 	double oldA = 0;
 	for (int j = 1; j < Np; ++j) {
-		if(Fe[j] > 0){
+		if(dFe[j] > 0){
 			double nuc = criticalNu(Ee[j], sinhi, B);
 			double gamma = Ee[j] / (massElectron * speed_of_light2);
 			double gamma4 = gamma*gamma*gamma*gamma;
-			double sigmaCoef = concentration*Fe[j]/(B*gamma4);
+			double sigmaCoef = concentration*dFe[j]/(B*gamma4);
 
-			Inu = Inu + coef * Fe[j] * B * sinhi * evaluateMcDonaldIntegral(nu / nuc);
+			Inu = Inu + coef * dFe[j] * B * sinhi * evaluateMcDonaldIntegral(nu / nuc);
 			if(Inu < 0){
 				printf("Inu < 0\n");
-				printf("Fe[j] = %g\n", Fe[j]);
+				printf("dFe[j] = %g\n", dFe[j]);
 				exit(0);
 			}
+			////todo! F(g +dg)
+			double tempP = gamma*gamma*coef * B*dFe[j] * sinhi * evaluateMcDonaldIntegral(nu / nuc);
+			double dg = 0.01*gamma;
 
-			double tempP = gamma*gamma*coef * B * sinhi * evaluateMcDonaldIntegral(nu / nuc);
-			double dg = 0.1*gamma;
 			double tempGamma = gamma + dg;
 			double tempnuc = criticalNu(massElectron*speed_of_light2*tempGamma, sinhi, B);
-			double tempP2 = tempGamma*tempGamma*coef * B * sinhi * evaluateMcDonaldIntegral(nu / tempnuc);
+			double nextdFe = evaluateNextdFe(Ee, dFe, dg, j, Np);
+			double tempP2 = tempGamma*tempGamma*coef * B*nextdFe * sinhi * evaluateMcDonaldIntegral(nu / tempnuc);
 			double Pder = (tempP2 - tempP)/dg;
 
 				
 
-			Anu = Anu + (1.0/(2*massElectron*nu*nu))*Fe[j]*Pder/(gamma*gamma);
+			Anu = Anu + (1.0/(2*massElectron*nu*nu))*Pder/(gamma*gamma);
 			if(Anu < 0){
 				printf("Anu < 0\n");
-				printf("Fe[j] = %g\n", Fe[j]);
-				exit(0);
+				printf("dFe[j] = %g\n", dFe[j]);
+				//exit(0);
 			}
-			oldA = oldA + (16*pi*pi*electron_charge/(3.0*sqrt(3.0)))*Fe[j]*evaluateMcDonaldFunction5_3(nu/nuc)/(gamma*gamma*gamma*gamma*gamma*B*sinhi);
+			oldA = oldA + (16*pi*pi*electron_charge/(3.0*sqrt(3.0)))*dFe[j]*evaluateMcDonaldFunction5_3(nu/nuc)/(gamma*gamma*gamma*gamma*gamma*B*sinhi);
 			if(Inu != Inu){
 				printf("Inu NaN\n");
 				exit(0);
