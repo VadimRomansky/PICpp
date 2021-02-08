@@ -13,6 +13,10 @@
 #include "optimization.h"
 #include "spectrum.h"
 
+double phiValue[Nphi];
+double sinPhiValue[Nphi];
+double cosPhiValue[Nphi];
+
 
 void findMaxNu(int& nuMaxIndex, double* Inu, int Nnu) {
 	double Imax = 0;
@@ -333,6 +337,12 @@ int main()
 		}
 	}
 
+	for(int i = 0; i < Nphi; ++i){
+		phiValue[i] = dphi/2.0 + i*dphi;
+		sinPhiValue[i] = sin(phiValue[i]);
+		cosPhiValue[i] = cos(phiValue[i]);
+	}
+
 	/*Bx = new double*[Ntheta];
 	By = new double*[Ntheta];
 	Bz = new double*[Ntheta];
@@ -578,7 +588,7 @@ int main()
 				fscanf(inputPe, "%lf", &u);
 				fscanf(inputFe, "%lf", &Fe[j][i]);
 
-				u = u*massSpectrumFactor;
+				u = u*realMassRelationSqrt/massRelationSqrt;
 				//if( u < 3000){
 					double gamma = sqrt(u * u  + 1);
 					Ee[j][i] = sqrt(u * u  + 1)*massElectron*speed_of_light2;
@@ -603,8 +613,8 @@ int main()
 				fscanf(inputPe, "%lf", &u);
 				fscanf(inputFe, "%lf", &Fe[j][i]);
 
-				//todo massSpectrumFactor?
-				double gamma = u*massSpectrumFactor + 1;
+				//todo massRelationSqrt?
+				double gamma = u*realMassRelationSqrt/massRelationSqrt + 1;
 				//if( u < 3000){
 				Ee[j][i] = gamma*massElectron*speed_of_light2;
 					//maxEnergy = Ee[i];
@@ -628,12 +638,12 @@ int main()
 				fscanf(inputPe, "%lf", &u);
 				fscanf(inputFe, "%lf", &Fe[j][i]);
 
-				double Te = (1.6*massSpectrumFactor)*1E10;
+				double Te = (massRelationSqrt/realMassRelationSqrt)*2.4E11;
 				//double Te = 1.6*1E10;
 				double thetae = kBoltzman*Te/(massElectron*speed_of_light2);
 
-				//todo massSpectrumFactor?
-				double gamma = u*massSpectrumFactor + 1;
+				//todo massRelationSqrt?
+				double gamma = u*realMassRelationSqrt/massRelationSqrt + 1;
 				Ee[j][i] = gamma*massElectron*speed_of_light2;
 
 
@@ -645,7 +655,7 @@ int main()
 				fscanf(inputPe, "%lf", &u);
 				fscanf(inputFe, "%lf", &Fe[j][i]);
 
-				double gamma = u*massSpectrumFactor + 1;
+				double gamma = u*realMassRelationSqrt/massRelationSqrt + 1;
 				Ee[j][i] = gamma*massElectron*speed_of_light2;
 
 				double minGamma = 2;
@@ -839,7 +849,7 @@ int main()
 	const int Nrp = 5;
 	double Bpoints[Nbp] = {0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
 	double npoints[Nnp] = {0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200};
-	double fpoints[Nfp] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7};
+	double fpoints[Nfp] = {0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
 	double vpoints[Nvp] = { 0.5*speed_of_light, 0.6*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
 	for(int i = 0; i < Nbp; ++i){

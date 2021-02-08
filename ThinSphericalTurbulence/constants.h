@@ -7,13 +7,13 @@ const double massProtonReal = 1.67262177E-24;
 const double massAlphaReal = 6.644656E-24;
 const double massElectron = 0.910938291E-27;
 //const double massElectronFactor = massProtonReal/(10.0*massElectronReal);
-const double massElectronFactor = 100;
 const double massDeuteriumReal = 3.34449696893E-24;
 const double massHelium3Real = 5.00823792874E-24;
 const double massOxygenReal = 26.5601801672E-24;
 const double massSiliconReal = 46.4567787264E-24;
 
-const double massSpectrumFactor = sqrt(massProtonReal/(massElectronFactor*massElectron));
+const double massRelationSqrt = sqrt(100.0);
+const double realMassRelationSqrt = sqrt(massProtonReal/massElectron);
 
 const double kBoltzman = 1.3806488E-16;
 const double speed_of_light = 2.99792458E10;
@@ -46,9 +46,9 @@ const double times[Nmonth] = {0, 2760000, 5270400, 10700000, 19000000, 56100000}
 
 const double distance = 40*3*1.0E24;
 
-const int Nrho = 10;
-const int Nphi = 10;
-const int Nz = 10;
+const int Nrho = 20;
+const int Nphi = 20;
+const int Nz = 20;
 
 const int Nk = 10;
 
@@ -58,9 +58,6 @@ const int Nk = 10;
 //const double dz = dr;
 
 const double dphi = (2*pi)/Nphi;
-const double phiValue[Nphi] = {dphi/2, 3*dphi/2, 5*dphi/2, 7*dphi/2, 9*dphi/2, 11*dphi/2, 13*dphi/2, 15*dphi/2, 17*dphi/2, 19*dphi/2};
-const double sinPhiValue[Nphi] = {sin(dphi/2), sin(3*dphi/2), sin(5*dphi/2), sin(7*dphi/2), sin(9*dphi/2), sin(11*dphi/2), sin(13*dphi/2), sin(15*dphi/2), sin(17*dphi/2), sin(19*dphi/2) };
-const double cosPhiValue[Nphi] = {cos(dphi/2), cos(3*dphi/2), cos(5*dphi/2), cos(7*dphi/2), cos(9*dphi/2), cos(11*dphi/2), cos(13*dphi/2), cos(15*dphi/2), cos(17*dphi/2), cos(19*dphi/2)};
 
 const int Ntheta = 10;
 
@@ -155,7 +152,7 @@ const double maxB = 0.2;
 const double minN = 0.01;
 const double maxN = 200;
 const double minFraction = 0.001;
-const double maxFraction = 1.0;
+const double maxFraction = 0.2;
 const double maxSigma = 10.0;
 const double minEta = 0;
 const double maxEta = 0.8*pi/2;
