@@ -473,7 +473,7 @@ int main()
 	double turbulenceFraction = 0.9;
 	double turbNorm = evaluateTurbNorm(kmax, Nk, 1.0, turbulenceFraction);
 
-	//if(turbulence){
+	if(turbulence){
 		for(int i = 0; i < Nrho; ++i){
 			for(int j = 0; j < Nphi; ++j){
 				for(int k = 0; k < Nz; ++k){
@@ -537,7 +537,7 @@ int main()
 				}
 			}
 		}
-	//}
+	}
 
 	if(geometry == SPHERICAL){
 		evaluateOrientationParameters3d(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
@@ -981,6 +981,9 @@ int main()
 		for(int i = 0; i < Nrho; ++i) {
 			for(int j = 0; j < Nphi; ++j) {
 				fprintf(imageFile, "%g", image[i][j][k]);
+				if(j < Nphi - 1) {
+					fprintf(imageFile, " ");
+				}
 			}
 			fprintf(imageFile,"\n");
 		}
