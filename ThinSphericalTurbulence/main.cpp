@@ -202,9 +202,9 @@ void initializeParker(double*** Bx, double*** By, double*** Bz){
 	double sinThetaObserv = sin(thetaObserv);
 	double cosThetaObserv = cos(thetaObserv);
 	double rcorot = Nrho/10.0;
-	double rmin = Nrho/2.0;
-	double Br1 = sqr(rmin/Nrho)*sqrt(0.5);
-	double Bphi1 = ((Nrho - rmin)/rcorot)*sqr(rmin/Nrho)*0.5;
+	double rmin = Nrho/100.0;
+	double Br1 = sqr(rmin/Nrho);
+	double Bphi1 = ((Nrho - rmin)/rcorot)*sqr(rmin/Nrho);
 	//norm to 1;
 	double B0 = 1.0/sqrt(Br1*Br1 + Bphi1*Bphi1);
 	for(int i = 0; i < Nrho; ++i){
@@ -473,7 +473,7 @@ int main()
 	double turbulenceFraction = 0.9;
 	double turbNorm = evaluateTurbNorm(kmax, Nk, 1.0, turbulenceFraction);
 
-	if(turbulence){
+	//if(turbulence){
 		for(int i = 0; i < Nrho; ++i){
 			for(int j = 0; j < Nphi; ++j){
 				for(int k = 0; k < Nz; ++k){
@@ -488,20 +488,20 @@ int main()
 		for(int ki = 0; ki < Nk; ++ki){
 			printf("%d\n", ki);
 			for(int kj = 0; kj < Nk; ++kj){
-				for(int kk = 0; kk < Nk; ++kk){
-					if ((ki + kj + kk) > 4) {
+				//for(int kk = 0; kk < Nk; ++kk){
+					if ((ki + kj) > 4) {
 						double phase1 = 2*pi*uniformDistribution();
 						double phase2 = 2*pi*uniformDistribution();
 
 
 						double kx = ki*dk;
 						double ky = kj*dk;
-						double kz = kk*dk;
+						//double kz = kk*dk;
 
-						double kw = sqrt(kx*kx + ky*ky + kz*kz);
+						double kw = sqrt(kx*kx + ky*ky);
 						double kxy = sqrt(ky*ky + kx*kx);
-						double cosTheta = kz/kw;
-						double sinTheta = kxy/kw;
+						double cosTheta = 0;
+						double sinTheta = 1.0;
 						double cosPhi = 1.0;
 						double sinPhi = 0;
 						if(kj + ki > 0) {
@@ -512,18 +512,20 @@ int main()
 							sinPhi = 0.0;
 						}
 
-						double Bturbulent = evaluateTurbB(kx, ky, kz, turbNorm);
+						double Bturbulent = evaluateTurbB(kx, ky, 0, turbNorm);
 
 						for(int i = 0; i < Nrho; ++i){
 							for(int j = 0; j < Nphi; ++j){
 								for(int k = 0; k < Nz; ++k){
 									double x = (i+0.5)*cos((2*pi/Nphi)*(j+0.5));
 									double y = (i+0.5)*sin((2*pi/Nphi)*(j+0.5));
-									double z = 4.0*(k+0.5)/3.0;
+									double z = (k - Nz/2.0 +0.5);
 
-									double kmultr = kx*x + ky*y + kz*z;
-									double localB1 = 0.3*Bturbulent*sin(kmultr + phase1);
-									double localB2 = 0.3*Bturbulent*sin(kmultr + phase2);
+									double kmultr = kx*x + ky*y;
+									double localB1 = Bturbulent*sin(kmultr + phase1)*cos(pi*z/(2*Nz));
+									double localB2 = Bturbulent*sin(kmultr + phase2)*cos(pi*z/(2*Nz));
+									localB1 = 0;
+									localB2 = localB2*sqrt(2.0);
 
 									Bz3d[i][j][k] = Bz3d[i][j][k] - localB1*sinTheta;
 									Bx3d[i][j][k] = Bx3d[i][j][k] + (localB1*cosTheta*cosPhi - localB2*sinPhi);
@@ -531,11 +533,11 @@ int main()
 								}
 							}
 						}
-					}
+					//}
 				}
 			}
 		}
-	}
+	//}
 
 	if(geometry == SPHERICAL){
 		evaluateOrientationParameters3d(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
@@ -931,13 +933,23 @@ int main()
 			}
 		}
 	}
+
+	double*** image = new double**[Nrho];
+	for(int i = 0; i < Nrho; ++i) {
+		image[i] = new double*[Nphi];
+		for(int j = 0; j < Nphi; ++j) {
+			image[i][j] = new double[Nnum];
+			for(int k = 0; k < Nnum; ++k) {
+				image[i][j][k] = 0;
+			}
+		}
+	}
+
 	for(int l = 0; l < Nmonth; ++l){
 		double r = rmax + v*times[l];
 		double rfactor = r/rmax;
 		double locB = Bfactor*rmax/r;
 		double locN = concentration*sqr(rmax/r);
-
-
 
 		tempTotalInu[l] = new double[Nnu];
 
@@ -946,6 +958,14 @@ int main()
 		//evaluateSpectrum(nu, tempTotalInu[l], Inu, Anu, area, length, Nnu, r, Rho, Phi);
 
 		evaluateAllEmissivityAndAbsorption(nu, tempInu, tempAnu, Nnu, Ee, dFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, rfactor);
+
+		if(l == 0) {
+			if(geometry == SPHERICAL){
+				evaluateImageSpherical(image, Numonth[l], tempInu, tempAnu, rmax, Nnum, rfactor, fractionSize);
+			} else {
+				evaluateImageFlat(image, Numonth[l], tempInu, tempAnu, rmax, Nnum, rfactor, fractionSize);
+			}
+		}
 		//evaluateSpectrum(nu, tempTotalInu[l], tempInu, tempAnu, area3d, length3d, Nnu, rfactor);
 		if(geometry == SPHERICAL){
 			evaluateSpectrumSpherical(nu, tempTotalInu[l], tempInu, tempAnu, rmax, Nnu, rfactor, fractionSize);
@@ -955,6 +975,24 @@ int main()
 
 		//evaluateSpectrumFlatSimple(nu, tempTotalInu[l], Inuflat, Anuflat, Nnu, r, fractionSize);
 	}
+
+	FILE* imageFile = fopen("image.dat","w");
+	for(int k = 0; k < Nnum; ++k) {
+		for(int i = 0; i < Nrho; ++i) {
+			for(int j = 0; j < Nphi; ++j) {
+				fprintf(imageFile, "%g", image[i][j][k]);
+			}
+			fprintf(imageFile,"\n");
+		}
+	}
+	fclose(imageFile);
+	for(int i = 0; i < Nrho; ++i) {
+		for(int j = 0; j < Nphi; ++j) {
+			delete[] image[i][j];
+		}
+		delete[] image[i];
+	}
+	delete[] image;
 
 	FILE* errorFile = fopen("error.dat","w");
 	FILE* Bp = fopen("Bpoints.dat","w");

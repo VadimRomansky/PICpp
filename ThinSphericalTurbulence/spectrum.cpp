@@ -786,6 +786,176 @@ void evaluateSpectrumAtNuSimple(double nu, double& totalInu, double Inu, double 
 	totalInu = totalInu*1E26/(distance*distance);
 }
 
+//spherical
+void evaluateImageSpherical(double*** image, double* nu, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength){
+	double tempRmax = rmax*rfactor;
+	double tempRmin = (1.0 - fractionLength)*tempRmax;
+	double tempdr = tempRmax/Nrho;
+	double dphi = 2*pi/Nphi;
+	double dz = 2*rmax*rfactor/Nz;
+
+	for(int i = 0; i < Nrho; ++i) {
+		for(int j = 0; j < Nphi; ++j){
+			for(int l = 0; l < Nnu; ++l){
+				image[i][j][l] = 0;
+			}
+		}
+	}
+
+
+	double length[Nz];
+
+	for(int i = 0; i < Nrho; ++i){
+		double r = (i + 0.5)*tempdr;
+		double s = 0.5*dphi*(2*i + 1)*tempdr*tempdr;
+		double z1 = -sqrt(tempRmax*tempRmax -r*r);
+		double z2 = -sqrt(tempRmin*tempRmin - r*r);
+		double z3 = -z2;
+		double z4 = -z1;
+
+
+		for(int k = 0; k < Nz; ++k){
+			double z = - tempRmax + (k +0.5)*dz;
+			double minz  = - tempRmax + k*dz;
+			double maxz = -tempRmax + (k+1)*dz;
+			//length
+			length[k] = 0;
+			if(z < 0){
+				if(z1 > maxz){
+					length[k] = 0;
+				} else if (z2 < minz){
+					length[k] = 0;
+				} else {
+					double lowz = max(minz, z1);
+					double topz = min(maxz, z2);
+					length[k] = topz - lowz;
+				}
+			} else {
+				if(z4 < minz){
+					length[k] = 0;
+				} else if(z3 > maxz){
+					length[k] = 0;
+				} else {
+					double lowz = max(minz, z3);
+					double topz = min(maxz, z4);
+					length[k] = topz - lowz;
+				}
+			}
+		}
+
+		for(int j = 0; j < Nphi; ++j){
+			for(int l = 0; l < Nnu; ++l){
+				double localI = 0;
+				for(int k = 0; k < Nz; ++k){				
+					double I0 = localI;
+					if(length[k] > 0){
+						double Q = Inu[l][i][j][k]*s;
+						double tau = Anu[l][i][j][k]*length[k];
+						double S = 0;
+						if(Q > 0){
+							S = Q/Anu[l][i][j][k];
+						}
+
+						localI = S + (I0 - S)*exp(-tau);
+					}
+				}
+				image[i][j][l] = localI;
+			}
+			
+		}
+	}
+
+	//delete[] length;
+	for(int i = 0; i < Nrho; ++i) {
+		for(int j = 0; j < Nphi; ++j){
+			for(int l = 0; l < Nnu; ++l){
+				image[i][j][l] = image[i][j][l]*1E26/(distance*distance);
+			}
+		}
+	}
+}
+
+//flat
+void evaluateImageFlat(double*** image, double* nu, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength){
+	double tempRmax = rmax*rfactor;
+	double tempRmin = (1.0 - fractionLength)*tempRmax;
+	double tempdr = tempRmax/Nrho;
+	double dphi = 2*pi/Nphi;
+	double dz = (4.0/3.0)*tempRmax/Nz;
+	double zmin = (4.0/3.0)*(1.0 - fractionLength)*tempRmax;
+
+	for(int i = 0; i < Nrho; ++i){
+		for(int j = 0; j < Nphi; ++j){
+			for(int l = 0; l < Nnu; ++l){
+				image[i][j][l] = 0;
+			}
+		}
+	}
+
+	double length[Nz];
+
+	for(int k = 0; k < Nz; ++k){
+		double z1  = k*dz;
+		double z2 = (k+1)*dz;
+		//length
+		length[k] = 0;
+		if(z2 < zmin){
+			length[k] = 0;
+		} else if(z1 > zmin){
+			length[k] = dz;
+		} else {
+			length[k] = z2 - zmin;
+		}
+	}
+
+	for(int i = 0; i < Nrho; ++i){
+		double s = 0.5*dphi*(2*i + 1)*tempdr*tempdr;
+		for(int j = 0; j < Nphi; ++j){
+			for(int l = 0; l < Nnu; ++l){
+				double localI = 0;
+				for(int k = 0; k < Nz; ++k){				
+					double I0 = localI;
+					if(length[k] > 0){
+						double Q = Inu[l][i][j][k]*s;
+						if(Inu[l][i][j][k] != Inu[l][i][j][k]){
+							printf("Inu[l][i][j][k] = NaN\n");
+							exit(0);
+						}
+						double tau = Anu[l][i][j][k]*length[k];
+						if(Anu[l][i][j][k] != Anu[l][i][j][k]){
+							printf("Anu[l][i][j][k] = NaN\n");
+							exit(0);
+						}
+						double S = 0;
+						if(Q > 0){
+							S = Q/Anu[l][i][j][k];
+						}
+
+						localI = S + (I0 - S)*exp(-tau);
+						if(localI != localI){
+							printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[l][i][j][k], Inu[l][i][j][k], Q, s, length[k],tau, I0);
+							printf("localI = NaN\n");
+							exit(0);
+						}
+					}
+				}
+				image[i][j][l] += localI;
+			}
+			
+		}
+	}
+
+	//delete[] length;
+
+	for(int i = 0; i < Nrho; ++i) {	
+		for(int j = 0; j < Nphi; ++j){
+			for(int l = 0; l < Nnu; ++l){
+				image[i][j][l] = image[i][j][l]*1E26/(distance*distance);
+			}
+		}	
+	}
+}
+
 double evaluateNextdFe(double* Ee, double* dFe, double dg, int j, int Np) {
 	double gamma = Ee[j] / (massElectron * speed_of_light2);
 	double nextGamma = gamma + dg;
@@ -855,11 +1025,11 @@ void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& A
 				
 
 			Anu = Anu + (1.0/(2*massElectron*nu*nu))*Pder/(gamma*gamma);
-			if(Anu < 0){
+			/*if(Anu < 0){
 				printf("Anu < 0\n");
 				printf("dFe[j] = %g\n", dFe[j]);
 				//exit(0);
-			}
+			}*/
 			oldA = oldA + (16*pi*pi*electron_charge/(3.0*sqrt(3.0)))*dFe[j]*evaluateMcDonaldFunction5_3(nu/nuc)/(gamma*gamma*gamma*gamma*gamma*B*sinhi);
 			if(Inu != Inu){
 				printf("Inu NaN\n");

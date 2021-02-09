@@ -21,6 +21,9 @@ void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double****
 void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength);
 double evaluateNextdFe(double* Ee, double* dFe, double dg, int i, int Np);
 
+void evaluateImageSpherical(double*** image, double* nu, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength);
+void evaluateImageFlat(double*** image, double* nu, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength);
+
 //for simple flat disk
 void evaluateSpectrumAtNuSimple(double nu, double& totalInu, double Inu, double Anu, double rmax, double fraction);
 void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& Anu, double* Ee, double* Fe, int Np, double sinhi, double B, double concentration);

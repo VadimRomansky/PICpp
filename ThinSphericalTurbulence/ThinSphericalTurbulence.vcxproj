@@ -14,6 +14,7 @@
     <ProjectGuid>{EE48822B-5F2D-4B59-B8EF-C4309D29828F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ThinSphericalTurbulence</RootNamespace>
+    <ProjectName>Radiation</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -77,7 +78,7 @@
   <ItemGroup>
     <ClCompile Include="optimization.cpp" />
     <ClCompile Include="spectrum.cpp" />
-    <ClCompile Include="ThinSphericalTurbulence.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
