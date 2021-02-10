@@ -521,7 +521,10 @@ void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double****
 		double r = (i + 0.5)*tempdr;
 		double s = 0.5*dphi*(2*i + 1)*tempdr*tempdr;
 		double z1 = -sqrt(tempRmax*tempRmax -r*r);
-		double z2 = -sqrt(tempRmin*tempRmin - r*r);
+		double z2 = 0;
+		if(tempRmin > r){
+			z2 = -sqrt(tempRmin*tempRmin - r*r);
+		}
 		double z3 = -z2;
 		double z4 = -z1;
 
@@ -809,7 +812,10 @@ void evaluateImageSpherical(double*** image, double* nu, double**** Inu, double*
 		double r = (i + 0.5)*tempdr;
 		double s = 0.5*dphi*(2*i + 1)*tempdr*tempdr;
 		double z1 = -sqrt(tempRmax*tempRmax -r*r);
-		double z2 = -sqrt(tempRmin*tempRmin - r*r);
+		double z2 = 0;
+		if(tempRmin > r){
+			z2 = -sqrt(tempRmin*tempRmin - r*r);
+		}
 		double z3 = -z2;
 		double z4 = -z1;
 
