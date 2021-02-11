@@ -6,6 +6,7 @@
 #include <string>
 #include <omp.h>
 
+#include "startparameters.h"
 #include "constants.h"
 #include "util.h"
 #include "spectrum.h"

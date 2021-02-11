@@ -8,6 +8,7 @@
 #include <string>
 #include <omp.h>
 
+#include "startparameters.h"
 #include "constants.h"
 #include "util.h"
 #include "optimization.h"
@@ -852,7 +853,7 @@ int main()
 	double Bpoints[Nbp] = {0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
 	double npoints[Nnp] = {0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200};
 	double fpoints[Nfp] = {0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
-	double vpoints[Nvp] = { 0.5*speed_of_light, 0.6*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
+	double vpoints[Nvp] = { 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
 	for(int i = 0; i < Nbp; ++i){
 		double tempBfactor = Bpoints[i];

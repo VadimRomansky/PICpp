@@ -6,6 +6,7 @@
 #include <string>
 #include <omp.h>
 
+#include "startparameters.h"
 #include "constants.h"
 #include "spectrum.h"
 #include "util.h"
@@ -86,7 +87,7 @@ void findMinParameters5(const double& B0, const double& N0, const double& R0, co
 		step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
 	}
 	if(gradV > 0){
-		step = min(step, 0.4*fabs(v/(V0*gradV)));
+		step = min(step, 0.4*fabs((v-minV)/(V0*gradV)));
 	}
 
 	
@@ -148,6 +149,9 @@ void findMinParameters5(const double& B0, const double& N0, const double& R0, co
 			if(v1 > maxV){
 				v1 = maxV;
 			}
+			if(v1 < minV){
+				v1 = minV;
+			}
 
 			f1 = evaluateOptimizationFunction5(B1, N1, S1, r1, v1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 		}
@@ -191,7 +195,7 @@ void findMinParameters5(const double& B0, const double& N0, const double& R0, co
 		step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
 	}
 	if(gradV > 0){
-		step = min(step, 0.4*fabs(v/(V0*gradV)));
+		step = min(step, 0.4*fabs((v-minV)/(V0*gradV)));
 	}
 	double B2 = B1 - gradB*step*B0;
 	double N2 = N1 - gradN*step*N0;
@@ -214,6 +218,9 @@ void findMinParameters5(const double& B0, const double& N0, const double& R0, co
 	}
 	if(v2 > maxV){
 		v2 = maxV;
+	}
+	if(v2 < minV){
+		v2 = minV;
 	}
 	double f2 = evaluateOptimizationFunction5(B2, N2, S2, r2, v2, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 	int iterations = 0;
@@ -250,7 +257,7 @@ void findMinParameters5(const double& B0, const double& N0, const double& R0, co
 			step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
 		}
 		if(gradV > 0){
-			step = min(step, 0.4*fabs(v/(V0*gradV)));
+			step = min(step, 0.4*fabs((v-minV)/(V0*gradV)));
 		}
 		B2 = Bfactor - gradB*step*B0;
 		N2 = N - gradN*step*N0;
@@ -276,6 +283,9 @@ void findMinParameters5(const double& B0, const double& N0, const double& R0, co
 		}
 		if(v2 > maxV){
 			v2 = maxV;
+		}
+		if(v2 < minV){
+			v2 = minV;
 		}
 		f1 = f2;
 		f2 = evaluateOptimizationFunction5(B2, N2, S2, r2, v2, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
@@ -315,9 +325,12 @@ void optimizeParameters5(const double& B0, const double& N0, const double& R0, c
 				tempS = maxFraction;
 			}
 			double tempR = rmax + 0.2*rmax*(uniformDistribution() - 0.5);
-			double tempV = 0.2*speed_of_light + (maxV - 0.2*speed_of_light)*uniformDistribution();
+			double tempV = v + (maxV - 0.2*speed_of_light)*uniformDistribution();
 			if(tempV > maxV){
 				tempV = maxV;
+			}
+			if(tempV < minV){
+				tempV = minV;
 			}
 			double tempF = evaluateOptimizationFunction5(tempB, tempN, tempS, tempR, tempV, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 			if(tempF < currentF){
@@ -600,7 +613,7 @@ void findMinParameters5sigma(const double& sigma, const double& B0, const double
 		step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
 	}
 	if(gradV > 0){
-		step = min(step, 0.4*fabs(v/(V0*gradV)));
+		step = min(step, 0.4*fabs((v-minV)/(V0*gradV)));
 	}
 
 	
@@ -629,6 +642,9 @@ void findMinParameters5sigma(const double& sigma, const double& B0, const double
 	if(v1 > maxV){
 		v1 = maxV;
 	}
+	if(v1 < minV){
+		v1 = minV;
+	}
 
 	double f1 = evaluateOptimizationFunction5(B1, N1, S1, r1, v1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 	if(f1 > currentF){
@@ -655,6 +671,9 @@ void findMinParameters5sigma(const double& sigma, const double& B0, const double
 			}
 			if(v1 > maxV){
 				v1 = maxV;
+			}
+			if(v1 < minV){
+				v1 = minV;
 			}
 
 			f1 = evaluateOptimizationFunction5(B1, N1, S1, r1, v1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
@@ -690,7 +709,7 @@ void findMinParameters5sigma(const double& sigma, const double& B0, const double
 		step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
 	}
 	if(gradV > 0){
-		step = min(step, 0.4*fabs(v/(V0*gradV)));
+		step = min(step, 0.4*fabs((v-minV)/(V0*gradV)));
 	}
 	double B2 = B1 - gradB*step*B0;
 	double N2 = sqr(B2)/(sigma*4*pi*massProtonReal*speed_of_light2);
@@ -710,6 +729,9 @@ void findMinParameters5sigma(const double& sigma, const double& B0, const double
 	}
 	if(v2 > maxV){
 		v2 = maxV;
+	}
+	if(v2 < minV){
+		v2 = minV;
 	}
 	double f2 = evaluateOptimizationFunction5(B2, N2, S2, r2, v2, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 	int iterations = 0;
@@ -737,7 +759,7 @@ void findMinParameters5sigma(const double& sigma, const double& B0, const double
 			step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
 		}
 		if(gradV > 0){
-			step = min(step, 0.4*fabs(v/(V0*gradV)));
+			step = min(step, 0.4*fabs((v-minV)/(V0*gradV)));
 		}
 		B2 = Bfactor - gradB*step*B0;
 		N2 = sqr(B2)/(sigma*4*pi*massProtonReal*speed_of_light2);
@@ -761,6 +783,9 @@ void findMinParameters5sigma(const double& sigma, const double& B0, const double
 		if(v2 > maxV){
 			v2 = maxV;
 		}
+		if(v2 < minV){
+			v2 = minV;
+		}
 		f1 = f2;
 		f2 = evaluateOptimizationFunction5(B2, N2, S2, r2, v2, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 	}
@@ -775,14 +800,31 @@ void optimizeParameters5sigma(const double& sigma, const double& B0, const doubl
 	for(int i = 0; i < Niterations; ++i) {
 		///randomization;
 		for(int j = 0; j < 5; ++j){
-			//double tempN = N + 0.2*N*(uniformDistribution() - 0.5);
-			//tempN = N;
 			double tempB = Bfactor + 0.2*Bfactor*(uniformDistribution() - 0.5);
+			if(tempB < minB){
+				tempB = minB;
+			}
+			if(tempB > maxB){
+				tempB = maxB;
+			}
+
 			double tempN = sqr(tempB)/(sigma*4*pi*massProtonReal*speed_of_light2);
-			//tempB = Bfactor;
+
 			double tempS  = min(max(minFraction,fractionSize + 0.2*fractionSize*(uniformDistribution() - 0.5)), maxFraction);
+			if(tempS < minFraction){
+				tempS = minFraction;
+			}
+			if(tempS > maxFraction){
+				tempS = maxFraction;
+			}
 			double tempR = rmax + 0.2*rmax*(uniformDistribution() - 0.5);
-			double tempV = 0.2*speed_of_light + (maxV - 0.2*speed_of_light)*uniformDistribution();
+			double tempV = v + (maxV - 0.2*speed_of_light)*uniformDistribution();
+			if(tempV > maxV){
+				tempV = maxV;
+			}
+			if(tempV < minV){
+				tempV = minV;
+			}
 			double tempF = evaluateOptimizationFunction5(tempB, tempN, tempS, tempR, tempV, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 			if(tempF < currentF){
 				currentF = tempF;
@@ -1110,7 +1152,7 @@ void findMinParameters5simple(const double& B0, const double& N0, const double& 
 		step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
 	}
 	if(gradV < 0){
-		step = min(step, 0.4*fabs(v/(V0*gradV)));
+		step = min(step, 0.4*fabs((v-minV)/(V0*gradV)));
 	}
 
 	
@@ -1139,6 +1181,9 @@ void findMinParameters5simple(const double& B0, const double& N0, const double& 
 	if(v1 > maxV){
 		v1 = maxV;
 	}
+	if(v1 < minV){
+		v1 = minV;
+	}
 
 	double f1 = evaluateOptimizationFunction5simple(B1, N1, S1, r1, v1, Ee, dFe, Np, Nd, sintheta, thetaIndex);
 	if(f1 > currentF){
@@ -1163,6 +1208,9 @@ void findMinParameters5simple(const double& B0, const double& N0, const double& 
 			}
 			if(v1 > maxV){
 				v1 = maxV;
+			}
+			if(v1 < minV){
+				v1 = minV;
 			}
 
 			f1 = evaluateOptimizationFunction5simple(B1, N1, S1, r1, v1, Ee, dFe, Np, Nd, sintheta, thetaIndex);
@@ -1199,7 +1247,7 @@ void findMinParameters5simple(const double& B0, const double& N0, const double& 
 		step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
 	}
 	if(gradV < 0){
-		step = min(step, 0.4*fabs(v/(V0*gradV)));
+		step = min(step, 0.4*fabs((v-minV)/(V0*gradV)));
 	}
 	double B2 = B1 - gradB*step*B0;
 	double N2 = N1 - gradN*step*N0;
@@ -1219,6 +1267,9 @@ void findMinParameters5simple(const double& B0, const double& N0, const double& 
 	}
 	if(v2 > maxV){
 		v2 = maxV;
+	}
+	if(v2 < minV){
+		v2 = minV;
 	}
 	double f2 = evaluateOptimizationFunction5simple(B2, N2, S2, r2, v2, Ee, dFe, Np, Nd, sintheta, thetaIndex);
 	int iterations = 0;
@@ -1249,7 +1300,7 @@ void findMinParameters5simple(const double& B0, const double& N0, const double& 
 			step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
 		}
 		if(gradV < 0){
-			step = min(step, 0.4*fabs(v/(V0*gradV)));
+			step = min(step, 0.4*fabs((v-minV)/(V0*gradV)));
 		}
 		B2 = Bfactor - gradB*step*B0;
 		N2 = N - gradN*step*N0;
@@ -1273,6 +1324,9 @@ void findMinParameters5simple(const double& B0, const double& N0, const double& 
 		if(v2 > maxV){
 			v2 = maxV;
 		}
+		if(v2 < minV){
+			v2 = minV;
+		}
 		f1 = f2;
 		f2 = evaluateOptimizationFunction5simple(B2, N2, S2, r2, v2, Ee, dFe, Np, Nd, sintheta, thetaIndex);
 	}
@@ -1289,15 +1343,44 @@ void optimizeParameters5simple(const double& B0, const double& N0, const double&
 	for(int i = 0; i < Niterations; ++i) {
 		///randomization;
 		for(int j = 0; j < 5; ++j){
-			double tempN = N + 0.2*N*(uniformDistribution() - 0.5);
+						double tempN = N + 0.2*N*(uniformDistribution() - 0.5);
+			if(tempN < minN){
+				tempN = minN;
+			}
+			if(tempN > maxN){
+				tempN = maxN;
+			}
+			//tempN = N;
 			double tempB = Bfactor + 0.2*Bfactor*(uniformDistribution() - 0.5);
+			if(tempB < minB){
+				tempB = minB;
+			}
+			if(tempB > maxB){
+				tempB = maxB;
+			}
+			//tempB = Bfactor;
 			double tempS  = min(max(minFraction,fractionSize + 0.2*fractionSize*(uniformDistribution() - 0.5)), maxFraction);
-			double tempF = evaluateOptimizationFunction5simple(tempB, tempN, tempS, rmax, v, Ee, dFe, Np, Nd, sintheta, thetaIndex);
+			if(tempS < minFraction){
+				tempS = minFraction;
+			}
+			if(tempS > maxFraction){
+				tempS = maxFraction;
+			}
+			double tempR = rmax + 0.2*rmax*(uniformDistribution() - 0.5);
+			double tempV = v + (maxV - 0.2*speed_of_light)*uniformDistribution();
+			if(tempV > maxV){
+				tempV = maxV;
+			}
+			if(tempV < minV){
+				tempV = minV;
+			}
+			double tempF = evaluateOptimizationFunction5simple(tempB, tempN, tempS, rmax, tempV, Ee, dFe, Np, Nd, sintheta, thetaIndex);
 			if(tempF < currentF){
 				currentF = tempF;
 				Bfactor = tempB;
 				fractionSize = tempS;
 				N = tempN;
+				v = tempV;
 				printf("random search\n");
 				fprintf(logFile, "random search\n");
 			}
