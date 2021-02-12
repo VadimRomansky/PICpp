@@ -1,7 +1,13 @@
 #ifndef OPTIMIZATION_H
 #define OPTIMIZATION_H
 
-//for flat disk
+//new scheme
+double evaluateOptimizationFunction5(double* vector, double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length);
+void findMinParameters5(double* vector, const double* grad, double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, double& currentF);
+void optimizeParameters5(double* vector,  double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, FILE* logFile);
+
+
+
 double evaluateOptimizationFunction5(double Bfactor, double n, double fractionSize, double rmax, double v, double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length);
 void findMinParameters5(const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v, double gradB, double gradN, double gradS, double gradR, double gradV, double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, double& currentF);
 void optimizeParameters5(const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v,  double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, FILE* logFile);
