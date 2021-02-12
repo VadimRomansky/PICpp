@@ -37,15 +37,15 @@ const std::string logFileName = "log.dat";
 const std::string BFileName = "B.dat";
 
 const int Niterations = 20;
-const int Nmonth = 4;
+const int Nmonth = 6;
 const int Nmontecarlo = 100000;
 
-//const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17, 4.6E17, 14E17};
-const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17};
+const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17, 4.6E17, 14E17};
+//const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17};
 
 
-//const double times[Nmonth] = {0, 2760000, 5270400, 10700000, 19000000, 56100000};
-const double times[Nmonth] = {0, 2760000, 5270400, 10700000};
+const double times[Nmonth] = {0, 2760000, 5270400, 10700000, 19000000, 56100000};
+//const double times[Nmonth] = {0, 2760000, 5270400, 10700000};
 
 const double distance = 40*3*1.0E24;
 
@@ -161,5 +161,6 @@ const double minEta = 0;
 const double maxEta = 0.8*pi/2;
 const double maxV = 0.9*speed_of_light;
 const double minV = 0.6*speed_of_light;
+const double maxR = 19*24*3600*3E10;
 
 #endif

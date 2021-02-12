@@ -80,8 +80,11 @@ void findMinParameters5(const double& B0, const double& N0, const double& R0, co
 	if(gradS > 0){
 		step = min(step, 0.4*fabs((fractionSize - minFraction)/gradS));
 	}
-	if(fabs(gradR) > 0){
+	if(gradR > 0){
 		step = min(step, 0.4*fabs(rmax/(R0*gradR)));
+	}
+	if(gradR < 0){
+		step = min(step, 0.4*fabs((maxR - rmax)/(R0*gradR)));
 	}
 	if(gradV < 0){
 		step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
@@ -188,8 +191,11 @@ void findMinParameters5(const double& B0, const double& N0, const double& R0, co
 	if(gradS > 0){
 		step = min(step, 0.4*fabs((fractionSize - minFraction)/gradS));
 	}
-	if(fabs(gradR) > 0){
+	if(gradR > 0){
 		step = min(step, 0.4*fabs(rmax/(R0*gradR)));
+	}
+	if(gradR < 0){
+		step = min(step, 0.4*fabs((maxR - rmax)/(R0*gradR)));
 	}
 	if(gradV < 0){
 		step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
@@ -250,8 +256,11 @@ void findMinParameters5(const double& B0, const double& N0, const double& R0, co
 		if(gradS > 0){
 			step = min(step, 0.4*fabs((fractionSize - minFraction)/gradS));
 		}
-		if(fabs(gradR) > 0){
+		if(gradR > 0){
 			step = min(step, 0.4*fabs(rmax/(R0*gradR)));
+		}
+		if(gradR < 0){
+			step = min(step, 0.4*fabs((maxR - rmax)/(R0*gradR)));
 		}
 		if(gradV < 0){
 			step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
@@ -325,6 +334,9 @@ void optimizeParameters5(const double& B0, const double& N0, const double& R0, c
 				tempS = maxFraction;
 			}
 			double tempR = rmax + 0.2*rmax*(uniformDistribution() - 0.5);
+			if(tempR > maxR) {
+				tempR = maxR;
+			}
 			double tempV = v + (maxV - 0.2*speed_of_light)*uniformDistribution();
 			if(tempV > maxV){
 				tempV = maxV;
@@ -606,8 +618,11 @@ void findMinParameters5sigma(const double& sigma, const double& B0, const double
 	if(gradS > 0){
 		step = min(step, 0.4*fabs((fractionSize - minFraction)/gradS));
 	}
-	if(fabs(gradR) > 0){
+	if(gradR > 0){
 		step = min(step, 0.4*fabs(rmax/(R0*gradR)));
+	}
+	if(gradR < 0){
+		step = min(step, 0.4*fabs((maxR - rmax)/(R0*gradR)));
 	}
 	if(gradV < 0){
 		step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
@@ -702,8 +717,11 @@ void findMinParameters5sigma(const double& sigma, const double& B0, const double
 	if(gradS > 0){
 		step = min(step, 0.4*fabs((fractionSize - minFraction)/gradS));
 	}
-	if(fabs(gradR) > 0){
+	if(gradR > 0){
 		step = min(step, 0.4*fabs(rmax/(R0*gradR)));
+	}
+	if(gradR < 0){
+		step = min(step, 0.4*fabs((maxR - rmax)/(R0*gradR)));
 	}
 	if(gradV < 0){
 		step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
@@ -752,8 +770,11 @@ void findMinParameters5sigma(const double& sigma, const double& B0, const double
 		if(gradS > 0){
 			step = min(step, 0.4*fabs((fractionSize - minFraction)/gradS));
 		}
-		if(fabs(gradR) > 0){
+		if(gradR > 0){
 			step = min(step, 0.4*fabs(rmax/(R0*gradR)));
+		}
+		if(gradR < 0){
+			step = min(step, 0.4*fabs((maxR - rmax)/(R0*gradR)));
 		}
 		if(gradV < 0){
 			step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
@@ -818,6 +839,9 @@ void optimizeParameters5sigma(const double& sigma, const double& B0, const doubl
 				tempS = maxFraction;
 			}
 			double tempR = rmax + 0.2*rmax*(uniformDistribution() - 0.5);
+			if(tempR > maxR) {
+				tempR = maxR;
+			}
 			double tempV = v + (maxV - 0.2*speed_of_light)*uniformDistribution();
 			if(tempV > maxV){
 				tempV = maxV;
@@ -1145,8 +1169,11 @@ void findMinParameters5simple(const double& B0, const double& N0, const double& 
 	if(gradS < 0){
 		step = min(step, 0.4*fabs((fractionSize - minFraction)/gradS));
 	}
-	if(fabs(gradR) > 0){
+	if(gradR > 0){
 		step = min(step, 0.4*fabs(rmax/(R0*gradR)));
+	}
+	if(gradR < 0){
+		step = min(step, 0.4*fabs((maxR - rmax)/(R0*gradR)));
 	}
 	if(gradV > 0){
 		step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
@@ -1240,8 +1267,11 @@ void findMinParameters5simple(const double& B0, const double& N0, const double& 
 	if(gradS < 0){
 		step = min(step, 0.4*fabs((fractionSize - minFraction)/gradS));
 	}
-	if(fabs(gradR) > 0){
+	if(gradR > 0){
 		step = min(step, 0.4*fabs(rmax/(R0*gradR)));
+	}
+	if(gradR < 0){
+		step = min(step, 0.4*fabs((maxR - rmax)/(R0*gradR)));
 	}
 	if(gradV > 0){
 		step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
@@ -1293,8 +1323,11 @@ void findMinParameters5simple(const double& B0, const double& N0, const double& 
 		if(gradS < 0){
 			step = min(step, 0.4*fabs((fractionSize - minFraction)/gradS));
 		}
-		if(fabs(gradR) > 0){
+		if(gradR > 0){
 			step = min(step, 0.4*fabs(rmax/(R0*gradR)));
+		}
+		if(gradR < 0){
+			step = min(step, 0.4*fabs((maxR - rmax)/(R0*gradR)));
 		}
 		if(gradV > 0){
 			step = min(step, 0.4*fabs((maxV - v)/(V0*gradV)));
@@ -1367,6 +1400,9 @@ void optimizeParameters5simple(const double& B0, const double& N0, const double&
 				tempS = maxFraction;
 			}
 			double tempR = rmax + 0.2*rmax*(uniformDistribution() - 0.5);
+			if(tempR > maxR) {
+				tempR = maxR;
+			}
 			double tempV = v + (maxV - 0.2*speed_of_light)*uniformDistribution();
 			if(tempV > maxV){
 				tempV = maxV;
@@ -1374,13 +1410,14 @@ void optimizeParameters5simple(const double& B0, const double& N0, const double&
 			if(tempV < minV){
 				tempV = minV;
 			}
-			double tempF = evaluateOptimizationFunction5simple(tempB, tempN, tempS, rmax, tempV, Ee, dFe, Np, Nd, sintheta, thetaIndex);
+			double tempF = evaluateOptimizationFunction5simple(tempB, tempN, tempS, tempR, tempV, Ee, dFe, Np, Nd, sintheta, thetaIndex);
 			if(tempF < currentF){
 				currentF = tempF;
 				Bfactor = tempB;
 				fractionSize = tempS;
 				N = tempN;
 				v = tempV;
+				rmax = tempR;
 				printf("random search\n");
 				fprintf(logFile, "random search\n");
 			}

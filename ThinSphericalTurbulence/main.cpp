@@ -776,7 +776,7 @@ int main()
 	Numonth[3][3] = augx[4]*1E9;
 	Fmonth[3][3] = augy[4];
 
-	/*Numonth[4][0] = octx[0]*1E9;
+	Numonth[4][0] = octx[0]*1E9;
 	Fmonth[4][0] = octy[0];
 	Numonth[4][1] = octx[0]*1E9;
 	Fmonth[4][1] = octy[0];
@@ -792,7 +792,7 @@ int main()
 	Numonth[5][2] = decx[1]*1E9;
 	Fmonth[5][2] = decy[1];
 	Numonth[5][3] = decx[2]*1E9;
-	Fmonth[5][3] = decy[2];*/
+	Fmonth[5][3] = decy[2];
 
 	//todo chose B
 	/*double meanB = 0;
@@ -835,11 +835,11 @@ int main()
 	printf("optimizing parameters\n");
 	fprintf(logFile, "optimizing parameters\n");
 	fflush(logFile);
-	Bfactor = 0.1;
-	concentration = 11;
-	fractionSize = 0.37;
-	rmax = 3.7E16;
-	v = 0.68*speed_of_light;
+	Bfactor = 0.199;
+	concentration = 163;
+	fractionSize = 0.2;
+	rmax = 5.96E16;
+	v = 0.67*speed_of_light;
 	sigma = 0.02;
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
 	double error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
@@ -855,7 +855,7 @@ int main()
 	double fpoints[Nfp] = {0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
 	double vpoints[Nvp] = { 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
-	for(int i = 0; i < Nbp; ++i){
+	/*for(int i = 0; i < Nbp; ++i){
 		double tempBfactor = Bpoints[i];
 		for(int j = 0; j < Nnp; ++j){
 			double tempConcentration = npoints[j];
@@ -882,12 +882,12 @@ int main()
 				}
 			}
 		}
-	}
-	/*Bfactor = 0.2;
+	}*/
+	Bfactor = 0.2;
 	concentration = 100;
 	fractionSize = 0.2;
 	rmax = 3E16;
-	v = 0.75*speed_of_light;*/
+	v = 0.75*speed_of_light;
 
 	//optimizeParameters(Bfactor, concentration, fractionSize, nu1, rmax, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters4(1.0, 2000, 3.4E16, Bfactor, concentration, fractionSize, rmax, nu1, Ee, dFe, Np, Nnu1, Ndist, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
