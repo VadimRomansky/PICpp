@@ -59,10 +59,10 @@ void findMinParameters5(double* vector, const double* grad, double** nu, double*
 	double maxLambda = sqrt(1.0*Ngrad);
 	for(int i = 0; i < Ngrad; ++i) {
 		if(grad[i] > 0) {
-			maxLambda = min(maxLambda, (vector[i] - minVector[i])/grad[i]);
+			maxLambda = min(maxLambda, fabs((vector[i] - minVector[i])/grad[i]));
 		}
 		if(grad[i] < 0) {
-			maxLambda = min(maxLambda, (1.0 - vector[i])/grad[i]);
+			maxLambda = min(maxLambda, fabs((1.0 - vector[i])/grad[i]));
 		}
 	}
 
@@ -109,10 +109,10 @@ void findMinParameters5(double* vector, const double* grad, double** nu, double*
 	maxLambda = sqrt(1.0*Ngrad);
 	for(int i = 0; i < Ngrad; ++i) {
 		if(grad[i] > 0) {
-			maxLambda = min(maxLambda, (vector[i] - minVector[i])/grad[i]);
+			maxLambda = min(maxLambda, fabs((vector[i] - minVector[i])/grad[i]));
 		}
 		if(grad[i] < 0) {
-			maxLambda = min(maxLambda, (1.0 - vector[i])/grad[i]);
+			maxLambda = min(maxLambda, fabs((1.0 - vector[i])/grad[i]));
 		}
 	}
 

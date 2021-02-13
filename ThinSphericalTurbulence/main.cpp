@@ -445,8 +445,8 @@ int main()
 				} else {
 					concentrations3d[i][j][k] = 1.0;
 				}
-				sintheta3d[i][j][k] = 1.0;
-				thetaIndex3d[i][j][k] = 9;
+				//sintheta3d[i][j][k] = 1.0;
+				//thetaIndex3d[i][j][k] = 9;
 			}
 		}
 	}
@@ -835,10 +835,10 @@ int main()
 	printf("optimizing parameters\n");
 	fprintf(logFile, "optimizing parameters\n");
 	fflush(logFile);
-	Bfactor = 0.199;
-	concentration = 163;
-	fractionSize = 0.2;
-	rmax = 5.96E16;
+	Bfactor = 0.5*maxB;
+	concentration = 0.5*maxN;
+	fractionSize = 0.5*maxFraction;
+	rmax = 4.0E16;
 	v = 0.67*speed_of_light;
 	sigma = 0.02;
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
@@ -855,10 +855,10 @@ int main()
 	double fpoints[Nfp] = {0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
 	double vpoints[Nvp] = { 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
-	/*for(int i = 0; i < Nbp; ++i){
+	for(int i = 0; i < Nbp; ++i){
 		double tempBfactor = Bpoints[i];
 		for(int j = 0; j < Nnp; ++j){
-			double tempConcentration = npoints[j];
+			tempConcentration = npoints[j];
 			for(int k = 0; k < Nfp; ++k){
 				double tempFractionSize = fpoints[k];
 				for(int l = 0; l < Nvp; ++l){
@@ -882,12 +882,12 @@ int main()
 				}
 			}
 		}
-	}*/
-	Bfactor = 0.1;
+	}
+	/*Bfactor = 0.1;
 	concentration = 100;
-	fractionSize = 0.2;
+	fractionSize = 0.1;
 	rmax = 3E16;
-	v = 0.6*speed_of_light;
+	v = 0.7*speed_of_light;*/
 
 	double vector[5];
 	vector[0] = Bfactor/maxB;
