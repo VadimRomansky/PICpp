@@ -247,8 +247,9 @@ void optimizeParameters5(double* vector,  double** nu, double** observedInu, dou
 			for(int j = 0; j < Ngrad; ++j) {
 				tempVector[j] = vector[j];
 			}
-			double dx = fabs(vector[i])/10;
+			double dx = fabs(vector[i])/1000;
 			tempVector[i] = vector[i] + dx;
+			//currentF = evaluateOptimizationFunction5(vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxR, vector[4]*maxV, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 			double f = evaluateOptimizationFunction5(tempVector[0]*maxB, tempVector[1]*maxN, tempVector[2]*maxFraction, tempVector[3]*maxR, tempVector[4]*maxV, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 			tempVector[i] = vector[i] - dx;
 			double f1 = evaluateOptimizationFunction5(tempVector[0]*maxB, tempVector[1]*maxN, tempVector[2]*maxFraction, tempVector[3]*maxR, tempVector[4]*maxV, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
@@ -296,7 +297,7 @@ void optimizeParameters5(double* vector,  double** nu, double** observedInu, dou
 			for(int j = 0; j < Ngrad; ++j) {
 				tempVector[j] = vector[j];
 			}
-			double dx = fabs(vector[i])/10;
+			double dx = fabs(vector[i])/1000;
 			tempVector[i] = vector[i] + dx;
 			double f = evaluateOptimizationFunction5(tempVector[0]*maxB, tempVector[1]*maxN, tempVector[2]*maxFraction, tempVector[3]*maxR, tempVector[4]*maxV, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 			tempVector[i] = vector[i] - dx;

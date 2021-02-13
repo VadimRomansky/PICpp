@@ -855,7 +855,7 @@ int main()
 	double fpoints[Nfp] = {0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
 	double vpoints[Nvp] = { 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
-	for(int i = 0; i < Nbp; ++i){
+	/*for(int i = 0; i < Nbp; ++i){
 		double tempBfactor = Bpoints[i];
 		for(int j = 0; j < Nnp; ++j){
 			double tempConcentration = npoints[j];
@@ -882,12 +882,12 @@ int main()
 				}
 			}
 		}
-	}
-	/*Bfactor = 0.2;
+	}*/
+	Bfactor = 0.1;
 	concentration = 100;
 	fractionSize = 0.2;
 	rmax = 3E16;
-	v = 0.75*speed_of_light;*/
+	v = 0.6*speed_of_light;
 
 	double vector[5];
 	vector[0] = Bfactor/maxB;
