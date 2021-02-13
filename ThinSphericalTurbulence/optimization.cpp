@@ -53,7 +53,7 @@ void findMinParameters5(double* vector, const double* grad, double** nu, double*
 	minVector[0] = minB/maxB;
 	minVector[1] = minN/maxN;
 	minVector[2] = minFraction/maxFraction;
-	minVector[3] = 0;
+	minVector[3] = minR/maxR;
 	minVector[4] = minV/maxV;
 
 	double maxLambda = sqrt(1.0*Ngrad);
@@ -98,6 +98,7 @@ void findMinParameters5(double* vector, const double* grad, double** nu, double*
 			//todo!
 			for(int i = 0; i < Ngrad; ++i) {
 				vector[i] = tempVector1[i];
+				return;
 			}
 		} else {
 			return;
@@ -199,7 +200,7 @@ void optimizeParameters5(double* vector,  double** nu, double** observedInu, dou
 	minVector[0] = minB/maxB;
 	minVector[1] = minN/maxN;
 	minVector[2] = minFraction/maxFraction;
-	minVector[3] = 0;
+	minVector[3] = minR/maxR;
 	minVector[4] = minV/maxV;
 	double currentF = evaluateOptimizationFunction5(vector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 	printf("optimization function = %g\n", currentF);
@@ -278,6 +279,7 @@ void optimizeParameters5(double* vector,  double** nu, double** observedInu, dou
 		gradNorm = sqrt(gradNorm);
 		if(gradNorm <= 0){
 			printf("gradNorm <= 0\n");
+			continue;
 		}
 		if(gradNorm != gradNorm){
 			printf("gradNorm = NaN\n");
@@ -327,6 +329,7 @@ void optimizeParameters5(double* vector,  double** nu, double** observedInu, dou
 		gradNorm = sqrt(gradNorm);
 		if(gradNorm <= 0){
 			printf("gradNorm <= 0\n");
+			continue;
 		}
 		if(gradNorm != gradNorm){
 			printf("gradNorm = NaN\n");

@@ -49,9 +49,9 @@ const double times[Nmonth] = {0, 2760000, 5270400, 10700000, 19000000, 56100000}
 
 const double distance = 40*3*1.0E24;
 
-const int Nrho = 20;
-const int Nphi = 20;
-const int Nz = 20;
+const int Nrho = 10;
+const int Nphi = 10;
+const int Nz = 10;
 
 const int Nk = 10;
 
@@ -162,5 +162,6 @@ const double maxEta = 0.8*pi/2;
 const double maxV = 0.9*speed_of_light;
 const double minV = 0.6*speed_of_light;
 const double maxR = 19*24*3600*3E10;
+const double minR = 1E16;
 
 #endif

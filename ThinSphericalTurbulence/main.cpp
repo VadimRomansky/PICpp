@@ -160,7 +160,7 @@ void evaluateOrientationParameters3dflat(double*** B, double*** sintheta, int***
 				if(sinTheta != sinTheta){
 					printf("sintheta NaN\n");
 				}
-
+				sintheta[i][j][k] = sinTheta;
 
 				double theta2 = acos(cosTheta);
 				if(theta2 >= pi/2){
@@ -883,11 +883,15 @@ int main()
 			}
 		}
 	}
-	/*Bfactor = 0.1;
+	/*Bfactor = 0.2;
 	concentration = 100;
-	fractionSize = 0.1;
+	fractionSize = 0.2;
 	rmax = 3E16;
-	v = 0.7*speed_of_light;*/
+	v = 0.6*speed_of_light;*/
+
+	error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
+	printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
 
 	double vector[5];
 	vector[0] = Bfactor/maxB;
