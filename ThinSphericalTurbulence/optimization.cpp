@@ -98,8 +98,8 @@ void findMinParameters5(double* vector, const double* grad, double** nu, double*
 			//todo!
 			for(int i = 0; i < Ngrad; ++i) {
 				vector[i] = tempVector1[i];
-				return;
 			}
+			return;
 		} else {
 			return;
 		}
@@ -211,7 +211,7 @@ void optimizeParameters5(double* vector,  double** nu, double** observedInu, dou
 		///randomization;
 		for(int j = 0; j < 5; ++j){
 			for(int i = 0; i < Ngrad; ++i) {
-				tempVector[i] = vector[i] + 0.2*(uniformDistribution() - 0.5);
+				tempVector[i] = minVector[i] + (1.0 - minVector[i])*uniformDistribution();
 				if(tempVector[i] > 1.0) {
 					tempVector[i] = 1.0;
 				}
@@ -322,7 +322,7 @@ void optimizeParameters5(double* vector,  double** nu, double** observedInu, dou
 			}
 		}
 
-		gradNorm = 0;
+ 		gradNorm = 0;
 		for(int i = 0; i < Ngrad; ++i){
 			gradNorm = gradNorm + grad[i]*grad[i];
 		}

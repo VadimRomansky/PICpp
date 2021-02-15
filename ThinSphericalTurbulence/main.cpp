@@ -776,23 +776,25 @@ int main()
 	Numonth[3][3] = augx[4]*1E9;
 	Fmonth[3][3] = augy[4];
 
-	Numonth[4][0] = octx[0]*1E9;
-	Fmonth[4][0] = octy[0];
-	Numonth[4][1] = octx[0]*1E9;
-	Fmonth[4][1] = octy[0];
-	Numonth[4][2] = octx[1]*1E9;
-	Fmonth[4][2] = octy[1];
-	Numonth[4][3] = octx[2]*1E9;
-	Fmonth[4][3] = octy[2];
+	if(Nmonth > 4){
+		Numonth[4][0] = octx[0]*1E9;
+		Fmonth[4][0] = octy[0];
+		Numonth[4][1] = octx[0]*1E9;
+		Fmonth[4][1] = octy[0];
+		Numonth[4][2] = octx[1]*1E9;
+		Fmonth[4][2] = octy[1];
+		Numonth[4][3] = octx[2]*1E9;
+		Fmonth[4][3] = octy[2];
 
-	Numonth[5][0] = decx[0]*1E9;
-	Fmonth[5][0] = decy[0];
-	Numonth[5][1] = decx[0]*1E9;
-	Fmonth[5][1] = decy[0];
-	Numonth[5][2] = decx[1]*1E9;
-	Fmonth[5][2] = decy[1];
-	Numonth[5][3] = decx[2]*1E9;
-	Fmonth[5][3] = decy[2];
+		Numonth[5][0] = decx[0]*1E9;
+		Fmonth[5][0] = decy[0];
+		Numonth[5][1] = decx[0]*1E9;
+		Fmonth[5][1] = decy[0];
+		Numonth[5][2] = decx[1]*1E9;
+		Fmonth[5][2] = decy[1];
+		Numonth[5][3] = decx[2]*1E9;
+		Fmonth[5][3] = decy[2];
+	}
 
 	//todo chose B
 	/*double meanB = 0;
@@ -884,10 +886,10 @@ int main()
 		}
 	}
 	/*Bfactor = 0.2;
-	concentration = 100;
+	concentration = 200;
 	fractionSize = 0.2;
 	rmax = 3E16;
-	v = 0.6*speed_of_light;*/
+	v = 0.7*speed_of_light;*/
 
 	error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
