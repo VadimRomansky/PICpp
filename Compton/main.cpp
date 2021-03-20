@@ -41,6 +41,7 @@ double evaluatePhotonDistribution(const double& energy, int Np, double* Eph, dou
 			}
 		}
 		double result = (Fph[currentI]*(Eph[nextI] - energy) + Fph[nextI]*(energy - Eph[currentI]))/(Eph[nextI] - Eph[currentI]);
+		return result;
 	}
 }
 
@@ -49,7 +50,7 @@ int main()
 {
 	const int Ndist = 10;
 	const int Np = 200;
-	const int Nnu = 100;
+	const int Nnu = 400;
 
 
 	const int Nphi = 20;
@@ -179,7 +180,7 @@ int main()
 				Ee[j][i] = gamma*massElectron*speed_of_light2;
 
 				double minGamma = 2;
-				double power = 3;
+				double power = 2;
 
 				if(gamma >= minGamma){
 					Fe[j][i] = 1.0/pow(Ee[j][i],power);
@@ -198,8 +199,8 @@ int main()
 
 	double* E = new double[Nnu];
 	double* I = new double[Nnu];
-	double Emin = kBoltzman*Tphotons;
-	double Emax = Ee[iangle][Np-1]*2;
+	double Emin = 0.000001*kBoltzman*Tphotons;
+	double Emax = Ee[iangle][Np-1];
 	factor = pow(Emax/Emin, 1.0/(Nnu - 1));
 	E[0] = Emin;
 	I[0] = 0;
@@ -207,6 +208,15 @@ int main()
 		E[i] = E[i-1]*factor;
 		I[i] = 0;
 	}
+
+	//for debug
+	/*for(int i = 0; i < Np; ++i){
+		Fe[iangle][i] = 0;
+		Fph[i] = 0;
+	}
+	Fe[iangle][Np/2] = 1.0;
+	Fph[Np/2] = 1.0;*/
+	/////
 
 	double re2 = sqr(electron_charge*electron_charge/(massElectron*speed_of_light2));
 
@@ -246,6 +256,10 @@ int main()
 						I[i] += (re2*speed_of_light*(1.0 - electronInitialBeta*photonInitialCosTheta)/(2*electronInitialGamma*(1.0 - electronInitialBeta*photonFinalCosTheta)))*
 							(1.0 + cosXiPrimed*cosXiPrimed + sqr(photonFinalEnergyPrimed/(massElectron*speed_of_light2))*sqr(1.0 - cosXiPrimed)/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed)))*
 							2*pi*dcosTheta*dphi*dcosTheta*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Np, Eph, Fph);
+						if(I[i] != I[i]){
+							printf("I[i] = NaN\n");
+							exit(0);
+						}
 					}
 				}
 			}
@@ -254,7 +268,8 @@ int main()
 
 	FILE* output = fopen("output.dat","w");
 	for(int i = 0; i < Nnu; ++i){
-		fprintf(output, "%g %g\n", E[i], I[i]);
+		double nu2 = sqr(E[i]/hplank);
+		fprintf(output, "%g %g\n", E[i]/(1.6E-12), nu2*I[i]);
 	}
 	fclose(output);
 
