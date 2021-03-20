@@ -20,6 +20,7 @@ const double speed_of_light = 2.99792458E10;
 const double speed_of_light2 = speed_of_light * speed_of_light;
 const double speed_of_light4 = speed_of_light2 * speed_of_light2;
 const double electron_charge = 4.803529695E-10;
+const double hplank = 6.626E-27;
 const double pi = 4*atan2(1.0,1.0);
 const double four_pi = 4*pi;
 
