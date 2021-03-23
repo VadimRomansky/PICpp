@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Adiabata", "Adiabata\Adiaba
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Radiation", "ThinSphericalTurbulence\ThinSphericalTurbulence.vcxproj", "{EE48822B-5F2D-4B59-B8EF-C4309D29828F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Compton", "Compton\Compton.vcxproj", "{3657735B-2619-4E34-ABEF-AF2C99ED3A4B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -133,6 +135,16 @@ Global
 		{EE48822B-5F2D-4B59-B8EF-C4309D29828F}.Release|Win32.ActiveCfg = Release|Win32
 		{EE48822B-5F2D-4B59-B8EF-C4309D29828F}.Release|Win32.Build.0 = Release|Win32
 		{EE48822B-5F2D-4B59-B8EF-C4309D29828F}.Release|x64.ActiveCfg = Release|Win32
+		{3657735B-2619-4E34-ABEF-AF2C99ED3A4B}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{3657735B-2619-4E34-ABEF-AF2C99ED3A4B}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{3657735B-2619-4E34-ABEF-AF2C99ED3A4B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3657735B-2619-4E34-ABEF-AF2C99ED3A4B}.Debug|Win32.Build.0 = Debug|Win32
+		{3657735B-2619-4E34-ABEF-AF2C99ED3A4B}.Debug|x64.ActiveCfg = Debug|Win32
+		{3657735B-2619-4E34-ABEF-AF2C99ED3A4B}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{3657735B-2619-4E34-ABEF-AF2C99ED3A4B}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{3657735B-2619-4E34-ABEF-AF2C99ED3A4B}.Release|Win32.ActiveCfg = Release|Win32
+		{3657735B-2619-4E34-ABEF-AF2C99ED3A4B}.Release|Win32.Build.0 = Release|Win32
+		{3657735B-2619-4E34-ABEF-AF2C99ED3A4B}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
