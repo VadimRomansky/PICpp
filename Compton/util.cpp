@@ -78,3 +78,10 @@ std::string convertIntToString(int a) {
 	std::string result = "-";
 	return result + convertIntToString(a);
 }
+
+void printLog(const char* s){
+	FILE* logFile = fopen("log.dat", "a");
+	printf(s);
+	fprintf(logFile, s);
+	fclose(logFile);
+}

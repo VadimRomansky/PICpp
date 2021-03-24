@@ -51,7 +51,7 @@ void initializeParker(int Nrho, int Ntheta, int Nphi, double*** Bx, double*** By
 	double cosThetaObserv = cos(thetaObserv);
 	double rcorot = rho[Nrho-1]/10.0;
 	double rmin = rho[Nrho-1]/100.0;
-	double Br1 = sqr(rmin/Nrho);
+	double Br1 = sqr(rmin/rho[Nrho-1]);
 	double Bphi1 = ((rho[Nrho-1] - rmin)/rcorot)*sqr(rmin/rho[Nrho-1]);
 	//norm to 1;
 	double B0 = 1.0/sqrt(Br1*Br1 + Bphi1*Bphi1);
@@ -72,8 +72,8 @@ void initializeParker(int Nrho, int Ntheta, int Nphi, double*** Bx, double*** By
 				double costheta = z1/r;
 				double sintheta = sqrt(1.0 - costheta*costheta);
 
-				double sinphi = y1/sqrt(x1*x1 + y1*y1);
-				double cosphi = x1/sqrt(x1*x1 + y1*y1);
+				double sinphi = sinPhiValue[k];
+				double cosphi = cosPhiValue[k];
 
 				double Br = B0*costheta*sqr(rmin/r);
 				double Bphi = B0*costheta*((r - rmin)/rcorot)*sqr(rmin/r)*sintheta;
@@ -88,6 +88,8 @@ void initializeParker(int Nrho, int Ntheta, int Nphi, double*** Bx, double*** By
 
 				if(Bx[i][j][k] != Bx[i][j][k]){
 					printf("Bx = NaN\n");
+					printLog("Bx = NaN\n");
+					exit(0);
 				}
 			}
 		}
@@ -105,6 +107,8 @@ void evaluateOrientationParameters3d(int Nrho, int Ntheta, int Nphi, double*** B
 				double sinTheta = Bxy/B[i][j][k];
 				if(sinTheta != sinTheta){
 					printf("sintheta NaN\n");
+					printLog("sinTheta = NaN\n");
+					exit(0);
 				}
 				sintheta[i][j][k] = sinTheta;
 
@@ -142,6 +146,31 @@ void evaluateOrientationParameters3d(int Nrho, int Ntheta, int Nphi, double*** B
 	}
 }
 
+double evaluateTurbB(const double& kx, const double& ky, const double& kz, const double turbNorm){
+	double k = sqrt(kx*kx + ky*ky + kz*kz);
+	return turbNorm/pow(k, 11.0/3.0);
+}
+
+double evaluateTurbNorm(const double& kmax, const int& Nk, const double& B0, const double& energyFraction){
+	double dk = kmax/Nk;
+	double sum = 0;
+	for(int i = 0; i < Nk; ++i){
+		for(int j = 0; j < Nk; ++j){
+			for(int k = 0; k < Nk; ++k){
+				if((i + j + k) > 4){
+					double kx = i*dk;
+					double ky = j*dk;
+					double kz = k*dk;
+					double B = evaluateTurbB(kx, ky, kz, 1.0);
+
+					sum = sum + B*B;
+				}
+			}
+		}
+	}
+	return B0*sqrt(energyFraction/((1.0 - energyFraction)*sum));
+}
+
 
 int main()
 {
@@ -154,7 +183,8 @@ int main()
 
 
 	const int Nphi = 10;
-	const int Ntheta = 10;
+	const int Ntheta = 20;
+	double cosThetaLeft[Ntheta];
 	double cosTheta[Ntheta];
 	double phi[Nphi];
 	double sinPhiValue[Nphi];
@@ -164,6 +194,7 @@ int main()
 	double dphi = 2.0*pi/Nphi;
 	for(int i = 0; i < Ntheta; ++i){
 		cosTheta[i] = 1.0 - (i + 0.5)*dcosTheta;
+		cosThetaLeft[i] = 1.0 - (i)*dcosTheta;
 	}
 	for(int i = 0; i < Nphi; ++i){
 		phi[i] = (i + 0.5)*dphi;
@@ -179,6 +210,11 @@ int main()
 	double Ephmin = 0.1*kBoltzman*Tphotons;
 	double Ephmax = kBoltzman*Tphotons*100;
 
+	FILE* logFile = fopen("log.dat", "w");
+	fclose(logFile);
+
+	printLog("start\n");
+
 	double factor = pow(Ephmax/Ephmin, 1.0/(Np - 1));
 	Eph[0] = Ephmin;
 	Fph[0] = 0;
@@ -191,6 +227,7 @@ int main()
 		dFph[i] = Fph[i]*(Eph[i] - Eph[i-1]);
 	}
 
+	printLog("read electrons distribution\n");
 	double** Fe = new double*[Ndist];
 	double** dFe = new double*[Ndist];
 	double** Ee = new double*[Ndist];
@@ -299,6 +336,7 @@ int main()
 		fclose(inputFe);
 	}
 
+	printLog("initialize fields\n");
 	const int Nrho = 10;
 	double rmax = 3.6E16;
 	double fraction = 0.2;
@@ -325,7 +363,7 @@ int main()
 		concentrations3d[i] = new double*[Ntheta];
 		sintheta3d[i] = new double*[Ntheta];
 		thetaIndex3d[i] = new int*[Ntheta];
-		for(int j = 0; j < Nphi; ++j){
+		for(int j = 0; j < Ntheta; ++j){
 			volume[i][j] = new double[Nphi];
 			B3d[i][j] = new double[Nphi];
 			Bx3d[i][j] = new double[Nphi];
@@ -351,10 +389,94 @@ int main()
 		}
 	}
 
+	printLog("initialize Parker\n");
 	if(parker){
 		initializeParker(Nrho, Ntheta, Nphi, Bx3d, By3d, Bz3d, rho, cosTheta, sinPhiValue, cosPhiValue);
 	}
 
+	printLog("initialize turbulence\n");
+	srand(time(NULL));
+	int randomSeed = rand();
+	randomSeed = 10;
+	printf("random seed = %d\n", randomSeed);
+	srand(randomSeed);
+
+	const int Nk = 10;
+
+	double kmin = 2*pi*2/(0.5);
+	double dk = kmin;
+	double kmax = Nk*dk;
+	double turbulenceFraction = 0.9;
+	double turbNorm = evaluateTurbNorm(kmax, Nk, 1.0, turbulenceFraction);
+
+	if(turbulence){
+		for(int i = 0; i < Nrho; ++i){
+			for(int j = 0; j < Ntheta; ++j){
+				for(int k = 0; k < Nphi; ++k){
+					Bx3d[i][j][k] = Bx3d[i][j][k]*sqrt(1.0 - turbulenceFraction);
+					By3d[i][j][k] = By3d[i][j][k]*sqrt(1.0 - turbulenceFraction);
+					Bz3d[i][j][k] = Bz3d[i][j][k]*sqrt(1.0 - turbulenceFraction);
+					B3d[i][j][k] = B3d[i][j][k]*sqrt(1.0 - turbulenceFraction);
+				}
+			}
+		}
+
+		for(int ki = 0; ki < Nk; ++ki){
+			printf("%d\n", ki);
+			for(int kj = 0; kj < Nk; ++kj){
+				//for(int kk = 0; kk < Nk; ++kk){
+					if ((ki + kj) > 4) {
+						double phase1 = 2*pi*uniformDistribution();
+						double phase2 = 2*pi*uniformDistribution();
+
+
+						double kx = ki*dk;
+						double ky = kj*dk;
+						//double kz = kk*dk;
+
+						double kw = sqrt(kx*kx + ky*ky);
+						double kxy = sqrt(ky*ky + kx*kx);
+						//double cosTheta1 = 0;
+						//double sinTheta1 = 1.0;
+						double cosPhi = 1.0;
+						double sinPhi = 0;
+						if(kj + ki > 0) {
+							cosPhi = kx/kxy;
+							sinPhi = ky/kxy;
+						} else {
+							cosPhi = 1.0;
+							sinPhi = 0.0;
+						}
+
+						double Bturbulent = evaluateTurbB(kx, ky, 0, turbNorm);
+
+						for(int i = 0; i < Nrho; ++i){
+							for(int j = 0; j < Ntheta; ++j){
+								for(int k = 0; k < Nphi; ++k){
+									double z = rho[i]*cosTheta[j];
+									double rxy = sqrt(rho[i]*rho[i] - z*z);
+									double x = rxy*cosPhiValue[k];
+									double y = rxy*sinPhiValue[k];
+
+									double kmultr = kx*x + ky*y;
+									double localB1 = Bturbulent*sin(kmultr + phase1)*cos(pi*z/(2*rho[Nrho-1]));
+									double localB2 = Bturbulent*sin(kmultr + phase2)*cos(pi*z/(2*rho[Nrho-1]));
+									localB1 = 0;
+									localB2 = localB2*sqrt(2.0);
+
+									Bz3d[i][j][k] = Bz3d[i][j][k] - localB1;
+									Bx3d[i][j][k] = Bx3d[i][j][k] - localB2*sinPhi;
+									By3d[i][j][k] = By3d[i][j][k] + localB2*cosPhi;
+								}
+							}
+						}
+					//}
+				}
+			}
+		}
+	}
+
+	printLog("evaluate orientation parameters\n");
 	evaluateOrientationParameters3d(Nrho, Ntheta, Nphi, B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist, rho, cosTheta, sinPhiValue, cosPhiValue);
 
 	int iangle = 3;
@@ -379,15 +501,22 @@ int main()
 	Fe[iangle][Np/2] = 1.0;
 	Fph[Np/2] = 1.0;*/
 	/////
-
+	printLog("evaluate spectrum\n");
 	double re2 = sqr(electron_charge*electron_charge/(massElectron*speed_of_light2));
 
+	#pragma omp parallel for shared(logFile)
 	for(int i = 0; i < Nnu; ++i){
+		logFile = fopen("log.dat","a");
 		printf("i nu = %d\n", i);
+		fprintf(logFile, "i nu = %d\n", i);
+		fclose(logFile);
 		double photonFinalEnergy = E[i];
 		for(int j = 0; j < Ntheta; ++j){
 			//integration by phi changes to 2 pi?
-			double photonFinalCosTheta = cosTheta[j];
+			double photonFinalCosTheta = cosThetaLeft[j];
+			//int ir = 0;
+			//int itheta = 0;
+			//int iphi = 0;
 			for(int ir = 0; ir < Nrho; ++ir){
 				for(int itheta = 0; itheta < Ntheta; ++itheta){
 					for(int iphi = 0; iphi < Nphi; ++iphi){
@@ -408,7 +537,7 @@ int main()
 							LorentzTransformationPhotonZ(electronInitialBeta, photonFinalEnergy, photonFinalCosTheta, photonFinalEnergyPrimed, photonFinalCosThetaPrimed);
 							double photonFinalSinThetaPrimed = sqrt(1.0 - photonFinalCosThetaPrimed*photonFinalCosThetaPrimed);
 							for(int l = 0; l < Ntheta; ++l){
-								double photonInitialCosTheta = cosTheta[l];
+								double photonInitialCosTheta = cosThetaLeft[l];
 								double photonInitialCosThetaPrimed = (photonInitialCosTheta - electronInitialBeta)/(1.0 - electronInitialBeta*photonInitialCosTheta);
 								double photonInitialSinThetaPrimed = sqrt(1.0 - photonInitialCosThetaPrimed*photonInitialCosThetaPrimed);
 								for(int m = 0; m < Nphi; ++m){
@@ -424,6 +553,7 @@ int main()
 										2*pi*dcosTheta*dphi*dcosTheta*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Np, Eph, Fph);
 									if(I[i] != I[i]){
 										printf("I[i] = NaN\n");
+										printLog("I[i] = NaN\n");
 										exit(0);
 									}
 								}
@@ -435,12 +565,16 @@ int main()
 		}
 	}
 
+	printLog("output\n");
+
 	FILE* output = fopen("output.dat","w");
 	for(int i = 0; i < Nnu; ++i){
 		double nu = E[i]/hplank;
 		fprintf(output, "%g %g\n", E[i]/(1.6E-12), nu*E[i]*I[i]/sqr(distance));
 	}
 	fclose(output);
+
+	printLog("delete arrays\n");
 
 	for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){

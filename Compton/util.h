@@ -10,5 +10,6 @@ double min3(const double& a, const double& b, const double& c);
 double min4(const double& a, const double& b, const double& c, const double& d);
 double max(const double& a, const double& b);
 std::string convertIntToString(int a);
+void printLog(const char* s);
 
 #endif
