@@ -7,6 +7,7 @@
 #include <time.h>
 #include <cmath>
 #include <string>
+#include <omp.h>
 
 #include "constants.h"
 #include "util.h"
@@ -511,12 +512,16 @@ int main()
 	printLog("evaluate spectrum\n");
 	double re2 = sqr(electron_charge*electron_charge/(massElectron*speed_of_light2));
 
-	#pragma omp parallel for shared(logFile)
+	omp_lock_t write_lock;
+
+	#pragma omp parallel for shared(logFile, re2, E, I, concentrations3d, thetaIndex3d, volume, rho, Ee, Fe, Eph, Fph, cosTheta, cosThetaLeft, sinPhiValue, cosPhiValue) private(iangle)
 	for(int i = 0; i < Nnu; ++i){
+		omp_set_lock(&write_lock);
 		logFile = fopen("log.dat","a");
 		printf("i nu = %d\n", i);
 		fprintf(logFile, "i nu = %d\n", i);
 		fclose(logFile);
+		omp_unset_lock(&write_lock);
 		double photonFinalEnergy = E[i];
 		for(int j = 0; j < Ntheta; ++j){
 			//integration by phi changes to 2 pi?
@@ -583,6 +588,8 @@ int main()
 			}
 		}
 	}
+
+	omp_destroy_lock(&write_lock);
 
 	printLog("output\n");
 
