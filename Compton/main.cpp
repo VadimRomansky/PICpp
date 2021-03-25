@@ -62,8 +62,8 @@ void initializeParker(int Nrho, int Ntheta, int Nphi, double*** Bx, double*** By
 				double z = r*cosTheta[j];
 				double rxy = sqrt(r*r - z*z);
 
-				double x = rxy*cosPhiValue[j];
-				double y = rxy*sinPhiValue[j];
+				double x = rxy*cosPhiValue[k];
+				double y = rxy*sinPhiValue[k];
 
 				double y1 = y;
 				double z1 = z*cosThetaObserv + x*sinThetaObserv;
@@ -114,11 +114,11 @@ void evaluateOrientationParameters3d(int Nrho, int Ntheta, int Nphi, double*** B
 
 				double r = rho[i];
 
-				double cosTheta1 = cosThetaValue[j];
+				double cosTheta1 = cosThetaValue[k];
 				double sinTheta1 = sqrt(1.0 - cosTheta1*cosTheta1);
 				
-				double cosPhi1 = cosPhiValue[j];
-				double sinPhi1 = sinPhiValue[j];
+				double cosPhi1 = cosPhiValue[k];
+				double sinPhi1 = sinPhiValue[k];
 
 				double Br = Bx[i][j][k]*sinTheta1*cosPhi1 + 
 						    By[i][j][k]*sinTheta1*sinPhi1 +
@@ -138,6 +138,13 @@ void evaluateOrientationParameters3d(int Nrho, int Ntheta, int Nphi, double*** B
 					printf("thetaIndex == Nd\n");
 					printf("%lf\n", By[i][j][k]);
 					thetaIndex[i][j][k] = Nd - 1;
+				}
+				if(thetaIndex[i][j][k] < 0 || thetaIndex[i][j][k] > Nd){
+					FILE* logFile = fopen("log.dat","a");
+					printf("thetaIndex = %d\n", thetaIndex[i][j][k]);
+					fprintf(logFile, "thetaIndex = %d\n", thetaIndex[i][j][k]);
+					fclose(logFile); 
+					exit(0);
 				}
 				//for debug
 				//thetaIndex[i][j][k] = 9;
@@ -523,8 +530,16 @@ int main()
 						iangle = thetaIndex3d[ir][itheta][iphi];
 						for(int k = 0; k < Np; ++k){
 							double electronInitialEnergy = Ee[iangle][k];
+							/*logFile = fopen("log.dat","a");
+							printf("electronInitialEnergy = %g\n", electronInitialEnergy);
+							fprintf(logFile, "electronInitialEnergy = %g\n", electronInitialEnergy);
+							fclose(logFile);*/
 							double electronInitialGamma = electronInitialEnergy/(massElectron*speed_of_light2);
 							double electronInitialBeta = sqrt(1.0 - 1.0/(electronInitialGamma*electronInitialGamma));
+							/*logFile = fopen("log.dat","a");
+							printf("electronInitialBeta = %g\n", electronInitialBeta);
+							fprintf(logFile, "electronInitialBeta = %g\n", electronInitialBeta);
+							fclose(logFile);*/
 							double delectronEnergy;
 							if(k == 0){
 								delectronEnergy = Ee[iangle][1] - Ee[iangle][0];
@@ -537,6 +552,10 @@ int main()
 							LorentzTransformationPhotonZ(electronInitialBeta, photonFinalEnergy, photonFinalCosTheta, photonFinalEnergyPrimed, photonFinalCosThetaPrimed);
 							double photonFinalSinThetaPrimed = sqrt(1.0 - photonFinalCosThetaPrimed*photonFinalCosThetaPrimed);
 							for(int l = 0; l < Ntheta; ++l){
+								/*logFile = fopen("log.dat","a");
+								printf("l photon initial theta = %d\n", l);
+								fprintf(logFile, "l photon initial theta = %d\n", l);
+								fclose(logFile);*/
 								double photonInitialCosTheta = cosThetaLeft[l];
 								double photonInitialCosThetaPrimed = (photonInitialCosTheta - electronInitialBeta)/(1.0 - electronInitialBeta*photonInitialCosTheta);
 								double photonInitialSinThetaPrimed = sqrt(1.0 - photonInitialCosThetaPrimed*photonInitialCosThetaPrimed);
