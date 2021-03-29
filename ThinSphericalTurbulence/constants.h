@@ -11,6 +11,7 @@ const double massDeuteriumReal = 3.34449696893E-24;
 const double massHelium3Real = 5.00823792874E-24;
 const double massOxygenReal = 26.5601801672E-24;
 const double massSiliconReal = 46.4567787264E-24;
+const double dzeta3 = 1.202056903;
 
 const double massRelationSqrt = sqrt(100.0);
 const double realMassRelationSqrt = sqrt(massProtonReal/massElectron);

@@ -19,6 +19,10 @@ double sqr(const double& a){
 	return a*a;
 }
 
+double cube(const double& a){
+	return a*a*a;
+}
+
 double min(const double& a, const double& b){
 	if(a < b) {
 		return a;

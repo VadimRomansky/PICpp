@@ -224,13 +224,18 @@ int main()
 		cosThetaSpace[i] = 1.0 - (i + 0.5)*dcosThetaSpace;
 	}
 
-	double Tphotons = 20;
+	double Tphotons1 = 2.7;
+	double Tphotons2 = 20;
+	double Tphotons3 = 5000;
+	double a1 = 1.0;
+	double a2 = 4E-4;
+	double a3 = 1E-13;
 	double* Fph = new double[Np];
 	double* dFph = new double[Np];
 	double* Eph = new double[Np];
 
-	double Ephmin = 0.1*kBoltzman*Tphotons;
-	double Ephmax = kBoltzman*Tphotons*1000;
+	double Ephmin = 0.1*kBoltzman*Tphotons1;
+	double Ephmax = kBoltzman*Tphotons3*100;
 
 	FILE* logFile = fopen("log.dat", "w");
 	fclose(logFile);
@@ -243,11 +248,23 @@ int main()
 	dFph[0] = 0;
 	//todo check and normalize
 	for(int i = 1; i < Np; ++i){
+		Fph[i] = 0;
+		dFph[i] = 0;
 		Eph[i] = Eph[i-1]*factor;
-		double theta = Eph[i]/(kBoltzman*Tphotons);
-		Fph[i] =  (2*Eph[i]*Eph[i]/(speed_of_light2*hplank*hplank))/(exp(theta)-1.0);
+		double theta = Eph[i]/(kBoltzman*Tphotons1);
+		Fph[i] +=  a1*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
+		theta = Eph[i]/(kBoltzman*Tphotons2);
+		Fph[i] +=  a2*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
+		theta = Eph[i]/(kBoltzman*Tphotons3);
+		Fph[i] +=  a3*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
 		dFph[i] = Fph[i]*(Eph[i] - Eph[i-1]);
 	}
+
+	FILE* photons = fopen("photons.dat","w");
+	for(int i = 0; i < Np; ++i){
+		fprintf(photons, "%g %g\n", Eph[i]/1.6E-12, Fph[i]);
+	}
+	fclose(photons);
 
 	printLog("read electrons distribution\n");
 	double** Fe = new double*[Ndist];
@@ -505,7 +522,7 @@ int main()
 
 	double* E = new double[Nnu];
 	double* I = new double[Nnu];
-	double Emin = 0.000001*kBoltzman*Tphotons;
+	double Emin = 0.0001*kBoltzman*Tphotons1;
 	double Emax = 2*Ee[iangle][Np-1] + Eph[Np-1];
 	factor = pow(Emax/Emin, 1.0/(Nnu - 1));
 	E[0] = Emin;
@@ -544,9 +561,9 @@ int main()
 			int ir = 0;
 			int itheta = 0;
 			int iphi = 0;
-			//for(int ir = 0; ir < Nrho; ++ir){
-				//for(int itheta = 0; itheta < Ntheta; ++itheta){
-					//for(int iphi = 0; iphi < Nphi; ++iphi){
+			for(int ir = 0; ir < Nrho; ++ir){
+				for(int itheta = 0; itheta < NthetaSpace; ++itheta){
+					for(int iphi = 0; iphi < Nphi; ++iphi){
 						iangle = thetaIndex3d[ir][itheta][iphi];
 						for(int k = 0; k < Np; ++k){
 							double electronInitialEnergy = Ee[iangle][k];
@@ -597,9 +614,9 @@ int main()
 										exit(0);
 									}
 								}
-							//}
-						//}
-					//}
+							}
+						}
+					}
 				}
 			}
 		}
