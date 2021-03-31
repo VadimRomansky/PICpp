@@ -186,7 +186,7 @@ int main()
 	const int Np = 200;
 	const int Nnu = 200;
 
-	const double electronConcentration = 1.0;
+	const double electronConcentration = 200.0;
 	const double photonConcentration = 1.0;
 
 
@@ -375,6 +375,17 @@ int main()
 		fclose(inputFe);
 	}
 
+	for(int i = 0; i < Ndist; ++i){
+		double norm = 0;
+		for(int j = 1; j < Np; ++j){
+			norm += Fe[i][j]*(Ee[i][j] - Ee[i][j-1]);
+		}
+		for(int j = 0; j < Np; ++j){
+			Fe[i][j] = Fe[i][j]/norm;
+			dFe[i][j] = dFe[i][j]/norm;
+		}
+	}
+
 	printLog("initialize fields\n");
 	const int Nrho = 10;
 	double rmax = 3.6E16;
@@ -541,7 +552,7 @@ int main()
 	Fph[Np/2] = 1.0;*/
 	/////
 	printLog("evaluate spectrum\n");
-	double re2 = sqr(electron_charge*electron_charge/(massElectron*speed_of_light2));
+	double re2 = sqr(electron_charge*electron_charge)/(massElectron*speed_of_light2);
 
 	omp_lock_t write_lock;
 	omp_init_lock(&write_lock);
