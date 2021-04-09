@@ -640,7 +640,7 @@ int main()
 	FILE* output = fopen("output.dat","w");
 	for(int i = 0; i < Nnu; ++i){
 		double nu = E[i]/hplank;
-		fprintf(output, "%g %g\n", E[i]/(1.6E-12), nu*E[i]*I[i]/sqr(distance));
+		fprintf(output, "%g %g\n", E[i]/(1.6E-12), E[i]*E[i]*I[i]/sqr(distance));
 	}
 	fclose(output);
 
