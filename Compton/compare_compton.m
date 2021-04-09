@@ -10,7 +10,7 @@ figure(1);
 hold on;
 title ('{\nu} F_{\nu}');
 xlabel ('E eV');
-ylabel ('{\nu} F_{\nu}');
+ylabel ('{\nu} F_{\nu} erg cm^{-2} s^{-1}');
 
 plot(radiation1(1:Nnu,1),radiation1(1:Nnu,2),'red',radiation2(1:Nnu,1),radiation2(1:Nnu,2),'blue','LineWidth',2);
 grid ;
