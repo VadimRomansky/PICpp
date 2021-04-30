@@ -552,7 +552,7 @@ int main()
 	Fph[Np/2] = 1.0;*/
 	/////
 	printLog("evaluate spectrum\n");
-	double re2 = sqr(electron_charge*electron_charge)/(massElectron*speed_of_light2);
+	double re2 = sqr(electron_charge*electron_charge/(massElectron*speed_of_light2));
 
 	omp_lock_t write_lock;
 	omp_init_lock(&write_lock);
@@ -566,63 +566,120 @@ int main()
 		fclose(logFile);
 		omp_unset_lock(&write_lock);
 		double photonFinalEnergy = E[i];
-		for(int j = 0; j < Ntheta; ++j){
-			//integration by phi changes to 2 pi?
-			double photonFinalCosTheta = cosThetaLeft[j];
-			int ir = 0;
-			int itheta = 0;
-			int iphi = 0;
+
+		////Uvarov
+		if(solver == Solver::UVAROV){
 			for(int ir = 0; ir < Nrho; ++ir){
 				for(int itheta = 0; itheta < NthetaSpace; ++itheta){
 					for(int iphi = 0; iphi < Nphi; ++iphi){
 						iangle = thetaIndex3d[ir][itheta][iphi];
 						for(int k = 0; k < Np; ++k){
 							double electronInitialEnergy = Ee[iangle][k];
-							/*logFile = fopen("log.dat","a");
-							printf("electronInitialEnergy = %g\n", electronInitialEnergy);
-							fprintf(logFile, "electronInitialEnergy = %g\n", electronInitialEnergy);
-							fclose(logFile);*/
+							double delectronEnergy;
 							double electronInitialGamma = electronInitialEnergy/(massElectron*speed_of_light2);
 							double electronInitialBeta = sqrt(1.0 - 1.0/(electronInitialGamma*electronInitialGamma));
-							/*logFile = fopen("log.dat","a");
-							printf("electronInitialBeta = %g\n", electronInitialBeta);
-							fprintf(logFile, "electronInitialBeta = %g\n", electronInitialBeta);
-							fclose(logFile);*/
-							double delectronEnergy;
 							if(k == 0){
 								delectronEnergy = Ee[iangle][1] - Ee[iangle][0];
 							} else {
 								delectronEnergy = Ee[iangle][k] - Ee[iangle][k-1];
 							}
+							for(int l = 0; l < Np; ++l){
+								double photonInitialEnergy = Eph[l];
+								double dphotonInitialEnergy;
+								if(l == 0){
+									dphotonInitialEnergy = Eph[1] - Eph[0];
+								} else {
+									dphotonInitialEnergy = Eph[l] - Eph[l-1];
+								}
 
-							double electronDist = Fe[iangle][k];
-							double photonFinalEnergyPrimed;
-							double photonFinalCosThetaPrimed;
-							LorentzTransformationPhotonZ(electronInitialBeta, photonFinalEnergy, photonFinalCosTheta, photonFinalEnergyPrimed, photonFinalCosThetaPrimed);
-							double photonFinalSinThetaPrimed = sqrt(1.0 - photonFinalCosThetaPrimed*photonFinalCosThetaPrimed);
-							for(int l = 0; l < Ntheta; ++l){
+								if(electronInitialGamma > photonFinalEnergy/(massElectron*speed_of_light2)){
+									double G = 4*electronInitialGamma*photonInitialEnergy/(massElectron*speed_of_light2);
+									double q = (photonFinalEnergy/(massElectron*speed_of_light2))/((electronInitialGamma - photonFinalEnergy/(massElectron*speed_of_light2))*G);
+									if( q <= 1.0){
+										double sigma = 2*pi*re2*(2*q*log(q) + 1 + q - 2*q*q + 0.5*q*q*(1-q)*G*G/(1 + q*G))/(electronInitialGamma*electronInitialGamma*photonInitialEnergy/(massElectron*speed_of_light2));
+										I[i] += electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*sigma*Fph[l]*Fe[iangle][k]*speed_of_light*electronInitialBeta*delectronEnergy*dphotonInitialEnergy;
+
+										if(I[i] < 0){
+											printf("I[i] < 0\n");
+											printLog("I[i] < 0\n");
+											exit(0);
+										}
+
+										if(I[i] != I[i]){
+											printf("I[i] = NaN\n");
+											printLog("I[i] = NaN\n");
+											exit(0);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+			}
+
+			} else if(solver == Solver::DUBUS){
+			////Dubus
+		
+			for(int j = 0; j < Ntheta; ++j){
+				//integration by phi changes to 2 pi?
+				double photonFinalCosTheta = cosThetaLeft[j];
+				int ir = 0;
+				int itheta = 0;
+				int iphi = 0;
+				for(int ir = 0; ir < Nrho; ++ir){
+					for(int itheta = 0; itheta < NthetaSpace; ++itheta){
+						for(int iphi = 0; iphi < Nphi; ++iphi){
+							iangle = thetaIndex3d[ir][itheta][iphi];
+							for(int k = 0; k < Np; ++k){
+								double electronInitialEnergy = Ee[iangle][k];
 								/*logFile = fopen("log.dat","a");
-								printf("l photon initial theta = %d\n", l);
-								fprintf(logFile, "l photon initial theta = %d\n", l);
+								printf("electronInitialEnergy = %g\n", electronInitialEnergy);
+								fprintf(logFile, "electronInitialEnergy = %g\n", electronInitialEnergy);
 								fclose(logFile);*/
-								double photonInitialCosTheta = -cosThetaLeft[l];
-								double photonInitialCosThetaPrimed = (photonInitialCosTheta - electronInitialBeta)/(1.0 - electronInitialBeta*photonInitialCosTheta);
-								double photonInitialSinThetaPrimed = sqrt(1.0 - photonInitialCosThetaPrimed*photonInitialCosThetaPrimed);
-								for(int m = 0; m < Nphi; ++m){
-									double photonInitialPhi = phi[m];
-									double cosXiPrimed = photonInitialCosThetaPrimed*photonFinalCosThetaPrimed + photonInitialSinThetaPrimed*photonFinalSinThetaPrimed*cos(photonInitialPhi);
+								double electronInitialGamma = electronInitialEnergy/(massElectron*speed_of_light2);
+								double electronInitialBeta = sqrt(1.0 - 1.0/(electronInitialGamma*electronInitialGamma));
+								/*logFile = fopen("log.dat","a");
+								printf("electronInitialBeta = %g\n", electronInitialBeta);
+								fprintf(logFile, "electronInitialBeta = %g\n", electronInitialBeta);
+								fclose(logFile);*/
+								double delectronEnergy;
+								if(k == 0){
+									delectronEnergy = Ee[iangle][1] - Ee[iangle][0];
+								} else {
+									delectronEnergy = Ee[iangle][k] - Ee[iangle][k-1];
+								}
 
-									double photonInitialEnergyPrimed = photonFinalEnergyPrimed/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed));
+								double electronDist = Fe[iangle][k];
+								double photonFinalEnergyPrimed;
+								double photonFinalCosThetaPrimed;
+								LorentzTransformationPhotonZ(electronInitialBeta, photonFinalEnergy, photonFinalCosTheta, photonFinalEnergyPrimed, photonFinalCosThetaPrimed);
+								double photonFinalSinThetaPrimed = sqrt(1.0 - photonFinalCosThetaPrimed*photonFinalCosThetaPrimed);
+								for(int l = 0; l < Ntheta; ++l){
+									/*logFile = fopen("log.dat","a");
+									printf("l photon initial theta = %d\n", l);
+									fprintf(logFile, "l photon initial theta = %d\n", l);
+									fclose(logFile);*/
+									double photonInitialCosTheta = -cosThetaLeft[l];
+									double photonInitialCosThetaPrimed = (photonInitialCosTheta - electronInitialBeta)/(1.0 - electronInitialBeta*photonInitialCosTheta);
+									double photonInitialSinThetaPrimed = sqrt(1.0 - photonInitialCosThetaPrimed*photonInitialCosThetaPrimed);
+									for(int m = 0; m < Nphi; ++m){
+										double photonInitialPhi = phi[m];
+										double cosXiPrimed = photonInitialCosThetaPrimed*photonFinalCosThetaPrimed + photonInitialSinThetaPrimed*photonFinalSinThetaPrimed*cos(photonInitialPhi);
 
-									double photonInitialEnergy = electronInitialGamma*photonInitialEnergyPrimed + electronInitialBeta*electronInitialGamma*photonInitialEnergyPrimed*photonInitialCosThetaPrimed;
+										double photonInitialEnergyPrimed = photonFinalEnergyPrimed/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed));
 
-									I[i] += electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*(re2*speed_of_light*(1.0 - electronInitialBeta*photonInitialCosTheta)/(2*electronInitialGamma*(1.0 - electronInitialBeta*photonFinalCosTheta)))*
-										(1.0 + cosXiPrimed*cosXiPrimed + sqr(photonFinalEnergyPrimed/(massElectron*speed_of_light2))*sqr(1.0 - cosXiPrimed)/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed)))*
-										2*pi*dcosTheta[j]*dphi*dcosTheta[l]*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Np, Eph, Fph);
-									if(I[i] != I[i]){
-										printf("I[i] = NaN\n");
-										printLog("I[i] = NaN\n");
-										exit(0);
+										double photonInitialEnergy = electronInitialGamma*photonInitialEnergyPrimed + electronInitialBeta*electronInitialGamma*photonInitialEnergyPrimed*photonInitialCosThetaPrimed;
+
+										I[i] += electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*(re2*speed_of_light*(1.0 - electronInitialBeta*photonInitialCosTheta)/(2*electronInitialGamma*(1.0 - electronInitialBeta*photonFinalCosTheta)))*
+											(1.0 + cosXiPrimed*cosXiPrimed + sqr(photonFinalEnergyPrimed/(massElectron*speed_of_light2))*sqr(1.0 - cosXiPrimed)/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed)))*
+											2*pi*dcosTheta[j]*dphi*dcosTheta[l]*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Np, Eph, Fph);
+										if(I[i] != I[i]){
+											printf("I[i] = NaN\n");
+											printLog("I[i] = NaN\n");
+											exit(0);
+										}
 									}
 								}
 							}
