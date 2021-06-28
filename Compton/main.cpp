@@ -619,7 +619,7 @@ int main()
 
 			}
 
-			} else if(solver == Solver::DUBUS){
+		} else if(solver == Solver::DUBUS){
 			////Dubus
 		
 			for(int j = 0; j < Ntheta; ++j){

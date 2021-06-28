@@ -245,6 +245,20 @@ void initializeParker(double*** Bx, double*** By, double*** Bz){
 			}
 		}
 	}
+
+	double maxB = 0;
+	//for(int i = 0; i < Nrho; ++i){
+	int i = Nrho - 1;
+		for(int j = 0; j < Nphi; ++j){
+			for(int k = 0; k < Nz; ++k){
+				double B = sqrt(Bx[i][j][k]*Bx[i][j][k] + By[i][j][k]*By[i][j][k] + Bz[i][j][k]*Bz[i][j][k]);
+				if(B > maxB) {
+					maxB = B;
+				}
+			}
+		}
+	//}
+	printf("maxB in parker = %g\n", maxB);
 }
 
 
@@ -471,7 +485,7 @@ int main()
 	double kmin = 2*pi*2/(0.5);
 	double dk = kmin;
 	double kmax = Nk*dk;
-	double turbulenceFraction = 0.9;
+	double turbulenceFraction = 0.000000001;
 	double turbNorm = evaluateTurbNorm(kmax, Nk, 1.0, turbulenceFraction);
 
 	if(turbulence){
@@ -483,6 +497,65 @@ int main()
 					Bz3d[i][j][k] = Bz3d[i][j][k]*sqrt(1.0 - turbulenceFraction);
 					B3d[i][j][k] = B3d[i][j][k]*sqrt(1.0 - turbulenceFraction);
 				}
+			}
+		}
+
+		const int tempNr = 10000;
+		double tempB[tempNr];
+		double tempBx[tempNr];
+		double tempBy[tempNr];
+		double tempBz[tempNr];
+		double lambda[tempNr];
+		double delta[tempNr];
+		double tempr[tempNr];
+		for(int i = 0; i < tempNr; ++i){
+			tempr[i] = Nrho*(i+0.5)/tempNr;
+			tempB[i] = 0;
+			tempBx[i] = 0;
+			tempBy[i] = 0;
+			tempBz[i] = 0;
+			lambda[i] = 0;
+			delta[i] = 0;
+		}
+
+		if(parker){
+			double thetaObserv = 0;
+			double sinThetaObserv = sin(thetaObserv);
+			double cosThetaObserv = cos(thetaObserv);
+			double rcorot = Nrho/10.0;
+			double rmin = Nrho/100.0;
+			double Br1 = sqr(rmin/Nrho);
+			double Bphi1 = ((Nrho - rmin)/rcorot)*sqr(rmin/Nrho);
+			//norm to 1;
+			double B0 = 1.0/sqrt(Br1*Br1 + Bphi1*Bphi1);
+			for(int i = 0; i < tempNr; ++i){
+				double rho = i + 0.5;
+				double z = 0.5 - Nz/2.0;
+				double r = sqrt(rho*rho + z*z);
+
+				double x = rho;
+				double y = 0;
+
+				double y1 = y;
+				double z1 = z*cosThetaObserv + x*sinThetaObserv;
+				double x1 = x*cosThetaObserv - z*sinThetaObserv;
+
+				double costheta = z1/r;
+				double sintheta = sqrt(1.0 - costheta*costheta);
+
+				double sinphi = y1/sqrt(x1*x1 + y1*y1);
+				double cosphi = x1/sqrt(x1*x1 + y1*y1);
+
+				double Br = B0*costheta*sqr(rmin/r);
+				double Bphi = B0*costheta*((r - rmin)/rcorot)*sqr(rmin/r)*sintheta;
+
+				double Bx1 = Br*sintheta*cosphi - Bphi*sinphi;
+				double By1 = Br*sintheta*sinphi + Bphi*cosphi;
+				double Bz1 = Br*costheta;
+
+				tempBx[i] = Bx1*cosThetaObserv + Bz1*sinThetaObserv;
+				tempBy[i] = By1;
+				tempBz[i] = Bz1*cosThetaObserv - Bx1*sinThetaObserv;
 			}
 		}
 
@@ -515,6 +588,19 @@ int main()
 
 						double Bturbulent = evaluateTurbB(kx, ky, 0, turbNorm);
 
+						for(int i = 0; i < tempNr; ++i){
+							double x = tempr[i];
+							double kmultr = kx*x;
+							double localB1 = Bturbulent*sin(kmultr + phase1);
+							double localB2 = Bturbulent*sin(kmultr + phase2);
+							localB1 = 0;
+							localB2 = localB2*sqrt(2.0);
+
+							tempBz[i] = tempBz[i] - localB1*sinTheta;
+							tempBx[i] = tempBx[i] + (localB1*cosTheta*cosPhi - localB2*sinPhi);
+							tempBy[i] = tempBy[i] + (localB1*cosTheta*sinPhi + localB2*cosPhi);
+						}
+
 						for(int i = 0; i < Nrho; ++i){
 							for(int j = 0; j < Nphi; ++j){
 								for(int k = 0; k < Nz; ++k){
@@ -538,7 +624,17 @@ int main()
 				}
 			}
 		}
+
+		FILE* tempBfile = fopen("turbulentB.dat","w");
+		for(int i = 0; i < tempNr; ++i){
+			tempB[i] = sqrt(tempBx[i]*tempBx[i] + tempBy[i]*tempBy[i] + tempBz[i]*tempBz[i]);
+			lambda[i] = atan2(tempBy[i],tempBx[i])*180/pi;
+			delta[i] = acos(tempBz[i]/tempB[i])*180/pi;
+			fprintf(tempBfile, "%g %g %g %g\n", tempr[i], tempB[i], lambda[i], delta[i]);
+		}
+		fclose(tempBfile);
 	}
+
 
 	if(geometry == SPHERICAL){
 		evaluateOrientationParameters3d(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
