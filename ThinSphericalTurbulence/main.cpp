@@ -41,7 +41,7 @@ double evaluateTurbNorm(const double& kmax, const int& Nk, const double& B0, con
 	for(int i = 0; i < Nk; ++i){
 		for(int j = 0; j < Nk; ++j){
 			for(int k = 0; k < Nk; ++k){
-				if((i + j + k) > 4){
+				if((i + j + k) > 1){
 					double kx = i*dk;
 					double ky = j*dk;
 					double kz = k*dk;
@@ -261,6 +261,90 @@ void initializeParker(double*** Bx, double*** By, double*** Bz){
 	printf("maxB in parker = %g\n", maxB);
 }
 
+void evaluateAngleWeights(double* weights, int Nd, double B0, double theta, double turbulenceFraction){
+	const int Nx = 1000;
+	const int Nk = 10;
+	double x[Nx];
+	double y[Nx];
+	double z[Nx];
+	double Bx[Nx];
+	double By[Nx];
+	double Bz[Nx];
+
+	for( int i = 0; i < Nx; ++i){
+		Bx[i] = B0*cos(theta);
+		Bz[i] = B0*sin(theta);
+		By[i] = 0;
+		x[i] = uniformDistribution();
+		y[i] = uniformDistribution();
+		z[i] = uniformDistribution();
+	}
+
+	double turbNorm = evaluateTurbNorm(2*pi*10, Nk, B0, turbulenceFraction);
+
+	for(int i = 0; i < Nd; ++i){
+		weights[i] = 0;
+	}
+
+	double dk = 2*pi;
+
+	for(int ki = 0; ki < Nk; ++ki){
+		printf("%d\n", ki);
+		for(int kj = 0; kj < Nk; ++kj){
+			for(int kk = 0; kk < Nk; ++kk){
+				if ((ki + kj + kk) > 1) {
+					double phase1 = 2*pi*uniformDistribution();
+					double phase2 = 2*pi*uniformDistribution();
+
+
+					double kx = ki*dk;
+					double ky = kj*dk;
+					double kz = kk*dk;
+
+					double kw = sqrt(kx*kx + ky*ky);
+					double kxy = sqrt(ky*ky + kx*kx);
+					double cosTheta = 0;
+					double sinTheta = 1.0;
+					double cosPhi = 1.0;
+					double sinPhi = 0;
+					if(kj + ki > 0) {
+						cosPhi = kx/kxy;
+						sinPhi = ky/kxy;
+					} else {
+						cosPhi = 1.0;
+						sinPhi = 0.0;
+					}
+
+					double Bturbulent = evaluateTurbB(kx, ky, kz, turbNorm);
+
+					for(int i = 0; i < Nx; ++i){
+						double kmultr = (kx*x[i] + ky*y[i] + kz*z[i]);
+						double localB1 = Bturbulent*sin(kmultr + phase1);
+						double localB2 = Bturbulent*sin(kmultr + phase2);
+						//localB1 = 0;
+						//localB2 = localB2*sqrt(2.0);
+
+						Bz[i] = Bz[i] - localB1*sinTheta;
+						Bx[i] = Bx[i] + (localB1*cosTheta*cosPhi - localB2*sinPhi);
+						By[i] = By[i] + (localB1*cosTheta*sinPhi + localB2*cosPhi);
+					}
+				}
+			}
+		}
+	}
+
+	for(int i = 0; i < Nx; ++i){
+		double B = sqrt(Bx[i]*Bx[i] + By[i]*By[i] + Bz[i]*Bz[i]);
+		double theta1 = acos(Bx[i]/B);
+		if(theta1 >= pi/2){
+			theta1 = pi - theta1;
+		}
+
+		int thetaIndex = floor(theta1 / (pi/(2*Nd))); 
+		weights[thetaIndex] += 1.0/Nx;
+	}
+}
+
 
 
 int main()
@@ -282,10 +366,10 @@ int main()
 	double cosThetaObserv = cos(thetaObserv);
 	double sinThetaObserv = sin(thetaObserv);
 
-	int Np= 200;
-	int Nnu = 100;
-	int Nnu1 = 5;
-	int Ndist = 10;
+	const int Np= 200;
+	const int Nnu = 100;
+	const int Nnu1 = 5;
+	const int Ndist = 10;
 
 	double** Fe;
 	double** dFe;
@@ -642,7 +726,15 @@ int main()
 		evaluateOrientationParameters3dflat(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
 	}
 
-	
+	double weights[Ndist];
+
+	for(int i = 0; i < Nrho; ++i){
+		for(int j = 0; j < Nphi; ++j){
+			for(int k = 0; k < Nz; ++k){
+				evaluateAngleWeights(weights, Ndist, 1.0, sin(sintheta3d[i][j][k]), 0.9);
+			}
+		}
+	}
 
 	/*FILE* bFile = fopen(BFileName.c_str(), "w");
 	for(int j = 0; j < Ntheta; ++j){
