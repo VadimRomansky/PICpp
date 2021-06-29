@@ -597,7 +597,7 @@ int main()
 									double q = (photonFinalEnergy/(massElectron*speed_of_light2))/((electronInitialGamma - photonFinalEnergy/(massElectron*speed_of_light2))*G);
 									if( q <= 1.0){
 										double sigma = 2*pi*re2*(2*q*log(q) + 1 + q - 2*q*q + 0.5*q*q*(1-q)*G*G/(1 + q*G))/(electronInitialGamma*electronInitialGamma*photonInitialEnergy/(massElectron*speed_of_light2));
-										I[i] += electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*sigma*Fph[l]*Fe[iangle][k]*speed_of_light*electronInitialBeta*delectronEnergy*dphotonInitialEnergy;
+										I[i] += electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*sigma*Fph[l]*Fe[iangle][k]*speed_of_light*electronInitialBeta*delectronEnergy*dphotonInitialEnergy/photonFinalEnergy;
 
 										if(I[i] < 0){
 											printf("I[i] < 0\n");
