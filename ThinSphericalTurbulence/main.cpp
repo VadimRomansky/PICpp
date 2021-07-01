@@ -261,7 +261,7 @@ void initializeParker(double*** Bx, double*** By, double*** Bz){
 	printf("maxB in parker = %g\n", maxB);
 }
 
-void evaluateAngleWeights(double* weights, int Nd, double B0, double theta, double turbulenceFraction){
+void evaluateAngleWeights(double* weights, int Nd, double B0, double sintheta, double turbulenceFraction){
 	const int Nx = 1000;
 	const int Nk = 10;
 	double x[Nx];
@@ -272,8 +272,8 @@ void evaluateAngleWeights(double* weights, int Nd, double B0, double theta, doub
 	double Bz[Nx];
 
 	for( int i = 0; i < Nx; ++i){
-		Bx[i] = B0*cos(theta);
-		Bz[i] = B0*sin(theta);
+		Bx[i] = B0*sqrt(1.0 - sintheta*sintheta);
+		Bz[i] = B0*sintheta;
 		By[i] = 0;
 		x[i] = uniformDistribution();
 		y[i] = uniformDistribution();
@@ -289,7 +289,6 @@ void evaluateAngleWeights(double* weights, int Nd, double B0, double theta, doub
 	double dk = 2*pi;
 
 	for(int ki = 0; ki < Nk; ++ki){
-		printf("%d\n", ki);
 		for(int kj = 0; kj < Nk; ++kj){
 			for(int kk = 0; kk < Nk; ++kk){
 				if ((ki + kj + kk) > 1) {
@@ -342,7 +341,52 @@ void evaluateAngleWeights(double* weights, int Nd, double B0, double theta, doub
 
 		int thetaIndex = floor(theta1 / (pi/(2*Nd))); 
 		weights[thetaIndex] += 1.0/Nx;
+		if(weights[thetaIndex] != weights[thetaIndex]){
+			printf("weight = NaN\n");
+			exit(0);
+		}
 	}
+
+	for(int i = 0; i < Nd; ++i){
+		if(weights[i] != weights[i]){
+			printf("weight = NaN\n");
+			exit(0);
+		}
+		if(0*weights[i] != 0*weights[i]){
+			printf("weight = NaN\n");
+			exit(0);
+		}
+	}
+}
+
+double findFeAt(double* Ee, double* Fe, double currentE, int Np) {
+	if(currentE <= Ee[0]) {
+		return Fe[0];
+	}
+	if(currentE >= Ee[Np - 1]) {
+		return Fe[Np - 1];
+	}
+	int leftIndex = 0;
+	int rightIndex = Np-1;
+	while(rightIndex - leftIndex > 1){
+		int currentIndex = (rightIndex + leftIndex)/2;
+		if(Ee[currentIndex] > currentE){
+			rightIndex = currentIndex;
+		} else { 
+			leftIndex = currentIndex;
+		}
+	}
+	//return Inu[i - 1] * exp(log(Inu[i] / Inu[i - 1]) * ((currentNu - nu[i-1]) / (nu[i] - nu[i - 1])));
+	double result = (Fe[leftIndex] *(Ee[rightIndex] - currentE) + Fe[rightIndex]*(currentE - Ee[leftIndex]))/ (Ee[rightIndex] - Ee[leftIndex]);
+	if(result != result){
+		printf("result = NaN\n");
+		exit(0);
+	}
+	if(0*result != 0*result){
+		printf("result = QNaN\n");
+		exit(0);
+	}
+	return result;
 }
 
 
@@ -572,7 +616,7 @@ int main()
 	double turbulenceFraction = 0.000000001;
 	double turbNorm = evaluateTurbNorm(kmax, Nk, 1.0, turbulenceFraction);
 
-	if(turbulence){
+	/*if(turbulence){
 		for(int i = 0; i < Nrho; ++i){
 			for(int j = 0; j < Nphi; ++j){
 				for(int k = 0; k < Nz; ++k){
@@ -600,47 +644,6 @@ int main()
 			tempBz[i] = 0;
 			lambda[i] = 0;
 			delta[i] = 0;
-		}
-
-		if(parker){
-			double thetaObserv = 0;
-			double sinThetaObserv = sin(thetaObserv);
-			double cosThetaObserv = cos(thetaObserv);
-			double rcorot = Nrho/10.0;
-			double rmin = Nrho/100.0;
-			double Br1 = sqr(rmin/Nrho);
-			double Bphi1 = ((Nrho - rmin)/rcorot)*sqr(rmin/Nrho);
-			//norm to 1;
-			double B0 = 1.0/sqrt(Br1*Br1 + Bphi1*Bphi1);
-			for(int i = 0; i < tempNr; ++i){
-				double rho = i + 0.5;
-				double z = 0.5 - Nz/2.0;
-				double r = sqrt(rho*rho + z*z);
-
-				double x = rho;
-				double y = 0;
-
-				double y1 = y;
-				double z1 = z*cosThetaObserv + x*sinThetaObserv;
-				double x1 = x*cosThetaObserv - z*sinThetaObserv;
-
-				double costheta = z1/r;
-				double sintheta = sqrt(1.0 - costheta*costheta);
-
-				double sinphi = y1/sqrt(x1*x1 + y1*y1);
-				double cosphi = x1/sqrt(x1*x1 + y1*y1);
-
-				double Br = B0*costheta*sqr(rmin/r);
-				double Bphi = B0*costheta*((r - rmin)/rcorot)*sqr(rmin/r)*sintheta;
-
-				double Bx1 = Br*sintheta*cosphi - Bphi*sinphi;
-				double By1 = Br*sintheta*sinphi + Bphi*cosphi;
-				double Bz1 = Br*costheta;
-
-				tempBx[i] = Bx1*cosThetaObserv + Bz1*sinThetaObserv;
-				tempBy[i] = By1;
-				tempBz[i] = Bz1*cosThetaObserv - Bx1*sinThetaObserv;
-			}
 		}
 
 		for(int ki = 0; ki < Nk; ++ki){
@@ -717,7 +720,7 @@ int main()
 			fprintf(tempBfile, "%g %g %g %g\n", tempr[i], tempB[i], lambda[i], delta[i]);
 		}
 		fclose(tempBfile);
-	}
+	}*/
 
 
 	if(geometry == SPHERICAL){
@@ -726,12 +729,22 @@ int main()
 		evaluateOrientationParameters3dflat(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
 	}
 
-	double weights[Ndist];
+	double**** weights = new double***[Nrho];
 
 	for(int i = 0; i < Nrho; ++i){
+		weights[i] = new double**[Nphi];
 		for(int j = 0; j < Nphi; ++j){
+			weights[i][j] = new double*[Nz];
 			for(int k = 0; k < Nz; ++k){
-				evaluateAngleWeights(weights, Ndist, 1.0, sin(sintheta3d[i][j][k]), 0.9);
+				weights[i][j][k] = new double[Ndist];
+				if(turbulence){
+					evaluateAngleWeights(weights[i][j][k], Ndist, 1.0, sintheta3d[i][j][k], 0.9);
+				} else {
+					for(int l = 0; l < Ndist; ++l){
+						weights[i][j][k][l] = 0;
+					}
+					weights[i][j][k][thetaIndex3d[i][j][k]] = 1.0;
+				}
 			}
 		}
 	}
@@ -857,6 +870,7 @@ int main()
 				} else {
 					Fe[j][i] = 0;
 				}
+				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
 		}
 
@@ -871,6 +885,65 @@ int main()
 		for (int i = 0; i < Np; ++i) {
 			Fe[j][i] = Fe[j][i] / norm;
 			dFe[j][i] = dFe[j][i]/norm;
+		}
+	}
+
+	double* weightedEe = new double[Np];
+	double**** weightedFe = new double***[Nrho];
+	double minE = Ee[0][0];
+	double maxE = Ee[0][Np-1];
+	for(int i = 0; i < Ndist; ++i){
+		if(Ee[i][0] < minE){
+			minE = Ee[i][0];
+		}
+		if(Ee[i][Np-1] > maxE){
+			maxE = Ee[i][Np-1];
+		}
+	}
+
+	double factor = pow(maxE/minE, 1.0/(Np - 1));
+	weightedEe[0] = minE;
+	for(int i = 1; i < Np; ++i){
+		weightedEe[i] = weightedEe[i-1]*factor;
+	}
+	weightedEe[Np-1] = maxE;
+
+	for(int i = 0; i < Nrho; ++i){
+		weightedFe[i] = new double**[Nphi];
+		for(int j = 0; j < Nphi; ++j){
+			weightedFe[i][j] = new double*[Nz];
+			for(int k = 0; k < Nz; ++k){
+				weightedFe[i][j][k] = new double[Np];
+				for(int l = 0; l < Np; ++l){
+					weightedFe[i][j][k][l] = 0;
+					for(int m = 0; m < Ndist; ++m){
+						weightedFe[i][j][k][l] += weights[i][j][k][m]*findFeAt(Ee[m], Fe[m], weightedEe[l], Np);
+						if(weightedFe[i][j][k][l] != weightedFe[i][j][k][l]){
+							printf("WeightdFe = NaN\n");
+							exit(0);
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+	for(int i = 0; i < Nrho; ++i){
+		for(int j = 0; j < Nphi; ++j){
+			for(int k = 0; k < Nz; ++k){
+				double norm = 0;
+				weightedFe[i][j][k][0] = 0;
+				for(int l = 1; l < Np; ++l){
+					/*norm += weightedFe[i][j][k][l]*(weightedEe[l] - weightedEe[l-1]);
+					if(norm != norm){
+						printf("norm = NaN\n");
+						exit(0);
+					}*/
+
+					weightedFe[i][j][k][l] = (weightedFe[i][j][k][l]/(4*pi))*(weightedEe[l] - weightedEe[l-1]);
+				}
+			}
 		}
 	}
 
@@ -1032,7 +1105,7 @@ int main()
 	v = 0.67*speed_of_light;
 	sigma = 0.02;
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
-	double error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+	double error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 	printf("error = %lf\n", error);
 	fprintf(logFile, "error = %lf\n", error);
 	const int Nbp = 10;
@@ -1055,7 +1128,7 @@ int main()
 					double tempV = vpoints[l];
 					for(int m = 0; m < Nrp; ++m){
 						double tempRmax = rpoints[m];
-						double tempError = evaluateOptimizationFunction5(tempBfactor, tempConcentration, tempFractionSize, tempRmax, tempV, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+						double tempError = evaluateOptimizationFunction5(tempBfactor, tempConcentration, tempFractionSize, tempRmax, tempV, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 						//printf("tempError = %lf\n", tempError);
 						//fprintf(logFile, "tempError = %lf\n", tempError);
 						if(tempError < error){
@@ -1079,7 +1152,7 @@ int main()
 	rmax = 3E16;
 	v = 0.7*speed_of_light;*/
 
-	error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+	error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
 	printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
 
@@ -1094,9 +1167,9 @@ int main()
 	//optimizeParameters4(1.0, 2000, 3.4E16, Bfactor, concentration, fractionSize, rmax, nu1, Ee, dFe, Np, Nnu1, Ndist, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	//optimizeParameters4(Bfactor, concentration, fractionSize,rmax, nu1, Ee, dFe, Np, Nnu1, Nd, B, sintheta, thetaIndex, concentrations, Inu1, Anu1, area, length, Rho, Phi, logFile);
 	if(geometry == FLAT_SIMPLE){
-		optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, Ee, dFe, Np, Ndist, 1.0, 8, logFile);
+		optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, weightedEe, weightedFe[0][0][0], Np, Ndist, 1.0, 8, logFile);
 	} else {
-		optimizeParameters5(vector, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
+		optimizeParameters5(vector, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
 		Bfactor = vector[0]*maxB;
 		concentration = vector[1]*maxN;
 		fractionSize = vector[2]*maxFraction;
@@ -1104,7 +1177,7 @@ int main()
 		v = vector[4]*maxV;
 	}
 	//optimizeParameters5sigma(sigma, 1.0, N0, 3.4E16,V0, Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
-	error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+	error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 
 	///////////////////
 
@@ -1164,7 +1237,7 @@ int main()
 		//evaluateAllEmissivityAndAbsorption1(nu, Inu, Anu, Nnu, Ee, dFe, Np, Ndist, B, sintheta, thetaIndex, concentrations, locN, locB, fractionSize);
 		//evaluateSpectrum(nu, tempTotalInu[l], Inu, Anu, area, length, Nnu, r, Rho, Phi);
 
-		evaluateAllEmissivityAndAbsorption(nu, tempInu, tempAnu, Nnu, Ee, dFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, rfactor);
+		evaluateAllEmissivityAndAbsorption(nu, tempInu, tempAnu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, rfactor);
 
 		if(l == 0) {
 			if(geometry == SPHERICAL){
@@ -1219,7 +1292,7 @@ int main()
 		Bfactor = Bpoints[i];
 		for(int j = 0; j < Nnp; ++j){
 			concentration = npoints[j];
-			double tempError = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+			double tempError = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 			fprintf(errorFile, "%g ", tempError);
 		}
 		fprintf(errorFile, "\n");
@@ -1317,6 +1390,9 @@ int main()
 
 	for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
+			for(int k = 0; k < Nz; ++k){
+				delete[] weightedFe[i][j][k];
+			}
 			delete[] area3d[i][j];
 			delete[] length3d[i][j];
 			delete[] B3d[i][j];
@@ -1326,6 +1402,8 @@ int main()
 			delete[] concentrations3d[i][j];
 			delete[] sintheta3d[i][j];
 			delete[] thetaIndex3d[i][j];
+			delete[] weights[i][j];
+			delete[] weightedFe[i][j];
 		}
 		delete[] area3d[i];
 		delete[] length3d[i];
@@ -1336,6 +1414,8 @@ int main()
 		delete[] concentrations3d[i];
 		delete[] sintheta3d[i];
 		delete[] thetaIndex3d[i];
+		delete[] weights[i];
+		delete[] weightedFe[i];
 	}
 	delete[] area3d;
 	delete[] length3d;
@@ -1346,6 +1426,9 @@ int main()
 	delete[] concentrations3d;
 	delete[] sintheta3d;
 	delete[] thetaIndex3d;
+	delete[] weights;
+	delete[] weightedFe;
+	delete[] weightedEe;
 
 	for(int i = 0; i < Ntheta; ++i){
 		for(int j = 0; j < Nphi; ++j){

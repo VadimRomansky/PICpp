@@ -2,7 +2,7 @@
 #define STARTPARAMETERS_H
 
 const bool parker = true;
-const bool turbulence = false;
+const bool turbulence = true;
 
 enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
 const Geometry geometry = Geometry::SPHERICAL;

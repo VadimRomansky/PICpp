@@ -13,7 +13,7 @@
 
 #include "optimization.h"
 
-double evaluateOptimizationFunction5(double* vector, double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length){
+double evaluateOptimizationFunction5(double* vector, double** nu, double** observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length){
 	// v[0] = B, v[1] - N, v[2] - f, v[3] - R, v[4] - v
 	double* totalInu = new double[Nnu];
 	//evaluateVolumeAndLength(area, length, rmax, fractionSize);
@@ -45,7 +45,7 @@ double evaluateOptimizationFunction5(double* vector, double** nu, double** obser
 	return err;
 }
 
-void findMinParameters5(double* vector, const double* grad, double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, double& currentF){
+void findMinParameters5(double* vector, const double* grad, double** nu, double** observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, double& currentF){
 	const int Ngrad = 5;
 	double minVector[Ngrad];
 	double tempVector1[Ngrad];
@@ -193,7 +193,7 @@ void findMinParameters5(double* vector, const double* grad, double** nu, double*
 	}
 }
 
-void optimizeParameters5(double* vector,  double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, FILE* logFile){
+void optimizeParameters5(double* vector,  double** nu, double** observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, FILE* logFile){
 	const int Ngrad = 5;
 	double minVector[Ngrad];
 	double tempVector[Ngrad];
@@ -391,7 +391,7 @@ void optimizeParameters5(double* vector,  double** nu, double** observedInu, dou
 	fprintf(logFile, "finish optimization\n");
 }
 
-double evaluateOptimizationFunction5(double Bfactor, double n, double fractionSize, double rmax, double v, double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length){
+double evaluateOptimizationFunction5(double Bfactor, double n, double fractionSize, double rmax, double v, double** nu, double** observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length){
 	if(fractionSize > 1.0){
 		fractionSize = 1.0;
 	}
@@ -430,7 +430,7 @@ double evaluateOptimizationFunction5(double Bfactor, double n, double fractionSi
 	return err;
 }
 
-void findMinParameters5(const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v, double gradB, double gradN, double gradS, double gradR, double gradV, double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, double& currentF){
+void findMinParameters5(const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v, double gradB, double gradN, double gradS, double gradR, double gradV, double** nu, double** observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, double& currentF){
 	double step = 0.4;
 	/*if(fabs(gradB) > 0){
 		step = 0.4*fabs(Bfactor/(B0*gradB));
@@ -677,7 +677,7 @@ void findMinParameters5(const double& B0, const double& N0, const double& R0, co
 	}
 }
 
-void optimizeParameters5(const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v,  double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, FILE* logFile){
+void optimizeParameters5(const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v,  double** nu, double** observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, FILE* logFile){
 	double currentF = evaluateOptimizationFunction5(Bfactor, N, fractionSize, rmax, v, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 	printf("optimization function = %g\n", currentF);
 	fprintf(logFile, "optimization function = %g\n", currentF);
@@ -983,7 +983,7 @@ void optimizeParameters5(const double& B0, const double& N0, const double& R0, c
 	fprintf(logFile, "finish optimization\n");
 }
 
-void findMinParameters5sigma(const double& sigma, const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v, double gradB, double gradS, double gradR, double gradV, double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, double& currentF){
+void findMinParameters5sigma(const double& sigma, const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v, double gradB, double gradS, double gradR, double gradV, double** nu, double** observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, double& currentF){
 	double step = 0.4;
 	if(fabs(gradB) > 0){
 		step = 0.4*fabs(Bfactor/(B0*gradB));
@@ -1188,7 +1188,7 @@ void findMinParameters5sigma(const double& sigma, const double& B0, const double
 	}
 }
 
-void optimizeParameters5sigma(const double& sigma, const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v,  double** nu, double** observedInu, double** Ee, double** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, FILE* logFile){
+void optimizeParameters5sigma(const double& sigma, const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v,  double** nu, double** observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, double*** area, double*** length, FILE* logFile){
 	double currentF = evaluateOptimizationFunction5(Bfactor, N, fractionSize, rmax, v, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 	printf("optimization function = %g\n", currentF);
 	fprintf(logFile, "optimization function = %g\n", currentF);
@@ -1471,7 +1471,7 @@ void optimizeParameters5sigma(const double& sigma, const double& B0, const doubl
 	fprintf(logFile, "finish optimization\n");
 }
 
-double evaluateOptimizationFunction5simple(double Bfactor, double n, double fractionSize, double rmax, double v, double** Ee, double** dFe, int Np, int Nd, double sintheta, int thetaIndex) {
+double evaluateOptimizationFunction5simple(double Bfactor, double n, double fractionSize, double rmax, double v, double* Ee, double* dFe, int Np, int Nd, double sintheta, int thetaIndex) {
 	if(fractionSize > 1.0){
 		fractionSize = 1.0;
 	}
@@ -1488,7 +1488,7 @@ double evaluateOptimizationFunction5simple(double Bfactor, double n, double frac
 	for(int i = 0; i < 4; ++i){
 		double I = 0;
 		nu = aprx[i]*1E9;
-		evaluateEmissivityAndAbsorptionAtNuSimple(nu, Inu, Anu, Ee[thetaIndex], dFe[thetaIndex], Np, sintheta, B, N);
+		evaluateEmissivityAndAbsorptionAtNuSimple(nu, Inu, Anu, Ee, dFe, Np, sintheta, B, N);
 		evaluateSpectrumAtNuSimple(nu, I, Inu, Anu, r, fractionSize);
 		err = err + sqr(I - apry[i]);
 	}
@@ -1499,7 +1499,7 @@ double evaluateOptimizationFunction5simple(double Bfactor, double n, double frac
 	for(int i = 0; i < 3; ++i){
 		double I = 0;
 		nu = mayx[i]*1E9;
-		evaluateEmissivityAndAbsorptionAtNuSimple(nu, Inu, Anu, Ee[thetaIndex], dFe[thetaIndex], Np, sintheta, B, N);
+		evaluateEmissivityAndAbsorptionAtNuSimple(nu, Inu, Anu, Ee, dFe, Np, sintheta, B, N);
 		evaluateSpectrumAtNuSimple(nu, I, Inu, Anu, r, fractionSize);
 		err = err + sqr(I - mayy[i]);
 	}
@@ -1510,7 +1510,7 @@ double evaluateOptimizationFunction5simple(double Bfactor, double n, double frac
 	for(int i = 0; i < 4; ++i){
 		double I = 0;
 		nu = junx[i]*1E9;
-		evaluateEmissivityAndAbsorptionAtNuSimple(nu, Inu, Anu, Ee[thetaIndex], dFe[thetaIndex], Np, sintheta, B, N);
+		evaluateEmissivityAndAbsorptionAtNuSimple(nu, Inu, Anu, Ee, dFe, Np, sintheta, B, N);
 		evaluateSpectrumAtNuSimple(nu, I, Inu, Anu, r, fractionSize);
 		err = err + sqr(I - juny[i]);
 	}
@@ -1521,7 +1521,7 @@ double evaluateOptimizationFunction5simple(double Bfactor, double n, double frac
 	for(int i = 0; i < 5; ++i){
 		double I = 0;
 		nu = augx[i]*1E9;
-		evaluateEmissivityAndAbsorptionAtNuSimple(nu, Inu, Anu, Ee[thetaIndex], dFe[thetaIndex], Np, sintheta, B, N);
+		evaluateEmissivityAndAbsorptionAtNuSimple(nu, Inu, Anu, Ee, dFe, Np, sintheta, B, N);
 		evaluateSpectrumAtNuSimple(nu, I, Inu, Anu, r, fractionSize);
 		err = err + sqr(I - augy[i]);
 	}
@@ -1531,7 +1531,7 @@ double evaluateOptimizationFunction5simple(double Bfactor, double n, double frac
 
 
 
-void findMinParameters5simple(const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v, double gradB, double gradN, double gradS, double gradR, double gradV, double** Ee, double** dFe, int Np, int Nd, double sintheta, int thetaIndex, double& currentF) {
+void findMinParameters5simple(const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v, double gradB, double gradN, double gradS, double gradR, double gradV, double* Ee, double* dFe, int Np, int Nd, double sintheta, int thetaIndex, double& currentF) {
 	double step = 0.4;
 	if(fabs(gradB) > 0){
 		step = 0.4*fabs(Bfactor/(B0*gradB));
@@ -1743,7 +1743,7 @@ void findMinParameters5simple(const double& B0, const double& N0, const double& 
 	//findMinParameters(Bfactor, N, minLambda, maxLambda, gradB, gradN, nu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, distance, Inu, Anu, X, Y, Z, rmax);
 }
 
-void optimizeParameters5simple(const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v, double** Ee, double** dFe, int Np, int Nd, double sintheta, int thetaIndex, FILE* logFile) {
+void optimizeParameters5simple(const double& B0, const double& N0, const double& R0, const double& V0, double& Bfactor, double& N, double& fractionSize, double& rmax, double& v, double* Ee, double* dFe, int Np, int Nd, double sintheta, int thetaIndex, FILE* logFile) {
 	double currentF = evaluateOptimizationFunction5simple(Bfactor, N, fractionSize, rmax, v, Ee, dFe, Np, Nd, sintheta, thetaIndex);
 	printf("optimization function = %g\n", currentF);
 	fprintf(logFile, "optimization function = %g\n", currentF);

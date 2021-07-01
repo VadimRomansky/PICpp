@@ -329,33 +329,13 @@ void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu,
 	//}
 }
 
-void evaluateAllEmissivityAndAbsorption(double* nu, double*** Inu, double*** Anu, int Nnu, double** Ee, double** Fe, int Np, int Nd, double** Bn, double** sintheta, int** thetaIndex, double** concentrations, double concentration, double Bfactor, double fractionSize){
-	int i = 0;
-	#pragma omp parallel for shared(nu, Inu, Anu, Nnu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentration, Bfactor, fractionSize) private(i)
-	for(int j = 0; j < Nphi; ++j){
-		for(int k = 0; k < Nz; ++k){
-			evaluateLocalEmissivityAndAbsorption(nu, Inu[j][k], Anu[j][k], Nnu, Ee[thetaIndex[j][k]], Fe[thetaIndex[j][k]], Np, sintheta[j][k], Bn[j][k]*Bfactor, concentration*concentrations[j][k], fractionSize);
-		}
-	}
-}
-
-void evaluateAllEmissivityAndAbsorption1(double* nu, double*** Inu, double*** Anu, int Nnu, double** Ee, double** Fe, int Np, int Nd, double** Bn, double** sintheta, int** thetaIndex, double** concentrations, double concentration, double Bfactor, double fractionSize){
-	int i = 0;
-	#pragma omp parallel for shared(nu, Inu, Anu, Nnu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentration, Bfactor, fractionSize) private(i)
-	for(int j = 0; j < Nphi; ++j){
-		for(int k = 0; k < Nz; ++k){
-			evaluateLocalEmissivityAndAbsorption1(nu, Inu[j][k], Anu[j][k], Nnu, Ee[thetaIndex[j][k]], Fe[thetaIndex[j][k]], Np, sintheta[j][k], Bn[j][k]*Bfactor, concentration*concentrations[j][k], fractionSize);
-		}
-	}
-}
-
-void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double** Ee, double** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor){
+void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor){
 #pragma omp parallel for shared(nu, Inu, Anu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, concentration, Bfactor, rfactor)	
 for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
 			for(int k = 0; k < Nz; ++k){
 				for(int l = 0; l < Nnu; ++l){
-					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee[thetaIndex[i][j][k]], Fe[thetaIndex[i][j][k]], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/rfactor, concentration*concentrations[i][j][k]/(rfactor*rfactor));
+					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/rfactor, concentration*concentrations[i][j][k]/(rfactor*rfactor));
 				}
 			}
 		}
