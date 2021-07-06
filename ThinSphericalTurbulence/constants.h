@@ -153,9 +153,9 @@ const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
 
 const double minB = 0.0001;
-const double maxB = 0.2;
+const double maxB = 0.4;
 const double minN = 0.01;
-const double maxN = 200;
+const double maxN = 400;
 const double minFraction = 0.001;
 const double maxFraction = 0.2;
 const double maxSigma = 10.0;
