@@ -769,6 +769,8 @@ int main()
 	printf("reading input\n");
 	fprintf(logFile, "reading input\n");
 	fflush(logFile);
+	int powerlawStart[Ndist] = {155,155,155,155,155,155,145,145,145,145};
+
 
 	Fe = new double*[Ndist];
 	dFe = new double*[Ndist];
@@ -855,14 +857,20 @@ int main()
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
 		} else if(input == POWERLAW) {
-			for (int i = 1; i < Np; ++i) {
+	
+			int Npowerlaw = powerlawStart[j];
+			for (int i = 1; i < Npowerlaw; ++i) {
+
 				fscanf(inputPe, "%lf", &u);
 				fscanf(inputFe, "%lf", &Fe[j][i]);
 
+				//todo massRelationSqrt?
 				double gamma = u*realMassRelationSqrt/massRelationSqrt + 1;
 				Ee[j][i] = gamma*massElectron*speed_of_light2;
+				Fe[j][i] = Fe[j][i] / (massElectron*speed_of_light2);
+				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 
-				double minGamma = 2;
+				/*double minGamma = 2;
 				double power = 3;
 
 				if(gamma >= minGamma){
@@ -870,6 +878,14 @@ int main()
 				} else {
 					Fe[j][i] = 0;
 				}
+				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);*/
+			}
+			Ee[j][Np-1] = 1E8;
+			double factor = pow(Ee[j][Np-1]/Ee[j][Npowerlaw-1], 1.0/(Np-Npowerlaw));
+			double gammae = -log(Fe[j][Npowerlaw-10]/Fe[j][Npowerlaw-1])/log(Ee[j][Npowerlaw-10]/Ee[j][Npowerlaw-1]);
+			for(int i = Npowerlaw; i < Np; ++i){
+				Ee[j][i] = Ee[j][i-1]*factor;
+				Fe[j][i] = Fe[j][Npowerlaw-1]*pow(Ee[j][Npowerlaw-1]/Ee[j][i], gammae);
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
 		}
@@ -1074,7 +1090,9 @@ int main()
 	meanB = meanB/ncells;*/
 
 	//evaluateNu(nu, Nnu, 1.1*massElectron*speed_of_light2, 1000*massElectron*speed_of_light2, meanB);
-	createNu(nu, Nnu, 0.001*1E9, 10000*1E9);
+	double numax = 10000*1E9;
+	numax = 1000*1.6*1E-12/hplank;
+	createNu(nu, Nnu, 0.001*1E9, numax);
 	/*for(int i = 0; i < Nnu1; ++i){
 		nu1[i] = aprx[i]*1.0E9;
 	}*/
