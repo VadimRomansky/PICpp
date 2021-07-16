@@ -181,10 +181,15 @@ testy(1) = apry(3);
 testy(2) = testy(1)*power(testx(2)/testx(1),-gamma);
 testy(3) = testy(1)*power(testx(3)/testx(1),-gamma);
 
+nufnu(1:N) = 0;
+for i = 1:N,
+    nufnu(i) = radiation(i,1)*radiation(i,2)/10^26;
+end;
+
 figure(2);
 hold on;
-title ('I_{\nu}');
+title ('{\nu} F_{\nu}');
 xlabel ('{\nu} GHz');
-ylabel ('mJy');
-loglog(radiation(1:N,1),radiation(1:N,2),'red','LineWidth',2);
-loglog(aprx(1:4),apry(1:4),'--o','Color','red','LineWidth',2);
+ylabel ('erg/s cm^2');
+loglog(radiation(1:N,1),nufnu(1:N),'red','LineWidth',2);
+%loglog(aprx(1:4),apry(1:4),'--o','Color','red','LineWidth',2);
