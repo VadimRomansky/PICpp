@@ -556,8 +556,11 @@ void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double****
 						if(Q > 0){
 							S = Q/Anu[l][rhoindex][j][k];
 						}
-
-						localI = S + (I0 - S)*exp(-tau);
+						if(fabs(tau) < 1E-15){
+							localI = I0*(1.0 - tau) + S*tau;
+						} else {
+							localI = S + (I0 - S)*exp(-tau);
+						}
 					}
 				}
 				I[l] += localI;
