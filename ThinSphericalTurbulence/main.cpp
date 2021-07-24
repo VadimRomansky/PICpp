@@ -1343,6 +1343,72 @@ int main()
 		delete[] tempTotalInu[l];
 	}
 	delete[] tempTotalInu;
+	
+
+	//Chevalier compare to SN1987A
+	const int Nchevalier = 5;
+	const int Ntchev = 100;
+	double Nuchev = 0.843E9;
+	double* tchev = new double[Ntchev];
+	double* chevTotalInu = new double[Ntchev];
+	tchev[0] = 24*3600;
+	factor = pow(1000.0, 1.0/(Ntchev - 1));
+	for(int i = 1; i < Ntchev; ++i){
+		tchev[i] = tchev[i-1]*factor;
+	}
+	double dchev = 0.05;
+	double rchev = 1.5E15;
+	double Bchev = 0.23;
+	double nchev = (6E-19)/(1.6E-24);
+	double fchev = 0.2;
+	double vchev = 5100000000;
+
+	for(int l = 0; l < Ntchev; ++l){
+		double r = rchev + v*tchev[l];
+		double rfactor = r/rchev;
+		double locB = Bfactor*rchev/r;
+		double locN = nchev*pow(tchev[l]/(365*24*3600),-3)*pow(vchev/1000000000,-9);
+
+
+		for(int i = 0; i < Nrho; ++i){
+			for(int j = 0; j < Nphi; ++j){
+				for(int k = 0; k < Nz; ++k){
+					evaluateEmissivityAndAbsorptionAtNuSimple(Nuchev, tempInu[0][i][j][k], tempAnu[0][i][j][k], weightedEe, weightedFe[i][j][k], Np, sintheta3d[i][j][k], locB, locN);
+				}
+			}
+		}
+
+		//evaluateAllEmissivityAndAbsorption(nu, tempInu, tempAnu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, nchev[l], Bchev[l], 1.0);
+
+
+		//evaluateSpectrum(nu, tempTotalInu[l], tempInu, tempAnu, area3d, length3d, Nnu, rfactor);
+		if(geometry == SPHERICAL){
+			evaluateSpectrumSphericalAtNu(Nuchev, chevTotalInu[l], tempInu[0], tempAnu[0], r, 1.0, fchev, dchev);
+		} else {
+			evaluateSpectrumFlatAtNu(Nuchev, chevTotalInu[l], tempInu[0], tempAnu[0], r, 1.0, fchev, dchev);
+		}
+	}
+
+	FILE* chevOutput = fopen("chevalier.dat","w");
+
+	/*for(int i = 0; i < Nnu; ++i){
+		fprintf(chevOutput, "%g", nu[i]/1E9, chevTotalInu[0][i]);
+		for(int l = 0; l < Nchev; ++l){
+			fprintf(chevOutput, " %g", chevTotalInu[l][i]);
+		}
+		fprintf(chevOutput, "\n");
+	}*/
+
+	for(int i = 0; i < Ntchev; ++i){
+		fprintf(chevOutput, "%g %g\n", tchev[i], chevTotalInu[i]);
+	}
+
+	fclose(chevOutput);
+
+	delete[] tchev;
+	delete[] chevTotalInu;
+	//
+
 	for(int l = 0; l < Nnu; ++l){
 		for(int i = 0; i < Nrho; ++i){
 			for(int j = 0; j < Nphi; ++j){

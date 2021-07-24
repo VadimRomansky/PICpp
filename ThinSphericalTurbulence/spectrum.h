@@ -14,7 +14,9 @@ void evaluateVolumeAndLength(double*** area, double*** length, double rmax, doub
 void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor);
 void evaluateSpectrum(double* nu, double* I, double**** Inu, double**** Anu, double*** area, double*** length, int Nnu, double rfactor);
 void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength);
+void evaluateSpectrumSphericalAtNu(double nu, double& I, double*** Inu, double*** Anu, double rmax, double rfactor, double fractionLength, double d);
 void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength);
+void evaluateSpectrumFlatAtNu(double nu, double& I, double*** Inu, double*** Anu, double rmax, double rfactor, double fractionLength, double d);
 double evaluateNextdFe(double* Ee, double* dFe, double dg, int i, int Np);
 
 void evaluateImageSpherical(double*** image, double* nu, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength);

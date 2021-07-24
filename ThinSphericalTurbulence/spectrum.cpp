@@ -331,7 +331,7 @@ void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu,
 
 void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor){
 #pragma omp parallel for shared(nu, Inu, Anu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, concentration, Bfactor, rfactor)	
-for(int i = 0; i < Nrho; ++i){
+	for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
 			for(int k = 0; k < Nz; ++k){
 				for(int l = 0; l < Nnu; ++l){
@@ -576,6 +576,94 @@ void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double****
 	}
 }
 
+void evaluateSpectrumSphericalAtNu(double nu, double& I, double*** Inu, double*** Anu, double rmax, double rfactor, double fractionLength, double d){
+	int tempNr = 100;
+	double tempRmax = rmax*rfactor;
+	double tempRmin = (1.0 - fractionLength)*tempRmax;
+	double tempdr = tempRmax/tempNr;
+	double dphi = 2*pi/Nphi;
+	double dz = 2*rmax*rfactor/Nz;
+
+	I = 0;
+
+	double drho = tempRmax/Nrho;
+
+	double length[Nz];
+
+	for(int i = 0; i < tempNr; ++i){
+		double r = (i + 0.5)*tempdr;
+		double s = 0.5*dphi*(2*i + 1)*tempdr*tempdr;
+		double z1 = -sqrt(tempRmax*tempRmax -r*r);
+		double z2 = 0;
+		if(tempRmin > r){
+			z2 = -sqrt(tempRmin*tempRmin - r*r);
+		}
+		double z3 = -z2;
+		double z4 = -z1;
+
+		int rhoindex = floor(r/drho);
+		if(rhoindex >= Nrho){
+			printf("rhoindex > Nrho\n");
+			rhoindex = Nrho-1;
+		}
+
+		for(int k = 0; k < Nz; ++k){
+			double z = - tempRmax + (k +0.5)*dz;
+			double minz  = - tempRmax + k*dz;
+			double maxz = -tempRmax + (k+1)*dz;
+			//length
+			length[k] = 0;
+			if(z < 0){
+				if(z1 > maxz){
+					length[k] = 0;
+				} else if (z2 < minz){
+					length[k] = 0;
+				} else {
+					double lowz = max(minz, z1);
+					double topz = min(maxz, z2);
+					length[k] = topz - lowz;
+				}
+			} else {
+				if(z4 < minz){
+					length[k] = 0;
+				} else if(z3 > maxz){
+					length[k] = 0;
+				} else {
+					double lowz = max(minz, z3);
+					double topz = min(maxz, z4);
+					length[k] = topz - lowz;
+				}
+			}
+		}
+
+		for(int j = 0; j < Nphi; ++j){
+				double localI = 0;
+				for(int k = 0; k < Nz; ++k){				
+					double I0 = localI;
+					if(length[k] > 0){
+						double Q = Inu[rhoindex][j][k]*s;
+						double tau = Anu[rhoindex][j][k]*length[k];
+						double S = 0;
+						if(Q > 0){
+							S = Q/Anu[rhoindex][j][k];
+						}
+						if(fabs(tau) < 1E-15){
+							localI = I0*(1.0 - tau) + S*tau;
+						} else {
+							localI = S + (I0 - S)*exp(-tau);
+						}
+					}
+				}
+				I += localI;
+			}
+			
+		}
+
+	//delete[] length;
+
+	I = I*1E26/(d*d);
+}
+
 //flat
 void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength){
 	double tempRmax = rmax*rfactor;
@@ -630,7 +718,11 @@ void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu,
 							S = Q/Anu[l][i][j][k];
 						}
 
-						localI = S + (I0 - S)*exp(-tau);
+						if(fabs(tau) < 1E-15){
+							localI = I0*(1.0 - tau) + S*tau;
+						} else {
+							localI = S + (I0 - S)*exp(-tau);
+						}
 						if(localI != localI){
 							printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[l][i][j][k], Inu[l][i][j][k], Q, s, length[k],tau, I0);
 							printf("localI = NaN\n");
@@ -649,6 +741,78 @@ void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu,
 	for(int l = 0; l < Nnu; ++l){
 		I[l] = I[l]*1E26/(distance*distance);
 	}
+}
+
+void evaluateSpectrumFlatAtNu(double nu, double& I, double*** Inu, double*** Anu, double rmax, double rfactor, double fractionLength, double d){
+	double tempRmax = rmax*rfactor;
+	double tempRmin = (1.0 - fractionLength)*tempRmax;
+	double tempdr = tempRmax/Nrho;
+	double dphi = 2*pi/Nphi;
+	double dz = (4.0/3.0)*tempRmax/Nz;
+	double zmin = (4.0/3.0)*(1.0 - fractionLength)*tempRmax;
+
+	I = 0;
+
+	double drho = tempRmax/Nrho;
+
+	double length[Nz];
+
+	for(int k = 0; k < Nz; ++k){
+		double z1  = k*dz;
+		double z2 = (k+1)*dz;
+		//length
+		length[k] = 0;
+		if(z2 < zmin){
+			length[k] = 0;
+		} else if(z1 > zmin){
+			length[k] = dz;
+		} else {
+			length[k] = z2 - zmin;
+		}
+	}
+
+	for(int i = 0; i < Nrho; ++i){
+		double s = 0.5*dphi*(2*i + 1)*tempdr*tempdr;
+		for(int j = 0; j < Nphi; ++j){
+			double localI = 0;
+			for(int k = 0; k < Nz; ++k){				
+				double I0 = localI;
+				if(length[k] > 0){
+					double Q = Inu[i][j][k]*s;
+					if(Inu[i][j][k] != Inu[i][j][k]){
+						printf("Inu[i][j][k] = NaN\n");
+						exit(0);
+					}
+					double tau = Anu[i][j][k]*length[k];
+					if(Anu[i][j][k] != Anu[i][j][k]){
+						printf("Anu[i][j][k] = NaN\n");
+						exit(0);
+					}
+					double S = 0;
+					if(Q > 0){
+						S = Q/Anu[i][j][k];
+					}
+
+					if(fabs(tau) < 1E-15){
+						localI = I0*(1.0 - tau) + S*tau;
+					} else {
+						localI = S + (I0 - S)*exp(-tau);
+					}
+					if(localI != localI){
+						printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[i][j][k], Inu[i][j][k], Q, s, length[k],tau, I0);
+						printf("localI = NaN\n");
+						exit(0);
+					}
+				}
+			}
+			I += localI;
+		}
+			
+	}
+
+	//delete[] length;
+
+	I = I*1E26/(d*d);
 }
 
 void evaluateSpectrum(double* nu, double* totalInu, double*** Inu, double*** Anu, double** area, double** length, int Nnu, double rmax, double* Rho, double* Phi){
