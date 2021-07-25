@@ -1356,7 +1356,7 @@ int main()
 	for(int i = 1; i < Ntchev; ++i){
 		tchev[i] = tchev[i-1]*factor;
 	}
-	double dchev = 0.05;
+	double dchev = 0.05*3.08E24;
 	double rchev = 1.5E15;
 	double Bchev = 0.23;
 	double nchev = (6E-19)/(1.6E-24);
@@ -1365,10 +1365,11 @@ int main()
 
 	for(int l = 0; l < Ntchev; ++l){
 		double r = rchev + v*tchev[l];
-		double rfactor = r/rchev;
-		double locB = Bfactor*rchev/r;
+		double locB = Bchev*rchev/r;
+		//locB = Bchev;
 		double locN = nchev*pow(tchev[l]/(365*24*3600),-3)*pow(vchev/1000000000,-9);
 
+		//locN = nchev;
 
 		for(int i = 0; i < Nrho; ++i){
 			for(int j = 0; j < Nphi; ++j){
@@ -1400,7 +1401,7 @@ int main()
 	}*/
 
 	for(int i = 0; i < Ntchev; ++i){
-		fprintf(chevOutput, "%g %g\n", tchev[i], chevTotalInu[i]);
+		fprintf(chevOutput, "%g %g\n", tchev[i]/(24*3600), chevTotalInu[i]);
 	}
 
 	fclose(chevOutput);
