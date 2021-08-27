@@ -1358,17 +1358,18 @@ int main()
 	}
 	double dchev = 0.05*3.08E24;
 	double rchev = 1.5E15;
-	double Bchev = 0.23;
+	double Bchev = 0.03;
 	double nchev = (6E-19)/(1.6E-24);
+	nchev = 1;
 	double fchev = 0.2;
 	double vchev = 5100000000;
 
 	for(int l = 0; l < Ntchev; ++l){
-		double r = rchev + v*tchev[l];
+		double r = rchev + vchev*tchev[l];
 		double locB = Bchev*rchev/r;
 		//locB = Bchev;
 		double locN = nchev*pow(tchev[l]/(365*24*3600),-3)*pow(vchev/1000000000,-9);
-
+		locN - nchev*(rchev/r)*(rchev/r);
 		//locN = nchev;
 
 		for(int i = 0; i < Nrho; ++i){
