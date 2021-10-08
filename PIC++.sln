@@ -25,6 +25,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Compton", "Compton\Compton.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Turbulence1", "Turbulence1\Turbulence1.vcxproj", "{572A21F8-FD5A-416A-A9BB-9C6A18DE920F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleRadiation", "SimpleRadiation\SimpleRadiation.vcxproj", "{913CE54B-BD5D-4A5C-A348-1497B32E205F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -157,6 +159,16 @@ Global
 		{572A21F8-FD5A-416A-A9BB-9C6A18DE920F}.Release|Win32.ActiveCfg = Release|Win32
 		{572A21F8-FD5A-416A-A9BB-9C6A18DE920F}.Release|Win32.Build.0 = Release|Win32
 		{572A21F8-FD5A-416A-A9BB-9C6A18DE920F}.Release|x64.ActiveCfg = Release|Win32
+		{913CE54B-BD5D-4A5C-A348-1497B32E205F}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{913CE54B-BD5D-4A5C-A348-1497B32E205F}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{913CE54B-BD5D-4A5C-A348-1497B32E205F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{913CE54B-BD5D-4A5C-A348-1497B32E205F}.Debug|Win32.Build.0 = Debug|Win32
+		{913CE54B-BD5D-4A5C-A348-1497B32E205F}.Debug|x64.ActiveCfg = Debug|Win32
+		{913CE54B-BD5D-4A5C-A348-1497B32E205F}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{913CE54B-BD5D-4A5C-A348-1497B32E205F}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{913CE54B-BD5D-4A5C-A348-1497B32E205F}.Release|Win32.ActiveCfg = Release|Win32
+		{913CE54B-BD5D-4A5C-A348-1497B32E205F}.Release|Win32.Build.0 = Release|Win32
+		{913CE54B-BD5D-4A5C-A348-1497B32E205F}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
