@@ -50,7 +50,7 @@ const double times[Nmonth] = {0, 2760000, 5270400, 10700000, 19000000, 56100000}
 //const double times[Nmonth] = {0, 2760000, 5270400, 10700000};
 
 //const double distance = 40*3.08*1.0E24;
-const double distance = 40*3.08*1.0E24;
+const double distance = 66*3.08*1.0E24;
 
 const int Nrho = 10;
 const int Nphi = 10;

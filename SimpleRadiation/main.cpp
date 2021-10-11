@@ -388,6 +388,39 @@ double findFeAt(double* Ee, double* Fe, double currentE, int Np) {
 	return result;
 }
 
+double evaluateR(double nupeak, double fpeak, double d, double fraction, double epsilone, double epsilonB){
+	double c1 = 6.265E18;
+	double c5 = 0.6688E-23;
+	double c6 = 5.2179E-41;
+
+	double p = 2.5;
+
+	double a1 = pow(c6, p+5);
+	double a2 = pow(fpeak, p+6);
+	double a3 = pow(d, p + 6);
+
+
+	double a = 6*(pow(c6, p+5)*pow(d, p + 6))* (pow(fpeak, p+6)*pow(d, p + 6));
+	double b = (epsilone/epsilonB)*fraction*(p-2)*pow(pi, p+5)*pow(c5, p+6)*pow(massElectron*speed_of_light2, p-2);
+
+	double result = pow(a/b, 1.0/(2*p + 13))*2*c1/nupeak;
+
+	return result;
+}
+
+double evaluateB(double nupeak, double fpeak, double d, double fraction, double epsilone, double epsilonB){
+	double c1 = 6.265E18;
+	double c5 = 0.6688E-23;
+	double c6 = 5.2179E-41;
+
+	double p = 2.5;
+	double a = 36*pi*pi*pi*c5;
+	double b = pow(epsilone/epsilonB, 2)*fraction*fraction*(p-2.0)*(p-2.0)*c6*c6*c6*pow(massElectron*speed_of_light2, 2*(p-2.0))*fpeak*d*d;
+
+	double result = pow(a/b, 2.0/(2*p + 13))*nupeak/(2*c1);
+
+	return result;
+}
 
 
 int main()
@@ -432,7 +465,20 @@ int main()
 	int*** thetaIndex3d;
 	double*** sintheta3d;
 
-	
+	double d = 66*3.08*1.0E24;
+	double fraction = 0.5;
+	double fpeak = 1.1E-26;
+	double nupeak = 1.25E9;
+
+	double epsilone = 0.1;
+	double epsilonB = 0.01;
+
+	double B1 = evaluateB(nupeak, fpeak, d, fraction, epsilone, epsilonB);
+	double R1 = evaluateR(nupeak, fpeak, d, fraction, epsilone, epsilonB);
+	double t1 = 138*24*3600;
+	double v1 = R1/t1;
+	double beta1 = v1/speed_of_light;
+	double n1 = (B1*B1/(8*pi))/(epsilonB*v1*v1*massProtonReal);
 
 	//double rmin = dx*sqrt(3.0)/2;
 	double rmax = size[0];
@@ -753,7 +799,7 @@ int main()
 	printf("reading input\n");
 	fprintf(logFile, "reading input\n");
 	fflush(logFile);
-	int powerlawStart[Ndist] = {155,155,155,155,155,155,145,145,145,145};
+	int powerlawStart[Ndist] = {140,140,140,140,140,140,140,140,140,140};
 
 
 	Fe = new double*[Ndist];
@@ -844,7 +890,8 @@ int main()
 		} else if(input == POWERLAW) {
 	
 			int Npowerlaw = powerlawStart[j];
-			for (int i = 1; i < Npowerlaw; ++i) {
+			Npowerlaw = 1;
+			for (int i = 1; i < Np; ++i) {
 
 				fscanf(inputPe, "%lf", &u);
 				fscanf(inputFe, "%lf", &Fe[j][i]);
@@ -855,24 +902,31 @@ int main()
 				Fe[j][i] = Fe[j][i] / (massElectron*speed_of_light2);
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 
-				/*double minGamma = 2;
-				double power = 3;
+				double minGamma = 2;
+				double power = 2.5;
 
 				if(gamma >= minGamma){
 					Fe[j][i] = 1.0/pow(Ee[j][i],power);
 				} else {
 					Fe[j][i] = 0;
 				}
-				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);*/
+				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
-			Ee[j][Np-1] = 1E8;
+			/*Ee[j][Np-1] = 1E8;
 			double factor = pow(Ee[j][Np-1]/Ee[j][Npowerlaw-1], 1.0/(Np-Npowerlaw));
-			double gammae = -log(Fe[j][Npowerlaw-10]/Fe[j][Npowerlaw-1])/log(Ee[j][Npowerlaw-10]/Ee[j][Npowerlaw-1]);
+			//double gammae = -log(Fe[j][Npowerlaw-10]/Fe[j][Npowerlaw-1])/log(Ee[j][Npowerlaw-10]/Ee[j][Npowerlaw-1]);
+			double gammae = 2.5;
 			for(int i = Npowerlaw; i < Np; ++i){
+				fscanf(inputPe, "%lf", &u);
+				fscanf(inputFe, "%lf", &Fe[j][i]);
+
+				//todo massRelationSqrt?
+				double gamma = u*realMassRelationSqrt/massRelationSqrt + 1;
+				//Ee[j][i] = gamma*massElectron*speed_of_light2;
 				Ee[j][i] = Ee[j][i-1]*factor;
 				Fe[j][i] = Fe[j][Npowerlaw-1]*pow(Ee[j][Npowerlaw-1]/Ee[j][i], gammae);
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
-			}
+			}*/
 		}
 
 
@@ -975,7 +1029,7 @@ int main()
 	//evaluateNu(nu, Nnu, 1.1*massElectron*speed_of_light2, 1000*massElectron*speed_of_light2, meanB);
 	double numax = 10000*1E9;
 	numax = 1000*1.6*1E-12/hplank;
-	createNu(nu, Nnu, 0.001*1E9, numax);
+	createNu(nu, Nnu, 0.1*1E9, 10*1E9);
 	/*for(int i = 0; i < Nnu1; ++i){
 		nu1[i] = aprx[i]*1.0E9;
 	}*/
@@ -999,16 +1053,32 @@ int main()
 	printf("optimizing parameters\n");
 	fprintf(logFile, "optimizing parameters\n");
 	fflush(logFile);
-	double epsilonB = 0.1;
-	v = 0.1*speed_of_light;
-	double t = 82.0*24.0*3600.0;
+	epsilonB = 0.1;
+	v = 0.15*speed_of_light;
+
+
+	//from Nayan day 138
+	rmax = 5.38E16;
+	Bfactor = 0.065;
+	double Mdot = 4.82E-5;
+	concentration = n1;
+	fractionSize = 1.0 - pow(0.5, 1.0/3.0);
+
+	rmax = R1;
+	Bfactor = B1;
+	concentration = n1;
+	fractionSize = 1.0 - pow(0.5, 1.0/3.0);
+	//fractionSize = 0.5;
+	v = v1;
+
+	/*double t = 82.0*24.0*3600.0;
 	rmax = 82.0*24.0*3600.0*v;
 	double gam = 1.0/sqrt(1.0 - v*v/speed_of_light2);
 	double n0 = (9E6)/(82*82/49);
 	Bfactor = sqrt(epsilonB*8*pi*(gam - 1.0)*n0*massProtonReal*speed_of_light2);
 	concentration = 2*n0;
 	fractionSize = 0.1;
-	sigma = 0.02;
+	sigma = 0.02;*/
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
 
 
