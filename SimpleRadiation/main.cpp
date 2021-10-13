@@ -482,7 +482,7 @@ int main()
 
 	//double rmin = dx*sqrt(3.0)/2;
 	double rmax = size[0];
-	double rmin = 1E13;
+	double rmin = 1E13;	
 
 	//double B0 = 1000;
 	double B0 = 1.0;
