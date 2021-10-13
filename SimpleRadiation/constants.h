@@ -49,6 +49,10 @@ const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17, 4.6E17, 14E17};
 const double times[Nmonth] = {0, 2760000, 5270400, 10700000, 19000000, 56100000};
 //const double times[Nmonth] = {0, 2760000, 5270400, 10700000};
 
+//1.0 1.5 2.0 2.5 3.0 3.5
+const double pacholczykC5[6] = {3.8359E-23, 1.6954E-23, 0.9874E-23, 0.6688E-23, 0.5013E-23, 0.4050E-23};
+const double pacholczykC6[6] = {8.4809E-41, 6.7024E-41, 5.7410E-41, 5.2179E-41, 4.9697E-41, 4.9198E-41};
+
 //const double distance = 40*3.08*1.0E24;
 const double distance = 66*3.08*1.0E24;
 

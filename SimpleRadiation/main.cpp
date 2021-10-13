@@ -388,12 +388,10 @@ double findFeAt(double* Ee, double* Fe, double currentE, int Np) {
 	return result;
 }
 
-double evaluateR(double nupeak, double fpeak, double d, double fraction, double epsilone, double epsilonB){
+double evaluateR(double nupeak, double fpeak, double d, double fraction, double epsilone, double epsilonB, double p){
 	double c1 = 6.265E18;
-	double c5 = 0.6688E-23;
-	double c6 = 5.2179E-41;
-
-	double p = 2.5;
+	double c5 = pacholczykC5[4];
+	double c6 = pacholczykC6[4];
 
 	double a1 = pow(c6, p+5);
 	double a2 = pow(fpeak, p+6);
@@ -408,12 +406,11 @@ double evaluateR(double nupeak, double fpeak, double d, double fraction, double 
 	return result;
 }
 
-double evaluateB(double nupeak, double fpeak, double d, double fraction, double epsilone, double epsilonB){
+double evaluateB(double nupeak, double fpeak, double d, double fraction, double epsilone, double epsilonB, double p){
 	double c1 = 6.265E18;
-	double c5 = 0.6688E-23;
-	double c6 = 5.2179E-41;
+	double c5 = pacholczykC5[4];
+	double c6 = pacholczykC6[4];
 
-	double p = 2.5;
 	double a = 36*pi*pi*pi*c5;
 	double b = pow(epsilone/epsilonB, 2)*fraction*fraction*(p-2.0)*(p-2.0)*c6*c6*c6*pow(massElectron*speed_of_light2, 2*(p-2.0))*fpeak*d*d;
 
@@ -465,18 +462,21 @@ int main()
 	int*** thetaIndex3d;
 	double*** sintheta3d;
 
-	double d = 66*3.08*1.0E24;
+	double z = 0.2433;
+	double d = 816*3.08*1.0E24;
 	double fraction = 0.5;
-	double fpeak = 1.1E-26;
-	double nupeak = 1.25E9;
+	double fpeak = 0.48E-26;
+	double nupeak = 22.0E9;
 
-	double epsilone = 0.1;
-	double epsilonB = 0.01;
+	double epsilone = 0.33;
+	double epsilonB = 0.33;
 
-	double B1 = evaluateB(nupeak, fpeak, d, fraction, epsilone, epsilonB);
-	double R1 = evaluateR(nupeak, fpeak, d, fraction, epsilone, epsilonB);
-	double t1 = 138*24*3600;
-	double v1 = R1/t1;
+	double p = 3.0;
+
+	double B1 = evaluateB(nupeak, fpeak, d, fraction, epsilone, epsilonB, p);
+	double R1 = evaluateR(nupeak, fpeak, d, fraction, epsilone, epsilonB, p);
+	double t1 = 71*24*3600;
+	double v1 = (1+z)*R1/t1;
 	double beta1 = v1/speed_of_light;
 	double n1 = (B1*B1/(8*pi))/(epsilonB*v1*v1*massProtonReal);
 
