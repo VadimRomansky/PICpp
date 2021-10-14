@@ -411,10 +411,17 @@ double evaluateB(double nupeak, double fpeak, double d, double fraction, double 
 	double c5 = pacholczykC5[4];
 	double c6 = pacholczykC6[4];
 
+	//double d0 = 3.08E24;
+	//double nu0 = 5E9;
+	//double f0 = 1E-23;
+
 	double a = 36*pi*pi*pi*c5;
 	double b = pow(epsilone/epsilonB, 2)*fraction*fraction*(p-2.0)*(p-2.0)*c6*c6*c6*pow(massElectron*speed_of_light2, 2*(p-2.0))*fpeak*d*d;
 
 	double result = pow(a/b, 2.0/(2*p + 13))*nupeak/(2*c1);
+
+
+	//double result = 0.58*pow(epsilone/epsilonB, -4.0/(2*p +13))*pow(fraction/0.5,-4.0/(2*p +13))*pow(fpeak/f0, -2.0/(2*p +13))*pow(d/d0, -4.0/(2*p +13))*(nupeak/nu0);
 
 	return result;
 }
@@ -463,13 +470,18 @@ int main()
 	double*** sintheta3d;
 
 	double z = 0.2433;
-	double d = 816*3.08*1.0E24;
+	double d = 816*3.08*1.0E24; //angular diameter distance
 	double fraction = 0.5;
 	double fpeak = 0.48E-26;
 	double nupeak = 22.0E9;
 
 	double epsilone = 0.33;
 	double epsilonB = 0.33;
+
+	fpeak = 1E-23;
+	nupeak = 5E9;
+	d = 3.085*1.0E24;
+	fraction = 1.0;
 
 	double p = 3.0;
 
