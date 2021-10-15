@@ -478,10 +478,13 @@ int main()
 	double epsilone = 0.33;
 	double epsilonB = 0.33;
 
+	//double epsilone = 0.0154;
+	//double epsilonB = 0.04;
+
 	fpeak = 1E-23;
 	nupeak = 5E9;
 	d = 3.085*1.0E24;
-	fraction = 1.0;
+	fraction = 0.5;
 
 	double p = 3.0;
 
@@ -915,7 +918,7 @@ int main()
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 
 				double minGamma = 2;
-				double power = 2.5;
+				double power = 3.0;
 
 				if(gamma >= minGamma){
 					Fe[j][i] = 1.0/pow(Ee[j][i],power);
@@ -1092,6 +1095,13 @@ int main()
 	fractionSize = 0.1;
 	sigma = 0.02;*/
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
+
+	//Ho atm2020
+	Bfactor = 0.87;
+	rmax = 2.2E16;
+	fractionSize = 0.99;
+	concentration = 3700;
+	v = 0.15*speed_of_light;
 
 
 

@@ -54,7 +54,7 @@ const double pacholczykC5[6] = {3.8359E-23, 1.6954E-23, 0.9874E-23, 0.6688E-23, 
 const double pacholczykC6[6] = {8.4809E-41, 6.7024E-41, 5.7410E-41, 5.2179E-41, 4.9697E-41, 4.9198E-41};
 
 //const double distance = 40*3.08*1.0E24;
-const double distance = 66*3.08*1.0E24;
+const double distance = 816*3.08*1.0E24;
 
 const int Nrho = 10;
 const int Nphi = 10;
