@@ -12,6 +12,7 @@
 #include "constants.h"
 #include "util.h"
 #include "spectrum.h"
+#include "optimization.h"
 
 double phiValue[Nphi];
 double sinPhiValue[Nphi];
@@ -390,30 +391,35 @@ double findFeAt(double* Ee, double* Fe, double currentE, int Np) {
 
 double evaluateR(double nupeak, double fpeak, double d, double fraction, double epsilone, double epsilonB, double p){
 	double c1 = 6.265E18;
-	double c5 = pacholczykC5[4];
-	double c6 = pacholczykC6[4];
+	double c5 = pacholczykC5[5];
+	double c6 = pacholczykC6[5];
 
 	double a1 = pow(c6, p+5);
 	double a2 = pow(fpeak, p+6);
 	double a3 = pow(d, p + 6);
 
+	double d0 = 3.08E24;
+	double nu0 = 5E9;
+	double f0 = 1E-23;
 
 	double a = 6*(pow(c6, p+5)*pow(d, p + 6))* (pow(fpeak, p+6)*pow(d, p + 6));
 	double b = (epsilone/epsilonB)*fraction*(p-2)*pow(pi, p+5)*pow(c5, p+6)*pow(massElectron*speed_of_light2, p-2);
 
 	double result = pow(a/b, 1.0/(2*p + 13))*2*c1/nupeak;
 
+	//double result = 5.1E15*pow(epsilone/epsilonB, -1.0/(2*p +13))*pow(fpeak/f0, (p+6)/(2*p +13))*pow(d/d0, (2*p+12)/(2*p +13))*(nu0/nupeak);
+
 	return result;
 }
 
 double evaluateB(double nupeak, double fpeak, double d, double fraction, double epsilone, double epsilonB, double p){
 	double c1 = 6.265E18;
-	double c5 = pacholczykC5[4];
-	double c6 = pacholczykC6[4];
+	double c5 = pacholczykC5[5];
+	double c6 = pacholczykC6[5];
 
-	//double d0 = 3.08E24;
-	//double nu0 = 5E9;
-	//double f0 = 1E-23;
+	double d0 = 3.08E24;
+	double nu0 = 5E9;
+	double f0 = 1E-23;
 
 	double a = 36*pi*pi*pi*c5;
 	double b = pow(epsilone/epsilonB, 2)*fraction*fraction*(p-2.0)*(p-2.0)*c6*c6*c6*pow(massElectron*speed_of_light2, 2*(p-2.0))*fpeak*d*d;
@@ -421,7 +427,7 @@ double evaluateB(double nupeak, double fpeak, double d, double fraction, double 
 	double result = pow(a/b, 2.0/(2*p + 13))*nupeak/(2*c1);
 
 
-	//double result = 0.58*pow(epsilone/epsilonB, -4.0/(2*p +13))*pow(fraction/0.5,-4.0/(2*p +13))*pow(fpeak/f0, -2.0/(2*p +13))*pow(d/d0, -4.0/(2*p +13))*(nupeak/nu0);
+	//double result = 0.3*pow(epsilone/epsilonB, -4.0/(2*p +13))*pow(fpeak/f0, -2.0/(2*p +13))*pow(d/d0, -4.0/(2*p +13))*(nupeak/nu0);
 
 	return result;
 }
@@ -438,9 +444,9 @@ int main()
 
 	double** concentrations;
 
-	double** B;
-	double** sintheta;
-	int** thetaIndex;
+	//double** B;
+	//double** sintheta;
+	//int** thetaIndex;
 
 	double thetaObserv = 0;
 	double cosThetaObserv = cos(thetaObserv);
@@ -472,7 +478,7 @@ int main()
 	double z = 0.2433;
 	double d = 816*3.08*1.0E24; //angular diameter distance
 	double fraction = 0.5;
-	double fpeak = 0.48E-26;
+	double fpeak = 0.68E-26;
 	double nupeak = 22.0E9;
 
 	double epsilone = 0.33;
@@ -481,10 +487,10 @@ int main()
 	//double epsilone = 0.0154;
 	//double epsilonB = 0.04;
 
-	fpeak = 1E-23;
-	nupeak = 5E9;
-	d = 3.085*1.0E24;
-	fraction = 0.5;
+	//fpeak = 1E-23;
+	//nupeak = 5E9;
+	//d = 3.085*1.0E24;
+	//fraction = 0.5;
 
 	double p = 3.0;
 
@@ -917,8 +923,8 @@ int main()
 				Fe[j][i] = Fe[j][i] / (massElectron*speed_of_light2);
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 
-				double minGamma = 2;
-				double power = 3.0;
+				double minGamma = 4.0;
+				double power = 3.5;
 
 				if(gamma >= minGamma){
 					Fe[j][i] = 1.0/pow(Ee[j][i],power);
@@ -971,12 +977,15 @@ int main()
 		}
 	}
 
-	double factor = pow(maxE/minE, 1.0/(Np - 1));
+	/*double factor = pow(maxE/minE, 1.0/(Np - 1));
 	weightedEe[0] = minE;
 	for(int i = 1; i < Np; ++i){
 		weightedEe[i] = weightedEe[i-1]*factor;
 	}
-	weightedEe[Np-1] = maxE;
+	weightedEe[Np-1] = maxE;*/
+	for(int i = 0; i < Np; ++i){
+		weightedEe[i] = Ee[0][i];
+	}
 
 	for(int i = 0; i < Nrho; ++i){
 		weightedFe[i] = new double**[Nphi];
@@ -986,13 +995,14 @@ int main()
 				weightedFe[i][j][k] = new double[Np];
 				for(int l = 0; l < Np; ++l){
 					weightedFe[i][j][k][l] = 0;
-					for(int m = 0; m < Ndist; ++m){
-						weightedFe[i][j][k][l] += weights[i][j][k][m]*findFeAt(Ee[m], Fe[m], weightedEe[l], Np);
+					//for(int m = 0; m < Ndist; ++m){
+						//weightedFe[i][j][k][l] += weights[i][j][k][m]*findFeAt(Ee[m], Fe[m], weightedEe[l], Np);
+						weightedFe[i][j][k][l] = Fe[0][l];
 						if(weightedFe[i][j][k][l] != weightedFe[i][j][k][l]){
 							printf("WeightdFe = NaN\n");
 							exit(0);
 						}
-					}
+					//}
 				}
 			}
 		}
@@ -1044,7 +1054,7 @@ int main()
 	//evaluateNu(nu, Nnu, 1.1*massElectron*speed_of_light2, 1000*massElectron*speed_of_light2, meanB);
 	double numax = 10000*1E9;
 	numax = 1000*1.6*1E-12/hplank;
-	createNu(nu, Nnu, 0.1*1E9, 10*1E9);
+	createNu(nu, Nnu, 0.1*1E9, 100*1E9);
 	/*for(int i = 0; i < Nnu1; ++i){
 		nu1[i] = aprx[i]*1.0E9;
 	}*/
@@ -1097,12 +1107,12 @@ int main()
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
 
 	//Ho atm2020
-	Bfactor = 0.87;
-	rmax = 2.2E16;
-	fractionSize = 0.99;
-	concentration = 3700;
+	Bfactor = 0.052;
+	rmax = 33E16;
+	fractionSize = 0.5;
+	concentration = 1.9;
 	v = 0.15*speed_of_light;
-
+	z = 0;
 
 
 	printf("integrating fields\n");
@@ -1142,9 +1152,68 @@ int main()
 		}
 	}
 
-	
+	double vector[2];
+	vector[0] = Bfactor/maxB;
+	vector[1] = rmax/maxR;
+	epsilonB = 0.0014;
+
+	double nu1[6];
+	double observedInu[6];
+
+	nu1[0] = 0.33E9;
+	observedInu[0] = 0.357;
+	nu1[1] = 0.61E9;
+	observedInu[1] = 0.79;
+	nu1[2] = 1.5E9;
+	observedInu[2] = 0.27;
+	nu1[3] = 3.0E9;
+	observedInu[3] = 0.17;
+	nu1[4] = 6.05E9;
+	observedInu[4] = 0.07;
+	nu1[5] = 10.0E9;
+	observedInu[5] = 0.032;
+
+	const int Nobs = 6;
+
+	double**** Inu1 = new double***[Nobs];
+	double**** Anu1 = new double***[Nobs];
+	for(int l = 0; l < Nobs; ++l){
+		Inu1[l] = new double**[Nrho];
+		Anu1[l] = new double**[Nrho];
+		for(int i = 0; i < Nrho; ++i){
+			Inu1[l][i] = new double*[Nphi];
+			Anu1[l][i] = new double*[Nphi];
+			for(int j = 0; j < Nphi; ++j){
+				Inu1[l][i][j] = new double[Nz];
+				Anu1[l][i][j] = new double[Nz];
+			}
+		}
+	}
+
+	optimizeParameters5(vector, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, fraction, epsilonB, logFile);
+
+	for(int l = 0; l < Nobs; ++l){
+		for(int i = 0; i < Nrho; ++i){
+			for(int j = 0; j < Nphi; ++j){
+				delete[] Inu1[l][i][j];
+				delete[] Anu1[l][i][j];
+			}
+			delete[] Inu1[l][i];
+			delete[] Anu1[l][i];
+		}
+		delete[] Inu1[l];
+		delete[] Anu1[l];
+	}
+	delete[] Inu1;
+	delete[] Anu1;
+
+	//Bfactor = vector[0]*maxB;
+	//Bfactor = 0.0219;
+	//rmax = vector[1]*maxR;
+	concentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 
 	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, 1.0);
+
 
 		
 	if(geometry == SPHERICAL){
@@ -1196,7 +1265,7 @@ int main()
 	//std::string fileNumber = std::string(number);
 	FILE* output = fopen(outputfileName.c_str(), "w");
 	for (int i = 0; i < Nnu; ++i) {	
-		fprintf(output, "%g %g\n", nu[i]/1E9, totalInu[i]);	
+		fprintf(output, "%g %g\n", nu[i]/((1 + z)*1E9), totalInu[i]/(1 + z));	
 	}
 
 	fclose(output);
@@ -1275,16 +1344,16 @@ int main()
 		delete[] Inu[i];
 		delete[] Anu[i];
 		delete[] concentrations[i];
-		delete[] B[i];
-		delete[] sintheta[i];
-		delete[] thetaIndex[i];
+		//delete[] B[i];
+		//delete[] sintheta[i];
+		//delete[] thetaIndex[i];
 	}
 	delete[] Inu;
 	delete[] Anu;
 	delete[] concentrations;
-	delete[] B;
-	delete[] sintheta;
-	delete[] thetaIndex;
+	//delete[] B;
+	//delete[] sintheta;
+	//delete[] thetaIndex;
 
 	for(int i = 0; i < Nrho; ++i){
 		delete[] area[i];

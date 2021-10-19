@@ -38,7 +38,7 @@ const std::string fileNameF = "Fs";
 const std::string logFileName = "log.dat";
 const std::string BFileName = "B.dat";
 
-const int Niterations = 20;
+const int Niterations = 10;
 const int Nmonth = 6;
 const int Nmontecarlo = 100000;
 
@@ -54,7 +54,7 @@ const double pacholczykC5[6] = {3.8359E-23, 1.6954E-23, 0.9874E-23, 0.6688E-23, 
 const double pacholczykC6[6] = {8.4809E-41, 6.7024E-41, 5.7410E-41, 5.2179E-41, 4.9697E-41, 4.9198E-41};
 
 //const double distance = 40*3.08*1.0E24;
-const double distance = 816*3.08*1.0E24;
+const double distance = 150*3.08*1.0E24;
 
 const int Nrho = 10;
 const int Nphi = 10;
@@ -158,17 +158,17 @@ const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
 
 const double minB = 0.0001;
-const double maxB = 0.4;
+const double maxB = 4.0;
 const double minN = 0.01;
-const double maxN = 400;
+const double maxN = 4000;
 const double minFraction = 0.001;
-const double maxFraction = 0.2;
+const double maxFraction = 0.9;
 const double maxSigma = 10.0;
 const double minEta = 0;
 const double maxEta = 0.8*pi/2;
 const double maxV = 0.9*speed_of_light;
 const double minV = 0.6*speed_of_light;
-const double maxR = 19*24*3600*3E10;
+const double maxR = 350*24*3600*3E10;
 const double minR = 1E16;
 
 #endif

@@ -76,11 +76,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="optimization.cpp" />
     <ClCompile Include="spectrum.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h" />
+    <ClInclude Include="optimization.h" />
     <ClInclude Include="spectrum.h" />
     <ClInclude Include="startparameters.h" />
     <ClInclude Include="util.h" />

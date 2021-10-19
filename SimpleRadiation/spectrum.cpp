@@ -14,12 +14,12 @@
 double evaluateMcDonaldIntegral(const double& nu) {
 	int curIndex = 0;
 	if (nu < UvarovX[0]) {
-		//printf("x < UvarovX[0]\n");
+		printf("x < UvarovX[0]\n");
 		return 0;
 	}
 	if (nu > UvarovX[Napprox - 1]) {
 		//printf("x > UvarovX[Napprox - 1]\n");
-		return 0;
+		return sqrt(nu*pi/2)*exp(-nu);
 	}
 	int leftIndex = 0;
 	int rightIndex = Napprox-1;
@@ -32,9 +32,8 @@ double evaluateMcDonaldIntegral(const double& nu) {
 		}
 	}
 
-	double result = (UvarovValue[rightIndex]*(nu - UvarovX[leftIndex]) + UvarovValue[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
-	//double result = UvarovValue[curIndex - 1] * exp(
-	//	log(UvarovValue[curIndex] / UvarovValue[curIndex - 1]) * ((nu - UvarovX[curIndex - 1]) / (UvarovX[curIndex] - UvarovX[curIndex - 1])));
+	//double result = (UvarovValue[rightIndex]*(nu - UvarovX[leftIndex]) + UvarovValue[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
+	double result = UvarovValue[rightIndex] * exp(log(UvarovValue[rightIndex] / UvarovValue[leftIndex]) * ((nu - UvarovX[leftIndex]) / (UvarovX[rightIndex] - UvarovX[leftIndex])));
 	if (result < 0) {
 		printf("result < 0\n");
 	}

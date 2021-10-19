@@ -11,6 +11,6 @@ enum Input {TRISTAN, SMILEI, MAXWELL, POWERLAW};
 const Input input = Input::SMILEI;
 
 enum Scale {LINEAR, LOG};
-const Scale scale = Scale::LINEAR;
+const Scale scale = Scale::LOG;
 
 #endif

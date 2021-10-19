@@ -1,9 +1,9 @@
 clear;
-radiation = importdata('radiation.dat');
+radiation1 = importdata('radiation1.dat');
 radiation2 = importdata('radiation2.dat');
-N = size(radiation,1);
+N = size(radiation1,1);
 
-%from cppejans
+%from coppejans css161010
 x99(1:4) = 0;
 y99(1:4) = 0;
 x99(1) = 1.5;
@@ -30,14 +30,18 @@ y162(5) = 0.56;
 
 x357(1:4) = 0;
 y357(1:4) = 0;
-x357(1) = 1.5;
-x357(2) = 3;
-x357(3) = 6.05;
-x357(4) = 10;
-y357(1) = 0.27;
-y357(2) = 0.17;
-y357(3) = 0.07;
-y357(4) = 0.032;
+x357(1) = 0.33;
+x357(2) = 0.61;
+x357(3) = 1.5;
+x357(4) = 3;
+x357(5) = 6.05;
+x357(6) = 10;
+y357(1) = 0.357;
+y357(2) = 0.79;
+y357(3) = 0.27;
+y357(4) = 0.17;
+y357(5) = 0.07;
+y357(6) = 0.032;
 
 %at2018cow from nayana
 x138(1:3) = 0;
@@ -144,10 +148,10 @@ figure(1);
 hold on;
 set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'log');
-plot(radiation(1:N,1),radiation(1:N,2),'Color','red','LineWidth',2);
+plot(radiation1(1:N,1),radiation1(1:N,2),'Color','red','LineWidth',2);
 plot(radiation2(1:N,1),radiation2(1:N,2),'Color','blue','LineWidth',2);
-plot(x71(1:3),y71(1:3),'--o','Color','red','LineWidth',2);
-legend('F(E) ~ E^{-3}','PIC spectrum','observation');
+plot(x357(1:6),y357(1:6),'--o','Color','red','LineWidth',2);
+legend('F(E) ~ E^{-3.5}','PIC spectrum','observation','Location','southeast');
 title ('I_{\nu}');
 xlabel ('{\nu} GHz');
 ylabel ('mJy');

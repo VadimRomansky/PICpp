@@ -19,7 +19,7 @@ double evaluateMcDonaldIntegral(const double& nu) {
 	}
 	if (nu > UvarovX[Napprox - 1]) {
 		//printf("x > UvarovX[Napprox - 1]\n");
-		return 0;
+		return sqrt(nu*pi/2)*exp(-nu);
 	}
 	int leftIndex = 0;
 	int rightIndex = Napprox-1;
