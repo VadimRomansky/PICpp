@@ -7,8 +7,8 @@ const bool turbulence = false;
 enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
 const Geometry geometry = Geometry::SPHERICAL;
 
-enum Input {TRISTAN, SMILEI, MAXWELL, POWERLAW};
-const Input input = Input::SMILEI;
+enum Input {TRISTAN, SMILEI, MAXWELL, POWERLAW, COMBINED};
+const Input input = Input::COMBINED;
 
 enum Scale {LINEAR, LOG};
 const Scale scale = Scale::LINEAR;

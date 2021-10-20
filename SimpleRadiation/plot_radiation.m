@@ -1,5 +1,5 @@
 clear;
-radiation1 = importdata('radiation1.dat');
+radiation1 = importdata('radiation.dat');
 radiation2 = importdata('radiation2.dat');
 N = size(radiation1,1);
 

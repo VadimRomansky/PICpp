@@ -33,7 +33,7 @@ double evaluateMcDonaldIntegral(const double& nu) {
 	}
 
 	//double result = (UvarovValue[rightIndex]*(nu - UvarovX[leftIndex]) + UvarovValue[leftIndex]*(UvarovX[rightIndex] - nu))/(UvarovX[rightIndex] - UvarovX[leftIndex]);
-	double result = UvarovValue[rightIndex] * exp(log(UvarovValue[rightIndex] / UvarovValue[leftIndex]) * ((nu - UvarovX[leftIndex]) / (UvarovX[rightIndex] - UvarovX[leftIndex])));
+	double result = UvarovValue[leftIndex] * exp(log(UvarovValue[rightIndex] / UvarovValue[leftIndex]) * ((nu - UvarovX[leftIndex]) / (UvarovX[rightIndex] - UvarovX[leftIndex])));
 	if (result < 0) {
 		printf("result < 0\n");
 	}
@@ -1126,9 +1126,14 @@ double evaluateNextdFe(double* Ee, double* dFe, double dg, int j, int Np) {
 		nextdFe = prevF*(Ee[j] - tempE) + F*(tempE - Ee[j-1]);
 	} else {
 		double tempE = (gamma + dg)*massElectron*speed_of_light2;
+		//printf("tempe = %g\n", tempE);
+		//printf("E[j] = %g\n", Ee[j]);
+		//printf("E[j+1] = %g\n", Ee[j+1]);
 		double dE = Ee[j] - Ee[j-1];
 		double F = dFe[j]/dE;
+		//printf("F = %lf\n", F);
 		double nextF = dFe[j+1]/(Ee[j+1]-Ee[j]);
+		//printf("nextF = %lf\n", nextF);
 		nextdFe = (F*(Ee[j+1] - tempE) + nextF*(tempE - Ee[j]))/(Ee[j+1]-Ee[j]);
 		nextdFe *= dE;
 	}
@@ -1167,11 +1172,14 @@ void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& A
 			}
 			////todo! F(g +dg)
 			double tempP = gamma*gamma*coef * B*dFe[j] * sinhi * evaluateMcDonaldIntegral(nu / nuc);
-			double dg = 0.01*gamma;
+			double dg = 0.1*(Ee[j] - Ee[j-1])/ (massElectron * speed_of_light2);
 
 			double tempGamma = gamma + dg;
 			double tempnuc = criticalNu(massElectron*speed_of_light2*tempGamma, sinhi, B);
 			double nextdFe = evaluateNextdFe(Ee, dFe, dg, j, Np);
+			if(nextdFe < 0){
+				printf("nextdFe < 0\n");
+			}
 			double tempP2 = tempGamma*tempGamma*coef * B*nextdFe * sinhi * evaluateMcDonaldIntegral(nu / tempnuc);
 			double Pder = (tempP2 - tempP)/dg;
 

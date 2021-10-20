@@ -948,6 +948,23 @@ int main()
 				Fe[j][i] = Fe[j][Npowerlaw-1]*pow(Ee[j][Npowerlaw-1]/Ee[j][i], gammae);
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}*/
+		} else if (input == COMBINED){
+			for (int i = 1; i < Np; ++i) {
+				fscanf(inputPe, "%lf", &u);
+				fscanf(inputFe, "%lf", &Fe[j][i]);
+
+				//todo massRelationSqrt?
+				double gamma = u*realMassRelationSqrt/massRelationSqrt + 1;
+				//if( u < 3000){
+				Ee[j][i] = gamma*massElectron*speed_of_light2;
+				//maxEnergy = Ee[i];
+				Fe[j][i] = Fe[j][i] / (massElectron*speed_of_light2);
+				if(i > 137){
+					Fe[j][i] = Fe[j][137]*pow(Ee[j][i]/Ee[j][137], -3.5);
+				}
+				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
+			}
+
 		}
 
 
@@ -1190,7 +1207,7 @@ int main()
 		}
 	}
 
-	optimizeParameters5(vector, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, fraction, epsilonB, logFile);
+	//optimizeParameters5(vector, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, fraction, epsilonB, logFile);
 
 	for(int l = 0; l < Nobs; ++l){
 		for(int i = 0; i < Nrho; ++i){
@@ -1213,6 +1230,21 @@ int main()
 	concentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 
 	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, 1.0);
+
+	FILE* Ifile = fopen("Inu.dat","w");
+	FILE* Afile = fopen("Anu.dat","w");
+	FILE* Kfile = fopen("Knu.dat","w");
+	double nuc = nu[10];
+	for(int i = 0; i < Nnu; ++i){
+		fprintf(Ifile,"%g %g\n", nu[i], Inu[i][5][5][0]);
+		fprintf(Afile,"%g %g\n", nu[i], Anu[i][5][5][0]);
+		double K = evaluateMcDonaldIntegral(nu[i]/nuc);
+		fprintf(Kfile,"%g %g\n", nu[i], K);
+	}
+	fclose(Ifile);
+	fclose(Afile);
+	fclose(Kfile);
+
 
 
 		
