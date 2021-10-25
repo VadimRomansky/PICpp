@@ -1,0 +1,25 @@
+size 24 24
+set font times8b hei 1.0
+set lwidth 0.12
+amove 3.7 3.0
+begin graph
+  size 20 20
+  fullsize
+  xtitle "Log_1_0\,\nu\,[GHz]"
+  ytitle "F_{\nu}, [mJy]"
+  data   "css16.dat"
+  xaxis min -1 max 2
+  xaxis ftick 0 dticks 1 
+  yaxis min 1.0E-2 max 1.0 log 
+  ylabels log off
+  d1 lstyle 1 lwidth 0.12 color blue
+  d2 lstyle 1 lwidth 0.12 color red
+  data "css16obs.dat" d3=c1,c2
+  d3 line marker wcircle lstyle 2 lwidth 0.12 color green
+end graph
+begin key
+   pos tr
+   text "f(E)~E^{-3.5}" line lstyle 1 lwidth 0.12 color blue
+   text "f(E) from PIC" line lstyle 1 lwidth 0.12 color red
+   text "observation" line lstyle 2 lwidth 0.12 color green
+end key

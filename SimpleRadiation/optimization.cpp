@@ -203,9 +203,10 @@ void optimizeParameters5(double* vector,  double* nu, double* observedInu, doubl
 	fprintf(logFile, "Bfactor = %grmax = %g\n", vector[0]*maxB, vector[1]*maxR);
 	for(int k = 0; k < Niterations; ++k) {
 		///randomization;
-		/*for(int j = 0; j < 5; ++j){
+		for(int j = 0; j < 5; ++j){
 			for(int i = 0; i < Ngrad; ++i) {
-				tempVector[i] = minVector[i] + (1.0 - minVector[i])*uniformDistribution();
+				//tempVector[i] = minVector[i] + (1.0 - minVector[i])*uniformDistribution();
+				tempVector[i] = tempVector[i] + 0.2*minVector[i]*(0,5 - uniformDistribution());
 				if(tempVector[i] > 1.0) {
 					tempVector[i] = 1.0;
 				}
@@ -223,7 +224,7 @@ void optimizeParameters5(double* vector,  double* nu, double* observedInu, doubl
 				printf("random search\n");
 				fprintf(logFile, "random search\n");
 			}
-		}*/
+		}
 		double prevF = currentF;
 		//
 		//valley first step

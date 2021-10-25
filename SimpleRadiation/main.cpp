@@ -1071,7 +1071,7 @@ int main()
 	//evaluateNu(nu, Nnu, 1.1*massElectron*speed_of_light2, 1000*massElectron*speed_of_light2, meanB);
 	double numax = 10000*1E9;
 	numax = 1000*1.6*1E-12/hplank;
-	createNu(nu, Nnu, 0.1*1E9, 100*1E9);
+	createNu(nu, Nnu, 0.1*1E9, 1000*1E9);
 	/*for(int i = 0; i < Nnu1; ++i){
 		nu1[i] = aprx[i]*1.0E9;
 	}*/
@@ -1124,8 +1124,8 @@ int main()
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
 
 	//Ho atm2020
-	Bfactor = 0.052;
-	rmax = 33E16;
+	Bfactor = 6;
+	rmax = 7E15;
 	fractionSize = 0.5;
 	concentration = 1.9;
 	v = 0.15*speed_of_light;
@@ -1172,12 +1172,14 @@ int main()
 	double vector[2];
 	vector[0] = Bfactor/maxB;
 	vector[1] = rmax/maxR;
-	epsilonB = 0.0014;
+	epsilonB = 0.0012;
 
-	double nu1[6];
-	double observedInu[6];
+	const int Nobs = 4;
+	double nu1[Nobs];
+	double observedInu[Nobs];
 
-	nu1[0] = 0.33E9;
+	//css161010 t = 357
+	/*nu1[0] = 0.33E9;
 	observedInu[0] = 0.357;
 	nu1[1] = 0.61E9;
 	observedInu[1] = 0.79;
@@ -1188,9 +1190,20 @@ int main()
 	nu1[4] = 6.05E9;
 	observedInu[4] = 0.07;
 	nu1[5] = 10.0E9;
-	observedInu[5] = 0.032;
+	observedInu[5] = 0.032;*/
 
-	const int Nobs = 6;
+	//at2018 t = 15
+	nu1[0] = 35E9;
+	observedInu[0] = 8;
+	nu1[1] = 225E9;
+	observedInu[1] = 30.8;
+	nu1[2] = 233E9;
+	observedInu[2] = 28.6;
+	nu1[3] = 241E9;
+	observedInu[3] = 27.4;
+	//nu1[4] = 249E9;
+	//observedInu[4] = 15.4;
+
 
 	double**** Inu1 = new double***[Nobs];
 	double**** Anu1 = new double***[Nobs];
@@ -1207,7 +1220,7 @@ int main()
 		}
 	}
 
-	//optimizeParameters5(vector, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, fraction, epsilonB, logFile);
+	optimizeParameters5(vector, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, fraction, epsilonB, logFile);
 
 	for(int l = 0; l < Nobs; ++l){
 		for(int i = 0; i < Nrho; ++i){
@@ -1224,9 +1237,9 @@ int main()
 	delete[] Inu1;
 	delete[] Anu1;
 
-	//Bfactor = vector[0]*maxB;
-	//Bfactor = 0.0219;
-	//rmax = vector[1]*maxR;
+	Bfactor = vector[0]*maxB;
+	//Bfactor = 0.048;
+	rmax = vector[1]*maxR;
 	concentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 
 	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, 1.0);

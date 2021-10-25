@@ -43,7 +43,21 @@ y357(4) = 0.17;
 y357(5) = 0.07;
 y357(6) = 0.032;
 
+%at2018 from margutti
+x15(1:4) = 0;
+y15(1:4) = 0;
+
+x15(1) = 35;
+y15(1) = 8;
+x15(2) = 225;
+y15(2) = 30.8;
+x15(3) = 233;
+y15(3) = 28.6;
+x15(4) = 241;
+y15(4) = 27.4;
+
 %at2018cow from nayana
+
 x138(1:3) = 0;
 y138(1:3) = 0;
 
@@ -149,9 +163,24 @@ hold on;
 set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'log');
 plot(radiation1(1:N,1),radiation1(1:N,2),'Color','red','LineWidth',2);
-plot(radiation2(1:N,1),radiation2(1:N,2),'Color','blue','LineWidth',2);
-plot(x357(1:6),y357(1:6),'--o','Color','red','LineWidth',2);
-legend('F(E) ~ E^{-3.5}','PIC spectrum','observation','Location','southeast');
+%plot(radiation2(1:N,1),radiation2(1:N,2),'Color','blue','LineWidth',2);
+plot(x15(1:4),y15(1:4),'--o','Color','black','LineWidth',2);
+%legend('F(E) ~ E^{-3.5}','PIC spectrum','observation','Location','southeast');
 title ('I_{\nu}');
 xlabel ('{\nu} GHz');
 ylabel ('mJy');
+
+output(1:N,1:3) = 0;
+for i = 1:N,
+    output(i,1) = log10(radiation1(i,1));
+    output(i,2) = radiation1(i,2);
+    output(i,3) = radiation2(i,2);
+end;
+output2(1:6, 1:2) = 0;
+for i = 1:6,
+    output2(i,1) = log10(x357(i));
+    output2(i,2) = y357(i);
+end;
+
+dlmwrite('css16.dat',output,'delimiter',' ');
+dlmwrite('css16obs.dat',output2,'delimiter',' ');

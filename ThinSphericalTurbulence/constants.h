@@ -153,7 +153,7 @@ const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
 
 const double minB = 0.0001;
-const double maxB = 0.4;
+const double maxB = 10;
 const double minN = 0.01;
 const double maxN = 400;
 const double minFraction = 0.001;
@@ -163,7 +163,7 @@ const double minEta = 0;
 const double maxEta = 0.8*pi/2;
 const double maxV = 0.9*speed_of_light;
 const double minV = 0.6*speed_of_light;
-const double maxR = 19*24*3600*3E10;
-const double minR = 1E16;
+const double maxR = 30*24*3600*3E10;
+const double minR = 1E15;
 
 #endif
