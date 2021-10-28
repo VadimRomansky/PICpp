@@ -3,6 +3,7 @@ clear;
 radiation = importdata('output.dat');
 
 radiation1 = importdata('output1.dat');
+radiation3 = importdata('output3.dat');
 
 Nnu = size(radiation,1);
 
@@ -53,5 +54,6 @@ xlabel ('\nu GHz');
 ylabel ('F_{\nu} mJy');
 
 plot(radiation1(1:Nnu,1),radiation1(1:Nnu,2),'red','LineWidth',2);
+plot(radiation3(1:Nnu,1),radiation3(1:Nnu,2),'green','LineWidth',2);
 plot(radiation1(1:Nnu,1),Fa(1:Nnu),'blue','LineWidth',2);
 grid ;
