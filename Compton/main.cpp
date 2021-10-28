@@ -27,7 +27,7 @@ void LorentzTransformationPhotonZ(const double& beta, const double& Einit, const
 }
 
 double evaluatePhotonDistribution(const double& energy, int Np, double* Eph, double* Fph){
-	if(energy <= Eph[0]){
+	if(energy <= Eph[1]){
 		return 0;
 	} else if(energy >= Eph[Np-1]){
 		return 0;
@@ -41,7 +41,12 @@ double evaluatePhotonDistribution(const double& energy, int Np, double* Eph, dou
 				break;
 			}
 		}
-		double result = (Fph[currentI]*(Eph[nextI] - energy) + Fph[nextI]*(energy - Eph[currentI]))/(Eph[nextI] - Eph[currentI]);
+		//double result = (Fph[currentI]*(Eph[nextI] - energy) + Fph[nextI]*(energy - Eph[currentI]))/(Eph[nextI] - Eph[currentI]);
+		double result = Fph[currentI] * exp(log(Fph[nextI] / Fph[currentI]) * ((energy - Eph[currentI]) / (Eph[nextI] - Eph[currentI])));
+		if(result != result){
+			printf("result = NaN\n");
+			exit(0);
+		}
 		return result;
 	}
 }
@@ -115,7 +120,7 @@ void evaluateOrientationParameters3d(int Nrho, int Ntheta, int Nphi, double*** B
 
 				double r = rho[i];
 
-				double cosTheta1 = cosThetaValue[k];
+				double cosTheta1 = cosThetaValue[j];
 				double sinTheta1 = sqrt(1.0 - cosTheta1*cosTheta1);
 				
 				double cosPhi1 = cosPhiValue[k];
@@ -192,7 +197,7 @@ int main()
 
 	const int Nphi = 10;
 	const int Ntheta = 20;
-	const int NthetaSpace = 10;
+	const int NthetaSpace = 2;
 	double cosThetaLeft[Ntheta];
 	double cosTheta[Ntheta];
 	double cosThetaSpace[NthetaSpace];
@@ -224,18 +229,23 @@ int main()
 		cosThetaSpace[i] = 1.0 - (i + 0.5)*dcosThetaSpace;
 	}
 
-	double Tphotons1 = 2.7;
-	double Tphotons2 = 20;
-	double Tphotons3 = 5000;
-	double a1 = 1.0;
-	double a2 = 4E-4;
-	double a3 = 1E-13;
+	const double intx2plank = 2.4042;
+	const double intx3plank = pi*pi*pi*pi/15;
+	double rmax = 0.1*speed_of_light*16.5*24*3600;
+	double L = 4.0E44;
+
+	double Tphotons1 = 34;
+	//double Tphotons2 = 20;
+	//double Tphotons3 = 5000;
+	double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
+	//double a2 = 4E-4;
+	//double a3 = 1E-13;
 	double* Fph = new double[Np];
 	double* dFph = new double[Np];
 	double* Eph = new double[Np];
 
 	double Ephmin = 0.1*kBoltzman*Tphotons1;
-	double Ephmax = kBoltzman*Tphotons3*100;
+	double Ephmax = kBoltzman*Tphotons1*100;
 
 	FILE* logFile = fopen("log.dat", "w");
 	fclose(logFile);
@@ -248,16 +258,17 @@ int main()
 	dFph[0] = 0;
 	//todo check and normalize
 	for(int i = 1; i < Np; ++i){
+		//todo pi or not to pi?
 		Fph[i] = 0;
 		dFph[i] = 0;
 		Eph[i] = Eph[i-1]*factor;
 		double theta = Eph[i]/(kBoltzman*Tphotons1);
 		Fph[i] +=  a1*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
-		theta = Eph[i]/(kBoltzman*Tphotons2);
-		Fph[i] +=  a2*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
-		theta = Eph[i]/(kBoltzman*Tphotons3);
-		Fph[i] +=  a3*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
-		dFph[i] = Fph[i]*(Eph[i] - Eph[i-1]);
+		//theta = Eph[i]/(kBoltzman*Tphotons2);
+		//Fph[i] +=  a2*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
+		//theta = Eph[i]/(kBoltzman*Tphotons3);
+		//Fph[i] +=  a3*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
+		//dFph[i] = Fph[i]*(Eph[i] - Eph[i-1]);
 	}
 
 	FILE* photons = fopen("photons.dat","w");
@@ -270,8 +281,10 @@ int main()
 	double** Fe = new double*[Ndist];
 	double** dFe = new double*[Ndist];
 	double** Ee = new double*[Ndist];
+	int powerlawStart[Ndist] = {140,140,140,140,140,140,140,140,140,140};
 	for(int j = 0; j < Ndist; ++j){
-		std::string fileNumber = convertIntToString(j);
+		//std::string fileNumber = convertIntToString(j);
+		std::string fileNumber = convertIntToString(0);
 		FILE* inputPe = fopen((fileNameP + fileNumber + ".dat").c_str(), "r");
 		FILE* inputFe = fopen((fileNameF + fileNumber + ".dat").c_str(), "r");
 		Fe[j] = new double[Np];
@@ -352,22 +365,62 @@ int main()
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
 		} else if(input == POWERLAW) {
+	
+			int Npowerlaw = powerlawStart[j];
+			Npowerlaw = 1;
 			for (int i = 1; i < Np; ++i) {
+
 				fscanf(inputPe, "%lf", &u);
 				fscanf(inputFe, "%lf", &Fe[j][i]);
 
+				//todo massRelationSqrt?
 				double gamma = u*realMassRelationSqrt/massRelationSqrt + 1;
 				Ee[j][i] = gamma*massElectron*speed_of_light2;
+				Fe[j][i] = Fe[j][i] / (massElectron*speed_of_light2);
+				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 
-				double minGamma = 2;
-				double power = 2;
+				double minGamma = 4.0;
+				double power = 4.0;
 
 				if(gamma >= minGamma){
 					Fe[j][i] = 1.0/pow(Ee[j][i],power);
 				} else {
 					Fe[j][i] = 0;
 				}
+				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
+			/*Ee[j][Np-1] = 1E8;
+			double factor = pow(Ee[j][Np-1]/Ee[j][Npowerlaw-1], 1.0/(Np-Npowerlaw));
+			//double gammae = -log(Fe[j][Npowerlaw-10]/Fe[j][Npowerlaw-1])/log(Ee[j][Npowerlaw-10]/Ee[j][Npowerlaw-1]);
+			double gammae = 2.5;
+			for(int i = Npowerlaw; i < Np; ++i){
+				fscanf(inputPe, "%lf", &u);
+				fscanf(inputFe, "%lf", &Fe[j][i]);
+
+				//todo massRelationSqrt?
+				double gamma = u*realMassRelationSqrt/massRelationSqrt + 1;
+				//Ee[j][i] = gamma*massElectron*speed_of_light2;
+				Ee[j][i] = Ee[j][i-1]*factor;
+				Fe[j][i] = Fe[j][Npowerlaw-1]*pow(Ee[j][Npowerlaw-1]/Ee[j][i], gammae);
+				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
+			}*/
+		} else if (input == COMBINED){
+			for (int i = 1; i < Np; ++i) {
+				fscanf(inputPe, "%lf", &u);
+				fscanf(inputFe, "%lf", &Fe[j][i]);
+
+				//todo massRelationSqrt?
+				double gamma = u*realMassRelationSqrt/massRelationSqrt + 1;
+				//if( u < 3000){
+				Ee[j][i] = gamma*massElectron*speed_of_light2;
+				//maxEnergy = Ee[i];
+				Fe[j][i] = Fe[j][i] / (massElectron*speed_of_light2);
+				if(i > 137){
+					Fe[j][i] = Fe[j][137]*pow(Ee[j][i]/Ee[j][137], -3.5);
+				}
+				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
+			}
+
 		}
 
 
@@ -387,9 +440,8 @@ int main()
 	}
 
 	printLog("initialize fields\n");
-	const int Nrho = 10;
-	double rmax = 3.6E16;
-	double fraction = 0.2;
+	const int Nrho = 1;
+	double fraction = 0.5;
 	double rmin = rmax*(1.0 - fraction);
 	double dr = (rmax - rmin)/Nrho;
 	double rho[Nrho];
@@ -534,7 +586,7 @@ int main()
 	double* E = new double[Nnu];
 	double* I = new double[Nnu];
 	double Emin = 0.0001*kBoltzman*Tphotons1;
-	double Emax = 2*Ee[iangle][Np-1] + Eph[Np-1];
+	double Emax = 1000*(2*Ee[iangle][Np-1] + Eph[Np-1]);
 	factor = pow(Emax/Emin, 1.0/(Nnu - 1));
 	E[0] = Emin;
 	I[0] = 0;
@@ -567,7 +619,7 @@ int main()
 		omp_unset_lock(&write_lock);
 		double photonFinalEnergy = E[i];
 
-		////Uvarov
+		////Uvarov  Bykov Chevalier Elixon Uvarov 1999
 		if(solver == Solver::UVAROV){
 			for(int ir = 0; ir < Nrho; ++ir){
 				for(int itheta = 0; itheta < NthetaSpace; ++itheta){
@@ -597,8 +649,9 @@ int main()
 									double q = (photonFinalEnergy/(massElectron*speed_of_light2))/((electronInitialGamma - photonFinalEnergy/(massElectron*speed_of_light2))*G);
 									if( q <= 1.0){
 										double sigma = 2*pi*re2*(2*q*log(q) + 1 + q - 2*q*q + 0.5*q*q*(1-q)*G*G/(1 + q*G))/(electronInitialGamma*electronInitialGamma*photonInitialEnergy/(massElectron*speed_of_light2));
+										//divide by energy to get number of photons
 										I[i] += electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*sigma*Fph[l]*Fe[iangle][k]*speed_of_light*electronInitialBeta*delectronEnergy*dphotonInitialEnergy/photonFinalEnergy;
-
+										//I[i] += electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*sigma*Fph[l]*Fe[iangle][k]*speed_of_light*electronInitialBeta*delectronEnergy*dphotonInitialEnergy;
 										if(I[i] < 0){
 											printf("I[i] < 0\n");
 											printLog("I[i] < 0\n");
@@ -620,19 +673,25 @@ int main()
 			}
 
 		} else if(solver == Solver::DUBUS){
-			////Dubus
+			////Dubus 2008
 		
 			for(int j = 0; j < Ntheta; ++j){
+				//integral by dmu1
 				//integration by phi changes to 2 pi?
 				double photonFinalCosTheta = cosThetaLeft[j];
 				int ir = 0;
 				int itheta = 0;
 				int iphi = 0;
 				for(int ir = 0; ir < Nrho; ++ir){
+					//integral by volume dr
 					for(int itheta = 0; itheta < NthetaSpace; ++itheta){
+						//integral by volume dtheta
 						for(int iphi = 0; iphi < Nphi; ++iphi){
+							//intehral by volume dphi
 							iangle = thetaIndex3d[ir][itheta][iphi];
 							for(int k = 0; k < Np; ++k){
+								//integral by dE electron
+								//integral by dE photon is eaten by delta function
 								double electronInitialEnergy = Ee[iangle][k];
 								/*logFile = fopen("log.dat","a");
 								printf("electronInitialEnergy = %g\n", electronInitialEnergy);
@@ -657,6 +716,7 @@ int main()
 								LorentzTransformationPhotonZ(electronInitialBeta, photonFinalEnergy, photonFinalCosTheta, photonFinalEnergyPrimed, photonFinalCosThetaPrimed);
 								double photonFinalSinThetaPrimed = sqrt(1.0 - photonFinalCosThetaPrimed*photonFinalCosThetaPrimed);
 								for(int l = 0; l < Ntheta; ++l){
+									//integral by dmu0
 									/*logFile = fopen("log.dat","a");
 									printf("l photon initial theta = %d\n", l);
 									fprintf(logFile, "l photon initial theta = %d\n", l);
@@ -664,7 +724,10 @@ int main()
 									double photonInitialCosTheta = -cosThetaLeft[l];
 									double photonInitialCosThetaPrimed = (photonInitialCosTheta - electronInitialBeta)/(1.0 - electronInitialBeta*photonInitialCosTheta);
 									double photonInitialSinThetaPrimed = sqrt(1.0 - photonInitialCosThetaPrimed*photonInitialCosThetaPrimed);
+
+									double coef = electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*(re2*speed_of_light*(1.0 - electronInitialBeta*photonInitialCosTheta)/(2*electronInitialGamma*(1.0 - electronInitialBeta*photonFinalCosTheta)));
 									for(int m = 0; m < Nphi; ++m){
+										//integral by dphi0
 										double photonInitialPhi = phi[m];
 										double cosXiPrimed = photonInitialCosThetaPrimed*photonFinalCosThetaPrimed + photonInitialSinThetaPrimed*photonFinalSinThetaPrimed*cos(photonInitialPhi);
 
@@ -672,7 +735,7 @@ int main()
 
 										double photonInitialEnergy = electronInitialGamma*photonInitialEnergyPrimed + electronInitialBeta*electronInitialGamma*photonInitialEnergyPrimed*photonInitialCosThetaPrimed;
 
-										I[i] += electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*(re2*speed_of_light*(1.0 - electronInitialBeta*photonInitialCosTheta)/(2*electronInitialGamma*(1.0 - electronInitialBeta*photonFinalCosTheta)))*
+										I[i] += coef*
 											(1.0 + cosXiPrimed*cosXiPrimed + sqr(photonFinalEnergyPrimed/(massElectron*speed_of_light2))*sqr(1.0 - cosXiPrimed)/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed)))*
 											2*pi*dcosTheta[j]*dphi*dcosTheta[l]*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Np, Eph, Fph);
 										if(I[i] != I[i]){
@@ -695,11 +758,14 @@ int main()
 	printLog("output\n");
 
 	FILE* output = fopen("output.dat","w");
+	FILE* output1 = fopen("output1.dat","w");
 	for(int i = 0; i < Nnu; ++i){
 		double nu = E[i]/hplank;
 		fprintf(output, "%g %g\n", E[i]/(1.6E-12), E[i]*E[i]*I[i]/sqr(distance));
+		fprintf(output1, "%g %g\n", nu/1E9, 1E26*hplank*E[i]*I[i]/sqr(distance));
 	}
 	fclose(output);
+	fclose(output1);
 
 	printLog("delete arrays\n");
 
