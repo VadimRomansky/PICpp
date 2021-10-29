@@ -195,31 +195,40 @@ int main()
 	const double photonConcentration = 1.0;
 
 
-	const int Nphi = 10;
-	const int Ntheta = 20;
-	const int NthetaSpace = 2;
-	double cosThetaLeft[Ntheta];
-	double cosTheta[Ntheta];
+	const int Nphi = 2;
+	const int NthetaFinal = 20;
+	const int NthetaInitial = 20;
+	const int NthetaSpace = 4;
+	double cosThetaLeftFinal[NthetaFinal];
+	double cosThetaFinal[NthetaFinal];
+	double ThetaFinal[NthetaFinal];
+	double cosThetaLeftInitial[NthetaInitial];
+	double cosThetaInitial[NthetaInitial];
+	double ThetaInitial[NthetaInitial];
 	double cosThetaSpace[NthetaSpace];
 	double phi[Nphi];
 	double sinPhiValue[Nphi];
 	double cosPhiValue[Nphi];
 
-	double dcosTheta[Ntheta];
+	double dcosThetaFinal[NthetaFinal];
+	double dcosThetaInitial = 2.0/NthetaInitial;
 	double dcosThetaSpace = 2.0/NthetaSpace;
 	double dphi = 2.0*pi/Nphi;
 	double gammamax = 1000;
-	double thetamin = 0.1/gammamax;
-	double dlogtheta = log(2*pi/thetamin)/Ntheta;
-	for(int i = 0; i < Ntheta; ++i){
-		cosThetaLeft[i] = cos(thetamin*exp(dlogtheta*i));
+	double thetamin = 0.001/gammamax;
+	double dlogtheta = log(pi/thetamin)/(NthetaFinal-2);
+	ThetaFinal[0] = 0;
+	cosThetaLeftFinal[0] = 1.0;
+	for(int i = 1; i < NthetaFinal; ++i){
+		ThetaFinal[i] = thetamin*exp(dlogtheta*(i-1));
+		cosThetaLeftFinal[i] = cos(thetamin*exp(dlogtheta*(i-1)));
 	}
-	for(int i = 0; i < Ntheta-1; ++i){
-		dcosTheta[i] = cosThetaLeft[i+1] - cosThetaLeft[i];
-		cosTheta[i] = (cosThetaLeft[i] + cosThetaLeft[i+1])/2.0;
+	for(int i = 0; i < NthetaFinal-1; ++i){
+		dcosThetaFinal[i] = -(cosThetaLeftFinal[i+1] - cosThetaLeftFinal[i]);
+		cosThetaFinal[i] = (cosThetaLeftFinal[i] + cosThetaLeftFinal[i+1])/2.0;
 	}
-	dcosTheta[Ntheta - 1] = 1.0 + cosThetaLeft[Ntheta - 1];
-	cosTheta[Ntheta - 1] = (-1.0 + cosThetaLeft[Ntheta - 1])/2;
+	dcosThetaFinal[NthetaFinal - 1] = 1.0 + cosThetaLeftFinal[NthetaFinal - 1];
+	cosThetaFinal[NthetaFinal - 1] = (-1.0 + cosThetaLeftFinal[NthetaFinal - 1])/2;
 	for(int i = 0; i < Nphi; ++i){
 		phi[i] = (i + 0.5)*dphi;
 		sinPhiValue[i] = sin(phi[i]);
@@ -227,6 +236,10 @@ int main()
 	}
 	for(int i = 0; i < NthetaSpace; ++i){
 		cosThetaSpace[i] = 1.0 - (i + 0.5)*dcosThetaSpace;
+	}
+	for(int i = 0; i < NthetaInitial; ++i){
+		cosThetaInitial[i] = 1.0 - (i + 0.5)*dcosThetaInitial;
+		cosThetaLeftInitial[i] = 1.0 - i*dcosThetaInitial;
 	}
 
 	const double intx2plank = 2.4042;
@@ -650,7 +663,7 @@ int main()
 									if( q <= 1.0){
 										double sigma = 2*pi*re2*(2*q*log(q) + 1 + q - 2*q*q + 0.5*q*q*(1-q)*G*G/(1 + q*G))/(electronInitialGamma*electronInitialGamma*photonInitialEnergy/(massElectron*speed_of_light2));
 										//divide by energy to get number of photons
-										I[i] += electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*sigma*Fph[l]*Fe[iangle][k]*speed_of_light*electronInitialBeta*delectronEnergy*dphotonInitialEnergy/photonFinalEnergy;
+										I[i] += electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*sigma*Fph[l]*Fe[iangle][k]*speed_of_light*electronInitialBeta*delectronEnergy*dphotonInitialEnergy/(massElectron*speed_of_light2);
 										//I[i] += electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*sigma*Fph[l]*Fe[iangle][k]*speed_of_light*electronInitialBeta*delectronEnergy*dphotonInitialEnergy;
 										if(I[i] < 0){
 											printf("I[i] < 0\n");
@@ -675,10 +688,10 @@ int main()
 		} else if(solver == Solver::DUBUS){
 			////Dubus 2008
 		
-			for(int j = 0; j < Ntheta; ++j){
+			for(int j = 0; j < NthetaFinal; ++j){
 				//integral by dmu1
 				//integration by phi changes to 2 pi?
-				double photonFinalCosTheta = cosThetaLeft[j];
+				double photonFinalCosTheta = cosThetaLeftFinal[j];
 				int ir = 0;
 				int itheta = 0;
 				int iphi = 0;
@@ -715,13 +728,13 @@ int main()
 								double photonFinalCosThetaPrimed;
 								LorentzTransformationPhotonZ(electronInitialBeta, photonFinalEnergy, photonFinalCosTheta, photonFinalEnergyPrimed, photonFinalCosThetaPrimed);
 								double photonFinalSinThetaPrimed = sqrt(1.0 - photonFinalCosThetaPrimed*photonFinalCosThetaPrimed);
-								for(int l = 0; l < Ntheta; ++l){
+								for(int l = 0; l < NthetaInitial; ++l){
 									//integral by dmu0
 									/*logFile = fopen("log.dat","a");
 									printf("l photon initial theta = %d\n", l);
 									fprintf(logFile, "l photon initial theta = %d\n", l);
 									fclose(logFile);*/
-									double photonInitialCosTheta = -cosThetaLeft[l];
+									double photonInitialCosTheta = -cosThetaLeftInitial[l];
 									double photonInitialCosThetaPrimed = (photonInitialCosTheta - electronInitialBeta)/(1.0 - electronInitialBeta*photonInitialCosTheta);
 									double photonInitialSinThetaPrimed = sqrt(1.0 - photonInitialCosThetaPrimed*photonInitialCosThetaPrimed);
 
@@ -739,7 +752,7 @@ int main()
 										//derivative??
 										I[i] += coef*
 											(1.0 + cosXiPrimed*cosXiPrimed + sqr(photonFinalEnergyPrimed/(massElectron*speed_of_light2))*sqr(1.0 - cosXiPrimed)/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed)))*
-											2*pi*dcosTheta[j]*dphi*dcosTheta[l]*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Np, Eph, Fph)/derivative;
+											2*pi*dcosThetaFinal[j]*dphi*dcosThetaInitial*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Np, Eph, Fph)/derivative;
 										if(I[i] != I[i]){
 											printf("I[i] = NaN\n");
 											printLog("I[i] = NaN\n");
