@@ -195,9 +195,9 @@ int main()
 	const double photonConcentration = 1.0;
 
 
-	const int Nphi = 2;
+	const int Nphi = 10;
 	const int NthetaFinal = 20;
-	const int NthetaInitial = 20;
+	const int NthetaInitial = 10;
 	const int NthetaSpace = 4;
 	double cosThetaLeftFinal[NthetaFinal];
 	double cosThetaFinal[NthetaFinal];
@@ -215,7 +215,7 @@ int main()
 	double dcosThetaSpace = 2.0/NthetaSpace;
 	double dphi = 2.0*pi/Nphi;
 	double gammamax = 1000;
-	double thetamin = 0.001/gammamax;
+	double thetamin = 0.00001/gammamax;
 	double dlogtheta = log(pi/thetamin)/(NthetaFinal-2);
 	ThetaFinal[0] = 0;
 	cosThetaLeftFinal[0] = 1.0;
@@ -230,7 +230,7 @@ int main()
 	dcosThetaFinal[NthetaFinal - 1] = 1.0 + cosThetaLeftFinal[NthetaFinal - 1];
 	cosThetaFinal[NthetaFinal - 1] = (-1.0 + cosThetaLeftFinal[NthetaFinal - 1])/2;
 	for(int i = 0; i < Nphi; ++i){
-		phi[i] = (i + 0.5)*dphi;
+		phi[i] = (i + 0)*dphi;
 		sinPhiValue[i] = sin(phi[i]);
 		cosPhiValue[i] = cos(phi[i]);
 	}
@@ -622,7 +622,7 @@ int main()
 	omp_lock_t write_lock;
 	omp_init_lock(&write_lock);
 
-	#pragma omp parallel for shared(write_lock, logFile, re2, E, I, concentrations3d, thetaIndex3d, volume, rho, Ee, Fe, Eph, Fph, cosTheta, cosThetaLeft, sinPhiValue, cosPhiValue) private(iangle)
+	#pragma omp parallel for shared(write_lock, logFile, re2, E, I, concentrations3d, thetaIndex3d, volume, rho, Ee, Fe, Eph, Fph, cosThetaInitial, cosThetaLeftInitial, cosThetaFinal, cosThetaLeftFinal, sinPhiValue, cosPhiValue) private(iangle)
 	for(int i = 0; i < Nnu; ++i){
 		omp_set_lock(&write_lock);
 		logFile = fopen("log.dat","a");
