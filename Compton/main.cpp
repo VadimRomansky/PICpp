@@ -41,8 +41,8 @@ double evaluatePhotonDistribution(const double& energy, int Np, double* Eph, dou
 				break;
 			}
 		}
-		//double result = (Fph[currentI]*(Eph[nextI] - energy) + Fph[nextI]*(energy - Eph[currentI]))/(Eph[nextI] - Eph[currentI]);
-		double result = Fph[currentI] * exp(log(Fph[nextI] / Fph[currentI]) * ((energy - Eph[currentI]) / (Eph[nextI] - Eph[currentI])));
+		double result = (Fph[currentI]*(Eph[nextI] - energy) + Fph[nextI]*(energy - Eph[currentI]))/(Eph[nextI] - Eph[currentI]);
+		//double result = Fph[currentI] * exp(log(Fph[nextI] / Fph[currentI]) * ((energy - Eph[currentI]) / (Eph[nextI] - Eph[currentI])));
 		if(result != result){
 			printf("result = NaN\n");
 			exit(0);
@@ -191,11 +191,13 @@ int main()
 	const int Np = 200;
 	const int Nnu = 200;
 
-	const double electronConcentration = 200.0;
+	const double Bfactor = 5;
+	const double epsilonB = 0.0012;
+	const double electronConcentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 	const double photonConcentration = 1.0;
 
 
-	const int Nphi = 10;
+	const int Nphi = 2;
 	const int NthetaFinal = 20;
 	const int NthetaInitial = 10;
 	const int NthetaSpace = 4;
@@ -230,7 +232,7 @@ int main()
 	dcosThetaFinal[NthetaFinal - 1] = 1.0 + cosThetaLeftFinal[NthetaFinal - 1];
 	cosThetaFinal[NthetaFinal - 1] = (-1.0 + cosThetaLeftFinal[NthetaFinal - 1])/2;
 	for(int i = 0; i < Nphi; ++i){
-		phi[i] = (i + 0)*dphi;
+		phi[i] = (i + 0.5)*dphi;
 		sinPhiValue[i] = sin(phi[i]);
 		cosPhiValue[i] = cos(phi[i]);
 	}
@@ -245,9 +247,10 @@ int main()
 	const double intx2plank = 2.4042;
 	const double intx3plank = pi*pi*pi*pi/15;
 	double rmax = 0.1*speed_of_light*16.5*24*3600;
+	rmax = 1.8E16;
 	double L = 4.0E44;
 
-	double Tphotons1 = 34;
+	double Tphotons1 = 34000;
 	//double Tphotons2 = 20;
 	//double Tphotons3 = 5000;
 	double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
@@ -743,7 +746,7 @@ int main()
 									for(int m = 0; m < Nphi; ++m){
 										//integral by dphi0
 										double photonInitialPhi = phi[m];
-										double cosXiPrimed = photonInitialCosThetaPrimed*photonFinalCosThetaPrimed + photonInitialSinThetaPrimed*photonFinalSinThetaPrimed*cos(photonInitialPhi);
+										double cosXiPrimed = photonInitialCosThetaPrimed*photonFinalCosThetaPrimed + photonInitialSinThetaPrimed*photonFinalSinThetaPrimed*cosPhiValue[m];
 
 										double photonInitialEnergyPrimed = photonFinalEnergyPrimed/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed));
 
