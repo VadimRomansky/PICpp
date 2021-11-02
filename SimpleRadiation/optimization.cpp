@@ -13,22 +13,19 @@
 
 #include "optimization.h"
 
-double evaluateOptimizationFunction5(const double* vector, double* nu, double* observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double**** Inu, double**** Anu, double*** area, double*** length, double fraction, double epsilonB){
-	// v[0] = B, v[1] = R
+double evaluateOptimizationFunction(double* nu, double* observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double**** Inu, double**** Anu, double*** area, double*** length, const double& B, const double& R, const double& fraction, const double& epsilonB){
 	double* totalInu = new double[Nnu];
 	//evaluateVolumeAndLength(area, length, rmax, fractionSize);
 	double err = 0;
-	double r = vector[1]*maxR;
-	double B = vector[0]*maxB;
 	double n = B*B/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, Ee, dFe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, n, B, 1.0);
 		//
 		//evaluateSpectrum(nu[i], totalInu, Inu[i], Anu[i], area, length, Nnu, rfactor);
 		//
 		if(geometry == SPHERICAL){
-			evaluateSpectrumSpherical(nu, totalInu, Inu, Anu, r, Nnu, 1.0, fraction);
+			evaluateSpectrumSpherical(nu, totalInu, Inu, Anu, R, Nnu, 1.0, fraction);
 		} else {
-			evaluateSpectrumFlat(nu, totalInu, Inu, Anu, r, Nnu, 1.0, fraction);
+			evaluateSpectrumFlat(nu, totalInu, Inu, Anu, R, Nnu, 1.0, fraction);
 		}
 		for(int j = 0; j < Nnu; ++j){
 			double err1 = 0;
@@ -45,7 +42,14 @@ double evaluateOptimizationFunction5(const double* vector, double* nu, double* o
 	return err;
 }
 
-void findMinParameters5(double* vector, const double* grad, double* nu, double* observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double**** Inu, double**** Anu, double*** area, double*** length, double& currentF, double fraction, double epsilonB){
+double evaluateOptimizationFunctionBandR(const double* vector, double* nu, double* observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double**** Inu, double**** Anu, double*** area, double*** length, const double& fraction, const double& epsilonB){
+	double r = vector[1]*maxR;
+	double B = vector[0]*maxB;
+	
+	return evaluateOptimizationFunction(nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, B, r, fraction, epsilonB);
+}
+
+void findMinParametersBandR(double* vector, const double* grad, double* nu, double* observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double**** Inu, double**** Anu, double*** area, double*** length, double& currentF, const double& fraction, const double& epsilonB){
 	const int Ngrad = 2;
 	double minVector[Ngrad];
 	double tempVector1[Ngrad];
@@ -73,7 +77,7 @@ void findMinParameters5(double* vector, const double* grad, double* nu, double* 
 		}
 	}
 
-	double f = evaluateOptimizationFunction5(tempVector1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+	double f = evaluateOptimizationFunctionBandR(tempVector1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 	if(f > currentF){
 		int count = 0;
 		while (f > currentF && count < 20){
@@ -88,7 +92,7 @@ void findMinParameters5(double* vector, const double* grad, double* nu, double* 
 				}
 			}
 
-			f = evaluateOptimizationFunction5(tempVector1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+			f = evaluateOptimizationFunctionBandR(tempVector1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 		}
 
 		if(f < currentF){
@@ -102,7 +106,7 @@ void findMinParameters5(double* vector, const double* grad, double* nu, double* 
 		}
 	}
 
-	f = evaluateOptimizationFunction5(vector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+	f = evaluateOptimizationFunctionBandR(vector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 
 	maxLambda = sqrt(1.0*Ngrad);
 	for(int i = 0; i < Ngrad; ++i) {
@@ -123,7 +127,7 @@ void findMinParameters5(double* vector, const double* grad, double* nu, double* 
 			tempVector1[i] = minVector[i];
 		}
 	}
-	double f3 = evaluateOptimizationFunction5(tempVector1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+	double f3 = evaluateOptimizationFunctionBandR(tempVector1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 
 	double leftLambda = 0;
 	double rightLambda = maxLambda;
@@ -138,8 +142,8 @@ void findMinParameters5(double* vector, const double* grad, double* nu, double* 
 			tempVector2[i] = vector[i] - lambda2*grad[i];
 		}
 
-		double f1 = evaluateOptimizationFunction5(tempVector1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
-		double f2 = evaluateOptimizationFunction5(tempVector2, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+		double f1 = evaluateOptimizationFunctionBandR(tempVector1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+		double f2 = evaluateOptimizationFunctionBandR(tempVector2, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 
 		if(f1 > f2) {
 			leftLambda = lambda1;
@@ -159,7 +163,7 @@ void findMinParameters5(double* vector, const double* grad, double* nu, double* 
 		}
 	}
 
-	double tempF = evaluateOptimizationFunction5(tempVector1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+	double tempF = evaluateOptimizationFunctionBandR(tempVector1, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 
 	if(f < tempF) {
 		if(f < f3) {
@@ -190,20 +194,20 @@ void findMinParameters5(double* vector, const double* grad, double* nu, double* 
 	}
 }
 
-void optimizeParameters5(double* vector,  double* nu, double* observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double**** Inu, double**** Anu, double*** area, double*** length, double fraction, double epsilonB, FILE* logFile){
+void optimizeParametersBandR(double* vector,  double* nu, double* observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double**** Inu, double**** Anu, double*** area, double*** length, const double& fraction, const double& epsilonB, FILE* logFile){
 	const int Ngrad = 2;
 	double minVector[Ngrad];
 	double tempVector[Ngrad];
 	minVector[0] = minB/maxB;
 	minVector[1] = minR/maxR;
-	double currentF = evaluateOptimizationFunction5(vector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+	double currentF = evaluateOptimizationFunctionBandR(vector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 	printf("optimization function = %g\n", currentF);
 	fprintf(logFile, "optimization function = %g\n", currentF);
 	printf("Bfactor = %g rmax = %g\n", vector[0]*maxB, vector[1]*maxR);
 	fprintf(logFile, "Bfactor = %grmax = %g\n", vector[0]*maxB, vector[1]*maxR);
 	for(int k = 0; k < Niterations; ++k) {
 		///randomization;
-		for(int j = 0; j < 5; ++j){
+		/*for(int j = 0; j < 5; ++j){
 			for(int i = 0; i < Ngrad; ++i) {
 				//tempVector[i] = minVector[i] + (1.0 - minVector[i])*uniformDistribution();
 				tempVector[i] = tempVector[i] + 0.2*minVector[i]*(0,5 - uniformDistribution());
@@ -224,7 +228,7 @@ void optimizeParameters5(double* vector,  double* nu, double* observedInu, doubl
 				printf("random search\n");
 				fprintf(logFile, "random search\n");
 			}
-		}
+		}*/
 		double prevF = currentF;
 		//
 		//valley first step
@@ -246,9 +250,9 @@ void optimizeParameters5(double* vector,  double* nu, double* observedInu, doubl
 			double dx = fabs(vector[i])/1000;
 			tempVector[i] = vector[i] + dx;
 			//currentF = evaluateOptimizationFunction5(vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxR, vector[4]*maxV, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
-			double f = evaluateOptimizationFunction5(tempVector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+			double f = evaluateOptimizationFunctionBandR(tempVector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 			tempVector[i] = vector[i] - dx;
-			double f1 = evaluateOptimizationFunction5(tempVector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+			double f1 = evaluateOptimizationFunctionBandR(tempVector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 
 			grad[i] = (f - f1)/(2*dx);
 			if(grad[i] != grad[i]) {
@@ -285,9 +289,9 @@ void optimizeParameters5(double* vector,  double* nu, double* observedInu, doubl
 		}
 
 
-		findMinParameters5(vector, grad, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, currentF, fraction, epsilonB);
+		findMinParametersBandR(vector, grad, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, currentF, fraction, epsilonB);
 
-		currentF = evaluateOptimizationFunction5(vector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+		currentF = evaluateOptimizationFunctionBandR(vector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 		//valley second step
 
 		for(int i = 0; i < Ngrad; ++i) {
@@ -296,9 +300,9 @@ void optimizeParameters5(double* vector,  double* nu, double* observedInu, doubl
 			}
 			double dx = fabs(vector[i])/1000;
 			tempVector[i] = vector[i] + dx;
-			double f = evaluateOptimizationFunction5(tempVector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+			double f = evaluateOptimizationFunctionBandR(tempVector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 			tempVector[i] = vector[i] - dx;
-			double f1 = evaluateOptimizationFunction5(tempVector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+			double f1 = evaluateOptimizationFunctionBandR(tempVector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 
 			grad[i] = (f - f1)/(2*dx);
 			if(grad[i] != grad[i]) {
@@ -334,9 +338,9 @@ void optimizeParameters5(double* vector,  double* nu, double* observedInu, doubl
 			grad[i] = grad[i]/gradNorm;
 		}
 
-		findMinParameters5(vector, grad, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, currentF, fraction, epsilonB);
+		findMinParametersBandR(vector, grad, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, currentF, fraction, epsilonB);
 
-		currentF = evaluateOptimizationFunction5(vector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+		currentF = evaluateOptimizationFunctionBandR(vector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 
 		double valley2[Ngrad];
 		for(int i = 0; i < Ngrad; ++i) {
@@ -368,10 +372,10 @@ void optimizeParameters5(double* vector,  double* nu, double* observedInu, doubl
 				grad[i] = grad[i]/gradNorm;
 			}
 
-			findMinParameters5(vector, grad, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, currentF, fraction, epsilonB);
+			findMinParametersBandR(vector, grad, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, currentF, fraction, epsilonB);
 
 		}
-		currentF = evaluateOptimizationFunction5(vector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+		currentF = evaluateOptimizationFunctionBandR(vector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
 		
 		/*if(fabs(currentF - prevF) < 0.00000001){
 			break;
@@ -384,4 +388,40 @@ void optimizeParameters5(double* vector,  double* nu, double* observedInu, doubl
 	}
 	printf("finish optimization\n");
 	fprintf(logFile, "finish optimization\n");
+}
+
+
+void optimizeParameterB(double& B, double* nu, double* observedInu, double* Ee, double**** dFe, int Np, int Nnu, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double**** Inu, double**** Anu, double*** area, double*** length, const double& R, const double& fraction, const double& epsilonB, FILE* logFile){
+	const double Nb = 100;
+	double factor = pow(maxB/minB, 1.0/(Nb - 1));
+	double curMinB = minB;
+	double curB = minB;
+	double curMin = evaluateOptimizationFunction(nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, curMinB, R, fraction, epsilonB);
+	for(int i = 1; i < Nb; ++i){
+		curB = curB*factor;
+		double curErr = evaluateOptimizationFunction(nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, curB, R, fraction, epsilonB);
+		if(curErr < curMin){
+			curMin = curErr;
+			curMinB = curB;
+		}
+	}
+	B = curMinB;
+	double leftB = B/factor;
+	double rightB = B*factor;
+	double B1 = leftB + (rightB - leftB)/3.0;
+	double B2 = leftB + 2*(rightB - leftB)/3.0;
+
+	for(int i = 0; i < Niterations; ++i){
+		double error1 = evaluateOptimizationFunction(nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, B1, R, fraction, epsilonB);
+		double error2 = evaluateOptimizationFunction(nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, B2, R, fraction, epsilonB);
+		if(error1 <= error2){
+			rightB = B2;
+		} else {
+			leftB = B1;
+		}
+		B1 = leftB + (rightB - leftB)/3.0;
+	    B2 = leftB + 2*(rightB - leftB)/3.0;
+	}
+
+	B = (B1 + B2)/2;
 }

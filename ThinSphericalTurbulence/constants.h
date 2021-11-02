@@ -49,7 +49,12 @@ const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17, 4.6E17, 14E17};
 const double times[Nmonth] = {0, 2760000, 5270400, 10700000, 19000000, 56100000};
 //const double times[Nmonth] = {0, 2760000, 5270400, 10700000};
 
+//SN2009bb
+//const double distance = 40*3.08*1.0E24;
+//AT2018
 const double distance = 60*3.08*1.0E24;
+//CSS161010
+//const double distance = 150*3.08*1.0E24;
 
 const int Nrho = 10;
 const int Nphi = 10;
@@ -163,7 +168,7 @@ const double minEta = 0;
 const double maxEta = 0.8*pi/2;
 const double maxV = 0.9*speed_of_light;
 const double minV = 0.6*speed_of_light;
-const double maxR = 30*24*3600*3E10;
+const double maxR = 16.5*24*3600*3E10;
 const double minR = 1E15;
 
 #endif

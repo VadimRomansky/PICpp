@@ -480,7 +480,7 @@ int main()
 	double fraction = 0.5;
 	double fpeak = 0.68E-26;
 	double nupeak = 22.0E9;
-
+	double Time = 16.5*24*3600;
 	double epsilone = 0.33;
 	double epsilonB = 0.33;
 
@@ -1070,7 +1070,7 @@ int main()
 
 	//evaluateNu(nu, Nnu, 1.1*massElectron*speed_of_light2, 1000*massElectron*speed_of_light2, meanB);
 	double numax = 10000*1E9;
-	numax = 1000*1.6*1E-12/hplank;
+	numax = 10000*1.6*1E-12/hplank;
 	createNu(nu, Nnu, 0.1*1E9, 1000*1E9);
 	/*for(int i = 0; i < Nnu1; ++i){
 		nu1[i] = aprx[i]*1.0E9;
@@ -1135,7 +1135,7 @@ int main()
 	rmax = 16.5*24*3600*0.1*speed_of_light;
 	fractionSize = 0.5;
 	v = 0.1*speed_of_light;
-	Bfactor = 5;
+	Bfactor = 6;
 	epsilonB = 0.0012;
 	concentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 	z = 0;
@@ -1210,6 +1210,7 @@ int main()
 	observedInu[2] = 28.6;
 	nu1[3] = 241E9;
 	observedInu[3] = 27.4;
+	Time = 16.5*24*3600;
 	//nu1[4] = 249E9;
 	//observedInu[4] = 15.4;
 
@@ -1229,7 +1230,12 @@ int main()
 		}
 	}
 
-	optimizeParameters5(vector, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, fraction, epsilonB, logFile);
+	optimizeParametersBandR(vector, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, fraction, epsilonB, logFile);
+	Bfactor = vector[0]*maxB;
+	rmax = vector[1]*maxR;
+	v = rmax/Time;
+	concentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
+	//optimizeParameterB(Bfactor, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, rmax, fraction, epsilonB, logFile);
 
 	for(int l = 0; l < Nobs; ++l){
 		for(int i = 0; i < Nrho; ++i){
@@ -1245,11 +1251,6 @@ int main()
 	}
 	delete[] Inu1;
 	delete[] Anu1;
-
-	Bfactor = vector[0]*maxB;
-	//Bfactor = 0.048;
-	rmax = vector[1]*maxR;
-	concentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 
 	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, 1.0);
 

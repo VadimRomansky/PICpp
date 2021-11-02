@@ -24,7 +24,12 @@ const double hplank = 6.626E-27;
 const double pi = 4*atan2(1.0,1.0);
 const double four_pi = 4*pi;
 
-const double distance = 150*3*1.0E24;
+//SN2009bb
+//const double distance = 40*3.08*1.0E24;
+//AT2018
+const double distance = 60*3.08*1.0E24;
+//CSS161010
+//const double distance = 150*3.08*1.0E24;
 
 const std::string outputfileName = "radiation.dat";
 //const std::string fileNameP = "../../tristan-mp-pitp/Pe";
