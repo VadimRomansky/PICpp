@@ -191,9 +191,9 @@ int main()
 	const int Np = 200;
 	const int Nnu = 200;
 
-	const double Bfactor = 5.9;
+	const double Bfactor = 17;
 	const double epsilonB = 0.0012;
-	const double electronConcentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
+	const double electronConcentration = 10*Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 	const double photonConcentration = 1.0;
 
 
@@ -246,11 +246,10 @@ int main()
 
 	const double intx2plank = 2.4042;
 	const double intx3plank = pi*pi*pi*pi/15;
-	double rmax = 0.1*speed_of_light*16.5*24*3600;
-	rmax = 7.6E15;
+	double rmax = 0.1*speed_of_light*7.7*24*3600;
 	double L = 1.0E44;
 
-	double Tphotons1 = 340000;
+	double Tphotons1 = 11000*200;
 	//double Tphotons2 = 20;
 	//double Tphotons3 = 5000;
 	double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
