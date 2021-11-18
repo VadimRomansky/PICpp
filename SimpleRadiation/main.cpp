@@ -1244,7 +1244,7 @@ int main()
 		}
 	}
 
-	optimizeParametersGeneral(vector, 2, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, logFile);
+	optimizeParametersGeneral(vector, 2, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, logFile);
 	fraction = vector[2];
 	epsilonB = vector[3];
 
