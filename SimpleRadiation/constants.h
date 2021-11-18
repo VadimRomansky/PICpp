@@ -56,9 +56,9 @@ const double pacholczykC6[6] = {8.4809E-41, 6.7024E-41, 5.7410E-41, 5.2179E-41, 
 //SN2009bb
 //const double distance = 40*3.08*1.0E24;
 //AT2018
-const double distance = 60*3.08*1.0E24;
+//const double distance = 60*3.08*1.0E24;
 //CSS161010
-//const double distance = 150*3.08*1.0E24;
+const double distance = 150*3.08*1.0E24;
 
 const int Nrho = 10;
 const int Nphi = 10;

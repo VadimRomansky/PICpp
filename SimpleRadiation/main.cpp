@@ -1182,37 +1182,51 @@ int main()
 	vector[0] = Bfactor/maxB;
 	vector[1] = rmax/maxR;
 	epsilonB = 0.0012;
+	vector[2] = fraction;
+	vector[3] = epsilonB;
 
-	const int Nobs = 4;
+	const int Nobs = 6;
 	double nu1[Nobs];
 	double observedInu[Nobs];
+	double observedError[Nobs];
 
 	//css161010 t = 357
-	/*nu1[0] = 0.33E9;
+	nu1[0] = 0.33E9;
 	observedInu[0] = 0.357;
+	observedError[0] = 0.09;
 	nu1[1] = 0.61E9;
 	observedInu[1] = 0.79;
+	observedError[1] = 0.09;
 	nu1[2] = 1.5E9;
 	observedInu[2] = 0.27;
+	observedError[2] = 0.07;
 	nu1[3] = 3.0E9;
 	observedInu[3] = 0.17;
+	observedError[3] = 0.03;
 	nu1[4] = 6.05E9;
 	observedInu[4] = 0.07;
+	observedError[4] = 0.01;
 	nu1[5] = 10.0E9;
-	observedInu[5] = 0.032;*/
+	observedInu[5] = 0.032;
+	observedError[5] = 0.008;
+	Time = 357*24*3600;
 
 	//at2018 t = 15
-	nu1[0] = 35E9;
+	/*nu1[0] = 35E9;
 	observedInu[0] = 8;
+	observedError[0] = ;
 	nu1[1] = 225E9;
 	observedInu[1] = 30.8;
+	observedError[1] = ;
 	nu1[2] = 233E9;
 	observedInu[2] = 28.6;
+	observedError[2] = ;
 	nu1[3] = 241E9;
 	observedInu[3] = 27.4;
-	Time = 16.5*24*3600;
+	observedError[3] = ;*/
 	//nu1[4] = 249E9;
 	//observedInu[4] = 15.4;
+	//Time = 16.5*24*3600;
 
 
 	double**** Inu1 = new double***[Nobs];
@@ -1230,7 +1244,11 @@ int main()
 		}
 	}
 
-	optimizeParametersBandR(vector, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, fraction, epsilonB, logFile);
+	optimizeParametersGeneral(vector, 2, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, logFile);
+	fraction = vector[2];
+	epsilonB = vector[3];
+
+	//optimizeParametersBandR(vector, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, fraction, epsilonB, logFile);
 	Bfactor = vector[0]*maxB;
 	rmax = vector[1]*maxR;
 	v = rmax/Time;
