@@ -541,6 +541,9 @@ void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double****
 					length[k] = topz - lowz;
 				}
 			}
+			if(i == 0){
+				printf("length = %g\n", length[k]);
+			}
 		}
 
 		for(int j = 0; j < Nphi; ++j){

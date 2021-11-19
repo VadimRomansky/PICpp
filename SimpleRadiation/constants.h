@@ -38,7 +38,7 @@ const std::string fileNameF = "Fs";
 const std::string logFileName = "log.dat";
 const std::string BFileName = "B.dat";
 
-const int Niterations = 10;
+const int Niterations = 20;
 const int Nmonth = 6;
 const int Nmontecarlo = 100000;
 
@@ -162,7 +162,7 @@ const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
 
 const double minB = 0.01;
-const double maxB = 10.0;
+const double maxB = 30.0;
 const double minN = 0.01;
 const double maxN = 4000;
 const double minFraction = 0.001;

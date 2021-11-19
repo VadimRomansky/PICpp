@@ -1,8 +1,14 @@
 clear;
 radiation1 = importdata('radiation.dat');
 radiation2 = importdata('radiation2.dat');
+datar = importdata('at2018radio.dat');
 N = size(radiation1,1);
 
+Ndatar = size(datar,1);
+for i = 1:Ndatar,
+    datar(i,1) = datar(i,1)/10^9;
+    datar(i,2) = datar(i,2)/1000;
+end;
 %from coppejans css161010
 x99(1:4) = 0;
 y99(1:4) = 0;
@@ -164,7 +170,8 @@ set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'log');
 plot(radiation1(1:N,1),radiation1(1:N,2),'Color','red','LineWidth',2);
 %plot(radiation2(1:N,1),radiation2(1:N,2),'Color','blue','LineWidth',2);
-plot(x15(1:4),y15(1:4),'--o','Color','black','LineWidth',2);
+sz = 20;
+scatter(datar(1:Ndatar,1), datar(1:Ndatar,2),sz,'MarkerEdgeColor','magenta','MarkerFaceColor','magenta','LineWidth',2);
 %legend('F(E) ~ E^{-3.5}','PIC spectrum','observation','Location','southeast');
 title ('I_{\nu}');
 xlabel ('{\nu} GHz');
