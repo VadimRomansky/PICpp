@@ -1178,29 +1178,31 @@ int main()
 		}
 	}
 
-	double vector[3];
-	vector[0] = Bfactor/maxB;
-	vector[1] = rmax/maxR;
-	vector[2] = fractionSize;
-	epsilonB = 0.0012;
-
-	const int Nobs = 3;
+	const int Nobs = 6;
 	double nu1[Nobs];
 	double observedInu[Nobs];
+	double observedError[Nobs];
 
 	//css161010 t = 357
-	/*nu1[0] = 0.33E9;
+	nu1[0] = 0.33E9;
 	observedInu[0] = 0.357;
+	observedError[0] = 0.09;
 	nu1[1] = 0.61E9;
 	observedInu[1] = 0.79;
+	observedError[1] = 0.09;
 	nu1[2] = 1.5E9;
 	observedInu[2] = 0.27;
+	observedError[2] = 0.07;
 	nu1[3] = 3.0E9;
 	observedInu[3] = 0.17;
+	observedError[3] = 0.03;
 	nu1[4] = 6.05E9;
 	observedInu[4] = 0.07;
+	observedError[4] = 0.01;
 	nu1[5] = 10.0E9;
-	observedInu[5] = 0.032;*/
+	observedInu[5] = 0.032;
+	observedError[5] = 0.008;
+	Time = 357*24*3600;
 
 	//at2018 t = 15
 	//nu1[0] = 35E9;
@@ -1213,13 +1215,13 @@ int main()
 	//observedInu[3] = 27.4;
 	//Time = 16.5*24*3600;
 	//at2018 t = 7.7
-	nu1[0] = 15.5E9;
-	observedInu[0] = 0.489;
-	nu1[1] = 214E9;
-	observedInu[1] = 36.425;
-	nu1[2] = 326E9;
-	observedInu[2] = 32.705;
-	Time = 7.7*24*3600;
+	//nu1[0] = 15.5E9;
+	//observedInu[0] = 0.489;
+	//nu1[1] = 214E9;
+	//observedInu[1] = 36.425;
+	//nu1[2] = 326E9;
+	//observedInu[2] = 32.705;
+	//Time = 7.7*24*3600;
 
 
 	double**** Inu1 = new double***[Nobs];
@@ -1237,21 +1239,30 @@ int main()
 		}
 	}
 
+	double vector[3];
+	vector[0] = Bfactor/maxB;
+	vector[1] = rmax/maxR;
+	vector[2] = fractionSize;
+	epsilonB = 0.0012;
+	vector[3] = epsilonB;
+
+	optimizeParametersGeneral(vector, 3, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, logFile);
+	Bfactor = vector[0]*maxB;
+	rmax = vector[1]*maxR;
+	fractionSize = vector[2];
+	epsilonB = vector[3];
+	v = rmax/Time;
+	concentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
+
 	//optimizeParametersBandR(vector, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, fraction, epsilonB, logFile);
 	//Bfactor = vector[0]*maxB;
 	//rmax = vector[1]*maxR;
 	//v = rmax/Time;
 	//concentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 
-	//optimizeParametersBandRandF(vector, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, epsilonB, logFile);
-	//Bfactor = vector[0]*maxB;
-	//rmax = vector[1]*maxR;
-	//fractionSize = vector[2];
-	//v = rmax/Time;
-	//concentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 
-	optimizeParameterB(Bfactor, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, rmax, fraction, epsilonB, logFile);
-	concentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
+	//optimizeParameterB(Bfactor, nu1, observedInu, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, rmax, fraction, epsilonB, logFile);
+	//concentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 
 	for(int l = 0; l < Nobs; ++l){
 		for(int i = 0; i < Nrho; ++i){

@@ -246,10 +246,10 @@ int main()
 
 	const double intx2plank = 2.4042;
 	const double intx3plank = pi*pi*pi*pi/15;
-	double rmax = 0.1*speed_of_light*7.7*24*3600;
+	double rmax = 0.13*speed_of_light*7.7*24*3600;
 	double L = 1.0E44;
 
-	double Tphotons1 = 11000*200;
+	double Tphotons1 = 11000*3;
 	//double Tphotons2 = 20;
 	//double Tphotons3 = 5000;
 	double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
@@ -431,7 +431,7 @@ int main()
 				//maxEnergy = Ee[i];
 				Fe[j][i] = Fe[j][i] / (massElectron*speed_of_light2);
 				if(i > 137){
-					Fe[j][i] = Fe[j][137]*pow(Ee[j][i]/Ee[j][137], -3.5);
+					Fe[j][i] = Fe[j][137]*pow(Ee[j][i]/Ee[j][137], -2.0);
 				}
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
