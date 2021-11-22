@@ -39,20 +39,19 @@ const std::string logFileName = "log.dat";
 const std::string BFileName = "B.dat";
 
 const int Niterations = 20;
-const int Nmonth = 6;
+const int Nmonth = 4;
 const int Nmontecarlo = 100000;
 
-const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17, 4.6E17, 14E17};
-//const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17};
+//const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17, 4.6E17, 14E17};
+const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17};
 
 
-const double times[Nmonth] = {0, 2760000, 5270400, 10700000, 19000000, 56100000};
-//const double times[Nmonth] = {0, 2760000, 5270400, 10700000};
+const double times[Nmonth] = {18.1*24*3600, 50*24*3600, 77*24*3600, 143*24*3600};
 
 //SN2009bb
-//const double distance = 40*3.08*1.0E24;
+const double distance = 40*3.08*1.0E24;
 //AT2018
-const double distance = 60*3.08*1.0E24;
+//const double distance = 60*3.08*1.0E24;
 //CSS161010
 //const double distance = 150*3.08*1.0E24;
 
@@ -133,26 +132,37 @@ const double decy[3] = {6.1, 1.9, 0.9};
 const double octx[3]= {0.325, 0.61, 1.28};
 const double octy[3] = {12.0, 6.3, 4.4};
 
-const double augx[6] = {0.332, 0.617, 1.43, 4.86, 8.46, 84.6};
-const double augy[6] = {3.3, 7.9, 8.68, 2.47, 1.084, 0.1084};
+//aug 11
+const double augx[5] = {0.332, 0.617, 1.43, 4.86, 8.46};
+const double augy[5] = {3.3, 7.9, 8.687, 2.470, 1.084};
+const double augError[5] = {0.7, 0.3, 0.341, 0.155, 0.091};
 
 const double augmaxx = 0.8;
 const double augmaxy = 11;
 
+//june 6-10
 const double junx[4] = {0.617, 1.43, 4.86, 8.46};
-const double juny[4] = {2.98, 12.3, 5.79, 3.15};
+const double juny[4] = {3.0, 9.465, 5.877, 3.203};
+const double junError[4] = {0.3, 0.186, 0.11, 0.074};
 
 const double junmaxx = 1.65;
 const double junmaxy = 13.2;
 
+
+//may 10.1
 const double mayx[3]= {1.43, 4.86, 8.46};
 const double mayy[3] = {4.93, 12.2, 6.82};
+const double mayError[3] = {0.122, 0.165, 0.098};
 
 const double maymaxx = 2.96;
 const double maymaxy = 15.2;
 
+//apr 8.2
 const double aprx[4] = {1.43, 4.86, 8.46, 22.5};
 const double apry[4] ={1.3, 12.86, 17.57, 5.2};
+const double aprError[4] = {0.1, 0.161, 0.088, 0.19};
+
+//SN2009bb explosion 21.1 March
 
 const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
@@ -162,13 +172,13 @@ const double maxB = 10;
 const double minN = 0.01;
 const double maxN = 400;
 const double minFraction = 0.001;
-const double maxFraction = 0.2;
+const double maxFraction = 1.0;
 const double maxSigma = 10.0;
 const double minEta = 0;
 const double maxEta = 0.8*pi/2;
 const double maxV = 0.9*speed_of_light;
-const double minV = 0.6*speed_of_light;
-const double maxR = 16.5*24*3600*3E10;
+const double minV = 0.1*speed_of_light;
+const double maxR = 160*24*3600*3E10;
 const double minR = 1E15;
 
 #endif

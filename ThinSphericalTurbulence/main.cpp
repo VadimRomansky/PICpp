@@ -967,6 +967,12 @@ int main()
 	fprintf(logFile, "evaluating local emissivity\n");
 	fflush(logFile);
 
+	int Nnumonth[Nmonth];
+	Nnumonth[0] = 4;
+	Nnumonth[1] = 3;
+	Nnumonth[2] = 4;
+	Nnumonth[3] = 5;
+
 	nu = new double[Nnu];
 	Inu = new double**[Ntheta];
 	Anu = new double**[Ntheta];
@@ -991,16 +997,19 @@ int main()
 
 	Numonth = new double*[Nmonth];
 	Fmonth = new double*[Nmonth];
+	double** ErrorMonth = new double*[Nmonth];
 	Inumonth = new double****[Nmonth];
 	Anumonth = new double****[Nmonth];
 	for(int m = 0; m < Nmonth; ++m){
-		Numonth[m] = new double[Nnum];
-		Fmonth[m] = new double[Nnum];
-		Inumonth[m] = new double***[Nnum];
-		Anumonth[m] = new double***[Nnum];
+		Numonth[m] = new double[Nnumonth[m]];
+		Fmonth[m] = new double[Nnumonth[m]];
+		ErrorMonth[m] = new double[Nnumonth[m]];
+		Inumonth[m] = new double***[Nnumonth[m]];
+		Anumonth[m] = new double***[Nnumonth[m]];
 		for(int l = 0; l < Nnum; ++l){
 			Numonth[m][l] = 0;
 			Fmonth[m][l]= 0;
+			ErrorMonth[m][l] = 1.0;
 			Inumonth[m][l] = new double**[Nrho];
 			Anumonth[m][l] = new double**[Nrho];
 			for(int i = 0; i < Nrho; ++i){
@@ -1017,60 +1026,43 @@ int main()
 			}
 		}
 	}
-	Numonth[0][0] = aprx[0]*1E9;
-	Fmonth[0][0] = apry[0];
-	Numonth[0][1] = aprx[1]*1E9;
-	Fmonth[0][1] = apry[1];
-	Numonth[0][2] = aprx[2]*1E9;
-	Fmonth[0][2] = apry[2];
-	Numonth[0][3] = aprx[3]*1E9;
-	Fmonth[0][3] = apry[3];
 
-	Numonth[1][0] = mayx[0]*1E9;
-	Fmonth[1][0] = mayy[0];
-	Numonth[1][1] = mayx[0]*1E9;
-	Fmonth[1][1] = mayy[0];
-	Numonth[1][2] = mayx[1]*1E9;
-	Fmonth[1][2] = mayy[1];
-	Numonth[1][3] = mayx[2]*1E9;
-	Fmonth[1][3] = mayy[2];
+	for(int i = 0; i < Nnumonth[0]; ++i){
+		Numonth[0][i] = aprx[i]*1E9;
+		Fmonth[0][i] = apry[i];
+		ErrorMonth[0][i] = aprError[i];
+	}
 
-	Numonth[2][0] = junx[0]*1E9;
-	Fmonth[2][0] = juny[0];
-	Numonth[2][1] = junx[1]*1E9;
-	Fmonth[2][1] = juny[1];
-	Numonth[2][2] = junx[2]*1E9;
-	Fmonth[2][2] = juny[2];
-	Numonth[2][3] = junx[3]*1E9;
-	Fmonth[2][3] = juny[3];
+	for(int i = 0; i < Nnumonth[1]; ++i){
+		Numonth[1][i] = mayx[i]*1E9;
+		Fmonth[1][i] = mayy[i];
+		ErrorMonth[1][i] = mayError[i];
+	}
 
-	Numonth[3][0] = augx[1]*1E9;
-	Fmonth[3][0] = augy[1];
-	Numonth[3][1] = augx[2]*1E9;
-	Fmonth[3][1] = augy[2];
-	Numonth[3][2] = augx[3]*1E9;
-	Fmonth[3][2] = augy[3];
-	Numonth[3][3] = augx[4]*1E9;
-	Fmonth[3][3] = augy[4];
+	for(int i = 0; i < Nnumonth[2]; ++i){
+		Numonth[2][i] = junx[i]*1E9;
+		Fmonth[2][i] = juny[i];
+		ErrorMonth[2][i] = junError[i];
+	}
+
+	for(int i = 0; i < Nnumonth[3]; ++i){
+		Numonth[3][i] = augx[i]*1E9;
+		Fmonth[3][i] = augy[i];
+		ErrorMonth[3][i] = augError[i];
+	}
 
 	if(Nmonth > 4){
-		Numonth[4][0] = octx[0]*1E9;
-		Fmonth[4][0] = octy[0];
-		Numonth[4][1] = octx[0]*1E9;
-		Fmonth[4][1] = octy[0];
-		Numonth[4][2] = octx[1]*1E9;
-		Fmonth[4][2] = octy[1];
-		Numonth[4][3] = octx[2]*1E9;
-		Fmonth[4][3] = octy[2];
+		for(int i = 0; i < Nnumonth[4]; ++i){
+			Numonth[4][i] = octx[i]*1E9;
+			Fmonth[4][i] = octy[i];
+			//ErrorMonth[4][i] = octError[i];
+		}
 
-		Numonth[5][0] = decx[0]*1E9;
-		Fmonth[5][0] = decy[0];
-		Numonth[5][1] = decx[0]*1E9;
-		Fmonth[5][1] = decy[0];
-		Numonth[5][2] = decx[1]*1E9;
-		Fmonth[5][2] = decy[1];
-		Numonth[5][3] = decx[2]*1E9;
-		Fmonth[5][3] = decy[2];
+		for(int i = 0; i < Nnumonth[5]; ++i){
+			Numonth[5][i] = decx[i]*1E9;
+			Fmonth[5][i] = decy[i];
+			//ErrorMonth[5][i] = decError[i];
+		}
 	}
 
 	//todo chose B
@@ -1174,26 +1166,31 @@ int main()
 	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
 	printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
 
-	double vector[5];
+	double vector[4];
 	vector[0] = Bfactor/maxB;
 	vector[1] = concentration/maxN;
 	vector[2] = fractionSize/maxFraction;
-	vector[3] = rmax/maxR;
-	vector[4] = v/maxV;
+	vector[3] = v/maxV;
+
+	double timeMoments[Nmonth];
+	for(int i = 0; i < Nmonth; ++i){
+		timeMoments[i] = times[i];
+	}
 
 	
-	/*if(geometry == FLAT_SIMPLE){
+	if(geometry == FLAT_SIMPLE){
 		optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, weightedEe, weightedFe[0][0][0], Np, Ndist, 1.0, 8, logFile);
 	} else {
-		optimizeParameters5(vector, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
+		//optimizeParameters5(vector, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
+		optimizeParametersGeneral(vector, 4, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
 		Bfactor = vector[0]*maxB;
 		concentration = vector[1]*maxN;
 		fractionSize = vector[2]*maxFraction;
 		rmax = vector[3]*maxR;
 		v = vector[4]*maxV;
-	}*/
+	}
 	
-	error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+	//error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 
 	///////////////////
 
