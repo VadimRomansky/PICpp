@@ -496,6 +496,7 @@ void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double****
 	double drho = tempRmax/Nrho;
 
 	double length[Nz];
+	//printf("evaluate spectrum\n");
 
 	for(int i = 0; i < tempNr; ++i){
 		double r = (i + 0.5)*tempdr;
@@ -542,7 +543,7 @@ void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double****
 				}
 			}
 			if(i == 0){
-				printf("length = %g\n", length[k]);
+				//printf("length = %g\n", length[k]);
 			}
 		}
 

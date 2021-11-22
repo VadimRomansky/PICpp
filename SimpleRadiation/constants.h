@@ -38,7 +38,7 @@ const std::string fileNameF = "Fs";
 const std::string logFileName = "log.dat";
 const std::string BFileName = "B.dat";
 
-const int Niterations = 20;
+const int Niterations = 10;
 const int Nmonth = 6;
 const int Nmontecarlo = 100000;
 
@@ -172,7 +172,8 @@ const double minEta = 0;
 const double maxEta = 0.8*pi/2;
 const double maxV = 0.9*speed_of_light;
 const double minV = 0.6*speed_of_light;
-const double maxR = 16.5*24*3600*3E10;
-const double minR = 1E16;
+//const double maxR = 16.5*24*3600*3E10;
+const double maxR = 357*24*3600*3E10;
+const double minR = 1E15;
 
 #endif

@@ -1132,10 +1132,12 @@ int main()
 	z = 0;
 
 	//margutti at2018 16.5 days
-	rmax = 7.7*24*3600*0.1*speed_of_light;
+	//rmax = 7.7*24*3600*0.1*speed_of_light;
+	//css161010 357
+	rmax = 357*24*3600*0.3*speed_of_light;
 	fractionSize = 0.5;
 	v = 0.1*speed_of_light;
-	Bfactor = 20;
+	Bfactor = 0.048;
 	epsilonB = 0.0012;
 	concentration = Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 	z = 0;
