@@ -1006,7 +1006,7 @@ int main()
 		ErrorMonth[m] = new double[Nnumonth[m]];
 		Inumonth[m] = new double***[Nnumonth[m]];
 		Anumonth[m] = new double***[Nnumonth[m]];
-		for(int l = 0; l < Nnum; ++l){
+		for(int l = 0; l < Nnumonth[m]; ++l){
 			Numonth[m][l] = 0;
 			Fmonth[m][l]= 0;
 			ErrorMonth[m][l] = 1.0;
@@ -1115,57 +1115,6 @@ int main()
 	v = 0.67*speed_of_light;
 	sigma = 0.02;
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
-	double error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
-	printf("error = %lf\n", error);
-	fprintf(logFile, "error = %lf\n", error);
-	const int Nbp = 10;
-	const int Nnp = 12;
-	const int Nfp = 7;
-	const int Nvp = 5;
-	const int Nrp = 5;
-	double Bpoints[Nbp] = {0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
-	double npoints[Nnp] = {0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200};
-	double fpoints[Nfp] = {0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
-	double vpoints[Nvp] = { 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
-	double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
-	/*for(int i = 0; i < Nbp; ++i){
-		double tempBfactor = Bpoints[i];
-		for(int j = 0; j < Nnp; ++j){
-			tempConcentration = npoints[j];
-			for(int k = 0; k < Nfp; ++k){
-				double tempFractionSize = fpoints[k];
-				for(int l = 0; l < Nvp; ++l){
-					double tempV = vpoints[l];
-					for(int m = 0; m < Nrp; ++m){
-						double tempRmax = rpoints[m];
-						double tempError = evaluateOptimizationFunction5(tempBfactor, tempConcentration, tempFractionSize, tempRmax, tempV, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
-						//printf("tempError = %lf\n", tempError);
-						//fprintf(logFile, "tempError = %lf\n", tempError);
-						if(tempError < error){
-							error = tempError;
-							Bfactor = tempBfactor;
-							concentration = tempConcentration;
-							fractionSize = tempFractionSize;
-							rmax = tempRmax;
-							v = tempV;
-							fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
-							printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
-						}
-					}
-				}
-			}
-		}
-	}*/
-	/*Bfactor = 0.2;
-	concentration = 200;
-	fractionSize = 0.2;
-	rmax = 3E16;
-	v = 0.7*speed_of_light;*/
-
-	error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
-	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
-	printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
-
 	double vector[4];
 	vector[0] = Bfactor/maxB;
 	vector[1] = concentration/maxN;
@@ -1176,6 +1125,63 @@ int main()
 	for(int i = 0; i < Nmonth; ++i){
 		timeMoments[i] = times[i];
 	}
+
+	double error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+	printf("error = %lf\n", error);
+	fprintf(logFile, "error = %lf\n", error);
+	const int Nbp = 10;
+	const int Nnp = 10;
+	const int Nfp = 1;
+	const int Nvp = 4;
+	//const int Nrp = 5;
+	double Bpoints[Nbp] = {0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
+	double npoints[Nnp] = {0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100};
+	double fpoints[Nfp] = {0.5};
+	double vpoints[Nvp] = { 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light};
+	//double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
+	for(int i = 0; i < Nbp; ++i){
+		double tempBfactor = Bpoints[i];
+		for(int j = 0; j < Nnp; ++j){
+			tempConcentration = npoints[j];
+			for(int k = 0; k < Nfp; ++k){
+				double tempFractionSize = fpoints[k];
+				for(int l = 0; l < Nvp; ++l){
+					double tempV = vpoints[l];
+						vector[0] = tempBfactor/maxB;
+						vector[1] = tempConcentration/maxN;
+						vector[2] = tempFractionSize/maxFraction;
+						vector[3] = tempV/maxV;
+						double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+						printf("tempError = %lf\n", tempError);
+						//fprintf(logFile, "tempError = %lf\n", tempError);
+						if(tempError < error){
+							error = tempError;
+							Bfactor = vector[0]*maxB;
+							concentration = vector[1]*maxN;
+							fractionSize = vector[2]*maxFraction;
+							v = vector[3]*maxV;
+							fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light);
+							printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light);
+						}
+				}
+			}
+		}
+	}
+	/*Bfactor = 0.2;
+	concentration = 200;
+	fractionSize = 0.2;
+	rmax = 3E16;
+	v = 0.7*speed_of_light;*/
+
+	vector[0] = Bfactor/maxB;
+	vector[1] = concentration/maxN;
+	vector[2] = fractionSize/maxFraction;
+	vector[3] = v/maxV;
+
+	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
+	printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
+
 
 	
 	if(geometry == FLAT_SIMPLE){

@@ -2003,8 +2003,8 @@ void findMinParametersGeneral(double* vector, int Npar, const double* grad, doub
 	double tempVector2[Ngrad];
 	minVector[0] = minB/maxB;
 	minVector[1] = minN/maxN;
-	minVector[2] = minFraction;
-	minVector[3] = minV;
+	minVector[2] = minFraction/maxFraction;
+	minVector[3] = minV/maxV;
 
 	double maxLambda = sqrt(1.0*Npar);
 	for(int i = 0; i < Npar; ++i) {
@@ -2179,8 +2179,8 @@ void optimizeParametersGeneral(double* vector, int Npar, double* time,  double**
 	double currentVector[Ngrad];
 	minVector[0] = minB/maxB;
 	minVector[1] = minR/maxR;
-	minVector[2] = minFraction;
-	minVector[3] = 0.00001;
+	minVector[2] = minFraction/maxFraction;
+	minVector[3] = minV/maxV;
 	for(int i = 0; i < Ngrad; ++i){
 		prevVector[i] = vector[i];
 		currentVector[i] = vector[i];
@@ -2377,8 +2377,8 @@ void optimizeParametersGeneral(double* vector, int Npar, double* time,  double**
 		}
 		printf("optimization function = %g\n", currentF);
 		fprintf(logFile, "optimization function = %g\n", currentF);
-		printf("Bfactor = %g n = %g fraction = %10.7g v/c = %10.7g\n", vector[0]*maxB, vector[1]*maxR, vector[2], vector[3]*maxV/speed_of_light);
-		fprintf(logFile, "Bfactor = %g n = %g  fraction = %10.7g v/c = %10.7g\n", vector[0]*maxB, vector[1]*maxR, vector[2], vector[3]*maxV/speed_of_light);
+		printf("Bfactor = %g n = %g fraction = %10.7g v/c = %10.7g\n", vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxV/speed_of_light);
+		fprintf(logFile, "Bfactor = %g n = %g  fraction = %10.7g v/c = %10.7g\n", vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxV/speed_of_light);
 	}
 	printf("finish optimization\n");
 	fprintf(logFile, "finish optimization\n");
