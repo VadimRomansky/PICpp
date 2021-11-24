@@ -1115,6 +1115,7 @@ int main()
 	v = 0.67*speed_of_light;
 	sigma = 0.02;
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
+	bool optPar[4] = {true, true, false, true};
 	double vector[4];
 	vector[0] = Bfactor/maxB;
 	vector[1] = concentration/maxN;
@@ -1188,7 +1189,7 @@ int main()
 		optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, weightedEe, weightedFe[0][0][0], Np, Ndist, 1.0, 8, logFile);
 	} else {
 		//optimizeParameters5(vector, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
-		optimizeParametersGeneral(vector, 4, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
+		optimizeParametersGeneral(vector, optPar, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
 		Bfactor = vector[0]*maxB;
 		concentration = vector[1]*maxN;
 		fractionSize = vector[2]*maxFraction;
