@@ -1115,7 +1115,7 @@ int main()
 	v = 0.67*speed_of_light;
 	sigma = 0.02;
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
-	bool optPar[4] = {true, true, false, true};
+	bool optPar[4] = {true, true, true, true};
 	double vector[4];
 	vector[0] = Bfactor/maxB;
 	vector[1] = concentration/maxN;
@@ -1130,17 +1130,17 @@ int main()
 	double error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 	printf("error = %lf\n", error);
 	fprintf(logFile, "error = %lf\n", error);
-	const int Nbp = 10;
+	const int Nbp = 7;
 	const int Nnp = 10;
 	const int Nfp = 1;
-	const int Nvp = 4;
+	const int Nvp = 5;
 	//const int Nrp = 5;
-	double Bpoints[Nbp] = {0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
+	double Bpoints[Nbp] = {0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
 	double npoints[Nnp] = {0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100};
 	double fpoints[Nfp] = {0.5};
-	double vpoints[Nvp] = { 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light};
+	double vpoints[Nvp] = { 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	//double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
-	for(int i = 0; i < Nbp; ++i){
+	/*for(int i = 0; i < Nbp; ++i){
 		double tempBfactor = Bpoints[i];
 		for(int j = 0; j < Nnp; ++j){
 			tempConcentration = npoints[j];
@@ -1167,12 +1167,12 @@ int main()
 				}
 			}
 		}
-	}
-	/*Bfactor = 0.2;
-	concentration = 200;
-	fractionSize = 0.2;
+	}*/
+	Bfactor = 0.05;
+	concentration = 0.2;
+	fractionSize = 0.5;
 	rmax = 3E16;
-	v = 0.7*speed_of_light;*/
+	v = 0.65*speed_of_light;
 
 	vector[0] = Bfactor/maxB;
 	vector[1] = concentration/maxN;
@@ -1188,13 +1188,12 @@ int main()
 	if(geometry == FLAT_SIMPLE){
 		optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, weightedEe, weightedFe[0][0][0], Np, Ndist, 1.0, 8, logFile);
 	} else {
-		//optimizeParameters5(vector, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
 		optimizeParametersGeneral(vector, optPar, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
 		Bfactor = vector[0]*maxB;
 		concentration = vector[1]*maxN;
 		fractionSize = vector[2]*maxFraction;
-		rmax = vector[3]*maxR;
-		v = vector[4]*maxV;
+		//rmax = vector[3]*maxR;
+		v = vector[3]*maxV;
 	}
 	
 	//error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
@@ -1202,7 +1201,7 @@ int main()
 	///////////////////
 
 
-	//error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, Ee, dFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 
 	printf("integrating fields\n");
 	fprintf(logFile, "integrating Fields\n");
@@ -1245,8 +1244,9 @@ int main()
 		}
 	}
 
+	rmax = v*timeMoments[3];
 	for(int l = 0; l < Nmonth; ++l){
-		double r = rmax + v*times[l];
+		double r = v*timeMoments[l];
 		double rfactor = r/rmax;
 		double locB = Bfactor*rmax/r;
 		double locN = concentration*sqr(rmax/r);
@@ -1312,7 +1312,12 @@ int main()
 		Bfactor = Bpoints[i];
 		for(int j = 0; j < Nnp; ++j){
 			concentration = npoints[j];
-			double tempError = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+			vector[0] = Bfactor/maxB;
+			vector[1] = concentration/maxN;
+			vector[2] = fractionSize/maxFraction;
+			vector[3] = v/maxV;
+
+			double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 			fprintf(errorFile, "%g ", tempError);
 		}
 		fprintf(errorFile, "\n");
@@ -1350,7 +1355,7 @@ int main()
 	
 
 	//Chevalier compare to SN1987A
-	const int Nchevalier = 5;
+	/*const int Nchevalier = 5;
 	const int Ntchev = 100;
 	double Nuchev = 0.843E9;
 	double* tchev = new double[Ntchev];
@@ -1397,13 +1402,13 @@ int main()
 
 	FILE* chevOutput = fopen("chevalier.dat","w");
 
-	/*for(int i = 0; i < Nnu; ++i){
+	for(int i = 0; i < Nnu; ++i){
 		fprintf(chevOutput, "%g", nu[i]/1E9, chevTotalInu[0][i]);
 		for(int l = 0; l < Nchev; ++l){
 			fprintf(chevOutput, " %g", chevTotalInu[l][i]);
 		}
 		fprintf(chevOutput, "\n");
-	}*/
+	}
 
 	for(int i = 0; i < Ntchev; ++i){
 		fprintf(chevOutput, "%g %g\n", tchev[i]/(24*3600), chevTotalInu[i]);
@@ -1412,8 +1417,15 @@ int main()
 	fclose(chevOutput);
 
 	delete[] tchev;
-	delete[] chevTotalInu;
+	delete[] chevTotalInu;*/
 	//
+
+	FILE* outputParam = fopen("parameters.dat","w");
+	fprintf(outputParam, "B = %g\n", Bfactor);
+	fprintf(outputParam, "n = %g\n", concentration);
+	fprintf(outputParam, "f = %g\n", fractionSize);
+	fprintf(outputParam, "v/c = %g\n", v/speed_of_light);
+	fclose(outputParam);
 
 	for(int l = 0; l < Nnu; ++l){
 		for(int i = 0; i < Nrho; ++i){
@@ -1430,15 +1442,6 @@ int main()
 	delete[] tempInu;
 	delete[] tempAnu;
 
-
-	FILE* outputParam = fopen("parameters.dat","w");
-	fprintf(outputParam, "%g\n", Bfactor);
-	fprintf(outputParam, "%g\n", concentration);
-	fprintf(outputParam, "%g\n", fractionSize);
-	fprintf(outputParam, "%g\n", rmax);
-	fprintf(outputParam, "%g\n", v/speed_of_light);
-	fclose(outputParam);
-
 	////////////////////
 
 	printf("deleting arrays\n");
@@ -1454,7 +1457,7 @@ int main()
 	delete[] Ee;
 
 	for(int m = 0; m < Nmonth; ++m){
-		for(int l = 0; l < Nnum; ++l){
+		for(int l = 0; l < Nnumonth[m]; ++l){
 			for(int i = 0; i < Nrho; ++i){
 				for(int j = 0; j < Nphi; ++j){
 					delete[] Inumonth[m][l][i][j];

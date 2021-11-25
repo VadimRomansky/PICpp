@@ -2231,23 +2231,26 @@ void optimizeParametersGeneral(double* vector, bool* optPar, double* time,  doub
 	double currentF = evaluateOptimizationFunction5(vector, time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 	printf("optimization function = %g\n", currentF);
 	fprintf(logFile, "optimization function = %g\n", currentF);
-	printf("Bfactor = %g n = %g fraction = %10.7g v/c = %10.7g\n", vector[0]*maxB, vector[1]*maxR, vector[2], vector[3]*maxV/speed_of_light);
-		fprintf(logFile, "Bfactor = %g n = %g  fraction = %10.7g v/c = %10.7g\n", vector[0]*maxB, vector[1]*maxR, vector[2], vector[3]*maxV/speed_of_light);
+	printf("Bfactor = %g n = %g fraction = %10.7g v/c = %10.7g\n", vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxV/speed_of_light);
+		fprintf(logFile, "Bfactor = %g n = %g  fraction = %10.7g v/c = %10.7g\n", vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxV/speed_of_light);
 	for(int k = 0; k < Niterations; ++k) {
 		///randomization;
-		/*for(int j = 0; j < 5; ++j){
+		for(int j = 0; j < 5; ++j){
 			for(int i = 0; i < Ngrad; ++i) {
-				//tempVector[i] = minVector[i] + (1.0 - minVector[i])*uniformDistribution();
-				tempVector[i] = tempVector[i] + 0.2*minVector[i]*(0,5 - uniformDistribution());
-				if(tempVector[i] > 1.0) {
-					tempVector[i] = 1.0;
-				}
-				if(tempVector[i] < minVector[i]) {
-					tempVector[i] = minVector[i];
+				tempVector[i] = vector[i];
+				if(optPar[i]){
+					//tempVector[i] = minVector[i] + (1.0 - minVector[i])*uniformDistribution();
+					tempVector[i] = tempVector[i] + 0.2*minVector[i]*(0.5 - uniformDistribution());
+					if(tempVector[i] > 1.0) {
+						tempVector[i] = 1.0;
+					}
+					if(tempVector[i] < minVector[i]) {
+						tempVector[i] = minVector[i];
+					}
 				}
 			}
 			
-			double tempF = evaluateOptimizationFunction5(tempVector, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, fraction, epsilonB);
+			double tempF = evaluateOptimizationFunction5(tempVector, time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 			if(tempF < currentF){
 				currentF = tempF;
 				for(int i = 0; i < Ngrad; ++i) {
@@ -2256,7 +2259,7 @@ void optimizeParametersGeneral(double* vector, bool* optPar, double* time,  doub
 				printf("random search\n");
 				fprintf(logFile, "random search\n");
 			}
-		}*/
+		}
 		double prevF = currentF;
 		//
 		//valley first step
