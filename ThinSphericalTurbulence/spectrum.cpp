@@ -334,7 +334,9 @@ void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** A
 		for(int j = 0; j < Nphi; ++j){
 			for(int k = 0; k < Nz; ++k){
 				for(int l = 0; l < Nnu; ++l){
-					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/rfactor, concentration*concentrations[i][j][k]/(rfactor*rfactor));
+					//evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/rfactor, concentration*concentrations[i][j][k]/(rfactor*rfactor));
+					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/(rfactor), concentration*concentrations[i][j][k]/pow(rfactor,3.6666));
+					//evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k], concentration*concentrations[i][j][k]/(rfactor*rfactor));
 				}
 			}
 		}
@@ -481,13 +483,13 @@ void evaluateSpectrum(double* nu, double* I, double**** Inu, double**** Anu, dou
 }
 
 //spherical
-void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength){
+void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double fractionLength){
 	int tempNr = 100;
-	double tempRmax = rmax*rfactor;
+	double tempRmax = rmax;
 	double tempRmin = (1.0 - fractionLength)*tempRmax;
 	double tempdr = tempRmax/tempNr;
 	double dphi = 2*pi/Nphi;
-	double dz = 2*rmax*rfactor/Nz;
+	double dz = 2*rmax/Nz;
 
 	for(int l = 0; l < Nnu; ++l){
 		I[l] = 0;
@@ -664,8 +666,8 @@ void evaluateSpectrumSphericalAtNu(double nu, double& I, double*** Inu, double**
 }
 
 //flat
-void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength){
-	double tempRmax = rmax*rfactor;
+void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double fractionLength){
+	double tempRmax = rmax;
 	double tempRmin = (1.0 - fractionLength)*tempRmax;
 	double tempdr = tempRmax/Nrho;
 	double dphi = 2*pi/Nphi;

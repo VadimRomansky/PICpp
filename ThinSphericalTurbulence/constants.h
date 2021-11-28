@@ -178,7 +178,7 @@ const double minEta = 0;
 const double maxEta = 0.8*pi/2;
 const double maxV = 0.9*speed_of_light;
 const double minV = 0.1*speed_of_light;
-const double maxR = 160*24*3600*3E10;
-const double minR = 1E15;
+const double maxR0 = 18*24*3600*0.5*3.0E10;
+const double minR0 = 0;
 
 #endif

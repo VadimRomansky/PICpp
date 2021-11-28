@@ -162,8 +162,8 @@ loglog(augx(1:5),augy(1:5),'--o','Color','magenta','LineWidth',2);
 
 %legend('theory', 'shevalier', 'observation');
 
-xlim([0.2 50]);
-ylim([0.5 40]);
+%xlim([0.2 50]);
+%ylim([0.5 40]);
 
 legend('april','may','june','august');
 

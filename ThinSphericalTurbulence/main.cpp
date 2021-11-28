@@ -1100,6 +1100,7 @@ int main()
 	double fractionSize = 0.5;
 	double V0 = speed_of_light;
 	double v = 0.75*speed_of_light;
+	double r0 = 0.1*maxR0;
 	rmax = 3.4E16;
 	////////////////////
 	printf("initial optimizing parameters\n");
@@ -1115,12 +1116,14 @@ int main()
 	v = 0.67*speed_of_light;
 	sigma = 0.02;
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
-	bool optPar[4] = {true, true, true, true};
-	double vector[4];
+	bool optPar[5] = {true, true, true, true, true};
+	double vector[5];
 	vector[0] = Bfactor/maxB;
 	vector[1] = concentration/maxN;
 	vector[2] = fractionSize/maxFraction;
 	vector[3] = v/maxV;
+	vector[4] = r0/maxR0;
+	
 
 	double timeMoments[Nmonth];
 	for(int i = 0; i < Nmonth; ++i){
@@ -1130,17 +1133,17 @@ int main()
 	double error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 	printf("error = %lf\n", error);
 	fprintf(logFile, "error = %lf\n", error);
-	const int Nbp = 7;
-	const int Nnp = 10;
-	const int Nfp = 1;
-	const int Nvp = 5;
-	//const int Nrp = 5;
-	double Bpoints[Nbp] = {0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
-	double npoints[Nnp] = {0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100};
-	double fpoints[Nfp] = {0.5};
-	double vpoints[Nvp] = { 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
-	//double rpoints[Nrp] = {3.0E16, 3.4E16, 3.6E16, 3.8E16, 4.0E16};
-	/*for(int i = 0; i < Nbp; ++i){
+	const int Nbp = 10;
+	const int Nnp = 11;
+	const int Nfp = 6;
+	const int Nvp = 6;
+	const int Nr0 = 6;
+	double Bpoints[Nbp] = {0.00002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
+	double npoints[Nnp] = {0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100};
+	double fpoints[Nfp] = {0.1, 0.2,0.3,0.4,0.5,0.6};
+	double vpoints[Nvp] = {0.5*speed_of_light, 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
+	double rpoints[Nr0] = {0.1*maxR0, 0.2*maxR0, 0.4*maxR0, 0.5*maxR0, 0.6*maxR0, 0.8*maxR0};
+	for(int i = 0; i < Nbp; ++i){
 		double tempBfactor = Bpoints[i];
 		for(int j = 0; j < Nnp; ++j){
 			tempConcentration = npoints[j];
@@ -1148,10 +1151,12 @@ int main()
 				double tempFractionSize = fpoints[k];
 				for(int l = 0; l < Nvp; ++l){
 					double tempV = vpoints[l];
+					double tempR0 = r0;
 						vector[0] = tempBfactor/maxB;
 						vector[1] = tempConcentration/maxN;
 						vector[2] = tempFractionSize/maxFraction;
 						vector[3] = tempV/maxV;
+						vector[4] = tempR0/maxR0;
 						double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 						printf("tempError = %lf\n", tempError);
 						//fprintf(logFile, "tempError = %lf\n", tempError);
@@ -1161,32 +1166,34 @@ int main()
 							concentration = vector[1]*maxN;
 							fractionSize = vector[2]*maxFraction;
 							v = vector[3]*maxV;
-							fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light);
-							printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light);
+							r0 = vector[4]*maxR0;
+							fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf r0 = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0);
+							printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf\n r0 = %lf", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0);
 						}
 				}
 			}
 		}
-	}*/
-	Bfactor = 0.05;
-	concentration = 0.2;
-	fractionSize = 0.5;
-	rmax = 3E16;
-	v = 0.65*speed_of_light;
+	}
+	/*Bfactor = 0.0027664;
+	concentration = 99.9977;
+	fractionSize = 0.600291;
+	r0 = 1.1664E16;
+	v = 0.650913*speed_of_light;*/
 
 	vector[0] = Bfactor/maxB;
 	vector[1] = concentration/maxN;
 	vector[2] = fractionSize/maxFraction;
 	vector[3] = v/maxV;
+	vector[4] = r0/maxR0;
 
 	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
-	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
-	printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v = %lf\n", error, Bfactor, concentration, fractionSize, rmax, v);
+	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf, r0 = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0);
+	printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v/c = %lf, r0 = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0);
 
 
 	
 	if(geometry == FLAT_SIMPLE){
-		optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, weightedEe, weightedFe[0][0][0], Np, Ndist, 1.0, 8, logFile);
+		//optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, weightedEe, weightedFe[0][0][0], Np, Ndist, 1.0, 8, logFile);
 	} else {
 		optimizeParametersGeneral(vector, optPar, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d, logFile);
 		Bfactor = vector[0]*maxB;
@@ -1194,6 +1201,7 @@ int main()
 		fractionSize = vector[2]*maxFraction;
 		//rmax = vector[3]*maxR;
 		v = vector[3]*maxV;
+		r0 = vector[4]*maxR0;
 	}
 	
 	//error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
@@ -1208,9 +1216,9 @@ int main()
 	fflush(logFile);
 	double* totalInu = new double[Nnu];
 	double finalSigma = sqr(Bfactor)/(4*pi*concentration*massProtonReal*speed_of_light2);
-	printf("Bfactor = %g, n = %g\n fraction = %g rmax = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, finalSigma);
+	printf("Bfactor = %g, n = %g\n fraction = %g v/c = %g r0 = %g sigma = %g\n", Bfactor, concentration, fractionSize, v/speed_of_light, r0, finalSigma);
 	printf("error = %g\n", error);
-	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g rmax = %g v/c = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, v/speed_of_light, finalSigma);
+	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g v/c = %g r0 = %g sigma = %g\n", Bfactor, concentration, fractionSize, v/speed_of_light, r0, finalSigma);
 	fprintf(logFile, "error = %g\n", error);
 	fflush(logFile);
 
@@ -1244,12 +1252,15 @@ int main()
 		}
 	}
 
-	rmax = v*timeMoments[3];
+	rmax = r0 + v*timeMoments[3];
+	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
+	printf("Bfactor = %g, n = %g\n fraction = %g v/c = %g r0 = %g sigma = %g\n", Bfactor, concentration, fractionSize, v/speed_of_light, r0, finalSigma);
+	printf("error = %g\n", error);
 	for(int l = 0; l < Nmonth; ++l){
-		double r = v*timeMoments[l];
+		double r = r0 + v*timeMoments[l];
 		double rfactor = r/rmax;
-		double locB = Bfactor*rmax/r;
-		double locN = concentration*sqr(rmax/r);
+		//double locB = Bfactor/(rfactor*rfactor);
+		//double locN = concentration/pow(rfactor, 3.6666);
 
 		tempTotalInu[l] = new double[Nnu];
 
@@ -1261,16 +1272,16 @@ int main()
 
 		if(l == 0) {
 			if(geometry == SPHERICAL){
-				evaluateImageSpherical(image, Numonth[l], tempInu, tempAnu, rmax, Nnum, rfactor, fractionSize);
+				evaluateImageSpherical(image, Numonth[l], tempInu, tempAnu, r, Nnum, rfactor, fractionSize);
 			} else {
-				evaluateImageFlat(image, Numonth[l], tempInu, tempAnu, rmax, Nnum, rfactor, fractionSize);
+				evaluateImageFlat(image, Numonth[l], tempInu, tempAnu, r, Nnum, rfactor, fractionSize);
 			}
 		}
 		//evaluateSpectrum(nu, tempTotalInu[l], tempInu, tempAnu, area3d, length3d, Nnu, rfactor);
 		if(geometry == SPHERICAL){
-			evaluateSpectrumSpherical(nu, tempTotalInu[l], tempInu, tempAnu, rmax, Nnu, rfactor, fractionSize);
+			evaluateSpectrumSpherical(nu, tempTotalInu[l], tempInu, tempAnu, r, Nnu, fractionSize);
 		} else {
-			evaluateSpectrumFlat(nu, tempTotalInu[l], tempInu, tempAnu, rmax, Nnu, rfactor, fractionSize);
+			evaluateSpectrumFlat(nu, tempTotalInu[l], tempInu, tempAnu, r, Nnu, fractionSize);
 		}
 
 		//evaluateSpectrumFlatSimple(nu, tempTotalInu[l], Inuflat, Anuflat, Nnu, r, fractionSize);
@@ -1316,6 +1327,7 @@ int main()
 			vector[1] = concentration/maxN;
 			vector[2] = fractionSize/maxFraction;
 			vector[3] = v/maxV;
+			vector[4] = r0/maxR0;
 
 			double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
 			fprintf(errorFile, "%g ", tempError);
@@ -1425,6 +1437,7 @@ int main()
 	fprintf(outputParam, "n = %g\n", concentration);
 	fprintf(outputParam, "f = %g\n", fractionSize);
 	fprintf(outputParam, "v/c = %g\n", v/speed_of_light);
+	fprintf(outputParam, "r0 = %g\n", r0);
 	fclose(outputParam);
 
 	for(int l = 0; l < Nnu; ++l){
