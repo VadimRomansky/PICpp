@@ -180,5 +180,9 @@ const double maxV = 0.9*speed_of_light;
 const double minV = 0.1*speed_of_light;
 const double maxR0 = 18*24*3600*0.5*3.0E10;
 const double minR0 = 0;
+const double minBpower = 0;
+const double maxBpower = 4;
+const double minNpower = 0;
+const double maxNpower = 4;
 
 #endif

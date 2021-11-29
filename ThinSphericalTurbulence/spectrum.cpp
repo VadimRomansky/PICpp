@@ -11,6 +11,14 @@
 #include "util.h"
 #include "spectrum.h"
 
+double getCurrentB(const double& Blast, const double& rfactor){
+	return Blast;
+}
+
+double getCurrentN(const double& nlast, const double& rfactor){
+	return nlast/(rfactor*rfactor);
+}
+
 double evaluateMcDonaldIntegral(const double& nu) {
 	int curIndex = 0;
 	if (nu < UvarovX[0]) {
@@ -328,14 +336,15 @@ void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu,
 	//}
 }
 
-void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor){
+void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor, double a, double b){
 #pragma omp parallel for shared(nu, Inu, Anu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, concentration, Bfactor, rfactor)	
 	for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
 			for(int k = 0; k < Nz; ++k){
 				for(int l = 0; l < Nnu; ++l){
+					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/pow(rfactor, a), concentration*concentrations[i][j][k]/pow(rfactor,b));
 					//evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/rfactor, concentration*concentrations[i][j][k]/(rfactor*rfactor));
-					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/(rfactor), concentration*concentrations[i][j][k]/pow(rfactor,3.6666));
+					//evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/(rfactor), concentration*concentrations[i][j][k]/pow(rfactor,3.6666));
 					//evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k], concentration*concentrations[i][j][k]/(rfactor*rfactor));
 				}
 			}
@@ -364,123 +373,6 @@ double findEmissivityAt(double* nu, double* Inu, double currentNu, int Nnu) {
 	return (Inu[leftIndex] *(nu[rightIndex] - currentNu) + Inu[rightIndex]*(currentNu - nu[leftIndex]))/ (nu[rightIndex] - nu[leftIndex]);
 }
 
-
-
-void evaluateVolumeAndLength(double** area, double** length, double rmax, double* Rho, double* Phi, const double& fractionSize){
-	double rmin = rmax*(1.0 - fractionSize);
-	double dr = rmax/Nrho;
-	for(int i = 0; i < Nrho; ++i){
-		double minRho = dr*i;
-		double maxRho = dr*(i + 1);
-		
-		double s = 0;
-		double l = 0;
-
-		s = 0.5*dphi*(maxRho*maxRho - minRho*minRho);
-		//todo rho or minrho
-		if(minRho < rmin){
-			l = sqrt(rmax*rmax - minRho*minRho) - sqrt(rmin*rmin - minRho*minRho);
-		} else {
-			l = sqrt(rmax*rmax - minRho*minRho);
-		}
-
-		for(int j = 0; j < Nphi; ++j){
-			/*length[i][j] = l;
-			double phi = Phi[j];
-			if(phi > pi/2){
-				phi = pi - phi;
-			}
-			double phi1 = phi - dphi/2;
-			double phi2 = phi + dphi/2;
-
-			double l1 = maxRho*cos(phi1);
-			double l2 = minRho*cos(phi1);
-			double l3 = maxRho*cos(phi2);
-			double l4 = minRho*cos(phi2);
-
-			if(l1 <= l0){
-				area[i][j] = s;
-			} else if(l4 >= l0){
-				area[i][j] = 0;
-			} else if((l2 < l0) && (l3 < l0)){
-				double h = sqrt(maxRho*maxRho - l0*l0);
-				double phi3 = atan2(h, l0);
-				//todo what if infinity?
-				area[i][j] = 0.5*l0*h - 0.5*l0*l0*tan(phi1) - 0.5*minRho*minRho*(phi3 - phi1);
-			} else if(l2 < l0){
-				area[i][j] = 0.5*l0*l0*tan(phi2) - 0.5*l0*l0*tan(phi1) - 0.5*minRho*minRho*dphi;
-			} else if(l3 < l0){
-				double h3 = sqrt(maxRho*maxRho - l0*l0);
-				double h4 = sqrt(minRho*minRho - l0*l0);
-				double phi3 = atan2(h3, l0);
-				double phi4 = atan2(h4, l0);
-				area[i][j] = 0.5*maxRho*maxRho*(phi2 - phi3) + 0.5*rmin*rmax*sin(phi3 - phi4) - 0.5*minRho*minRho*(phi2 - phi4);
-			} else {
-				double l2 = l0/cos(phi2);
-				double h = sqrt(minRho*minRho - l0*l0);
-				double phi3 = atan2(h, l0);
-				area[i][j] = 0.5*l2*rmin*sin(phi2 - phi3) - 0.5*minRho*minRho*(phi2 - phi3);
-			}
-			if(area[i][j] < 0){
-				printf("area < 0\n");
-			}*/
-			length[i][j] = (4.0/3.0)*rmax*fractionSize;
-			area[i][j] = s;
-		}
-	}
-}
-
-void evaluateVolumeAndLength(double*** area, double*** length, double rmax, double fractionSize){
-	double rmin = rmax*(1.0 - fractionSize);
-	double dr = rmax/Nrho;
-	double dz = 4.0*rmax/(3.0*Nz);
-	for(int i = 0; i < Nrho; ++i){
-		double minRho = dr*i;
-		double maxRho = dr*(i + 1);
-		double s = 0.5*dphi*(maxRho*maxRho - minRho*minRho);
-		for(int j = 0; j < Nphi; ++j){
-			for(int k = 0; k < Nz; ++k){
-				double z = dz*(k+1);
-
-				double l = 0;
-
-
-				//todo rho or minrho
-				if(z < 4.0*rmin/3.0){
-					l = 0;
-				} else if (z - dz < 4.0*rmin/3.0) {
-					l = z - 4.0*rmin/3.0;
-				} else {
-					l = dz;
-				}
-
-				length[i][j][k] = l;
-				area[i][j][k] = s;
-			}
-		}
-	}
-}
-
-void evaluateSpectrum(double* nu, double* I, double**** Inu, double**** Anu, double*** area, double*** length, int Nnu, double rfactor){
-	for(int l = 0; l < Nnu; ++l){
-		I[l] = 0;
-		for(int i = 0; i < Nrho; ++i){
-			for(int j = 0; j < Nphi; ++j){
-				double localInu = 0;
-				for(int k = 0; k < Nz; ++k){
-					double I0 = localInu;
-					double Q = Inu[l][i][j][k]*area[i][j][k]*rfactor*rfactor;
-					double tau = Anu[l][i][j][k]*length[i][j][k]*rfactor;
-					double S = Q/Anu[l][i][j][k];
-
-					localInu = S + (I0 - S)*exp(-tau);
-				}
-				I[l] = I[l] + localInu;
-			}
-		}
-		I[l] = I[l]*1E26/(distance*distance);
-	}
-}
 
 //spherical
 void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double fractionLength){
@@ -814,52 +706,6 @@ void evaluateSpectrumFlatAtNu(double nu, double& I, double*** Inu, double*** Anu
 	//delete[] length;
 
 	I = I*1E26/(d*d);
-}
-
-void evaluateSpectrum(double* nu, double* totalInu, double*** Inu, double*** Anu, double** area, double** length, int Nnu, double rmax, double* Rho, double* Phi){
-	for(int l = 0; l < Nnu; ++l){
-		totalInu[l] = 0;
-		int currentThetaIndex = 0;
-		double dr = rmax/Nrho;
-		for(int i = 0; i < Nrho; ++i){
-			double minRho = dr*i;
-			double maxRho = dr*(i+1);
-			//todo while, -1 or not?
-			while((minRho > rmax*sinThetaValue[currentThetaIndex]) && (currentThetaIndex < Ntheta/2 - 1)){
-				currentThetaIndex++;
-			}
-			for(int j = 0; j < Nphi; ++j){
-				double localInu = 0;
-
-					//todo find what Inu
-					double Q = Inu[Ntheta - 1 - currentThetaIndex][j][l]*area[i][j];
-					double A = Anu[Ntheta - 1 - currentThetaIndex][j][l];
-
-					double tau = A*length[i][j];
-
-					if(tau > 0.01){
-						localInu = (Q/A)*(1.0 - exp(-tau));
-					} else {
-						localInu = Q*length[i][j] - A*Q*length[i][j]*length[i][j]/2.0;
-					}
-
-					//Q = Inu[currentThetaIndex][j][l]*area[i][j];
-					//A = Anu[currentThetaIndex][j][l];
-					//double B = localInu*A/Q - 1.0;
-
-					//tau = A*length[i][j];
-
-					//if(tau > 0.01){
-					//	localInu = (Q/A)*(1 + B*exp(-tau));
-					//} else {
-					//	localInu = localInu - (localInu - Q/A)*tau + (localInu - Q/A)*tau*tau/2.0;
-					//}
-
-				totalInu[l] = totalInu[l] + localInu;
-			}
-		}
-		totalInu[l] = totalInu[l]*1E26/(distance*distance);
-	}
 }
 
 void evaluateSpectrumFlatSimple(double* nu, double* totalInu, double* Inu, double* Anu, int Nnu, double rmax, double fraction){
