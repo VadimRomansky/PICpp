@@ -1125,20 +1125,20 @@ int main()
 	double error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth);
 	printf("error = %lf\n", error);
 	fprintf(logFile, "error = %lf\n", error);
-	const int Nbp = 8;
-	const int Nnp = 8;
+	const int Nbp = 5;
+	const int Nnp = 7;
 	const int Nfp = 4;
 	const int Nvp = 6;
 	const int Nr0 = 4;
-	const int Na = 5;
-	const int Nb1 = 5;
-	double Bpoints[Nbp] = {0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2};
-	double npoints[Nnp] = {0.2, 0.5, 1, 2, 5, 10, 20, 50};
+	const int Na = 3;
+	const int Nb1 = 3;
+	double Bpoints[Nbp] = {0.01, 0.02, 0.05, 0.1, 0.2};
+	double npoints[Nnp] = {0.5, 1, 2, 5, 10, 20, 50};
 	double fpoints[Nfp] = {0.1,0.3,0.4,0.5};
 	double vpoints[Nvp] = {0.5*speed_of_light, 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nr0] = {0.1*maxR0, 0.2*maxR0, 0.4*maxR0, 0.5*maxR0};
-	double apoints[Na] = {0,1,2,3,4};
-	double bpoints[Nb1] = {0,1,2,3,4};
+	double apoints[Na] = {0,1,2};
+	double bpoints[Nb1] = {0,1,2};
 	for(int i = 0; i < Nbp; ++i){
 		double tempBfactor = Bpoints[i];
 		for(int j = 0; j < Nnp; ++j){
@@ -1151,7 +1151,7 @@ int main()
 						double tempR0 = rpoints[m];
 						for(int ii = 0; ii < Na; ++ii){
 							double tempA = apoints[ii]/maxBpower;
-							for(int jj = 0; jj < Nb1; ++j){
+							for(int jj = 0; jj < Nb1; ++jj){
 								double tempB = bpoints[jj]/maxNpower;
 								vector[0] = tempBfactor/maxB;
 								vector[1] = tempConcentration/maxN;
@@ -1174,6 +1174,7 @@ int main()
 									b = vector[6]*maxNpower;
 									fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf r0 = %lf a = %lf b = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b);
 									printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf\n r0 = %lf a = %lf b = %lf", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b);
+									fflush(logFile);
 								}
 							}
 						}
@@ -1199,8 +1200,8 @@ int main()
 	vector[6] = b/maxNpower;
 
 	//error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth);
-	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf, r0 = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0);
-	printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v/c = %lf, r0 = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0);
+	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf, r0 = %lf a = %lf b = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b);
+	printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v/c = %lf, r0 = %lf a = %lf b = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b);
 
 
 	
@@ -1451,6 +1452,8 @@ int main()
 	fprintf(outputParam, "f = %g\n", fractionSize);
 	fprintf(outputParam, "v/c = %g\n", v/speed_of_light);
 	fprintf(outputParam, "r0 = %g\n", r0);
+	fprintf(outputParam, "a = %g\n", a);
+	fprintf(outputParam, "b = %g\n", b);
 	fclose(outputParam);
 
 	for(int l = 0; l < Nnu; ++l){
