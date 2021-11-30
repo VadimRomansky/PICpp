@@ -1150,9 +1150,9 @@ int main()
 					for(int m = 0; m < Nr0; ++m){
 						double tempR0 = rpoints[m];
 						for(int ii = 0; ii < Na; ++ii){
-							double tempA = apoints[ii]/maxBpower;
+							double tempA = apoints[ii];
 							for(int jj = 0; jj < Nb1; ++jj){
-								double tempB = bpoints[jj]/maxNpower;
+								double tempB = bpoints[jj];
 								vector[0] = tempBfactor/maxB;
 								vector[1] = tempConcentration/maxN;
 								vector[2] = tempFractionSize/maxFraction;
