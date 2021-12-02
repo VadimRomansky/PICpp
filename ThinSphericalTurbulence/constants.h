@@ -168,21 +168,28 @@ const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
 
 const double minB = 0.0001;
+const double minBbound = 0;
 const double maxB = 10;
 const double minN = 0.01;
+const double minNbound = 0;
 const double maxN = 400;
 const double minFraction = 0.001;
 const double maxFraction = 1.0;
+const double minFbound = 0;
 const double maxSigma = 10.0;
 const double minEta = 0;
 const double maxEta = 0.8*pi/2;
 const double maxV = 0.9*speed_of_light;
 const double minV = 0.1*speed_of_light;
+const double minVbound = 0;
 const double maxR0 = 18*24*3600*0.5*3.0E10;
-const double minR0 = 0;
+const double minR0 = 0.1;
+const double minRbound = 0;
 const double minBpower = 0;
 const double maxBpower = 4;
+const double minBpbound = -1;
 const double minNpower = 0;
 const double maxNpower = 4;
+const double minNpbound = -1;
 
 #endif

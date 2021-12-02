@@ -1139,7 +1139,7 @@ int main()
 	double rpoints[Nr0] = {0.1*maxR0, 0.2*maxR0, 0.4*maxR0, 0.5*maxR0};
 	double apoints[Na] = {0,1,2};
 	double bpoints[Nb1] = {0,1,2};
-	for(int i = 0; i < Nbp; ++i){
+	/*for(int i = 0; i < Nbp; ++i){
 		double tempBfactor = Bpoints[i];
 		for(int j = 0; j < Nnp; ++j){
 			tempConcentration = npoints[j];
@@ -1182,14 +1182,14 @@ int main()
 				}
 			}
 		}
-	}
-	/*Bfactor = 0.0027664;
-	concentration = 99.9977;
-	fractionSize = 0.600291;
-	r0 = 1.1664E16;
-	v = 0.650913*speed_of_light;
-	a = 1.0;
-	b = 2.0;*/
+	}*/
+	Bfactor = 0.05;
+	concentration = 0.5;
+	fractionSize = 0.1;
+	r0 = 9331200000000000;
+	v = 0.5*speed_of_light;
+	a = 4.0;
+	b = 4.0;
 
 	vector[0] = Bfactor/maxB;
 	vector[1] = concentration/maxN;
