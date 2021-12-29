@@ -959,7 +959,8 @@ int main()
 				Ee[j][i] = gamma*massElectron*speed_of_light2;
 				//maxEnergy = Ee[i];
 				Fe[j][i] = Fe[j][i] / (massElectron*speed_of_light2);
-				if(i > 137){
+				if((i > 137) && (u < 500)){
+				//if((i > 137)){
 					Fe[j][i] = Fe[j][137]*pow(Ee[j][i]/Ee[j][137], -3.5);
 				}
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
@@ -1280,6 +1281,12 @@ int main()
 	}
 	delete[] Inu1;
 	delete[] Anu1;
+
+	//from coppejans day 357
+	//Bfactor = 0.052;
+	//concentration = 1.9;
+	//rmax = 3.3E17;
+	//fractionSize = 0.5;
 
 	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, 1.0);
 
