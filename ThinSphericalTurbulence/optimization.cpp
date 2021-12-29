@@ -271,6 +271,7 @@ void optimizeParametersGeneral(double* vector, bool* optPar, double* time,  doub
 		exit(0);
 	}
 	double minVector[Ngrad];
+	double minBoundVector[Ngrad];
 	double tempVector[Ngrad];
 	double prevVector[Ngrad];
 	double currentVector[Ngrad];
@@ -281,6 +282,13 @@ void optimizeParametersGeneral(double* vector, bool* optPar, double* time,  doub
 	minVector[4] = minR0/maxR0;
 	minVector[5] = minBpower*1.0/maxBpower;
 	minVector[6] = minNpower*1.0/maxNpower;
+	minBoundVector[0] = minBbound/maxB;
+	minBoundVector[1] = minNbound/maxN;
+	minBoundVector[2] = minFbound/maxFraction;
+	minBoundVector[3] = minVbound/maxV;
+	minBoundVector[4] = minRbound/maxR0;
+	minBoundVector[5] = minBpbound/maxBpower;
+	minBoundVector[0] = minNpbound/maxNpower;
 	for(int i = 0; i < Ngrad; ++i){
 		prevVector[i] = vector[i];
 		currentVector[i] = vector[i];
@@ -340,6 +348,7 @@ void optimizeParametersGeneral(double* vector, bool* optPar, double* time,  doub
 				if(k > 0){
 					dx = max(0.000001,fabs(currentVector[i] - prevVector[i])/10);
 				}
+				dx = min(0.5*fabs(vector[i] - minBoundVector[i]), dx);
 				tempVector[i] = vector[i] + dx;
 				//currentF = evaluateOptimizationFunction5(vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxR, vector[4]*maxV, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
 				double f = evaluateOptimizationFunction5(tempVector, time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu);
@@ -400,6 +409,7 @@ void optimizeParametersGeneral(double* vector, bool* optPar, double* time,  doub
 				if(k > 0){
 					dx = max(0.000001,fabs(currentVector[i] - prevVector[i])/10);
 				}
+				dx = min(0.5*fabs(vector[i] - minBoundVector[i]), dx);
 				tempVector[i] = vector[i] + dx;
 				double f = evaluateOptimizationFunction5(tempVector, time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu);
 				tempVector[i] = vector[i] - dx;
