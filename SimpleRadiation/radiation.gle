@@ -10,16 +10,18 @@ begin graph
   data   "css16.dat"
   xaxis min -1 max 2
   xaxis ftick 0 dticks 1 
-  yaxis min 1.0E-2 max 1.0 log 
+  yaxis min 1.0E-2 max 2.0 log 
   ylabels log off
   d1 lstyle 1 lwidth 0.12 color blue
   d2 lstyle 1 lwidth 0.12 color red
-  data "css16obs.dat" d3=c1,c2
-  d3 line marker wcircle lstyle 2 lwidth 0.12 color green
+  d3 lstyle 1 lwidth 0.12 color purple
+  data "css16obs.dat" d4=c1,c2
+  d4 line marker wcircle lstyle 2 lwidth 0.12 color green
 end graph
 begin key
    pos tr
    text "f(E)~E^{-3.5}" line lstyle 1 lwidth 0.12 color blue
-   text "f(E) from PIC" line lstyle 1 lwidth 0.12 color red
+   text "f(E) from PIC \\with extrapolation" line lstyle 1 lwidth 0.12 color red
+   text "f(E) from PIC" line lstyle 1 lwidth 0.12 color purple
    text "observation" line lstyle 2 lwidth 0.12 color green
 end key
