@@ -959,7 +959,8 @@ int main()
 				Ee[j][i] = gamma*massElectron*speed_of_light2;
 				//maxEnergy = Ee[i];
 				Fe[j][i] = Fe[j][i] / (massElectron*speed_of_light2);
-				if(i > 137){
+				//if(i > 137){
+				if((i > 137)&&(u < 500)){
 					Fe[j][i] = Fe[j][137]*pow(Ee[j][i]/Ee[j][137], -3.5);
 				}
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
