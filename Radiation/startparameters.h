@@ -4,10 +4,12 @@
 const bool parker = false;
 const bool turbulence = false;
 
+const bool initialGridSearch = false;
+
 enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
 const Geometry geometry = Geometry::SPHERICAL;
 
-enum Input {TRISTAN, SMILEI, MAXWELL, POWERLAW};
+enum Input {TRISTAN, SMILEI, MAXWELL, POWERLAW, COMBINED};
 const Input input = Input::SMILEI;
 
 enum Scale {LINEAR, LOG};
