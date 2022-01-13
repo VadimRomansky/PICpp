@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Compton", "Compton\Compton.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Adiabata", "Adiabata\Adiabata.vcxproj", "{F547D6E5-8355-48B8-989D-DA7169EA0603}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Radiation", "ThinSphericalTurbulence\ThinSphericalTurbulence.vcxproj", "{EE48822B-5F2D-4B59-B8EF-C4309D29828F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Radiation", "Radiation\Radiation.vcxproj", "{EE48822B-5F2D-4B59-B8EF-C4309D29828F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
