@@ -5,6 +5,7 @@ const bool parker = false;
 const bool turbulence = false;
 
 const bool initialGridSearch = false;
+const bool optimization = true; //false for debug only
 
 enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
 const Geometry geometry = Geometry::SPHERICAL;

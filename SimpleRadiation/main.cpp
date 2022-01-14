@@ -634,7 +634,9 @@ int main()
 				By3d[i][j][k] = 0.0;
 				Bz3d[i][j][k] = 0.0;
 				if(geometry == SPHERICAL) {
-					concentrations3d[i][j][k] = 1.0*sqr(rmax/r);
+					//concentrations3d[i][j][k] = 1.0*sqr(rmax/r);
+					//concentrations3d[i][j][k] = 1.0*sqr(r/rmax);
+					concentrations3d[i][j][k] = 1.0;
 				} else {
 					concentrations3d[i][j][k] = 1.0;
 				}
@@ -923,7 +925,7 @@ int main()
 				Fe[j][i] = Fe[j][i] / (massElectron*speed_of_light2);
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 
-				double minGamma = 4.0;
+				double minGamma = 6.0;
 				double power = 3.5;
 
 				if(gamma >= minGamma){

@@ -389,6 +389,50 @@ double findFeAt(double* Ee, double* Fe, double currentE, int Np) {
 	return result;
 }
 
+double evaluateR(double nupeak, double fpeak, double d, double fraction, double epsilone, double epsilonB, double p){
+	double c1 = 6.265E18;
+	//todo - also depends on p
+	double c5 = pacholczykC5[5];
+	double c6 = pacholczykC6[5];
+
+	double a1 = pow(c6, p+5);
+	double a2 = pow(fpeak, p+6);
+	double a3 = pow(d, p + 6);
+
+	double d0 = 3.08E24;
+	double nu0 = 5E9;
+	double f0 = 1E-23;
+
+	double a = 6*(pow(c6, p+5)*pow(d, p + 6))* (pow(fpeak, p+6)*pow(d, p + 6));
+	double b = (epsilone/epsilonB)*fraction*(p-2)*pow(pi, p+5)*pow(c5, p+6)*pow(massElectron*speed_of_light2, p-2);
+
+	double result = pow(a/b, 1.0/(2*p + 13))*2*c1/nupeak;
+
+	//double result = 5.1E15*pow(epsilone/epsilonB, -1.0/(2*p +13))*pow(fpeak/f0, (p+6)/(2*p +13))*pow(d/d0, (2*p+12)/(2*p +13))*(nu0/nupeak);
+
+	return result;
+}
+
+double evaluateB(double nupeak, double fpeak, double d, double fraction, double epsilone, double epsilonB, double p){
+	double c1 = 6.265E18;
+	//todo - also depends on p
+	double c5 = pacholczykC5[5];
+	double c6 = pacholczykC6[5];
+
+	double d0 = 3.08E24;
+	double nu0 = 5E9;
+	double f0 = 1E-23;
+
+	double a = 36*pi*pi*pi*c5;
+	double b = pow(epsilone/epsilonB, 2)*fraction*fraction*(p-2.0)*(p-2.0)*c6*c6*c6*pow(massElectron*speed_of_light2, 2*(p-2.0))*fpeak*d*d;
+
+	double result = pow(a/b, 2.0/(2*p + 13))*nupeak/(2*c1);
+
+
+	//double result = 0.3*pow(epsilone/epsilonB, -4.0/(2*p +13))*pow(fpeak/f0, -2.0/(2*p +13))*pow(d/d0, -4.0/(2*p +13))*(nupeak/nu0);
+
+	return result;
+}
 
 
 int main()
@@ -1234,25 +1278,26 @@ int main()
 	vector[6] = b/maxNpower;
 	vector[7] = fpower/maxFpower;
 
-	//error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth);
+	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth);
 	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf, r0 = %lf a = %lf b = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b);
 	printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v/c = %lf, r0 = %lf a = %lf b = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b);
 
 
-	
-	if(geometry == FLAT_SIMPLE){
-		//optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, weightedEe, weightedFe[0][0][0], Np, Ndist, 1.0, 8, logFile);
-	} else {
-		optimizeParametersGeneral(vector, optPar, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, logFile);
-		Bfactor = vector[0]*maxB;
-		concentration = vector[1]*maxN;
-		fractionSize = vector[2]*maxFraction;
-		//rmax = vector[3]*maxR;
-		v = vector[3]*maxV;
-		r0 = vector[4]*maxR0;
-		a = vector[5]*maxBpower;
-		b = vector[6]*maxNpower;
-		fpower = vector[7]*maxFpower;
+	if(optimization){
+		if(geometry == FLAT_SIMPLE){
+			//optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, weightedEe, weightedFe[0][0][0], Np, Ndist, 1.0, 8, logFile);
+		} else {
+			optimizeParametersGeneral(vector, optPar, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, logFile);
+			Bfactor = vector[0]*maxB;
+			concentration = vector[1]*maxN;
+			fractionSize = vector[2]*maxFraction;
+			//rmax = vector[3]*maxR;
+			v = vector[3]*maxV;
+			r0 = vector[4]*maxR0;
+			a = vector[5]*maxBpower;
+			b = vector[6]*maxNpower;
+			fpower = vector[7]*maxFpower;
+		}
 	}
 	
 	//error = evaluateOptimizationFunction5(Bfactor, concentration, fractionSize, rmax, v, Numonth, Fmonth, weightedEe, weightedFe, Np, Nnum, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, area3d, length3d);
@@ -1303,10 +1348,10 @@ int main()
 		}
 	}
 
-	rmax = r0 + v*timeMoments[3];
+	rmin = r0 + v*timeMoments[0];
 	for(int l = 0; l < Nmonth; ++l){
 		double r = r0 + v*timeMoments[l];
-		double rfactor = r/rmax;
+		double rfactor = r/rmin;
 		//double locB = Bfactor/(rfactor*rfactor);
 		//double locN = concentration/pow(rfactor, 3.6666);
 
@@ -1317,19 +1362,19 @@ int main()
 		//evaluateSpectrum(nu, tempTotalInu[l], Inu, Anu, area, length, Nnu, r, Rho, Phi);
 
 		evaluateAllEmissivityAndAbsorption(nu, tempInu, tempAnu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, rfactor, a, b);
-
+		double tempFraction = fractionSize/pow(rfactor, fpower);
 		if(l == 0) {
 			if(geometry == SPHERICAL){
-				evaluateImageSpherical(image, Numonth[l], tempInu, tempAnu, r, Nnum, rfactor, fractionSize);
+				evaluateImageSpherical(image, Numonth[l], tempInu, tempAnu, r, Nnum, rfactor, tempFraction);
 			} else {
-				evaluateImageFlat(image, Numonth[l], tempInu, tempAnu, r, Nnum, rfactor, fractionSize);
+				evaluateImageFlat(image, Numonth[l], tempInu, tempAnu, r, Nnum, rfactor, tempFraction);
 			}
 		}
 		//evaluateSpectrum(nu, tempTotalInu[l], tempInu, tempAnu, area3d, length3d, Nnu, rfactor);
 		if(geometry == SPHERICAL){
-			evaluateSpectrumSpherical(nu, tempTotalInu[l], tempInu, tempAnu, r, Nnu, fractionSize);
+			evaluateSpectrumSpherical(nu, tempTotalInu[l], tempInu, tempAnu, r, Nnu, tempFraction);
 		} else {
-			evaluateSpectrumFlat(nu, tempTotalInu[l], tempInu, tempAnu, r, Nnu, fractionSize);
+			evaluateSpectrumFlat(nu, tempTotalInu[l], tempInu, tempAnu, r, Nnu, tempFraction);
 		}
 
 		//evaluateSpectrumFlatSimple(nu, tempTotalInu[l], Inuflat, Anuflat, Nnu, r, fractionSize);
