@@ -39,8 +39,10 @@ double evaluateOptimizationFunction5(double* vector, double* time, double** nu, 
 			} else {
 				err1 = sqr(log(totalInu[j]) - log(observedInu[i][j]));
 			}
+			//printf("%lf\n",err1);
 			err = err + err1;
 		}
+		//printf("\n");
 		delete[] totalInu;
 	}
 	

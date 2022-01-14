@@ -126,6 +126,10 @@ const double alphaValue[Nalpha] = {dalpha/2, 3*dalpha/2, 5*dalpha/2, 7*dalpha/2,
 const double sinAlphaValue[Nalpha] = {sin(dalpha/2), sin(3*dalpha/2), sin(5*dalpha/2), sin(7*dalpha/2), sin(9*dalpha/2), sin(11*dalpha/2)};
 const double cosAlphaValue[Nalpha] = {cos(dalpha/2), cos(3*dalpha/2), cos(5*dalpha/2), cos(7*dalpha/2), cos(9*dalpha/2), cos(11*dalpha/2)};
 
+//1.0 1.5 2.0 2.5 3.0 3.5
+const double pacholczykC5[6] = {3.8359E-23, 1.6954E-23, 0.9874E-23, 0.6688E-23, 0.5013E-23, 0.4050E-23};
+const double pacholczykC6[6] = {8.4809E-41, 6.7024E-41, 5.7410E-41, 5.2179E-41, 4.9697E-41, 4.9198E-41};
+
 const double decx[3]= {0.325, 0.61, 1.28};
 const double decy[3] = {6.1, 1.9, 0.9};
 

@@ -60,6 +60,12 @@ augy(2) = 7.9;
 augy(3) = 8.68;
 augy(4) = 2.47;
 augy(5) = 1.084;
+augerr(1:5) = 0;
+augerr(1) = 0.7;
+augerr(2) = 0.3;
+augerr(3) = 0.341;
+augerr(4) = 0.155;
+augerr(5) = 0.091;
 
 augmax = 0.886;
 augmaxy = 11.2;
@@ -74,6 +80,11 @@ juny(1) = 3.0;
 juny(2) = 9.465;
 juny(3) = 5.877;
 juny(4) = 3.203;
+junerr(1:4) = 0;
+junerr(1) = 0.3;
+junerr(2) = 0.186;
+junerr(3) = 0.11;
+junerr(4) = 0.074;
 
 junmaxx = 1.65;
 junmaxy = 13.2;
@@ -86,6 +97,10 @@ mayy(1:3) = 0;
 mayy(1) = 4.93;
 mayy(2) = 12.2;
 mayy(3) = 6.82;
+mayerr(1:3) = 0;
+mayerr(1) = 0.122;
+mayerr(2) = 0.165;
+mayerr(3) = 0.098;
 
 maymaxx = 2.96;
 maymaxy = 15.2;
@@ -100,6 +115,11 @@ apry(1) = 1.3;
 apry(2) = 12.86;
 apry(3) = 17.57;
 apry(4) = 5.2;
+aprerr(1:4) = 0;
+aprerr(1) = 0.1;
+aprerr(2) = 0.161;
+aprerr(3) = 0.088;
+aprerr(4) = 0.19;
 
 aprmaxx = 6.50;
 aprmaxy = 19.3;
@@ -149,23 +169,25 @@ loglog(radiation(1:N,1),radiation(1:N,4),'blue','LineWidth',2);
 loglog(radiation(1:N,1),radiation(1:N,5),'magenta','LineWidth',2);
 %plot(radiation(1:N,1),radiation(1:N,6),'Color',[1.0,0.6,0],'LineWidth',2);
 %plot(radiation(1:N,1),radiation(1:N,7),'black','LineWidth',2);
-%for i = 3:Nr,
- %   plot(radiation(1:N,1),radiation(1:N,i),'red');
-%end;
-%plot(radiation(1:N,1),theorRadiation(1:N),'green');
-loglog(aprx(1:4),apry(1:4),'--o','Color','red','LineWidth',2);
-loglog(mayx(1:3),mayy(1:3),'--o','Color','green','LineWidth',2);
-loglog(junx(1:4),juny(1:4),'--o','Color','blue','LineWidth',2);
-loglog(augx(1:5),augy(1:5),'--o','Color','magenta','LineWidth',2);
+
+%loglog(aprx(1:4),apry(1:4),'--o','Color','red','LineWidth',2);
+%loglog(mayx(1:3),mayy(1:3),'--o','Color','green','LineWidth',2);
+%loglog(junx(1:4),juny(1:4),'--o','Color','blue','LineWidth',2);
+%loglog(augx(1:5),augy(1:5),'--o','Color','magenta','LineWidth',2);
 %plot(octx(1:3),octy(1:3),'--o','Color',[1.0,0.6,0],'LineWidth',2);
 %plot(decx(1:3),decy(1:3),'--o','Color','black','LineWidth',2);
 
+errorbar(aprx,apry,aprerr,'red','LineWidth',2);
+errorbar(mayx,mayy,mayerr,'green','LineWidth',2);
+errorbar(junx,juny,junerr,'blue','LineWidth',2);
+errorbar(augx,augy,augerr,'magenta','LineWidth',2);
+
 %legend('theory', 'shevalier', 'observation');
 
-%xlim([0.2 50]);
-%ylim([0.5 40]);
+xlim([0.1 50]);
+ylim([0.5 50]);
 
-legend('april','may','june','august');
+legend('april','may','june','august','Location','northwest');
 
 grid ;
 
