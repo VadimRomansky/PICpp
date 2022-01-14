@@ -1,5 +1,5 @@
 clear;
-radiation1 = importdata('radiation2.dat');
+radiation1 = importdata('radiation1.dat');
 radiation3 = importdata('radiation3.dat');
 radiation4 = importdata('radiation4.dat');
 %datar = importdata('at2018radio.dat');

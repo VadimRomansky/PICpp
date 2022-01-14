@@ -1,6 +1,6 @@
 clear;
 radiation1 = importdata('radiation1.dat');
-radiation2 = importdata('radiation2.dat');
+%radiation2 = importdata('radiation2.dat');
 radiation3 = importdata('radiation3.dat');
 radiation4 = importdata('radiation4.dat');
 N = size(radiation1,1);
@@ -151,7 +151,7 @@ hold on;
 set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'log');
 plot(radiation1(1:N,1),radiation1(1:N,2),'Color','red','LineWidth',2);
-plot(radiation2(1:N,1),radiation2(1:N,2),'Color','blue','LineWidth',2);
+%plot(radiation2(1:N,1),radiation2(1:N,2),'Color','blue','LineWidth',2);
 plot(radiation4(1:N,1),radiation4(1:N,2),'Color','magenta','LineWidth',2);
 plot(radiation3(1:N,1),radiation3(1:N,2),'Color','green','LineWidth',2);
 plot(x357(1:6),y357(1:6),'--o','Color','black','LineWidth',2);
