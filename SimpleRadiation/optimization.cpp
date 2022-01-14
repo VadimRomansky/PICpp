@@ -32,7 +32,8 @@ double evaluateOptimizationFunction(double* nu, double* observedInu, double* obs
 			if(scale == LINEAR){
 				err1 = sqr(totalInu[j] - observedInu[j])/sqr(observedError[j]);
 			} else {
-				err1 = sqr(log(totalInu[j]) - log(observedInu[j]));
+				//todo
+				err1 = sqr(log(totalInu[j]) - log(observedInu[j]))/sqr(observedError[j]/observedInu[j]);
 			}
 			err = err + err1;
 		}

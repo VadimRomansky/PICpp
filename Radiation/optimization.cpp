@@ -14,21 +14,23 @@
 #include "optimization.h"
 
 double evaluateOptimizationFunction5(double* vector, double* time, double** nu, double** observedInu, double** observedError, double* Ee, double**** dFe, int Np, int* Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu){
-	// v[0] = B, v[1] - N, v[2] - f, v[3] - v v[4] - r0 v[5] B/r^a v[6] N/r^b
+	// v[0] = B, v[1] - N, v[2] - f, v[3] - v v[4] - r0 v[5] B/r^a v[6] N/r^b v[7] f/r^(f-1)
 	//evaluateVolumeAndLength(area, length, rmax, fractionSize);
 	double err = 0;
 	for(int i = 0; i < Nmonth; ++i){
 		double* totalInu = new double[Nnu[i]];
 		double r = vector[4]*maxR0 + vector[3]*maxV*times[i];
-		double rfactor = r/(vector[4]*maxR0 + vector[3]*maxV*times[Nmonth-1]);
+		//important 0 or Nmonth-1!
+		double rfactor = r/(vector[4]*maxR0 + vector[3]*maxV*times[0]);
 		evaluateAllEmissivityAndAbsorption(nu[i], Inu[i], Anu[i], Nnu[i], Ee, dFe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, vector[1]*maxN, vector[0]*maxB, rfactor, vector[5]*maxBpower, vector[6]*maxNpower);
 		//
 		//evaluateSpectrum(nu[i], totalInu, Inu[i], Anu[i], area, length, Nnu, rfactor);
 		//
+		double tempFraction = vector[2]*maxFraction/pow(rfactor, vector[7]*maxFpower - 1.0);
 		if(geometry == SPHERICAL){
-			evaluateSpectrumSpherical(nu[i], totalInu, Inu[i], Anu[i], r, Nnu[i], vector[2]*maxFraction);
+			evaluateSpectrumSpherical(nu[i], totalInu, Inu[i], Anu[i], r, Nnu[i], tempFraction);
 		} else {
-			evaluateSpectrumFlat(nu[i], totalInu, Inu[i], Anu[i], r, Nnu[i], vector[2]*maxFraction);
+			evaluateSpectrumFlat(nu[i], totalInu, Inu[i], Anu[i], r, Nnu[i], tempFraction);
 		}
 		for(int j = 0; j < Nnu[i]; ++j){
 			double err1 = 0;
@@ -50,7 +52,7 @@ void findMinParametersGeneral(double* vector, bool* optPar, const double* grad, 
 	//v[0] = B, v[1] - N, v[2] - f, v[3] - v, v[4] - r0
 
 
-	const int Ngrad = 7;
+	const int Ngrad = 8;
 	int Npar = 0;
 	for(int i = 0; i < Ngrad; ++i){
 		if(optPar[i]){
@@ -74,6 +76,7 @@ void findMinParametersGeneral(double* vector, bool* optPar, const double* grad, 
 	minVector[4] = minR0/maxR0;
 	minVector[5] = minBpower*1.0/maxBpower;
 	minVector[6] = minNpower*1.0/maxNpower;
+	minVector[7] = minFpower*1.0/maxFpower;
 
 	double maxLambda = sqrt(1.0*Npar);
 	for(int i = 0; i < Ngrad; ++i) {
@@ -251,7 +254,7 @@ void findMinParametersGeneral(double* vector, bool* optPar, const double* grad, 
 }
 
 void optimizeParametersGeneral(double* vector, bool* optPar, double* time,  double** nu, double** observedInu, double** observedError, double* Ee, double**** dFe, int Np, int* Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** Inu, double***** Anu, FILE* logFile){
-	const int Ngrad = 7;
+	const int Ngrad = 8;
 	int Npar = 0;
 	for(int i = 0; i < Ngrad; ++i){
 		if(optPar[i]){
@@ -264,9 +267,9 @@ void optimizeParametersGeneral(double* vector, bool* optPar, double* time,  doub
 		fclose(logFile);
 		exit(0);
 	}
-	if(Npar > 7){
-		printf("Npar must be <= 7\n");
-		fprintf(logFile,"Npar must be <= 7\n");
+	if(Npar > 8){
+		printf("Npar must be <= 8\n");
+		fprintf(logFile,"Npar must be <= 8\n");
 		fclose(logFile);
 		exit(0);
 	}
@@ -282,13 +285,15 @@ void optimizeParametersGeneral(double* vector, bool* optPar, double* time,  doub
 	minVector[4] = minR0/maxR0;
 	minVector[5] = minBpower*1.0/maxBpower;
 	minVector[6] = minNpower*1.0/maxNpower;
+	minVector[7] = minFpower*1.0/maxFpower;
 	minBoundVector[0] = minBbound/maxB;
 	minBoundVector[1] = minNbound/maxN;
 	minBoundVector[2] = minFbound/maxFraction;
 	minBoundVector[3] = minVbound/maxV;
 	minBoundVector[4] = minRbound/maxR0;
 	minBoundVector[5] = minBpbound/maxBpower;
-	minBoundVector[0] = minNpbound/maxNpower;
+	minBoundVector[6] = minNpbound/maxNpower;
+	minBoundVector[7] = minFpbound/maxFpower;
 	for(int i = 0; i < Ngrad; ++i){
 		prevVector[i] = vector[i];
 		currentVector[i] = vector[i];
@@ -296,8 +301,8 @@ void optimizeParametersGeneral(double* vector, bool* optPar, double* time,  doub
 	double currentF = evaluateOptimizationFunction5(vector, time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu);
 	printf("optimization function = %g\n", currentF);
 	fprintf(logFile, "optimization function = %g\n", currentF);
-	printf("Bfactor = %g n = %g fraction = %10.7g v/c = %10.7g r0 = %10.7g a = %10.7g b = %10.7g\n", vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxV/speed_of_light, vector[4]*maxR0, vector[5]*maxBpower, vector[6]*maxNpower);
-	fprintf(logFile, "Bfactor = %g n = %g  fraction = %10.7g v/c = %10.7g r0 = %10.7g a = %10.7g b = %10.7g\n", vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxV/speed_of_light, vector[4]*maxR0, vector[5]*maxBpower, vector[6]*maxNpower);
+	printf("Bfactor = %g n = %g fraction = %10.7g v/c = %10.7g r0 = %10.7g a = %10.7g b = %10.7g fpower = %10.7g\n", vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxV/speed_of_light, vector[4]*maxR0, vector[5]*maxBpower, vector[6]*maxNpower, vector[7]*maxFpower);
+	fprintf(logFile, "Bfactor = %g n = %g  fraction = %10.7g v/c = %10.7g r0 = %10.7g a = %10.7g b = %10.7g fpower = %10.7g\n", vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxV/speed_of_light, vector[4]*maxR0, vector[5]*maxBpower, vector[6]*maxNpower, vector[7]*maxFpower);
 	for(int k = 0; k < Niterations; ++k) {
 		///randomization;
 		for(int j = 0; j < 5; ++j){
@@ -508,8 +513,8 @@ void optimizeParametersGeneral(double* vector, bool* optPar, double* time,  doub
 		}
 		printf("optimization function = %g\n", currentF);
 		fprintf(logFile, "optimization function = %g\n", currentF);
-		printf("Bfactor = %g n = %g fraction = %10.7g v/c = %10.7g r0 = %10.7g a = %10.7g b = %10.7g\n", vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxV/speed_of_light, vector[4]*maxR0, vector[5]*maxBpower, vector[6]*maxNpower);
-		fprintf(logFile, "Bfactor = %g n = %g  fraction = %10.7g v/c = %10.7g r0 = %10.7g a = %10.7g b = %10.7g\n", vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxV/speed_of_light, vector[4]*maxR0, vector[5]*maxBpower, vector[6]*maxNpower);
+		printf("Bfactor = %g n = %g fraction = %10.7g v/c = %10.7g r0 = %10.7g a = %10.7g b = %10.7g fpower = %10.7g\n", vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxV/speed_of_light, vector[4]*maxR0, vector[5]*maxBpower, vector[6]*maxNpower, vector[7]*maxFpower);
+		fprintf(logFile, "Bfactor = %g n = %g  fraction = %10.7g v/c = %10.7g r0 = %10.7g a = %10.7g b = %10.7g fpower = %10.7g\n", vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxV/speed_of_light, vector[4]*maxR0, vector[5]*maxBpower, vector[6]*maxNpower, vector[7]*maxFpower);
 	}
 	printf("finish optimization\n");
 	fprintf(logFile, "finish optimization\n");
