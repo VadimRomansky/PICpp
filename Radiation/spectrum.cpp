@@ -11,14 +11,6 @@
 #include "util.h"
 #include "spectrum.h"
 
-double getCurrentB(const double& Blast, const double& rfactor){
-	return Blast;
-}
-
-double getCurrentN(const double& nlast, const double& rfactor){
-	return nlast/(rfactor*rfactor);
-}
-
 double evaluateMcDonaldIntegral(const double& nu) {
 	int curIndex = 0;
 	if (nu < UvarovX[0]) {
@@ -113,7 +105,7 @@ double criticalNu(const double& E, const double& sinhi, const double& H) {
 	return criticalNuCoef * H * sinhi * E * E;
 }
 
-void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, int Nnu, double* Ee, double* Fe, int Np, double sinhi, double B, double concentration, double fractionSize) {
+/*void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, int Nnu, double* Ee, double* Fe, int Np, double sinhi, double B, double concentration, double fractionSize) {
 	//Anu from quantum cross-section from??
 	Inu[0] = 0;
 	Anu[0] = 0;
@@ -264,9 +256,9 @@ void evaluateLocalEmissivityAndAbsorption(double* nu, double* Inu, double* Anu, 
 	//for (int i = 0; i < Nnu; ++i) {
 	//	Inu[i] = Inu[i] * (1 - exp(-Anu[i] * fractionSize * localSize)) / (Anu[i] * fractionSize * localSize);
 	//}
-}
+}*/
 
-void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu, int Nnu, double* Ee, double* Fe, int Np, double sinhi, double B, double concentration, double fractionSize) {
+/*void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu, int Nnu, double* Ee, double* Fe, int Np, double sinhi, double B, double concentration, double fractionSize) {
 	//Anu from ghiselini simple
 	Inu[0] = 0;
 	Anu[0] = 0;
@@ -334,9 +326,9 @@ void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu,
 	//for (int i = 0; i < Nnu; ++i) {
 	//	Inu[i] = Inu[i] * (1 - exp(-Anu[i] * fractionSize * localSize)) / (Anu[i] * fractionSize * localSize);
 	//}
-}
+}*/
 
-void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor, double a, double b){
+void evaluateAllEmissivityAndAbsorption(double**** nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor, double a, double b){
 	double tempRB = pow(rfactor, a);
 	double tempRN = pow(rfactor,b);
 #pragma omp parallel for shared(nu, Inu, Anu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, concentration, Bfactor, rfactor, tempRB, tempRN)	
@@ -344,10 +336,7 @@ void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** A
 		for(int j = 0; j < Nphi; ++j){
 			for(int k = 0; k < Nz; ++k){
 				for(int l = 0; l < Nnu; ++l){
-					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/tempRB, concentration*concentrations[i][j][k]/tempRN);
-					//evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/rfactor, concentration*concentrations[i][j][k]/(rfactor*rfactor));
-					//evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/(rfactor), concentration*concentrations[i][j][k]/pow(rfactor,3.6666));
-					//evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k], concentration*concentrations[i][j][k]/(rfactor*rfactor));
+					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l][i][j][k], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/tempRB, concentration*concentrations[i][j][k]/tempRN);
 				}
 			}
 		}
@@ -377,13 +366,14 @@ double findEmissivityAt(double* nu, double* Inu, double currentNu, int Nnu) {
 
 
 //spherical
-void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double fractionLength){
+void evaluateSpectrumSpherical(double* nu, double**** nuDoppler, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double fractionLength, const double& beta){
 	int tempNr = 100;
 	double tempRmax = rmax;
 	double tempRmin = (1.0 - fractionLength)*tempRmax;
 	double tempdr = tempRmax/tempNr;
 	double dphi = 2*pi/Nphi;
 	double dz = 2*rmax/Nz;
+	double gamma = 1.0/sqrt(1.0 - beta*beta);
 
 	for(int l = 0; l < Nnu; ++l){
 		I[l] = 0;
@@ -445,20 +435,51 @@ void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double****
 				for(int k = 0; k < Nz; ++k){				
 					double I0 = localI;
 					if(length[k] > 0){
-						double Q = Inu[l][rhoindex][j][k]*s;
-						double tau = Anu[l][rhoindex][j][k]*length[k];
-						double S = 0;
-						if(Q > 0){
-							S = Q/Anu[l][rhoindex][j][k];
-						}
-						if(fabs(tau) < 1E-15){
-							localI = I0*(1.0 - tau) + S*tau;
-						} else {
-							localI = S + (I0 - S)*exp(-tau);
+						double Q;
+						double tau;
+						double S;
+						switch(doppler){
+							case Doppler::INTEGER :
+								Q = Inu[l][rhoindex][j][k]*s;
+								tau = Anu[l][rhoindex][j][k]*length[k];
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[l][rhoindex][j][k];
+								}
+								if(fabs(tau) < 1E-15){
+									localI = I0*(1.0 - tau) + S*tau;
+								} else {
+									localI = S + (I0 - S)*exp(-tau);
+								}
+								break;
+							case Doppler::DIFFERENTIAL :
+								//todo
+								break;
+							default:
+								//Doppler::NO
+								Q = Inu[l][rhoindex][j][k]*s;
+								tau = Anu[l][rhoindex][j][k]*length[k];
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[l][rhoindex][j][k];
+								}
+								if(fabs(tau) < 1E-15){
+									localI = I0*(1.0 - tau) + S*tau;
+								} else {
+									localI = S + (I0 - S)*exp(-tau);
+								}
 						}
 					}
 				}
-				I[l] += localI;
+				switch(doppler){
+					case Doppler::INTEGER : 
+						I[l] += localI*(1 + beta)*gamma;
+						break;
+					case Doppler::DIFFERENTIAL :
+						break;
+					default :
+						I[l] += localI;
+				}
 			}
 			
 		}
@@ -471,13 +492,14 @@ void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double****
 	}
 }
 
-void evaluateSpectrumSphericalAtNu(double nu, double& I, double*** Inu, double*** Anu, double rmax, double rfactor, double fractionLength, double d){
+void evaluateSpectrumSphericalAtNu(double nu, double*** nudoppler, double& I, double*** Inu, double*** Anu, double rmax, double rfactor, double fractionLength, double d, const double& beta){
 	int tempNr = 100;
 	double tempRmax = rmax*rfactor;
 	double tempRmin = (1.0 - fractionLength)*tempRmax;
 	double tempdr = tempRmax/tempNr;
 	double dphi = 2*pi/Nphi;
 	double dz = 2*rmax*rfactor/Nz;
+	double gamma = 1.0/sqrt(1.0 - beta*beta);
 
 	I = 0;
 
@@ -536,20 +558,48 @@ void evaluateSpectrumSphericalAtNu(double nu, double& I, double*** Inu, double**
 				for(int k = 0; k < Nz; ++k){				
 					double I0 = localI;
 					if(length[k] > 0){
-						double Q = Inu[rhoindex][j][k]*s;
-						double tau = Anu[rhoindex][j][k]*length[k];
-						double S = 0;
-						if(Q > 0){
-							S = Q/Anu[rhoindex][j][k];
+						double Q, tau, S;
+						switch(doppler){
+							case Doppler::INTEGER :
+								Q = Inu[rhoindex][j][k]*s;
+								tau = Anu[rhoindex][j][k]*length[k];
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[rhoindex][j][k];
+								}
+								if(fabs(tau) < 1E-15){
+									localI = I0*(1.0 - tau) + S*tau;
+								} else {
+									localI = S + (I0 - S)*exp(-tau);
+								}
+								break;
+							case Doppler::DIFFERENTIAL :
+								break;
+							default:
+								Q = Inu[rhoindex][j][k]*s;
+								tau = Anu[rhoindex][j][k]*length[k];
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[rhoindex][j][k];
+								}
+								if(fabs(tau) < 1E-15){
+									localI = I0*(1.0 - tau) + S*tau;
+								} else {
+									localI = S + (I0 - S)*exp(-tau);
+								}
 						}
-						if(fabs(tau) < 1E-15){
-							localI = I0*(1.0 - tau) + S*tau;
-						} else {
-							localI = S + (I0 - S)*exp(-tau);
-						}
+
 					}
 				}
-				I += localI;
+				switch(doppler){
+					case Doppler::INTEGER : 
+						I += localI*(1 + beta)*gamma;
+						break;
+					case Doppler::DIFFERENTIAL :
+						break;
+					default :
+						I += localI;
+				}
 			}
 			
 		}
@@ -560,13 +610,14 @@ void evaluateSpectrumSphericalAtNu(double nu, double& I, double*** Inu, double**
 }
 
 //flat
-void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double fractionLength){
+void evaluateSpectrumFlat(double* nu, double**** nudoppler, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double fractionLength, const double& beta){
 	double tempRmax = rmax;
 	double tempRmin = (1.0 - fractionLength)*tempRmax;
 	double tempdr = tempRmax/Nrho;
 	double dphi = 2*pi/Nphi;
 	double dz = (4.0/3.0)*tempRmax/Nz;
 	double zmin = (4.0/3.0)*(1.0 - fractionLength)*tempRmax;
+	double gamma = 1.0/sqrt(1.0 - beta*beta);
 
 	for(int l = 0; l < Nnu; ++l){
 		I[l] = 0;
@@ -598,36 +649,76 @@ void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu,
 				for(int k = 0; k < Nz; ++k){				
 					double I0 = localI;
 					if(length[k] > 0){
-						double Q = Inu[l][i][j][k]*s;
-						if(Inu[l][i][j][k] != Inu[l][i][j][k]){
-							printf("Inu[l][i][j][k] = NaN\n");
-							exit(0);
-						}
-						double tau = Anu[l][i][j][k]*length[k];
-						if(Anu[l][i][j][k] != Anu[l][i][j][k]){
-							printf("Anu[l][i][j][k] = NaN\n");
-							exit(0);
-						}
-						double S = 0;
-						if(Q > 0){
-							S = Q/Anu[l][i][j][k];
-						}
-
-						if(fabs(tau) < 1E-15){
-							localI = I0*(1.0 - tau) + S*tau;
-						} else {
-							localI = S + (I0 - S)*exp(-tau);
-						}
-						if(localI != localI){
-							printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[l][i][j][k], Inu[l][i][j][k], Q, s, length[k],tau, I0);
-							printf("localI = NaN\n");
-							exit(0);
+						double Q, tau, S;
+						switch(doppler){
+							case Doppler::INTEGER :
+							Q = Inu[l][i][j][k]*s;
+							if(Inu[l][i][j][k] != Inu[l][i][j][k]){
+								printf("Inu[l][i][j][k] = NaN\n");
+								exit(0);
+							}
+							tau = Anu[l][i][j][k]*length[k];
+							if(Anu[l][i][j][k] != Anu[l][i][j][k]){
+								printf("Anu[l][i][j][k] = NaN\n");
+								exit(0);
+							}
+							S = 0;
+							if(Q > 0){
+								S = Q/Anu[l][i][j][k];
+							}
+									
+							if(fabs(tau) < 1E-15){
+								localI = I0*(1.0 - tau) + S*tau;
+							} else {
+								localI = S + (I0 - S)*exp(-tau);
+							}
+							if(localI != localI){
+								printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[l][i][j][k], Inu[l][i][j][k], Q, s, length[k],tau, I0);
+								printf("localI = NaN\n");
+								exit(0);
+							}
+							break;
+							case Doppler::DIFFERENTIAL:
+							break;
+							default:
+							Q = Inu[l][i][j][k]*s;
+							if(Inu[l][i][j][k] != Inu[l][i][j][k]){
+								printf("Inu[l][i][j][k] = NaN\n");
+								exit(0);
+							}
+							tau = Anu[l][i][j][k]*length[k];
+							if(Anu[l][i][j][k] != Anu[l][i][j][k]){
+								printf("Anu[l][i][j][k] = NaN\n");
+								exit(0);
+							}
+							S = 0;
+							if(Q > 0){
+								S = Q/Anu[l][i][j][k];
+							}
+									
+							if(fabs(tau) < 1E-15){
+								localI = I0*(1.0 - tau) + S*tau;
+							} else {
+								localI = S + (I0 - S)*exp(-tau);
+							}
+							if(localI != localI){
+								printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[l][i][j][k], Inu[l][i][j][k], Q, s, length[k],tau, I0);
+								printf("localI = NaN\n");
+								exit(0);
+							}
 						}
 					}
 				}
-				I[l] += localI;
-			}
-			
+				switch(doppler){
+					case Doppler::INTEGER : 
+					I[l] += localI*(1 + beta)*gamma;
+					break;
+					case Doppler::DIFFERENTIAL :
+					break;
+					default :
+					I[l] += localI;
+				}
+			}		
 		}
 	}
 
@@ -638,13 +729,14 @@ void evaluateSpectrumFlat(double* nu, double* I, double**** Inu, double**** Anu,
 	}
 }
 
-void evaluateSpectrumFlatAtNu(double nu, double& I, double*** Inu, double*** Anu, double rmax, double rfactor, double fractionLength, double d){
+void evaluateSpectrumFlatAtNu(double nu, double*** nudoppler, double& I, double*** Inu, double*** Anu, double rmax, double rfactor, double fractionLength, double d, const double& beta){
 	double tempRmax = rmax*rfactor;
 	double tempRmin = (1.0 - fractionLength)*tempRmax;
 	double tempdr = tempRmax/Nrho;
 	double dphi = 2*pi/Nphi;
 	double dz = (4.0/3.0)*tempRmax/Nz;
 	double zmin = (4.0/3.0)*(1.0 - fractionLength)*tempRmax;
+	double gamma = 1.0/sqrt(1.0 - beta*beta);
 
 	I = 0;
 
@@ -673,34 +765,75 @@ void evaluateSpectrumFlatAtNu(double nu, double& I, double*** Inu, double*** Anu
 			for(int k = 0; k < Nz; ++k){				
 				double I0 = localI;
 				if(length[k] > 0){
-					double Q = Inu[i][j][k]*s;
-					if(Inu[i][j][k] != Inu[i][j][k]){
-						printf("Inu[i][j][k] = NaN\n");
-						exit(0);
-					}
-					double tau = Anu[i][j][k]*length[k];
-					if(Anu[i][j][k] != Anu[i][j][k]){
-						printf("Anu[i][j][k] = NaN\n");
-						exit(0);
-					}
-					double S = 0;
-					if(Q > 0){
-						S = Q/Anu[i][j][k];
-					}
+					double Q, tau, S;
+					switch(doppler){
+						case Doppler::INTEGER :
+						Q = Inu[i][j][k]*s;
+						if(Inu[i][j][k] != Inu[i][j][k]){
+							printf("Inu[i][j][k] = NaN\n");
+							exit(0);
+						}
+						tau = Anu[i][j][k]*length[k];
+						if(Anu[i][j][k] != Anu[i][j][k]){
+							printf("Anu[i][j][k] = NaN\n");
+							exit(0);
+						}
+						S = 0;
+						if(Q > 0){
+							S = Q/Anu[i][j][k];
+						}
 
-					if(fabs(tau) < 1E-15){
-						localI = I0*(1.0 - tau) + S*tau;
-					} else {
-						localI = S + (I0 - S)*exp(-tau);
-					}
-					if(localI != localI){
-						printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[i][j][k], Inu[i][j][k], Q, s, length[k],tau, I0);
-						printf("localI = NaN\n");
-						exit(0);
+						if(fabs(tau) < 1E-15){
+							localI = I0*(1.0 - tau) + S*tau;
+						} else {
+							localI = S + (I0 - S)*exp(-tau);
+						}
+						if(localI != localI){
+							printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[i][j][k], Inu[i][j][k], Q, s, length[k],tau, I0);
+							printf("localI = NaN\n");
+							exit(0);
+						}
+						break;
+						case Doppler::DIFFERENTIAL:
+						break;
+						default:
+						Q = Inu[i][j][k]*s;
+						if(Inu[i][j][k] != Inu[i][j][k]){
+							printf("Inu[i][j][k] = NaN\n");
+							exit(0);
+						}
+						tau = Anu[i][j][k]*length[k];
+						if(Anu[i][j][k] != Anu[i][j][k]){
+							printf("Anu[i][j][k] = NaN\n");
+							exit(0);
+						}
+						S = 0;
+						if(Q > 0){
+							S = Q/Anu[i][j][k];
+						}
+
+						if(fabs(tau) < 1E-15){
+							localI = I0*(1.0 - tau) + S*tau;
+						} else {
+							localI = S + (I0 - S)*exp(-tau);
+						}
+						if(localI != localI){
+							printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[i][j][k], Inu[i][j][k], Q, s, length[k],tau, I0);
+							printf("localI = NaN\n");
+							exit(0);
+						}
 					}
 				}
 			}
-			I += localI;
+			switch(doppler){
+				case Doppler::INTEGER : 
+					I += localI*(1 + beta)*gamma;
+					break;
+				case Doppler::DIFFERENTIAL :
+					break;
+				default :
+					I += localI;
+			}
 		}
 			
 	}
@@ -787,12 +920,13 @@ void evaluateSpectrumAtNuSimple(double nu, double& totalInu, double Inu, double 
 }
 
 //spherical
-void evaluateImageSpherical(double*** image, double* nu, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength){
+void evaluateImageSpherical(double*** image, double* nu, double**** nudoppler, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength, const double& beta){
 	double tempRmax = rmax*rfactor;
 	double tempRmin = (1.0 - fractionLength)*tempRmax;
 	double tempdr = tempRmax/Nrho;
 	double dphi = 2*pi/Nphi;
 	double dz = 2*rmax*rfactor/Nz;
+	double gamma = 1.0/sqrt(1.0 - beta*beta);
 
 	for(int i = 0; i < Nrho; ++i) {
 		for(int j = 0; j < Nphi; ++j){
@@ -852,17 +986,41 @@ void evaluateImageSpherical(double*** image, double* nu, double**** Inu, double*
 				for(int k = 0; k < Nz; ++k){				
 					double I0 = localI;
 					if(length[k] > 0){
-						double Q = Inu[l][i][j][k]*s;
-						double tau = Anu[l][i][j][k]*length[k];
-						double S = 0;
-						if(Q > 0){
-							S = Q/Anu[l][i][j][k];
-						}
+						double Q, tau, S;
+						switch(doppler){
+							case Doppler::INTEGER :
+								Q = Inu[l][i][j][k]*s;
+								tau = Anu[l][i][j][k]*length[k];
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[l][i][j][k];
+								}
 
-						localI = S + (I0 - S)*exp(-tau);
+								localI = S + (I0 - S)*exp(-tau);
+								break;
+							case Doppler::DIFFERENTIAL :
+								break;
+							default :
+								Q = Inu[l][i][j][k]*s;
+								tau = Anu[l][i][j][k]*length[k];
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[l][i][j][k];
+								}
+
+								localI = S + (I0 - S)*exp(-tau);
+						}
 					}
 				}
-				image[i][j][l] = localI;
+				switch(doppler){
+					case Doppler::INTEGER :
+						image[i][j][l] = localI*(1 + beta)*gamma;
+						break;
+					case Doppler::DIFFERENTIAL :
+						break;
+					default :
+						image[i][j][l] = localI;
+				}
 			}
 			
 		}
@@ -879,13 +1037,14 @@ void evaluateImageSpherical(double*** image, double* nu, double**** Inu, double*
 }
 
 //flat
-void evaluateImageFlat(double*** image, double* nu, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength){
+void evaluateImageFlat(double*** image, double* nu, double**** nudoppler, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength, const double& beta){
 	double tempRmax = rmax*rfactor;
 	double tempRmin = (1.0 - fractionLength)*tempRmax;
 	double tempdr = tempRmax/Nrho;
 	double dphi = 2*pi/Nphi;
 	double dz = (4.0/3.0)*tempRmax/Nz;
 	double zmin = (4.0/3.0)*(1.0 - fractionLength)*tempRmax;
+	double gamma = 1.0/sqrt(1.0 - beta*beta);
 
 	for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
@@ -919,32 +1078,68 @@ void evaluateImageFlat(double*** image, double* nu, double**** Inu, double**** A
 				for(int k = 0; k < Nz; ++k){				
 					double I0 = localI;
 					if(length[k] > 0){
-						double Q = Inu[l][i][j][k]*s;
-						if(Inu[l][i][j][k] != Inu[l][i][j][k]){
-							printf("Inu[l][i][j][k] = NaN\n");
-							exit(0);
-						}
-						double tau = Anu[l][i][j][k]*length[k];
-						if(Anu[l][i][j][k] != Anu[l][i][j][k]){
-							printf("Anu[l][i][j][k] = NaN\n");
-							exit(0);
-						}
-						double S = 0;
-						if(Q > 0){
-							S = Q/Anu[l][i][j][k];
-						}
+						double Q, tau, S;
+						switch(doppler){
+							case Doppler::INTEGER :
+								Q = Inu[l][i][j][k]*s;
+								if(Inu[l][i][j][k] != Inu[l][i][j][k]){
+									printf("Inu[l][i][j][k] = NaN\n");
+									exit(0);
+								}
+								tau = Anu[l][i][j][k]*length[k];
+								if(Anu[l][i][j][k] != Anu[l][i][j][k]){
+									printf("Anu[l][i][j][k] = NaN\n");
+									exit(0);
+								}
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[l][i][j][k];
+								}
 
-						localI = S + (I0 - S)*exp(-tau);
-						if(localI != localI){
-							printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[l][i][j][k], Inu[l][i][j][k], Q, s, length[k],tau, I0);
-							printf("localI = NaN\n");
-							exit(0);
+								localI = S + (I0 - S)*exp(-tau);
+								if(localI != localI){
+									printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[l][i][j][k], Inu[l][i][j][k], Q, s, length[k],tau, I0);
+									printf("localI = NaN\n");
+									exit(0);
+								}
+								break;
+							case Doppler::DIFFERENTIAL :
+								break;
+							default :
+								Q = Inu[l][i][j][k]*s;
+								if(Inu[l][i][j][k] != Inu[l][i][j][k]){
+									printf("Inu[l][i][j][k] = NaN\n");
+									exit(0);
+								}
+								tau = Anu[l][i][j][k]*length[k];
+								if(Anu[l][i][j][k] != Anu[l][i][j][k]){
+									printf("Anu[l][i][j][k] = NaN\n");
+									exit(0);
+								}
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[l][i][j][k];
+								}
+
+								localI = S + (I0 - S)*exp(-tau);
+								if(localI != localI){
+									printf("Anu = %g Inu = %g Q = %g s = %g length = %g tau = %g I0 = %g\n", Anu[l][i][j][k], Inu[l][i][j][k], Q, s, length[k],tau, I0);
+									printf("localI = NaN\n");
+									exit(0);
+								}
 						}
 					}
 				}
-				image[i][j][l] += localI;
+				switch(doppler){
+					case Doppler::INTEGER :
+						image[i][j][l] = localI*(1 + beta)*gamma;
+						break;
+					case Doppler::DIFFERENTIAL :
+						break;
+					default :
+						image[i][j][l] = localI;
+				}
 			}
-			
 		}
 	}
 
@@ -1058,5 +1253,33 @@ void evaluateEmissivityAndAbsorptionFlatSimple(double* nu, double* Inu, double* 
 
 	for(int i = 0; i < Nnu; ++i){
 		evaluateEmissivityAndAbsorptionAtNuSimple(nu[i], Inu[i], Anu[i], Ee, Fe, Np, sinhi, B, concentration);
+	}
+}
+
+void evaluateNuDoppler(double***** NuDoppler, int Nmonth, int* Nnumonth, double** Numonth, const double& beta){
+	for(int m = 0; m < Nmonth; ++m){
+		for(int l = 0; l < Nnumonth[m]; ++l){
+			for(int i = 0; i < Nrho; ++i){
+				for(int j = 0; j < Nphi; ++j){
+					for(int k = 0; k < Nz; ++k){
+						switch(doppler){
+							double gamma;
+							case Doppler::NO :
+								NuDoppler[m][l][i][j][k] = Numonth[m][l];
+								break;
+							case Doppler::INTEGER :
+								gamma = 1.0/sqrt(1.0 - beta*beta);
+								NuDoppler[m][l][i][j][k] = Numonth[m][l]*(1 - beta)/gamma;
+								break;
+							case Doppler::DIFFERENTIAL:
+								//todo
+								break;
+							default :
+								NuDoppler[m][l][i][j][k] = Numonth[m][l];
+						}
+					}
+				}
+			}
+		}
 	}
 }

@@ -481,6 +481,7 @@ int main()
 	double***** Anumonth;
 	double** Fmonth;
 	double** Numonth;
+	double***** NuDoppler;
 
 	double*** B3d;
 	double*** Bx3d;
@@ -1046,29 +1047,35 @@ int main()
 	double* Anuflat = new double[Nnu];
 
 	Numonth = new double*[Nmonth];
+	NuDoppler = new double****[Nmonth];
 	Fmonth = new double*[Nmonth];
 	double** ErrorMonth = new double*[Nmonth];
 	Inumonth = new double****[Nmonth];
 	Anumonth = new double****[Nmonth];
 	for(int m = 0; m < Nmonth; ++m){
 		Numonth[m] = new double[Nnumonth[m]];
+		NuDoppler[m] = new double***[Nnumonth[m]];
 		Fmonth[m] = new double[Nnumonth[m]];
 		ErrorMonth[m] = new double[Nnumonth[m]];
 		Inumonth[m] = new double***[Nnumonth[m]];
 		Anumonth[m] = new double***[Nnumonth[m]];
 		for(int l = 0; l < Nnumonth[m]; ++l){
 			Numonth[m][l] = 0;
+			NuDoppler[m][l] = new double**[Nrho];
 			Fmonth[m][l]= 0;
 			ErrorMonth[m][l] = 1.0;
 			Inumonth[m][l] = new double**[Nrho];
 			Anumonth[m][l] = new double**[Nrho];
 			for(int i = 0; i < Nrho; ++i){
+				NuDoppler[m][l][i] = new double*[Nphi];
 				Inumonth[m][l][i] = new double*[Nphi];
 				Anumonth[m][l][i] = new double*[Nphi];
 				for(int j = 0; j < Nphi; ++j){
+					NuDoppler[m][l][i][j] = new double[Nz];
 					Inumonth[m][l][i][j] = new double[Nz];
 					Anumonth[m][l][i][j] = new double[Nz];
 					for(int k = 0; k < Nz; ++k){
+						NuDoppler[m][l][i][j][k] = 0;
 						Inumonth[m][l][i][j][k] = 0;
 						Anumonth[m][l][i][j][k] = 0;
 					}
@@ -1186,7 +1193,7 @@ int main()
 		timeMoments[i] = times[i];
 	}
 
-	double error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth);
+	double error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
 	printf("error = %lf\n", error);
 	fprintf(logFile, "error = %lf\n", error);
 	const int Nbp = 5;
@@ -1227,7 +1234,7 @@ int main()
 									vector[5] = tempA/maxBpower;
 									vector[6] = tempB/maxNpower;
 									vector[7] = tempFpower/maxFpower;
-									double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth);
+									double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
 									printf("tempError = %lf\n", tempError);
 									//fprintf(logFile, "tempError = %lf\n", tempError);
 									if(tempError < error){
@@ -1278,7 +1285,7 @@ int main()
 	vector[6] = b/maxNpower;
 	vector[7] = fpower/maxFpower;
 
-	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth);
+	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
 	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf, r0 = %lf a = %lf b = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b);
 	printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v/c = %lf, r0 = %lf a = %lf b = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b);
 
@@ -1287,7 +1294,7 @@ int main()
 		if(geometry == FLAT_SIMPLE){
 			//optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, weightedEe, weightedFe[0][0][0], Np, Ndist, 1.0, 8, logFile);
 		} else {
-			optimizeParametersGeneral(vector, optPar, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth, logFile);
+			optimizeParametersGeneral(vector, optPar, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth, logFile);
 			Bfactor = vector[0]*maxB;
 			concentration = vector[1]*maxN;
 			fractionSize = vector[2]*maxFraction;
@@ -1305,7 +1312,7 @@ int main()
 	///////////////////
 
 
-	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth);
+	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
 
 	printf("integrating fields\n");
 	fprintf(logFile, "integrating Fields\n");
@@ -1349,6 +1356,7 @@ int main()
 	}
 
 	rmin = r0 + v*timeMoments[0];
+	evaluateNuDoppler(NuDoppler, Nmonth, Nnumonth, Numonth, v/speed_of_light); 
 	for(int l = 0; l < Nmonth; ++l){
 		double r = r0 + v*timeMoments[l];
 		double rfactor = r/rmin;
@@ -1361,20 +1369,20 @@ int main()
 		//evaluateAllEmissivityAndAbsorption1(nu, Inu, Anu, Nnu, Ee, dFe, Np, Ndist, B, sintheta, thetaIndex, concentrations, locN, locB, fractionSize);
 		//evaluateSpectrum(nu, tempTotalInu[l], Inu, Anu, area, length, Nnu, r, Rho, Phi);
 
-		evaluateAllEmissivityAndAbsorption(nu, tempInu, tempAnu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, rfactor, a, b);
+		evaluateAllEmissivityAndAbsorption(NuDoppler[l], tempInu, tempAnu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, rfactor, a, b);
 		double tempFraction = fractionSize/pow(rfactor, fpower);
 		if(l == 0) {
 			if(geometry == SPHERICAL){
-				evaluateImageSpherical(image, Numonth[l], tempInu, tempAnu, r, Nnum, rfactor, tempFraction);
+				evaluateImageSpherical(image, Numonth[l], NuDoppler[l], tempInu, tempAnu, r, Nnum, rfactor, tempFraction, v/speed_of_light);
 			} else {
-				evaluateImageFlat(image, Numonth[l], tempInu, tempAnu, r, Nnum, rfactor, tempFraction);
+				evaluateImageFlat(image, Numonth[l], NuDoppler[l], tempInu, tempAnu, r, Nnum, rfactor, tempFraction, v/speed_of_light);
 			}
 		}
 		//evaluateSpectrum(nu, tempTotalInu[l], tempInu, tempAnu, area3d, length3d, Nnu, rfactor);
 		if(geometry == SPHERICAL){
-			evaluateSpectrumSpherical(nu, tempTotalInu[l], tempInu, tempAnu, r, Nnu, tempFraction);
+			evaluateSpectrumSpherical(nu, NuDoppler[l], tempTotalInu[l], tempInu, tempAnu, r, Nnu, tempFraction, v/speed_of_light);
 		} else {
-			evaluateSpectrumFlat(nu, tempTotalInu[l], tempInu, tempAnu, r, Nnu, tempFraction);
+			evaluateSpectrumFlat(nu, NuDoppler[l], tempTotalInu[l], tempInu, tempAnu, r, Nnu, tempFraction, v/speed_of_light);
 		}
 
 		//evaluateSpectrumFlatSimple(nu, tempTotalInu[l], Inuflat, Anuflat, Nnu, r, fractionSize);
@@ -1425,7 +1433,7 @@ int main()
 			vector[6] = b/maxNpower;
 			vector[7] = fpower/maxFpower;
 
-			double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inumonth, Anumonth);
+			double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
 			fprintf(errorFile, "%g ", tempError);
 		}
 		fprintf(errorFile, "\n");
