@@ -14,9 +14,10 @@
 #include "optimization.h"
 
 double evaluateOptimizationFunction5(double* vector, double* time, double** nu, double** observedInu, double** observedError, double* Ee, double**** dFe, int Np, int* Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double***** nudoppler, double***** Inu, double***** Anu){
-	// v[0] = B, v[1] - N, v[2] - f, v[3] - v v[4] - r0 v[5] B/r^a v[6] N/r^b v[7] f/r^(f-1)
+	// v[0] = B, v[1] - N, v[2] - f, v[3] - v v[4] - r0 v[5] B/r^(a-1) v[6] N/r^(b-1) v[7] f/r^(f-1)
 	//evaluateVolumeAndLength(area, length, rmax, fractionSize);
-	evaluateNuDoppler(nudoppler, Nmonth, Nnu, nu, vector[3]*maxV/speed_of_light);
+	double dopplerBeta =  0.75*vector[3]*maxV/speed_of_light;
+	evaluateNuDoppler(nudoppler, Nmonth, Nnu, nu, dopplerBeta);
 	double err = 0;
 	for(int i = 0; i < Nmonth; ++i){
 		double* totalInu = new double[Nnu[i]];
@@ -29,9 +30,9 @@ double evaluateOptimizationFunction5(double* vector, double* time, double** nu, 
 		//
 		double tempFraction = vector[2]*maxFraction/pow(rfactor, vector[7]*maxFpower - 1.0);
 		if(geometry == SPHERICAL){
-			evaluateSpectrumSpherical(nu[i], nudoppler[i], totalInu, Inu[i], Anu[i], r, Nnu[i], tempFraction, vector[3]*maxV/speed_of_light);
+			evaluateSpectrumSpherical(nu[i], nudoppler[i], totalInu, Inu[i], Anu[i], r, Nnu[i], tempFraction, dopplerBeta);
 		} else {
-			evaluateSpectrumFlat(nu[i], nudoppler[i], totalInu, Inu[i], Anu[i], r, Nnu[i], tempFraction, vector[3]*maxV/speed_of_light);
+			evaluateSpectrumFlat(nu[i], nudoppler[i], totalInu, Inu[i], Anu[i], r, Nnu[i], tempFraction, dopplerBeta);
 		}
 		for(int j = 0; j < Nnu[i]; ++j){
 			double err1 = 0;

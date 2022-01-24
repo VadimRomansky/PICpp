@@ -329,8 +329,8 @@ double criticalNu(const double& E, const double& sinhi, const double& H) {
 }*/
 
 void evaluateAllEmissivityAndAbsorption(double**** nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor, double a, double b){
-	double tempRB = pow(rfactor, a);
-	double tempRN = pow(rfactor,b);
+	double tempRB = pow(rfactor, a-1);
+	double tempRN = pow(rfactor,b-1);
 #pragma omp parallel for shared(nu, Inu, Anu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, concentration, Bfactor, rfactor, tempRB, tempRN)	
 	for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
@@ -452,8 +452,24 @@ void evaluateSpectrumSpherical(double* nu, double**** nuDoppler, double* I, doub
 									localI = S + (I0 - S)*exp(-tau);
 								}
 								break;
-							case Doppler::DIFFERENTIAL :
-								//todo
+							case Doppler::DIFFERENTIAL :{
+								/////////////////////
+								double z1 = (k - 0.5*Nz + 0.5)*dz;
+								double r1 = (rhoindex + 0.5)*drho;
+								double costheta = z1/sqrt(z1*z1 + r1*r1);
+								double dopplerfactor = 1.0/(gamma*(1.0 - beta*costheta));
+								Q = Inu[l][rhoindex][j][k]*s*cube(dopplerfactor);
+								tau = Anu[l][rhoindex][j][k]*length[k];
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[l][rhoindex][j][k];
+								}
+								if(fabs(tau) < 1E-15){
+									localI = I0*(1.0 - tau) + S*tau;
+								} else {
+									localI = S + (I0 - S)*exp(-tau);
+								}
+								}
 								break;
 							default:
 								//Doppler::NO
@@ -473,9 +489,10 @@ void evaluateSpectrumSpherical(double* nu, double**** nuDoppler, double* I, doub
 				}
 				switch(doppler){
 					case Doppler::INTEGER : 
-						I[l] += localI*(1 + beta)*gamma;
+						I[l] += localI/cube((1 - beta)*gamma);
 						break;
 					case Doppler::DIFFERENTIAL :
+						I[l] += localI;
 						break;
 					default :
 						I[l] += localI;
@@ -573,7 +590,24 @@ void evaluateSpectrumSphericalAtNu(double nu, double*** nudoppler, double& I, do
 									localI = S + (I0 - S)*exp(-tau);
 								}
 								break;
-							case Doppler::DIFFERENTIAL :
+							case Doppler::DIFFERENTIAL :{
+								/////////////////////
+								double z1 = (k - 0.5*Nz + 0.5)*dz;
+								double r1 = (rhoindex + 0.5)*drho;
+								double costheta = z1/sqrt(z1*z1 + r1*r1);
+								double dopplerfactor = 1.0/(gamma*(1.0 - beta*costheta));
+								Q = Inu[rhoindex][j][k]*s*cube(dopplerfactor);
+								tau = Anu[rhoindex][j][k]*length[k];
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[rhoindex][j][k];
+								}
+								if(fabs(tau) < 1E-15){
+									localI = I0*(1.0 - tau) + S*tau;
+								} else {
+									localI = S + (I0 - S)*exp(-tau);
+								}
+								}
 								break;
 							default:
 								Q = Inu[rhoindex][j][k]*s;
@@ -593,9 +627,10 @@ void evaluateSpectrumSphericalAtNu(double nu, double*** nudoppler, double& I, do
 				}
 				switch(doppler){
 					case Doppler::INTEGER : 
-						I += localI*(1 + beta)*gamma;
+						I += localI/cube((1 - beta)*gamma);
 						break;
 					case Doppler::DIFFERENTIAL :
+						I += localI;
 						break;
 					default :
 						I += localI;
@@ -678,8 +713,25 @@ void evaluateSpectrumFlat(double* nu, double**** nudoppler, double* I, double***
 								exit(0);
 							}
 							break;
-							case Doppler::DIFFERENTIAL:
-							break;
+							case Doppler::DIFFERENTIAL:{
+							/////////////////////
+								double z1 = (k + 0.5)*dz;
+								double r1 = (i + 0.5)*drho;
+								double costheta = z1/sqrt(z1*z1 + r1*r1);
+								double dopplerfactor = 1.0/(gamma*(1.0 - beta*costheta));
+								Q = Inu[l][i][j][k]*s*cube(dopplerfactor);
+								tau = Anu[l][i][j][k]*length[k];
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[l][i][j][k];
+								}
+								if(fabs(tau) < 1E-15){
+									localI = I0*(1.0 - tau) + S*tau;
+								} else {
+									localI = S + (I0 - S)*exp(-tau);
+								}
+								}
+								break;
 							default:
 							Q = Inu[l][i][j][k]*s;
 							if(Inu[l][i][j][k] != Inu[l][i][j][k]){
@@ -711,9 +763,10 @@ void evaluateSpectrumFlat(double* nu, double**** nudoppler, double* I, double***
 				}
 				switch(doppler){
 					case Doppler::INTEGER : 
-					I[l] += localI*(1 + beta)*gamma;
+					I[l] += localI/cube((1 - beta)*gamma);
 					break;
 					case Doppler::DIFFERENTIAL :
+					I[l] += localI;
 					break;
 					default :
 					I[l] += localI;
@@ -794,7 +847,25 @@ void evaluateSpectrumFlatAtNu(double nu, double*** nudoppler, double& I, double*
 							exit(0);
 						}
 						break;
-						case Doppler::DIFFERENTIAL:
+						case Doppler::DIFFERENTIAL:{
+							/////////////////////
+								double z1 = (k + 0.5)*dz;
+								double r1 = (i + 0.5)*drho;
+								double costheta = z1/sqrt(z1*z1 + r1*r1);
+								double dopplerfactor = 1.0/(gamma*(1.0 - beta*costheta));
+								Q = Inu[i][j][k]*s*cube(dopplerfactor);
+								tau = Anu[i][j][k]*length[k];
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[i][j][k];
+								}
+								if(fabs(tau) < 1E-15){
+									localI = I0*(1.0 - tau) + S*tau;
+								} else {
+									localI = S + (I0 - S)*exp(-tau);
+								}
+								}
+								break;
 						break;
 						default:
 						Q = Inu[i][j][k]*s;
@@ -827,9 +898,10 @@ void evaluateSpectrumFlatAtNu(double nu, double*** nudoppler, double& I, double*
 			}
 			switch(doppler){
 				case Doppler::INTEGER : 
-					I += localI*(1 + beta)*gamma;
+					I += localI/cube((1 - beta)*gamma);
 					break;
 				case Doppler::DIFFERENTIAL :
+					I += localI;
 					break;
 				default :
 					I += localI;
@@ -998,7 +1070,23 @@ void evaluateImageSpherical(double*** image, double* nu, double**** nudoppler, d
 
 								localI = S + (I0 - S)*exp(-tau);
 								break;
-							case Doppler::DIFFERENTIAL :
+							case Doppler::DIFFERENTIAL :{
+								/////////////////////
+								double z1 = (k + 0.5)*dz;
+								double costheta = z1/sqrt(z1*z1 + r*r);
+								double dopplerfactor = 1.0/(gamma*(1.0 - beta*costheta));
+								Q = Inu[l][i][j][k]*s*cube(dopplerfactor);
+								tau = Anu[l][i][j][k]*length[k];
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[l][i][j][k];
+								}
+								if(fabs(tau) < 1E-15){
+									localI = I0*(1.0 - tau) + S*tau;
+								} else {
+									localI = S + (I0 - S)*exp(-tau);
+								}
+								}
 								break;
 							default :
 								Q = Inu[l][i][j][k]*s;
@@ -1014,9 +1102,10 @@ void evaluateImageSpherical(double*** image, double* nu, double**** nudoppler, d
 				}
 				switch(doppler){
 					case Doppler::INTEGER :
-						image[i][j][l] = localI*(1 + beta)*gamma;
+						image[i][j][l] = localI/cube((1 - beta)*gamma);
 						break;
 					case Doppler::DIFFERENTIAL :
+						image[i][j][l] = localI;
 						break;
 					default :
 						image[i][j][l] = localI;
@@ -1103,7 +1192,24 @@ void evaluateImageFlat(double*** image, double* nu, double**** nudoppler, double
 									exit(0);
 								}
 								break;
-							case Doppler::DIFFERENTIAL :
+							case Doppler::DIFFERENTIAL :{
+								/////////////////////
+								double z1 = (k + 0.5)*dz;
+								double r1 = (i + 0.5)*tempdr;
+								double costheta = z1/sqrt(z1*z1 + r1*r1);
+								double dopplerfactor = 1.0/(gamma*(1.0 - beta*costheta));
+								Q = Inu[l][i][j][k]*s*cube(dopplerfactor);
+								tau = Anu[l][i][j][k]*length[k];
+								S = 0;
+								if(Q > 0){
+									S = Q/Anu[l][i][j][k];
+								}
+								if(fabs(tau) < 1E-15){
+									localI = I0*(1.0 - tau) + S*tau;
+								} else {
+									localI = S + (I0 - S)*exp(-tau);
+								}
+								}
 								break;
 							default :
 								Q = Inu[l][i][j][k]*s;
@@ -1132,9 +1238,10 @@ void evaluateImageFlat(double*** image, double* nu, double**** nudoppler, double
 				}
 				switch(doppler){
 					case Doppler::INTEGER :
-						image[i][j][l] = localI*(1 + beta)*gamma;
+						image[i][j][l] = localI/(1 - beta)*gamma;
 						break;
 					case Doppler::DIFFERENTIAL :
+						image[i][j][l] = localI;
 						break;
 					default :
 						image[i][j][l] = localI;
@@ -1257,6 +1364,7 @@ void evaluateEmissivityAndAbsorptionFlatSimple(double* nu, double* Inu, double* 
 }
 
 void evaluateNuDoppler(double***** NuDoppler, int Nmonth, int* Nnumonth, double** Numonth, const double& beta){
+	double gamma = 1.0/sqrt(1.0 - beta*beta);
 	for(int m = 0; m < Nmonth; ++m){
 		for(int l = 0; l < Nnumonth[m]; ++l){
 			for(int i = 0; i < Nrho; ++i){
@@ -1268,11 +1376,15 @@ void evaluateNuDoppler(double***** NuDoppler, int Nmonth, int* Nnumonth, double*
 								NuDoppler[m][l][i][j][k] = Numonth[m][l];
 								break;
 							case Doppler::INTEGER :
-								gamma = 1.0/sqrt(1.0 - beta*beta);
-								NuDoppler[m][l][i][j][k] = Numonth[m][l]*(1 - beta)/gamma;
+								NuDoppler[m][l][i][j][k] = Numonth[m][l]*(1 - beta)*gamma;
 								break;
-							case Doppler::DIFFERENTIAL:
-								//todo
+							case Doppler::DIFFERENTIAL:{
+								double z = (k - 0.5*Nz + 0.5);
+								double r = i + 0.5;
+								double costheta = z/sqrt(z*z + r*r);
+								double dopplerfactor = 1.0/(gamma*(1 - beta*costheta));
+								NuDoppler[m][l][i][j][k] = Numonth[m][l]/dopplerfactor;
+								}
 								break;
 							default :
 								NuDoppler[m][l][i][j][k] = Numonth[m][l];
