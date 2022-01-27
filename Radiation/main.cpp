@@ -616,7 +616,8 @@ int main()
 				By3d[i][j][k] = 0.0;
 				Bz3d[i][j][k] = 0.0;
 				if(geometry == SPHERICAL) {
-					concentrations3d[i][j][k] = 1.0*sqr(rmax/r);
+					double tempBeta = 0.75;
+					concentrations3d[i][j][k] = 1.0*pow(1 - tempBeta, 7.0/4.0)/pow(1 - tempBeta*r/rmax, 7.0/4.0);
 				} else {
 					concentrations3d[i][j][k] = 1.0;
 				}
@@ -1176,7 +1177,7 @@ int main()
 	v = 0.67*speed_of_light;
 	sigma = 0.02;
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
-	bool optPar[8] = {true, true, true, true, true, true, true, true};
+	bool optPar[8] = {true, true, true, true, true, false, false, true};
 	double vector[8];
 	vector[0] = Bfactor/maxB;
 	vector[1] = concentration/maxN;
@@ -1198,15 +1199,15 @@ int main()
 	fprintf(logFile, "error = %lf\n", error);
 	const int Nbp = 8;
 	const int Nnp = 10;
-	const int Nfp = 4;
-	const int Nvp = 6;
+	const int Nfp = 6;
+	const int Nvp = 7;
 	const int Nr0 = 4;
 	const int Na = 3;
 	const int Nb1 = 3;
 	double Bpoints[Nbp] = {0.1, 0.2, 0.5, 1, 2, 5, 10, 20};
 	double npoints[Nnp] = {0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500};
-	double fpoints[Nfp] = {0.1,0.3,0.4,0.5};
-	double vpoints[Nvp] = {0.5*speed_of_light, 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
+	double fpoints[Nfp] = {0.03, 0.06, 0.1,0.3,0.4,0.5};
+	double vpoints[Nvp] = {0.4*speed_of_light, 0.5*speed_of_light, 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nr0] = {0.1*maxR0, 0.2*maxR0, 0.4*maxR0, 0.5*maxR0};
 	double apoints[Na] = {0,1,2};
 	double bpoints[Nb1] = {0,1,2};
@@ -1266,14 +1267,14 @@ int main()
 		fscanf(initialFile, "%lf %lf %lf %lf %lf %lf %lf %lf", &Bfactor, &concentration, &fractionSize, &v, &r0, &a, &b, &fpower);
 		v = v*speed_of_light;
 		fclose(initialFile);
-		Bfactor = 0.2;
+		/*Bfactor = 0.2;
 		concentration = 10;
 		fractionSize = 0.4;
 		r0 = 1.1664e+16;
 		v = 0.5*speed_of_light;
 		a = 2.0;
 		b = 0.0;
-		fpower = 1.0;
+		fpower = 1.0;*/
 	}
 
 	vector[0] = Bfactor/maxB;
@@ -1331,15 +1332,19 @@ int main()
 
 	double**** tempInu = new double***[Nnu];
 	double**** tempAnu = new double***[Nnu];
+	double**** tempNuDoppler = new double***[Nnu];
 	for(int l = 0; l < Nnu; ++l){
 		tempInu[l] = new double**[Nrho];
 		tempAnu[l] = new double**[Nrho];
+		tempNuDoppler[l] = new double**[Nrho];
 		for(int i = 0; i < Nrho; ++i){
 			tempInu[l][i] = new double*[Nphi];
 			tempAnu[l][i] = new double*[Nphi];
+			tempNuDoppler[l][i] = new double*[Nphi];
 			for(int j = 0; j < Nphi; ++j){
 				tempInu[l][i][j] = new double[Nz];
 				tempAnu[l][i][j] = new double[Nz];
+				tempNuDoppler[l][i][j] = new double[Nz];
 			}
 		}
 	}
@@ -1356,8 +1361,10 @@ int main()
 	}
 
 	rmin = r0 + v*timeMoments[0];
-	evaluateNuDoppler(NuDoppler, Nmonth, Nnumonth, Numonth, v/speed_of_light); 
+	evaluateNuDoppler(tempNuDoppler, Nnu, nu, 0.75*v/speed_of_light); 
 	for(int l = 0; l < Nmonth; ++l){
+		fprintf(logFile, "evaluate final spectrum month = %d\n", l);
+		fflush(logFile);
 		double r = r0 + v*timeMoments[l];
 		double rfactor = r/rmin;
 		//double locB = Bfactor/(rfactor*rfactor);
@@ -1369,21 +1376,21 @@ int main()
 		//evaluateAllEmissivityAndAbsorption1(nu, Inu, Anu, Nnu, Ee, dFe, Np, Ndist, B, sintheta, thetaIndex, concentrations, locN, locB, fractionSize);
 		//evaluateSpectrum(nu, tempTotalInu[l], Inu, Anu, area, length, Nnu, r, Rho, Phi);
 
-		evaluateAllEmissivityAndAbsorption(NuDoppler[l], tempInu, tempAnu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, rfactor, a, b);
+		evaluateAllEmissivityAndAbsorption(tempNuDoppler, tempInu, tempAnu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, rfactor, a, b);
 		double tempFraction = fractionSize/pow(rfactor, fpower);
 		double dopplerBeta = 0.75*v/speed_of_light;
 		if(l == 0) {
 			if(geometry == SPHERICAL){
-				evaluateImageSpherical(image, Numonth[l], NuDoppler[l], tempInu, tempAnu, r, Nnum, rfactor, tempFraction, dopplerBeta);
+				evaluateImageSpherical(image, nu, tempNuDoppler, tempInu, tempAnu, r, Nnum, rfactor, tempFraction, dopplerBeta);
 			} else {
-				evaluateImageFlat(image, Numonth[l], NuDoppler[l], tempInu, tempAnu, r, Nnum, rfactor, tempFraction, dopplerBeta);
+				evaluateImageFlat(image, nu, tempNuDoppler, tempInu, tempAnu, r, Nnum, rfactor, tempFraction, dopplerBeta);
 			}
 		}
 		//evaluateSpectrum(nu, tempTotalInu[l], tempInu, tempAnu, area3d, length3d, Nnu, rfactor);
 		if(geometry == SPHERICAL){
-			evaluateSpectrumSpherical(nu, NuDoppler[l], tempTotalInu[l], tempInu, tempAnu, r, Nnu, tempFraction, dopplerBeta);
+			evaluateSpectrumSpherical(nu, tempNuDoppler, tempTotalInu[l], tempInu, tempAnu, r, Nnu, tempFraction, dopplerBeta);
 		} else {
-			evaluateSpectrumFlat(nu, NuDoppler[l], tempTotalInu[l], tempInu, tempAnu, r, Nnu, tempFraction, dopplerBeta);
+			evaluateSpectrumFlat(nu, tempNuDoppler, tempTotalInu[l], tempInu, tempAnu, r, Nnu, tempFraction, dopplerBeta);
 		}
 
 		//evaluateSpectrumFlatSimple(nu, tempTotalInu[l], Inuflat, Anuflat, Nnu, r, fractionSize);

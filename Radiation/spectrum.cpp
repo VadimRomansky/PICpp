@@ -1371,7 +1371,6 @@ void evaluateNuDoppler(double***** NuDoppler, int Nmonth, int* Nnumonth, double*
 				for(int j = 0; j < Nphi; ++j){
 					for(int k = 0; k < Nz; ++k){
 						switch(doppler){
-							double gamma;
 							case Doppler::NO :
 								NuDoppler[m][l][i][j][k] = Numonth[m][l];
 								break;
@@ -1389,6 +1388,36 @@ void evaluateNuDoppler(double***** NuDoppler, int Nmonth, int* Nnumonth, double*
 							default :
 								NuDoppler[m][l][i][j][k] = Numonth[m][l];
 						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void evaluateNuDoppler(double**** NuDoppler, int Nnu, double* nu, const double& beta){
+	double gamma = 1.0/sqrt(1.0 - beta*beta);
+	for(int l = 0; l < Nnu; ++l){
+		for(int i = 0; i < Nrho; ++i){
+			for(int j = 0; j < Nphi; ++j){
+				for(int k = 0; k < Nz; ++k){
+					switch(doppler){
+						case Doppler::NO :
+							NuDoppler[l][i][j][k] = nu[l];
+							break;
+						case Doppler::INTEGER :
+							NuDoppler[l][i][j][k] = nu[l]*(1 - beta)*gamma;
+							break;
+						case Doppler::DIFFERENTIAL:{
+							double z = (k - 0.5*Nz + 0.5);
+							double r = i + 0.5;
+							double costheta = z/sqrt(z*z + r*r);
+							double dopplerfactor = 1.0/(gamma*(1 - beta*costheta));
+							NuDoppler[l][i][j][k] = nu[l]/dopplerfactor;
+							}
+							break;
+						default :
+							NuDoppler[l][i][j][k] = nu[l];
 					}
 				}
 			}

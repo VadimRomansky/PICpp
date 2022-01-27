@@ -21,6 +21,7 @@ void evaluateImageSpherical(double*** image, double* nu, double**** nudoppler, d
 void evaluateImageFlat(double*** image, double* nu, double**** nudoppler, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength, const double& beta);
 
 void evaluateNuDoppler(double***** NuDoppler, int Nmonth, int* Nnumonth, double** Numonth, const double& beta);
+void evaluateNuDoppler(double**** NuDoppler, int Nnu, double* nu, const double& beta);
 
 //for simple flat disk
 void evaluateSpectrumFlatSimple(double* nu, double* totalInu, double* Inu, double* Anu, int Nnu, double rmax, double fraction);
