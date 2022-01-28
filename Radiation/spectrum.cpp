@@ -381,9 +381,9 @@ void evaluateSpectrumSpherical(double* nu, double**** nuDoppler, double* I, doub
 
 	double drho = tempRmax/Nrho;
 
-	double length[Nz];
-
+#pragma omp parallel for shared(nu, nuDoppler, I, Inu, Anu, rmax, Nnu, fractionLength, beta, tempNr, tempRmax, tempRmin, tempdr, dphi, dz, gamma)
 	for(int i = 0; i < tempNr; ++i){
+		double length[Nz];
 		double r = (i + 0.5)*tempdr;
 		double s = 0.5*dphi*(2*i + 1)*tempdr*tempdr;
 		double z1 = -sqrt(tempRmax*tempRmax -r*r);
@@ -522,9 +522,9 @@ void evaluateSpectrumSphericalAtNu(double nu, double*** nudoppler, double& I, do
 
 	double drho = tempRmax/Nrho;
 
-	double length[Nz];
-
+#pragma omp parallel for shared(nu, nudoppler, I, Inu, Anu, rmax,rfactor, fractionLength, d, beta, tempNr, tempRmax, tempRmin, tempdr, dphi, dz, gamma)
 	for(int i = 0; i < tempNr; ++i){
+		double length[Nz];
 		double r = (i + 0.5)*tempdr;
 		double s = 0.5*dphi*(2*i + 1)*tempdr*tempdr;
 		double z1 = -sqrt(tempRmax*tempRmax -r*r);
@@ -676,6 +676,7 @@ void evaluateSpectrumFlat(double* nu, double**** nudoppler, double* I, double***
 		}
 	}
 
+#pragma omp parallel for shared(nu, nudoppler, I, Inu, Anu, rmax, Nnu, fractionLength, beta, tempRmax, tempRmin, tempdr, dphi, dz, zmin, gamma, drho, length)
 	for(int i = 0; i < Nrho; ++i){
 		double s = 0.5*dphi*(2*i + 1)*tempdr*tempdr;
 		for(int j = 0; j < Nphi; ++j){
@@ -811,6 +812,7 @@ void evaluateSpectrumFlatAtNu(double nu, double*** nudoppler, double& I, double*
 		}
 	}
 
+#pragma omp parallel for shared(nu, nudoppler, I, Inu, Anu, rmax, rfactor, fractionLength, d, beta, tempRmax, tempRmin, tempdr, dphi, dz, zmin, gamma, drho, length)
 	for(int i = 0; i < Nrho; ++i){
 		double s = 0.5*dphi*(2*i + 1)*tempdr*tempdr;
 		for(int j = 0; j < Nphi; ++j){
@@ -1397,30 +1399,36 @@ void evaluateNuDoppler(double***** NuDoppler, int Nmonth, int* Nnumonth, double*
 
 void evaluateNuDoppler(double**** NuDoppler, int Nnu, double* nu, const double& beta){
 	double gamma = 1.0/sqrt(1.0 - beta*beta);
-	for(int l = 0; l < Nnu; ++l){
 		for(int i = 0; i < Nrho; ++i){
 			for(int j = 0; j < Nphi; ++j){
 				for(int k = 0; k < Nz; ++k){
 					switch(doppler){
 						case Doppler::NO :
-							NuDoppler[l][i][j][k] = nu[l];
+							for(int l = 0; l < Nnu; ++l){
+								NuDoppler[l][i][j][k] = nu[l];
+							}
 							break;
 						case Doppler::INTEGER :
-							NuDoppler[l][i][j][k] = nu[l]*(1 - beta)*gamma;
+							for(int l = 0; l < Nnu; ++l){
+								NuDoppler[l][i][j][k] = nu[l]*(1 - beta)*gamma;
+							}
 							break;
 						case Doppler::DIFFERENTIAL:{
-							double z = (k - 0.5*Nz + 0.5);
-							double r = i + 0.5;
-							double costheta = z/sqrt(z*z + r*r);
-							double dopplerfactor = 1.0/(gamma*(1 - beta*costheta));
-							NuDoppler[l][i][j][k] = nu[l]/dopplerfactor;
+							for(int l = 0; l < Nnu; ++l){
+								double z = (k - 0.5*Nz + 0.5);
+								double r = i + 0.5;
+								double costheta = z/sqrt(z*z + r*r);
+								double dopplerfactor = 1.0/(gamma*(1 - beta*costheta));
+								NuDoppler[l][i][j][k] = nu[l]/dopplerfactor;
+							}
 							}
 							break;
 						default :
-							NuDoppler[l][i][j][k] = nu[l];
+							for(int l = 0; l < Nnu; ++l){
+								NuDoppler[l][i][j][k] = nu[l];
+							}
 					}
 				}
 			}
 		}
-	}
 }

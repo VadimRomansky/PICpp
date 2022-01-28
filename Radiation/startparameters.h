@@ -4,7 +4,7 @@
 const bool parker = false;
 const bool turbulence = false;
 
-const bool initialGridSearch = false;
+const bool initialGridSearch = true;
 const bool optimization = true; //false for debug only
 
 enum Doppler {NO, INTEGER, DIFFERENTIAL};

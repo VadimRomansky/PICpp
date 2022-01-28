@@ -1267,14 +1267,14 @@ int main()
 		fscanf(initialFile, "%lf %lf %lf %lf %lf %lf %lf %lf", &Bfactor, &concentration, &fractionSize, &v, &r0, &a, &b, &fpower);
 		v = v*speed_of_light;
 		fclose(initialFile);
-		/*Bfactor = 0.2;
-		concentration = 10;
-		fractionSize = 0.4;
-		r0 = 1.1664e+16;
-		v = 0.5*speed_of_light;
+		Bfactor = 0.362992;
+		concentration = 501.865;
+		fractionSize = 0.112738;
+		r0 = 5.10995e+15;
+		v = 0.364802*speed_of_light;
 		a = 2.0;
-		b = 0.0;
-		fpower = 1.0;*/
+		b = 2.0;
+		fpower = 2.56063;
 	}
 
 	vector[0] = Bfactor/maxB;
@@ -1363,6 +1363,7 @@ int main()
 	rmin = r0 + v*timeMoments[0];
 	evaluateNuDoppler(tempNuDoppler, Nnu, nu, 0.75*v/speed_of_light); 
 	for(int l = 0; l < Nmonth; ++l){
+		printf("evaluate final spectrum month = %d\n", l);
 		fprintf(logFile, "evaluate final spectrum month = %d\n", l);
 		fflush(logFile);
 		double r = r0 + v*timeMoments[l];
@@ -1377,7 +1378,7 @@ int main()
 		//evaluateSpectrum(nu, tempTotalInu[l], Inu, Anu, area, length, Nnu, r, Rho, Phi);
 
 		evaluateAllEmissivityAndAbsorption(tempNuDoppler, tempInu, tempAnu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, rfactor, a, b);
-		double tempFraction = fractionSize/pow(rfactor, fpower);
+		double tempFraction = fractionSize/pow(rfactor, fpower - 1.0);
 		double dopplerBeta = 0.75*v/speed_of_light;
 		if(l == 0) {
 			if(geometry == SPHERICAL){
