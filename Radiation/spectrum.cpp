@@ -459,7 +459,7 @@ void evaluateSpectrumSpherical(double* nu, double**** nuDoppler, double* I, doub
 								double costheta = z1/sqrt(z1*z1 + r1*r1);
 								double dopplerfactor = 1.0/(gamma*(1.0 - beta*costheta));
 								Q = Inu[l][rhoindex][j][k]*s*cube(dopplerfactor);
-								tau = Anu[l][rhoindex][j][k]*length[k];
+								tau = Anu[l][rhoindex][j][k]*length[k]/dopplerfactor;
 								S = 0;
 								if(Q > 0){
 									S = Q/Anu[l][rhoindex][j][k];
