@@ -328,15 +328,33 @@ double criticalNu(const double& E, const double& sinhi, const double& H) {
 	//}
 }*/
 
-void evaluateAllEmissivityAndAbsorption(double**** nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor, double a, double b){
+void evaluateAllEmissivityAndAbsorption(double**** nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, double*** psi, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor, double a, double b, double dopplerBeta){
 	double tempRB = pow(rfactor, a-1);
-	double tempRN = pow(rfactor,b-1);
+	double tempRN = pow(rfactor, b-1);
 #pragma omp parallel for shared(nu, Inu, Anu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, concentration, Bfactor, rfactor, tempRB, tempRN)	
 	for(int i = 0; i < Nrho; ++i){
-		for(int j = 0; j < Nphi; ++j){
-			for(int k = 0; k < Nz; ++k){
+		for(int k = 0; k < Nz; ++k){
+			double cosbeta = 1.0;
+			switch (doppler) {
+				case Doppler::NO:
+					cosbeta = 1.0;
+					break;
+				case Doppler::INTEGER:
+					cosbeta = 1.0;
+					break;
+				case Doppler::DIFFERENTIAL: {
+						double z = (k - 0.5 * Nz + 0.5);
+						double r = i + 0.5;
+						cosbeta = z / sqrt(z * z + r * r);
+					}
+					break;
+				default:
+					cosbeta = 1.0;
+			}
+			for (int j = 0; j < Nphi; ++j) {
 				for(int l = 0; l < Nnu; ++l){
-					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l][i][j][k], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/tempRB, concentration*concentrations[i][j][k]/tempRN);
+					double phi = 2 * pi * (j + 0.5) / Nphi;
+					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l][i][j][k], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], psi[i][j][k], Bfactor * Bn[i][j][k] / tempRB, concentration * concentrations[i][j][k] / tempRN, dopplerBeta, cosbeta, phi);
 				}
 			}
 		}
@@ -381,7 +399,7 @@ void evaluateSpectrumSpherical(double* nu, double**** nuDoppler, double* I, doub
 
 	double drho = tempRmax/Nrho;
 
-#pragma omp parallel for shared(nu, nuDoppler, I, Inu, Anu, rmax, Nnu, fractionLength, beta, tempNr, tempRmax, tempRmin, tempdr, dphi, dz, gamma)
+//#pragma omp parallel for shared(nu, nuDoppler, I, Inu, Anu, rmax, Nnu, fractionLength, beta, tempNr, tempRmax, tempRmin, tempdr, dphi, dz, gamma)
 	for(int i = 0; i < tempNr; ++i){
 		double length[Nz];
 		double r = (i + 0.5)*tempdr;
@@ -522,7 +540,7 @@ void evaluateSpectrumSphericalAtNu(double nu, double*** nudoppler, double& I, do
 
 	double drho = tempRmax/Nrho;
 
-#pragma omp parallel for shared(nu, nudoppler, I, Inu, Anu, rmax,rfactor, fractionLength, d, beta, tempNr, tempRmax, tempRmin, tempdr, dphi, dz, gamma)
+//#pragma omp parallel for shared(nu, nudoppler, I, Inu, Anu, rmax,rfactor, fractionLength, d, beta, tempNr, tempRmax, tempRmin, tempdr, dphi, dz, gamma)
 	for(int i = 0; i < tempNr; ++i){
 		double length[Nz];
 		double r = (i + 0.5)*tempdr;
@@ -597,7 +615,7 @@ void evaluateSpectrumSphericalAtNu(double nu, double*** nudoppler, double& I, do
 								double costheta = z1/sqrt(z1*z1 + r1*r1);
 								double dopplerfactor = 1.0/(gamma*(1.0 - beta*costheta));
 								Q = Inu[rhoindex][j][k]*s*cube(dopplerfactor);
-								tau = Anu[rhoindex][j][k]*length[k];
+								tau = Anu[rhoindex][j][k]*length[k]/dopplerfactor;
 								S = 0;
 								if(Q > 0){
 									S = Q/Anu[rhoindex][j][k];
@@ -676,7 +694,7 @@ void evaluateSpectrumFlat(double* nu, double**** nudoppler, double* I, double***
 		}
 	}
 
-#pragma omp parallel for shared(nu, nudoppler, I, Inu, Anu, rmax, Nnu, fractionLength, beta, tempRmax, tempRmin, tempdr, dphi, dz, zmin, gamma, drho, length)
+//#pragma omp parallel for shared(nu, nudoppler, I, Inu, Anu, rmax, Nnu, fractionLength, beta, tempRmax, tempRmin, tempdr, dphi, dz, zmin, gamma, drho, length)
 	for(int i = 0; i < Nrho; ++i){
 		double s = 0.5*dphi*(2*i + 1)*tempdr*tempdr;
 		for(int j = 0; j < Nphi; ++j){
@@ -721,7 +739,7 @@ void evaluateSpectrumFlat(double* nu, double**** nudoppler, double* I, double***
 								double costheta = z1/sqrt(z1*z1 + r1*r1);
 								double dopplerfactor = 1.0/(gamma*(1.0 - beta*costheta));
 								Q = Inu[l][i][j][k]*s*cube(dopplerfactor);
-								tau = Anu[l][i][j][k]*length[k];
+								tau = Anu[l][i][j][k]*length[k]/dopplerfactor;
 								S = 0;
 								if(Q > 0){
 									S = Q/Anu[l][i][j][k];
@@ -812,7 +830,7 @@ void evaluateSpectrumFlatAtNu(double nu, double*** nudoppler, double& I, double*
 		}
 	}
 
-#pragma omp parallel for shared(nu, nudoppler, I, Inu, Anu, rmax, rfactor, fractionLength, d, beta, tempRmax, tempRmin, tempdr, dphi, dz, zmin, gamma, drho, length)
+//#pragma omp parallel for shared(nu, nudoppler, I, Inu, Anu, rmax, rfactor, fractionLength, d, beta, tempRmax, tempRmin, tempdr, dphi, dz, zmin, gamma, drho, length)
 	for(int i = 0; i < Nrho; ++i){
 		double s = 0.5*dphi*(2*i + 1)*tempdr*tempdr;
 		for(int j = 0; j < Nphi; ++j){
@@ -856,7 +874,7 @@ void evaluateSpectrumFlatAtNu(double nu, double*** nudoppler, double& I, double*
 								double costheta = z1/sqrt(z1*z1 + r1*r1);
 								double dopplerfactor = 1.0/(gamma*(1.0 - beta*costheta));
 								Q = Inu[i][j][k]*s*cube(dopplerfactor);
-								tau = Anu[i][j][k]*length[k];
+								tau = Anu[i][j][k]*length[k]/dopplerfactor;
 								S = 0;
 								if(Q > 0){
 									S = Q/Anu[i][j][k];
@@ -1290,19 +1308,50 @@ double evaluateNextdFe(double* Ee, double* dFe, double dg, int j, int Np) {
 	return nextdFe;
 }
 
-void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& Anu, double* Ee, double* dFe, int Np, double sinhi, double B, double concentration){
+void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& Anu, double* Ee, double* dFe, int Np, double sinhi, double psi, double B, double concentration, double dopplerBeta, double cosbeta, double phi){
 	//Anu from ghiselini simple
 	Inu = 0;
 	Anu = 0;
 
-	if(sinhi == 0.0){
+	double coshi1;
+	double sinhi1;
+
+	switch (doppler) {
+	case Doppler::DIFFERENTIAL: {
+			double Bx1, By1, Bz1;
+			//todo lorentz transformation of fields?
+			if (fabs(sinhi) > 1.0) {
+				printf("sinhi > 1\n");
+				exit(0);
+			}
+			double coshi = sqrt(1.0 - sinhi * sinhi);
+			Bz1 = B * coshi;
+			Bx1 = B * sinhi * cos(psi);
+			By1 = B * sinhi * sin(psi);
+			double beta = acos(cosbeta);
+			double cosbeta1 = (cosbeta - dopplerBeta) / (1.0 - dopplerBeta * cosbeta);
+			double beta1 = acos(cosbeta1);
+
+			double nz1 = cos(beta1 - beta);
+			double nx1 = sin(beta1 - beta) * cos(phi);
+			double ny1 = sin(beta1 - beta) * sin(phi);
+
+			coshi1 = (nx1 * Bx1 + ny1 * By1 + nz1 * Bz1) / B;
+			sinhi1 = sqrt(1.0 - coshi1 * coshi1);
+		}
+		break;
+	default:
+		sinhi1 = sinhi;
+		coshi1 = sqrt(1.0 - sinhi * sinhi);
+	}
+
+	if (sinhi1 == 0.0) {
 		return;
 	}
 
 	double coef = concentration * emissivityCoef;
 	//double coefAbsorb = concentration * absorpCoef/B;
 	//todo what if < 0?
-	double coshi = sqrt(1.0 - sinhi*sinhi);
 
 
 	double oldA = 0;
@@ -1350,7 +1399,7 @@ void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& A
 	}
 }
 
-void evaluateEmissivityAndAbsorptionFlatSimple(double* nu, double* Inu, double* Anu, double* Ee, double* Fe, int Np, int Nnu, double sinhi, double B, double concentration){
+void evaluateEmissivityAndAbsorptionFlatSimple(double* nu, double* Inu, double* Anu, double* Ee, double* Fe, int Np, int Nnu, double sinhi, double psi, double B, double concentration, double dopplerBeta){
 	for(int i = 0; i < Nnu; ++i){
 		Inu[i] = 0;
 		Anu[i] = 0;
@@ -1360,8 +1409,9 @@ void evaluateEmissivityAndAbsorptionFlatSimple(double* nu, double* Inu, double* 
 		return;
 	}
 
+	double cosbeta = 1.0;
 	for(int i = 0; i < Nnu; ++i){
-		evaluateEmissivityAndAbsorptionAtNuSimple(nu[i], Inu[i], Anu[i], Ee, Fe, Np, sinhi, B, concentration);
+		evaluateEmissivityAndAbsorptionAtNuSimple(nu[i], Inu[i], Anu[i], Ee, Fe, Np, sinhi, psi, B, concentration, dopplerBeta, cosbeta, 0);
 	}
 }
 

@@ -99,11 +99,12 @@ void evaluateOrientationParameters(double** B, double** sintheta, int** thetaInd
 	}
 }
 
-void evaluateOrientationParameters3d(double*** B, double*** sintheta, int*** thetaIndex, double*** Bx, double*** By, double*** Bz, int Nd){
+void evaluateOrientationParameters3d(double*** B, double*** sintheta, double*** psi, int*** thetaIndex, double*** Bx, double*** By, double*** Bz, int Nd){
 	for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
 			for(int k = 0; k < Nz; ++k){
 				//double r = rmax;
+				psi[i][j][k] = atan2(By[i][j][k], Bx[i][j][k]);
 				double Bxy = sqrt(Bx[i][j][k]*Bx[i][j][k] + By[i][j][k]*By[i][j][k]);
 				B[i][j][k] = sqrt(Bz[i][j][k]*Bz[i][j][k] + Bx[i][j][k]*Bx[i][j][k] + By[i][j][k]*By[i][j][k]);
 				double cosTheta = Bz[i][j][k]/B[i][j][k];
@@ -148,11 +149,12 @@ void evaluateOrientationParameters3d(double*** B, double*** sintheta, int*** the
 	}
 }
 
-void evaluateOrientationParameters3dflat(double*** B, double*** sintheta, int*** thetaIndex, double*** Bx, double*** By, double*** Bz, int Nd){
+void evaluateOrientationParameters3dflat(double*** B, double*** sintheta, double*** psi, int*** thetaIndex, double*** Bx, double*** By, double*** Bz, int Nd){
 	for(int i = 0; i < Nrho; ++i){
 		for(int j = 0; j < Nphi; ++j){
 			for(int k = 0; k < Nz; ++k){
 				//double r = rmax;
+				psi[i][j][k] = atan2(By[i][j][k], Bx[i][j][k]);
 				double Bxy = sqrt(Bx[i][j][k]*Bx[i][j][k] + By[i][j][k]*By[i][j][k]);
 				B[i][j][k] = sqrt(Bz[i][j][k]*Bz[i][j][k] + Bx[i][j][k]*Bx[i][j][k] + By[i][j][k]*By[i][j][k]);
 				double cosTheta = Bz[i][j][k]/B[i][j][k];
@@ -490,6 +492,7 @@ int main()
 	double*** concentrations3d;
 	int*** thetaIndex3d;
 	double*** sintheta3d;
+	double*** psi3d;
 
 	
 
@@ -591,6 +594,7 @@ int main()
 	Bz3d = new double**[Nrho];
 	concentrations3d = new double**[Nrho];
 	sintheta3d = new double**[Nrho];
+	psi3d = new double** [Nrho];
 	thetaIndex3d = new int**[Nrho];
 	for(int i = 0; i < Nrho; ++i){
 		B3d[i] = new double*[Nphi];
@@ -599,6 +603,7 @@ int main()
 		Bz3d[i] = new double*[Nphi];
 		concentrations3d[i] = new double*[Nphi];
 		sintheta3d[i] = new double*[Nphi];
+		psi3d[i] = new double* [Nphi];
 		thetaIndex3d[i] = new int*[Nphi];
 		for(int j = 0; j < Nphi; ++j){
 			B3d[i][j] = new double[Nz];
@@ -607,6 +612,7 @@ int main()
 			Bz3d[i][j] = new double[Nz];
 			concentrations3d[i][j] = new double[Nz];
 			sintheta3d[i][j] = new double[Nz];
+			psi3d[i][j] = new double[Nz];
 			thetaIndex3d[i][j] = new int[Nz];
 			for(int k = 0; k < Nz; ++k){
 				double r = sqrt(1.0*(i+0.5)*(i+0.5) + (k + 0.5 - Nz/2.0)*(k + 0.5 - Nz/2.0));
@@ -758,9 +764,9 @@ int main()
 
 
 	if(geometry == SPHERICAL){
-		evaluateOrientationParameters3d(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
+		evaluateOrientationParameters3d(B3d, sintheta3d, psi3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
 	} else {
-		evaluateOrientationParameters3dflat(B3d, sintheta3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
+		evaluateOrientationParameters3dflat(B3d, sintheta3d, psi3d, thetaIndex3d, Bx3d, By3d, Bz3d, Ndist);
 	}
 
 	double**** weights = new double***[Nrho];
@@ -1194,7 +1200,7 @@ int main()
 		timeMoments[i] = times[i];
 	}
 
-	double error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
+	double error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
 	printf("error = %lf\n", error);
 	fprintf(logFile, "error = %lf\n", error);
 	const int Nbp = 8;
@@ -1235,7 +1241,7 @@ int main()
 									vector[5] = tempA/maxBpower;
 									vector[6] = tempB/maxNpower;
 									vector[7] = tempFpower/maxFpower;
-									double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
+									double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
 									printf("tempError = %lf\n", tempError);
 									//fprintf(logFile, "tempError = %lf\n", tempError);
 									if(tempError < error){
@@ -1286,7 +1292,7 @@ int main()
 	vector[6] = b/maxNpower;
 	vector[7] = fpower/maxFpower;
 
-	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
+	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
 	fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf, r0 = %lf a = %lf b = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b);
 	printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, rmax = %lf, v/c = %lf, r0 = %lf a = %lf b = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b);
 
@@ -1295,7 +1301,7 @@ int main()
 		if(geometry == FLAT_SIMPLE){
 			//optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, weightedEe, weightedFe[0][0][0], Np, Ndist, 1.0, 8, logFile);
 		} else {
-			optimizeParametersGeneral(vector, optPar, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth, logFile);
+			optimizeParametersGeneral(vector, optPar, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth, logFile);
 			Bfactor = vector[0]*maxB;
 			concentration = vector[1]*maxN;
 			fractionSize = vector[2]*maxFraction;
@@ -1313,7 +1319,7 @@ int main()
 	///////////////////
 
 
-	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
+	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
 
 	printf("integrating fields\n");
 	fprintf(logFile, "integrating Fields\n");
@@ -1377,9 +1383,9 @@ int main()
 		//evaluateAllEmissivityAndAbsorption1(nu, Inu, Anu, Nnu, Ee, dFe, Np, Ndist, B, sintheta, thetaIndex, concentrations, locN, locB, fractionSize);
 		//evaluateSpectrum(nu, tempTotalInu[l], Inu, Anu, area, length, Nnu, r, Rho, Phi);
 
-		evaluateAllEmissivityAndAbsorption(tempNuDoppler, tempInu, tempAnu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, rfactor, a, b);
+		double dopplerBeta = 0.75 * v / speed_of_light;
+		evaluateAllEmissivityAndAbsorption(tempNuDoppler, tempInu, tempAnu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, concentration, Bfactor, rfactor, a, b, dopplerBeta);
 		double tempFraction = fractionSize/pow(rfactor, fpower - 1.0);
-		double dopplerBeta = 0.75*v/speed_of_light;
 		if(l == 0) {
 			if(geometry == SPHERICAL){
 				evaluateImageSpherical(image, nu, tempNuDoppler, tempInu, tempAnu, r, Nnum, rfactor, tempFraction, dopplerBeta);
@@ -1442,7 +1448,7 @@ int main()
 			vector[6] = b/maxNpower;
 			vector[7] = fpower/maxFpower;
 
-			double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
+			double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
 			fprintf(errorFile, "%g ", tempError);
 		}
 		fprintf(errorFile, "\n");

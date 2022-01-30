@@ -7,7 +7,7 @@ void evaluateMcDonaldFunctions(const double& nu, double& K1_3, double& K2_3, dou
 double criticalNu(const double& E, const double& sinhi, const double& H);
 double findEmissivityAt(double* nu, double* Inu, double currentNu, int Nnu);
 
-void evaluateAllEmissivityAndAbsorption(double**** nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor, double a, double b);
+void evaluateAllEmissivityAndAbsorption(double**** nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, double*** psi, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor, double a, double b, double dopplerBeta);
 
 void evaluateSpectrumSpherical(double* nu, double**** nudoppler, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double fractionLength, const double& beta);
 void evaluateSpectrumSphericalAtNu(double nu, double*** nudoppler, double& I, double*** Inu, double*** Anu, double rmax, double rfactor, double fractionLength, double d, const double& beta);
@@ -27,6 +27,6 @@ void evaluateNuDoppler(double**** NuDoppler, int Nnu, double* nu, const double& 
 void evaluateSpectrumFlatSimple(double* nu, double* totalInu, double* Inu, double* Anu, int Nnu, double rmax, double fraction);
 
 void evaluateSpectrumAtNuSimple(double nu, double& totalInu, double Inu, double Anu, double rmax, double fraction);
-void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& Anu, double* Ee, double* Fe, int Np, double sinhi, double B, double concentration);
-void evaluateEmissivityAndAbsorptionFlatSimple(double* nu, double* Inu, double* Anu, double* Ee, double* Fe, int Np, int Nnu, double sinhi, double B, double concentration);
+void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& Anu, double* Ee, double* dFe, int Np, double sinhi, double psi, double B, double concentration, double dopplerBeta, double cosbeta, double phi);
+void evaluateEmissivityAndAbsorptionFlatSimple(double* nu, double* Inu, double* Anu, double* Ee, double* Fe, int Np, int Nnu, double sinhi, double psi, double B, double concentration, double dopplerBeta);
 #endif

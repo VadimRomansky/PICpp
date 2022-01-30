@@ -1145,7 +1145,7 @@ double evaluateNextdFe(double* Ee, double* dFe, double dg, int j, int Np) {
 	return nextdFe;
 }
 
-void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& Anu, double* Ee, double* dFe, int Np, double sinhi, double B, double concentration){
+void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& Anu, double* Ee, double* dFe, int Np, double sinhi, double B, double concentration, double dopplerBeta, double cosbeta){
 	//Anu from ghiselini simple
 	Inu = 0;
 	Anu = 0;
