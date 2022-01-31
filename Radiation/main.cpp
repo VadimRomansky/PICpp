@@ -1165,8 +1165,8 @@ int main()
 	double V0 = speed_of_light;
 	double v = 0.75*speed_of_light;
 	double r0 = 0.1*maxR0;
-	double a = 1.0; //B power r
-	double b = 2.0; //N power r
+	double a = 1.0; //B power r ^(a-1)
+	double b = 2.0; //N power r ^ (b-1);
 	double fpower = 1.0;//f-1 power r
 	rmax = 3.4E16;
 	////////////////////
@@ -1183,8 +1183,9 @@ int main()
 	v = 0.67*speed_of_light;
 	sigma = 0.02;
 	//concentration = sqr(Bfactor)/(sigma*4*pi*massProtonReal*speed_of_light2);
-	bool optPar[8] = {true, true, true, true, true, false, false, true};
-	double vector[8];
+	const int Nopt = 8;
+	bool optPar[Nopt] = {true, true, true, true, true, false, false, false};
+	double vector[Nopt];
 	vector[0] = Bfactor/maxB;
 	vector[1] = concentration/maxN;
 	vector[2] = fractionSize/maxFraction;
@@ -1215,8 +1216,8 @@ int main()
 	double fpoints[Nfp] = {0.03, 0.06, 0.1,0.3,0.4,0.5};
 	double vpoints[Nvp] = {0.4*speed_of_light, 0.5*speed_of_light, 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nr0] = {0.1*maxR0, 0.2*maxR0, 0.4*maxR0, 0.5*maxR0};
-	double apoints[Na] = {0,1,2};
-	double bpoints[Nb1] = {0,1,2};
+	double apoints[Na] = {1,2,3};
+	double bpoints[Nb1] = {1,2,3};
 	if(initialGridSearch){
 		for(int i = 0; i < Nbp; ++i){
 			double tempBfactor = Bpoints[i];
@@ -1273,14 +1274,14 @@ int main()
 		fscanf(initialFile, "%lf %lf %lf %lf %lf %lf %lf %lf", &Bfactor, &concentration, &fractionSize, &v, &r0, &a, &b, &fpower);
 		v = v*speed_of_light;
 		fclose(initialFile);
-		Bfactor = 0.362992;
+		/*Bfactor = 0.362992;
 		concentration = 501.865;
 		fractionSize = 0.112738;
 		r0 = 5.10995e+15;
 		v = 0.364802*speed_of_light;
 		a = 2.0;
 		b = 2.0;
-		fpower = 2.56063;
+		fpower = 2.56063;*/
 	}
 
 	vector[0] = Bfactor/maxB;
@@ -1321,15 +1322,31 @@ int main()
 
 	error = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
 
+	int optimizationNumber = 0;
+	for (int i = 0; i < Nopt; ++i) {
+		if (optPar[i]) {
+			optimizationNumber++;
+		}
+	}
+	int pointsNumber = 0;
+	for (int i = 0; i < Nmonth; ++i) {
+		pointsNumber += Nnumonth[i];
+	}
 	printf("integrating fields\n");
 	fprintf(logFile, "integrating Fields\n");
 	fflush(logFile);
 	double* totalInu = new double[Nnu];
-	double finalSigma = sqr(Bfactor)/(4*pi*concentration*massProtonReal*speed_of_light2);
+	double gamma = 1.0 / sqrt(1.0 - 0.75 * 0.75 * v * v / speed_of_light2);
+	double finalSigma = sqr(Bfactor)/(4*pi*gamma*concentration*massProtonReal*speed_of_light2);
 	printf("Bfactor = %g, n = %g\n fraction = %g v/c = %g r0 = %g a = %g b = %g fpower = %g sigma = %g\n", Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b, fpower, finalSigma);
 	printf("error = %g\n", error);
-	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g v/c = %g r0 = %g a = %g b = %g fpower = %g sigma = %g\n", Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b, fpower, finalSigma);
+	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g v/c = %g r0 = %g a = %g b = %g fpower = %g\n", Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b, fpower);
+	fprintf(logFile, "sigma = %g\n", finalSigma);
+	fprintf(logFile, "R at t0 = %g\n", r0 + v * timeMoments[0]);
+	fprintf(logFile, "B ~ 1/r^%lf,  N ~ 1/r^%lf\n", a - 1, b - 1);
 	fprintf(logFile, "error = %g\n", error);
+	fprintf(logFile, "number of parameters = %d, number of points = %d\n", optimizationNumber, pointsNumber);
+	fprintf(logFile, "chi nu = %g\n", error/(pointsNumber - optimizationNumber));
 	fflush(logFile);
 
 	double** tempTotalInu = new double*[Nmonth];
