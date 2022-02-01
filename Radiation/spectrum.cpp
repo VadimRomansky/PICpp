@@ -399,7 +399,7 @@ void evaluateSpectrumSpherical(double* nu, double**** nuDoppler, double* I, doub
 
 	double drho = tempRmax/Nrho;
 
-//#pragma omp parallel for shared(nu, nuDoppler, I, Inu, Anu, rmax, Nnu, fractionLength, beta, tempNr, tempRmax, tempRmin, tempdr, dphi, dz, gamma)
+#pragma omp parallel for shared(nu, nuDoppler, I, Inu, Anu, rmax, Nnu, fractionLength, beta, tempNr, tempRmax, tempRmin, tempdr, dphi, dz, gamma)
 	for(int i = 0; i < tempNr; ++i){
 		double length[Nz];
 		double r = (i + 0.5)*tempdr;

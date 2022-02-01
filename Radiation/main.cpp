@@ -439,18 +439,6 @@ double evaluateB(double nupeak, double fpeak, double d, double fraction, double 
 
 int main()
 {
-	double** Bx;
-	double** By;
-	double** Bz;
-
-	double** area;
-	double** length;
-
-	double** concentrations;
-
-	double** B;
-	double** sintheta;
-	int** thetaIndex;
 
 	double thetaObserv = 0;
 	double cosThetaObserv = cos(thetaObserv);
@@ -1205,19 +1193,21 @@ int main()
 	printf("error = %lf\n", error);
 	fprintf(logFile, "error = %lf\n", error);
 	const int Nbp = 8;
-	const int Nnp = 10;
+	const int Nnp = 11;
 	const int Nfp = 6;
-	const int Nvp = 7;
+	const int Nvp = 8;
 	const int Nr0 = 4;
 	const int Na = 3;
 	const int Nb1 = 3;
+	const int Nf1 = 2;
 	double Bpoints[Nbp] = {0.1, 0.2, 0.5, 1, 2, 5, 10, 20};
-	double npoints[Nnp] = {0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500};
+	double npoints[Nnp] = {0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
 	double fpoints[Nfp] = {0.03, 0.06, 0.1,0.3,0.4,0.5};
-	double vpoints[Nvp] = {0.4*speed_of_light, 0.5*speed_of_light, 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
+	double vpoints[Nvp] = {0.3 * speed_of_light, 0.4*speed_of_light, 0.5*speed_of_light, 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nr0] = {0.1*maxR0, 0.2*maxR0, 0.4*maxR0, 0.5*maxR0};
 	double apoints[Na] = {1,2,3};
 	double bpoints[Nb1] = {1,2,3};
+	double fppoints[Nf1] = {1,2};
 	if(initialGridSearch){
 		for(int i = 0; i < Nbp; ++i){
 			double tempBfactor = Bpoints[i];
@@ -1233,34 +1223,36 @@ int main()
 								double tempA = apoints[ii];
 								for(int jj = 0; jj < Nb1; ++jj){
 									double tempB = bpoints[jj];
-									double tempFpower = fpower;
-									vector[0] = tempBfactor/maxB;
-									vector[1] = tempConcentration/maxN;
-									vector[2] = tempFractionSize/maxFraction;
-									vector[3] = tempV/maxV;
-									vector[4] = tempR0/maxR0;
-									vector[5] = tempA/maxBpower;
-									vector[6] = tempB/maxNpower;
-									vector[7] = tempFpower/maxFpower;
-									double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
-									printf("tempError = %lf\n", tempError);
-									//fprintf(logFile, "tempError = %lf\n", tempError);
-									if(tempError < error){
-										error = tempError;
-										Bfactor = vector[0]*maxB;
-										concentration = vector[1]*maxN;
-										fractionSize = vector[2]*maxFraction;
-										v = vector[3]*maxV;
-										r0 = vector[4]*maxR0;
-										a = vector[5]*maxBpower;
-										b = vector[6]*maxNpower;
-										fpower = vector[7]*maxFpower;
-										fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf r0 = %g a = %lf b = %lf fpower = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b, fpower);
-										printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf\n r0 = %g a = %lf b = %lf fpower = %lf", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b, fpower);
-										fflush(logFile);
-										FILE* initialFile = fopen("initialParameters.dat","w");
-										fprintf(initialFile,"%lf %lf %lf %lf %lf %lf %lf %lf", Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b, fpower);
-										fclose(initialFile);
+									for(int kk = 0; kk < Nf1; ++kk){
+										double tempFpower = fppoints[kk];
+										vector[0] = tempBfactor/maxB;
+										vector[1] = tempConcentration/maxN;
+										vector[2] = tempFractionSize/maxFraction;
+										vector[3] = tempV/maxV;
+										vector[4] = tempR0/maxR0;
+										vector[5] = tempA/maxBpower;
+										vector[6] = tempB/maxNpower;
+										vector[7] = tempFpower/maxFpower;
+										double tempError = evaluateOptimizationFunction5(vector, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth);
+										printf("tempError = %lf\n", tempError);
+										//fprintf(logFile, "tempError = %lf\n", tempError);
+										if(tempError < error){
+											error = tempError;
+											Bfactor = vector[0]*maxB;
+											concentration = vector[1]*maxN;
+											fractionSize = vector[2]*maxFraction;
+											v = vector[3]*maxV;
+											r0 = vector[4]*maxR0;
+											a = vector[5]*maxBpower;
+											b = vector[6]*maxNpower;
+											fpower = vector[7]*maxFpower;
+											fprintf(logFile, "tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf r0 = %g a = %lf b = %lf fpower = %lf\n", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b, fpower);
+											printf("tempError = %lf, Bfactor = %lf, concentration = %lf, fraction = %lf, v/c = %lf\n r0 = %g a = %lf b = %lf fpower = %lf", error, Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b, fpower);
+											fflush(logFile);
+											FILE* initialFile = fopen("initialParameters.dat","w");
+											fprintf(initialFile,"%lf %lf %lf %lf %lf %lf %lf %lf", Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b, fpower);
+											fclose(initialFile);
+										}
 									}
 								}
 							}
@@ -1336,17 +1328,21 @@ int main()
 	fprintf(logFile, "integrating Fields\n");
 	fflush(logFile);
 	double* totalInu = new double[Nnu];
+	double Rfiducial = 1E16;
 	double gamma = 1.0 / sqrt(1.0 - 0.75 * 0.75 * v * v / speed_of_light2);
 	double finalSigma = sqr(Bfactor)/(4*pi*gamma*concentration*massProtonReal*speed_of_light2);
 	printf("Bfactor = %g, n = %g\n fraction = %g v/c = %g r0 = %g a = %g b = %g fpower = %g sigma = %g\n", Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b, fpower, finalSigma);
 	printf("error = %g\n", error);
 	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g v/c = %g r0 = %g a = %g b = %g fpower = %g\n", Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b, fpower);
 	fprintf(logFile, "sigma = %g\n", finalSigma);
-	fprintf(logFile, "R at t0 = %g\n", r0 + v * timeMoments[0]);
+	double r1 = r0 + v * timeMoments[0];
+	fprintf(logFile, "R at t0 = %g\n",rmin);
 	fprintf(logFile, "B ~ 1/r^%lf,  N ~ 1/r^%lf\n", a - 1, b - 1);
+	fprintf(logFile, "B at %g cm = %g G, N at %g cm = %g cm^-3\n", Rfiducial, Bfactor / pow(Rfiducial / r1, a - 1),Rfiducial, concentration / pow(Rfiducial / r1, b - 1));
 	fprintf(logFile, "error = %g\n", error);
 	fprintf(logFile, "number of parameters = %d, number of points = %d\n", optimizationNumber, pointsNumber);
 	fprintf(logFile, "chi nu = %g\n", error/(pointsNumber - optimizationNumber));
+	fprintf(logFile, "approximate mass loss = %g Msun/year\n", 3.0E7*4*pi*massProtonReal*r1*r1*concentration*1.0E8/(2.0E33));
 	fflush(logFile);
 
 	double** tempTotalInu = new double*[Nmonth];
@@ -1673,34 +1669,13 @@ int main()
 			delete[] Anu[i][j];
 		}
 		delete[] Inu[i];
-		delete[] Anu[i];
-		delete[] Bx[i];
-		delete[] By[i];
-		delete[] Bz[i];
-		delete[] concentrations[i];
-		delete[] B[i];
-		delete[] sintheta[i];
-		delete[] thetaIndex[i];
+		delete[] Anu[i];;
 	}
 	delete[] Inu;
 	delete[] Anu;
-	delete[] Bx;
-	delete[] By;
-	delete[] Bz;
-	delete[] concentrations;
-	delete[] B;
-	delete[] sintheta;
-	delete[] thetaIndex;
 
 	delete[] Inuflat;
 	delete[] Anuflat;
-
-	for(int i = 0; i < Nrho; ++i){
-		delete[] area[i];
-		delete[] length[i];
-	}
-	delete[] area;
-	delete[] length;
 
 	delete[] Rho;
 	delete[] Phi;
