@@ -23,6 +23,8 @@ void evaluateImageFlat(double*** image, double* nu, double**** nudoppler, double
 void evaluateNuDoppler(double***** NuDoppler, int Nmonth, int* Nnumonth, double** Numonth, const double& beta);
 void evaluateNuDoppler(double**** NuDoppler, int Nnu, double* nu, const double& beta);
 
+void updateConcentartions(double*** concentrations3d, double beta);
+
 //for simple flat disk
 void evaluateSpectrumFlatSimple(double* nu, double* totalInu, double* Inu, double* Anu, int Nnu, double rmax, double fraction);
 

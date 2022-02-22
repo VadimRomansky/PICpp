@@ -55,9 +55,9 @@ const double distance = 40*3.08*1.0E24;
 //CSS161010
 //const double distance = 150*3.08*1.0E24;
 
-const int Nrho = 10;
+const int Nrho = 20;
 const int Nphi = 10;
-const int Nz = 10;
+const int Nz = 20;
 
 const int Nk = 10;
 
@@ -176,7 +176,7 @@ const double minBbound = 0;
 const double maxB = 50;
 const double minN = 0.01;
 const double minNbound = 0;
-const double maxN = 1000;
+const double maxN = 5000;
 const double minFraction = 0.001;
 const double maxFraction = 0.9;
 const double minFbound = 0;

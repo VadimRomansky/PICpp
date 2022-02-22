@@ -24,6 +24,7 @@ double evaluateOptimizationFunction5(double* vector, double* time, double** nu, 
 		double r = vector[4]*maxR0 + vector[3]*maxV*times[i];
 		//important 0 or Nmonth-1!
 		double rfactor = r/(vector[4]*maxR0 + vector[3]*maxV*times[0]);
+		updateConcentartions(concentrations, vector[3] * maxV / speed_of_light);
 		evaluateAllEmissivityAndAbsorption(nudoppler[i], Inu[i], Anu[i], Nnu[i], Ee, dFe, Np, Nd, Bn, sintheta, psi, thetaIndex, concentrations, vector[1]*maxN, vector[0]*maxB, rfactor, vector[5]*maxBpower, vector[6]*maxNpower, dopplerBeta);
 		//
 		//evaluateSpectrum(nu[i], totalInu, Inu[i], Anu[i], area, length, Nnu, rfactor);

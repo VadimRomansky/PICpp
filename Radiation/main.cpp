@@ -1197,16 +1197,37 @@ int main()
 	const int Nfp = 6;
 	const int Nvp = 8;
 	const int Nr0 = 4;
-	const int Na = 3;
-	const int Nb1 = 3;
+	int Na = 3;
+	double* apoints;
+	if (parker) {
+		Na = 1;
+		apoints = new double[Na];
+		apoints[0] = 2.0;
+	} else {
+		Na = 3;
+		apoints = new double[Na];
+		apoints[0] = 1.0;
+		apoints[1] = 2.0;
+		apoints[2] = 3.0;
+	}
+	int Nb1 = 3;
+	double* bpoints;
+	if (parker) {
+		Nb1 = 1;
+		bpoints = new double[Nb1];
+		bpoints[0] = 3.0;
+	} else {
+		Nb1 = 2;
+		bpoints = new double[Nb1];
+		bpoints[0] = 1.0;
+		bpoints[1] = 3.0;
+	}
 	const int Nf1 = 2;
 	double Bpoints[Nbp] = {0.1, 0.2, 0.5, 1, 2, 5, 10, 20};
-	double npoints[Nnp] = {0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
+	double npoints[Nnp] = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000};
 	double fpoints[Nfp] = {0.03, 0.06, 0.1,0.3,0.4,0.5};
 	double vpoints[Nvp] = {0.3 * speed_of_light, 0.4*speed_of_light, 0.5*speed_of_light, 0.6*speed_of_light, 0.65*speed_of_light, 0.7*speed_of_light, 0.75*speed_of_light, 0.8*speed_of_light};
 	double rpoints[Nr0] = {0.1*maxR0, 0.2*maxR0, 0.4*maxR0, 0.5*maxR0};
-	double apoints[Na] = {1,2,3};
-	double bpoints[Nb1] = {1,2,3};
 	double fppoints[Nf1] = {1,2};
 	if(initialGridSearch){
 		for(int i = 0; i < Nbp; ++i){
@@ -1275,6 +1296,8 @@ int main()
 		b = 2.0;
 		fpower = 2.56063;*/
 	}
+	delete[] bpoints;
+	delete[] apoints;
 
 	vector[0] = Bfactor/maxB;
 	vector[1] = concentration/maxN;
@@ -1336,13 +1359,13 @@ int main()
 	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g v/c = %g r0 = %g a = %g b = %g fpower = %g\n", Bfactor, concentration, fractionSize, v/speed_of_light, r0, a, b, fpower);
 	fprintf(logFile, "sigma = %g\n", finalSigma);
 	double r1 = r0 + v * timeMoments[0];
-	fprintf(logFile, "R at t0 = %g\n",rmin);
+	fprintf(logFile, "R at t0 = %g\n",r1);
 	fprintf(logFile, "B ~ 1/r^%lf,  N ~ 1/r^%lf\n", a - 1, b - 1);
 	fprintf(logFile, "B at %g cm = %g G, N at %g cm = %g cm^-3\n", Rfiducial, Bfactor / pow(Rfiducial / r1, a - 1),Rfiducial, concentration / pow(Rfiducial / r1, b - 1));
 	fprintf(logFile, "error = %g\n", error);
 	fprintf(logFile, "number of parameters = %d, number of points = %d\n", optimizationNumber, pointsNumber);
 	fprintf(logFile, "chi nu = %g\n", error/(pointsNumber - optimizationNumber));
-	fprintf(logFile, "approximate mass loss = %g Msun/year\n", 3.0E7*4*pi*massProtonReal*r1*r1*concentration*1.0E8/(2.0E33));
+	fprintf(logFile, "approximate mass loss = %g Msun/year\n", 3.14E7*4*pi*massProtonReal*r1*r1*concentration*1.0E8/(2.0E33));
 	fflush(logFile);
 
 	double** tempTotalInu = new double*[Nmonth];
@@ -1397,6 +1420,7 @@ int main()
 		//evaluateSpectrum(nu, tempTotalInu[l], Inu, Anu, area, length, Nnu, r, Rho, Phi);
 
 		double dopplerBeta = 0.75 * v / speed_of_light;
+		updateConcentartions(concentrations3d, v / speed_of_light);
 		evaluateAllEmissivityAndAbsorption(tempNuDoppler, tempInu, tempAnu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, concentration, Bfactor, rfactor, a, b, dopplerBeta);
 		double tempFraction = fractionSize/pow(rfactor, fpower - 1.0);
 		if(l == 0) {

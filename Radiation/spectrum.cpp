@@ -399,7 +399,7 @@ void evaluateSpectrumSpherical(double* nu, double**** nuDoppler, double* I, doub
 
 	double drho = tempRmax/Nrho;
 
-#pragma omp parallel for shared(nu, nuDoppler, I, Inu, Anu, rmax, Nnu, fractionLength, beta, tempNr, tempRmax, tempRmin, tempdr, dphi, dz, gamma)
+//#pragma omp parallel for shared(nu, nuDoppler, I, Inu, Anu, rmax, Nnu, fractionLength, beta, tempNr, tempRmax, tempRmin, tempdr, dphi, dz, gamma)
 	for(int i = 0; i < tempNr; ++i){
 		double length[Nz];
 		double r = (i + 0.5)*tempdr;
@@ -1481,4 +1481,21 @@ void evaluateNuDoppler(double**** NuDoppler, int Nnu, double* nu, const double& 
 				}
 			}
 		}
+}
+
+void updateConcentartions(double*** concentrations3d, double beta) {
+	for (int i = 0; i < Nrho; ++i) {
+		for (int j = 0; j < Nphi; ++j) {
+			for (int k = 0; k < Nz; ++k) {
+				if (geometry == SPHERICAL) {
+					double r = sqrt(1.0 * (i + 0.5) * (i + 0.5) + (k + 0.5 - Nz / 2.0) * (k + 0.5 - Nz / 2.0));
+					double rmax = Nrho;
+					concentrations3d[i][j][k] = 1.0 * pow(1 - beta, 7.0 / 4.0) / pow(1 - beta * r / rmax, 7.0 / 4.0);
+				}
+				else {
+					concentrations3d[i][j][k] = 1.0;
+				}
+			}
+		}
+	}
 }
