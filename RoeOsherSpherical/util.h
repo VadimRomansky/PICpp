@@ -1,5 +1,7 @@
 #ifndef UTIL_H
 #define UTIL_H
+# include <string>
+
 
 double power(double v, double p);
 double sqr(double v);

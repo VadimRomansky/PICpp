@@ -41,8 +41,8 @@ double Simulation::injection(int i){
 	//double xi = 5;
 	double xi = pgrid[injectionMomentum]*speed_of_light/(kBoltzman*temperatureIn(i+1));
 	double eta = cube(xi)*exp(-xi);
-    //return (1E-3)*middleDensity[i+1]*abs2(middleVelocity[i-1])*pf/(massProton*dp*deltaR[i]);
-    return (1E-3)*pf*pf*pf*middleDensity[i+1]/(massProton*dp*volume(i)*deltaT);
+    return (1E-3)*middleDensity[i+1]*abs2(middleVelocity[i-1])*pf/(massProton*dp*deltaR[i]);
+    //return (1E-3)*pf*pf*pf*middleDensity[i+1]/(massProton*dp*volume(i)*deltaT);
 }
 
 
@@ -54,20 +54,20 @@ void Simulation::evaluateCR(){
 		distributionFunction[shockWavePoint][injectionMomentum] += injection()*deltaT;
 	}*/
 	double mc2 = massProton*sqr(speed_of_light);
+	double* upper = new double[rgridNumber + 1];
+	double* middle = new double[rgridNumber + 1];
+	double* lower = new double[rgridNumber + 1];
 
+	double* f = new double[rgridNumber + 1];
+	double* x = new double[rgridNumber + 1];
+
+	double* alpha = new double[rgridNumber];
+	double* beta = new double[rgridNumber];
 	int k;
-#pragma omp parallel for private(k)
+	//todo?? private pointer?
+#pragma omp parallel for private(k, upper, middle, lower, f, x, alpha, beta)
 		for(k = 0; k < pgridNumber; ++k){
 
-			double* upper = new double[rgridNumber+1];
-			double* middle = new double[rgridNumber+1];
-			double* lower = new double[rgridNumber+1];
-		
-			double* f = new double[rgridNumber+1];
- 			double* x = new double[rgridNumber+1];
-
-			double* alpha = new double[rgridNumber];
-			double* beta = new double[rgridNumber];
 
 			double y = logPgrid[k];
 			double p = pgrid[k];
@@ -234,16 +234,16 @@ void Simulation::evaluateCR(){
 			}
 			//tempDistributionFunction[rgridNumber][k] =x[rgridNumber-1];
 			tempDistributionFunction[rgridNumber][k] = 0;
-
-			delete[] upper;
-			delete[] middle;
-			delete[] lower;
-			delete[] f;
-			delete[] x;
-			delete[] alpha;
-			delete[] beta;
 		
 	}
+
+	delete[] upper;
+	delete[] middle;
+	delete[] lower;
+	delete[] f;
+	delete[] x;
+	delete[] alpha;
+	delete[] beta;
 	
 }
 

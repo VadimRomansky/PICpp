@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleRadiation", "SimpleRadiation\SimpleRadiation.vcxproj", "{913CE54B-BD5D-4A5C-A348-1497B32E205F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PIC++", "PIC++\PIC++.vcxproj", "{A36B2A8B-8E90-49F0-9C6C-0CC1F904545A}"
@@ -10,6 +12,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Adiabata", "Adiabata\Adiabata.vcxproj", "{F547D6E5-8355-48B8-989D-DA7169EA0603}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Radiation", "Radiation\Radiation.vcxproj", "{EE48822B-5F2D-4B59-B8EF-C4309D29828F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RoeOsherSpherical", "RoeOsherSpherical\RoeOsherSpherical.vcxproj", "{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -73,8 +77,23 @@ Global
 		{EE48822B-5F2D-4B59-B8EF-C4309D29828F}.Release|Win32.ActiveCfg = Release|Win32
 		{EE48822B-5F2D-4B59-B8EF-C4309D29828F}.Release|Win32.Build.0 = Release|Win32
 		{EE48822B-5F2D-4B59-B8EF-C4309D29828F}.Release|x64.ActiveCfg = Release|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Debug|Win32.Build.0 = Debug|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Debug|x64.ActiveCfg = Debug|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Debug|x64.Build.0 = Debug|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|Win32.ActiveCfg = Release|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|Win32.Build.0 = Release|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|x64.ActiveCfg = Release|Win32
+		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|x64.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CB83C666-0B6A-4B8C-BC67-70B148A9BAC7}
 	EndGlobalSection
 EndGlobal

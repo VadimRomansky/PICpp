@@ -443,16 +443,15 @@ void Simulation::evaluateFluxes(){
 	int ompi = 0;
     //#pragma omp parallel for private(ompi)
 	for(ompi = 0; ompi < numThreads; ++ ompi){
-		for(int i = ompi+1; i < rgridNumber; i = i + numThreads){
-			double** vectors = new double*[3];
-			double* deltaS = new double[3];
-			double* lambdaPlus = new double[3];
-			double* lambdaMinus = new double[3];
-			double* lambdaMod = new double[3];
+		double vectors[3][3];
+		double deltaS[3] = {0,0,0};
+		double lambdaPlus[3] = { 0,0,0 };
+		double lambdaMinus[3] = { 0,0,0 };
+		double lambdaMod[3] = { 0,0,0 };
 
-			for(int k = 0; k < 3; ++k){
-				vectors[k] = new double[3];
-			}
+		
+		for(int i = ompi+1; i < rgridNumber; i = i + numThreads){
+			
 			double leftDflux = middleVelocity[i-1]*middleDensity[i-1];
 			double rightDflux = middleVelocity[i]*middleDensity[i];
 			double leftMflux = leftDflux*middleVelocity[i-1] + middlePressure[i-1];
@@ -512,17 +511,7 @@ void Simulation::evaluateFluxes(){
 				eFluxPlus[i][j] = lambdaPlus[j]*deltaS[j]*vectors[2][j];
 				eFluxMinus[i][j] = lambdaMinus[j]*deltaS[j]*vectors[2][j];
 			}
-
-			for(int k = 0; k < 3; ++k){
-				delete[] vectors[k];
-			}
-			delete[] vectors;
-			delete[] deltaS;
-			delete[] lambdaPlus;
-			delete[] lambdaMinus;
-			delete[] lambdaMod;
 		}
-	
 	}
 }
 

@@ -1,11 +1,15 @@
 clear;
-tamc_radial_profile = importdata('./output/tamc_radial_profile_25.dat');
+tamc_radial_profile = importdata('./output/tamc_radial_profile_230.dat');
 xfile = importdata('./output/xfile.dat');
 
 Nx = size(xfile,1);
 Nt = size(tamc_radial_profile,1)/Nx;
 
 a = Nt - 1;
+
+set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
+set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
+set(0, 'DefaultLineLineWidth', 1.5);
 
 figure(1);
 plot (xfile(1:Nx),tamc_radial_profile(a*Nx + (1:Nx), 1), 'red');
