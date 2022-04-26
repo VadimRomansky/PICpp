@@ -33,8 +33,8 @@ int main()
 	//const double gamma_sh=1.5;
 	const double gamma0 = 10.0;
 	const double beta0 = sqrt(1.0 - 1.0/sqr(gamma0));
-	const double beta_sh = 0.504;
-	const double beta1 = (beta0 + beta_sh)/(1 + beta0*beta_sh);
+	const double beta_sh_d = 0.504;
+	const double beta1 = (beta0 + beta_sh_d)/(1 + beta0*beta_sh_d);
 	const double gamma_sh= 1.0/sqrt(1.0 - beta1*beta1);
 	const double UpstreamNumberDensity=1.0/gamma_sh;
 	const double UpstreamFlowSpeed=c_cgs*sqrt((1.0-sqr(1.0/gamma_sh)));
