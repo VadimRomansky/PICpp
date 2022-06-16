@@ -1244,14 +1244,18 @@ int main()
 		}
 	}
 
+	Bfactor = 0.069;
+	rmax = 3E17;
+
 	double vector[3];
 	vector[0] = Bfactor/maxB;
 	vector[1] = rmax/maxR;
 	vector[2] = fractionSize;
 	epsilonB = 0.0012;
 	vector[3] = epsilonB;
+	double dopplerBeta = 0.75 * 0.5 * speed_of_light;
 
-	optimizeParametersGeneral(vector, 3, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, logFile);
+	optimizeParametersGeneral(vector, 3, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, dopplerBeta, logFile);
 	Bfactor = vector[0]*maxB;
 	rmax = vector[1]*maxR;
 	fractionSize = vector[2];
@@ -1284,7 +1288,7 @@ int main()
 	delete[] Inu1;
 	delete[] Anu1;
 
-	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, 1.0);
+	evaluateAllEmissivityAndAbsorption(nu, Inu, Anu, Nnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, 1.0, 0.75*v/speed_of_light);
 
 	FILE* Ifile = fopen("Inu.dat","w");
 	FILE* Afile = fopen("Anu.dat","w");
@@ -1360,11 +1364,11 @@ int main()
 
 
 	FILE* outputParam = fopen("parameters.dat","w");
-	fprintf(outputParam, "%g\n", Bfactor);
-	fprintf(outputParam, "%g\n", concentration);
-	fprintf(outputParam, "%g\n", fractionSize);
-	fprintf(outputParam, "%g\n", rmax);
-	fprintf(outputParam, "%g\n", v/speed_of_light);
+	fprintf(outputParam, "B %g\n", Bfactor);
+	fprintf(outputParam, "n %g\n", concentration);
+	fprintf(outputParam, "f %g\n", fractionSize);
+	fprintf(outputParam, "R %g\n", rmax);
+	fprintf(outputParam, "v/c %g\n", v/speed_of_light);
 	fclose(outputParam);
 
 	////////////////////

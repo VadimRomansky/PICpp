@@ -328,13 +328,30 @@ void evaluateLocalEmissivityAndAbsorption1(double* nu, double* Inu, double* Anu,
 	//}
 }
 
-void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor){
+void evaluateAllEmissivityAndAbsorption(double* nu, double**** Inu, double**** Anu, int Nnu, double* Ee, double**** Fe, int Np, int Nd, double*** Bn, double*** sintheta, int*** thetaIndex, double*** concentrations, double concentration, double Bfactor, double rfactor, double dopplerBeta){
 #pragma omp parallel for shared(nu, Inu, Anu, Ee, Fe, Np, Nd, Bn, sintheta, thetaIndex, concentrations, concentration, Bfactor, rfactor)	
 	for(int i = 0; i < Nrho; ++i){
-		for(int j = 0; j < Nphi; ++j){
-			for(int k = 0; k < Nz; ++k){
+		for(int k = 0; k < Nz; ++k){
+			double cosbeta = 1.0;
+			switch (doppler) {
+			case Doppler::NO:
+				cosbeta = 1.0;
+				break;
+			case Doppler::INTEGER:
+				cosbeta = 1.0;
+				break;
+			case Doppler::DIFFERENTIAL: {
+					double z = (k - 0.5 * Nz + 0.5);
+					double r = i + 0.5;
+					cosbeta = z / sqrt(z * z + r * r);
+				}
+				break;
+			default:
+				cosbeta = 1.0;
+			}
+			for (int j = 0; j < Nphi; ++j) {
 				for(int l = 0; l < Nnu; ++l){
-					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/rfactor, concentration*concentrations[i][j][k]/(rfactor*rfactor));
+					evaluateEmissivityAndAbsorptionAtNuSimple(nu[l], Inu[l][i][j][k], Anu[l][i][j][k], Ee, Fe[i][j][k], Np, sintheta[i][j][k], Bfactor*Bn[i][j][k]/rfactor, concentration*concentrations[i][j][k]/(rfactor*rfactor), dopplerBeta, cosbeta);
 				}
 			}
 		}
@@ -1208,7 +1225,7 @@ void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& A
 	}
 }
 
-void evaluateEmissivityAndAbsorptionFlatSimple(double* nu, double* Inu, double* Anu, double* Ee, double* Fe, int Np, int Nnu, double sinhi, double B, double concentration){
+void evaluateEmissivityAndAbsorptionFlatSimple(double* nu, double* Inu, double* Anu, double* Ee, double* Fe, int Np, int Nnu, double sinhi, double B, double concentration, double dopplerBeta){
 	for(int i = 0; i < Nnu; ++i){
 		Inu[i] = 0;
 		Anu[i] = 0;
@@ -1219,6 +1236,6 @@ void evaluateEmissivityAndAbsorptionFlatSimple(double* nu, double* Inu, double* 
 	}
 
 	for(int i = 0; i < Nnu; ++i){
-		evaluateEmissivityAndAbsorptionAtNuSimple(nu[i], Inu[i], Anu[i], Ee, Fe, Np, sinhi, B, concentration);
+		evaluateEmissivityAndAbsorptionAtNuSimple(nu[i], Inu[i], Anu[i], Ee, Fe, Np, sinhi, B, concentration, dopplerBeta, 1.0);
 	}
 }

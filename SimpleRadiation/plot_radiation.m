@@ -171,6 +171,7 @@ set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'log');
 plot(radiation1(1:N,1),radiation1(1:N,2),'Color','red','LineWidth',2);
 plot(radiation3(1:N,1),radiation3(1:N,2),'Color','blue','LineWidth',2);
+plot(radiation4(1:N,1),radiation4(1:N,2),'Color','green','LineWidth',2);
 sz = 20;
 scatter(x357(1:6), y357(1:6),sz,'MarkerEdgeColor','magenta','MarkerFaceColor','magenta','LineWidth',2);
 %scatter(datar(1:Ndatar,1), datar(1:Ndatar,2),sz,'MarkerEdgeColor','magenta','MarkerFaceColor','magenta','LineWidth',2);

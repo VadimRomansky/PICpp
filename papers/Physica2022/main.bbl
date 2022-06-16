@@ -1,0 +1,135 @@
+\providecommand{\newblock}{}
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{{\tt #1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+% Bibliography created with iopart-num v2.0
+% /biblio/bibtex/contrib/iopart-num
+
+\bibitem{2016ApJ...819...35A}
+{Arcavi} I, {Wolf} W~M, {Howell} D~A, {Bildsten} L, {Leloudas} G, {Hardin} D,
+  {Prajs} S, {Perley} D~A, {Svirski} G, {Gal-Yam} A, {Katz} B, {McCully} C,
+  {Cenko} S~B, {Lidman} C, {Sullivan} M, {Valenti} S, {Astier} P, {Balland} C,
+  {Carlberg} R~G, {Conley} A, {Fouchez} D, {Guy} J, {Pain} R,
+  {Palanque-Delabrouille} N, {Perrett} K, {Pritchet} C~J, {Regnault} N, {Rich}
+  J and {Ruhlmann-Kleider} V 2016 {\em \apj\/} {\bf 819} 35 (\textit{Preprint}
+  \eprint{1511.00704})
+
+\bibitem{2019ApJ...872...18M}
+{Margutti} R, {Metzger} B~D, {Chornock} R, {Vurm} I, {Roth} N, {Grefenstette}
+  B~W, {Savchenko} V, {Cartier} R, {Steiner} J~F, {Terreran} G, {Margalit} B,
+  {Migliori} G, {Milisavljevic} D, {Alexander} K~D, {Bietenholz} M, {Blanchard}
+  P~K, {Bozzo} E, {Brethauer} D, {Chilingarian} I~V, {Coppejans} D~L, {Ducci}
+  L, {Ferrigno} C, {Fong} W, {G{\"o}tz} D, {Guidorzi} C, {Hajela} A, {Hurley}
+  K, {Kuulkers} E, {Laurent} P, {Mereghetti} S, {Nicholl} M, {Patnaude} D,
+  {Ubertini} P, {Banovetz} J, {Bartel} N, {Berger} E, {Coughlin} E~R,
+  {Eftekhari} T, {Frederiks} D~D, {Kozlova} A~V, {Laskar} T, {Svinkin} D~S,
+  {Drout} M~R, {MacFadyen} A and {Paterson} K 2019 {\em \apj\/} {\bf 872} 18
+  (\textit{Preprint} \eprint{1810.10720})
+
+\bibitem{2020ApJ...895...49H}
+{Ho} A~Y~Q, {Perley} D~A, {Kulkarni} S~R, {Dong} D~Z~J, {De} K, {Chandra} P,
+  {Andreoni} I, {Bellm} E~C, {Burdge} K~B, {Coughlin} M, {Dekany} R, {Feeney}
+  M, {Frederiks} D~D, {Fremling} C, {Golkhou} V~Z, {Graham} M~J, {Hale} D,
+  {Helou} G, {Horesh} A, {Kasliwal} M~M, {Laher} R~R, {Masci} F~J, {Miller}
+  A~A, {Porter} M, {Ridnaia} A, {Rusholme} B, {Shupe} D~L, {Soumagnac} M~T and
+  {Svinkin} D~S 2020 {\em \apj\/} {\bf 895} 49 (\textit{Preprint}
+  \eprint{2003.01222})
+
+\bibitem{2021ApJ...912L...9N}
+{Nayana} A~J and {Chandra} P 2021 {\em \apjl\/} {\bf 912} L9 (\textit{Preprint}
+  \eprint{2103.06008})
+
+\bibitem{2019LRR....23....1M}
+{Metzger} B~D 2019 {\em Living Reviews in Relativity\/} {\bf 23} 1
+  (\textit{Preprint} \eprint{1910.01617})
+
+\bibitem{2021ARA&A..59..155M}
+{Margutti} R and {Chornock} R 2021 {\em \araa\/} {\bf 59} (\textit{Preprint}
+  \eprint{2012.04810})
+
+\bibitem{2021ApJ...911..104K}
+{Kremer} K, {Lu} W, {Piro} A~L, {Chatterjee} S, {Rasio} F~A and {Ye} C~S 2021
+  {\em \apj\/} {\bf 911} 104 (\textit{Preprint} \eprint{2012.02796})
+
+\bibitem{2022ApJ...927L..17H}
+{Hajela} A, {Margutti} R, {Bright} J~S, {Alexander} K~D, {Metzger} B~D,
+  {Nedora} V, {Kathirgamaraju} A, {Margalit} B, {Radice} D, {Guidorzi} C,
+  {Berger} E, {MacFadyen} A, {Giannios} D, {Chornock} R, {Heywood} I, {Sironi}
+  L, {Gottlieb} O, {Coppejans} D, {Laskar} T, {Cendes} Y, {Duran} R~B,
+  {Eftekhari} T, {Fong} W, {McDowell} A, {Nicholl} M, {Xie} X, {Zrake} J,
+  {Bernuzzi} S, {Broekgaarden} F~S, {Kilpatrick} C~D, {Terreran} G, {Villar}
+  V~A, {Blanchard} P~K, {Gomez} S, {Hosseinzadeh} G, {Matthews} D~J and
+  {Rastinejad} J~C 2022 {\em \apjl\/} {\bf 927} L17 (\textit{Preprint}
+  \eprint{2104.02070})
+
+\bibitem{ZTF_stat_Ho21}
+{Ho} A~Y~Q, {Perley} D~A, {Gal-Yam} A, {Lunnan} R, {Sollerman} J, {Schulze} S,
+  {Das} K~K, {Dobie} D, {Yao} Y, {Fremling} C, {Adams} S, {Anand} S, {Andreoni}
+  I, {Bellm} E~C, {Bruch} R~J, {Burdge} K~B, {Castro-Tirado} A~J, {Dahiwale} A,
+  {De} K, {Dekany} R, {Drake} A~J, {Duev} D~A, {Graham} M~J, {Helou} G,
+  {Kaplan} D~L, {Karambelkar} V, {Kasliwal} M~M, {Kool} E~C, {Kulkarni} S~R,
+  {Mahabal} A~A, {Medford} M~S, {Miller} A~A, {Nordin} J, {Ofek} E, {Petitpas}
+  G, {Riddle} R, {Sharma} Y, {Smith} R, {Stewart} A~J, {Taggart} K, {Tartaglia}
+  L, {Tzanidakis} A and {Winters} J~M 2021 {\em arXiv e-prints\/}
+  arXiv:2105.08811 (\textit{Preprint} \eprint{2105.08811})
+
+\bibitem{2012ApJ...750...68L}
+{Lazzati} D, {Morsony} B~J, {Blackwell} C~H and {Begelman} M~C 2012 {\em
+  \apj\/} {\bf 750} 68 (\textit{Preprint} \eprint{1111.0970})
+
+\bibitem{2021NewAR..9201614C}
+{Corsi} A and {Lazzati} D 2021 {\em \nar\/} {\bf 92} 101614
+
+\bibitem{2019ApJ...871L..25P}
+{Piran} T, {Nakar} E, {Mazzali} P and {Pian} E 2019 {\em \apjl\/} {\bf 871} L25
+
+\bibitem{2022MNRAS.tmp..970G}
+{Gottlieb} O, {Tchekhovskoy} A and {Margutti} R 2022 {\em \mnras\/}
+  (\textit{Preprint} \eprint{2201.04636})
+
+\bibitem{BRO22_Univ}
+{Bykov} A, {Romansky} V and {Osipov} S 2022 {\em Universe\/} {\bf 8} 32
+  (\textit{Preprint} \eprint{2201.11791})
+
+\bibitem{Piran04}
+{Piran} T 2004 {\em Reviews of Modern Physics\/} {\bf 76} 1143--1210
+  (\textit{Preprint} \eprint{astro-ph/0405503})
+
+\bibitem{Meszaros06}
+{M{\'e}sz{\'a}ros} P 2006 {\em Reports on Progress in Physics\/} {\bf 69}
+  2259--2321 (\textit{Preprint} \eprint{astro-ph/0605208})
+
+\bibitem{GRBafterglow_hydro12}
+{van Eerten} H, {van der Horst} A and {MacFadyen} A 2012 {\em \apj\/} {\bf 749}
+  44 (\textit{Preprint} \eprint{1110.5089})
+
+\bibitem{2018SSRv..214...41B}
+{Bykov} A~M, {Ellison} D~C, {Marcowith} A and {Osipov} S~M 2018 {\em \ssr\/}
+  {\bf 214} 41 (\textit{Preprint} \eprint{1801.08890})
+
+\bibitem{Smilei18}
+{Derouillat} J, {Beck} A, {P{\'e}rez} F, {Vinci} T, {Chiaramello} M, {Grassi}
+  A, {Fl{\'e}} M, {Bouchard} G, {Plotnikov} I, {Aunai} N, {Dargent} J,
+  {Riconda} C and {Grech} M 2018 {\em Computer Physics Communications\/} {\bf
+  222} 351--373 (\textit{Preprint} \eprint{1702.05128})
+
+\bibitem{1999ApJ...510..379M}
+{Matzner} C~D and {McKee} C~F 1999 {\em \apj\/} {\bf 510} 379--403
+  (\textit{Preprint} \eprint{astro-ph/9807046})
+
+\bibitem{2020ApJ...903...66L}
+{Leung} S~C, {Blinnikov} S, {Nomoto} K, {Baklanov} P, {Sorokina} E and
+  {Tolstov} A 2020 {\em \apj\/} {\bf 903} 66 (\textit{Preprint}
+  \eprint{2008.11404})
+
+\bibitem{2021ApJS..256....8U}
+{Urvachev} E, {Shidlovski} D, {Tominaga} N, {Glazyrin} S and {Blinnikov} S 2021
+  {\em \apjs\/} {\bf 256} 8
+
+\bibitem{2022arXiv220108432E}
+{Eisenberg} M, {Gottlieb} O and {Nakar} E 2022 {\em arXiv e-prints\/}
+  arXiv:2201.08432 (\textit{Preprint} \eprint{2201.08432})
+
+\end{thebibliography}
