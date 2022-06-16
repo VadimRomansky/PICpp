@@ -1255,7 +1255,7 @@ int main()
 	vector[3] = epsilonB;
 	double dopplerBeta = 0.75 * 0.5 * speed_of_light;
 
-	optimizeParametersGeneral(vector, 3, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, dopplerBeta, logFile);
+	optimizeParametersGeneral(vector, 4, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, dopplerBeta, logFile);
 	Bfactor = vector[0]*maxB;
 	rmax = vector[1]*maxR;
 	fractionSize = vector[2];
