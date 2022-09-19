@@ -1183,7 +1183,7 @@ int main()
 		}
 	}
 
-	const int Nobs = 6;
+	const int Nobs = 4;
 	double nu1[Nobs];
 	double observedInu[Nobs];
 	double observedError[Nobs];
@@ -1208,7 +1208,20 @@ int main()
 	observedInu[5] = 0.032;
 	observedError[5] = 0.008;
 	Time = 357*24*3600;
-
+	//css1610101 t = 98
+	nu1[0] = 1.5E9;
+	observedInu[0] = 1.5;
+	observedError[0] = 0.1;
+	nu1[1] = 3.0E9;
+	observedInu[1] = 4.3;
+	observedError[1] = 0.2;
+	nu1[2] = 6.1E9;
+	observedInu[2] = 6.1;
+	observedError[2] = 0.3;
+	nu1[3] = 9.87E9;
+	observedInu[3] = 4.2;
+	observedError[3] = 0.2;
+	Time = 98 * 24 * 3600;
 	//at2018 t = 15
 	//nu1[0] = 35E9;
 	//observedInu[0] = 8;
@@ -1244,8 +1257,10 @@ int main()
 		}
 	}
 
-	Bfactor = 0.069;
-	rmax = 3E17;
+	//Bfactor = 0.069;
+	Bfactor = 0.29;
+	//rmax = 3E17;
+	rmax = 1.4E17;
 
 	double vector[3];
 	vector[0] = Bfactor/maxB;

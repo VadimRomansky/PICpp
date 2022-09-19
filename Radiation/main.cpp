@@ -1014,10 +1014,16 @@ int main()
 	fflush(logFile);
 
 	int Nnumonth[Nmonth];
-	Nnumonth[0] = 4;
+	//SN2009bb
+	/*Nnumonth[0] = 4;
 	Nnumonth[1] = 3;
 	Nnumonth[2] = 4;
 	Nnumonth[3] = 5;
+	*/
+	//CSS161010
+	Nnumonth[0] = 4;
+	Nnumonth[1] = 5;
+	Nnumonth[2] = 6;
 
 	nu = new double[Nnu];
 	Inu = new double**[Ntheta];
@@ -1079,7 +1085,8 @@ int main()
 		}
 	}
 
-	for(int i = 0; i < Nnumonth[0]; ++i){
+	//SN2009bb
+	/*for (int i = 0; i < Nnumonth[0]; ++i) {
 		Numonth[0][i] = aprx[i]*1E9;
 		Fmonth[0][i] = apry[i];
 		ErrorMonth[0][i] = aprError[i];
@@ -1115,7 +1122,27 @@ int main()
 			Fmonth[5][i] = decy[i];
 			//ErrorMonth[5][i] = decError[i];
 		}
+	}*/
+
+	//CSS161010
+	for (int i = 0; i < Nnumonth[0]; ++i) {
+		Numonth[0][i] = cssx1[i] * 1E9;
+		Fmonth[0][i] = cssy1[i];
+		ErrorMonth[0][i] = cssError1[i];
 	}
+
+	for (int i = 0; i < Nnumonth[1]; ++i) {
+		Numonth[1][i] = cssx2[i] * 1E9;
+		Fmonth[1][i] = cssy2[i];
+		ErrorMonth[1][i] = cssError2[i];
+	}
+
+	for (int i = 0; i < Nnumonth[2]; ++i) {
+		Numonth[2][i] = cssx3[i] * 1E9;
+		Fmonth[2][i] = cssy3[i];
+		ErrorMonth[2][i] = cssError3[i];
+	}
+
 
 	//todo chose B
 	/*double meanB = 0;
@@ -1151,10 +1178,10 @@ int main()
 	//double fractionSize = 1.0 - pow((3.0/(4.0*pi))*(1 - 0.5),1.0/3.0);
 	double fractionSize = 0.5;
 	double V0 = speed_of_light;
-	double v = 0.75*speed_of_light;
+	double v = 0.4*speed_of_light;
 	double r0 = 0.1*maxR0;
-	double a = 1.0; //B power r ^(a-1)
-	double b = 2.0; //N power r ^ (b-1);
+	double a = 2.0; //B power r ^(a-1)
+	double b = 3.0; //N power r ^ (b-1);
 	double fpower = 1.0;//f-1 power r
 	rmax = 3.4E16;
 	////////////////////
@@ -1461,6 +1488,34 @@ int main()
 	}
 	delete[] image;
 
+	printf("outputing\n");
+	fprintf(logFile, "ooutputing\n");
+	fflush(logFile);
+	//char* number = new char[100];
+	//itoa(0, number, 10);
+	//delete[] number;
+	//std::string fileNumber = std::string(number);
+	FILE* output = fopen(outputfileName.c_str(), "w");
+	for (int i = 0; i < Nnu; ++i) {
+		for (int j = 0; j < Nmonth; ++j) {
+			if (tempTotalInu[j][i] != tempTotalInu[j][i]) {
+				tempTotalInu[j][i] = 0;
+			}
+		}
+		fprintf(output, "%g ", nu[i] / 1E9);
+		for (int j = 0; j < Nmonth; ++j) {
+			fprintf(output, "%g ", tempTotalInu[j][i]);
+		}
+		fprintf(output, "\n");
+	}
+
+	fclose(output);
+
+	for (int l = 0; l < Nmonth; ++l) {
+		delete[] tempTotalInu[l];
+	}
+	delete[] tempTotalInu;
+
 	FILE* errorFile = fopen("error.dat","w");
 	FILE* Bp = fopen("Bpoints.dat","w");
 	FILE* np = fopen("Npoints.dat","w");
@@ -1493,33 +1548,7 @@ int main()
 	fclose(errorFile);
 
 	//////////
-	printf("outputing\n");
-	fprintf(logFile, "ooutputing\n");
-	fflush(logFile);
-	//char* number = new char[100];
-	//itoa(0, number, 10);
-	//delete[] number;
-	//std::string fileNumber = std::string(number);
-	FILE* output = fopen(outputfileName.c_str(), "w");
-	for (int i = 0; i < Nnu; ++i) {
-		for(int j = 0; j < Nmonth; ++j){
-			if(tempTotalInu[j][i] != tempTotalInu[j][i]){
-				tempTotalInu[j][i] = 0;
-			}
-		}
-		if(Nmonth > 4){
-			fprintf(output, "%g %g %g %g %g %g %g\n", nu[i]/1E9, tempTotalInu[0][i], tempTotalInu[1][i] , tempTotalInu[2][i], tempTotalInu[3][i], tempTotalInu[4][i], tempTotalInu[5][i]);
-		} else {
-			fprintf(output, "%g %g %g %g %g\n", nu[i]/1E9, tempTotalInu[0][i], tempTotalInu[1][i] , tempTotalInu[2][i], tempTotalInu[3][i]);
-		}
-	}
 
-	fclose(output);
-
-	for(int l = 0; l < Nmonth; ++l){
-		delete[] tempTotalInu[l];
-	}
-	delete[] tempTotalInu;
 	
 
 	//Chevalier compare to SN1987A

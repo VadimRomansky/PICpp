@@ -1,23 +1,16 @@
 clear;
 
-radiation = importdata('output.dat');
 
 radiation1 = importdata('output1.dat');
 radiation3 = importdata('output3.dat');
 
-Nnu = size(radiation,1);
+radiation2 = importdata('output2.dat');
+radiation4 = importdata('output4.dat');
+
+Nnu = size(radiation1,1);
 
 
-figure(1);
-hold on;
-set(gca, 'YScale', 'log');
-set(gca, 'XScale', 'log');
-title ('{\nu} F_{\nu}');
-xlabel ('E eV');
-ylabel ('{\nu} F_{\nu} erg cm^{-2} s^{-1}');
 
-plot(radiation(1:Nnu,1),radiation(1:Nnu,2),'red','LineWidth',2);
-grid ;
 
 startPower = 100;
 endPower = 110;
@@ -59,4 +52,19 @@ plot(radiation1(1:Nnu,1),radiation1(1:Nnu,2),'red','LineWidth',2);
 plot(radiation3(1:Nnu,1),radiation3(1:Nnu,2),'green','LineWidth',2);
 plot(radiation1(1:Nnu,1),Fa(1:Nnu),'blue','LineWidth',2);
 legend('Dubus','Uvarov/mc^2','\nu^{-1.5}');
+grid ;
+
+figure(3);
+hold on;
+set(gca, 'YScale', 'log');
+set(gca, 'XScale', 'log');
+title ('F_{\nu}');
+xlabel ('E eV');
+ylabel ('E*F_{E} erg s^{-1}');
+
+
+
+plot(radiation2(1:Nnu,1),radiation2(1:Nnu,2),'red','LineWidth',2);
+plot(radiation4(1:Nnu,1),radiation4(1:Nnu,2),'green','LineWidth',2);
+legend('Dubus','Uvarov/mc^2');
 grid ;

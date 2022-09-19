@@ -193,7 +193,8 @@ int main()
 
 	const double Bfactor = 17;
 	const double epsilonB = 0.0012;
-	const double electronConcentration = 10*Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
+	//const double electronConcentration = 10*Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
+	const double electronConcentration = 210;
 	const double photonConcentration = 1.0;
 
 
@@ -246,7 +247,10 @@ int main()
 
 	const double intx2plank = 2.4042;
 	const double intx3plank = pi*pi*pi*pi/15;
-	double rmax = 0.13*speed_of_light*7.7*24*3600;
+	//double rmax = 0.13*speed_of_light*7.7*24*3600;
+	//CSS161010
+	//double rmax = 0.3 * speed_of_light * 357 * 24 * 3600;
+	double rmax = 3.0E17;
 	double L = 1.0E44;
 
 	double Tphotons1 = 11000*3;
@@ -774,15 +778,37 @@ int main()
 
 	printLog("output\n");
 
-	FILE* output = fopen("output.dat","w");
-	FILE* output1 = fopen("output1.dat","w");
+	FILE* output_ev_EFE = fopen("outputE.dat","w");
+	FILE* output_GHz_Jansky = fopen("outputNu.dat","w");
 	for(int i = 0; i < Nnu; ++i){
 		double nu = E[i]/hplank;
-		fprintf(output, "%g %g\n", E[i]/(1.6E-12), E[i]*E[i]*I[i]/sqr(distance));
-		fprintf(output1, "%g %g\n", nu/1E9, 1E26*hplank*E[i]*I[i]/sqr(distance));
+		fprintf(output_ev_EFE, "%g %g\n", E[i]/(1.6E-12), E[i]*E[i]*I[i]/sqr(distance));
+		fprintf(output_GHz_Jansky, "%g %g\n", nu/1E9, 1E26*hplank*E[i]*I[i]/sqr(distance));
 	}
-	fclose(output);
-	fclose(output1);
+	fclose(output_ev_EFE);
+	fclose(output_GHz_Jansky);
+
+	printLog("evaluate total luminosity\n");
+	double totalLuminosity = 0;
+	double totalFlux = 0;
+	double minEev = 0.3 * 1000;
+	double maxEev = 10 * 1000;
+	for (int i = 0; i < Nnu; ++i) {
+		double Eev = E[i] / (1.6E-12);
+		if ((Eev > minEev) && (Eev < maxEev)) {
+			totalLuminosity += 4 * pi * E[i] * I[i]*(E[i] - E[i-1]);
+			totalFlux += E[i] * I[i] * (E[i] - E[i - 1])/sqr(distance);
+		}
+	}
+	printf("total luminosity = %g erg/s \n", totalLuminosity);
+	printf("total flux = %g erg/s cm^2 \n", totalFlux);
+	//CSS161010
+	//99 days F = 1.33+-0.76 10^-15 L = 3.4+-1.9 10^39
+	//130 days F = 1.94+-0.74 10^-15 L = 5.0+-2.5 10^39
+	//291 days F << 1.31 10^-15 L << 3.4 10^39
+	//H density 4.7*10^20 cm^-2 what does it means?
+	double theyRatio = 3.4E39 / 1.33E-15;
+	double myRatio = totalLuminosity / totalFlux;
 
 	printLog("delete arrays\n");
 

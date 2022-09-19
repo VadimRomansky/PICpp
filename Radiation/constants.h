@@ -39,21 +39,27 @@ const std::string logFileName = "log.dat";
 const std::string BFileName = "B.dat";
 
 const int Niterations = 100;
-const int Nmonth = 4;
+//SN2009bb
+//const int Nmonth = 4;
+const int Nmonth = 3;
 const int Nmontecarlo = 100000;
 
 //const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17, 4.6E17, 14E17};
-const double size[Nmonth] = {3.4E16, 6.8E16, 1.06E17, 2.4E17};
+const double size[Nmonth] = {99*24*3600*0.3*speed_of_light, 162 * 24 * 3600 * 0.3 * speed_of_light, 357 * 24 * 3600 * 0.3 * speed_of_light };
 
-
-const double times[Nmonth] = {18.1*24*3600, 50*24*3600, 77*24*3600, 143*24*3600};
 
 //SN2009bb
-const double distance = 40*3.08*1.0E24;
+//const double times[Nmonth] = {18.1*24*3600, 50*24*3600, 77*24*3600, 143*24*3600};
+
+//CSS161010
+const double times[Nmonth] = { 99 * 24 * 3600, 162 * 24 * 3600, 77 * 24 * 3600};
+
+//SN2009bb
+//const double distance = 40*3.08*1.0E24;
 //AT2018
 //const double distance = 60*3.08*1.0E24;
 //CSS161010
-//const double distance = 150*3.08*1.0E24;
+const double distance = 150*3.08*1.0E24;
 
 const int Nrho = 20;
 const int Nphi = 10;
@@ -130,7 +136,8 @@ const double cosAlphaValue[Nalpha] = {cos(dalpha/2), cos(3*dalpha/2), cos(5*dalp
 const double pacholczykC5[6] = {3.8359E-23, 1.6954E-23, 0.9874E-23, 0.6688E-23, 0.5013E-23, 0.4050E-23};
 const double pacholczykC6[6] = {8.4809E-41, 6.7024E-41, 5.7410E-41, 5.2179E-41, 4.9697E-41, 4.9198E-41};
 
-const double decx[3]= {0.325, 0.61, 1.28};
+//SN2009bb
+/*const double decx[3] = {0.325, 0.61, 1.28};
 const double decy[3] = {6.1, 1.9, 0.9};
 
 const double octx[3]= {0.325, 0.61, 1.28};
@@ -164,9 +171,24 @@ const double maymaxy = 15.2;
 //apr 8.2
 const double aprx[4] = {1.43, 4.86, 8.46, 22.5};
 const double apry[4] ={1.3, 12.86, 17.57, 5.2};
-const double aprError[4] = {0.1, 0.161, 0.088, 0.19};
+const double aprError[4] = {0.1, 0.161, 0.088, 0.19};*/
 
 //SN2009bb explosion 21.1 March
+
+//CSS161010
+const double cssx1[4] = { 1.5, 3.0, 6.1, 9.87 };
+const double cssy1[4] = { 1.5, 4.3, 6.1, 4.2 };
+const double cssError1[4] = { 0.1, 0.2, 0.3, 0.2 };
+
+const double cssx2[5] = { 1.5, 2.94, 6.1, 9.74, 22.0 };
+const double cssy2[5] = { 4.7, 2.9, 2.3, 1.74, 0.56 };
+const double cssError2[5] = { 0.6, 0.2, 0.1, 0.09, 0.03 };
+
+const double cssx3[6] = { 0.33, 0.61, 1.5, 3.0, 6.05, 10.0 };
+//todo 0? or what?
+const double cssy3[6] = { 0.0, 0.79, 0.27, 0.17, 0.07, 0.032 };
+const double cssError3[6] = { 0.375, 0.09, 0.07, 0.03, 0.01, 0.008 };
+
 
 const double aprmaxx = 6.50;
 const double aprmaxy = 19.3;
