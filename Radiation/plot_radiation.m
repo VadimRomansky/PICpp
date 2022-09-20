@@ -5,6 +5,22 @@ radiation = importdata('radiation.dat');
 N = size(radiation,1);
 Nr = size(radiation,2);
 
+%CSS161010
+cssx1(1:4) = [1.5, 3.0, 6.1, 9.87 ];
+cssy1(1:4) = [ 1.5, 4.3, 6.1, 4.2 ];
+cssError1(1:4) = [ 0.1, 0.2, 0.3, 0.2 ];
+
+cssx2(1:5) = [ 1.5, 2.94, 6.1, 9.74, 22.0 ];
+cssy2(1:5) = [ 4.7, 2.9, 2.3, 1.74, 0.56 ];
+cssError2(1:5) = [ 0.6, 0.2, 0.1, 0.09, 0.03 ];
+
+cssx3(1:6) = [ 0.33, 0.61, 1.5, 3.0, 6.05, 10.0 ];
+%todo 0? or what?
+cssy3(1:6) = [ 0.0, 0.79, 0.27, 0.17, 0.07, 0.032 ];
+cssError3(1:6) = [ 0.375, 0.09, 0.07, 0.03, 0.01, 0.008 ];
+%
+
+%SN2009bb
 jul12x(1:2) = 0;
 jul12x(1) = 0.325;
 jul12x(2) = 0.61;
@@ -123,6 +139,7 @@ aprerr(4) = 0.19;
 
 aprmaxx = 6.50;
 aprmaxy = 19.3;
+%
 
 r = 5.17E16;
 d = 40*3*10^24;
@@ -166,7 +183,8 @@ ylabel ('mJy');
 loglog(radiation(1:N,1),radiation(1:N,2),'red','LineWidth',2);
 loglog(radiation(1:N,1),radiation(1:N,3),'green','LineWidth',2);
 loglog(radiation(1:N,1),radiation(1:N,4),'blue','LineWidth',2);
-loglog(radiation(1:N,1),radiation(1:N,5),'magenta','LineWidth',2);
+
+%loglog(radiation(1:N,1),radiation(1:N,5),'magenta','LineWidth',2);
 %plot(radiation(1:N,1),radiation(1:N,6),'Color',[1.0,0.6,0],'LineWidth',2);
 %plot(radiation(1:N,1),radiation(1:N,7),'black','LineWidth',2);
 
@@ -177,17 +195,22 @@ loglog(radiation(1:N,1),radiation(1:N,5),'magenta','LineWidth',2);
 %plot(octx(1:3),octy(1:3),'--o','Color',[1.0,0.6,0],'LineWidth',2);
 %plot(decx(1:3),decy(1:3),'--o','Color','black','LineWidth',2);
 
-errorbar(aprx,apry,aprerr,'red','LineWidth',2);
-errorbar(mayx,mayy,mayerr,'green','LineWidth',2);
-errorbar(junx,juny,junerr,'blue','LineWidth',2);
-errorbar(augx,augy,augerr,'magenta','LineWidth',2);
+errorbar(cssx1,cssy1,cssError1,'red','LineWidth',2);
+errorbar(cssx2,cssy2,cssError2,'green','LineWidth',2);
+errorbar(cssx3,cssy3,cssError3,'blue','LineWidth',2);
+
+%errorbar(aprx,apry,aprerr,'red','LineWidth',2);
+%errorbar(mayx,mayy,mayerr,'green','LineWidth',2);
+%errorbar(junx,juny,junerr,'blue','LineWidth',2);
+%errorbar(augx,augy,augerr,'magenta','LineWidth',2);
 
 %legend('theory', 'shevalier', 'observation');
 
-xlim([0.1 50]);
-ylim([0.5 50]);
+xlim([0.1 100]);
+ylim([0.05 50]);
 
-legend('april','may','june','august','Location','northwest');
+%legend('april','may','june','august','Location','northwest');
+legend('99 days','162 days ','357 days','Location','northwest');
 
 grid ;
 

@@ -13,6 +13,7 @@ N = size(radiation1,1);
 %from coppejans css161010
 x99(1:4) = 0;
 y99(1:4) = 0;
+e99(1:4) = 0;
 x99(1) = 1.5;
 x99(2) = 3;
 x99(3) = 6.1;
@@ -21,6 +22,10 @@ y99(1) = 1.5;
 y99(2) = 4.3;
 y99(3) = 6.1;
 y99(4) = 4.2;
+e99(1) = 0.1;
+e99(2) = 0.2;
+e99(3) = 0.3;
+e99(4) = 0.2;
 
 x162(1:5) = 0;
 y162(1:5) = 0;
@@ -174,7 +179,7 @@ plot(radiation3(1:N,1),radiation3(1:N,2),'Color','blue','LineWidth',2);
 plot(radiation4(1:N,1),radiation4(1:N,2),'Color','green','LineWidth',2);
 sz = 20;
 %scatter(x357(1:6), y357(1:6),sz,'MarkerEdgeColor','magenta','MarkerFaceColor','magenta','LineWidth',2);
-scatter(x99(1:6), y99(1:6),sz,'MarkerEdgeColor','magenta','MarkerFaceColor','magenta','LineWidth',2);
+errorbar(x99(1:4), y99(1:4),e99(1:4),'red','LineWidth',2,'LineStyle','--');
 %scatter(datar(1:Ndatar,1), datar(1:Ndatar,2),sz,'MarkerEdgeColor','magenta','MarkerFaceColor','magenta','LineWidth',2);
 %legend('F(E) ~ E^{-3.5}','PIC spectrum','observation','Location','southeast');
 title ('I_{\nu}');

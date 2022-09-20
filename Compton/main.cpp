@@ -191,10 +191,10 @@ int main()
 	const int Np = 200;
 	const int Nnu = 200;
 
-	const double Bfactor = 17;
+	const double Bfactor = 0.19;
 	const double epsilonB = 0.0012;
 	//const double electronConcentration = 10*Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
-	const double electronConcentration = 210;
+	const double electronConcentration = 150;
 	const double photonConcentration = 1.0;
 
 
@@ -250,10 +250,10 @@ int main()
 	//double rmax = 0.13*speed_of_light*7.7*24*3600;
 	//CSS161010
 	//double rmax = 0.3 * speed_of_light * 357 * 24 * 3600;
-	double rmax = 3.0E17;
+	double rmax = 1.3E17;
 	double L = 1.0E44;
 
-	double Tphotons1 = 11000*3;
+	double Tphotons1 = 11000;
 	//double Tphotons2 = 20;
 	//double Tphotons3 = 5000;
 	double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
@@ -399,7 +399,7 @@ int main()
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 
 				double minGamma = 4.0;
-				double power = 4.0;
+				double power = 3.0;
 
 				if(gamma >= minGamma){
 					Fe[j][i] = 1.0/pow(Ee[j][i],power);

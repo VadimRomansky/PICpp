@@ -142,6 +142,7 @@ void evaluateOrientationParameters3d(double*** B, double*** sintheta, double*** 
 					printf("%lf\n", By[i][j][k]);
 					thetaIndex[i][j][k] = Nd - 1;
 				}
+				printf("thetaa index[%d][%d][%d] = %d\n", i, j, k, thetaIndex[i][j][k]);
 				//for debug
 				//thetaIndex[i][j][k] = 9;
 			}

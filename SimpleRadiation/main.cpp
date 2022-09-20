@@ -1015,14 +1015,14 @@ int main()
 				weightedFe[i][j][k] = new double[Np];
 				for(int l = 0; l < Np; ++l){
 					weightedFe[i][j][k][l] = 0;
-					//for(int m = 0; m < Ndist; ++m){
-						//weightedFe[i][j][k][l] += weights[i][j][k][m]*findFeAt(Ee[m], Fe[m], weightedEe[l], Np);
-						weightedFe[i][j][k][l] = Fe[0][l];
+					for(int m = 0; m < Ndist; ++m){
+						weightedFe[i][j][k][l] += weights[i][j][k][m]*findFeAt(Ee[m], Fe[m], weightedEe[l], Np);
+						//weightedFe[i][j][k][l] = Fe[0][l];
 						if(weightedFe[i][j][k][l] != weightedFe[i][j][k][l]){
 							printf("WeightdFe = NaN\n");
 							exit(0);
 						}
-					//}
+					}
 				}
 			}
 		}
@@ -1188,6 +1188,19 @@ int main()
 	double observedInu[Nobs];
 	double observedError[Nobs];
 
+	//css161010 t = 99
+	nu1[0] = 1.5E9;
+	observedInu[0] = 1.5;
+	observedError[0] = 0.1;
+	nu1[1] = 3.0E9;
+	observedInu[1] = 4.3;
+	observedError[1] = 0.2;
+	nu1[2] = 6.1E9;
+	observedInu[2] = 6.1;
+	observedError[2] = 0.3;
+	nu1[3] = 9.87E9;
+	observedInu[3] = 4.2;
+	observedError[3] = 0.2;
 	//css161010 t = 357
 	nu1[0] = 0.33E9;
 	observedInu[0] = 0.357;
