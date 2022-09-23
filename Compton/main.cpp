@@ -441,6 +441,25 @@ int main()
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
 
+		} else if (input == LONG_COMBINED) {
+			for (int i = 1; i < Np; ++i) {
+				fscanf(inputPe, "%lf", &u);
+				fscanf(inputFe, "%lf", &Fe[j][i]);
+
+				//todo massRelationSqrt?
+				double gamma = u * realMassRelationSqrt / massRelationSqrt + 1;
+				//gamma = u + 1;
+				//if( u < 3000){
+				Ee[j][i] = gamma * massElectron * speed_of_light2;
+				//maxEnergy = Ee[i];
+				Fe[j][i] = Fe[j][i] / (massElectron * speed_of_light2);
+				if (i > 137) {
+					Ee[j][i] = Ee[j][i - 1] * 1.2;
+					Fe[j][i] = Fe[j][137] * pow(Ee[j][i] / Ee[j][137], -3.5);
+				 }
+				dFe[j][i] = (Fe[j][i] / (4 * pi)) * (Ee[j][i] - Ee[j][i - 1]);
+			}
+
 		}
 
 

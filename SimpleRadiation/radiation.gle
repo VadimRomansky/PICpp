@@ -16,7 +16,10 @@ begin graph
   d2 lstyle 1 lwidth 0.12 color red
   d3 lstyle 1 lwidth 0.12 color purple
   data "css16obs.dat" d4=c1,c2
+  data "css16err.dat"
   d4 line marker wcircle lstyle 2 lwidth 0.12 color green
+  d4 errup d5 
+  d4 errdown d5
 end graph
 begin key
    pos tr
