@@ -253,12 +253,12 @@ int main()
 	double rmax = 1.3E17;
 	double L = 1.0E44;
 
-	double Tphotons1 = 11000;
-	//double Tphotons2 = 20;
-	//double Tphotons3 = 5000;
+	double Tphotons1 = 2.7;
+	double Tphotons2 = 20;
+	double Tphotons3 = 5000;
 	double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
-	//double a2 = 4E-4;
-	//double a3 = 1E-13;
+	double a2 = 4E-4;
+	double a3 = 1E-13;
 	double* Fph = new double[Np];
 	double* dFph = new double[Np];
 	double* Eph = new double[Np];
@@ -283,11 +283,11 @@ int main()
 		Eph[i] = Eph[i-1]*factor;
 		double theta = Eph[i]/(kBoltzman*Tphotons1);
 		Fph[i] +=  a1*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
-		//theta = Eph[i]/(kBoltzman*Tphotons2);
-		//Fph[i] +=  a2*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
-		//theta = Eph[i]/(kBoltzman*Tphotons3);
-		//Fph[i] +=  a3*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
-		//dFph[i] = Fph[i]*(Eph[i] - Eph[i-1]);
+		theta = Eph[i]/(kBoltzman*Tphotons2);
+		Fph[i] +=  a2*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
+		theta = Eph[i]/(kBoltzman*Tphotons3);
+		Fph[i] +=  a3*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
+		dFph[i] = Fph[i]*(Eph[i] - Eph[i-1]);
 	}
 
 	FILE* photons = fopen("photons.dat","w");
@@ -430,12 +430,13 @@ int main()
 
 				//todo massRelationSqrt?
 				double gamma = u*realMassRelationSqrt/massRelationSqrt + 1;
+				//gamma = u + 1;
 				//if( u < 3000){
 				Ee[j][i] = gamma*massElectron*speed_of_light2;
 				//maxEnergy = Ee[i];
 				Fe[j][i] = Fe[j][i] / (massElectron*speed_of_light2);
 				if(i > 137){
-					Fe[j][i] = Fe[j][137]*pow(Ee[j][i]/Ee[j][137], -2.0);
+					Fe[j][i] = Fe[j][137]*pow(Ee[j][i]/Ee[j][137], -3.5);
 				}
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
@@ -783,7 +784,7 @@ int main()
 	for(int i = 0; i < Nnu; ++i){
 		double nu = E[i]/hplank;
 		fprintf(output_ev_EFE, "%g %g\n", E[i]/(1.6E-12), E[i]*E[i]*I[i]/sqr(distance));
-		fprintf(output_GHz_Jansky, "%g %g\n", nu/1E9, 1E26*hplank*E[i]*I[i]/sqr(distance));
+		fprintf(output_GHz_Jansky, "%g %g\n", nu/1E9, 1E26*hplank*E[i] * I[i] / sqr(distance));
 	}
 	fclose(output_ev_EFE);
 	fclose(output_GHz_Jansky);
