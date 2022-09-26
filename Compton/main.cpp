@@ -254,11 +254,15 @@ int main()
 
 	double Tphotons1 = 2.7;
 	double Tphotons2 = 20;
-	double Tphotons3 = 7000;
+	double Tphotons3 = 3000;
+	double Tphotons4 = 4000;
+	double Tphotons5 = 7500;
 	double a1 = 1.0;
 	//double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
 	double a2 = 4E-4;
-	double a3 = 1E-13;
+	double a3 = 4.0E-13;
+	double a4 = 1.65E-13;
+	double a5 = 1E-14;
 	double* Fph = new double[Np];
 	double* dFph = new double[Np];
 	double* Eph = new double[Np];
@@ -288,6 +292,10 @@ int main()
 		Fph[i] +=  a2*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
 		theta = Eph[i]/(kBoltzman*Tphotons3);
 		Fph[i] +=  a3*(2*Eph[i]*Eph[i]/cube(hplank*speed_of_light))/(exp(theta) - 1.0);
+		theta = Eph[i] / (kBoltzman * Tphotons4);
+		Fph[i] += a4 * (2 * Eph[i] * Eph[i] / cube(hplank * speed_of_light)) / (exp(theta) - 1.0);
+		theta = Eph[i] / (kBoltzman * Tphotons5);
+		Fph[i] += a5 * (2 * Eph[i] * Eph[i] / cube(hplank * speed_of_light)) / (exp(theta) - 1.0);
 		dFph[i] = Fph[i]*(Eph[i] - Eph[i-1]);
 	}
 
