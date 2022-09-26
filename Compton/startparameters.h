@@ -11,6 +11,6 @@ enum Input {TRISTAN, SMILEI, MAXWELL, POWERLAW, COMBINED, LONG_COMBINED};
 const Input input = Input::COMBINED;
 
 enum Solver {DUBUS, UVAROV};
-const Solver solver = Solver::UVAROV;
+const Solver solver = Solver::DUBUS;
 
 #endif

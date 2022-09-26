@@ -196,6 +196,8 @@ int main()
 	//const double electronConcentration = 10*Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
 	const double electronConcentration = 150;
 	const double photonConcentration = 1.0;
+	//double rmax = 0.3 * speed_of_light * 357 * 24 * 3600;
+	double rmax = 1.3E17;
 
 
 	const int Nphi = 2;
@@ -247,16 +249,14 @@ int main()
 
 	const double intx2plank = 2.4042;
 	const double intx3plank = pi*pi*pi*pi/15;
-	//double rmax = 0.13*speed_of_light*7.7*24*3600;
-	//CSS161010
-	//double rmax = 0.3 * speed_of_light * 357 * 24 * 3600;
-	double rmax = 1.3E17;
+	
 	double L = 1.0E44;
 
 	double Tphotons1 = 2.7;
 	double Tphotons2 = 20;
-	double Tphotons3 = 5000;
-	double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
+	double Tphotons3 = 7000;
+	double a1 = 1.0;
+	//double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
 	double a2 = 4E-4;
 	double a3 = 1E-13;
 	double* Fph = new double[Np];
@@ -265,6 +265,7 @@ int main()
 
 	double Ephmin = 0.1*kBoltzman*Tphotons1;
 	double Ephmax = kBoltzman*Tphotons1*100;
+	Ephmax = kBoltzman * Tphotons3 * 100;
 
 	FILE* logFile = fopen("log.dat", "w");
 	fclose(logFile);

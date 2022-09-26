@@ -8,9 +8,9 @@ begin graph
   xtitle "Log_1_0\,\nu\,[GHz]"
   ytitle "F_{\nu}, [mJy]"
   data   "css16.dat"
-  xaxis min -1 max 2
+  xaxis min -0.5 max 2.5
   xaxis ftick 0 dticks 1 
-  yaxis min 1.0E-2 max 2.0 log 
+  yaxis min 5.0E-1 max 50.0 log 
   ylabels log off
   d1 lstyle 1 lwidth 0.12 color blue
   d2 lstyle 1 lwidth 0.12 color red

@@ -69,4 +69,10 @@ plot(radiationEd(1:Nnu,1),Fa(1:Nnu),'blue','LineWidth',2);
 %legend('Dubus','Uvarov/mc^2');
 %grid ;
 
-dlmwrite('compton.dat',radiationEd,'delimiter',' ');
+output(1:Nnu, 1:2)=0;
+for i = 1:Nnu,
+    output(i,1) = log10(radiationEd(i,1));
+    output(i,2) = radiationEd(i,2);
+end;
+
+dlmwrite('compton.dat',output,'delimiter',' ');
