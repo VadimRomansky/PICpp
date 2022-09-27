@@ -14,7 +14,7 @@
 double evaluateMcDonaldIntegral(const double& nu) {
 	int curIndex = 0;
 	if (nu < UvarovX[0]) {
-		printf("x < UvarovX[0]\n");
+		//printf("x < UvarovX[0]\n");
 		return 0;
 	}
 	if (nu > UvarovX[Napprox - 1]) {
@@ -1139,12 +1139,28 @@ double evaluateNextdFe(double* Ee, double* dFe, double dg, int j, int Np) {
 		double F = 0;
 		double nextF = dFe[j+1]/(Ee[j+1]-Ee[j]);
 		nextdFe = F*(Ee[j+1] - tempE) + nextF*(tempE - Ee[j]);
+		if (nextdFe != nextdFe) {
+			printf("nextdFe = NaN\n");
+			exit(0);
+		}
+		if (nextdFe < 0) {
+			printf("nextdFe < 0\n");
+			exit(0);
+		}
 	} else if(j == Np-1){
 		double tempE = (gamma + dg)*massElectron*speed_of_light2;
 		double dE = Ee[j] - Ee[j-1];
 		double F = dFe[j]/dE;
 		double prevF = dFe[j-1]/(Ee[j-1]-Ee[j-2]);
 		nextdFe = prevF*(Ee[j] - tempE) + F*(tempE - Ee[j-1]);
+		if (nextdFe != nextdFe) {
+			printf("nextdFe = NaN\n");
+			exit(0);
+		}
+		if (nextdFe < 0) {
+			printf("nextdFe < 0\n");
+			exit(0);
+		}
 	} else {
 		double tempE = (gamma + dg)*massElectron*speed_of_light2;
 		//printf("tempe = %g\n", tempE);
@@ -1157,6 +1173,14 @@ double evaluateNextdFe(double* Ee, double* dFe, double dg, int j, int Np) {
 		//printf("nextF = %lf\n", nextF);
 		nextdFe = (F*(Ee[j+1] - tempE) + nextF*(tempE - Ee[j]))/(Ee[j+1]-Ee[j]);
 		nextdFe *= dE;
+		if (nextdFe != nextdFe) {
+			printf("nextdFe = NaN\n");
+			exit(0);
+		}
+		if (nextdFe < 0) {
+			printf("nextdFe < 0\n");
+			exit(0);
+		}
 	}
 
 	return nextdFe;

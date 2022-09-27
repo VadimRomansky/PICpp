@@ -1,5 +1,5 @@
 clear;
-filenumber = 3;
+filenumber = 0;
 energy = importdata(strcat('Ee',num2str(filenumber),'.dat'));
 distribution = importdata(strcat('Fs',num2str(filenumber),'.dat'));
 N1 = size(energy,2);
@@ -20,7 +20,8 @@ for i = 1:N2,
     distribution3(i,2) = distribution2(i,2)*gamma/(u*u*sqrt(gamma*gamma - 1));
 end;
 
-N3 = N1 + N2-36;
+Ns = 42;
+N3 = N1 + N2-Ns;
 distribution4(1:N3,2) = 0;
 for i = 1:N3;
     if (i < 140)
@@ -28,13 +29,16 @@ for i = 1:N3;
         distribution4(i,2) = distribution(i);
     elseif (i < N1)
         distribution4(i,1) = energy(i)+1;
+        %distribution4(i,2) = 0;
         distribution4(i,2) = distribution(140)*power((energy(i)+1)/(energy(140)+1), -3.5);
     elseif (i < N1 + 10)
-        distribution4(i,1) = distribution3(i-N1+36,1);
+        distribution4(i,1) = distribution3(i-N1+Ns,1);
+        %distribution4(i,2) = 0;
         distribution4(i,2) = distribution(140)*power(distribution4(i,1)/(energy(140)+1), -3.5);
     else
-        distribution4(i,1) = distribution3(i-N1+36,1);
-        distribution4(i,2) = distribution3(i-N1+36,2)*(distribution4(N1 + 10-1,2))/distribution3(36+10-1,2);
+        distribution4(i,1) = distribution3(i-N1+Ns,1);
+        %distribution4(i,2) = 0;
+        distribution4(i,2) = distribution3(i-N1+Ns,2)*(distribution4(N1 + 10-1,2))/distribution3(Ns+10-1,2);
     end
 end;
 
@@ -44,9 +48,9 @@ figure(1);
 hold on;
 set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'log');
-title ('F_{\gamma}');
-xlabel ('\gamma');
-ylabel ('F_{\gamma}');
+title ('F_{E}');
+xlabel ('E/m_e c');
+ylabel ('F_{E}');
 
 plot(energy(1:N1)+1,distribution(1:N1),'blue','LineWidth',2);
 plot(distribution3(1:N2,1), distribution3(1:N2,2), 'red', 'LineWidth',2);
@@ -55,13 +59,17 @@ figure(2);
 hold on;
 set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'log');
-title ('F_{\gamma}');
-xlabel ('\gamma');
-ylabel ('F_{\gamma}');
+title ('F_{E}');
+xlabel ('E/m_e c');
+ylabel ('F_{E}');
 
 plot(distribution4(1:N3,1), distribution4(1:N3,2), 'red', 'LineWidth',2);
 
-energyOutput(1:N3,1) = 0;
+energyOutput(1:N3) = 0;
 distributionOutput(1:N3) = 0;
+for i = 1:N3,
+    energyOutput(i) = distribution4(i,1);
+    distributionOutput(i) = distribution4(i,2);
+end;
 dlmwrite(strcat('Em',num2str(filenumber),'.dat'),energyOutput, 'delimiter',' ');
 dlmwrite(strcat('Fm',num2str(filenumber),'.dat'),distributionOutput, 'delimiter',' ');

@@ -452,7 +452,8 @@ int main()
 	double cosThetaObserv = cos(thetaObserv);
 	double sinThetaObserv = sin(thetaObserv);
 
-	const int Np= 200;
+	//const int Np= 200;
+	const int Np= 298;
 	const int Nnu = 100;
 	const int Nnu1 = 5;
 	const int Ndist = 10;
@@ -969,7 +970,31 @@ int main()
 			}
 
 		}
+		else if (input == MONTECARLO) {
+			for (int i = 1; i < Np; ++i) {
+				fscanf(inputPe, "%lf", &u);
+				fscanf(inputFe, "%lf", &Fe[j][i]);
 
+				double gamma = u;
+				//if( u < 3000){
+				Ee[j][i] = gamma * massElectron * speed_of_light2;
+				//maxEnergy = Ee[i];
+				Fe[j][i] = Fe[j][i] / (massElectron * speed_of_light2);
+				/*if(gamma >= 1.0){
+					Fe[j][i] = 1.0/pow(Ee[j][i],3);
+				} else {
+				Fe[j][i] = 0;
+				}*/
+				dFe[j][i] = (Fe[j][i] / (4 * pi)) * (Ee[j][i] - Ee[j][i - 1]);
+				//} else {
+				//	Fe[i] = 0;
+				//}
+
+
+				//Fe[j][i] = exp(-gamma/thetae)*gamma*u;
+				//dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
+			}
+		}
 
 		fclose(inputPe);
 		fclose(inputFe);
@@ -1347,6 +1372,42 @@ int main()
 	} else {
 		evaluateSpectrumFlat(nu, totalInu, Inu, Anu, rmax, Nnu, 1.0, fractionSize);
 	}
+
+	//evaluate rontgen
+	const int rontgenNnu = 10;
+	double**** rontgenInu = new double*** [rontgenNnu];
+	double**** rontgenAnu = new double*** [rontgenNnu];
+	for (int l = 0; l < Nnu; ++l) {
+		rontgenInu[l] = new double** [Nrho];
+		rontgenAnu[l] = new double** [Nrho];
+		for (int i = 0; i < Nrho; ++i) {
+			rontgenInu[l][i] = new double* [Nphi];
+			rontgenAnu[l][i] = new double* [Nphi];
+			for (int j = 0; j < Nphi; ++j) {
+				rontgenInu[l][i][j] = new double[Nz];
+				rontgenAnu[l][i][j] = new double[Nz];
+			}
+		}
+	}
+	double* rontgenTotalInu = new double[rontgenNnu];
+	double* rontgenNu = new double[rontgenNnu];
+	rontgenNu[0] = 0.3*1000 * 1.6E-12 / hplank;
+	double deltaNu = (10 - 0.3) * 1000 * 1.6E-12 / hplank/(rontgenNnu);
+	for (int i = 1; i < rontgenNnu; ++i) {
+		rontgenNu[i] = rontgenNu[i - 1] + deltaNu;
+	}
+	evaluateAllEmissivityAndAbsorption(rontgenNu, rontgenInu, rontgenAnu, rontgenNnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, 1.0, 0.75 * v / speed_of_light);
+	if (geometry == SPHERICAL) {
+		evaluateSpectrumSpherical(rontgenNu, rontgenTotalInu, rontgenInu, rontgenAnu, rmax, rontgenNnu, 1.0, fractionSize);
+	}
+	else {
+		evaluateSpectrumFlat(rontgenNu, rontgenTotalInu, rontgenInu, rontgenAnu, rmax, rontgenNnu, 1.0, fractionSize);
+	}
+	double rontgenFlux = 0;
+	for (int i = 0; i < rontgenNnu; ++i) {
+		rontgenFlux += rontgenTotalInu[i] * deltaNu / 1E26;
+	}
+	printf("rontgen flux = %g\n", rontgenFlux);
 
 	//evaluateSpectrumFlatSimple(nu, tempTotalInu[l], Inuflat, Anuflat, Nnu, r, fractionSize);
 	
