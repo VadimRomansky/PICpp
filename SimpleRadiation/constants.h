@@ -40,7 +40,7 @@ const std::string fileNameF = "Fm";
 const std::string logFileName = "log.dat";
 const std::string BFileName = "B.dat";
 
-const int Niterations = 2;
+const int Niterations = 10;
 const int Nmonth = 6;
 const int Nmontecarlo = 100000;
 

@@ -995,6 +995,34 @@ int main()
 				//dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
 		}
+		else if (input == MONTECARLO_CUT) {
+			for (int i = 1; i < Np; ++i) {
+				fscanf(inputPe, "%lf", &u);
+				fscanf(inputFe, "%lf", &Fe[j][i]);
+
+				double gamma = u;
+				//if( u < 3000){
+				Ee[j][i] = gamma * massElectron * speed_of_light2;
+				//maxEnergy = Ee[i];
+				Fe[j][i] = Fe[j][i] / (massElectron * speed_of_light2);
+				if (gamma > 5E6) {
+					Fe[j][i] = 0;
+				}
+				/*if(gamma >= 1.0){
+					Fe[j][i] = 1.0/pow(Ee[j][i],3);
+				} else {
+				Fe[j][i] = 0;
+				}*/
+				dFe[j][i] = (Fe[j][i] / (4 * pi)) * (Ee[j][i] - Ee[j][i - 1]);
+				//} else {
+				//	Fe[i] = 0;
+				//}
+
+
+				//Fe[j][i] = exp(-gamma/thetae)*gamma*u;
+				//dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
+			}
+		}
 
 		fclose(inputPe);
 		fclose(inputFe);
@@ -1099,7 +1127,7 @@ int main()
 	//evaluateNu(nu, Nnu, 1.1*massElectron*speed_of_light2, 1000*massElectron*speed_of_light2, meanB);
 	double numax = 10000*1E9;
 	numax = 10000*1.6*1E-12/hplank;
-	createNu(nu, Nnu, 0.1*1E9, 100000*1E9);
+	createNu(nu, Nnu, 0.1*1E9, 2E18);
 	/*for(int i = 0; i < Nnu1; ++i){
 		nu1[i] = aprx[i]*1.0E9;
 	}*/
@@ -1176,9 +1204,7 @@ int main()
 	fflush(logFile);
 	double* totalInu = new double[Nnu];
 	double finalSigma = sqr(Bfactor)/(4*pi*concentration*massProtonReal*speed_of_light2);
-	printf("Bfactor = %g, n = %g\n fraction = %g rmax = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, finalSigma);
-	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g rmax = %g v/c = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, v/speed_of_light, finalSigma);
-	fflush(logFile);
+	
 
 	evaluateVolumeAndLength(area3d, length3d, rmax, fractionSize);
 
@@ -1213,21 +1239,9 @@ int main()
 	double observedInu[Nobs];
 	double observedError[Nobs];
 
-	//css161010 t = 99
-	nu1[0] = 1.5E9;
-	observedInu[0] = 1.5;
-	observedError[0] = 0.1;
-	nu1[1] = 3.0E9;
-	observedInu[1] = 4.3;
-	observedError[1] = 0.2;
-	nu1[2] = 6.1E9;
-	observedInu[2] = 6.1;
-	observedError[2] = 0.3;
-	nu1[3] = 9.87E9;
-	observedInu[3] = 4.2;
-	observedError[3] = 0.2;
+
 	//css161010 t = 357
-	nu1[0] = 0.33E9;
+	/*nu1[0] = 0.33E9;
 	observedInu[0] = 0.357;
 	observedError[0] = 0.09;
 	nu1[1] = 0.61E9;
@@ -1245,7 +1259,7 @@ int main()
 	nu1[5] = 10.0E9;
 	observedInu[5] = 0.032;
 	observedError[5] = 0.008;
-	Time = 357*24*3600;
+	Time = 357*24*3600;*/
 	//css1610101 t = 98
 	nu1[0] = 1.5E9;
 	observedInu[0] = 1.5;
@@ -1299,14 +1313,19 @@ int main()
 	Bfactor = 0.29;
 	//rmax = 3E17;
 	rmax = 1.4E17;
+	epsilonB = 0.005;
+	fractionSize = 0.01;
 
-	double vector[3];
+	double vector[4];
 	vector[0] = Bfactor/maxB;
 	vector[1] = rmax/maxR;
 	vector[2] = fractionSize;
-	epsilonB = 0.0012;
 	vector[3] = epsilonB;
 	double dopplerBeta = 0.75 * 0.5 * speed_of_light;
+
+	printf("Bfactor = %g, n = %g\n fraction = %g rmax = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, finalSigma);
+	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g rmax = %g v/c = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, v / speed_of_light, finalSigma);
+	fflush(logFile);
 
 	optimizeParametersGeneral(vector, 4, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, dopplerBeta, logFile);
 	Bfactor = vector[0]*maxB;
@@ -1399,15 +1418,19 @@ int main()
 	evaluateAllEmissivityAndAbsorption(rontgenNu, rontgenInu, rontgenAnu, rontgenNnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, 1.0, 0.75 * v / speed_of_light);
 	if (geometry == SPHERICAL) {
 		evaluateSpectrumSpherical(rontgenNu, rontgenTotalInu, rontgenInu, rontgenAnu, rmax, rontgenNnu, 1.0, fractionSize);
+		//evaluateSpectrumSpherical(rontgenNu, rontgenTotalInu, rontgenInu, rontgenAnu, rmax, rontgenNnu, 1.0, 0.001);
 	}
 	else {
 		evaluateSpectrumFlat(rontgenNu, rontgenTotalInu, rontgenInu, rontgenAnu, rmax, rontgenNnu, 1.0, fractionSize);
+		//evaluateSpectrumFlat(rontgenNu, rontgenTotalInu, rontgenInu, rontgenAnu, rmax, rontgenNnu, 1.0, 0.001);
 	}
 	double rontgenFlux = 0;
 	for (int i = 0; i < rontgenNnu; ++i) {
 		rontgenFlux += rontgenTotalInu[i] * deltaNu / 1E26;
 	}
 	printf("rontgen flux = %g\n", rontgenFlux);
+	fprintf(logFile, "rontgen flux = %g\n", rontgenFlux);
+	fflush(logFile);
 
 	//evaluateSpectrumFlatSimple(nu, tempTotalInu[l], Inuflat, Anuflat, Nnu, r, fractionSize);
 	
@@ -1523,14 +1546,14 @@ int main()
 		}
 		delete[] Inu[i];
 		delete[] Anu[i];
-		delete[] concentrations[i];
+		//delete[] concentrations[i];
 		//delete[] B[i];
 		//delete[] sintheta[i];
 		//delete[] thetaIndex[i];
 	}
 	delete[] Inu;
 	delete[] Anu;
-	delete[] concentrations;
+	//delete[] concentrations;
 	//delete[] B;
 	//delete[] sintheta;
 	//delete[] thetaIndex;
