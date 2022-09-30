@@ -499,7 +499,7 @@ void evaluateSpectrum(double* nu, double* I, double**** Inu, double**** Anu, dou
 
 //spherical
 void evaluateSpectrumSpherical(double* nu, double* I, double**** Inu, double**** Anu, double rmax, int Nnu, double rfactor, double fractionLength){
-	int tempNr = 100;
+	int tempNr = 200;
 	double tempRmax = rmax*rfactor;
 	double tempRmin = (1.0 - fractionLength)*tempRmax;
 	double tempdr = tempRmax/tempNr;
