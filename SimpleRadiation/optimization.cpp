@@ -62,6 +62,10 @@ double evaluateOptimizationFunctionGeneral(const double* vector, double* nu, dou
 	double B = vector[0]*maxB;
 	double fraction = vector[2];
 	double epsilonB = vector[3];
+	if (epsilonB < 0) {
+		printf("epsilonB < 0\n");
+		exit(0);
+	}
 
 	
 	double result = evaluateOptimizationFunction(nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, B, r, fraction, epsilonB, dopplerBeta);
@@ -594,7 +598,7 @@ void optimizeParametersGeneral(double* vector, int Npar,  double* nu, double* ob
 	minVector[0] = minB/maxB;
 	minVector[1] = minR/maxR;
 	minVector[2] = minFraction;
-	minVector[3] = 0.00001;
+	minVector[3] = 0.000001;
 	for(int i = 0; i < Ngrad; ++i){
 		prevVector[i] = vector[i];
 		currentVector[i] = vector[i];
@@ -648,7 +652,7 @@ void optimizeParametersGeneral(double* vector, int Npar,  double* nu, double* ob
 			}
 			double dx = fabs(vector[i])/100;
 			if(k > 0){
-				dx = max(0.000001,fabs(currentVector[i] - prevVector[i])/10);
+				dx = min(max(0.000001,fabs(currentVector[i] - prevVector[i])/10),fabs(currentVector[i] - minVector[i])/2);
 			}
 			tempVector[i] = vector[i] + dx;
 			//currentF = evaluateOptimizationFunction5(vector[0]*maxB, vector[1]*maxN, vector[2]*maxFraction, vector[3]*maxR, vector[4]*maxV, nu, observedInu, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length);
@@ -702,7 +706,7 @@ void optimizeParametersGeneral(double* vector, int Npar,  double* nu, double* ob
 			}
 			double dx = fabs(vector[i])/100;
 			if(k > 0){
-				dx = max(0.000001,fabs(currentVector[i] - prevVector[i])/10);
+				dx = min(max(0.000001,fabs(currentVector[i] - prevVector[i])/10),fabs(currentVector[i] - minVector[i])/2);
 			}
 			tempVector[i] = vector[i] + dx;
 			double f = evaluateOptimizationFunctionGeneral(tempVector, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, dopplerBeta);

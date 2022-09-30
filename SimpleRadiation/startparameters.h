@@ -10,8 +10,8 @@ const Doppler doppler = Doppler::NO;
 enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
 const Geometry geometry = Geometry::SPHERICAL;
 
-enum Input {TRISTAN, SMILEI, MAXWELL, POWERLAW, COMBINED, MONTECARLO};
-const Input input = Input::POWERLAW;
+enum Input {TRISTAN, SMILEI, MAXWELL, POWERLAW, COMBINED, MONTECARLO, MONTECARLO_CUT};
+const Input input = Input::MONTECARLO;
 
 enum Scale {LINEAR, LOG};
 const Scale scale = Scale::LINEAR;

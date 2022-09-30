@@ -48,3 +48,13 @@ plot(Ee9(1:N),Fe9(1:N),'Color',Color{10});
 legend(LegendTitle{1}, LegendTitle{2}, LegendTitle{3}, LegendTitle{4}, LegendTitle{5}, LegendTitle{6}, LegendTitle{7}, LegendTitle{8}, LegendTitle{9}, LegendTitle{10},'Location','northwest');
 
 grid ;
+
+output(1:N,4)=0;
+for i = 1:N,
+    output(i,1) = log10(Ee1(i)+1);
+    output(i,2) = Fe2(i);
+    output(i,3) = Fe4(i);
+    output(i,4) = Fe9(i);
+end;
+
+dlmwrite('distributions.dat', output, 'delimiter',' ');

@@ -184,9 +184,23 @@ sz = 20;
 errorbar(x99(1:4), y99(1:4),e99(1:4),'red','LineWidth',2,'LineStyle','--');
 %scatter(datar(1:Ndatar,1), datar(1:Ndatar,2),sz,'MarkerEdgeColor','magenta','MarkerFaceColor','magenta','LineWidth',2);
 %legend('F(E) ~ E^{-3.5}','PIC spectrum','observation','Location','southeast');
-title ('I_{\nu}');
+title ('F_{\nu}');
 xlabel ('{\nu} GHz');
 ylabel ('mJy');
+
+nufnu(1:N)=0;
+for i = 1:N,
+    nufnu(i) = radiation(i,2)*radiation(i,1)/10^17;
+end;
+
+figure(2);
+hold on;
+set(gca, 'YScale', 'log');
+set(gca, 'XScale', 'log');
+plot(radiation(1:N,1), nufnu(1:N),'Color','red','LineWidth',2);
+title ('{\nu} F_{\nu}');
+xlabel ('{\nu} GHz');
+ylabel ('{\nu} F_{\nu}');
 
 output(1:N,1:4) = 0;
 for i = 1:N,

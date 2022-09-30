@@ -1,5 +1,5 @@
 clear;
-filenumber = 9;
+filenumber = 3;
 energy = importdata(strcat('Ee',num2str(filenumber),'.dat'));
 distribution = importdata(strcat('Fs',num2str(filenumber),'.dat'));
 N1 = size(energy,2);
@@ -27,19 +27,24 @@ for i = 1:N3;
     if (i < 140)
         distribution4(i,1) = energy(i)+1;
         distribution4(i,2) = distribution(i);
+    %elseif (i < 180)
+   %     distribution4(i,1) = energy(i)+1;
+    %    distribution4(i,2) = 0;
+    %    %distribution4(i,2) = distribution4(139,2)*power((energy(i)+1)/(energy(139)+1), -3.5);
     elseif (i < N1)
         distribution4(i,1) = energy(i)+1;
-        distribution4(i,2) = 0;
-        %distribution4(i,2) = distribution(140)*power((energy(i)+1)/(energy(140)+1), -3.5);
+        %distribution4(i,2) = 0;
+        distribution4(i,2) = distribution4(139,2)*power((energy(i)+1)/(energy(139)+1), -3.5);
+
     %elseif (i < N1 + 10)
         %distribution4(i,1) = distribution3(i-N1+Ns,1);
         %distribution4(i,2) = 0;
-        %distribution4(i,2) = distribution4(i,1)*distribution4(i,1)*distribution(140)*power(distribution4(i,1)/(energy(140)+1), -3.5);
+        %distribution4(i,2) = distribution4(i,1)*distribution4(i,1)*distribution4(139,2)*power(distribution4(i,1)/(energy(139)+1), -3.5);
     else
         distribution4(i,1) = distribution3(i-N1+Ns,1);
-        distribution4(i,2) = 0;
-        %distribution4(i,2) = distribution3(i-N1+Ns,2)*(distribution4(N1-1,2))/distribution3(Ns-1,2);
-    end
+        %distribution4(i,2) = 0;
+        distribution4(i,2) = distribution3(i-N1+Ns,2)*(distribution4(N1-1,2))/distribution3(Ns-1,2);
+    end;
 end;
 
 for i = 1:N3,
@@ -71,9 +76,13 @@ plot(distribution4(1:N3,1), distribution4(1:N3,2), 'red', 'LineWidth',2);
 
 energyOutput(1:N3) = 0;
 distributionOutput(1:N3) = 0;
+output(1:N3,1:2) = 0;
 for i = 1:N3,
     energyOutput(i) = distribution4(i,1);
-    distributionOutput(i) = distribution4(i,2);
+    distributionOutput(i) = distribution4(i,2)/(distribution4(i,1)*distribution4(i,1));
+    output(i,1)=log10(energyOutput(i));
+    output(i,2)=distribution4(i,2);
 end;
 dlmwrite(strcat('Em',num2str(filenumber),'.dat'),energyOutput, 'delimiter',' ');
 dlmwrite(strcat('Fm',num2str(filenumber),'.dat'),distributionOutput, 'delimiter',' ');
+dlmwrite('distr.dat',output,'delimiter',' ');
