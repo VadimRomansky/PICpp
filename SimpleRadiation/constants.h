@@ -167,9 +167,10 @@ const double minB = 0.01;
 const double maxB = 30.0;
 const double minN = 0.01;
 const double maxN = 4000;
-const double minFraction = 0.001;
+const double minFraction = 0.0001;
 const double maxFraction = 0.9;
-const double maxSigma = 10.0;
+const double maxSigma = 1.0;
+const double minSigma = 0.00000001;
 const double minEta = 0;
 const double maxEta = 0.8*pi/2;
 const double maxV = 0.9*speed_of_light;
@@ -177,5 +178,6 @@ const double minV = 0.6*speed_of_light;
 //const double maxR = 16.5*24*3600*3E10;
 const double maxR = 357*24*3600*3E10;
 const double minR = 1E15;
+const int tempNr = 10000;
 
 #endif

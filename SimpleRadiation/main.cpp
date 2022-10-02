@@ -1314,7 +1314,7 @@ int main()
 	//rmax = 3E17;
 	rmax = 1.4E17;
 	epsilonB = 0.0005;
-	fractionSize = 0.001;
+	fractionSize = 0.0001;
 
 	double vector[4];
 	vector[0] = Bfactor/maxB;
@@ -1327,7 +1327,10 @@ int main()
 	fprintf(logFile, "Bfactor = %g, n = %g fraction = %g rmax = %g v/c = %g sigma = %g\n", Bfactor, concentration, fractionSize, rmax, v / speed_of_light, finalSigma);
 	fflush(logFile);
 
-	optimizeParametersGeneral(vector, 4, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, dopplerBeta, logFile);
+	bool optPar[4] = { true, true, true, true };
+
+	//optimizeParametersGeneral(vector, optPar, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, dopplerBeta, logFile);
+	stochasticGradientOptimization(vector, optPar, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, dopplerBeta, logFile);
 	Bfactor = vector[0]*maxB;
 	rmax = vector[1]*maxR;
 	fractionSize = vector[2];
