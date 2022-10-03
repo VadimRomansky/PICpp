@@ -538,3 +538,114 @@ void optimizeParametersGeneral(double* vector, bool* optPar, double* time, doubl
 	}
 	delete[] observedError;
 }
+
+void stochasticGradientOptimization(double* vector, bool* optPar, double* time, double** nu, double** observedInu, double** observedError, double* Ee, double**** dFe, int Np, int* Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, double*** psi, int*** thetaIndex, double*** concentrations, double***** nudoppler, double***** Inu, double***** Anu, FILE* logFile) {
+	const int Ngrad = 8;
+	int Npar = 0;
+	for (int i = 0; i < Ngrad; ++i) {
+		if (optPar[i]) {
+			Npar++;
+		}
+	}
+	if (Npar < 2) {
+		printf("if Npar = 1 use optimizeB\n");
+		fprintf(logFile, "if Npar = 1 use optimizeB\n");
+		fclose(logFile);
+		exit(0);
+	}
+	if (Npar > 8) {
+		printf("Npar must be <= 8\n");
+		fprintf(logFile, "Npar must be <= 8\n");
+		fclose(logFile);
+		exit(0);
+	}
+
+	double minVector[Ngrad];
+	double tempVector[Ngrad];
+	double prevVector[Ngrad];
+	double currentVector[Ngrad];
+	minVector[0] = minB / maxB;
+	minVector[1] = minN / maxN;
+	minVector[2] = minFraction / maxFraction;
+	minVector[3] = minV / maxV;
+	minVector[4] = minR0 / maxR0;
+	minVector[5] = minBpower * 1.0 / maxBpower;
+	minVector[6] = minNpower * 1.0 / maxNpower;
+	minVector[7] = minFpower * 1.0 / maxFpower;
+	for (int i = 0; i < Ngrad; ++i) {
+		prevVector[i] = vector[i];
+		currentVector[i] = vector[i];
+	}
+	double currentF = evaluateOptimizationFunction5(vector, time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, psi, thetaIndex, concentrations, nudoppler, Inu, Anu);
+	printf("optimization function = %g\n", currentF);
+	fprintf(logFile, "optimization function = %g\n", currentF);
+	printf("Bfactor = %g n = %g fraction = %10.7g v/c = %10.7g r0 = %10.7g a = %10.7g b = %10.7g fpower = %10.7g\n", vector[0] * maxB, vector[1] * maxN, vector[2] * maxFraction, vector[3] * maxV / speed_of_light, vector[4] * maxR0, vector[5] * maxBpower, vector[6] * maxNpower, vector[7] * maxFpower);
+	fprintf(logFile, "Bfactor = %g n = %g  fraction = %10.7g v/c = %10.7g r0 = %10.7g a = %10.7g b = %10.7g fpower = %10.7g\n", vector[0] * maxB, vector[1] * maxN, vector[2] * maxFraction, vector[3] * maxV / speed_of_light, vector[4] * maxR0, vector[5] * maxBpower, vector[6] * maxNpower, vector[7] * maxFpower);
+	for (int k = 0; k < Niterations * Npar; ++k) {
+		printf("optimization k = %d\n", k);
+		fprintf(logFile, "optimization k = %d\n", k);
+		fflush(logFile);
+		int i = rand() % Ngrad;
+		if (optPar[i]) {
+			for (int j = 0; j < Ngrad; ++j) {
+				tempVector[j] = vector[j];
+			}
+
+			double dx = vector[i] * 1E-6;
+			tempVector[i] -= dx;
+			double f1 = evaluateOptimizationFunction5(tempVector, time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, psi, thetaIndex, concentrations, nudoppler, Inu, Anu);
+			if (f1 > currentF) {
+				findMinAlongAxis(vector, i, vector[i], 1.0, time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, psi, thetaIndex, concentrations, nudoppler, Inu, Anu, logFile);
+			}
+			else {
+				findMinAlongAxis(vector, i, minVector[i], vector[i], time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, psi, thetaIndex, concentrations, nudoppler, Inu, Anu, logFile);
+			}
+			currentF = evaluateOptimizationFunction5(vector, time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, psi, thetaIndex, concentrations, nudoppler, Inu, Anu);
+
+			printf("optimization function = %g\n", currentF);
+			fprintf(logFile, "optimization function = %g\n", currentF);
+			printf("Bfactor = %g n = %g fraction = %10.7g v/c = %10.7g r0 = %10.7g a = %10.7g b = %10.7g fpower = %10.7g\n", vector[0] * maxB, vector[1] * maxN, vector[2] * maxFraction, vector[3] * maxV / speed_of_light, vector[4] * maxR0, vector[5] * maxBpower, vector[6] * maxNpower, vector[7] * maxFpower);
+			fprintf(logFile, "Bfactor = %g n = %g  fraction = %10.7g v/c = %10.7g r0 = %10.7g a = %10.7g b = %10.7g fpower = %10.7g\n", vector[0] * maxB, vector[1] * maxN, vector[2] * maxFraction, vector[3] * maxV / speed_of_light, vector[4] * maxR0, vector[5] * maxBpower, vector[6] * maxNpower, vector[7] * maxFpower);
+		}
+	}
+}
+void findMinAlongAxis(double* vector, int axis, double left, double right, double* time, double** nu, double** observedInu, double** observedError, double* Ee, double**** dFe, int Np, int* Nnu, int Nd, int Nmonth, double*** Bn, double*** sintheta, double*** psi, int*** thetaIndex, double*** concentrations, double***** nudoppler, double***** Inu, double***** Anu, FILE* logFile) {
+	const int Ngrad = 4;
+	double tempVector[4][Ngrad];
+	for (int i = 0; i < Ngrad; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			tempVector[j][i] = vector[i];
+		}
+	}
+	tempVector[0][axis] = left;
+	tempVector[1][axis] = left + (right - left) / 3;
+	tempVector[2][axis] = left + 2 * (right - left) / 3;
+	tempVector[3][axis] = right;
+
+	double f = evaluateOptimizationFunction5(vector, time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, psi, thetaIndex, concentrations, nudoppler, Inu, Anu);
+
+	//double f0 = evaluateOptimizationFunctionGeneral(tempVector[0], nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, dopplerBeta);
+	double f1 = evaluateOptimizationFunction5(tempVector[1], time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, psi, thetaIndex, concentrations, nudoppler, Inu, Anu);
+	double f2 = evaluateOptimizationFunction5(tempVector[2], time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, psi, thetaIndex, concentrations, nudoppler, Inu, Anu);
+	//double f3 = evaluateOptimizationFunctionGeneral(tempVector[3], nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Bn, sintheta, thetaIndex, concentrations, Inu, Anu, area, length, dopplerBeta);
+
+	if (right - left < 1E-6) {
+		if (f1 < f) {
+			vector[axis] = tempVector[1][axis];
+		}
+		else if (f2 < f) {
+			vector[axis] = tempVector[2][axis];
+		}
+		else {
+			printf("x0 is already mininmum along axis %d\n", axis);
+		}
+		return;
+	}
+
+	if (f1 > f2) {
+		findMinAlongAxis(vector, axis, tempVector[1][axis], right, time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, psi, thetaIndex, concentrations, nudoppler, Inu, Anu, logFile);
+	}
+	else {
+		findMinAlongAxis(vector, axis, left, tempVector[2][axis], time, nu, observedInu, observedError, Ee, dFe, Np, Nnu, Nd, Nmonth, Bn, sintheta, psi, thetaIndex, concentrations, nudoppler, Inu, Anu, logFile);
+	}
+}
