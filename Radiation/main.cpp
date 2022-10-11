@@ -1345,7 +1345,8 @@ int main()
 		if(geometry == FLAT_SIMPLE){
 			//optimizeParameters5simple(1.0, 2000, 3.4E16, V0, Bfactor, concentration, fractionSize, rmax, v, weightedEe, weightedFe[0][0][0], Np, Ndist, 1.0, 8, logFile);
 		} else {
-			optimizeParametersGeneral(vector, optPar, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth, logFile);
+			//optimizeParametersGeneral(vector, optPar, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth, logFile);
+			stochasticGradientOptimization(vector, optPar, timeMoments, Numonth, Fmonth, ErrorMonth, weightedEe, weightedFe, Np, Nnumonth, Ndist, Nmonth, B3d, sintheta3d, psi3d, thetaIndex3d, concentrations3d, NuDoppler, Inumonth, Anumonth, logFile);
 			Bfactor = vector[0]*maxB;
 			concentration = vector[1]*maxN;
 			fractionSize = vector[2]*maxFraction;
