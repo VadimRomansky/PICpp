@@ -191,13 +191,13 @@ int main()
 	const int Np = 200;
 	const int Nnu = 200;
 
-	const double Bfactor = 0.19;
+	const double Bfactor = 0.29;
 	const double epsilonB = 0.0012;
 	//const double electronConcentration = 10*Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
-	const double electronConcentration = 150;
+	const double electronConcentration = 25;
 	const double photonConcentration = 1.0;
 	//double rmax = 0.3 * speed_of_light * 357 * 24 * 3600;
-	double rmax = 1.3E17;
+	double rmax = 1.4E17;
 
 
 	const int Nphi = 2;
@@ -260,9 +260,13 @@ int main()
 	double a1 = 1.0;
 	//double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
 	double a2 = 4E-4;
+	a2 = 0;
 	double a3 = 4.0E-13;
+	a3 = 0;
 	double a4 = 1.65E-13;
+	a4 = 0;
 	double a5 = 1E-14;
+	a5 = 0;
 	double* Fph = new double[Np];
 	double* dFph = new double[Np];
 	double* Eph = new double[Np];
