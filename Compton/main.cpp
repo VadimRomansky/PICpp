@@ -400,6 +400,8 @@ int main()
 	
 			int Npowerlaw = powerlawStart[j];
 			Npowerlaw = 1;
+			double Emax = 4.0E4 * massElectron * speed_of_light2;
+			double factor = pow(Emax / Ee[j][0], 1.0 / (Np - 1));
 			for (int i = 1; i < Np; ++i) {
 
 				fscanf(inputPe, "%lf", &u);
@@ -407,12 +409,13 @@ int main()
 
 				//todo massRelationSqrt?
 				double gamma = u*realMassRelationSqrt/massRelationSqrt + 1;
-				Ee[j][i] = gamma*massElectron*speed_of_light2;
+				//Ee[j][i] = gamma*massElectron*speed_of_light2;
+				Ee[j][i] = Ee[j][i-1]*factor;
 				Fe[j][i] = Fe[j][i] / (massElectron*speed_of_light2);
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 
-				double minGamma = 4.0;
-				double power = 3.0;
+				double minGamma = 1.0;
+				double power = 3.5;
 
 				if(gamma >= minGamma){
 					Fe[j][i] = 1.0/pow(Ee[j][i],power);
