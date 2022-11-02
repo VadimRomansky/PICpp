@@ -417,7 +417,8 @@ int main()
 				double minGamma = 1.0;
 				double power = 3.5;
 
-				if(gamma >= minGamma){
+				//if(gamma >= minGamma){
+				if(Ee[j][i] >= 1.0* massElectron * speed_of_light2){
 					Fe[j][i] = 1.0/pow(Ee[j][i],power);
 				} else {
 					Fe[j][i] = 0;
@@ -808,6 +809,26 @@ int main()
 				}
 			}
 		}
+		else if (solver == Solver::THOMPSON) {
+			if (input != Input::POWERLAW) {
+				printf("Thompson solver works only with powerlaw distribution\n");
+				exit(0);
+			}
+			double sigmat = 8 * pi * re2 / 3.0;
+			double index = 3.5;
+			double E0 = 1.0 * massElectron * speed_of_light2;
+			double K = (index - 1) * pow(E0, index - 1);
+			for (int ir = 0; ir < Nrho; ++ir) {
+				for (int itheta = 0; itheta < NthetaSpace; ++itheta) {
+					for (int iphi = 0; iphi < Nphi; ++iphi) {
+						I[i] += concentrations3d[ir][itheta][iphi] * volume[ir][itheta][iphi] * 0.5 * sigmat * pow(massElectron * speed_of_light2, 1.0 - index) * pow(photonFinalEnergy, -(index + 1.0) / 2.0) * pow(4.0 * kBoltzman * 2.8 / 3.0, -(index - 1.0) / 2.0)*speed_of_light/(4*pi);
+					}
+				}
+			}
+		}
+	{
+
+	}
 	}
 
 	omp_destroy_lock(&write_lock);
