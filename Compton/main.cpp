@@ -31,18 +31,23 @@ double evaluatePhotonDistribution(const double& energy, int Np, double* Eph, dou
 		return 0;
 	} else if(energy >= Eph[Np-1]){
 		return 0;
-	} else {
+	}
+	else {
 		int currentI = 0;
 		int nextI = 1;
-		for(int i = 1; i < Np; ++i){
-			currentI = i-1;
+		for (int i = 1; i < Np; ++i) {
+			currentI = i - 1;
 			nextI = i;
-			if(Eph[i] > energy){
+			if (Eph[i] > energy) {
 				break;
 			}
 		}
-		double result = (Fph[currentI]*(Eph[nextI] - energy) + Fph[nextI]*(energy - Eph[currentI]))/(Eph[nextI] - Eph[currentI]);
-		//double result = Fph[currentI] * exp(log(Fph[nextI] / Fph[currentI]) * ((energy - Eph[currentI]) / (Eph[nextI] - Eph[currentI])));
+		double result;
+		if (Fph[currentI] <= 0 || Fph[nextI] <= 0) {
+			result = (Fph[currentI] * (Eph[nextI] - energy) + Fph[nextI] * (energy - Eph[currentI])) / (Eph[nextI] - Eph[currentI]);
+		} else {
+			result = Fph[currentI] * exp(log(Fph[nextI] / Fph[currentI]) * ((energy - Eph[currentI]) / (Eph[nextI] - Eph[currentI])));
+		}
 		if(result != result){
 			printf("result = NaN\n");
 			exit(0);
@@ -400,7 +405,7 @@ int main()
 	
 			int Npowerlaw = powerlawStart[j];
 			Npowerlaw = 1;
-			double Emax = 4.0E4 * massElectron * speed_of_light2;
+			double Emax = 4.0E3 * massElectron * speed_of_light2;
 			double factor = pow(Emax / Ee[j][0], 1.0 / (Np - 1));
 			for (int i = 1; i < Np; ++i) {
 
@@ -537,7 +542,8 @@ int main()
 				By3d[i][j][k] = 0.0;
 				Bz3d[i][j][k] = 0.0;
 				if(geometry == SPHERICAL) {
-					concentrations3d[i][j][k] = 1.0*sqr(rmax/r);
+					//concentrations3d[i][j][k] = 1.0*sqr(rmax/r);
+					concentrations3d[i][j][k] = 1.0;
 				} else {
 					concentrations3d[i][j][k] = 1.0;
 				}
@@ -783,6 +789,7 @@ int main()
 
 									double coef = electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*(re2*speed_of_light*(1.0 - electronInitialBeta*photonInitialCosTheta)/(2*electronInitialGamma*(1.0 - electronInitialBeta*photonFinalCosTheta)));
 									double derivative = electronInitialGamma-electronInitialBeta*electronInitialBeta*photonInitialCosTheta;
+									//derivative = 1.0;
 									for(int m = 0; m < Nphi; ++m){
 										//integral by dphi0
 										double photonInitialPhi = phi[m];
@@ -814,6 +821,8 @@ int main()
 				printf("Thompson solver works only with powerlaw distribution\n");
 				exit(0);
 			}
+			//double photonConcentration = 3.536638846E7; //for CMB
+			double photonConcentration = 400; //for CMB
 			double sigmat = 8 * pi * re2 / 3.0;
 			double index = 3.5;
 			double E0 = 1.0 * massElectron * speed_of_light2;
@@ -821,14 +830,11 @@ int main()
 			for (int ir = 0; ir < Nrho; ++ir) {
 				for (int itheta = 0; itheta < NthetaSpace; ++itheta) {
 					for (int iphi = 0; iphi < Nphi; ++iphi) {
-						I[i] += concentrations3d[ir][itheta][iphi] * volume[ir][itheta][iphi] * 0.5 * sigmat * pow(massElectron * speed_of_light2, 1.0 - index) * pow(photonFinalEnergy, -(index + 1.0) / 2.0) * pow(4.0 * kBoltzman * 2.8 / 3.0, -(index - 1.0) / 2.0)*speed_of_light/(4*pi);
+						I[i] += photonConcentration*electronConcentration * concentrations3d[ir][itheta][iphi] * volume[ir][itheta][iphi] * 0.5 * sigmat * pow(massElectron * speed_of_light2, 1.0 - index) * pow(photonFinalEnergy, -(index + 1.0) / 2.0) * pow((4.0/3.0)*2.7012 * kBoltzman * 2.7, (index - 1.0) / 2.0) *K*speed_of_light / (4 * pi);
 					}
 				}
 			}
 		}
-	{
-
-	}
 	}
 
 	omp_destroy_lock(&write_lock);
