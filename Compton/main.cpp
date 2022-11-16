@@ -788,7 +788,7 @@ int main()
 									double photonInitialSinThetaPrimed = sqrt(1.0 - photonInitialCosThetaPrimed*photonInitialCosThetaPrimed);
 
 									double coef = electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*(re2*speed_of_light*(1.0 - electronInitialBeta*photonInitialCosTheta)/(2*electronInitialGamma*(1.0 - electronInitialBeta*photonFinalCosTheta)));
-									double derivative = electronInitialGamma-electronInitialBeta*electronInitialBeta*photonInitialCosTheta;
+									double derivative = electronInitialGamma-electronInitialGamma*electronInitialBeta*photonInitialCosTheta;
 									//derivative = 1.0;
 									for(int m = 0; m < Nphi; ++m){
 										//integral by dphi0
