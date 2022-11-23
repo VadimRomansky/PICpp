@@ -28,6 +28,7 @@ void LorentzTransformationPhotonZ(const double& beta, const double& Einit, const
 
 double evaluatePhotonDistribution(const double& energy, int Np, double* Eph, double* Fph){
 	if(energy <= Eph[1]){
+
 		return 0;
 	} else if(energy >= Eph[Np-1]){
 		return 0;
@@ -194,6 +195,7 @@ int main()
 {
 	const int Ndist = 10;
 	const int Np = 200;
+	const int Nphot = 2000;
 	const int Nnu = 200;
 
 	const double Bfactor = 0.29;
@@ -265,16 +267,16 @@ int main()
 	double a1 = 1.0;
 	//double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
 	double a2 = 4E-4;
-	//a2 = 0;
+	a2 = 0;
 	double a3 = 4.0E-13;
-	//a3 = 0;
+	a3 = 0;
 	double a4 = 1.65E-13;
-	//a4 = 0;
+	a4 = 0;
 	double a5 = 1E-14;
-	//a5 = 0;
-	double* Fph = new double[Np];
-	double* dFph = new double[Np];
-	double* Eph = new double[Np];
+	a5 = 0;
+	double* Fph = new double[Nphot];
+	double* dFph = new double[Nphot];
+	double* Eph = new double[Nphot];
 
 	double Ephmin = 0.1*kBoltzman*Tphotons1;
 	double Ephmax = kBoltzman*Tphotons1*100;
@@ -285,12 +287,12 @@ int main()
 
 	printLog("start\n");
 
-	double factor = pow(Ephmax/Ephmin, 1.0/(Np - 1));
+	double factor = pow(Ephmax/Ephmin, 1.0/(Nphot - 1));
 	Eph[0] = Ephmin;
 	Fph[0] = 0;
 	dFph[0] = 0;
 	//todo check and normalize
-	for(int i = 1; i < Np; ++i){
+	for(int i = 1; i < Nphot; ++i){
 		//todo pi or not to pi?
 		Fph[i] = 0;
 		dFph[i] = 0;
@@ -309,7 +311,7 @@ int main()
 	}
 
 	FILE* photons = fopen("photons.dat","w");
-	for(int i = 0; i < Np; ++i){
+	for(int i = 0; i < Nphot; ++i){
 		fprintf(photons, "%g %g\n", Eph[i]/1.6E-12, Fph[i]);
 	}
 	fclose(photons);
@@ -697,7 +699,7 @@ int main()
 							} else {
 								delectronEnergy = Ee[iangle][k] - Ee[iangle][k-1];
 							}
-							for(int l = 0; l < Np; ++l){
+							for(int l = 0; l < Nphot; ++l){
 								double photonInitialEnergy = Eph[l];
 								double dphotonInitialEnergy;
 								if(l == 0){
@@ -819,12 +821,13 @@ int main()
 										double photonInitialEnergyPrimed = photonFinalEnergyPrimed/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed));
 
 										double photonInitialEnergy = electronInitialGamma*photonInitialEnergyPrimed + electronInitialBeta*electronInitialGamma*photonInitialEnergyPrimed*photonInitialCosThetaPrimed;
-										double derivativeE = (1.0 + (photonInitialEnergyPrimed / (massElectron * speed_of_light2)) * (1.0 - cosXiPrimed)) / sqr(1.0 - (photonInitialEnergyPrimed / (massElectron * speed_of_light2)) * (1.0 - cosXiPrimed));
+										//double derivativeE = (1.0 + (photonInitialEnergyPrimed / (massElectron * speed_of_light2)) * (1.0 - cosXiPrimed)) / sqr(1.0 - (photonInitialEnergyPrimed / (massElectron * speed_of_light2)) * (1.0 - cosXiPrimed));
+										double derivativeE = 1.0;
 
 										//derivative??
 										I[i] += coef*
 											(1.0 + cosXiPrimed*cosXiPrimed + sqr(photonFinalEnergyPrimed/(massElectron*speed_of_light2))*sqr(1.0 - cosXiPrimed)/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed)))*
-											2*pi*dcosThetaFinal[j]*dphi*dcosThetaInitial*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Np, Eph, Fph)/(derivativeE*derivativeEE + derivativeXi*(derivativeXiMu0*derivativeMu0E + derivativeXiMu1 * derivativeMu1E));
+											2*pi*dcosThetaFinal[j]*dphi*dcosThetaInitial*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Nphot, Eph, Fph)/(derivativeE*derivativeEE - derivativeXi*(derivativeXiMu0*derivativeMu0E + derivativeXiMu1 * derivativeMu1E));
 										if(I[i] != I[i]){
 											printf("I[i] = NaN\n");
 											printLog("I[i] = NaN\n");
