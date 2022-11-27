@@ -256,6 +256,8 @@ int main()
 
 	const double intx2plank = 2.4042;
 	const double intx3plank = pi*pi*pi*pi/15;
+	//energy density = 8*pi*(kT)^4/(hc)^3 * intx3plank
+	//a = real density/energy density
 	
 	double L = 1.0E44;
 
@@ -266,21 +268,22 @@ int main()
 	double Tphotons5 = 7500;
 	double a1 = 1.0;
 	//double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
+	a1 = 0;
 	double a2 = 4E-4;
 	a2 = 0;
 	double a3 = 4.0E-13;
 	a3 = 0;
 	double a4 = 1.65E-13;
-	a4 = 0;
+	//a4 = 0;
 	double a5 = 1E-14;
 	a5 = 0;
 	double* Fph = new double[Nphot];
 	double* dFph = new double[Nphot];
 	double* Eph = new double[Nphot];
 
-	double Ephmin = 0.1*kBoltzman*Tphotons1;
+	double Ephmin = 0.01*kBoltzman*Tphotons1;
 	double Ephmax = kBoltzman*Tphotons1*100;
-	Ephmax = kBoltzman * Tphotons3 * 100;
+	Ephmax = kBoltzman * Tphotons5 * 100;
 
 	FILE* logFile = fopen("log.dat", "w");
 	fclose(logFile);
@@ -292,7 +295,8 @@ int main()
 	Fph[0] = 0;
 	dFph[0] = 0;
 	//todo check and normalize
-	for(int i = 1; i < Nphot; ++i){
+	//for intergalactic field
+	/*for (int i = 1; i < Nphot; ++i) {
 		//todo pi or not to pi?
 		Fph[i] = 0;
 		dFph[i] = 0;
@@ -308,6 +312,27 @@ int main()
 		theta = Eph[i] / (kBoltzman * Tphotons5);
 		Fph[i] += a5 * (2 * Eph[i] * Eph[i] / cube(hplank * speed_of_light)) / (exp(theta) - 1.0);
 		dFph[i] = Fph[i]*(Eph[i] - Eph[i-1]);
+	}*/
+
+	//for cluster
+	double R = 1E18;
+	double numax = 1E15;
+	double westerlundD = 4000 * 3E18;
+	double westerlundNuFNu = 1E14;
+	double westerlundL = (westerlundNuFNu / numax) * 4 * pi * westerlundD * westerlundD;
+	double realenergydensity = westerlundL / (4 * pi * speed_of_light * R * R);
+	double temperature = hplank*numax/kBoltzman;
+	double planckenergydensity = 8 * pi * pow(kBoltzman * temperature, 4) / pow(hplank * speed_of_light, 3) * intx3plank;
+	double a = realenergydensity / planckenergydensity;
+	if( a > 1){
+	    printf("a > 1 in planck spectrum\n");
+	}
+
+	for (int i = 1; i < Nphot; ++i) {
+		Eph[i] = Eph[i - 1] * factor;
+		double theta = Eph[i] / (kBoltzman * temperature);
+		Fph[i] = a * (2 * Eph[i] * Eph[i] / cube(hplank * speed_of_light)) / (exp(theta) - 1.0);
+		dFph[i] = Fph[i] * (Eph[i] - Eph[i - 1]);
 	}
 
 	FILE* photons = fopen("photons.dat","w");
@@ -890,6 +915,7 @@ int main()
 	}
 	printf("total luminosity = %g erg/s \n", totalLuminosity);
 	printf("total flux = %g erg/s cm^2 \n", totalFlux);
+	printf("99 days F = 1.33+-0.76 10^-15 L = 3.4+-1.9 10^39\n");
 	//CSS161010
 	//99 days F = 1.33+-0.76 10^-15 L = 3.4+-1.9 10^39
 	//130 days F = 1.94+-0.74 10^-15 L = 5.0+-2.5 10^39
