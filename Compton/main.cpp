@@ -201,10 +201,10 @@ int main()
 	const double Bfactor = 0.29;
 	const double epsilonB = 0.0012;
 	//const double electronConcentration = 10*Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
-	const double electronConcentration = 25;
+	const double electronConcentration = 1E10;
 	const double photonConcentration = 1.0;
 	//double rmax = 0.3 * speed_of_light * 357 * 24 * 3600;
-	double rmax = 1.4E17;
+	double rmax = 1E14;
 
 
 	const int Nphi = 2;
@@ -268,13 +268,13 @@ int main()
 	double Tphotons5 = 7500;
 	double a1 = 1.0;
 	//double a1 = 15*L*cube(hplank*speed_of_light)/(32*pi*pi*pi*pi*pi*pi*speed_of_light*rmax*rmax*pow(kBoltzman*Tphotons1,4));
-	a1 = 0;
+	//a1 = 0;
 	double a2 = 4E-4;
 	a2 = 0;
 	double a3 = 4.0E-13;
 	a3 = 0;
 	double a4 = 1.65E-13;
-	//a4 = 0;
+	a4 = 0;
 	double a5 = 1E-14;
 	a5 = 0;
 	double* Fph = new double[Nphot];
@@ -296,7 +296,7 @@ int main()
 	dFph[0] = 0;
 	//todo check and normalize
 	//for intergalactic field
-	/*for (int i = 1; i < Nphot; ++i) {
+	for (int i = 1; i < Nphot; ++i) {
 		//todo pi or not to pi?
 		Fph[i] = 0;
 		dFph[i] = 0;
@@ -312,10 +312,10 @@ int main()
 		theta = Eph[i] / (kBoltzman * Tphotons5);
 		Fph[i] += a5 * (2 * Eph[i] * Eph[i] / cube(hplank * speed_of_light)) / (exp(theta) - 1.0);
 		dFph[i] = Fph[i]*(Eph[i] - Eph[i-1]);
-	}*/
+	}
 
 	//for cluster
-	double R = 1E18;
+	/*double R = 1E18;
 	double numax = 1E15;
 	double westerlundD = 4000 * 3E18;
 	double westerlundNuFNu = 1E14;
@@ -333,7 +333,25 @@ int main()
 		double theta = Eph[i] / (kBoltzman * temperature);
 		Fph[i] = a * (2 * Eph[i] * Eph[i] / cube(hplank * speed_of_light)) / (exp(theta) - 1.0);
 		dFph[i] = Fph[i] * (Eph[i] - Eph[i - 1]);
+	}*/
+
+	//for star
+	/*double R = 1E14;
+	double westerlundL = 1E38;
+	double realenergydensity = westerlundL / (4 * pi * speed_of_light * R * R);
+	double temperature = 10000;
+	double planckenergydensity = 8 * pi * pow(kBoltzman * temperature, 4) / pow(hplank * speed_of_light, 3) * intx3plank;
+	double a = realenergydensity / planckenergydensity;
+	if (a > 1) {
+		printf("a > 1 in planck spectrum\n");
 	}
+
+	for (int i = 1; i < Nphot; ++i) {
+		Eph[i] = Eph[i - 1] * factor;
+		double theta = Eph[i] / (kBoltzman * temperature);
+		Fph[i] = a * (2 * Eph[i] * Eph[i] / cube(hplank * speed_of_light)) / (exp(theta) - 1.0);
+		dFph[i] = Fph[i] * (Eph[i] - Eph[i - 1]);
+	}*/
 
 	FILE* photons = fopen("photons.dat","w");
 	for(int i = 0; i < Nphot; ++i){
@@ -814,9 +832,9 @@ int main()
 									double photonInitialCosThetaPrimed = (photonInitialCosTheta - electronInitialBeta)/(1.0 - electronInitialBeta*photonInitialCosTheta);
 									double photonInitialSinThetaPrimed = sqrt(1.0 - photonInitialCosThetaPrimed*photonInitialCosThetaPrimed);
 
-									double coef = electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*(re2*speed_of_light*(1.0 - electronInitialBeta*photonInitialCosTheta)/(2*electronInitialGamma*(1.0 - electronInitialBeta*photonFinalCosTheta)));
+									double coef = electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*(re2*speed_of_light*sqr(1.0 - electronInitialBeta*photonInitialCosTheta)/(2*electronInitialGamma*(1.0 - electronInitialBeta*photonFinalCosTheta)));
 									double derivativeEE = electronInitialGamma-electronInitialGamma*electronInitialBeta*photonInitialCosTheta;
-									
+									//printf("%g\n", derivativeEE);
 									//derivativeE = 1.0;
 									for(int m = 0; m < Nphi; ++m){
 										//integral by dphi0
@@ -852,7 +870,8 @@ int main()
 										//derivative??
 										I[i] += coef*
 											(1.0 + cosXiPrimed*cosXiPrimed + sqr(photonFinalEnergyPrimed/(massElectron*speed_of_light2))*sqr(1.0 - cosXiPrimed)/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed)))*
-											2*pi*dcosThetaFinal[j]*dphi*dcosThetaInitial*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Nphot, Eph, Fph)/(derivativeE*derivativeEE - derivativeXi*(derivativeXiMu0*derivativeMu0E + derivativeXiMu1 * derivativeMu1E));
+											//2*pi*dcosThetaFinal[j]*dphi*dcosThetaInitial*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Nphot, Eph, Fph)/(derivativeE*derivativeEE - derivativeXi*(derivativeXiMu0*derivativeMu0E + derivativeXiMu1 * derivativeMu1E));
+											2*pi*dcosThetaFinal[j]*dphi*dcosThetaInitial*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Nphot, Eph, Fph)/derivativeEE;
 										if(I[i] != I[i]){
 											printf("I[i] = NaN\n");
 											printLog("I[i] = NaN\n");

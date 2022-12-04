@@ -1,0 +1,103 @@
+\documentclass[a4paper,12pt]{jpconf}
+
+\usepackage{cmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+
+%\usepackage{makeidx}
+\usepackage{amsmath,amssymb,amsthm,amsfonts,latexsym,mathtext}
+\usepackage[pdftex]{graphicx}
+\usepackage{float}
+%\usepackage{citesort}
+\usepackage{subfigure}
+\graphicspath{{fig/}{pict3/}}
+\usepackage{ifpdf}
+\ifpdf\usepackage{epstopdf}\fi
+
+\usepackage{bm,mathtools}
+\usepackage{geometry}
+\geometry{top=2cm}
+\geometry{bottom=2.5cm}
+\geometry{left=2.5cm}
+\geometry{right=2cm}
+
+\bibliographystyle{iopart-num}
+
+\newcommand{\be}{\begin{equation}}
+	\newcommand{\ee}{\end{equation}}
+\newcommand{\ba}{\begin{aligned}}
+	\newcommand{\ea}{\end{aligned}}
+
+\def\lsim{\;\raise0.3ex\hbox{$<$\kern-0.75em\raise-1.1ex\hbox{$\sim$}}\;}
+\def\gsim{\;\raise0.3ex\hbox{$>$\kern-0.75em\raise-1.1ex\hbox{$\sim$}}\;}
+\begin{document}
+	\title{Преобразование функции распределения}
+	\section{Преобразование функции распределения фотонов}
+	Функция распределения фотонов задана в сферических координатах $n_{ph}(\epsilon,\mu,\phi)$. Рассмотрим переход в систему отсчета, движущуюся в направлении оси $z$ с лоренц-фактором $\gamma = 1/\sqrt{1-\beta^2}$. Количество частиц в элементе фазового пространства $N$ - инвариант.
+	\begin{equation}
+		N = n_{ph}(\epsilon,\mu,\phi)d\epsilon d\mu d\phi dV = n'_{ph}(\epsilon',\mu',\phi')d\epsilon' d\mu' d\phi' dV'
+	\end{equation}
+	Рассмотрим преобразование вектора четырех-импульса. Поперечные компоненты не изменяются, а временная и продольная меняются следющим образом, учитывая что $p_z = \mu \epsilon$:
+	\begin{equation}\label{lorentz_ph}
+		\left(\begin{array}{c}
+			\epsilon'\\
+			\mu'\epsilon'
+		\end{array}
+		\right)
+		= \left(
+		\begin{array}{cc}
+			\gamma & -\beta\gamma\\
+			-\beta\gamma & \gamma
+		\end{array}
+		\right)
+		\times
+		\left(\begin{array}{c}
+			\epsilon\\
+			\mu\epsilon
+		\end{array}
+		\right)
+	\end{equation}
+	Из первой строчки матрицы получаем уравнение для допплеровского сдвига энергии
+	\begin{equation}\label{doppler_ph}
+		\epsilon'=\gamma(1-\mu\beta)\epsilon
+	\end{equation}
+	Вычислим производные новой энергии по старым координатам
+	\begin{equation}
+		\frac{d\epsilon'}{d\epsilon}=\gamma(1-\mu\beta)
+	\end{equation}
+	\begin{equation}
+		\frac{d\epsilon'}{d\mu}=-\gamma\beta\epsilon
+	\end{equation}
+	Из второй строчки матрицы получаем $\mu'\epsilon'=-\beta\gamma\epsilon+\gamma\mu\epsilon$. Подставив значение $\epsilon'$ из \ref{doppler_ph} и сократив $\epsilon$ получим уравнение аберрации света
+	\begin{equation}\label{aberration_ph}
+		\mu'=\frac{\mu-\beta}{1-\mu\beta}
+	\end{equation}
+	Заметим, что угол наклона луча в новой системе не зависит от энергии в старой системе. Вычислим частноую производную $\frac{d\mu'}{d\mu}$
+	\begin{equation}
+		\frac{d\mu'}{d\mu}=\frac{d}{d\mu}\frac{1}{\beta}\frac{\beta\mu-1+1-\beta^2}{1-\mu\beta}=\frac{d}{d\mu}\frac{1}{\beta}\frac{1-\beta^2}{1-\mu\beta}=\frac{1-\beta^2}{(1-\mu\beta)^2}=\frac{1}{\gamma^2(1-\mu\beta)^2}
+	\end{equation}
+	Азиметальный угол не зависит от системы отсчета $\phi' = \phi$. Преобразование элемента объема описывается выражением $\frac{dV'}{dV} = \frac{\epsilon}{\epsilon'}$ см. ЛЛ Т2 параграф 10, вот только там используется переход в собственную систему. То есть
+	\begin{equation}
+		\frac{dV'}{dV} = \frac{1}{\gamma(1-\mu\beta)}
+	\end{equation}
+	Матрица якоби преобразования координат выглядит следующим образом
+	\begin{equation}
+		J=\left(
+		\begin{array}{cccc}
+			\frac{d\epsilon'}{d\epsilon} & \frac{d\epsilon'}{d\mu}& 0 & 0\\
+			0 & \frac{d\mu'}{d\mu} & 0 & 0\\
+			0 & 0 & 1 & 0\\
+			0 & \frac{dV'}{d\mu} & 0 & \frac{dV'}{dV}
+		\end{array}
+		\right)
+	\end{equation}
+	При такой матрице якобиан, к счастью, равен произведению диагональных членов
+	\begin{equation}\label{jacobian_ph}
+		\frac{D(\epsilon',\mu',\phi',V')}{D(\epsilon,\mu,\phi,V)}=\frac{d\epsilon'}{d\epsilon}\frac{d\mu'}{d\mu}\frac{dV'}{dV}=\gamma(1-\mu\beta)\frac{1}{\gamma^2(1-\mu\beta)^2}\frac{1}{\gamma(1-\mu\beta)}=\frac{1}{\gamma^2(1-\mu\beta)^2}
+	\end{equation}
+	И в итоге функция распределения фотонов преобразуется с помощью деления на вычисленный якобиан
+	\begin{equation}\label{distribution_ph}
+		n'_{ph}(\epsilon',\mu',\phi') = \frac{n_{ph}(\epsilon,\mu,\phi)}{\frac{D(\epsilon',\mu',\phi',V')}{D(\epsilon,\mu,\phi,V)}}=\gamma^2(1-\mu\beta)^2 n_{ph}(\epsilon,\mu,\phi)
+	\end{equation}
+\end{document}
