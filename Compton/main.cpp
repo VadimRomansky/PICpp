@@ -832,7 +832,7 @@ int main()
 									double photonInitialCosThetaPrimed = (photonInitialCosTheta - electronInitialBeta)/(1.0 - electronInitialBeta*photonInitialCosTheta);
 									double photonInitialSinThetaPrimed = sqrt(1.0 - photonInitialCosThetaPrimed*photonInitialCosThetaPrimed);
 
-									double coef = electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*(re2*speed_of_light*sqr(1.0 - electronInitialBeta*photonInitialCosTheta)/(2*electronInitialGamma*(1.0 - electronInitialBeta*photonFinalCosTheta)));
+									double coef = electronConcentration*concentrations3d[ir][itheta][iphi]*volume[ir][itheta][iphi]*(re2*speed_of_light*sqr(1.0 - electronInitialBeta*photonInitialCosTheta)/(2*sqr(electronInitialGamma)*(1.0 - electronInitialBeta*photonFinalCosTheta)));
 									double derivativeEE = electronInitialGamma-electronInitialGamma*electronInitialBeta*photonInitialCosTheta;
 									//printf("%g\n", derivativeEE);
 									//derivativeE = 1.0;
@@ -871,7 +871,7 @@ int main()
 										I[i] += coef*
 											(1.0 + cosXiPrimed*cosXiPrimed + sqr(photonFinalEnergyPrimed/(massElectron*speed_of_light2))*sqr(1.0 - cosXiPrimed)/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed)))*
 											//2*pi*dcosThetaFinal[j]*dphi*dcosThetaInitial*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Nphot, Eph, Fph)/(derivativeE*derivativeEE - derivativeXi*(derivativeXiMu0*derivativeMu0E + derivativeXiMu1 * derivativeMu1E));
-											2*pi*dcosThetaFinal[j]*dphi*dcosThetaInitial*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Nphot, Eph, Fph)/derivativeEE;
+											2*pi*dcosThetaFinal[j]*dphi*dcosThetaInitial*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Nphot, Eph, Fph);
 										if(I[i] != I[i]){
 											printf("I[i] = NaN\n");
 											printLog("I[i] = NaN\n");
