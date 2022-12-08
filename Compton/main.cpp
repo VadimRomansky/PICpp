@@ -904,6 +904,37 @@ int main()
 				}
 			}
 		}
+		else if (solver == Solver::a) {
+			double photonFinalCosTheta = 1.0;
+			double photonPhinalPhi = 0;
+			for (int k = 0; k < Np; ++k) {
+				double electronInitialEnergy = Ee[iangle][k];
+				double delectronEnergy;
+				double electronInitialGamma = electronInitialEnergy / (massElectron * speed_of_light2);
+				double electronInitialBeta = sqrt(1.0 - 1.0 / (electronInitialGamma * electronInitialGamma));
+				if (k == 0) {
+					delectronEnergy = Ee[iangle][1] - Ee[iangle][0];
+				}
+				else {
+					delectronEnergy = Ee[iangle][k] - Ee[iangle][k - 1];
+				}
+				double electronDist = Fe[iangle][k];
+				double photonFinalEnergyPrimed;
+				double photonFinalCosThetaPrimed;
+				LorentzTransformationPhotonZ(electronInitialBeta, photonFinalEnergy, photonFinalCosTheta, photonFinalEnergyPrimed, photonFinalCosThetaPrimed);
+				double photonFinalSinThetaPrimed = sqrt(1.0 - photonFinalCosThetaPrimed * photonFinalCosThetaPrimed);
+				for (int imue = 0; imue < NthetaFinal; ++imue) {
+					for (int iphie = 0; iphie < Nphi; ++iphie) {
+						//rotation
+						for (int imuph = 0; imuph < NthetaInitial; ++imuph) {
+							for (int iphiph = 0; iphiph < Nphi; ++iphiph) {
+
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	omp_destroy_lock(&write_lock);
