@@ -159,7 +159,7 @@ void evaluateOrientationParameters3d(int Nrho, int Ntheta, int Nphi, double*** B
 					exit(0);
 				}
 				//for debug
-				//thetaIndex[i][j][k] = 9;
+				thetaIndex[i][j][k] = 3;
 			}
 		}
 	}
@@ -201,10 +201,10 @@ int main()
 	const double Bfactor = 0.29;
 	const double epsilonB = 0.0012;
 	//const double electronConcentration = 10*Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
-	const double electronConcentration = 1E10;
+	const double electronConcentration = 16E8;
 	const double photonConcentration = 1.0;
 	//double rmax = 0.3 * speed_of_light * 357 * 24 * 3600;
-	double rmax = 1E14;
+	double rmax = 0.25E15;
 
 
 	const int Nphi = 2;
@@ -336,10 +336,10 @@ int main()
 	}*/
 
 	//for star
-	/*double R = 1E14;
-	double westerlundL = 1E38;
-	double realenergydensity = westerlundL / (4 * pi * speed_of_light * R * R);
-	double temperature = 10000;
+	double R = rmax;
+	double starL = 300000*4E33;
+	double realenergydensity = starL / (4 * pi * speed_of_light * R * R);
+	double temperature = 50000;
 	double planckenergydensity = 8 * pi * pow(kBoltzman * temperature, 4) / pow(hplank * speed_of_light, 3) * intx3plank;
 	double a = realenergydensity / planckenergydensity;
 	if (a > 1) {
@@ -351,7 +351,7 @@ int main()
 		double theta = Eph[i] / (kBoltzman * temperature);
 		Fph[i] = a * (2 * Eph[i] * Eph[i] / cube(hplank * speed_of_light)) / (exp(theta) - 1.0);
 		dFph[i] = Fph[i] * (Eph[i] - Eph[i - 1]);
-	}*/
+	}
 
 	FILE* photons = fopen("photons.dat","w");
 	for(int i = 0; i < Nphot; ++i){
