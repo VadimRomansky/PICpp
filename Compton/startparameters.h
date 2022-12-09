@@ -10,7 +10,7 @@ const Geometry geometry = Geometry::SPHERICAL;
 enum Input {TRISTAN, SMILEI, MAXWELL, POWERLAW, COMBINED, LONG_COMBINED};
 const Input input = Input::COMBINED;
 
-enum Solver {DUBUS, UVAROV, THOMPSON};
+enum Solver {DUBUS, UVAROV, THOMPSON, ANISOTROPIC_KN};
 const Solver solver = Solver::UVAROV;
 
 #endif
