@@ -143,7 +143,7 @@ void inverseRotationSphericalCoordinates(const double& mur, const double& phir, 
 	}
 }
 
-double evaluatePhotonDistribution(const double& energy, int Np, double* Eph, double* Fph){
+double evaluatePhotonDistribution(const double& energy, const double& mu, const double& phi, int Np, double* Eph, double* Fph){
 	if(energy <= Eph[1]){
 
 		return 0;
@@ -318,46 +318,84 @@ int main()
 	const double Bfactor = 0.29;
 	const double epsilonB = 0.0012;
 	//const double electronConcentration = 10*Bfactor*Bfactor/(4*pi*massProtonReal*speed_of_light2*epsilonB);
-	const double electronConcentration = 16E8;
+	const double electronConcentration = 150;
 	const double photonConcentration = 1.0;
 	//double rmax = 0.3 * speed_of_light * 357 * 24 * 3600;
-	double rmax = 0.25E15;
+	double rmax = 1.3E17;
 
 
-	const int Nphi = 2;
+	const int Nphi = 4;
 	const int NthetaFinal = 20;
-	const int NthetaInitial = 10;
+	const int NthetaElectron = 20;
+	const int NthetaInitial = 20;
 	const int NthetaSpace = 4;
 	double cosThetaLeftFinal[NthetaFinal];
 	double cosThetaFinal[NthetaFinal];
 	double ThetaFinal[NthetaFinal];
 	double cosThetaLeftInitial[NthetaInitial];
 	double cosThetaInitial[NthetaInitial];
+	double cosThetaLeftElectron[NthetaElectron];
+	double cosThetaElectron[NthetaElectron];
 	double ThetaInitial[NthetaInitial];
+	double ThetaElectron[NthetaElectron];
 	double cosThetaSpace[NthetaSpace];
 	double phi[Nphi];
 	double sinPhiValue[Nphi];
 	double cosPhiValue[Nphi];
 
 	double dcosThetaFinal[NthetaFinal];
-	double dcosThetaInitial = 2.0/NthetaInitial;
+	double dcosThetaInitial[NthetaInitial];
+	double dcosThetaElectron[NthetaElectron];
 	double dcosThetaSpace = 2.0/NthetaSpace;
 	double dphi = 2.0*pi/Nphi;
-	double gammamax = 1000;
-	double thetamin = 0.00001/gammamax;
-	double dlogtheta = log(pi/thetamin)/(NthetaFinal-2);
+	double gammamax = 10000;
+	double thetamin = 0.001/gammamax;
+	double dlogtheta = log(pi/thetamin)/(NthetaFinal-1);
 	ThetaFinal[0] = 0;
 	cosThetaLeftFinal[0] = 1.0;
+	cosThetaFinal[0] = cos(thetamin);
 	for(int i = 1; i < NthetaFinal; ++i){
-		ThetaFinal[i] = thetamin*exp(dlogtheta*(i-1));
-		cosThetaLeftFinal[i] = cos(thetamin*exp(dlogtheta*(i-1)));
+		ThetaFinal[i] = thetamin*exp(dlogtheta*(i));
+		cosThetaFinal[i] = cos(thetamin*exp(dlogtheta*(i)));
+		cosThetaLeftFinal[i] = (cosThetaFinal[i] + cosThetaFinal[i - 1]) / 2.0;
 	}
 	for(int i = 0; i < NthetaFinal-1; ++i){
 		dcosThetaFinal[i] = -(cosThetaLeftFinal[i+1] - cosThetaLeftFinal[i]);
-		cosThetaFinal[i] = (cosThetaLeftFinal[i] + cosThetaLeftFinal[i+1])/2.0;
+		//cosThetaFinal[i] = (cosThetaLeftFinal[i] + cosThetaLeftFinal[i+1])/2.0;
 	}
 	dcosThetaFinal[NthetaFinal - 1] = 1.0 + cosThetaLeftFinal[NthetaFinal - 1];
-	cosThetaFinal[NthetaFinal - 1] = (-1.0 + cosThetaLeftFinal[NthetaFinal - 1])/2;
+	cosThetaFinal[NthetaFinal - 1] = -1.0;
+
+	ThetaInitial[0] = 0;
+	cosThetaLeftInitial[0] = 1.0;
+	cosThetaInitial[0] = cos(thetamin);
+	for (int i = 1; i < NthetaInitial; ++i) {
+		ThetaInitial[i] = thetamin * exp(dlogtheta * (i));
+		cosThetaInitial[i] = cos(thetamin * exp(dlogtheta * (i)));
+		cosThetaLeftInitial[i] = (cosThetaInitial[i] + cosThetaInitial[i - 1]) / 2.0;
+	}
+	for (int i = 0; i < NthetaInitial - 1; ++i) {
+		dcosThetaInitial[i] = -(cosThetaLeftInitial[i + 1] - cosThetaLeftInitial[i]);
+		//cosThetaInitial[i] = (cosThetaLeftInitial[i] + cosThetaLeftInitial[i+1])/2.0;
+	}
+	dcosThetaInitial[NthetaInitial - 1] = 1.0 + cosThetaLeftInitial[NthetaInitial - 1];
+	cosThetaFinal[NthetaInitial - 1] = -1.0;
+
+	ThetaElectron[0] = 0;
+	cosThetaLeftElectron[0] = 1.0;
+	cosThetaElectron[0] = cos(thetamin);
+	for (int i = 1; i < NthetaElectron; ++i) {
+		ThetaElectron[i] = thetamin * exp(dlogtheta * (i));
+		cosThetaElectron[i] = cos(thetamin * exp(dlogtheta * (i)));
+		cosThetaLeftElectron[i] = (cosThetaElectron[i] + cosThetaElectron[i - 1]) / 2.0;
+	}
+	for (int i = 0; i < NthetaElectron - 1; ++i) {
+		dcosThetaElectron[i] = -(cosThetaLeftElectron[i + 1] - cosThetaLeftElectron[i]);
+		//cosThetaElectron[i] = (cosThetaLeftElectron[i] + cosThetaLeftElectron[i+1])/2.0;
+	}
+	dcosThetaElectron[NthetaElectron - 1] = 1.0 + cosThetaLeftElectron[NthetaElectron - 1];
+	cosThetaElectron[NthetaElectron - 1] = -1.0;
+
 	for(int i = 0; i < Nphi; ++i){
 		phi[i] = (i + 0.5)*dphi;
 		sinPhiValue[i] = sin(phi[i]);
@@ -366,11 +404,11 @@ int main()
 	for(int i = 0; i < NthetaSpace; ++i){
 		cosThetaSpace[i] = 1.0 - (i + 0.5)*dcosThetaSpace;
 	}
-	for(int i = 0; i < NthetaInitial; ++i){
+	/*for (int i = 0; i < NthetaInitial; ++i) {
 		cosThetaInitial[i] = 1.0 - (i + 0.5)*dcosThetaInitial;
 		cosThetaLeftInitial[i] = 1.0 - i*dcosThetaInitial;
-	}
-
+	}*/
+	/*
 	//for check rotation transform
 	double mur = 0.5;
 	double phir = 0.6;
@@ -378,7 +416,7 @@ int main()
 	double phi0 = 0.9;
 	double mu1, phi1, mu2, phi2;
 	rotationSphericalCoordinates(mur, phir, mu0, phi0, mu1, phi1);
-	inverseRotationSphericalCoordinates(mur, phir, mu1, phi1, mu2, phi2);
+	inverseRotationSphericalCoordinates(mur, phir, mu1, phi1, mu2, phi2);*/
 
 	const double intx2plank = 2.4042;
 	const double intx3plank = pi*pi*pi*pi/15;
@@ -462,7 +500,7 @@ int main()
 	}*/
 
 	//for star
-	double R = rmax;
+	/*double R = rmax;
 	double starL = 300000*4E33;
 	double realenergydensity = starL / (4 * pi * speed_of_light * R * R);
 	double temperature = 50000;
@@ -477,7 +515,7 @@ int main()
 		double theta = Eph[i] / (kBoltzman * temperature);
 		Fph[i] = a * (2 * Eph[i] * Eph[i] / cube(hplank * speed_of_light)) / (exp(theta) - 1.0);
 		dFph[i] = Fph[i] * (Eph[i] - Eph[i - 1]);
-	}
+	}*/
 
 	FILE* photons = fopen("photons.dat","w");
 	for(int i = 0; i < Nphot; ++i){
@@ -997,7 +1035,7 @@ int main()
 										I[i] += coef*
 											(1.0 + cosXiPrimed*cosXiPrimed + sqr(photonFinalEnergyPrimed/(massElectron*speed_of_light2))*sqr(1.0 - cosXiPrimed)/(1.0 - (photonFinalEnergyPrimed/(massElectron*speed_of_light2))*(1.0 - cosXiPrimed)))*
 											//2*pi*dcosThetaFinal[j]*dphi*dcosThetaInitial*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Nphot, Eph, Fph)/(derivativeE*derivativeEE - derivativeXi*(derivativeXiMu0*derivativeMu0E + derivativeXiMu1 * derivativeMu1E));
-											2*pi*dcosThetaFinal[j]*dphi*dcosThetaInitial*delectronEnergy*Fe[iangle][k]*evaluatePhotonDistribution(photonInitialEnergy, Nphot, Eph, Fph);
+											2*pi*dcosThetaFinal[j]*dphi*dcosThetaInitial[l] * delectronEnergy * Fe[iangle][k] * evaluatePhotonDistribution(photonInitialEnergy, photonInitialCosTheta, photonInitialPhi, Nphot, Eph, Fph);
 										if(I[i] != I[i]){
 											printf("I[i] = NaN\n");
 											printLog("I[i] = NaN\n");
@@ -1031,8 +1069,10 @@ int main()
 			}
 		}
 		else if (solver == Solver::ANISOTROPIC_KN) {
+			double mec2 = massElectron * speed_of_light2;
+			double totalVolume = 4 * pi * rmax * rmax * rmax / 3;
 			double photonFinalCosTheta = 1.0;
-			double photonPhinalPhi = 0;
+			double photonFinalPhi = 0;
 			for (int k = 0; k < Np; ++k) {
 				double electronInitialEnergy = Ee[iangle][k];
 				double delectronEnergy;
@@ -1045,16 +1085,62 @@ int main()
 					delectronEnergy = Ee[iangle][k] - Ee[iangle][k - 1];
 				}
 				double electronDist = Fe[iangle][k];
-				double photonFinalEnergyPrimed;
-				double photonFinalCosThetaPrimed;
-				LorentzTransformationPhotonZ(electronInitialBeta, photonFinalEnergy, photonFinalCosTheta, photonFinalEnergyPrimed, photonFinalCosThetaPrimed);
-				double photonFinalSinThetaPrimed = sqrt(1.0 - photonFinalCosThetaPrimed * photonFinalCosThetaPrimed);
-				for (int imue = 0; imue < NthetaFinal; ++imue) {
+				
+				for (int imue = 0; imue < NthetaElectron; ++imue) {
+					double mu_e = cosThetaElectron[imue];
 					for (int iphie = 0; iphie < Nphi; ++iphie) {
+						double phi_e = 2 * pi * (iphie + 0.5) / Nphi;
+						double dphi_e = 1.0 / Nphi;
 						//rotation
+						double photonFinalCosThetaRotated;
+						double photonFinalPhiRotated;
+						rotationSphericalCoordinates(mu_e, phi_e, photonFinalCosTheta, photonFinalPhi, photonFinalCosThetaRotated, photonFinalPhiRotated);
+						//double photonFinalEnergyPrimed;
+						//double photonFinalCosThetaPrimed;
+						//LorentzTransformationPhotonZ(electronInitialBeta, photonFinalEnergy, photonFinalCosThetaRotated, photonFinalEnergyPrimed, photonFinalCosThetaPrimed);
+						double photonFinalEnergyPrimed = electronInitialGamma * (1 - photonFinalCosThetaRotated * electronInitialBeta) * photonFinalEnergy;
+						double photonFinalCosThetaPrimed = (photonFinalCosThetaRotated - electronInitialBeta) / (1.0 - electronInitialBeta * photonFinalCosThetaRotated);
+						double photonFinalSinThetaPrimed = sqrt(1.0 - photonFinalCosThetaPrimed * photonFinalCosThetaPrimed);
 						for (int imuph = 0; imuph < NthetaInitial; ++imuph) {
+							double mu_ph = -cosThetaInitial[imuph];
 							for (int iphiph = 0; iphiph < Nphi; ++iphiph) {
+								double phi_ph = 2 * pi * (iphiph + 0.5) / Nphi;
+								double dphi_ph = 1.0 / Nphi;
+								double photonInitialCosThetaPrimed = mu_ph;
+								double photonInitialPhiRotated = phi_ph;
+								//inverseRotationSphericalCoordinates(mu_e, phi_e, mu_ph, phi_ph, photonInitialCosThetaRotated, photonInitialPhiRotated);
+								//double photonInitialCosThetaPrimed = (photonInitialCosThetaRotated - electronInitialBeta) / (1.0 - electronInitialBeta * photonInitialCosThetaRotated);
+								
+								double photonInitialSinThetaPrimed = sqrt(1.0 - photonInitialCosThetaPrimed * photonInitialCosThetaPrimed);
+								
+								double cosXiPrimed = photonInitialCosThetaPrimed * photonFinalCosThetaPrimed + photonInitialSinThetaPrimed * photonFinalSinThetaPrimed * cos(photonFinalPhiRotated - photonInitialPhiRotated);
 
+								double photonInitialEnergyPrimed = photonFinalEnergyPrimed / (1.0 - (photonFinalEnergyPrimed / (mec2)) * (1.0 - cosXiPrimed));
+								double photonInitialEnergy = electronInitialGamma * photonInitialEnergyPrimed + electronInitialBeta * electronInitialGamma * photonInitialEnergyPrimed * photonInitialCosThetaPrimed;
+								double photonInitialCosThetaRotated = (photonInitialCosThetaPrimed + electronInitialBeta) / (1 + photonInitialCosThetaPrimed * electronInitialBeta);
+
+								double photonInitialCosTheta;
+								double photonInitialPhi;
+								inverseRotationSphericalCoordinates(mu_e, phi_e, photonInitialCosThetaRotated, photonInitialPhiRotated, photonInitialCosTheta, photonInitialPhi);
+
+								double dI = electronConcentration * totalVolume * 0.5 * re2 * speed_of_light * Fe[iangle][k] *
+									(sqr(1 - photonInitialCosThetaRotated * electronInitialBeta) / (1.0 - photonFinalCosThetaRotated * electronInitialBeta)) *
+									(1 + cosXiPrimed * cosXiPrimed + sqr(photonFinalEnergyPrimed / mec2) * sqr(1 - cosXiPrimed) / (1 - (photonFinalEnergyPrimed / mec2) * (1 - cosXiPrimed))) *
+									evaluatePhotonDistribution(photonInitialEnergy, photonInitialCosTheta, photonInitialPhi, Nphot, Eph, Fph) *
+									dphi_e * dphi_ph * dcosThetaElectron[imue] * dcosThetaInitial[imuph] * delectronEnergy;
+
+								if (dI < 0) {
+									printf("dI[i] <  0\n");
+									printLog("dI[i] < 0\n");
+									exit(0);
+								}
+
+								I[i] += dI;
+								if (I[i] != I[i]) {
+									printf("I[i] = NaN\n");
+									printLog("I[i] = NaN\n");
+									exit(0);
+								}
 							}
 						}
 					}

@@ -8,9 +8,9 @@ enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
 const Geometry geometry = Geometry::SPHERICAL;
 
 enum Input {TRISTAN, SMILEI, MAXWELL, POWERLAW, COMBINED, LONG_COMBINED};
-const Input input = Input::COMBINED;
+const Input input = Input::POWERLAW;
 
 enum Solver {DUBUS, UVAROV, THOMPSON, ANISOTROPIC_KN};
-const Solver solver = Solver::UVAROV;
+const Solver solver = Solver::ANISOTROPIC_KN;
 
 #endif
