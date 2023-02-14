@@ -52,7 +52,7 @@ const double size[Nmonth] = {99*24*3600*0.3*speed_of_light, 162 * 24 * 3600 * 0.
 //const double times[Nmonth] = {18.1*24*3600, 50*24*3600, 77*24*3600, 143*24*3600};
 
 //CSS161010
-const double times[Nmonth] = { 99 * 24 * 3600, 162 * 24 * 3600, 77 * 24 * 3600};
+const double times[Nmonth] = { 99 * 24 * 3600, 162 * 24 * 3600, 357 * 24 * 3600};
 
 //SN2009bb
 //const double distance = 40*3.08*1.0E24;

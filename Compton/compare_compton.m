@@ -3,17 +3,19 @@ clear;
 
 radiationEu = importdata('outputEu.dat');
 radiationEd = importdata('outputEd.dat');
+radiationEt = importdata('outputEt.dat');
 
 radiationu = importdata('outputNuu.dat');
 radiationd = importdata('outputNud.dat');
+radiationt = importdata('outputNut.dat');
 
-Nnu = size(radiationu,1);
+Nnu = size(radiationEu,1);
 
 
 
 
-startPower = 35;
-endPower = 50;
+startPower = 90;
+endPower = 110;
 
 Fa(1:Nnu) = 0;
 
@@ -65,8 +67,10 @@ ylabel ('E F_{E} erg/{s cm^{2}}');
 
 %plot(radiation2(1:Nnu,1),radiation2(1:Nnu,2),'red','LineWidth',2);
 plot(radiationEd(1:Nnu,1),radiationEd(1:Nnu,2),'red','LineWidth',2);
-plot(radiationEd(1:Nnu,1),Fa(1:Nnu),'blue','LineWidth',2);
-%legend('Dubus','Uvarov/mc^2');
+plot(radiationEu(1:Nnu,1),radiationEu(1:Nnu,2),'green','LineWidth',2);
+plot(radiationEt(1:Nnu,1),radiationEt(1:Nnu,2),'blue','LineWidth',2);
+plot(radiationEd(1:Nnu,1),Fa(1:Nnu),'black','LineWidth',2);
+legend('Dubus','Uvarov', 'Thonpson','powerlaw');
 %grid ;
 
 output(1:Nnu, 1:2)=0;

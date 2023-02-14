@@ -349,7 +349,7 @@ int main()
 	double dcosThetaSpace = 2.0/NthetaSpace;
 	double dphi = 2.0*pi/Nphi;
 	double gammamax = 10000;
-	double thetamin = 0.001/gammamax;
+	double thetamin = 0.02/gammamax;
 	double dlogtheta = log(pi/thetamin)/(NthetaFinal-1);
 	ThetaFinal[0] = 0;
 	cosThetaLeftFinal[0] = 1.0;
