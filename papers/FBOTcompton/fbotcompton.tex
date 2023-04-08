@@ -1,0 +1,55 @@
+%\documentclass[a4paper,12pt]{report}
+\documentclass[a4paper,12pt]{extreport}
+
+\bibliographystyle{iopart-num}
+\usepackage{amsmath}
+%\usepackage{citesort}
+\usepackage{subfigure}
+\usepackage{graphicx}
+\graphicspath{{fig/}}
+\usepackage{ifpdf}
+\ifpdf\usepackage{epstopdf}\fi
+\usepackage[export]{adjustbox}
+\usepackage[numbers]{natbib}
+
+\def\apj{ApJ}
+\def\apjl{ApJ Lett.}
+\def\mnras{MNRAS}
+\def\nat{Nature}
+\def\physrevB{Phys. Rev. B}
+\def\prd{Phys. Rev. D}
+\def\prl{Phys. Rev. Lett.}
+\def\pre{Phys. Rev. E}
+\def\araa{Ann. Rev. Astron. Astrophys.}                % "Ann. Rev. Astron. Astrophys."
+\def\aap{Astron. Astrophys.}                  % "Astron. Astrophys."
+\def\aaps{Astron. Astrophys. Suppl. Ser.}                 % "Astron. Astrophys. Suppl. Ser."
+\def\aj{Astron. J.}                      % "Astron. J."
+\def\apjs{Astrophys. J. Suppl. Ser.}                  % "Astrophys. J. Suppl. Ser."
+\def\pasp{Publ. Astron. Soc. Pac.}                  % "Publ. Astron. Soc. Pac."
+\def\apjl{ApJ Lett.}                   % letter at ApJ
+\def\pasj{PASJ}
+\def\apss{Astroph. Space Sci.}
+\def\aplett{Astroph. Lett.}
+\def\ssr{Space Sci. Rev.}
+\def\jcap{J. Cosmol. Astropart. Phys.}
+\def\apspr{Sov. Sci. Rev. Sect. E}
+\def\nar{New Astron. Rev.}
+\def\aapr{ Astron. Astrophys. Rev.}
+
+\begin{document}
+	\title{On X-ray emission from Fast Blue Optical Transients}
+	
+	\author{A M Bykov$^{1}$, V I Romansky$^{1}$}
+	
+
+Recent observations of Fast Blue Optical Transients \cite{Margutti2019,Ho2020,Coppejans2020} show high level of X-ray radiation. There are suggested different scenarios of  origins of this radiation: central engine or interaction of shock with external medium. In this paper we present model of interaction of shock with strong wind from close star, producing strong X-ray emission via inverse compton scattering on the photons of this star.
+
+%написать почему не хватает комптона от всей оболочки
+
+In our model we took two close stars, on a distance $1.4\cdot10^{17} cm$, wich correspondes to the radius of expanding shock of CSS161010 at 99 day after explosion. Such small distances are possible in young massive star clusters \cite{}. Also massive star clusters usually have dozens of bright stars with powerfull stellar winds (OB, Wolf-Rayet, and red supergiants). We will refer to them as first star - stable, generating wind, and the second - exploded as supernova. We assumed both stars have winds with velocity $v_w = ?$ and mass loss $\dot{M} = 10^{-5} M_\odot $ per year and luminocity $L=500000 L_\odot$ and surfece temperature $T = 2.5\cdot10^6 K$ which is typical for Wolf-Rayet stars. The magnetic fied of the wind is initialized using \cite{}, and for the first star  it's amplitude is $100 G$ at the radius $10$ while for the second we need much stronger field to satisfy synchrotron observational data, as it is shown in papers \cite{Coppejans2020, BykovUniverse}. So we took magnetic field $1000 G$ at the radius $10^12$, stars with such strong fields are described in \cite{}.
+
+For hydrodinamcal simulation we use code PLUTO \cite{MignonePluto}. We used several nested setups on different scales. At first we performed 3d modeling of two stable stars with parameters described above until they winds form a stable configuration. Sizes of the simulation box are $Lx = $ with number of grid points respectively. The next step was 1d spherical modeling of second star explosion. We use ejecta mass $M_{ej} = 0.02 M_\odot$ and velocity $v_{ej} = 0.3 c$ and initial conditions as described in \cite{}. At the third step we use results of the previous steps as initial and boundary conditions in setup with smaller scale - with size $Lx = $ . And at the last step, in setup with the smallest scale $Lx = $, wich is necessary to resolve bow- and tremination shock of the wind of the first star, we use results of the third step as initial and boundary conditions. Scheme of setups is shown in Figure \ref{}.
+
+\bibliographystyle{iopart-num}
+\bibliography{fbotcompton}
+\end{document}
