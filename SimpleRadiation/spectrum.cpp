@@ -1165,7 +1165,7 @@ double evaluateNextdFe(double* Ee, double* dFe, double dg, int j, int Np) {
 		//printf("tempe = %g\n", tempE);
 		//printf("E[j] = %g\n", Ee[j]);
 		//printf("E[j+1] = %g\n", Ee[j+1]);
-		double dE = Ee[j] - Ee[j-1];
+		double dE = Ee[j+1] - Ee[j];
 		double F = dFe[j]/dE;
 		//printf("F = %lf\n", F);
 		double nextF = dFe[j+1]/(Ee[j+1]-Ee[j]);
@@ -1201,7 +1201,7 @@ void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& A
 
 
 	double oldA = 0;
-	for (int j = 1; j < Np; ++j) {
+	for (int j = 1; j < Np-1; ++j) {
 		if(dFe[j] > 0){
 			double nuc = criticalNu(Ee[j], sinhi, B);
 			double gamma = Ee[j] / (massElectron * speed_of_light2);
@@ -1216,7 +1216,7 @@ void evaluateEmissivityAndAbsorptionAtNuSimple(double nu, double& Inu, double& A
 			}
 			////todo! F(g +dg)
 			double tempP = gamma*gamma*coef * B*dFe[j] * sinhi * evaluateMcDonaldIntegral(nu / nuc);
-			double dg = 0.1*(Ee[j] - Ee[j-1])/ (massElectron * speed_of_light2);
+			double dg = 0.01*(Ee[j+1] - Ee[j])/ (massElectron * speed_of_light2);
 
 			double tempGamma = gamma + dg;
 			double tempnuc = criticalNu(massElectron*speed_of_light2*tempGamma, sinhi, B);

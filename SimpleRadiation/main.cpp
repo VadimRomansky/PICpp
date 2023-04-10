@@ -967,6 +967,9 @@ int main()
 					Fe[j][i] = Fe[j][137]*pow(Ee[j][i]/Ee[j][137], -3.5);
 				}
 				dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
+				if (dFe[j][i] < 0) {
+					printf("dFe < 0\n");
+				}
 			}
 
 		}
@@ -1310,9 +1313,9 @@ int main()
 	}
 
 	//Bfactor = 0.069;
-	Bfactor = 0.29;
+	Bfactor = 0.6;
 	//rmax = 3E17;
-	rmax = 1.4E17;
+	rmax = 1.3E17;
 	epsilonB = 0.0005;
 	fractionSize = 0.0001;
 

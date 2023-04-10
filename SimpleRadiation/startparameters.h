@@ -11,7 +11,7 @@ enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
 const Geometry geometry = Geometry::SPHERICAL;
 
 enum Input {TRISTAN, SMILEI, MAXWELL, POWERLAW, COMBINED, MONTECARLO, MONTECARLO_CUT};
-const Input input = Input::MONTECARLO;
+const Input input = Input::COMBINED;
 
 enum Scale {LINEAR, LOG};
 const Scale scale = Scale::LINEAR;

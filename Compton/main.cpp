@@ -984,7 +984,7 @@ int main()
 								double electronDist = Fe[iangle][k];
 								double photonFinalEnergyPrimed;
 								double photonFinalCosThetaPrimed;
-								LorentzTransformationPhotonZ(electronInitialBeta, photonFinalEnergy, photonFinalCosTheta, photonFinalEnergyPrimed, photonFinalCosThetaPrimed);
+								LorentzTransformationPhotonZ(electronInitialGamma, photonFinalEnergy, photonFinalCosTheta, photonFinalEnergyPrimed, photonFinalCosThetaPrimed);
 								double photonFinalSinThetaPrimed = sqrt(1.0 - photonFinalCosThetaPrimed*photonFinalCosThetaPrimed);
 								for(int l = 0; l < NthetaInitial; ++l){
 									//integral by dmu0
@@ -1094,7 +1094,7 @@ int main()
 						//rotation
 						double photonFinalCosThetaRotated;
 						double photonFinalPhiRotated;
-						rotationSphericalCoordinates(mu_e, phi_e, photonFinalCosTheta, photonFinalPhi, photonFinalCosThetaRotated, photonFinalPhiRotated);
+						rotationSphericalCoordinates(thets_e, phi_e, photonFinalTheta, photonFinalPhi, photonFinalThetaRotated, photonFinalPhiRotated);
 						//double photonFinalEnergyPrimed;
 						//double photonFinalCosThetaPrimed;
 						//LorentzTransformationPhotonZ(electronInitialBeta, photonFinalEnergy, photonFinalCosThetaRotated, photonFinalEnergyPrimed, photonFinalCosThetaPrimed);
@@ -1121,7 +1121,7 @@ int main()
 
 								double photonInitialCosTheta;
 								double photonInitialPhi;
-								inverseRotationSphericalCoordinates(mu_e, phi_e, photonInitialCosThetaRotated, photonInitialPhiRotated, photonInitialCosTheta, photonInitialPhi);
+								inverseRotationSphericalCoordinates(theta_e, phi_e, photonInitialThetaRotated, photonInitialPhiRotated, photonInitialTheta, photonInitialPhi);
 
 								double dI = electronConcentration * totalVolume * 0.5 * re2 * speed_of_light * Fe[iangle][k] *
 									(sqr(1 - photonInitialCosThetaRotated * electronInitialBeta) / (1.0 - photonFinalCosThetaRotated * electronInitialBeta)) *
