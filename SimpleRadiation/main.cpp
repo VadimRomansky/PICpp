@@ -1441,11 +1441,11 @@ int main()
 	}
 	evaluateAllEmissivityAndAbsorption(rontgenNu, rontgenInu, rontgenAnu, rontgenNnu, weightedEe, weightedFe, Np, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, concentration, Bfactor, 1.0, 0.75 * v / speed_of_light);
 	if (geometry == SPHERICAL) {
-		evaluateSpectrumSpherical(rontgenNu, rontgenTotalInu, rontgenInu, rontgenAnu, rmax, rontgenNnu, 1.0, fractionSize);
+		//evaluateSpectrumSpherical(rontgenNu, rontgenTotalInu, rontgenInu, rontgenAnu, rmax, rontgenNnu, 1.0, fractionSize);
 		//evaluateSpectrumSpherical(rontgenNu, rontgenTotalInu, rontgenInu, rontgenAnu, rmax, rontgenNnu, 1.0, 0.001);
 	}
 	else {
-		evaluateSpectrumFlat(rontgenNu, rontgenTotalInu, rontgenInu, rontgenAnu, rmax, rontgenNnu, 1.0, fractionSize);
+		//evaluateSpectrumFlat(rontgenNu, rontgenTotalInu, rontgenInu, rontgenAnu, rmax, rontgenNnu, 1.0, fractionSize);
 		//evaluateSpectrumFlat(rontgenNu, rontgenTotalInu, rontgenInu, rontgenAnu, rmax, rontgenNnu, 1.0, 0.001);
 	}
 	double rontgenFlux = 0;
