@@ -1,10 +1,10 @@
 clear;
 radiation = importdata('radiation.dat');
-radiation1 = importdata('radiation1.dat');
-radiation3 = importdata('radiation3.dat');
-radiation4 = importdata('radiation4.dat');
+%radiation1 = importdata('radiation1.dat');
+%radiation3 = importdata('radiation3.dat');
+%radiation4 = importdata('radiation4.dat');
 %datar = importdata('at2018radio.dat');
-N = size(radiation1,1);
+N = size(radiation,1);
 
 %Ndatar = size(datar,1);
 %for i = 1:Ndatar,
@@ -202,22 +202,22 @@ title ('{\nu} F_{\nu}');
 xlabel ('{\nu} GHz');
 ylabel ('{\nu} F_{\nu}');
 
-output(1:N,1:4) = 0;
-for i = 1:N,
-    output(i,1) = log10(radiation1(i,1));
-    output(i,2) = radiation3(i,2);
-    output(i,3) = radiation1(i,2);
-    output(i,4) = radiation4(i,2);
-end;
-output2(1:4, 1:2) = 0;
-output3(1:4, 1:2) = 0;
-for i = 1:4,
-    output2(i,1) = log10(x99(i));
-    output2(i,2) = y99(i);
-    output3(i,1) = log10(x99(i));
-    output3(i,2) = e99(i);
-end;
-
-dlmwrite('css16.dat',output,'delimiter',' ');
-dlmwrite('css16obs.dat',output2,'delimiter',' ');
-dlmwrite('css16err.dat',output3,'delimiter',' ');
+% output(1:N,1:4) = 0;
+% for i = 1:N,
+%     output(i,1) = log10(radiation1(i,1));
+%     output(i,2) = radiation3(i,2);
+%     output(i,3) = radiation1(i,2);
+%     output(i,4) = radiation4(i,2);
+% end;
+% output2(1:4, 1:2) = 0;
+% output3(1:4, 1:2) = 0;
+% for i = 1:4,
+%     output2(i,1) = log10(x99(i));
+%     output2(i,2) = y99(i);
+%     output3(i,1) = log10(x99(i));
+%     output3(i,2) = e99(i);
+% end;
+% 
+% dlmwrite('css16.dat',output,'delimiter',' ');
+% dlmwrite('css16obs.dat',output2,'delimiter',' ');
+% dlmwrite('css16err.dat',output3,'delimiter',' ');

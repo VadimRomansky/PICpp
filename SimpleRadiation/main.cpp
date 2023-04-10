@@ -1026,6 +1026,37 @@ int main()
 				//dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
 			}
 		}
+		else if (input == MONOENERGETIC) {
+			for (int i = 1; i < Np; ++i) {
+				fscanf(inputPe, "%lf", &u);
+				fscanf(inputFe, "%lf", &Fe[j][i]);
+
+				double gamma = u;
+				//if( u < 3000){
+				Ee[j][i] = gamma * massElectron * speed_of_light2;
+				//maxEnergy = Ee[i];
+				Fe[j][i] = Fe[j][i] / (massElectron * speed_of_light2);
+				if (i!=120 && i!=121) {
+					Fe[j][i] = 0;
+				}
+				else {
+					Fe[j][i] = 1.0;
+				}
+				/*if(gamma >= 1.0){
+					Fe[j][i] = 1.0/pow(Ee[j][i],3);
+				} else {
+				Fe[j][i] = 0;
+				}*/
+				dFe[j][i] = (Fe[j][i] / (4 * pi)) * (Ee[j][i] - Ee[j][i - 1]);
+				//} else {
+				//	Fe[i] = 0;
+				//}
+
+
+				//Fe[j][i] = exp(-gamma/thetae)*gamma*u;
+				//dFe[j][i] = (Fe[j][i] / (4*pi)) * (Ee[j][i] - Ee[j][i - 1]);
+			}
+		}
 
 		fclose(inputPe);
 		fclose(inputFe);
@@ -1317,7 +1348,7 @@ int main()
 	//rmax = 3E17;
 	rmax = 1.3E17;
 	epsilonB = 0.0005;
-	fractionSize = 0.0001;
+	fractionSize = 0.001;
 
 	double vector[4];
 	vector[0] = Bfactor/maxB;
@@ -1332,8 +1363,8 @@ int main()
 
 	bool optPar[4] = { true, true, true, true };
 
-	//optimizeParametersGeneral(vector, optPar, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, dopplerBeta, logFile);
-	stochasticGradientOptimization(vector, optPar, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, dopplerBeta, logFile);
+	optimizeParametersGeneral(vector, optPar, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, dopplerBeta, logFile);
+	//stochasticGradientOptimization(vector, optPar, nu1, observedInu, observedError, weightedEe, weightedFe, Np, Nobs, Ndist, B3d, sintheta3d, thetaIndex3d, concentrations3d, Inu1, Anu1, area3d, length3d, dopplerBeta, logFile);
 	Bfactor = vector[0]*maxB;
 	rmax = vector[1]*maxR;
 	fractionSize = vector[2];

@@ -33,10 +33,12 @@ const double criticalNuCoef = 3 * electron_charge / (4 * pi * massElectron * mas
 const std::string outputfileName = "radiation.dat";
 //const std::string fileNameP = "../../tristan-mp-pitp/Pe";
 //const std::string fileNameF = "../../tristan-mp-pitp/Fe";
-//const std::string fileNameP = "Ee";
-//const std::string fileNameF = "Fs";
-const std::string fileNameP = "Em";
-const std::string fileNameF = "Fm";
+//smilei
+const std::string fileNameP = "Ee";
+const std::string fileNameF = "Fs";
+//montecrlo
+//const std::string fileNameP = "Em";
+//const std::string fileNameF = "Fm";
 const std::string logFileName = "log.dat";
 const std::string BFileName = "B.dat";
 
