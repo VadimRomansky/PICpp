@@ -193,14 +193,14 @@ for i = 1:N,
     nufnu(i) = radiation(i,2)*radiation(i,1)/10^17;
 end;
 
-figure(2);
-hold on;
-set(gca, 'YScale', 'log');
-set(gca, 'XScale', 'log');
-plot(radiation(1:N,1), nufnu(1:N),'Color','red','LineWidth',2);
-title ('{\nu} F_{\nu}');
-xlabel ('{\nu} GHz');
-ylabel ('{\nu} F_{\nu}');
+% figure(2);
+% hold on;
+% set(gca, 'YScale', 'log');
+% set(gca, 'XScale', 'log');
+% plot(radiation(1:N,1), nufnu(1:N),'Color','red','LineWidth',2);
+% title ('{\nu} F_{\nu}');
+% xlabel ('{\nu} GHz');
+% ylabel ('{\nu} F_{\nu}');
 
 % output(1:N,1:4) = 0;
 % for i = 1:N,

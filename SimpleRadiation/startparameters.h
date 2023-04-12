@@ -5,7 +5,7 @@ const bool parker = false;
 const bool turbulence = false;
 
 enum Doppler { NO, INTEGER, DIFFERENTIAL };
-const Doppler doppler = Doppler::NO;
+const Doppler doppler = Doppler::INTEGER;
 
 enum Geometry {FLAT_SIMPLE, FLAT, SPHERICAL};
 const Geometry geometry = Geometry::SPHERICAL;
