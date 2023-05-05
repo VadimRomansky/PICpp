@@ -53,7 +53,24 @@ For hydrodinamcal simulation we use code PLUTO \cite{MignonePluto}. We used seve
 Simulations showed that ejecta of supernovae, moving in interstellar medium has profile with thin and dense peak, with parameters number density $n \approx 10^5$ and width $d = 1E^{15}$.
 
 
-The wind shock has radius $R_w \approx 0.5\times10^14 cm$ and number density $n_w \approx 10^9 cm^{-3}$. With this parameters, and luminocity and temperature of the star, one can estimate observed X-ray flux, produxed by inverse compton scattering. 
+The wind shock has radius $R_w \approx 0.5\times10^14 cm$ and number density $n_w \approx 10^9 cm^{-3}$. With this parameters, and luminocity and temperature of the star, one can estimate observed X-ray flux, produxed by inverse compton scattering.
+
+\begin{figure}[h!]
+	\centering
+	\begin{minipage}{0.48\textwidth}
+		\centering
+		\includegraphics[width=0.98\textwidth]{./fig/density.png} 
+		\caption{Density profile of the system at different time moments}
+		\label{density}
+	\end{minipage}\hfill
+	\begin{minipage}{0.48\textwidth}
+		\centering
+		\includegraphics[width=0.98\textwidth]{./fig/Bfield.png} 
+		\caption{Magnetic field profile of the system at different time moments}
+		\label{Bfield}
+	\end{minipage}
+\end{figure}
+ 
 \section{radiation}
 For evaluating radiation we use our numerical code FAINA, which allows to evaluate synchrotron and inverse compton radiation and also fit model to observational data. 
 
