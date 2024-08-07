@@ -21,13 +21,13 @@ grid ;
 
 figure(3);
 hold on;
-plot(general(1:N,2),general(1:N,5),"Color","red");
-plot(general(1:N,2),general(1:N,6),"Color","green");
-plot(general(1:N,2),general(1:N,7),"Color","blue");
-plot(general(1:N,2),general(1:N,8),"Color","black");
-plot(general(1:N,2),general(1:N,9),"Color","yellow");
-plot(general(1:N,2),general(1:N,12),"Color","magenta");
-plot(general(1:N,2),general(1:N,13),"Color","cyan");
+plot(general(1:N,2),general(1:N,5),'Color','red');
+plot(general(1:N,2),general(1:N,6),'Color','green');
+plot(general(1:N,2),general(1:N,7),'Color','blue');
+plot(general(1:N,2),general(1:N,8),'Color','black');
+plot(general(1:N,2),general(1:N,9),'Color','yellow');
+plot(general(1:N,2),general(1:N,12),'Color','magenta');
+plot(general(1:N,2),general(1:N,13),'Color','cyan');
 
 legend('total energy', 'kinetic energy', 'thermal energy', 'particle enrgy', 'magnetic energy', 'injected energy', 'u grad p energy exchange');
 title ('E');
@@ -37,8 +37,8 @@ grid ;
 
 figure(4);
 hold on;
-plot(general(1:N,2),general(1:N,10),"Color","red");
-plot(general(1:N,2),general(1:N,11),"Color","blue");
+plot(general(1:N,2),general(1:N,10),'Color','red');
+plot(general(1:N,2),general(1:N,11),'Color','blue');
 legend('injected particles','total particles');
 title ('N particles');
 xlabel ('t');

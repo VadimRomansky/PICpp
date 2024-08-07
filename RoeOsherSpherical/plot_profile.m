@@ -1,5 +1,5 @@
 clear;
-tamc_radial_profile = importdata('./output/tamc_radial_profile_230.dat');
+tamc_radial_profile = importdata('./output/tamc_radial_profile_1400.dat');
 xfile = importdata('./output/xfile.dat');
 
 Nx = size(xfile,1);
