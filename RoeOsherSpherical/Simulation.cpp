@@ -63,6 +63,8 @@ void Simulation::simulate(){
 	fclose(outFullField);
 	FILE* outCoef = fopen((outputDir + "diff_coef" + fileNumber + ".dat").c_str(),suffix);
 	fclose(outCoef);
+	FILE* outGrowsRate = fopen((outputDir + "grows_rate" + fileNumber + ".dat").c_str(), suffix);
+	fclose(outGrowsRate);
 	FILE* xFile = fopen("./output/xfile.dat",suffix);
 	fclose(xFile);
 	FILE* pFile = fopen("./output/pfile.dat",suffix);
@@ -166,14 +168,16 @@ void Simulation::simulate(){
 			coordinateField = fopen((outputDir + "coordinate_field" + fileNumber + ".dat").c_str(),"w");
 			outField = fopen((outputDir + "field" + fileNumber + ".dat").c_str(),"w");
 			outCoef = fopen((outputDir + "diff_coef" + fileNumber + ".dat").c_str(),"w");
+			outGrowsRate = fopen((outputDir + "grows_rate" + fileNumber + ".dat").c_str(),"w");
 			xFile = fopen("./output/xfile.dat","w");
 			kFile = fopen("./output/kfile.dat","w");
 			pFile = fopen("./output/pfile.dat","w");
-			outputField(outField, coordinateField, outFullField, outCoef, xFile, kFile, pFile, this);
+			outputField(outField, coordinateField, outFullField, outCoef, outGrowsRate, xFile, kFile, pFile, this);
 			fclose(outField);
 			fclose(coordinateField);
 			fclose(outFullField);
 			fclose(outCoef);
+			fclose(outGrowsRate);
 			fclose(xFile);
 			fclose(kFile);
 			fclose(pFile);

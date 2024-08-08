@@ -142,7 +142,7 @@ void outMatrix(double* a, double* c, double* b, int N, double* f, double* x){
 	fclose(file);
 }
 
-void outputField(FILE* outFile, FILE* coordinateFile, FILE* outFull, FILE* coefFile, FILE* xfile, FILE* kfile, FILE* pfile,  Simulation* simulation){
+void outputField(FILE* outFile, FILE* coordinateFile, FILE* outFull, FILE* coefFile, FILE* growsFile, FILE* xfile, FILE* kfile, FILE* pfile,  Simulation* simulation){
 	double* integralField = new double[kgridNumber];
 	for(int k = 0; k < kgridNumber; ++k){
 		integralField[k] = 0;
@@ -162,6 +162,10 @@ void outputField(FILE* outFile, FILE* coordinateFile, FILE* outFull, FILE* coefF
 			}
 		}
 		fprintf(outFull, "\n");
+		for (int k = 0; k < kgridNumber; ++k) {
+			fprintf(growsFile, "%g ", simulation->growth_rate[i][k]);
+		}
+		fprintf(growsFile, "\n");
 	}
 
 	for(int j = 0; j < pgridNumber; ++j){

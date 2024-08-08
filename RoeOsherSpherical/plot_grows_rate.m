@@ -1,5 +1,5 @@
 clear;
-field = importdata('./output/full_field_120.dat');
+field = importdata('./output/grows_rate_20.dat');
 xfile = importdata('./output/xfile.dat');
 kfile = importdata('./output/kfile.dat');
 
@@ -11,9 +11,9 @@ figure(1);
 plot (kfile(1:Nk),field(Nx/10, 1:Nk), 'red');
 set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'log');
-title ('B');
+title ('\gamma');
 xlabel ('k');
-ylabel ('B');
+ylabel ('\gamma');
 grid ;
 
 
@@ -21,26 +21,26 @@ figure(2);
 plot (kfile(1:Nk),field(2*Nx/10, 1:Nk), 'red');
 set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'log');
-title ('B');
+title ('\gamma');
 xlabel ('k');
-ylabel ('B');
+ylabel ('\gamma');
 grid ;
 
 figure(3);
 plot (kfile(1:Nk),field(4*Nx/10, 1:Nk), 'red');
 set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'log');
-title ('B');
+title ('\gamma');
 xlabel ('k');
-ylabel ('B');
+ylabel ('\gamma');
 grid ;
 
 figure(4);
 plot (kfile(1:Nk),field(5*Nx/10, 1:Nk), 'red');
 set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'log');
-title ('B');
+title ('\gamma');
 xlabel ('k');
-ylabel ('B');
+ylabel ('\gamma');
 grid ;
 
