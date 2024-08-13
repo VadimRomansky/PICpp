@@ -157,6 +157,7 @@ void Simulation::evaluateCR(){
 					if(gkpp - gkp > 0)
 						f[i] += (deltaT/3)*((xp*xp*v2 - xm*xm*v1)/dV)*((gkpp - gkp)/deltaLogP);
 				}
+				//f[i] = distributionFunction[i][k];
                 if(abs2(i - shockWavePoint)<2 && abs2(k - injectionMomentum) < 1){
 					double inj = injection(i);
 					double E = sqrt(sqr(mc2) + sqr(pgrid[injectionMomentum])*speed_of_light) - mc2;

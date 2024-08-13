@@ -233,7 +233,8 @@ void Simulation::evaluateHydrodynamic() {
 	for(int i = 0; i < rgridNumber - 1; ++i){
 		tempMomentum[i] += deltaT*2*middlePressure[i]/middleGrid[i];
 
-		tempMomentum[i] -= deltaT*(cosmicRayPressure[i+1] - cosmicRayPressure[i])/(deltaR[i]);
+		//tempMomentum[i] -= deltaT*(cosmicRayPressure[i+1] - cosmicRayPressure[i])/(deltaR[i]);
+		tempMomentum[i] -= deltaT*(grid[i+1]*grid[i+1]*cosmicRayPressure[i+1] - grid[i]*grid[i]*cosmicRayPressure[i])/(middleGrid[i]*middleGrid[i]*deltaR[i]);
 		
 		if(i > 0 && i < rgridNumber-1){
 			for(int k = 0; k < kgridNumber; ++k){
@@ -248,8 +249,11 @@ void Simulation::evaluateHydrodynamic() {
     //#pragma omp for
 	for(int i = 1; i < rgridNumber-2; ++i){
 		double deltaE = 0;
-		tempEnergy[i] -= deltaT*middleVelocity[i]*(cosmicRayPressure[i+1] - cosmicRayPressure[i])/deltaR[i];
-		uGradPEnergy += deltaT*middleVelocity[i]*((cosmicRayPressure[i+1] - cosmicRayPressure[i])/deltaR[i])*volume(i);
+		//tempEnergy[i] -= deltaT*middleVelocity[i]*(cosmicRayPressure[i+1] - cosmicRayPressure[i])/deltaR[i];
+		//uGradPEnergy += deltaT*middleVelocity[i]*((cosmicRayPressure[i+1] - cosmicRayPressure[i])/deltaR[i])*volume(i);
+
+		tempEnergy[i] -= deltaT * middleVelocity[i] * (grid[i+1]*grid[i+1]*cosmicRayPressure[i + 1] - grid[i]*grid[i]*cosmicRayPressure[i]) / (middleGrid[i]*middleGrid[i]*deltaR[i]);
+		uGradPEnergy += deltaT * middleVelocity[i] * ((grid[i+1]*grid[i+1]*cosmicRayPressure[i + 1] - grid[i]*grid[i]*cosmicRayPressure[i]) / (middleGrid[i]*middleGrid[i]*deltaR[i])) * volume(i);
 		for(int k = 0; k < kgridNumber; ++k){
 			deltaE += deltaT*growth_rate[i][k]*magneticField[i][k]*kgrid[k]*deltaLogK;
 			tempEnergy[i] -= deltaT*0.5*middleVelocity[i]*(magneticField[i][k] - magneticField[i-1][k])*kgrid[k]*deltaLogK/deltaR[i];
@@ -741,9 +745,9 @@ void Simulation::updateParameters(){
 			}
 			totalParticles += distributionFunction[i][j]*volume(i)*deltaLogP;
 			//totalParticles += distributionFunction[i][j]*volume(i)*dp;
-			if(j > goodMomentum){
+			//if(j > goodMomentum){
 				totalParticleEnergy += speed_of_light*distributionFunction[i][j]*volume(i)*dp;
-			}
+			//}
 
 			//totalParticles += distributionFunction[i][j]*volume(i)*deltaLogP*cube(pgrid[j]);
 			//totalParticleEnergy += speed_of_light*distributionFunction[i][j]*volume(i)*dp*cube(pgrid[j]);
