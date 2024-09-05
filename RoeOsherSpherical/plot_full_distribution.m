@@ -13,6 +13,8 @@ set(0, 'DefaultLineLineWidth', 1.5);
 
 figure(1);
 plot (pfile(1:Np),distribuion(a*Np + (1:Np), 2), 'red');
+set(gca, 'YScale', 'log');
+set(gca, 'XScale', 'log');
 title ('f');
 xlabel ('p');
 ylabel ('f');
