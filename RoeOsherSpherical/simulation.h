@@ -3,8 +3,11 @@
 
 #include <list>
 
+enum Geometry{CARTESIAN, SPHERICAL};
+
 class Simulation{
 public:
+	Geometry geometry;
 	bool serialized;
 	bool stopAmplification;
 
@@ -141,6 +144,7 @@ public:
 
 
 	void evaluateCR();
+	void evaluateCR1();
 	void solveThreeDiagonal(double* middle, double* upper, double* lower, double* f, double* x, double* alpha, double* beta);
 	double injection(int i);
 	void evaluateCosmicRayPressure();

@@ -231,13 +231,18 @@ void Simulation::evaluateHydrodynamic() {
 
 	TracPenRadial(tempMomentum, mFlux);
 	for(int i = 0; i < rgridNumber - 1; ++i){
-		tempMomentum[i] += deltaT*2*middlePressure[i]/middleGrid[i];
+		if (geometry == Geometry::SPHERICAL) {
+			tempMomentum[i] += deltaT * 2 * middlePressure[i] / middleGrid[i];
 
-		//tempMomentum[i] -= deltaT*(cosmicRayPressure[i+1] - cosmicRayPressure[i])/(deltaR[i]);
-		tempMomentum[i] -= deltaT*(grid[i+1]*grid[i+1]*cosmicRayPressure[i+1] - grid[i]*grid[i]*cosmicRayPressure[i])/(middleGrid[i]*middleGrid[i]*deltaR[i]);
-		
+			//tempMomentum[i] -= deltaT*(cosmicRayPressure[i+1] - cosmicRayPressure[i])/(deltaR[i]);
+			tempMomentum[i] -= deltaT * (grid[i + 1] * grid[i + 1] * cosmicRayPressure[i + 1] - grid[i] * grid[i] * cosmicRayPressure[i]) / (middleGrid[i] * middleGrid[i] * deltaR[i]);
+		}
+		else if (geometry == Geometry::CARTESIAN) {
+			tempMomentum[i] -= deltaT * (cosmicRayPressure[i + 1] - cosmicRayPressure[i]) / (deltaR[i]);
+		}
 		if(i > 0 && i < rgridNumber-1){
 			for(int k = 0; k < kgridNumber; ++k){
+				//todo r^2?
 				tempMomentum[i] -= deltaT*0.5*(magneticField[i][k] - magneticField[i-1][k])*kgrid[k]*deltaLogK/deltaR[i];
 			}
 		}
@@ -317,9 +322,17 @@ void Simulation::solveDiscontinious(){
 void Simulation::CheckNegativeDensity(){
 	double dt = deltaT;
 	for(int i = 0; i < rgridNumber; ++i){
-		if(middleDensity[i]*volume(i) - dt*4*pi*(gridsquare[i+1]*densityFlux(i+1) - gridsquare[i]*densityFlux(i))< 0){
-			dt = 0.5*(middleDensity[i]*volume(i)/(4*pi*(gridsquare[i+1]*densityFlux(i+1) - gridsquare[i]*densityFlux(i))));
-			alertNaNOrInfinity(dt, "dt = NaN");
+		if (geometry == Geometry::SPHERICAL) {
+			if (middleDensity[i] * volume(i) - dt * 4 * pi * (gridsquare[i + 1] * densityFlux(i + 1) - gridsquare[i] * densityFlux(i)) < 0) {
+				dt = 0.5 * (middleDensity[i] * volume(i) / (4 * pi * (gridsquare[i + 1] * densityFlux(i + 1) - gridsquare[i] * densityFlux(i))));
+				alertNaNOrInfinity(dt, "dt = NaN");
+			}
+		}
+		else if (geometry == Geometry::CARTESIAN) {
+			if (middleDensity[i] * volume(i) - dt * (densityFlux(i + 1) - densityFlux(i)) < 0) {
+				dt = 0.5 * (middleDensity[i] * volume(i) / ((densityFlux(i + 1) - densityFlux(i))));
+				alertNaNOrInfinity(dt, "dt = NaN");
+			}
 		}
 	}
 	deltaT = dt;
@@ -331,19 +344,37 @@ void Simulation::CheckNegativeDensity(){
 //с учетом сферичности
 void Simulation::TracPenRadial(double* u, double* flux){
 
-	tempU[0] = u[0] - deltaT*(gridsquare[1]*flux[1] - gridsquare[0]*flux[0])/(middleGrid[0]*middleGrid[0]*deltaR[0]);
-	int i;
-    //#pragma omp parallel for private(i)
-		for(i = 1; i < rgridNumber - 1; ++i){
-			tempU[i] = u[i] - deltaT*((gridsquare[i+1]*flux[i+1] - gridsquare[i]*flux[i])/(middleGrid[i]*middleGrid[i]*deltaR[i]));
+	if (geometry == Geometry::SPHERICAL) {
+		tempU[0] = u[0] - deltaT * (gridsquare[1] * flux[1] - gridsquare[0] * flux[0]) / (middleGrid[0] * middleGrid[0] * deltaR[0]);
+		int i;
+		//#pragma omp parallel for private(i)
+		for (i = 1; i < rgridNumber - 1; ++i) {
+			tempU[i] = u[i] - deltaT * ((gridsquare[i + 1] * flux[i + 1] - gridsquare[i] * flux[i]) / (middleGrid[i] * middleGrid[i] * deltaR[i]));
 			/*if(tempU[i] < 0){
 				printf("temp U < 0\n");
 			}*/
 		}
-	tempU[rgridNumber - 1] = u[rgridNumber - 1];
+		tempU[rgridNumber - 1] = u[rgridNumber - 1];
 
-	for(i = 0; i < rgridNumber; ++i){
-		u[i] = tempU[i];
+		for (i = 0; i < rgridNumber; ++i) {
+			u[i] = tempU[i];
+		}
+	}
+	else if (geometry == Geometry::CARTESIAN) {
+		tempU[0] = u[0] - deltaT * (flux[1] - flux[0]) / (deltaR[0]);
+		int i;
+		//#pragma omp parallel for private(i)
+		for (i = 1; i < rgridNumber - 1; ++i) {
+			tempU[i] = u[i] - deltaT * ((flux[i + 1] - flux[i]) / (deltaR[i]));
+			/*if(tempU[i] < 0){
+				printf("temp U < 0\n");
+			}*/
+		}
+		tempU[rgridNumber - 1] = u[rgridNumber - 1];
+
+		for (i = 0; i < rgridNumber; ++i) {
+			u[i] = tempU[i];
+		}
 	}
 }
 
@@ -549,7 +580,12 @@ double Simulation::volume(int i){
 		printf("i < 0");
 		exit(0);
 	} else if(i >= 0 && i <= rgridNumber) {
-		return 4*pi*(cube(grid[i+1]) - cube(grid[i]))/3;
+		if (geometry == Geometry::SPHERICAL) {
+			return 4 * pi * (cube(grid[i + 1]) - cube(grid[i])) / 3;
+		}
+		else if (geometry == Geometry::CARTESIAN) {
+			return grid[i + 1] - grid[i];
+		}
 	} else {
 		printf("i > rgridNumber");
 		exit(0);

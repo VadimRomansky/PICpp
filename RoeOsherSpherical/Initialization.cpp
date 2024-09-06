@@ -11,6 +11,7 @@
 
 //конструктор
 Simulation::Simulation(){
+	geometry = Geometry::SPHERICAL;
 	serialized = false;
 	initialEnergy = 10E50;
 	myTime = 0;
