@@ -102,7 +102,7 @@ void Simulation::simulate(){
 		if(currentIteration > startCRevaluation){
 			//deltaT /= 10;
 			//for(int j = 0; j < 10; ++j){
-				evaluateCR();
+				evaluateCR1();
 			//}
 			//deltaT *= 10;
 		}

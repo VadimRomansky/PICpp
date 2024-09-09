@@ -1,5 +1,5 @@
 clear;
-distribuion = importdata('./output/distribution_25.dat');
+distribuion = importdata('./output/distribution_104.dat');
 pfile = importdata('./output/pfile.dat');
 
 Np = size(pfile,1);

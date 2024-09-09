@@ -85,19 +85,25 @@
     <ClCompile Include="GridUpdating.cpp" />
     <ClCompile Include="Initialization.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="largeVectorBasis.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="matrixelement.cpp" />
     <ClCompile Include="output.cpp" />
     <ClCompile Include="progon.cpp" />
     <ClCompile Include="Simulation.cpp" />
+    <ClCompile Include="specialmath.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="complex.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="largeVectorBasis.h" />
+    <ClInclude Include="matrixElement.h" />
     <ClInclude Include="output.h" />
     <ClInclude Include="progon.h" />
     <ClInclude Include="simulation.h" />
+    <ClInclude Include="specialmath.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

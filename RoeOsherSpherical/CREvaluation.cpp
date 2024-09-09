@@ -8,6 +8,8 @@
 #include "constants.h"
 #include "output.h"
 #include "progon.h"
+#include "specialmath.h"
+#include "matrixElement.h"
 
 void Simulation::updateDiffusionCoef(){
 	int i;
@@ -42,7 +44,7 @@ double Simulation::injection(int i){
 	double xi = pgrid[injectionMomentum]*speed_of_light/(kBoltzman*temperatureIn(i+1));
 	double eta = cube(xi)*exp(-xi);
     return (1E-3)*middleDensity[i+1]*abs2(middleVelocity[i-1])*pf/(massProton*dp*deltaR[i]);
-    return (1E-1)*middleDensity[i+1]*abs2(middleVelocity[i-1])*pf/(massProton*dp*deltaR[i]);
+    //return (1E-1)*middleDensity[i+1]*abs2(middleVelocity[i-1])*pf/(massProton*dp*deltaR[i]);
     //return (1E-3)*pf*pf*pf*middleDensity[i+1]/(massProton*dp*volume(i)*deltaT);
 }
 
@@ -267,18 +269,24 @@ void Simulation::evaluateCR1() {
 		distributionFunction[shockWavePoint][injectionMomentum] += injection()*deltaT;
 	}*/
 	double mc2 = massProton * sqr(speed_of_light);
-	double* upper = new double[rgridNumber + 1];
-	double* middle = new double[rgridNumber + 1];
-	double* lower = new double[rgridNumber + 1];
 
-	double* f = new double[rgridNumber + 1];
-	double* x = new double[rgridNumber + 1];
+	std::vector<MatrixElement>** matrix = new std::vector<MatrixElement>*[rgridNumber+1];
+	double** result = new double* [rgridNumber+1];
+	double** rightPart = new double* [rgridNumber+1];
 
-	double* alpha = new double[rgridNumber];
-	double* beta = new double[rgridNumber];
+	for (int i = 0; i < rgridNumber+1; ++i) {
+		matrix[i] = new std::vector<MatrixElement>[pgridNumber];
+		result[i] = new double[pgridNumber];
+		rightPart[i] = new double[pgridNumber];
+		for (int j = 0; j < pgridNumber; ++j) {
+			result[i][j] = 0;
+			rightPart[i][j] = 0;
+		}
+	}
+
 	int k;
 	//todo?? private pointer?
-#pragma omp parallel for private(k, upper, middle, lower, f, x, alpha, beta)
+
 	for (k = 0; k < pgridNumber; ++k) {
 
 
@@ -300,6 +308,7 @@ void Simulation::evaluateCR1() {
 			fkpp = 0;
 		}
 		//double dx = (grid[1] + upstreamR/2)/2;
+		double dx = (grid[1] - grid[0]);
 		double dxp = grid[1] - grid[0];
 		//double dxm = grid[0] + upstreamR/2;
 		double dxm = grid[1] - grid[0];
@@ -309,13 +318,10 @@ void Simulation::evaluateCR1() {
 		double gip = (distributionFunction[1][k] + distributionFunction[0][k]) / 2;
 		double gim = distributionFunction[0][k] / 2;
 		//double dV;
-		middle[0] = 1;// + (deltaT/(2*dx))*(diffusionCoef(0,p)/dxp + diffusionCoef(0,p)/dxm);
-		upper[0] = 0;// -(deltaT/(2*dx))*(diffusionCoef(0,p)/dxp);
-		f[0] = distributionFunction[0][k];// + (deltaT/(2*dx))*(diffusionCoef(0,p)*distributionFunction[1][k]/dxp)
-		// - (deltaT/(2*dx))*(diffusionCoef(0,p)/dxp+diffusionCoef(0,p)/dxm)*distributionFunction[0][k] 
-		// - (deltaT/dx)*(middleVelocity[1]*gip - middleVelocity[0]*gim)
-		// + (deltaT/3)*((middleVelocity[1] - middleVelocity[0])/dx)*((gkp-gkm)/deltaLogP);
-		for (int i = 1; i < rgridNumber - 1; ++i) {
+		matrix[0][k].push_back(MatrixElement(1, 0, k));
+		rightPart[0][k] = 0;
+
+		for (int i = 1; i < rgridNumber-1; ++i) {
 			fkp = distributionFunction[i][k];
 			if (k == 0) {
 				fkm = 0;
@@ -329,66 +335,39 @@ void Simulation::evaluateCR1() {
 			else {
 				fkpp = 0;
 			}
-			//dx = (grid[i+1] - grid[i-1])/2;
+			dx = (grid[i+1] - grid[i-1])/2;
 			dxp = grid[i + 1] - grid[i];
 			dxm = grid[i] - grid[i - 1];
 			xp = (grid[i + 1] + grid[i]) / 2;
 			xm = (grid[i] + grid[i - 1]) / 2;
 			double localx = grid[i];
 			//dV = (xp * xp * xp - xm * xm * xm) / 3;
-			gip = (distributionFunction[i + 1][k] + distributionFunction[i][k]) / 2;
-			gim = (distributionFunction[i][k] + distributionFunction[i - 1][k]) / 2;
-			lower[i - 1] = -(deltaT / (2 * dV)) * (xm * xm * diffusionCoef[i - 1][k] / dxm);
-			middle[i] = 1 + (deltaT / (2 * dV)) * (xp * xp * diffusionCoef[i - 1][k] / dxp + xm * xm * diffusionCoef[i][k] / dxm);
-			upper[i] = -(deltaT / (2 * dV)) * (xp * xp * diffusionCoef[i][k] / dxp);
+
+			double divu = (grid[i] * grid[i] * middleVelocity[i] - grid[i - 1] * grid[i - 1] * middleVelocity[i - 1]) / (grid[i] * grid[i] * dxm);
+			
+			double lower = (-deltaT / (grid[i] * grid[i] * dx)) * (xm * xm * diffusionCoef[i - 1][k] / dxm + grid[i - 1] * grid[i - 1] * middleVelocity[i - 1]);
+			double upper = (-deltaT / (grid[i] * grid[i] * dx)) * (xp * xp * diffusionCoef[i][k] / dxp);
+			double middle = 1 + (deltaT / (grid[i] * grid[i] * dx)) * (xm * xm * diffusionCoef[i - 1][k] / dxm  + xp*xp*diffusionCoef[i][k]/dxp + grid[i] * grid[i] * middleVelocity[i]) - deltaT*divu/(3*deltaLogP);
+
+			matrix[i][k].push_back(MatrixElement(lower, i - 1, k));
+			matrix[i][k].push_back(MatrixElement(middle, i, k));
+			matrix[i][k].push_back(MatrixElement(upper, i + 1, k));
+
+			//lower[i - 1] = -(deltaT / (2 * dV)) * (xm * xm * diffusionCoef[i - 1][k] / dxm);
+			//middle[i] = 1 + (deltaT / (2 * dV)) * (xp * xp * diffusionCoef[i - 1][k] / dxp + xm * xm * diffusionCoef[i][k] / dxm);
+			//upper[i] = -(deltaT / (2 * dV)) * (xp * xp * diffusionCoef[i][k] / dxp);
 			//f[i] = distributionFunction[i][k] + (deltaT/(2*dV))*(xp*xp*diffusionCoef[i][k]*(distributionFunction[i+1][k] - distributionFunction[i][k])/dxp
 							//- xm*xm*diffusionCoef[i-1][k]*(distributionFunction[i][k] - distributionFunction[i-1][k])/dxm)
 							//- (deltaT/dV)*(xp*xp*middleVelocity[i]*distributionFunction[i][k] - xm*xm*middleVelocity[i-1]*distributionFunction[i-1][k]);
-			if (i == shockWavePoint) {
-				//double v2 = middleVelocity[i+1] + vscattering[i+1];
-				double v2 = middleVelocity[i + 1];
-				//double v1 = middleVelocity[i] + vscattering[i];
-				double v1 = middleVelocity[i];
-				f[i] = distributionFunction[i][k] + deltaT * ((1 / (2 * dV)) * (xp * xp * diffusionCoef[i][k] * (distributionFunction[i + 1][k] - distributionFunction[i][k]) / dxp - xm * xm * diffusionCoef[i - 1][k] * (distributionFunction[i][k] - distributionFunction[i - 1][k]) / dxm) - (1 / dV) * localx * localx * distributionFunction[i][k] * (v2 - v1));
+			
+			if (k > 0) {
+				double a = deltaT * divu / (3 * deltaLogP);
+				matrix[i][k].push_back(MatrixElement(a, i, k - 1));
 			}
-			else if (i == shockWavePoint - 1) {
-				//double v2 = middleVelocity[i+1] + vscattering[i+1];
-				double v2 = middleVelocity[i + 1];
-				//double v2 = middleVelocity[i+1] + vscattering[i+1];
-				double v1 = middleVelocity[i];
-				f[i] = distributionFunction[i][k] + deltaT * ((1 / (2 * dV)) * (xp * xp * diffusionCoef[i][k] * (distributionFunction[i + 1][k] - distributionFunction[i][k]) / dxp - xm * xm * diffusionCoef[i - 1][k] * (distributionFunction[i][k] - distributionFunction[i - 1][k]) / dxm) - (1 / dV) * (xp * xp * v2 * distributionFunction[i + 1][k] - xm * xm * v1 * distributionFunction[i - 1][k]));
-			}
-			else {
-				//double v2 = middleVelocity[i+1] + vscattering[i+1];
-				double v2 = middleVelocity[i + 1];
-				//double v1 = middleVelocity[i-1] + vscattering[i-1];
-				double v1 = middleVelocity[i - 1];
-				f[i] = distributionFunction[i][k] + deltaT * ((1 / (2 * dV)) * (xp * xp * diffusionCoef[i][k] * (distributionFunction[i + 1][k] - distributionFunction[i][k]) / dxp - xm * xm * diffusionCoef[i - 1][k] * (distributionFunction[i][k] - distributionFunction[i - 1][k]) / dxm) - (1 / dV) * 0.5 * (gridsquare[i + 1] * v2 * distributionFunction[i + 1][k] - gridsquare[i - 1] * v1 * distributionFunction[i - 1][k]));
-			}
-			//f[i] = distributionFunction[i][k]  + deltaT*((1/(2*dV))*(xp*xp*diffusionCoef[i][k]*(distributionFunction[i+1][k] - distributionFunction[i][k])/dxp - xm*xm*diffusionCoef[i-1][k]*(distributionFunction[i][k] - distributionFunction[i-1][k])/dxm) - (1/dV)*(middleVelocity[i-1]+vscattering[i-1])*0.5*(distributionFunction[i+1][k] - distributionFunction[i-1][k]));
-			if (f[i] < 0) {
-				//printf("f[i] < 0\n");
-				f[i] = 0;
-			}
-			if ((xp * xp * middleVelocity[i + 1] - xm * xm * middleVelocity[i]) < 0) {
-				//double v2 = middleVelocity[i+1] + vscattering[i+1];
-				double v2 = middleVelocity[i + 1];
-				//double v1 = middleVelocity[i] + vscattering[i];
-				double v1 = middleVelocity[i];
-				if (fkp - fkm < 0)
-					//f[i] += (deltaT/3)*((xp*xp*middleVelocity[i] - xm*xm*middleVelocity[i-1])/dV)*((gkp - gkm)/deltaLogP);
-					f[i] += -(deltaT / 3) * ((xp * xp * v2 - xm * xm * v1) / dV) * ((fkm) / deltaLogP);
-				middle[i] += -(deltaT / 3) * ((xp * xp * v2 - xm * xm * v1) / dV) / deltaLogP;
-			}
-			else {
-				//double v2 = middleVelocity[i+1] + vscattering[i+1];
-				double v2 = middleVelocity[i + 1];
-				//double v1 = middleVelocity[i] + vscattering[i];
-				double v1 = middleVelocity[i];
-				if (fkpp - fkp > 0)
-					f[i] += (deltaT / 3) * ((xp * xp * v2 - xm * xm * v1) / dV) * ((fkpp - fkp) / deltaLogP);
-			}
-			//f[i] = distributionFunction[i][k];
+
+			rightPart[i][k] = distributionFunction[i][k];
+
+			
 			if (abs2(i - shockWavePoint) < 2 && abs2(k - injectionMomentum) < 1) {
 				double inj = injection(i);
 				double E = sqrt(sqr(mc2) + sqr(pgrid[injectionMomentum]) * speed_of_light) - mc2;
@@ -397,7 +376,7 @@ void Simulation::evaluateCR1() {
 					printf("dE < tempEnergy[i]\n");
 					inj *= 0.5 * tempEnergy[i] / dE;
 				}
-				f[i] += deltaT * inj;
+				rightPart[i][k] += deltaT * inj;
 				//todo shift volume to 1/2
 				injectedParticles += inj * deltaT * volume(i) * deltaLogP;
 				//tempDensity[i] -= deltaT*inj*massProton*deltaLogP;
@@ -405,22 +384,7 @@ void Simulation::evaluateCR1() {
 				//tempEnergy[i] -= deltaT*inj*E*deltaLogP;
 				injectedEnergy += deltaT * inj * E * deltaLogP * volume(i);
 
-				/*double inj = injection(i);
-				double E = sqrt(sqr(mc2) + sqr(pgrid[injectionMomentum])*speed_of_light) - mc2;
-				double dE = deltaT*inj*E*deltaLogP;
-				if(dE > tempEnergy[i]){
-					printf("dE < tempEnergy[i]\n");
-					inj *= 0.5*tempEnergy[i]/dE;
-				}
-				//f[i] += deltaT*inj;
-				f[i] += deltaT*inj/cube(pgrid[injectionMomentum]);
-				//todo shift volume to 1/2
-				//injectedParticles += inj*deltaT*volume(i)*deltaLogP;
-				injectedParticles += inj*deltaT*volume(i)*deltaLogP/cube(pgrid[injectionMomentum]);
-				tempDensity[i] -= deltaT*inj*massProton*deltaLogP;
-				tempMomentum[i] -= deltaT*inj*massProton*deltaLogP*middleVelocity[i];
-				tempEnergy[i] -= deltaT*inj*E*deltaLogP;
-				injectedEnergy += deltaT*inj*E*deltaLogP*volume(i);*/
+				
 				if (tempDensity[i] < 0) {
 					printf("tempDensity[i] < 0 by CR\n");
 					exit(0);
@@ -434,50 +398,37 @@ void Simulation::evaluateCR1() {
 				alertNaNOrInfinity(tempEnergy[i], "energy = NaN");
 			}
 		}
-		fkp = distributionFunction[rgridNumber - 1][k];
-		if (k == 0) {
-			fkm = 0;
-		}
-		else {
-			fkm = distributionFunction[rgridNumber - 1][k - 1];
-		}
-		//dx = (grid[rgridNumber-1] - grid[rgridNumber - 2])/2;
-		dxm = (grid[rgridNumber - 1] - grid[rgridNumber - 2]);
-		xp = grid[rgridNumber - 1];
-		xm = (grid[rgridNumber - 1] + grid[rgridNumber - 2]) / 2;
-		dV = (xp * xp * xp - xm * xm * xm) / 3;
-		gip = distributionFunction[rgridNumber - 1][k];
-		gim = (distributionFunction[rgridNumber - 1][k] + distributionFunction[rgridNumber - 2][k]) / 2;
-		lower[rgridNumber - 2] = -(deltaT / (2 * dV)) * (xp * xp * diffusionCoef[rgridNumber - 1][k] / dxp);
-		middle[rgridNumber - 1] = 1 + (deltaT / (2 * dV)) * (xm * xm * diffusionCoef[rgridNumber - 1][k] / dxm);
-		f[rgridNumber - 1] = distributionFunction[rgridNumber - 1][k] - (deltaT / (2 * dV)) * (xm * xm * diffusionCoef[rgridNumber - 2][k] * (distributionFunction[rgridNumber - 1][k] - distributionFunction[rgridNumber - 2][k]) / dxm)
-			- (deltaT / dV) * grid[rgridNumber - 1] * grid[rgridNumber - 1] * (middleVelocity[rgridNumber - 1] * gip - middleVelocity[rgridNumber - 2] * gim)
-			+ (deltaT / 3) * ((xp * xp * middleVelocity[rgridNumber - 1] - xm * xm * middleVelocity[rgridNumber - 2]) / dV) * ((fkp - fkm) / deltaLogP);
-		progon(lower, middle, upper, rgridNumber - 1, f, x, alpha, beta);
 
-		for (int i = 0; i < rgridNumber; ++i) {
+		matrix[rgridNumber - 1][k].push_back(MatrixElement(1.0, rgridNumber - 1, k));
+		matrix[rgridNumber][k].push_back(MatrixElement(1.0, rgridNumber, k));
+		rightPart[rgridNumber - 1][k] = 0;
+		rightPart[rgridNumber][k] = 0;
+	}
+
+	generalizedMinimalResidualMethod(matrix, rightPart, result, rgridNumber + 1, pgridNumber, 1E-5, 20, 0);
+
+	for (int i = 0; i < rgridNumber+1; ++i) {
+		for (int k = 0; k < pgridNumber; ++k) {
 			//alertNegative(x[i],"tempDistribution < 0");
-			alertNaNOrInfinity(x[i], "tempDistribution <= NaN");
-			tempDistributionFunction[i][k] = x[i];
-			if (x[i] < 0) {
+			alertNaNOrInfinity(result[i][k], "tempDistribution <= NaN");
+			tempDistributionFunction[i][k] = result[i][k];
+			if (result[i][k] < 0) {
 				tempDistributionFunction[i][k] = 0;
 				/*if(abs2(x[i]) > 1E-50){
 					printf("distribution[i] < 0\n");
 				}*/
 			}
 		}
-		//tempDistributionFunction[rgridNumber][k] =x[rgridNumber-1];
-		tempDistributionFunction[rgridNumber][k] = 0;
-
 	}
 
-	delete[] upper;
-	delete[] middle;
-	delete[] lower;
-	delete[] f;
-	delete[] x;
-	delete[] alpha;
-	delete[] beta;
+	for (int i = 0; i < rgridNumber + 1; ++i) {
+		delete[] matrix[i];
+		delete[] rightPart[i];
+		delete[] result[i];
+	}
+	delete[] matrix;
+	delete[] rightPart;
+	delete[] result;
 
 }
 

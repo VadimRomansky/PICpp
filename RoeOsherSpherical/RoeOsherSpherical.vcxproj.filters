@@ -51,6 +51,15 @@
     <ClCompile Include="Initialization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="matrixelement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="specialmath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="largeVectorBasis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="complex.h">
@@ -72,6 +81,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="matrixElement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="specialmath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="largeVectorBasis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
