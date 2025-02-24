@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Radiation", "Radiation\Radi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RoeOsherSpherical", "RoeOsherSpherical\RoeOsherSpherical.vcxproj", "{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DiffusionSolver", "DiffusionSolver\DiffusionSolver.vcxproj", "{86692E2A-5C20-44BB-975E-CF136B673042}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -97,6 +99,18 @@ Global
 		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|Win32.Build.0 = Release|Win32
 		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|x64.ActiveCfg = Release|Win32
 		{FB9DF301-C6E0-4523-BA28-FD8547F6CF4A}.Release|x64.Build.0 = Release|Win32
+		{86692E2A-5C20-44BB-975E-CF136B673042}.Debug|Mixed Platforms.ActiveCfg = Debug|x64
+		{86692E2A-5C20-44BB-975E-CF136B673042}.Debug|Mixed Platforms.Build.0 = Debug|x64
+		{86692E2A-5C20-44BB-975E-CF136B673042}.Debug|Win32.ActiveCfg = Debug|Win32
+		{86692E2A-5C20-44BB-975E-CF136B673042}.Debug|Win32.Build.0 = Debug|Win32
+		{86692E2A-5C20-44BB-975E-CF136B673042}.Debug|x64.ActiveCfg = Debug|x64
+		{86692E2A-5C20-44BB-975E-CF136B673042}.Debug|x64.Build.0 = Debug|x64
+		{86692E2A-5C20-44BB-975E-CF136B673042}.Release|Mixed Platforms.ActiveCfg = Release|x64
+		{86692E2A-5C20-44BB-975E-CF136B673042}.Release|Mixed Platforms.Build.0 = Release|x64
+		{86692E2A-5C20-44BB-975E-CF136B673042}.Release|Win32.ActiveCfg = Release|Win32
+		{86692E2A-5C20-44BB-975E-CF136B673042}.Release|Win32.Build.0 = Release|Win32
+		{86692E2A-5C20-44BB-975E-CF136B673042}.Release|x64.ActiveCfg = Release|x64
+		{86692E2A-5C20-44BB-975E-CF136B673042}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
