@@ -5,9 +5,9 @@
 #include "stdio.h"
 #include "math.h"
 
-const int Nx = 9;
+const int Nx = 1;
 const int Ny = 1;
-const int Nz = 1;
+const int Nz = 9;
 const int Nmomentum = 1;
 
 double*** create3Darray(int x, int y, int z) {
@@ -90,7 +90,7 @@ void advanceDiffusionStep(double**** F, double**** rightPart, double* xgrid, dou
 	}
 }
 
-void sequentialThreeDiagonalSolverX(double**** x, double**** rightPart, double**** a, double**** b, double**** c, double u, double v) {
+void sequentialThreeDiagonalSolverX(double**** x, double**** rightPart, double**** a, double**** b, double**** c) {
 	//double**** d = create4Darray(Nx, Ny, Nz, Nmomentum);
 
 	for (int j = 0; j < Ny; ++j) {
@@ -110,39 +110,40 @@ void sequentialThreeDiagonalSolverX(double**** x, double**** rightPart, double**
 
 					continue;
 				}
-
-				u /= b[k][j][0][l];
-				v /= b[k][j][Nx - 1][l];
+				
+				double u = a[k][j][0][l]/b[k][j][0][l];
+				double v = c[k][j][Nx - 1][l]/b[k][j][Nx - 1][l];
 				for (int i = 0; i < Nx; ++i) {
 					a[k][j][i][l] /= b[k][j][i][l];
 					c[k][j][i][l] /= b[k][j][i][l];
 					rightPart[k][j][i][l] /= b[k][j][i][l];
 					b[k][j][i][l] = 1.0;
 				}
-				double* d = new double[Nx];
-				d[0] = u;
-				d[1] = 0;
+				//double* d = new double[Nx];
+				//d[0] = u;
+				//d[1] = 0;
 
 				for (int i = 2; i < Nx; ++i) {
 					double r = 1.0 / (1 - a[k][j][i][l] * c[k][j][i - 1][l]);
-					d[i] = -r * a[k][j][i][l] * d[i - 1];
+					//d[i] = -r * a[k][j][i][l] * d[i - 1];
 					rightPart[k][j][i][l] = r * (rightPart[k][j][i][l] - a[k][j][i][l] * rightPart[k][j][i - 1][l]);
 					a[k][j][i][l] = -r * a[k][j][i][l] * a[k][j][i - 1][l];
+					if (i == Nx - 1) {
+						a[k][j][i][l] += v * r;
+					}
 					c[k][j][i][l] = r * c[k][j][i][l];
 
 				}
 
-				a[k][j][Nx - 1][l] += v;
-
 				for (int i = Nx - 3; i >= 1; i = i - 1) {
 					rightPart[k][j][i][l] = rightPart[k][j][i][l] - rightPart[k][j][i + 1][l] * c[k][j][i][l];
 					a[k][j][i][l] = a[k][j][i][l] - c[k][j][i][l] * a[k][j][i + 1][l];
-					c[k][j][i][l] = d[i] - c[k][j][i][l] * c[k][j][i + 1][l];
+					c[k][j][i][l] = -c[k][j][i][l] * c[k][j][i + 1][l];
 				}
 
 				double r = 1.0 / (1.0 - a[k][j][1][l] * c[k][j][0][l]);
 				rightPart[k][j][0][l] = r * (rightPart[k][j][0][l] - rightPart[k][j][1][l] * c[k][j][0][l]);
-				c[k][j][0][l] = r * (d[0] - c[k][j][0][l] * c[k][j][1][l]);
+				c[k][j][0][l] = r * (u - c[k][j][0][l] * c[k][j][1][l]);
 
 				double a1 = 1.0;
 				double c1 = c[k][j][0][l];
@@ -162,9 +163,242 @@ void sequentialThreeDiagonalSolverX(double**** x, double**** rightPart, double**
 					x[k][j][i][l] = rightPart[k][j][i][l] - a[k][j][i][l] * y1 - c[k][j][i][l] * y2;
 				}
 
-				delete[] d;
+				//delete[] d;
 			}
 		}
+	}
+}
+
+void sequentialThreeDiagonalSolverY(double**** x, double**** rightPart, double**** a, double**** b, double**** c) {
+	//double**** d = create4Darray(Nx, Ny, Nz, Nmomentum);
+
+	for (int i = 0; i < Nx; ++i) {
+		for (int k = 0; k < Nz; ++k) {
+			for (int l = 0; l < Nmomentum; ++l) {
+
+				double normRightPart = 0;
+
+				for (int j = 0; j < Ny; ++j) {
+					normRightPart = normRightPart + rightPart[k][j][i][l] * rightPart[k][j][i][l];
+				}
+
+				if (normRightPart <= 0) {
+					for (int j = 0; j < Ny; ++j) {
+						x[k][j][i][l] = 0;
+					}
+
+					continue;
+				}
+
+				double u = a[k][0][i][l]/b[k][0][i][l];
+				double v = c[k][Ny - 1][i][l]/b[k][Ny - 1][i][l];
+				for (int j = 0; j < Ny; ++j) {
+					a[k][j][i][l] /= b[k][j][i][l];
+					c[k][j][i][l] /= b[k][j][i][l];
+					rightPart[k][j][i][l] /= b[k][j][i][l];
+					b[k][j][i][l] = 1.0;
+				}
+				//double* d = new double[Ny];
+				//d[0] = u;
+				//d[1] = 0;
+
+				for (int j = 2; j < Ny; ++j) {
+					double r = 1.0 / (1 - a[k][j][i][l] * c[k][j - 1][i][l]);
+					//d[j] = -r * a[k][j][i][l] * d[j - 1];
+					rightPart[k][j][i][l] = r * (rightPart[k][j][i][l] - a[k][j][i][l] * rightPart[k][j - 1][i][l]);
+					a[k][j][i][l] = -r * a[k][j][i][l] * a[k][j- 1][i][l];
+					if (j == Ny - 1) {
+						a[k][j][i][l] += v * r;
+					}
+					c[k][j][i][l] = r * c[k][j][i][l];
+
+				}
+
+				for (int j = Ny - 3; j >= 1; j = j - 1) {
+					rightPart[k][j][i][l] = rightPart[k][j][i][l] - rightPart[k][j + 1][i][l] * c[k][j][i][l];
+					a[k][j][i][l] = a[k][j][i][l] - c[k][j][i][l] * a[k][j + 1][i][l];
+					c[k][j][i][l] = - c[k][j][i][l] * c[k][j + 1][i][l];
+				}
+
+				double r = 1.0 / (1.0 - a[k][1][i][l] * c[k][0][i][l]);
+				rightPart[k][0][i][l] = r * (rightPart[k][0][i][l] - rightPart[k][1][i][l] * c[k][0][i][l]);
+				c[k][0][i][l] = r * (u - c[k][0][i][l] * c[k][1][i][l]);
+
+				double a1 = 1.0;
+				double c1 = c[k][0][i][l];
+				double d1 = rightPart[k][0][i][l];
+
+				double a2 = a[k][Ny - 1][i][l];
+				double c2 = 1.0;
+				double d2 = rightPart[k][Ny - 1][i][l];
+
+				double y2 = (d2 - d1 * a2) / (c2 - c1 * a2);
+				double y1 = d1 - c1 * y2;
+
+				x[k][0][i][l] = y1;
+				x[k][Ny - 1][i][l] = y2;
+
+				for (int j = 1; j < Ny - 1; ++j) {
+					x[k][j][i][l] = rightPart[k][j][i][l] - a[k][j][i][l] * y1 - c[k][j][i][l] * y2;
+				}
+
+				//delete[] d;
+			}
+		}
+	}
+}
+
+void sequentialThreeDiagonalSolverZ(double**** x, double**** rightPart, double**** a, double**** b, double**** c) {
+	//double**** d = create4Darray(Nx, Ny, Nz, Nmomentum);
+
+	for (int i = 0; i < Nx; ++i) {
+		for (int j = 0; j < Ny; ++j) {
+			for (int l = 0; l < Nmomentum; ++l) {
+
+				double normRightPart = 0;
+
+				for (int k = 0; k < Nz; ++k) {
+					normRightPart = normRightPart + rightPart[k][j][i][l] * rightPart[k][j][i][l];
+				}
+
+				if (normRightPart <= 0) {
+					for (int k = 0; k < Nz; ++k) {
+						x[k][j][i][l] = 0;
+					}
+
+					continue;
+				}
+				
+				double u = a[0][j][i][l]/b[0][j][i][l];
+				double v = c[Nz - 1][j][i][l]/b[Nz - 1][j][i][l];
+				for (int k = 0; k < Nz; ++k) {
+					a[k][j][i][l] /= b[k][j][i][l];
+					c[k][j][i][l] /= b[k][j][i][l];
+					rightPart[k][j][i][l] /= b[k][j][i][l];
+					b[k][j][i][l] = 1.0;
+				}
+				//double* d = new double[Nz];
+				//d[0] = u;
+				//d[1] = 0;
+
+				for (int k = 2; k < Nz; ++k) {
+					double r = 1.0 / (1 - a[k][j][i][l] * c[k - 1][j][i][l]);
+					//d[k] = -r * a[k][j][i][l] * d[k - 1];
+					rightPart[k][j][i][l] = r * (rightPart[k][j][i][l] - a[k][j][i][l] * rightPart[k - 1][j][i][l]);
+					a[k][j][i][l] = -r * a[k][j][i][l] * a[k - 1][j][i][l];
+					if (k == Nz - 1) {
+						a[k][j][i][l] += v * r;
+					}
+					c[k][j][i][l] = r * c[k][j][i][l];
+
+				}
+
+				for (int k = Nz - 3; k >= 1; k = k - 1) {
+					rightPart[k][j][i][l] = rightPart[k][j][i][l] - rightPart[k + 1][j][i][l] * c[k][j][i][l];
+					a[k][j][i][l] = a[k][j][i][l] - c[k][j][i][l] * a[k + 1][j][i][l];
+					c[k][j][i][l] =  - c[k][j][i][l] * c[k + 1][j][i][l];
+				}
+
+				double r = 1.0 / (1.0 - a[1][j][i][l] * c[0][j][i][l]);
+				rightPart[0][j][i][l] = r * (rightPart[0][j][i][l] - rightPart[1][j][i][l] * c[0][j][i][l]);
+				c[0][j][i][l] = r * (u - c[0][j][i][l] * c[1][j][i][l]);
+
+				double a1 = 1.0;
+				double c1 = c[0][j][i][l];
+				double d1 = rightPart[0][j][i][l];
+
+				double a2 = a[Nz - 1][j][i][l];
+				double c2 = 1.0;
+				double d2 = rightPart[Nz - 1][j][i][l];
+
+				double y2 = (d2 - d1 * a2) / (c2 - c1 * a2);
+				double y1 = d1 - c1 * y2;
+
+				x[0][j][i][l] = y1;
+				x[Nz - 1][j][i][l] = y2;
+
+				for (int k = 1; k < Nz - 1; ++k) {
+					x[k][j][i][l] = rightPart[k][j][i][l] - a[k][j][i][l] * y1 - c[k][j][i][l] * y2;
+				}
+
+				//delete[] d;
+			}
+		}
+	}
+}
+
+void testSequentialThreeDiagonalSolver() {
+	double**** F = create4Darray(Nx, Ny, Nz, Nmomentum);
+	double**** rightPart = create4Darray(Nx, Ny, Nz, Nmomentum);
+	double**** ax = create4Darray(Nx, Ny, Nz, Nmomentum);
+	double**** bx = create4Darray(Nx, Ny, Nz, Nmomentum);
+	double**** cx = create4Darray(Nx, Ny, Nz, Nmomentum);
+
+	ax[0][0][0][0] = 1.0;
+	bx[0][0][0][0] = 2.0;
+	cx[0][0][0][0] = 1.0;
+
+	ax[1][0][0][0] = 2.0;
+	bx[1][0][0][0] = 2.0;
+	cx[1][0][0][0] = -1.0;
+
+	ax[2][0][0][0] = 1.0;
+	bx[2][0][0][0] = 1.0;
+	cx[2][0][0][0] = -2.0;
+
+	ax[3][0][0][0] = 1.0;
+	bx[3][0][0][0] = 2.0;
+	cx[3][0][0][0] = 3.0;
+
+	ax[4][0][0][0] = -1.0;
+	bx[4][0][0][0] = 1.0;
+	cx[4][0][0][0] = 2.0;
+
+	ax[5][0][0][0] = 0.0;
+	bx[5][0][0][0] = 3.0;
+	cx[5][0][0][0] = 1.0;
+
+	ax[6][0][0][0] = 2.0;
+	bx[6][0][0][0] = 1.0;
+	cx[6][0][0][0] = -3.0;
+
+	ax[7][0][0][0] = 1.0;
+	bx[7][0][0][0] = 2.0;
+	cx[7][0][0][0] = 2.0;
+
+	ax[8][0][0][0] = 2.0;
+	bx[8][0][0][0] = 1.0;
+	cx[8][0][0][0] = 1.0;
+
+	double v1 = 0;
+	double v2 = 0;
+
+	for (int i = 0; i < Nz; ++i) {
+		rightPart[i][0][0][0] = i + 1;
+	}
+
+	for (int i = 0; i < Nz; ++i) {
+		for (int j = 0; j < Nz; ++j) {
+			if (i == j) {
+				printf("%g ", bx[i][0][0][0]);
+			}
+			else if (i == j - 1) {
+				printf("%g ", cx[i][0][0][0]);
+			}
+			else if (i == j + 1) {
+				printf("%g ", ax[i][0][0][0]);
+			}
+			else {
+				printf("0 ");
+			}
+		}
+		printf("       %g\n", rightPart[i][0][0][0]);
+	}
+
+	sequentialThreeDiagonalSolverZ(F, rightPart, ax, bx, cx);
+
+	for (int i = 0; i < Nz; ++i) {
+		printf("%g\n", F[i][0][0][0]);
 	}
 }
 
@@ -212,76 +446,7 @@ int main()
 		}
 	}
 
-	double**** ax = create4Darray(Nx, Ny, Nz, Nmomentum);
-	double**** bx = create4Darray(Nx, Ny, Nz, Nmomentum);
-	double**** cx = create4Darray(Nx, Ny, Nz, Nmomentum);
-
-	ax[0][0][0][0] = 0.0;
-	bx[0][0][0][0] = 2.0;
-	cx[0][0][0][0] = 1.0;
-
-	ax[0][0][1][0] = 2.0;
-	bx[0][0][1][0] = 2.0;
-	cx[0][0][1][0] = -1.0;
-
-	ax[0][0][2][0] = 1.0;
-	bx[0][0][2][0] = 1.0;
-	cx[0][0][2][0] = -2.0;
-
-	ax[0][0][3][0] = 1.0;
-	bx[0][0][3][0] = 2.0;
-	cx[0][0][3][0] = 3.0;
-
-	ax[0][0][4][0] = -1.0;
-	bx[0][0][4][0] = 1.0;
-	cx[0][0][4][0] = 2.0;
-
-	ax[0][0][5][0] = 0.0;
-	bx[0][0][5][0] = 3.0;
-	cx[0][0][5][0] = 1.0;
-
-	ax[0][0][6][0] = 2.0;
-	bx[0][0][6][0] = 1.0;
-	cx[0][0][6][0] = -3.0;
-
-	ax[0][0][7][0] = 1.0;
-	bx[0][0][7][0] = 2.0;
-	cx[0][0][7][0] = 2.0;
-
-	ax[0][0][8][0] = 2.0;
-	bx[0][0][8][0] = 1.0;
-	cx[0][0][8][0] = 0.0;
-
-	double v1 = 0;
-	double v2 = 0;
-
-	for (int i = 0; i < Nx; ++i) {
-		rightPart[0][0][i][0] = i + 1;
-	}
-
-	for (int i = 0; i < Nx; ++i) {
-		for (int j = 0; j < Nx; ++j) {
-			if (i == j) {
-				printf("%g ", bx[0][0][i][0]);
-			}
-			else if (i == j - 1) {
-				printf("%g ", cx[0][0][i][0]);
-			}
-			else if (i == j + 1) {
-				printf("%g ", ax[0][0][i][0]);
-			}
-			else {
-				printf("0 ");
-			}
-		}
-		printf("       %g\n", rightPart[0][0][i][0]);
-	}
-
-	sequentialThreeDiagonalSolverX(F, rightPart, ax, bx, cx, v1, v2);
-
-	for (int i = 0; i < Nx; ++i) {
-		printf("%g\n", F[0][0][i][0]);
-	}
+	testSequentialThreeDiagonalSolver();
 
 
 	/*int Nt = 1000000;
