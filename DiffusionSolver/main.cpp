@@ -136,8 +136,8 @@ void sequentialThreeDiagonalSolverX(double**** x, double**** rightPart, double**
 
 				for (int i = Nx - 3; i >= 1; i = i - 1) {
 					rightPart[k][j][i][l] = rightPart[k][j][i][l] - rightPart[k][j][i + 1][l] * c[k][j][i][l];
-					c[k][j][i][l] = d[i] - c[k][j][i][l] * c[k][j][i + 1][l];
 					a[k][j][i][l] = a[k][j][i][l] - c[k][j][i][l] * a[k][j][i + 1][l];
+					c[k][j][i][l] = d[i] - c[k][j][i][l] * c[k][j][i + 1][l];
 				}
 
 				double r = 1.0 / (1.0 - a[k][j][1][l] * c[k][j][0][l]);
