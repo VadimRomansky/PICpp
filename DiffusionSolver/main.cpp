@@ -5,10 +5,10 @@
 #include "stdio.h"
 #include "math.h"
 
-const int Nx = 1;
+const int Nx = 100;
 const int Ny = 1;
-const int Nz = 9;
-const int Nmomentum = 1;
+const int Nz = 1;
+const int Nmomentum = 100;
 
 double*** create3Darray(int x, int y, int z) {
 	double*** u = new double** [z];
@@ -68,7 +68,9 @@ double evaluateDiffusionCoefficient(double p) {
 	return 0.001 * p;
 }
 
-void advanceDiffusionStep(double**** F, double**** rightPart, double* xgrid, double* ygrid, double* zgrid, double* pgrid, double dt) {
+void advanceDiffusionStep(double**** F, double**** rightPart, double* xgrid, double* ygrid, double* zgrid, double* pgrid, double*** u, double dt) {
+	double dx = xgrid[1] - xgrid[0];
+	
 	for (int k = 0; k < Nz; ++k) {
 		for (int j = 0; j < Ny; ++j) {
 			for (int i = 0; i < Nx; ++i) {
@@ -79,11 +81,27 @@ void advanceDiffusionStep(double**** F, double**** rightPart, double* xgrid, dou
 		}
 	}
 
+	double**** a = create4Darray(Nx, Ny, Nz, Nmomentum);
+	double**** b = create4Darray(Nx, Ny, Nz, Nmomentum);
+	double**** c = create4Darray(Nx, Ny, Nz, Nmomentum);
+
 	for (int k = 0; k < Nz; ++k) {
 		for (int j = 0; j < Ny; ++j) {
 			for (int i = 0; i < Nx; ++i) {
 				for (int l = 0; l < Nmomentum; ++l) {
-
+					if (i == 0) {
+						a[k][j][i][l] = 0;
+						b[k][j][i][l] = 1.0;
+						c[k][j][i][l] = 0;
+					}
+					else if (i == Nx - 1) {
+						a[k][j][i][l] = 0;
+						b[k][j][i][l] = 1.0;
+						c[k][j][i][l] = 0;
+					}
+					else {
+						a[k][j][i][l] = 
+					}
 				}
 			}
 		}
@@ -446,10 +464,10 @@ int main()
 		}
 	}
 
-	testSequentialThreeDiagonalSolver();
+	//testSequentialThreeDiagonalSolver();
 
 
-	/*int Nt = 1000000;
+	int Nt = 1000000;
 	double dt = 0.1;
 	for (int m = 0; m < Nt; ++m) {
 		printf("timestep %d\n", m);
@@ -460,6 +478,6 @@ int main()
 			}
 		}
 
-		advanceDiffusionStep(F, rightPart, xgrid, ygrid, zgrid, pgrid, dt);
-	}*/
+		advanceDiffusionStep(F, rightPart, xgrid, ygrid, zgrid, pgrid, u, dt);
+	}
 }
