@@ -1,6 +1,8 @@
 ﻿// DiffusionSolver.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
 //
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <string>
 #include "stdio.h"
@@ -340,11 +342,11 @@ void sequentialThreeDiagonalSolverP(double**** x, double**** rightPart, double**
 				//d[1] = 0;
 
 				for (int l = 2; l < Nmomentum; ++l) {
-					double r = 1.0 / (1 - a[k][j][i][l] * c[k][j][i - 1][l]);
+					double r = 1.0 / (1 - a[k][j][i][l] * c[k][j][i][l-1]);
 					//d[i] = -r * a[k][j][i][l] * d[i - 1];
-					rightPart[k][j][i][l] = r * (rightPart[k][j][i][l] - a[k][j][i][l] * rightPart[k][j][i - 1][l]);
-					a[k][j][i][l] = -r * a[k][j][i][l] * a[k][j][i - 1][l];
-					if (i == Nx - 1) {
+					rightPart[k][j][i][l] = r * (rightPart[k][j][i][l] - a[k][j][i][l] * rightPart[k][j][i][l-1]);
+					a[k][j][i][l] = -r * a[k][j][i][l] * a[k][j][i][l-1];
+					if (l == Nmomentum - 1) {
 						a[k][j][i][l] += v * r;
 					}
 					c[k][j][i][l] = r * c[k][j][i][l];
@@ -352,9 +354,9 @@ void sequentialThreeDiagonalSolverP(double**** x, double**** rightPart, double**
 				}
 
 				for (int l = Nmomentum - 3; l >= 1; l = l - 1) {
-					rightPart[k][j][i][l] = rightPart[k][j][i][l] - rightPart[k][j][i + 1][l] * c[k][j][i][l];
-					a[k][j][i][l] = a[k][j][i][l] - c[k][j][i][l] * a[k][j][i + 1][l];
-					c[k][j][i][l] = -c[k][j][i][l] * c[k][j][i + 1][l];
+					rightPart[k][j][i][l] = rightPart[k][j][i][l] - rightPart[k][j][i][l+1] * c[k][j][i][l];
+					a[k][j][i][l] = a[k][j][i][l] - c[k][j][i][l] * a[k][j][i][l+1];
+					c[k][j][i][l] = -c[k][j][i][l] * c[k][j][i][l+1];
 				}
 
 				double r = 1.0 / (1.0 - a[k][j][i][1] * c[k][j][i][0]);
@@ -463,6 +465,8 @@ void testSequentialThreeDiagonalSolver() {
 void advanceDiffusionStep(double**** F, double**** rightPart, double* xgrid, double* ygrid, double* zgrid, double* pgrid, double*** u, double dt) {
 	double dx = xgrid[1] - xgrid[0];
 
+	double D = 50;
+
 	for (int k = 0; k < Nz; ++k) {
 		for (int j = 0; j < Ny; ++j) {
 			for (int i = 0; i < Nx; ++i) {
@@ -492,9 +496,9 @@ void advanceDiffusionStep(double**** F, double**** rightPart, double* xgrid, dou
 						c[k][j][i][l] = 0;
 					}
 					else {
-						a[k][j][i][l] = -dt / (dx * dx) - dt * u[k][j][i - 1] / dx;
-						b[k][j][i][l] = 1 + 2 * dt / (dx * dx) + dt * u[k][j][i] / dx;
-						c[k][j][i][l] = -dt / (dx * dx);
+						a[k][j][i][l] = -dt*D / (dx * dx) - dt * u[k][j][i - 1] / dx;
+						b[k][j][i][l] = 1 + 2 * dt*D / (dx * dx) + dt * u[k][j][i] / dx;
+						c[k][j][i][l] = -dt*D / (dx * dx);
 					}
 				}
 			}
@@ -603,9 +607,16 @@ int main()
 
 	//testSequentialThreeDiagonalSolver();
 
+	double dx = xgrid[1] - xgrid[0];
+	double maxDivU = (1.0 - 0.25) / (xgrid[Nx / 2] - xgrid[Nx / 2 - 1]);
+	double maxU = 1.0;
+	
+	double advectiveDt = 0.5 * dx / maxU;
+	double accelerationDt = 0.5 * (pgrid[1] - pgrid[0]) / (pgrid[1] * maxDivU);
+
 
 	int Nt = 1000000;
-	double dt = 0.1;
+	double dt = 0.05;
 	int writeN = 100;
 	int writeCount = 0;
 	for (int m = 0; m < Nt; ++m) {
