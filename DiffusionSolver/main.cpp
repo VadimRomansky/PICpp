@@ -142,6 +142,10 @@ void sequentialThreeDiagonalSolverX(double**** x, double**** rightPart, double**
 
 				for (int i = 1; i < Nx - 1; ++i) {
 					x[k][j][i][l] = rightPart[k][j][i][l] - a[k][j][i][l] * y1 - c[k][j][i][l] * y2;
+					if ((x[k][j][i][l] != x[k][j][i][l]) || (0 * x[k][j][i][l] != 0 * x[k][j][i][l])) {
+						printf("x = NaN in solver X, k = %d , j = %d, i = %d, l = %d\n", k, j, i, l);
+						exit(0);
+					}
 				}
 
 				//delete[] d;
@@ -221,6 +225,10 @@ void sequentialThreeDiagonalSolverY(double**** x, double**** rightPart, double**
 
 				for (int j = 1; j < Ny - 1; ++j) {
 					x[k][j][i][l] = rightPart[k][j][i][l] - a[k][j][i][l] * y1 - c[k][j][i][l] * y2;
+					if ((x[k][j][i][l] != x[k][j][i][l]) || (0 * x[k][j][i][l] != 0 * x[k][j][i][l])) {
+						printf("x = NaN in solver Y, k = %d , j = %d, i = %d, l = %d\n", k, j, i, l);
+						exit(0);
+					}
 				}
 
 				//delete[] d;
@@ -300,6 +308,10 @@ void sequentialThreeDiagonalSolverZ(double**** x, double**** rightPart, double**
 
 				for (int k = 1; k < Nz - 1; ++k) {
 					x[k][j][i][l] = rightPart[k][j][i][l] - a[k][j][i][l] * y1 - c[k][j][i][l] * y2;
+					if ((x[k][j][i][l] != x[k][j][i][l]) || (0 * x[k][j][i][l] != 0 * x[k][j][i][l])) {
+						printf("x = NaN in solver Z, k = %d , j = %d, i = %d, l = %d\n", k, j, i, l);
+						exit(0);
+					}
 				}
 
 				//delete[] d;
@@ -359,26 +371,54 @@ void sequentialThreeDiagonalSolverP(double**** x, double**** rightPart, double**
 					c[k][j][i][l] = -c[k][j][i][l] * c[k][j][i][l+1];
 				}
 
-				double r = 1.0 / (1.0 - a[k][j][i][1] * c[k][j][i][0]);
-				rightPart[k][j][i][0] = r * (rightPart[k][j][i][0] - rightPart[k][j][i][1] * c[k][j][i][0]);
-				c[k][j][i][0] = r * (u - c[k][j][i][0] * c[k][j][i][1]);
+				double y1;
+				double y2;
 
-				double a1 = 1.0;
-				double c1 = c[k][j][i][0];
-				double d1 = rightPart[k][j][i][0];
+				if (a[k][j][i][1] * c[k][j][i][0] == 1.0) {
+					rightPart[k][j][i][0] = rightPart[k][j][i][0] - rightPart[k][j][i][1] * c[k][j][i][0];
+					c[k][j][i][0] = u - c[k][j][i][0] * c[k][j][i][1];
+					double a1 = 0.0;
+					double c1 = c[k][j][i][0];
+					double d1 = rightPart[k][j][i][0];
 
-				double a2 = a[k][j][i][Nmomentum - 1];
-				double c2 = 1.0;
-				double d2 = rightPart[k][j][i][Nmomentum - 1];
+					double a2 = a[k][j][i][Nmomentum - 1];
+					double c2 = 1.0;
+					double d2 = rightPart[k][j][i][Nmomentum - 1];
 
-				double y2 = (d2 - d1 * a2) / (c2 - c1 * a2);
-				double y1 = d1 - c1 * y2;
+					y2 = (d2 - d1 * a2) / (c2 - c1 * a2);
+					y1 = d1 - c1 * y2;
 
-				x[k][j][i][0] = y1;
-				x[k][j][i][Nmomentum - 1] = y2;
+					x[k][j][i][0] = y1;
+					x[k][j][i][Nmomentum - 1] = y2;
+				}
+				else {
+
+					double r = 1.0 / (1.0 - a[k][j][i][1] * c[k][j][i][0]);
+					rightPart[k][j][i][0] = r * (rightPart[k][j][i][0] - rightPart[k][j][i][1] * c[k][j][i][0]);
+					c[k][j][i][0] = r * (u - c[k][j][i][0] * c[k][j][i][1]);
+
+					double a1 = 1.0;
+					double c1 = c[k][j][i][0];
+					double d1 = rightPart[k][j][i][0];
+
+					double a2 = a[k][j][i][Nmomentum - 1];
+					double c2 = 1.0;
+					double d2 = rightPart[k][j][i][Nmomentum - 1];
+
+					y2 = (d2 - d1 * a2) / (c2 - c1 * a2);
+					y1 = d1 - c1 * y2;
+
+					x[k][j][i][0] = y1;
+					x[k][j][i][Nmomentum - 1] = y2;
+				}
+
 
 				for (int l = 0; l < Nmomentum; ++l) {
 					x[k][j][i][l] = rightPart[k][j][i][l] - a[k][j][i][l] * y1 - c[k][j][i][l] * y2;
+					if ((x[k][j][i][l] != x[k][j][i][l]) || (0 * x[k][j][i][l] != 0 * x[k][j][i][l])) {
+						printf("x = NaN in solver P, k = %d , j = %d, i = %d, l = %d\n", k, j, i, l);
+						exit(0);
+					}
 				}
 
 				//delete[] d;
@@ -537,6 +577,10 @@ void advanceDiffusionStep(double**** F, double**** rightPart, double* xgrid, dou
 	}
 
 	sequentialThreeDiagonalSolverP(F, rightPart, a, b, c);
+
+	delete4Darray(a, Nx, Ny, Nz, Nmomentum);
+	delete4Darray(b, Nx, Ny, Nz, Nmomentum);
+	delete4Darray(c, Nx, Ny, Nz, Nmomentum);
 }
 
 int main()
