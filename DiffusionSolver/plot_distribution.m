@@ -1,5 +1,5 @@
 clear;
-F = importdata('F5.dat');
+F = importdata('F300.dat');
 xgrid = importdata('xgrid.dat');
 ygrid = importdata('ygrid.dat');
 zgrid = importdata('zgrid.dat');
@@ -27,6 +27,14 @@ for i = 1:Nx,
     Fx(i) = F1(fix(Nz/2)+1, fix(Ny/2)+1, i, 1);
 end;
 
+Fx1(1:Nx) = 0;
+for i = fix(Nx/2)+1:Nx,
+    Fx1(i) = Fx(fix(Nx/2)+1);
+end;
+for i = 1:fix(Nx/2),
+    Fx1(i) = Fx(fix(Nx/2)+1)*exp((i-fix(Nx/2)-1)/5);
+end;
+
 Fp(1:Np) = 0;
 for l = 1:Np,
     Fp(l) = F1(fix(Nz/2)+1, fix(Ny/2)+1, fix(Nx/2)+1, l);
@@ -50,4 +58,5 @@ set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'linear');
 title ('F_{x}');
 xlabel ('x');
-plot(xgrid, Fx);
+plot(xgrid, Fx, 'b');
+plot(xgrid, Fx1, 'r');

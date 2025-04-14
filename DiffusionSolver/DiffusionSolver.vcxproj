@@ -128,6 +128,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Math\largeVectorBasis.cpp" />
+    <ClCompile Include="Math\matrixElement.cpp" />
+    <ClCompile Include="Math\specialmath.cpp" />
+    <ClCompile Include="Math\util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Math\largeVectorBasis.h" />
+    <ClInclude Include="Math\matrixElement.h" />
+    <ClInclude Include="Math\specialmath.h" />
+    <ClInclude Include="Math\util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
