@@ -8,11 +8,14 @@
 #include "stdio.h"
 #include "math.h"
 #include "mpi.h"
+#include <list>
 
 #include "./Math/largeVectorBasis.h"
 #include "./Math/matrixElement.h"
 #include "./Math/specialmath.h"
 #include "./Math/util.h"
+
+const double pi = 3.14159;
 
 /* test matrix
  * 2 1 0 0 0 0 0 0 0
@@ -1214,9 +1217,9 @@ void testSequentialThreeDiagonalSolverP() {
 	}*/
 }
 
-const double D = 50;
+const double D = 5;
 
-void advanceDiffusionStepExplicit(double**** F, double**** rightPart, double* xgrid, double* ygrid, double* zgrid, double* pgrid, double*** u, double dt, int Nx, int Ny, int Nz, int Nmomentum) {
+void advanceDiffusionStepExplicit(double**** F, double**** rightPart, double* xgrid, double* ygrid, double* zgrid, double* pgrid, double*** u, double dt, int Nx, int Ny, int Nz, int Nmomentum, double leftF, double rightF) {
 	double dx = xgrid[1] - xgrid[0];
 
 	for (int k = 0; k < Nz; ++k) {
@@ -1257,14 +1260,17 @@ void advanceDiffusionStepExplicit(double**** F, double**** rightPart, double* xg
 					if (i == 0) {
 						a[k][j][i][l] = 0.0;
 						b[k][j][i][l] = 1.0 + u[k][j][i]*dx/D;
+                        //b[k][j][i][l] = 1.0;
 						c[k][j][i][l] = -1.0;
-						rightPart[k][j][i][l] = 0;
+                        //c[k][j][i][l] = 0;
+						rightPart[k][j][i][l] = leftF;
 					}
 					else if (i == Nx - 1) {
 						a[k][j][i][l] = -1.0;
+                        //a[k][j][i][l] = 0;
 						b[k][j][i][l] = 1.0;
 						c[k][j][i][l] = 0;
-						rightPart[k][j][i][l] = 0.0;
+						rightPart[k][j][i][l] = rightF;
 					}
 					else {
 						a[k][j][i][l] = -dt*D / (dx * dx) - dt * u[k][j][i - 1] / dx;
@@ -1283,7 +1289,7 @@ void advanceDiffusionStepExplicit(double**** F, double**** rightPart, double* xg
 	delete4dArray(c, Nx, Ny, Nz, Nmomentum);
 }
 
-void advanceDiffusionStepImplicit(double**** F, double**** rightPart, double* xgrid, double* ygrid, double* zgrid, double* pgrid, double*** u, double dt, int Nx, int Ny, int Nz, int Nmomentum) {
+void advanceDiffusionStepImplicit(double**** F, double**** rightPart, double* xgrid, double* ygrid, double* zgrid, double* pgrid, double*** u, double dt, int Nx, int Ny, int Nz, int Nmomentum, double leftF, double rightF) {
 	double dx = xgrid[1] - xgrid[0];
 
 	for (int k = 0; k < Nz; ++k) {
@@ -1324,14 +1330,17 @@ void advanceDiffusionStepImplicit(double**** F, double**** rightPart, double* xg
 					if (i == 0) {
 						a[k][j][i][l] = 0.0;
 						b[k][j][i][l] = 1.0 + u[k][j][i]*dx/D;
+                        //b[k][j][i][l] = 1.0;
 						c[k][j][i][l] = -1.0;
-						rightPart[k][j][i][l] = 0;
+                        //c[k][j][i][l] = 0;
+						rightPart[k][j][i][l] = leftF;
 					}
 					else if (i == Nx - 1) {
 						a[k][j][i][l] = -1.0;
+                        //a[k][j][i][l] = 0;
 						b[k][j][i][l] = 1.0;
 						c[k][j][i][l] = 0;
-						rightPart[k][j][i][l] = 0.0;
+						rightPart[k][j][i][l] = rightF;
 					}
 					else {
 						a[k][j][i][l] = -dt * D / (dx * dx) - dt * u[k][j][i - 1] / dx;
@@ -1387,7 +1396,7 @@ void advanceDiffusionStepImplicit(double**** F, double**** rightPart, double* xg
 	delete4dArray(c, Nx, Ny, Nz, Nmomentum);
 }
 
-void advanceDiffusionStepGMRES(double**** F, double**** rightPart, std::vector<MatrixElement>**** matrix, LargeVectorBasis* GMRESbasis, double* xgrid, double* ygrid, double* zgrid, double* pgrid, double*** u, double dt, int Nx, int Ny, int Nz, int Nmomentum) {
+void advanceDiffusionStepGMRES(double**** F, double**** rightPart, std::vector<MatrixElement>**** matrix, LargeVectorBasis* GMRESbasis, double* xgrid, double* ygrid, double* zgrid, double* pgrid, double*** u, double dt, int Nx, int Ny, int Nz, int Nmomentum, double leftFlux, double rightFlux) {
 	GMRESbasis->clear();
 	for (int k = 0; k < Nz; ++k) {
 		for (int j = 0; j < Ny; ++j) {
@@ -1442,7 +1451,9 @@ void advanceDiffusionStepGMRES(double**** F, double**** rightPart, std::vector<M
 					if (i == 0) {
 						//matrix[k][j][i][l].push_back(MatrixElement(1.0, k, j, i, l));
 						matrix[k][j][i][l].push_back(MatrixElement(1.0 + u[k][j][i]*dx/D, k, j, i, l));
+
 						matrix[k][j][i][l].push_back(MatrixElement(-1.0, k, j, i + 1, l));
+
 						//a[k][j][i][l] = 0;
 						//b[k][j][i][l] = 1.0;
 						//c[k][j][i][l] = 0.0;
@@ -1451,6 +1462,7 @@ void advanceDiffusionStepGMRES(double**** F, double**** rightPart, std::vector<M
 					else if (i == Nx - 1) {
 						matrix[k][j][i][l].push_back(MatrixElement(1.0, k, j, i, l));
 						matrix[k][j][i][l].push_back(MatrixElement(-1.0, k, j, i - 1, l));
+
 						//a[k][j][i][l] = 0.0;
 						//b[k][j][i][l] = 1.0;
 						//c[k][j][i][l] = 0;
@@ -1508,11 +1520,208 @@ void advanceDiffusionStepGMRES(double**** F, double**** rightPart, std::vector<M
 	}
 }
 
-void testDiffusion(){
+void testDiffusion() {
     int Nx = 100;
     int Ny = 1;
     int Nz = 1;
-    int Nmomentum = 50;
+    int Nmomentum = 2;
+    double**** F = create4dArray(Nx, Ny, Nz, Nmomentum);
+    double**** F1 = create4dArray(Nx, Ny, Nz, Nmomentum);
+    double**** F2 = create4dArray(Nx, Ny, Nz, Nmomentum);
+    double**** tempF = create4dArray(Nx, Ny, Nz, Nmomentum);
+    double**** rightPart = create4dArray(Nx, Ny, Nz, Nmomentum);
+
+    std::list<double> leftFlux;
+    std::list<double> rightFlux;
+    std::list<double> leftFlux1;
+    std::list<double> rightFlux1;
+    std::list<double> leftFlux2;
+    std::list<double> rightFlux2;
+
+    leftFlux.push_back(0);
+    rightFlux.push_back(0);
+    leftFlux1.push_back(0);
+    rightFlux1.push_back(0);
+    leftFlux2.push_back(0);
+    rightFlux2.push_back(0);
+
+    double*** u = create3dArray(Nx, Ny, Nz);
+
+    LargeVectorBasis* GMRESbasis = new LargeVectorBasis(10, Nz, Ny, Nx, Nmomentum);
+
+    std::vector<MatrixElement>**** matrix = new std::vector<MatrixElement>***[Nz];
+    for (int k = 0; k < Nz; ++k) {
+        matrix[k] = new std::vector<MatrixElement>**[Ny];
+        for (int j = 0; j < Ny; ++j) {
+            matrix[k][j] = new std::vector<MatrixElement>*[Nx];
+            for (int i = 0; i < Nx; ++i) {
+                matrix[k][j][i] = new std::vector<MatrixElement>[Nx];
+            }
+        }
+    }
+
+    double* xgrid = new double[Nx];
+    for (int i = 0; i < Nx; ++i) {
+        xgrid[i] = i;
+    }
+    double* ygrid = new double[Ny];
+    for (int j = 0; j < Ny; ++j) {
+        ygrid[j] = j;
+    }
+    double* zgrid = new double[Nz];
+    for (int k = 0; k < Nz; ++k) {
+        zgrid[k] = k;
+    }
+    double pmin = 1.0;
+    double pmax = 1E3;
+    double factor = 1.0;
+    if (Nmomentum > 1) {
+        factor = pow(pmax / pmin, 1.0 / (Nmomentum - 1.0));
+    }
+    double* pgrid = new double[Nmomentum];
+    pgrid[0] = pmin;
+    for (int l = 1; l < Nmomentum; ++l) {
+        pgrid[l] = pgrid[l - 1] * factor;
+    }
+
+    FILE* xfile = fopen("./output/xgrid.dat", "w");
+    for (int i = 0; i < Nx; ++i) {
+        fprintf(xfile, "%g\n", xgrid[i]);
+    }
+    fclose(xfile);
+    FILE* yfile = fopen("./output/ygrid.dat", "w");
+    for (int i = 0; i < Ny; ++i) {
+        fprintf(yfile, "%g\n", ygrid[i]);
+    }
+    fclose(yfile);
+    FILE* zfile = fopen("./output/zgrid.dat", "w");
+    for (int i = 0; i < Nz; ++i) {
+        fprintf(zfile, "%g\n", zgrid[i]);
+    }
+    fclose(zfile);
+    FILE* pfile = fopen("./output/pgrid.dat", "w");
+    for (int i = 0; i < Nmomentum; ++i) {
+        fprintf(pfile, "%g\n", pgrid[i]);
+    }
+    fclose(pfile);
+
+
+    for (int k = 0; k < Nz; ++k) {
+        for (int j = 0; j < Ny; ++j) {
+            for (int i = 0; i < Nx; ++i) {
+                u[k][j][i] = 0;
+            }
+        }
+    }
+
+    double dx = xgrid[1] - xgrid[0];
+    double maxDivU = (1.0 - 0.25) / (xgrid[Nx / 2] - xgrid[Nx / 2 - 1]);
+    double maxU = 1.0;
+
+    double advectiveDt = 0.5 * dx / maxU;
+    double accelerationDt = 0.5 * (pgrid[1] - pgrid[0]) / (pgrid[1] * maxDivU);
+
+
+    int Nt = 1000000;
+    double dt = 0.001;
+    int writeN = 200;
+    int writeCount = 0;
+    for (int m = 0; m < Nt; ++m) {
+        printf("timestep %d\n", m);
+        //injection
+        if (m == 0) {
+            for (int k = 0; k < Nz; ++k) {
+                for (int j = 0; j < Ny; ++j) {
+                    F[k][j][Nx / 2][1] += 1.0 * dt;
+                    F1[k][j][Nx / 2][1] += 1.0 * dt;
+                    F2[k][j][Nx / 2][1] += 1.0 * dt;
+                }
+            }
+        }
+
+        if (leftFlux.size() > 1000) {
+            leftFlux.pop_front();
+            rightFlux.pop_front();
+            leftFlux1.pop_front();
+            rightFlux1.pop_front();
+            //leftFlux2.pop_front();
+            //rightFlux2.pop_front();
+        }
+
+        double leftF = 0;
+        double rightF = 0;
+        int l = 0;
+        for (std::list<double>::iterator it = leftFlux.begin(); it != leftFlux.end(); ++it) {
+            double tau = (leftFlux.size() - l) * dt;
+            leftF = leftF + (2 * dt / sqrt(4 * pi * D * tau)) * exp(-dx * dx / (4 * D * tau))*(*it)/dx;
+            l = l + 1;
+        }
+
+        l = 0;
+        for (std::list<double>::iterator it = rightFlux.begin(); it != rightFlux.end(); ++it) {
+            double tau = (rightFlux.size() - l) * dt;
+            rightF = rightF + (2 * dt / sqrt(4 * pi * D * tau)) * exp(-dx * dx / (4 * D * tau)) * (*it) / dx;
+            l = l + 1;
+        }
+
+        double leftF1 = 0;
+        double rightF1 = 0;
+        l = 0;
+        for (std::list<double>::iterator it = leftFlux1.begin(); it != leftFlux1.end(); ++it) {
+            double tau = (leftFlux1.size() - l) * dt;
+            //leftF1 = leftF1 + (0.0002 * dt / sqrt(4 * pi * D * tau)) * exp(-dx * dx / (4 * D * tau)) * (*it) / dx;
+            leftF1 = leftF1 + (dt / sqrt(4 * pi * D * tau*tau*tau)) * exp(-dx * dx / (4 * D * tau)) * (*it);
+            //leftF1 = leftF1 +(dt/D)* (sqrt(4*tau*D/pi) * exp(-dx * dx / (4 * D * tau)) - dx*erfc(dx/sqrt(4*D*tau))) * (*it);
+            l = l + 1;
+        }
+
+        l = 0;
+        for (std::list<double>::iterator it = rightFlux1.begin(); it != rightFlux1.end(); ++it) {
+            double tau = (rightFlux1.size() - l) * dt;
+            double flux = *it;
+            //rightF1 = rightF1 + (0.0002 * dt / sqrt(4 * pi * D * tau)) * exp(-dx * dx / (4 * D * tau)) * flux / dx;
+            rightF1 = rightF1 + (dt / sqrt(4 * pi * D * tau*tau*tau)) * exp(-dx * dx / (4 * D * tau)) * flux;
+            //rightF1 = rightF1 + (dt / D) * (sqrt(4 * tau * D / pi) * exp(-dx * dx / (4 * D * tau)) - dx * erfc(dx / sqrt(4 * D * tau))) * (*it);
+            l = l + 1;
+        }
+
+        advanceDiffusionStepExplicit(F, rightPart, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, 0, 0);
+        advanceDiffusionStepImplicit(F1, rightPart, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, -F1[0][0][0][1] + leftF1, F1[0][0][Nx-1][1] - rightF1);
+        advanceDiffusionStepGMRES(F2, rightPart, matrix, GMRESbasis, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, 0, 0);
+
+        /*leftFlux.push_back((F[0][0][0][1] - leftF) / dx);
+        rightFlux.push_back((F[0][0][Nx - 1][1] - rightF) / dx);
+        leftFlux1.push_back((F1[0][0][0][1] - leftF1) / dx);
+        rightFlux1.push_back((F1[0][0][Nx - 1][1] - rightF1) / dx);*/
+
+        leftFlux.push_back(F[0][0][0][1]);
+        rightFlux.push_back(F[0][0][Nx - 1][1]);
+        leftFlux1.push_back(F1[0][0][0][1]);
+        rightFlux1.push_back(F1[0][0][Nx - 1][1]);
+
+        if (m % writeN == 0) {
+            std::string fileName = std::string("./output/F") + std::to_string(writeCount) + std::string(".dat");
+            FILE* outFile = fopen(fileName.c_str(), "w");
+            for (int k = 0; k < Nz; ++k) {
+                for (int j = 0; j < Ny; ++j) {
+                    for (int i = 0; i < Nx; ++i) {
+                        for (int l = 0; l < Nmomentum; ++l) {
+                            fprintf(outFile, "%g %g %g\n", F[k][j][i][l], F1[k][j][i][l], F2[k][j][i][l]);
+                        }
+                    }
+                }
+            }
+            fclose(outFile);
+            writeCount = writeCount + 1;
+        }
+    }
+}
+
+void testDiffusionAcceleration(){
+    int Nx = 100;
+    int Ny = 1;
+    int Nz = 1;
+    int Nmomentum = 10;
     double**** F = create4dArray(Nx, Ny, Nz, Nmomentum);
     double**** F1 = create4dArray(Nx, Ny, Nz, Nmomentum);
     double**** F2 = create4dArray(Nx, Ny, Nz, Nmomentum);
@@ -1547,7 +1756,7 @@ void testDiffusion(){
         zgrid[k] = k;
     }
     double pmin = 1.0;
-    double pmax = 1E3;
+    double pmax = 1E2;
     double factor = 1.0;
     if(Nmomentum > 1){
         factor = pow(pmax / pmin, 1.0 / (Nmomentum - 1.0));
@@ -1583,14 +1792,14 @@ void testDiffusion(){
     for (int k = 0; k < Nz; ++k) {
         for (int j = 0; j < Ny; ++j) {
             for (int i = 0; i < Nx; ++i) {
-                if (i < Nx / 2 - 5) {
+                if (i < Nx / 2 - 10) {
                     u[k][j][i] = 1.0;
                 }
-                else if (i >= Nx / 2 + 5) {
+                else if (i >= Nx / 2 + 10) {
                     u[k][j][i] = 0.25;
                 }
                 else {
-                    u[k][j][i] = 1.0 - 0.75*(i - Nx/2 + 5)/10.0;
+                    u[k][j][i] = 1.0 - 0.75*(i - Nx/2.0 + 10)/20.0;
                 }
             }
         }
@@ -1602,11 +1811,14 @@ void testDiffusion(){
 
     double advectiveDt = 0.5 * dx / maxU;
     double accelerationDt = 0.5 * (pgrid[1] - pgrid[0]) / (pgrid[1] * maxDivU);
+    double diffusionDt = 0.5 * dx * dx / D;
+    double accelerationTime = (3.0 / (1.0 - 0.25)) * D * (1.0 / 1.0 + 1.0 / 0.25) * log(pmax / pmin);
 
 
-    int Nt = 1000000;
-    double dt = 0.1;
-    int writeN = 200;
+    double dt = 0.01;
+    double maxTime = 5000;
+    int Nt = maxTime / dt;
+    int writeN = 5000;
     int writeCount = 0;
     for (int m = 0; m < Nt; ++m) {
         printf("timestep %d\n", m);
@@ -1619,9 +1831,9 @@ void testDiffusion(){
             }
         }
 
-        advanceDiffusionStepExplicit(F, rightPart, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum);
-        advanceDiffusionStepImplicit(F1, rightPart, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum);
-        advanceDiffusionStepGMRES(F2, rightPart, matrix, GMRESbasis, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum);
+        advanceDiffusionStepExplicit(F, rightPart, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, 0, 0);
+        advanceDiffusionStepImplicit(F1, rightPart, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, 0, 0);
+        advanceDiffusionStepGMRES(F2, rightPart, matrix, GMRESbasis, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, 0, 0);
 
         if (m % writeN == 0) {
             std::string fileName = std::string("./output/F") + std::to_string(writeCount) + std::string(".dat");
@@ -2235,8 +2447,9 @@ int main( int argc, char *argv[] )
 
     //testParallelThreeDiagonalSolverX(argc, argv);
     //testParallelThreeDiagonalSolverY(argc, argv);
-    testParallelThreeDiagonalSolverZ(argc, argv);
+    //testParallelThreeDiagonalSolverZ(argc, argv);
 
     //testDiffusion();
+    testDiffusionAcceleration();
 
 }

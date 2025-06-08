@@ -1,5 +1,5 @@
 clear;
-F = importdata('./output/F20.dat');
+F = importdata('./output/F99.dat');
 xgrid = importdata('./output/xgrid.dat');
 ygrid = importdata('./output/ygrid.dat');
 zgrid = importdata('./output/zgrid.dat');
@@ -35,13 +35,20 @@ for i = 1:Nx,
     Fx3(i) = F3(fix(Nz/2) + 1, fix(Ny/2) + 1, i, 2);
 end;
 
+D = 5;
+t = 50*1000*0.01;
+
 Fx1(1:Nx) = 0;
 for i = fix(Nx/2)+1:Nx,
     Fx1(i) = Fx2(fix(Nx/2)+1);
 end;
 for i = 1:fix(Nx/2),
-    Fx1(i) = Fx2(fix(Nx/2)+1)*exp((xgrid(i) - xgrid(fix(Nx/2)+1))/50);
+    Fx1(i) = Fx2(fix(Nx/2)+1)*exp((xgrid(i) - xgrid(fix(Nx/2)+1))/D);
 end;
+
+%for i = 1:Nx,
+%    Fx1(i) = Fx2(fix(Nx/2)+1)*exp(-(xgrid(i) - xgrid(fix(Nx/2)+1))^2/(4*D*t));
+%end;
 
 Fp(1:Np) = 0;
 Fp1(1:Np) = 0;
@@ -51,7 +58,7 @@ for l = 1:Np,
     Fp(l) = F1(fix(Nz/2)+1, fix(Ny/2)+1, fix(Nx/2)+1, l);
     Fp2(l) = F2(fix(Nz/2)+1, fix(Ny/2)+1, fix(Nx/2)+1,l);
     Fp3(l) = F3(fix(Nz/2) + 1, fix(Ny/2) + 1, fix(Nx/2)+1, l);
-    Fp1(l) = Fp2(2)*pgrid(2)/pgrid(l);
+    Fp1(l) = Fp2(3)*pgrid(3)/pgrid(l);
 end;
 
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
@@ -65,9 +72,9 @@ title ('F_{p}');
 xlabel ('p/mc');
 ylabel ('F(p)*p^3');
 plot(pgrid, Fp, 'b');
-plot(pgrid, Fp2, 'g');
-plot(pgrid, Fp3, 'r');
-plot(pgrid, Fp1, 'm');
+plot(pgrid, 1.1*Fp2, 'g');
+plot(pgrid, 1.2*Fp3, 'r');
+plot(pgrid, 1.3*Fp1, 'm');
 legend('explicit','implicit','GMRES', 'analytic');
 
 figure(2);
@@ -76,8 +83,8 @@ set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'linear');
 title ('F_{x}');
 xlabel ('x');
-plot(xgrid, Fx, 'b');
-plot(xgrid, Fx2, 'g');
-plot(xgrid, Fx3, 'r');
-plot(xgrid, Fx1, 'm');
-legend('explicit','implicit','GMRES','analytic');
+plot(xgrid, Fx, 'b', linewidth = 2);
+plot(xgrid, 1.1*Fx2, 'g', linewidth = 2);
+plot(xgrid, 1.2*Fx3, 'r', linewidth = 2);
+plot(xgrid, 1.3*Fx1, 'm', linewidth = 2);
+legend('neumann','integral','dirichlet','analytical');
