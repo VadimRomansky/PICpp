@@ -52,7 +52,7 @@ const double pi = 3.14159;
  * 14.4286
  */
 
-const double Dglob = 5000000.0;
+const double Dglob = 5.0;
 
 double evaluateDiffusionCoefficient(double p) {
 	return Dglob * p;
@@ -1382,15 +1382,15 @@ void advanceDiffusionStepImplicit(double**** F, double**** rightPart, double* xg
                     double D = evaluateDiffusionCoefficient(pgrid[l]);
 					if (i == 0) {
 						a[k][j][i][l] = 0.0;
-						b[k][j][i][l] = 1.0 + u[k][j][i]*dx/D;
-                        //b[k][j][i][l] = 1.0;
-						c[k][j][i][l] = -1.0;
-                        //c[k][j][i][l] = 0;
+						//b[k][j][i][l] = 1.0 + u[k][j][i]*dx/D;
+                        b[k][j][i][l] = 1.0;
+						//c[k][j][i][l] = -1.0;
+                        c[k][j][i][l] = 0;
 						rightPart[k][j][i][l] = leftF;
 					}
 					else if (i == Nx - 1) {
-						a[k][j][i][l] = -1.0;
-                        //a[k][j][i][l] = 0;
+						//a[k][j][i][l] = -1.0;
+                        a[k][j][i][l] = 0;
 						b[k][j][i][l] = 1.0;
 						c[k][j][i][l] = 0;
 						rightPart[k][j][i][l] = rightF;

@@ -62,15 +62,15 @@ for l = 1:Np,
 end;
 
 
-Fppp(1:Np) = 0;
-Fp1(1:Np) = 0;
+Fpp(1:Np) = 0;
+Fpp1(1:Np) = 0;
 Fpp2(1:Np) = 0;
 Fpp3(1:Np) = 0;
 for l = 1:Np,
     for i = 1:Nx,
-    Fpp(l) = F1(fix(Nz/2)+1, fix(Ny/2)+1, i, l);
-    Fpp2(l) = F2(fix(Nz/2)+1, fix(Ny/2)+1, i,l);
-    Fpp3(l) = F3(fix(Nz/2) + 1, fix(Ny/2)+1,i, l);
+    Fpp(l) = Fpp(l) + F1(fix(Nz/2)+1, fix(Ny/2)+1, i, l);
+    Fpp2(l) = Fpp2(l) + F2(fix(Nz/2)+1, fix(Ny/2)+1, i,l);
+    Fpp3(l) = Fpp3(l) + F3(fix(Nz/2) + 1, fix(Ny/2)+1,i, l);
     end;
     Fpp1(l) = Fpp2(3)*pgrid(3)/pgrid(l);
 end;
@@ -85,10 +85,10 @@ set(gca, 'XScale', 'log');
 title ('F_{p}');
 xlabel ('p/mc');
 ylabel ('F(p)*p^3');
-plot(pgrid, Fpp, 'b');
-plot(pgrid, 1.1*Fpp2, 'g');
-plot(pgrid, 1.2*Fpp3, 'r');
-plot(pgrid, 1.3*Fpp1, 'm');
+plot(pgrid, Fp, 'b');
+plot(pgrid, 1.1*Fp2, 'g');
+plot(pgrid, 1.2*Fp3, 'r');
+plot(pgrid, 1.3*Fp1, 'm');
 legend('explicit p','implicit','GMRES', 'analytic');
 
 figure(2);
