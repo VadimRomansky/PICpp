@@ -61,6 +61,20 @@ for l = 1:Np,
     Fp1(l) = Fp2(3)*pgrid(3)/pgrid(l);
 end;
 
+
+Fppp(1:Np) = 0;
+Fp1(1:Np) = 0;
+Fpp2(1:Np) = 0;
+Fpp3(1:Np) = 0;
+for l = 1:Np,
+    for i = 1:Nx,
+    Fpp(l) = F1(fix(Nz/2)+1, fix(Ny/2)+1, i, l);
+    Fpp2(l) = F2(fix(Nz/2)+1, fix(Ny/2)+1, i,l);
+    Fpp3(l) = F3(fix(Nz/2) + 1, fix(Ny/2)+1,i, l);
+    end;
+    Fpp1(l) = Fpp2(3)*pgrid(3)/pgrid(l);
+end;
+
 set(0,'DefaultAxesFontSize',14,'DefaultAxesFontName','Times New Roman');
 set(0,'DefaultTextFontSize',20,'DefaultTextFontName','Times New Roman'); 
 
@@ -71,11 +85,11 @@ set(gca, 'XScale', 'log');
 title ('F_{p}');
 xlabel ('p/mc');
 ylabel ('F(p)*p^3');
-plot(pgrid, Fp, 'b');
-plot(pgrid, 1.1*Fp2, 'g');
-plot(pgrid, 1.2*Fp3, 'r');
-plot(pgrid, 1.3*Fp1, 'm');
-legend('explicit','implicit','GMRES', 'analytic');
+plot(pgrid, Fpp, 'b');
+plot(pgrid, 1.1*Fpp2, 'g');
+plot(pgrid, 1.2*Fpp3, 'r');
+plot(pgrid, 1.3*Fpp1, 'm');
+legend('explicit p','implicit','GMRES', 'analytic');
 
 figure(2);
 hold on;
@@ -87,4 +101,4 @@ plot(xgrid, Fx, 'b', linewidth = 2);
 plot(xgrid, 1.1*Fx2, 'g', linewidth = 2);
 plot(xgrid, 1.2*Fx3, 'r', linewidth = 2);
 plot(xgrid, 1.3*Fx1, 'm', linewidth = 2);
-legend('neumann','integral','dirichlet','analytical');
+legend('explicit p','implicit','GMRES', 'analytic');
