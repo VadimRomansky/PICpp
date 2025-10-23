@@ -52,7 +52,7 @@ const double pi = 3.14159;
  * 14.4286
  */
 
-const double Dglob = 5.0;
+const double Dglob = 1.0;
 
 double evaluateDiffusionCoefficient(double p) {
 	return Dglob * p;
@@ -1833,7 +1833,7 @@ void testDiffusionAcceleration(){
         zgrid[k] = k;
     }
     double pmin = 1.0;
-    double pmax = 1E2;
+    double pmax = 1E5;
     double factor = 1.0;
     if(Nmomentum > 1){
         factor = pow(pmax / pmin, 1.0 / (Nmomentum - 1.0));
@@ -2524,6 +2524,63 @@ void testParallelThreeDiagonalSolverZ( int argc, char *argv[] ){
     MPI_Finalize();
 }
 
+void testCommandNumber(int argc, char* argv[]) {
+    int size;
+    int rank;
+    MPI_Init(&argc, &argv);
+
+    int MPI_Nx = 1;
+    int MPI_Ny = 1;
+    int MPI_Nz = 1;
+    const int MPI_dim = 3;
+
+    int dims[MPI_dim];
+    int period[MPI_dim];
+    period[0] = 1;
+    period[1] = 1;
+    period[2] = 1;
+    dims[0] = MPI_Nx;
+    dims[1] = MPI_Ny;
+    dims[2] = MPI_Nz;
+
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+
+    MPI_Comm comm;
+    MPI_Cart_create(MPI_COMM_WORLD, MPI_dim, dims, period, 0, &comm);
+
+    MPI_Comm_size(comm, &size);
+    MPI_Comm_rank(comm, &rank);
+
+    printf("size = %d\n", size);
+    printf("rank = %d\n", rank);
+
+    MPI_Barrier(comm);
+
+    for (int i = 0; i < 2000000000; ++i) {
+        if (i % 10000000 == 0) {
+            printf("%d\n", i);
+        }
+        double outBuffer[1];
+        double inBuffer[1];
+        MPI_Status status;
+        MPI_Sendrecv(outBuffer, 1, MPI_DOUBLE, 0, 0, inBuffer, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
+    }
+
+    for (int i = 0; i < 2000000000; ++i) {
+        if (i % 10000000 == 0) {
+            printf("%d\n", i);
+        }
+        double outBuffer[1];
+        double inBuffer[1];
+        MPI_Status status;
+        MPI_Sendrecv(outBuffer, 1, MPI_DOUBLE, 0, 0, inBuffer, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
+    }
+
+    MPI_Finalize();
+}
+
 int main( int argc, char *argv[] )
 {
 
@@ -2537,5 +2594,5 @@ int main( int argc, char *argv[] )
 
     //testDiffusion();
     testDiffusionAcceleration();
-
+    //testCommandNumber(argc, argv);
 }
