@@ -8,34 +8,28 @@
 В процессе аккреции SS~433 производит транс-релятивистские джеты со скоростью потока $\sim 0.26\,c$ и углом растовора менее двух градусов \citep[e.g. ][]{Begelman1980, Calvani1981}. Эти узкие джеты видны в рентгеновском и оптическом диапазоне как пары линий сдвинутых в синюю и красную стороны, излучающиеся в пространственных областях $\lesssim 10^{12}$ см и $\lesssim 10^{15}$ см от источника соответственнои \citep[][]{Marshall2002, Fabrika2004,Khabibulin2016}. Однако сами джеты невидимы на расстояниях больших $\sim0.1$ пк от центрального источника \citep[e.g. ][]{Hjellming1981,Blundell2004}. 
 Но так как на больших масштабах (от 40 до 110 парсек) окружающая SS~433 яркая радио и ${\rm H}\alpha$ туманность W50 имеет вытянутую структуру с соотношением 3:1 в направлении оси прецессии джета, предполагается, что именно джеты надувают туманность W50  \citep[][]{Begelman1980,Zealey1980,Eichler1983,Peter1993,Zavala2008, Panferov2017}. 
 
-There is no direct evidence of the termination of the narrow jets in the radio, optical and X-ray maps of W50 \citep[][]{1998AJ....116.1842D,2011MNRAS.414.2838G,2017MNRAS.467.4777F,2018MNRAS.475.5360B}, while a
-broader and more extended X-ray structures are seen on both sides of SS~433  aligned with the narrow optical jet precession axis \cite[e.g.,][]{1983ApJ...273..688W,1994PASJ...46L.109Y,Safi-Harb1997,1999ApJ...512..784S,Brinkmann2007,Safi-Harb2022}. These extended X-ray jets appear at a distance of $\sim 20\,$pc from the compact source and have an opening angle of $\sim 20^\circ$ which is twice smaller than the precession amplitude of the narrow jets.
-The X-ray structures are probably of synchrotron origin \citep[e.g.,][]{Brinkmann2007}, which is confirmed by the detection of X-ray polarization by the IXPE telescope \citep{IXPE2024SS433}. The very high energy (VHE) gamma-ray emission from the source was predicted in a number of models  \citep[see, e.g.,][]{Safi-Harb1997, Reynoso2008, 1998NewAR..42..579A, 
-	2020ApJ...904..188K, 2020ApJ...889..146S}. Recently, the extended very high energy gamma-ray emission was detected from W50 \citep[][]{2018Natur.562...82A,HESS2024SS433,LHAASO2024SS433}, indicating the acceleration of PeV-regime particles in the source. The physical origin of these extended structures and their connection to the narrow transrelativistic jets currently launched by the system remains unclear \citep[e.g. ][ and references therein]{2020MNRAS.495L..51C}
-
-The `minimalist' model \citep{Churazov} explains the extended jet as a result of the powerful two-component anisotropic outflow produced by a supercritical accretion disk. In this model, a more collimated outflow (polar wind), aligned with the rotation axis of the binary, coexists with a more isotropic wind. The extended X-ray jets observed are associated with the recollimation shocks, which appear right after the collision of the collimated outflow with the isotropic wind termination surface.  The structure of  MHD outflow in the interaction region of the collimated wind with the termination surface of the isotropic wind was simulated with the PLUTO MHD code \cite{Mignone2007}. We present a model of very high-energy particle acceleration in the extended jets of the SS~433/W50 system following the two-component outflow scenario.
-
-
-The results of MHD modeling are described in Section \ref{sec:morphological}. Using the spatial distributions of the accelerated particles and magnetic field spectra obtained in the model, we construct profiles and spectra of non-thermal X-ray and gamma radiation of this object.
-The modeling includes the following steps, split across several sections.
-
-
-Section \ref{sec:MC}. Based on the plane-parallel Monte Carlo model of particle acceleration and magnification of magnetic fields near the shock fronts, the spectra of accelerated particles and magnetic fields near the shock waves obtained in the MHD model are found.
-
-Section \ref{sec:CorSh}. Based on MHD modeling of the passage of turbulence with significant density fluctuations through the shock front, profiles of the longitudinal $B_{\parallel}$  and transverse $B_{\perp}$ components of the magnetic field behind the shock front are obtained using the PLUTO code.
-
-
-Section \ref{sec:Spectrum}. Next, the spectra and profiles of the X-ray synchrotron emission are calculated based on the spectra of accelerated electrons and magnetic field profiles. Gamma Rays in the TeV range are also calculated. The simulation parameters are selected to match the model with the observational data \citep[][]{Brinkmann2007, Safi-Harb2022, HESS2024SS433, LHAASO2024SS433}.
-The anisotropy of the magnetic field in the shock downstream leads to the observed polarization of the X-ray radiation. The X-ray polarization obtained in the model near the shock wave is compared with the observational data from the IXPE observatory \citep{IXPE2024SS433}.
-
-High energy particle acceleration in microquasars as a potential contributor to the galactic cosmic ray pool was widely discussed (see e.g. \cite{2002A&A...390..751H, 2005A&A...432..609B,2017SSRv..207....5R}), while recently the interest to SS 433 as a pevatron was raised in \cite{Churazov,2024arXiv241108762P,2025arXiv250620193Z,2025arXiv250622550C,2025arXiv250721048W} by VHE gamma-ray observations reported in \cite{HESS2024SS433,LHAASO2024SS433}. 
-
-\begin{figure}
+\begin{figure}[h]
 	\centering
 	\includegraphics[width=0.9\textwidth]{./img_part2/w50.png} 
 	\caption{Изображение туманности W50 из работы \cite{Safi-Harb2022}. Красный цвет - радио \cite{Dubner1998}, зеленый - оптическое излучение \cite{Boumis2007}, желтый - мягкий рентген (0.5-1 кэВ), фиолетовый - средний рентген (1-2 кэВ), голубой - жесткий рентген (2-12 кэВ)\cite{Safi-Harb2022, Moldowan2005}.} 
 	\label{W50image} 
 \end{figure} 
+
+Нет наблюдаемых свидетельств остановки джетов и в то же время наблюдаются широкие протяженные рентгеновские структуры по обе стороны от SS~433, сонаправленные с осью прецессии джетов \cite[e.g.,][]{Watson1983,Yamauchi1994,Safi-Harb1997,Safi-Harb1999,Brinkmann2007,Safi-Harb2022}. Эти расширенные джеты появляются на расстояниях около $\sim 20\,$пк от центрального источника и имеют угол раствора$\sim 20^\circ$, что в два раза меньше чем угол прецессии узких джетов. Рентгеновское излучение в этих структурах имеет, вероятно, синхротронное происхождение \citep[e.g.,][]{Brinkmann2007}, что подтверждается измерянной рентгеновской поляризацией телескопом IXPE \citep{IXPE2024SS433}. Высокоэнергичной гамма-излучения от источника предсказывалось многими моделями \citep[see, e.g.,][]{Safi-Harb1997, Reynoso2008, Aharonian1998, Kimura2020, Sudoh2020}. Недавно оно было задетектировано телескопами HAWC, H.E.S.S. и LHAASO \citep[][]{Abeysekara2018,HESS2024SS433,LHAASO2024SS433}, что указывает на наличие частиц, ускоренных до энергий порядка петаэлектрон-вольт. 
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{./img_part2/HESS.png} 
+	\caption{Изображение туманности W50 в гамма лучах по данным телескопа HESS \cite{HESS2024SS433}. Приведена значимость сигнала в диапазонах: панель A - 0.8-2.5 ТэВ, панель B - 2.5-10 ТэВ, панель C - выше 10 ТэВ} 
+	\label{W50HESS} 
+
+	\centering
+	\includegraphics[width=0.9\textwidth]{./img_part2/LHAASO.png} 
+	\caption{Изображение туманности W50 в гамма лучах по данным телескопа LHAASO \cite{LHAASO2024SS433}. Приведена значимость сигнала в диапазонах: панель a - 1-25 ТэВ, панель b - 25-100 ТэВ, панель c - выше 100 ТэВ. Голубым цветом отмечена область излучающая гамма лучи с энергиями выше 10 ТэВ по данным HESS.} 
+	\label{W50LHASSOimage} 
+\end{figure} 
+
+Модель, предложенная в работе \citep{Churazov}, объяснят структуру туманности W50 как результат взаимодействия мощного двухкомпонентного ветра, создаваемого аккреционным диском. Транс-релятивистский поток, сонаправленный с осью прецесси узких джетов взаимодействует с более медленным квазисферическим ветром. В результате этого взаимодействия в полярном ветре возникают реколлимационные ударные волны, приводящие к ускорению космических лучей и фысокоэнергичному излучению. В данной главе мы проведем моделирование структуры туманности W50 в рамках вышеописанной модели с помощью магнито-гидродинамического кода PLUTO \cite{Mignone2007}, моделирование ускорения космических лучей полученными ударными волнами, а так же проведем расчет высокоэнергичного излучений и сравнение с наблюдательными данными.
 
 \section{Моделирование структуры туманности}
 \section{Расчет высокоэнергичного излучения}
