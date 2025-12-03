@@ -32,6 +32,41 @@
 Модель, предложенная в работе \citep{Churazov}, объяснят структуру туманности W50 как результат взаимодействия мощного двухкомпонентного ветра, создаваемого аккреционным диском. Транс-релятивистский поток, сонаправленный с осью прецесси узких джетов взаимодействует с более медленным квазисферическим ветром. В результате этого взаимодействия в полярном ветре возникают реколлимационные ударные волны, приводящие к ускорению космических лучей и фысокоэнергичному излучению. В данной главе мы проведем моделирование структуры туманности W50 в рамках вышеописанной модели с помощью магнито-гидродинамического кода PLUTO \cite{Mignone2007}, моделирование ускорения космических лучей полученными ударными волнами, а так же проведем расчет высокоэнергичного излучений и сравнение с наблюдательными данными.
 
 \section{Моделирование структуры туманности}
+\begin{figure}
+	\includegraphics[width=0.9\textwidth]{./img_part2/Scheme.png}
+	\caption{Schematic representation of the SS433+W50 system adopted here. The structures with bright non-thermal X-ray emission in the extended jet of SS 433 which we model here are marked as  `Cone", `Head", `e1' and `e2". They were detected and discussed in the papers \cite{Safi-Harb1997,Brinkmann2007,Safi-Harb2022}.}
+	\label{Scheme}
+\end{figure}
+
+
+In this section, we perform axisymmetric MHD modeling of the W50 nebula around the microquasar SS 433. It has a characteristic shape: a central spherical part and two opposite lobes to the east and west of the central source. The X-ray emission of the nebula is very inhomogeneous, with several bright X-ray regions - `e1", `e2", and `e3' to the east and `w1' and `w2' to the west \cite{Safi-Harb1997}. Following \cite{Churazov}, we model a wind from the central microquasar with two components - quasi-isotropic slow wind and a more collimated outflow, the polar wind. The kinetic power of each component is about $10^{39}$ erg/s, and the velocities are $\approx3000$ km/s for the isotropic wind and $\approx0.2~c$ for the jet. Interactions of the collimated outflow, isotropic wind, and ambient medium cause several recollimation shocks in the jet, which explains the existence of different X-ray emitting regions. The sketch of the hydrodynamical model with the emission regions shown from \cite{Safi-Harb2022, IXPE2024SS433} is presented in Figure \ref{Scheme}.
+
+We perform numerical simulations of the W50 nebula using the MHD code PLUTO \cite{Derouillat}. We used a 2D setup in cylindrical coordinates. In the central region, at the sphere with radius of 5 pc, we set internal boundary conditions with fixed density, pressure, and radial velocity, depending on the polar angle $\theta$ of the current grid point. For small angles, the outflow parameters correspond to the trans-relativistic collimated outflow, and for the larger angles to the isotropic wind. The ambient medium has constant density and pressure. 
+
+The magnetic field was set to 100 $\mu$G in the jet base and 1 $\mu$G in the ambient medium and isotropic wind, and directed along the z-axis. We managed to obtain an elongated structure with two strong recollimation shocks with noticeable Mach diamonds, located approximately at distances 32 and 48 pc from the central source, close to observed bright X-ray emitting regions, named `e1' and `e2' in the eastern jet \cite{Safi-Harb1997}. The structure of hydrodynamical flow is shown in Fig.~\ref{velocity} - large-scale velocity map in the top panel, and zoomed maps of velocity, density, and magnetic field in the region between the central source and `e2' in the lower panels. The parameters for this setup are: kinetic power of the isotropic wind $P_i$ is equal to kinetic power of the collimated outflow $P_j = 2.1\times10^{39}$ erg/s, the velocity of isotropic wind is $v_i=3000$ km/s, the velocity of collimated outflow is $v_j=0.2~c$, its half-width angle is $5^{\circ}$, the ambient number density is $\rho_{amb} = 0.005~\rm{cm^{-3}}$ and the temperature $T_{amb} = 8\times10^4~\rm{K}$. We assumed that the accretion disk outflows which produced the extended X-ray jet are propagating through a nebula of low plasma density created previously  by the supernova event and modified by the winds from the binary (see e.g. a model of the nebula in \citep{2021ApJ...910..149O}). 
+
+The ambient matter parameters used above are not unique. It is possible to obtain a similar structure of the extended X-ray jets and nebulae with higher ambient density and lower temperature e.g.  ($\rho_{amb}=0.05~\rm{cm^{-3}}$, $T_{amb} = 8.6\times10^3~\rm{K}$). In this case, the structure  with strong internal shocks,  similar to that shown in Fig. \ref{MHD_profile} appears at later times of about 100, 000 years. We left the detailed study of the parameter space of the ambient matter allowed by multiwavelength observations of W50 for future study, and here we model the VHE particle acceleration and nonthermal emission of the extended X-ray jets using the main setup described above.
+
+
+
+The first recollimation shock occurs close to the termination shock of the isotropic wind. The later behavior of the outflow - will it propagate further with a series of recollimation shocks, or stop after the first one, is determined by the pressure of the ambient medium. It should be low enough for the collimated outflow to propagate a large distance. In addition, relatively low ambient pressure is necessary to form Mach shocks with plasma flow normal to the shock front, instead of a system of crossing oblique shocks, as shown in \cite{Marti2018}. In numerical simulations, spatial resolution should be high enough to resolve Mach diamonds.
+
+The one-dimensional  density, velocity, and entropy profiles of the hydrodynamic flow near the regions `e1' and `e2' are shown in Figure~\ref{MHD_profile}. The density jumps at the two shocks are close to 4, which is a sign of the strong hydrodynamic shocks. Entropy jumps are relatively large as well. Also, there is a weak shock with smaller jumps between two strong shocks. Kinetic Monte Carlo collisionless shock models, which take into account the energy fluxes of accelerated particles, showed that the compression at the shock front can significantly exceed the adiabatic value 4 (see e.g. simulation in \cite{Bykov3inst2014}).
+
+\begin{figure}
+	\includegraphics[width=0.9\textwidth]{./img_part2/velocity4.png}
+	\caption{Morphology of the W50 nebula in simulations: a) large-scale velocity profile in the entire computational domain, b) velocity near e1 and e2 regions, c) density near e1 and e2 regions, d) magnetic field near e1 and e2 regions.} 
+	\label{velocity}
+\end{figure}
+
+
+\begin{figure}
+	\includegraphics[width=0.9\textwidth]{./img_part2/profile_1d_window2.png}
+	\caption{Density, velocity, and entropy profiles in the MHD run shown in Fig.~\ref{velocity}.} 
+	\label{MHD_profile}
+\end{figure}
+
+In the minimalists' scenario, the main goal was reproducing the overall morphology of the W50 radio emission and the emergence of the `extended X-ray jets' as a result of recollimation shocks in the anisotropic wind scenario. This model has several free parameters, including overall energetics, age of the system, density of the ambient medium, velocities and densities of the isotropic and polar winds, and the opening angle of the polar component. Various combinations of these parameters can lead to a qualitatively similar morphology of the nebula (see Fig.A1 in \cite{Churazov}). Here, our primary goal is to find parameters that lead to the efficient acceleration of the particles that give rise to the observed emission of EXJs. Knowing that accelerating electrons to $\gsim$ 100 TeV energies is especially efficient for strong shocks with velocities $\gtrsim$ 0.2c \cite{Churazov}, we ran the MHD version of a set-up with this value of the polar component velocity, but did not require the morphology of the simulated nebula boundary to match the observed one perfectly. We leave the task of finding a parameter combination that satisfies all observational requirements best for a future study. 
 \section{Расчет высокоэнергичного излучения}
 \subsection{Рентгеновское излучение}
 \subsection{Гамма излучение}
