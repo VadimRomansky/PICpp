@@ -33,42 +33,131 @@
 
 \section{Моделирование структуры туманности}
 \begin{figure}
-	\includegraphics[width=0.9\textwidth]{./img_part2/Scheme.png}
-	\caption{Schematic representation of the SS433+W50 system adopted here. The structures with bright non-thermal X-ray emission in the extended jet of SS 433 which we model here are marked as  `Cone", `Head", `e1' and `e2". They were detected and discussed in the papers \cite{Safi-Harb1997,Brinkmann2007,Safi-Harb2022}.}
+	\includegraphics[width=0.9\textwidth]{./img_part2/Scheme.pdf}
+	\caption{Схематичное изображение системы SS433+W50 system adopted here. Яркие рентгеновские области в расширенном джете обозначены как `Cone', `Head', `e1' и `e2'. Они были обнаружени и обсуждались в работах \cite{Safi-Harb1997,Brinkmann2007,Safi-Harb2022}.}
 	\label{Scheme}
 \end{figure}
 
 
-Туманность W50 имеет специфическую форму - у нее есть сферическая центральная часть и две вытянутые структуры к востоку и западу от ентрального источника. Рентгеновское излучение туманности неоднородно, а происходит от нескольких ярких областей - `e1", `e2", и `e3' на восточной стороне, `w1' и `w2' на западной \cite{Safi-Harb1997}. Следуя работе \cite{Churazov}, мы инициализируем течение из микроквазара в виде двух компонент - квазисферический медленный ветер и направленный транс-релятивистский полярный ветер (джет). Кинетическая мощность каждой компоненты составляет $2\times10^{39}$ erg/s, скорость медленного ветра - $\approx3000$ km/s, скорость полярного ветра $\approx0.2~c$. В результате взаимодействия направленного ветра, изотроного ветра и межзвездной среды образуются реколлимационные ударные волны в направленном ветре, что позволяет объяснить наличие нескольких ярких рентгеновских областей. Схема гидродинамической модели с излучающими областями, использованными в работах  \cite{Safi-Harb2022, IXPE2024SS433} показана на рисунке \ref{Scheme}.
+Туманность W50 имеет специфическую форму - у нее есть сферическая центральная часть и две вытянутые структуры к востоку и западу от ентрального источника. Рентгеновское излучение туманности неоднородно, а происходит от нескольких ярких областей - `e1", `e2", и `e3' на восточной стороне, `w1' и `w2' на западной \cite{Safi-Harb1997}. Следуя работе \cite{Churazov}, мы инициализируем течение из микроквазара в виде двух компонент - квазисферический медленный ветер и направленный транс-релятивистский полярный ветер (расширенный джет). Кинетическая мощность каждой компоненты составляет $2\times10^{39}$ erg/s, скорость медленного ветра - $\approx3000$ km/s, скорость полярного ветра $\approx0.2~c$. В результате взаимодействия направленного ветра, изотроного ветра и межзвездной среды образуются реколлимационные ударные волны в направленном ветре, что позволяет объяснить наличие нескольких ярких рентгеновских областей. Схема гидродинамической модели с излучающими областями, использованными в работах  \cite{Safi-Harb2022, IXPE2024SS433} показана на рисунке \ref{Scheme}.
 
-We perform numerical simulations of the W50 nebula using the MHD code PLUTO \cite{Derouillat}. We used a 2D setup in cylindrical coordinates. In the central region, at the sphere with radius of 5 pc, we set internal boundary conditions with fixed density, pressure, and radial velocity, depending on the polar angle $\theta$ of the current grid point. For small angles, the outflow parameters correspond to the trans-relativistic collimated outflow, and for the larger angles to the isotropic wind. The ambient medium has constant density and pressure. 
+Мы провели численное моделирование туманности W50 используя магнито-гидродинамический код PLUTO \cite{Mignone2007}. Мы использовали двумерные расчеты в цилиндрических координатах. В центральной области - сфере радиуса 5 пк, задавались внутренние граничные условия с заданными плотностью, давлением и скоростью радиального течения, которые зависели от полярного угла $\theta$ данной пространственной ячейки. Для малых углов параметры соответствовали транс-релятивистскому направленному потоку, а для больших - изотропному ветру. Внешняя межзвездная среда задавалась с постоянными плотностью и давлением.
 
-The magnetic field was set to 100 $\mu$G in the jet base and 1 $\mu$G in the ambient medium and isotropic wind, and directed along the z-axis. We managed to obtain an elongated structure with two strong recollimation shocks with noticeable Mach diamonds, located approximately at distances 32 and 48 pc from the central source, close to observed bright X-ray emitting regions, named `e1' and `e2' in the eastern jet \cite{Safi-Harb1997}. The structure of hydrodynamical flow is shown in Fig.~\ref{velocity} - large-scale velocity map in the top panel, and zoomed maps of velocity, density, and magnetic field in the region between the central source and `e2' in the lower panels. The parameters for this setup are: kinetic power of the isotropic wind $P_i$ is equal to kinetic power of the collimated outflow $P_j = 2.1\times10^{39}$ erg/s, the velocity of isotropic wind is $v_i=3000$ km/s, the velocity of collimated outflow is $v_j=0.2~c$, its half-width angle is $5^{\circ}$, the ambient number density is $\rho_{amb} = 0.005~\rm{cm^{-3}}$ and the temperature $T_{amb} = 8\times10^4~\rm{K}$. We assumed that the accretion disk outflows which produced the extended X-ray jet are propagating through a nebula of low plasma density created previously  by the supernova event and modified by the winds from the binary (see e.g. a model of the nebula in \citep{2021ApJ...910..149O}). 
+Магнитное поле задавалось равным 100 $\mu$G в основании расширенного джета и 1 $\mu$G в окружающей среде и изотропном ветре, и направлено по оси z. В результате моделирования удалось получить протяженную структуру со сферической центральной частью и двумя сильными реколлимационными ударными волнами с заметными дисками Маха, расположенными на расстоянии примерно 32 и 48 парсек от центрального источника, что близко к наблюдаемым ярким рентгеновским областям `e1' и `e2' в восточном джете \cite{Safi-Harb1997}. Структура гидродинамического течения изображена на рисунке ~\ref{velocity} - крупномасштабная карта скорости на верхней панели и увеличенные карты скорости, плотности и магнитного поля в области между центральным источником и `e2' на нижних панелях. Для данного сетапа были выбраны следующие параметры: кинетическая можность изотропного ветра $P_i$ и равная ей кинетическая мощность расширенного джета $P_j = 2.1\times10^{39}$ эрг/с, скорость изотропного ветра  $v_i=3000$ км/с, скорость расширенного джета $v_j=0.2~c$, его угол полураствора $5^{\circ}$, плотность межзвездной среды $\rho_{amb} = 0.005~\rm{cm^{-3}}$ и ее температура $T_{amb} = 8\times10^4~\rm{K}$. Время моделирования составило 30 000 лет.
 
-The ambient matter parameters used above are not unique. It is possible to obtain a similar structure of the extended X-ray jets and nebulae with higher ambient density and lower temperature e.g.  ($\rho_{amb}=0.05~\rm{cm^{-3}}$, $T_{amb} = 8.6\times10^3~\rm{K}$). In this case, the structure  with strong internal shocks,  similar to that shown in Fig. \ref{MHD_profile} appears at later times of about 100, 000 years. We left the detailed study of the parameter space of the ambient matter allowed by multiwavelength observations of W50 for future study, and here we model the VHE particle acceleration and nonthermal emission of the extended X-ray jets using the main setup described above.
+Подобную структуру можно и получить и при других параметрах среды, при большей плотности и меньшей температуре, например
+ ($\rho_{amb}=0.05~\rm{cm^{-3}}$, $T_{amb} = 8.6\times10^3~\rm{K}$). Но в этом случае подобная структура с сильными реколлимационными ударными волнами, расположенными в местах соответствующих областям `e1' и `e2' будет наблюдаться на более поздних временах, примерно 100 000 лет. 
 
+Первая реколлимационная ударная волна случается на расстоянии соответствующем ударной волне остановки изотропного ветра. Дальнейшее поведение расширенного джета - будет ли он распространяться с серией реколимационных ударных волн, или остановится после первой, определяется давлением внешней средыю Оно должно быть достаточно малым, чтобы направленный поток распространился на большие расстояния. К тому же, как показано в работе \cite{Marti2018}, относительно низкое внешнее давление необходимо для формирование перпендикулярных ударных волн (дисков Маха), а не системы косых ударных волн, менее пригодных для ускорения частиц. В дополнение, при численном моделировании необходимо достаточно высокое пространственное разрешение, чтобы было возможно наблюдать диски Маха.
 
-
-The first recollimation shock occurs close to the termination shock of the isotropic wind. The later behavior of the outflow - will it propagate further with a series of recollimation shocks, or stop after the first one, is determined by the pressure of the ambient medium. It should be low enough for the collimated outflow to propagate a large distance. In addition, relatively low ambient pressure is necessary to form Mach shocks with plasma flow normal to the shock front, instead of a system of crossing oblique shocks, as shown in \cite{Marti2018}. In numerical simulations, spatial resolution should be high enough to resolve Mach diamonds.
-
-The one-dimensional  density, velocity, and entropy profiles of the hydrodynamic flow near the regions `e1' and `e2' are shown in Figure~\ref{MHD_profile}. The density jumps at the two shocks are close to 4, which is a sign of the strong hydrodynamic shocks. Entropy jumps are relatively large as well. Also, there is a weak shock with smaller jumps between two strong shocks. Kinetic Monte Carlo collisionless shock models, which take into account the energy fluxes of accelerated particles, showed that the compression at the shock front can significantly exceed the adiabatic value 4 (see e.g. simulation in \cite{Bykov3inst2014}).
+Одномерные профили плотности, скорости и энтропии гидродинамического потока вблизи областей `e1' and `e2' показаны на рисунке~\ref{MHD_profile}. Скачок плотности на обоих ударных волнах близок к 4, что говорит о сильной ударной волне. Скачки энтропии тоже достаточно большие. Так же имеются признаки более слабых ударных волн с меньшими скачками плотности. Кинетическое Монте-Карло моделирование показывает, что при учете давления ускоренных частиц, сжатие на фронте ударной волны может значительно превосходить адиабатическиое предельное значение 4 (см. например \cite{Bykov3inst2014}).
 
 \begin{figure}
 	\includegraphics[width=0.9\textwidth]{./img_part2/velocity4.png}
-	\caption{Morphology of the W50 nebula in simulations: a) large-scale velocity profile in the entire computational domain, b) velocity near e1 and e2 regions, c) density near e1 and e2 regions, d) magnetic field near e1 and e2 regions.} 
+	\caption{Моделированная структура туманности W50: a) крупномасштабная карта скорости b) карта скорости вблизи областей e1 и e2 c) карта плотности d) карта магнитного поля.} 
 	\label{velocity}
 \end{figure}
 
 
 \begin{figure}
 	\includegraphics[width=0.9\textwidth]{./img_part2/profile_1d_window2.png}
-	\caption{Density, velocity, and entropy profiles in the MHD run shown in Fig.~\ref{velocity}.} 
+	\caption{Одномерные профили плотности, скорости и энтропии, соответствующие расчетам, показанным на рисунке~\ref{velocity}.} 
 	\label{MHD_profile}
 \end{figure}
 
-In the minimalists' scenario, the main goal was reproducing the overall morphology of the W50 radio emission and the emergence of the `extended X-ray jets' as a result of recollimation shocks in the anisotropic wind scenario. This model has several free parameters, including overall energetics, age of the system, density of the ambient medium, velocities and densities of the isotropic and polar winds, and the opening angle of the polar component. Various combinations of these parameters can lead to a qualitatively similar morphology of the nebula (see Fig.A1 in \cite{Churazov}). Here, our primary goal is to find parameters that lead to the efficient acceleration of the particles that give rise to the observed emission of EXJs. Knowing that accelerating electrons to $\gsim$ 100 TeV energies is especially efficient for strong shocks with velocities $\gtrsim$ 0.2c \cite{Churazov}, we ran the MHD version of a set-up with this value of the polar component velocity, but did not require the morphology of the simulated nebula boundary to match the observed one perfectly. We leave the task of finding a parameter combination that satisfies all observational requirements best for a future study. 
+
+
+\textcolor{red}{In the minimalists' scenario, the main goal was reproducing the overall morphology of the W50 radio emission and the emergence of the `extended X-ray jets' as a result of recollimation shocks in the anisotropic wind scenario. This model has several free parameters, including overall energetics, age of the system, density of the ambient medium, velocities and densities of the isotropic and polar winds, and the opening angle of the polar component. Various combinations of these parameters can lead to a qualitatively similar morphology of the nebula (see Fig.A1 in \cite{Churazov}). Here, our primary goal is to find parameters that lead to the efficient acceleration of the particles that give rise to the observed emission of EXJs. Knowing that accelerating electrons to above 100 TeV energies is especially efficient for strong shocks with velocities $\gtrsim$ 0.2c \cite{Churazov}, we ran the MHD version of a set-up with this value of the polar component velocity, but did not require the morphology of the simulated nebula boundary to match the observed one perfectly. We leave the task of finding a parameter combination that satisfies all observational requirements best for a future study.} 
 \section{Расчет высокоэнергичного излучения}
+Туманность W50 является ярким источником высокоэнергичного электромагнитного излучения. Она видна в рентгеновском диапазоне, с четко различимыми излучающими областями \cite{Safi-Harb1997, Safi-Harb2022}, а так же в гамма-излучении, кторое носит более диффузный характер \cite{HESS2024SS433, LHAASO2024SS433}. Для рождения фотонов с такими высокими энергиями (несколько сотен ТэВ) необходимо ускорение частиц до высоких энергий, порядка 1 ПэВ. Мы использовали спектры ускоренных частиц, полученные методом Монте-Карло моделирования, описанного в работах \citep[][]{EBJ96, Bykov3inst2014}, задавая в расчетах параметры ударных волн, соответствующие ударным волнам, полученным из гидродинамического моделирования. Использованный метод Монте-Карло моделирования не может корректно расчитывать ускорение электронов, но в диффузионной модели с коэффициентом диффузии зависящим только от заряда и энергии частицы движение электронов и протонов с одинаковыми энергиями будет одинаковым. Вследствие чего для достаточно больших энергий функции распределения протонов и электронов будут подобны. Функции распределения ускоренных частиц на фронтах ударных волн, с параметрами соответствующими ударным волнам, приведенным на рисунке \ref{velocity} показаны на рисунке \ref{pdf_shock_Q_esc}.
+
+\begin{figure}
+	\includegraphics[width=0.9\textwidth]{./img_part2/pdf_shock_Q_esc.pdf}
+	\caption{Функции распределения ускоренных частиц на фронтах ударных волн, полученные Монте-Карло моделированием. Красная и зеленая кривая - протоны, синяя и фиолетовая - электроны. Пунктирные лини показывают низкоэнергичную часть электронной функции распределения, которая не может быть точно получена из метода Монте-Карло.} 
+	\label{pdf_shock_Q_esc}
+\end{figure}
+
 \subsection{Рентгеновское излучение}
+X-ray emission from SS433/W50 nebula has several specific features - inhomogeneous spatial profile with bright regions, energy spectra, and polarization. In this section, we present a model describing observed X-ray emission from the eastern lobe of W50 \citep{Brinkmann2007,Safi-Harb2022}, via synchrotron radiation of electrons, accelerated on two trans-relativistic shocks, in the inhomogeneous anisotropic turbulent magnetic field. Assumption of inhomogeneous profile of turbulent magnetic field is supported by the fact that narrow peaks in observed profiles in the `Head' region in energy ranges 0.3-10 keV and 3-30 keV \cite{Safi-Harb2022} have similar widths, which can be explained by the structure of the magnetic field. On the contrary, under the assumption that the peak width is a result of synchrotron losses,  peaks should have different widths.
+
+\begin{figure}[th!]
+	\includegraphics[width=0.9\textwidth]{./img_part2/W50synch.png}
+	\caption{Modeled spectrum of X-ray synchrotron radiation in `Head' and `Cone' regions and observational data from \cite{Safi-Harb2022}. The estimated model fluxes of the GHz synchrotron radio emission from the two regions are about a few mJy. } 
+	\label{synchrotron}
+\end{figure}
+
+
+
+The exact description of VHE particle transport in the collimated outflow and the surrounding plasma cocoon would require a multiscale modeling of stochastic magnetic fields, which in turn would include different sources of turbulence associated with a complex MHD dynamics with recollimation shocks, shear flows, and cosmic-ray-driven instabilities. Such a model is unfeasible now. Instead, we parameterized the diffusion coefficient of relativistic particles in the system. 
+
+To evaluate the electron distribution function in the downstream flow, we use the advection - diffusion equation, neglecting stochastic acceleration and adiabatic losses:
+
+
+\begin{eqnarray}
+	&& \frac{\partial f({\bf r},E)}{\partial t} + {\bf v_{\alpha}(r)}\frac{\partial f({\bf r},E)}{\partial r_\alpha} = \nonumber \\ &=& \frac{\partial}{\partial r_\alpha} D_{\alpha \beta}({\bf r},E)\frac{\partial f({\bf r}, E)}{\partial r_\beta}  - \frac{\partial [a({\bf r},E) f({\bf r},E)]}{\partial E}.
+\end{eqnarray}
+
+
+
+
+
+
+
+Here $D_{\alpha \beta}({\bf r},E)$ is the diffusion coefficient,  $a({\bf r},E)=\frac{4\sigma_T}{3m_e^2c^3}\left(B({\bf r})^2/8\pi + U_{ph}\right)E^2$ is the electron synchrotron and Compton loss rates, $\sigma_T$ is the Thompson cross section, $B$ is the magnetic field and $U_{ph}$ is the energy density of the photon field. 
+
+
+We simulated a set of models with different assumptions about the diffusion coefficient of VHE particles.   If $D < 3\times 10^{28} см^2/c$, which is about 100 times larger than the Bohm diffusion coefficient at 100 TeV, the advection dominates the transport along the X-ray jet. Then, in a stationary regime, one can solve this equation by calculating the energy losses of the single electron during its advection into the downstream.
+
+\begin{equation}
+	E(z) = \frac{E\left(0\right)}{1+E\left(0\right)k(z)}
+\end{equation}
+
+where $k(z) = \int_0^z \frac{4\sigma_T}{3m_e^2c^3}\left(B(z)^2/8\pi + U_{ph}\right) \frac{dx}{v(z)}$. 
+The photon field is taken as cosmic microwave background radiation, scattering on all other possible components is suppressed due to the Klein-Nishina regime in the considered energy range (electrons with energies higher than 100 TeV). The turbulent magnetic field was established according to Section \ref{sec:CorSh}. We used two models of the magnetic
+field. In the first model, we calculate
+only a small-scale turbulent magnetic field. 
+In this model, we assume that the field decay stops at some distance
+from the shock, so the magnetic field remains constant onward. 
+In our calculation, we assume that the critical value at which the field decay stops is $8$ $\mu G$. In Model 2, we assume a superposition of the simulated short- and long-scale magnetic fields calculated
+for $l_{*}=3\cdot10^{17}$~cm and $l_{*}=3\cdot10^{19}$~cm. 
+Using the results of MHD magnetic field simulations discussed in Section \ref{sec:CorSh}, we constructed a smooth analytical approximation for square-averaged magnetic fields, neglecting small-scale fluctuations, as was done in \cite{2024PhRvD.110b3041B} for Tycho SNR. The averaging
+is performed on slices of the simulated MHD datasets at fixed coordinates $z$. 
+The square average magnetic field profiles for models 1 and 2
+are shown in Fig.~\ref{fig:Bprof}. 
+The approximation has a different
+functional dependence on the distance from the shock for normal ($B_{\parallel}$) and transverse (${B_{\perp}}$) field components.
+
+Thus, in the advection model, the electron distribution at a distance $z$ from the shock in the downstream can be evaluated as
+
+\begin{equation}
+	f(z,E)=f\left(0,\frac{E}{1-k(z)E}\right)\frac{1}{\left(1-k(z)E\right)^2}
+\end{equation}
+
+where $f(0,E)$ is the distribution function of electrons at the shock front, shown in Figure~\ref{pdf_shock_Q_esc}. 
+The modeled level of synchrotron radiation derived with the electron-to-proton ratio fixed to be 3.3$ \times 10^{-3}$ at 1 GeV described above fits well with the observed data.   The energy spectrum of the `Head' and `Cone' regions in the short-scale Bell's turbulent field model with characteristic length $l_\ast = 3\times10^{17}~\rm{cm}$, maximum field on the front $15~\rm{\mu G}$ and constant level $8~\rm{\mu G}$, constant velocity $v = 10.3\times10^8~\rm{cm/s}$ (consistent with Monte Carlo simulation), and observational data \cite{Safi-Harb2022} are shown in Fig.~\ref{synchrotron}. The modeled spectra are consistent with the power-law functions obtained in the observations.
+
+\begin{figure}[h!]
+	\includegraphics[width=0.9\textwidth]{./img_part2/profile.png}
+	\caption{Spatial profiles of synchrotron emission in e1 region in the energy range 0.3-10 keV predicted by the model in comparison with the XMM data \cite{Safi-Harb2022} (top panel), in the energy range 3-30 keV and the NuSTAR data \cite{Safi-Harb2022} (middle panel), and the profile of magnetic field used in the model (bottom panel).} 
+	\label{profile_e1}
+\end{figure}
+
+\begin{figure}[h!]
+	\includegraphics[width=0.9\textwidth]{./img_part2/profile_Brinkmann.png}
+	\caption{Modeled spatial profile of synchrotron radiation in e2 region in energy range 0.3-10 keV and XMM data \cite{Brinkmann2007} (top panel), and profile of magnetic field used for modeling radiation (bottom panel). } 
+	\label{profile_Brinkmann}
+\end{figure}
+
+Spatial profile of the X-ray luminosity for the same model is shown in Figure~\ref{profile_e1}. It is also consistent with observations. The profile for the `e2' region is described in \cite{Brinkmann2007}, and was studied only by XMM. To explain this case, we use a turbulent field with the maximum value of $9~\rm{\mu G}$, constant level of $3~\rm{\mu G}$, characteristic length $2\times10^{18}~\rm{cm}$ and velocity $9.3\times10^8~\rm{cm/s}$, results of simulation are shown in Fig.~\ref{profile_Brinkmann}.
+
+\begin{figure}[h!]
+	\includegraphics[scale=0.4]{B_test_model1}
+	\includegraphics[scale=0.4]{B_test_model2}
+	
+	\caption{\label{fig:Bprof} The upper panel shows the downstream rms magnetic field spatial profile approximations for model 1 described in the text, while
+		the lower panel shows it for model 2. }
+	
+\end{figure}
 \subsection{Гамма излучение}
 \section{Выводы} \label{SS433conclision}
 
