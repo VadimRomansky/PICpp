@@ -31,7 +31,7 @@
 
 Модель, предложенная в работе \citep{Churazov}, объяснят структуру туманности W50 как результат взаимодействия мощного двухкомпонентного ветра, создаваемого аккреционным диском. Транс-релятивистский поток, сонаправленный с осью прецесси узких джетов взаимодействует с более медленным квазисферическим ветром. В результате этого взаимодействия в полярном ветре возникают реколлимационные ударные волны, приводящие к ускорению космических лучей и фысокоэнергичному излучению. В данной главе мы проведем моделирование структуры туманности W50 в рамках вышеописанной модели с помощью магнито-гидродинамического кода PLUTO \cite{Mignone2007}, моделирование ускорения космических лучей полученными ударными волнами, а так же проведем расчет высокоэнергичного излучений и сравнение с наблюдательными данными.
 
-\section{Моделирование структуры туманности}
+\section{Моделирование структуры туманности} \label{W50morphology}
 \begin{figure}
 	\includegraphics[width=0.9\textwidth]{./img_part2/Scheme.pdf}
 	\caption{Схематичное изображение системы SS433+W50 system adopted here. Яркие рентгеновские области в расширенном джете обозначены как `Cone', `Head', `e1' и `e2'. Они были обнаружени и обсуждались в работах \cite{Safi-Harb1997,Brinkmann2007,Safi-Harb2022}.}
@@ -78,46 +78,60 @@
 \end{figure}
 
 \subsection{Рентгеновское излучение}
-X-ray emission from SS433/W50 nebula has several specific features - inhomogeneous spatial profile with bright regions, energy spectra, and polarization. In this section, we present a model describing observed X-ray emission from the eastern lobe of W50 \citep{Brinkmann2007,Safi-Harb2022}, via synchrotron radiation of electrons, accelerated on two trans-relativistic shocks, in the inhomogeneous anisotropic turbulent magnetic field. Assumption of inhomogeneous profile of turbulent magnetic field is supported by the fact that narrow peaks in observed profiles in the `Head' region in energy ranges 0.3-10 keV and 3-30 keV \cite{Safi-Harb2022} have similar widths, which can be explained by the structure of the magnetic field. On the contrary, under the assumption that the peak width is a result of synchrotron losses,  peaks should have different widths.
+Рентгеновское излучение SS433/W50 имеет несколько особенностей - неоднородное пространственное распределение с несколькими яркими областями, спектр с разными степенными индексами в разных диапазонах и поляризацию. В этом разделе представлена модель объясняющая рентгеновское излучение от восточной части туманности W50 как синхротронное излучение электронов, ускоренных на транс-релятивистских ударных волнах, в неоднородном турбулентном магнитном поле. Предположение о неоднородности магнитного поля подтверждается тем, что узкие пространственные пики яркости излучения в области, обозначенной как `Head' в диапазонах энергии 0.3-10 кэВ и 3-30 кэВ \cite{Safi-Harb2022} имеют приблизительно одинаковую ширину, в то время как если бы ширина пиков определялась бы синхротронными потерями в однородном поле, они имели бы разную ширину.
 
 \begin{figure}[th!]
 	\includegraphics[width=0.9\textwidth]{./img_part2/W50synch.png}
-	\caption{Modeled spectrum of X-ray synchrotron radiation in `Head' and `Cone' regions and observational data from \cite{Safi-Harb2022}. The estimated model fluxes of the GHz synchrotron radio emission from the two regions are about a few mJy. } 
+	\caption{Моделированный спектр рентгеновского излучения в областях `Head' и `Cone' и наблюдательные данные из работы\cite{Safi-Harb2022}.} 
 	\label{synchrotron}
 \end{figure}
 
+Полноценное описание переноса частиц в сложном гидродинамическом потоке, описанном в разделе \ref{W50morphology},  требует моделирования стохастического магнитного поля. Что в свою очередь требует расчета турбулентности создаваемой реколимационными ударными волнами, сдвиговыми течениями и током космическич лучей. Это задача недоступная численному моделированию на современных компьютерах, поэтому для расчета распространения ускоренных электронов внутри расширенного джета мы решаем одномерное конвекционно-диффузионное уравнение с добавленным членом для учета синхротронных потерь в заданном профиле усредненного магнитного поля \ref{convection-diffusion}. 
 
-
-The exact description of VHE particle transport in the collimated outflow and the surrounding plasma cocoon would require a multiscale modeling of stochastic magnetic fields, which in turn would include different sources of turbulence associated with a complex MHD dynamics with recollimation shocks, shear flows, and cosmic-ray-driven instabilities. Such a model is unfeasible now. Instead, we parameterized the diffusion coefficient of relativistic particles in the system. 
-
-To evaluate the electron distribution function in the downstream flow, we use the advection - diffusion equation, neglecting stochastic acceleration and adiabatic losses:
-
-
-\begin{eqnarray}
+\begin{eqnarray}\label{convection-diffusion}
 	&& \frac{\partial f({\bf r},E)}{\partial t} + {\bf v_{\alpha}(r)}\frac{\partial f({\bf r},E)}{\partial r_\alpha} = \nonumber \\ &=& \frac{\partial}{\partial r_\alpha} D_{\alpha \beta}({\bf r},E)\frac{\partial f({\bf r}, E)}{\partial r_\beta}  - \frac{\partial [a({\bf r},E) f({\bf r},E)]}{\partial E}.
 \end{eqnarray}
 
+Где $D_{\alpha \beta}({\bf r},E)$ - коэффициент диффузии,  $a({\bf r},E)=\frac{4\sigma_T}{3m_e^2c^3}\left(B({\bf r})^2/8\pi + U_{ph}\right)E^2$ - потери электронов на синхротронное и комптоновское излучение, $\sigma_T$ - томпсоновское сечение, $B$ - магнитное поле и $U_{ph}$ - плотность энергии фотонного поля. 
 
-
-
-
-
-
-Here $D_{\alpha \beta}({\bf r},E)$ is the diffusion coefficient,  $a({\bf r},E)=\frac{4\sigma_T}{3m_e^2c^3}\left(B({\bf r})^2/8\pi + U_{ph}\right)E^2$ is the electron synchrotron and Compton loss rates, $\sigma_T$ is the Thompson cross section, $B$ is the magnetic field and $U_{ph}$ is the energy density of the photon field. 
-
-
-We simulated a set of models with different assumptions about the diffusion coefficient of VHE particles.   If $D < 3\times 10^{28} см^2/c$, which is about 100 times larger than the Bohm diffusion coefficient at 100 TeV, the advection dominates the transport along the X-ray jet. Then, in a stationary regime, one can solve this equation by calculating the energy losses of the single electron during its advection into the downstream.
+Чтобы еще упростить уравнение, мы оценили вклад диффузионного члена, проведя Монте-Карло моделирование распространения частиц в соответствии с уравнением \ref{convection-diffusion}. Было установлено, что для коэфициентов диффузии $D < 3\times 10^{28} см^2/c$, что в 100 раз меньше бомовского коэффициента для энергии 100 ТэВ, конвекционный перенос вдоль оси джета доминирует доминирует над диффузионным на интересующих нас масштабах. Таким образом, дифузионным членом можно пренебречь. Тогда в приближении стационарности уравнение \ref{convection-diffusion} можно решить аналитически.
+Энергия частицы при движении вдоль оси z меняется как
 
 \begin{equation}
 	E(z) = \frac{E\left(0\right)}{1+E\left(0\right)k(z)}
 \end{equation}
 
-where $k(z) = \int_0^z \frac{4\sigma_T}{3m_e^2c^3}\left(B(z)^2/8\pi + U_{ph}\right) \frac{dx}{v(z)}$. 
-The photon field is taken as cosmic microwave background radiation, scattering on all other possible components is suppressed due to the Klein-Nishina regime in the considered energy range (electrons with energies higher than 100 TeV). The turbulent magnetic field was established according to Section \ref{sec:CorSh}. We used two models of the magnetic
+где $k(z) = \int_0^z \frac{4\sigma_T}{3m_e^2c^3}\left(B(z)^2/8\pi + U_{ph}\right) \frac{dx}{v(z)}$. 
+
+А функция распределения при движения за фронт ударной волны определяется уравнением
+
+\begin{equation}
+	f(z,E)=f\left(0,\frac{E}{1-k(z)E}\right)\frac{1}{\left(1-k(z)E\right)^2}
+\end{equation}
+
+где $f(0,E)$ - функция распределения электронов на фронте ударной волны, показанная на рисунке~\ref{pdf_shock_Q_esc}. 
+
+В качестве фотонного поля бралось реликтовое излучение, так как для интересующих нас наиболее высоких энрегий (выше 100 ТэВ), рассеяние на более высокочастотных фотонах подавлено в Клейн-Нишиновском режиме.
+
+ The turbulent magnetic field was established according to Section \ref{sec:CorSh}. We used two models of the magnetic
 field. In the first model, we calculate
 only a small-scale turbulent magnetic field. 
 In this model, we assume that the field decay stops at some distance
 from the shock, so the magnetic field remains constant onward. 
+
+When MHD turbulence containing strong density fluctuations passes through the shock,  strong oscillations of the shock front occur. These oscillations lead to significant turbulent fluctuations in the downstream flow velocity. Moreover, turbulent velocity fluctuations amplify the magnetic field downstream by the mechanism of a small-scale dynamo. It appears that in such a system, the longitudinal component of the magnetic field relative to the shock normal is amplified more strongly than the transverse components \citep{inoue13,Zirakashvili_2008pol,lazarian_MFA22,federath23,2024PhRvD.110b3041B}. Thus, there is a region downstream where the longitudinal component of the turbulent magnetic field is greater than the transverse one. Synchrotron radiation of electrons from this region should be highly polarized with polarization direction transverse to the shock normal.
+
+
+We simulate the passage of MHD turbulence amplified by the Bell instability through the shock to determine the anisotropy of the magnetic field downstream in a way similar to that in the paper \citep{2024PhRvD.110b3041B}. The 3D calculations are performed on the basis of the MHD module of the open-source code PLUTO. The calculation is performed in two stages: in the first stage, the amplification of MHD turbulence by the Bell instability is simulated in a cubic box (512x512x512 cells), and in the second stage, the passage of turbulence through the shock front is simulated (see \citep{2024PhRvD.110b3041B}). The sizes of the simulation box at the first stage in all directions vary from $-l_{\ast}$ to $l_{\ast}$, where $l_{\ast}$ is the normalization length of the PLUTO code. The size of the simulation box at the second stage along the z-axis is from 0 to $10l_{\ast}$, and along the x and y axes is from $-l_{\ast}$ to $l_{\ast}$ (512x512x2560 cells). The box of the first stage is used at the second stage as a boundary condition on the right boundary along the z-axis. The boundary condition on the left boundary of the z-axis is an outflow. The boundary conditions along the x and y axes are periodic. We vary the length of $l_{\ast}$ to achieve agreement with the observational data. The energy-carrying scale of turbulence $l_{0}$ (calculated at the first stage) passing the shock is approximately equal to $l_{\ast}/3$. At the initial moment, the shock is set perpendicular to the z-axis at the point $z=2 l_{\ast}$ and remains at rest in the absence of perturbations.
+
+
+The simulation parameters in the first stage of the calculations are taken in accordance with the conditions upstream of the first shock described in Section \ref{sec:MC}. The ratio of the rms deviation of the density to the average density is $\delta \rho/\rho\approx 0.6$ at the end of the first-stage simulation. 
+
+
+The results of the simulations for turbulence with strong density fluctuations and magnetic fields amplified by the Bell instability are shown in  Fig.~\ref{B2_Bell_art}. The origin of the z coordinate in Fig.~\ref{B2_Bell_art} and Fig.~\ref{B2_all_longscale_art} is shifted to the location of the shock front. These figures show the profiles of the magnetic field components averaged over slices with fixed coordinate z. In the figures, $B_{\parallel}$ is the RMS of the magnetic field component 
+parallel to the shock normal of the undisturbed shock. $B_{\perp}=\sqrt{B_{x}^{2}+B_{y}^{2}}$ is the RMS perpendicular component of the magnetic field, where $B_{x}$ is the RMS value of the x projection of the magnetic field, $B_{y}$ is the RMS value of the y projection of the magnetic field, and $B=\sqrt{B_{\parallel}^{2}+B_{\perp}^{2}}$. The blue curves in the figures show the same data after filtering out small-scale fluctuations. They are used in subsequent calculations.
+
+
 In our calculation, we assume that the critical value at which the field decay stops is $8$ $\mu G$. In Model 2, we assume a superposition of the simulated short- and long-scale magnetic fields calculated
 for $l_{*}=3\cdot10^{17}$~cm and $l_{*}=3\cdot10^{19}$~cm. 
 Using the results of MHD magnetic field simulations discussed in Section \ref{sec:CorSh}, we constructed a smooth analytical approximation for square-averaged magnetic fields, neglecting small-scale fluctuations, as was done in \cite{2024PhRvD.110b3041B} for Tycho SNR. The averaging
@@ -127,13 +141,6 @@ are shown in Fig.~\ref{fig:Bprof}.
 The approximation has a different
 functional dependence on the distance from the shock for normal ($B_{\parallel}$) and transverse (${B_{\perp}}$) field components.
 
-Thus, in the advection model, the electron distribution at a distance $z$ from the shock in the downstream can be evaluated as
-
-\begin{equation}
-	f(z,E)=f\left(0,\frac{E}{1-k(z)E}\right)\frac{1}{\left(1-k(z)E\right)^2}
-\end{equation}
-
-where $f(0,E)$ is the distribution function of electrons at the shock front, shown in Figure~\ref{pdf_shock_Q_esc}. 
 The modeled level of synchrotron radiation derived with the electron-to-proton ratio fixed to be 3.3$ \times 10^{-3}$ at 1 GeV described above fits well with the observed data.   The energy spectrum of the `Head' and `Cone' regions in the short-scale Bell's turbulent field model with characteristic length $l_\ast = 3\times10^{17}~\rm{cm}$, maximum field on the front $15~\rm{\mu G}$ and constant level $8~\rm{\mu G}$, constant velocity $v = 10.3\times10^8~\rm{cm/s}$ (consistent with Monte Carlo simulation), and observational data \cite{Safi-Harb2022} are shown in Fig.~\ref{synchrotron}. The modeled spectra are consistent with the power-law functions obtained in the observations.
 
 \begin{figure}[h!]
@@ -150,14 +157,21 @@ The modeled level of synchrotron radiation derived with the electron-to-proton r
 
 Spatial profile of the X-ray luminosity for the same model is shown in Figure~\ref{profile_e1}. It is also consistent with observations. The profile for the `e2' region is described in \cite{Brinkmann2007}, and was studied only by XMM. To explain this case, we use a turbulent field with the maximum value of $9~\rm{\mu G}$, constant level of $3~\rm{\mu G}$, characteristic length $2\times10^{18}~\rm{cm}$ and velocity $9.3\times10^8~\rm{cm/s}$, results of simulation are shown in Fig.~\ref{profile_Brinkmann}.
 
-\begin{figure}[h!]
-	\includegraphics[scale=0.4]{B_test_model1}
-	\includegraphics[scale=0.4]{B_test_model2}
-	
-	\caption{\label{fig:Bprof} The upper panel shows the downstream rms magnetic field spatial profile approximations for model 1 described in the text, while
-		the lower panel shows it for model 2. }
-	
+\begin{figure}[h]
+	\begin{minipage}{0.49\textwidth}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./img_part2/B2_Bell_art.pdf} 
+		\caption{Profiles of RMS components of the magnetic field in the shock downstream. The turbulence is produced by the passage of fluctuations amplified in the upstream by Bell's instability of accelerated cosmic rays. The green curve is the parallel magnetic field component. The red curve is the perpendicular magnetic field component. The dark green curve is the total magnetic field. Blue curves are fits to the data.} 
+		\label{B2_Bell_art}
+	\end{minipage} \hfill
+	\begin{minipage}{0.49\textwidth}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./img_part2/B2_all_longscale_art.pdf} 
+		\caption{Profiles of RMS components of the magnetic field in the shock downstream produced by the shock amplification of the preexisting long-wavelength fluctuations in the jet. The green curve is the parallel magnetic field component. The red curve is the perpendicular magnetic field component. The dark green curve is the total magnetic field. Blue curves are fits to the data.} 
+\label{B2_all_longscale_art}
+	\end{minipage}
 \end{figure}
+
 \subsection{Гамма излучение}
 \section{Выводы} \label{SS433conclision}
 
