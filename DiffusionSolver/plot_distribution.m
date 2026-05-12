@@ -1,5 +1,5 @@
 clear;
-F = importdata('./output/F99.dat');
+F = importdata('./output/F10.dat');
 xgrid = importdata('./output/xgrid.dat');
 ygrid = importdata('./output/ygrid.dat');
 zgrid = importdata('./output/zgrid.dat');
@@ -55,10 +55,10 @@ Fp1(1:Np) = 0;
 Fp2(1:Np) = 0;
 Fp3(1:Np) = 0;
 for l = 1:Np,
-    Fp(l) = F1(fix(Nz/2)+1, fix(Ny/2)+1, fix(Nx/2)+1, l);
-    Fp2(l) = F2(fix(Nz/2)+1, fix(Ny/2)+1, fix(Nx/2)+1,l);
-    Fp3(l) = F3(fix(Nz/2) + 1, fix(Ny/2) + 1, fix(Nx/2)+1, l);
-    Fp1(l) = Fp2(3)*pgrid(3)/pgrid(l);
+    Fp(l) = F1(fix(Nz/2)+1, fix(Ny/2)+1, fix(Nx/2)+1, l)*pgrid(l);
+    Fp2(l) = F2(fix(Nz/2)+1, fix(Ny/2)+1, fix(Nx/2)+1,l)*pgrid(l);
+    Fp3(l) = F3(fix(Nz/2) + 1, fix(Ny/2) + 1, fix(Nx/2)+1, l)*pgrid(l);
+    Fp1(l) = Fp2(3);
 end;
 
 
@@ -84,7 +84,7 @@ set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'log');
 title ('F_{p}');
 xlabel ('p/mc');
-ylabel ('F(p)*p^3');
+ylabel ('F(p)*p^4');
 plot(pgrid, Fp, 'b');
 plot(pgrid, 1.1*Fp2, 'g');
 plot(pgrid, 1.2*Fp3, 'r');

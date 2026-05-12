@@ -52,10 +52,10 @@ const double pi = 3.14159;
  * 14.4286
  */
 
-const double Dglob = 1.0;
+const double Dglob = 0.01;
 
 double evaluateDiffusionCoefficient(double p) {
-	return Dglob * p;
+	return Dglob;
 }
 
 void sequentialThreeDiagonalSolverX(double**** x, double**** rightPart, double**** a, double**** b, double**** c, int Nx, int Ny, int Nz, int Nmomentum) {
@@ -1314,7 +1314,7 @@ void advanceDiffusionStepExplicit(double**** F, double**** rightPart, double* xg
 						rightPart[k][j][i][l] = rightF;
 					}
 					else {
-						a[k][j][i][l] = -dt*D / (dx * dx) - dt * u[k][j][i - 1] / dx;
+						a[k][j][i][l] = -dt*D / (dx * dx) - dt * u[k][j][i-1] / dx;
                         //a[k][j][i][l] = -dt * D / (dx * dx) - dt * u[k][j][i] / dx;
 						b[k][j][i][l] = 1 + 2 * dt*D / (dx * dx) + dt * u[k][j][i] / dx;
 						c[k][j][i][l] = -dt*D / (dx * dx);
@@ -1396,9 +1396,13 @@ void advanceDiffusionStepImplicit(double**** F, double**** rightPart, double* xg
 						rightPart[k][j][i][l] = rightF;
 					}
 					else {
-						a[k][j][i][l] = -dt * D / (dx * dx) - dt * u[k][j][i - 1] / dx;
-						b[k][j][i][l] = 1 + 2 * dt * D / (dx * dx) + dt * u[k][j][i] / dx;
-						c[k][j][i][l] = -dt * D / (dx * dx);
+						a[k][j][i][l] = -dt * D / (dx * dx) - dt * u[k][j][i-1] / (dx);
+                        b[k][j][i][l] = 1 + 2 * dt * D / (dx * dx) +dt * u[k][j][i] / dx;
+                        c[k][j][i][l] = -dt * D / (dx * dx);// +dt * u[k][j][i] / (2 * dx);
+
+                        //a[k][j][i][l] = -dt * D / (dx * dx);
+                        //b[k][j][i][l] = 1 + 2 * dt * D / (dx * dx);
+                        //c[k][j][i][l] = -dt * D / (dx * dx);// +dt * u[k][j][i] / (2 * dx);
 					}
 				}
 			}
@@ -1435,8 +1439,8 @@ void advanceDiffusionStepImplicit(double**** F, double**** rightPart, double* xg
                         else {
                             double dp = pgrid[l] - pgrid[l - 1];
                             a[k][j][i][l] = dt * pgrid[l] * divu / (3 * dp);
-                            b[k][j][i][l] = 1 - dt * pgrid[l] * divu / (3 * dp);
-                            c[k][j][i][l] = 0;
+                            b[k][j][i][l] = 1 -dt * pgrid[l] * divu / (3 * dp);
+                            c[k][j][i][l] = 0;// -dt * pgrid[l] * divu / (2 * 3 * dp);
                         }
                     }
                     else {
@@ -1764,7 +1768,7 @@ void testDiffusion() {
 
         advanceDiffusionStepExplicit(F, rightPart, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, 0, 0);
         advanceDiffusionStepImplicit(F1, rightPart, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, -F1[0][0][0][1] + leftF1, F1[0][0][Nx-1][1] - rightF1);
-        advanceDiffusionStepGMRES(F2, rightPart, matrix, GMRESbasis, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, 0, 0);
+        //advanceDiffusionStepGMRES(F2, rightPart, matrix, GMRESbasis, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, 0, 0);
 
         /*leftFlux.push_back((F[0][0][0][1] - leftF) / dx);
         rightFlux.push_back((F[0][0][Nx - 1][1] - rightF) / dx);
@@ -1877,12 +1881,17 @@ void testDiffusionAcceleration(){
                 }
                 else {
                     u[k][j][i] = 1.0 - 0.75*(i - Nx/2.0 + 1)/2.0;
+                    //u[k][j][i] = 0.25;
                 }
             }
         }
     }
-    u[0][0][Nx / 2 + 3] = 0.8 * u[0][0][Nx / 2 + 3];
-    u[0][0][Nx / 2 + 4] = 0.8 * u[0][0][Nx / 2 + 4];
+    //u[0][0][Nx / 2 + 3] = 0.8 * u[0][0][Nx / 2 + 3];
+    //u[0][0][Nx / 2 + 4] = 0.8 * u[0][0][Nx / 2 + 4];
+
+    for (int i = 0; i < Nx; ++i) {
+        //u[0][0][i] = 0.1 * u[0][0][i];
+    }
 
     double dx = xgrid[1] - xgrid[0];
     double maxDivU = (1.0 - 0.25) / (xgrid[Nx / 2] - xgrid[Nx / 2 - 1]);
@@ -1896,12 +1905,14 @@ void testDiffusionAcceleration(){
     double diffusionDt2 = 0.5 * dx * dx / D2;
     double accelerationTime = (3.0 / (1.0 - 0.25)) * D * (1.0 / 1.0 + 1.0 / 0.25) * log(pmax / pmin);
     double dlnp = (pgrid[1] - pgrid[0]) / pgrid[1];
+    double ratio = maxU * dx / D;
 
     double realdu = 0.75 / (2 * 1.0);
     double a1 = realdu * pgrid[1] / (3 * (pgrid[1] - pgrid[0]));
 
 
-    double dt = 0.2;
+    double dt = 0.02;
+    double ratio2 = maxU * maxU * dt / D;
     double maxTime = 20000;
     int Nt = maxTime / dt;
     int writeN = 1000;
@@ -1917,7 +1928,7 @@ void testDiffusionAcceleration(){
             }
         }
 
-        advanceDiffusionStepExplicit(F, rightPart, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, 0, 0);
+        //advanceDiffusionStepExplicit(F, rightPart, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, 0, 0);
         advanceDiffusionStepImplicit(F1, rightPart, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, 0, 0);
         //advanceDiffusionStepGMRES(F2, rightPart, matrix, GMRESbasis, xgrid, ygrid, zgrid, pgrid, u, dt, Nx, Ny, Nz, Nmomentum, 0, 0);
 
