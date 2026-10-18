@@ -52,7 +52,7 @@ const double pi = 3.14159;
  * 14.4286
  */
 
-const double Dglob = 0.01;
+const double Dglob = 30.0;
 
 double evaluateDiffusionCoefficient(double p) {
 	return Dglob;
@@ -1876,22 +1876,29 @@ void testDiffusionAcceleration(){
                 if (i < Nx / 2.0 - 1) {
                     u[k][j][i] = 1.0;
                 }
-                else if (i >= Nx / 2.0 + 1) {
-                    u[k][j][i] = 0.25;
-                }
+                //else if (i >= Nx / 2.0 + 1) {
+                   // u[k][j][i] = 0.25;
+                //}
                 else {
-                    u[k][j][i] = 1.0 - 0.75*(i - Nx/2.0 + 1)/2.0;
-                    //u[k][j][i] = 0.25;
+                    //u[k][j][i] = 1.0 - 0.75*(i - Nx/2.0 + 1)/2.0;
+                    u[k][j][i] = 0.25;
                 }
             }
         }
     }
-    //u[0][0][Nx / 2 + 3] = 0.8 * u[0][0][Nx / 2 + 3];
-    //u[0][0][Nx / 2 + 4] = 0.8 * u[0][0][Nx / 2 + 4];
+    //u[0][0][Nx / 2 -1] = 0.8;
+    //u[0][0][Nx / 2] = 0.6;
+    //u[0][0][Nx / 2 + 1] = 0.4;
 
     for (int i = 0; i < Nx; ++i) {
         //u[0][0][i] = 0.1 * u[0][0][i];
     }
+
+    FILE* ufile = fopen("./output/u.dat", "w");
+    for (int i = 0; i < Nx; ++i) {
+        fprintf(ufile, "%g\n", u[i]);
+    }
+    fclose(ufile);
 
     double dx = xgrid[1] - xgrid[0];
     double maxDivU = (1.0 - 0.25) / (xgrid[Nx / 2] - xgrid[Nx / 2 - 1]);
@@ -1910,8 +1917,9 @@ void testDiffusionAcceleration(){
     double realdu = 0.75 / (2 * 1.0);
     double a1 = realdu * pgrid[1] / (3 * (pgrid[1] - pgrid[0]));
 
-
-    double dt = 0.02;
+    double dt = 0.2;
+    double dxdiff = sqrt(D * dt);
+    double dxadv = maxU * dt;
     double ratio2 = maxU * maxU * dt / D;
     double maxTime = 20000;
     int Nt = maxTime / dt;
@@ -1922,9 +1930,9 @@ void testDiffusionAcceleration(){
         //injection
         for (int k = 0; k < Nz; ++k) {
             for (int j = 0; j < Ny; ++j) {
-                F[k][j][Nx / 2][1] += 1.0*dt;
-                F1[k][j][Nx / 2][1] += 1.0 * dt;
-                F2[k][j][Nx / 2][1] += 1.0 * dt;
+                F[k][j][Nx / 2-1][1] += 1.0*dt;
+                F1[k][j][Nx / 2-1][1] += 1.0 * dt;
+                F2[k][j][Nx / 2-1][1] += 1.0 * dt;
             }
         }
 

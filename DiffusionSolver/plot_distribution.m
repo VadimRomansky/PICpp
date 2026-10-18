@@ -1,5 +1,5 @@
 clear;
-F = importdata('./output/F10.dat');
+F = importdata('./output/F99.dat');
 xgrid = importdata('./output/xgrid.dat');
 ygrid = importdata('./output/ygrid.dat');
 zgrid = importdata('./output/zgrid.dat');
